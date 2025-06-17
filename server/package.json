@@ -1,0 +1,37 @@
+{
+  "name": "peekabo-be",
+  "version": "1.0.0",
+  "description": "The backend for peekaboo",
+  "main": "src/server.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon --exec ts-node ./src/server.ts",
+    "start": "npm i && tsc && node ./dist/server.js"
+  },
+  "keywords": [
+    "peekaboo"
+  ],
+  "author": "Nishimwe Prince",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.8.4",
+    "bcrypt": "^5.1.1",
+    "class-validator": "^0.14.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "joi": "^17.13.3",
+    "pg": "^8.14.1",
+    "typeorm": "^0.3.22",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.14.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

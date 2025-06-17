@@ -1,0 +1,23 @@
+export enum OrderType {
+  SEND = "SEND",
+  RECEIVE = "RECEIVE",
+}
+
+export enum OrderStatus {
+  CREATED = "CREATED",
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  ACCEPTED = "ACCEPTED",
+  ACTIVE = "ACTIVE",
+  IN_TRANSIT = "IN_TRANSIT",
+  DELIVERED = "DELIVERED",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum OrderAssignmentStatus {
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+  PENDING = "PENDING",
+}
