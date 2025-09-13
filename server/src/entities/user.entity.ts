@@ -68,6 +68,7 @@ export class User extends AbstractEntity {
     type: 'varchar',
     length: 255,
     nullable: true,
+    select: false,
   })
   passwordHash?: string;
 

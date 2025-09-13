@@ -16,6 +16,10 @@ export class  Order extends AbstractEntity {
   @Column({ name: "recipient_id", type: "uuid", nullable: true })
   recipientId: UUID;
 
+  // SENDER ID
+  @Column({ name: "sender_id", type: "uuid", nullable: true })
+  senderId: UUID;
+
   // CREATED BY ID
   @Column({ name: "created_by_id", type: "uuid", nullable: false })
   createdById: UUID;
@@ -83,6 +87,11 @@ export class  Order extends AbstractEntity {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: "created_by_id" })
   createdBy: User;
+
+  // SENDER
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: "sender_id" })
+  sender: User;
 
   // ASSIGNMENTS
   @OneToMany(() => OrderAssignment, (orderAssignment) => orderAssignment.order)

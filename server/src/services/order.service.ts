@@ -20,16 +20,22 @@ import {
 import { OrderAssignmentService } from "./orderAssignment.service";
 import { AuditUpdate } from "../decorators/auditLog.decorator";
 import { AuditLogEntityTypes } from "../constants/auditLog.constants";
+import { User } from "../entities/user.entity";
+import { UserService } from "./user.service";
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
   private readonly conversationService: ConversationService;
   private readonly orderAssignmentService: OrderAssignmentService;
+  private readonly userRepository: Repository<User>;
+  private readonly userService: UserService;
 
   constructor() {
     this.orderRepository = AppDataSource.getRepository(Order);
     this.conversationService = new ConversationService();
     this.orderAssignmentService = new OrderAssignmentService();
+    this.userRepository = AppDataSource.getRepository(User);
+    this.userService = new UserService();
   }
 
   // CREATE ORDER
@@ -57,6 +63,62 @@ export class OrderService {
     return createdOrder;
   }
 
+  // CREATE PUBLIC ORDER
+  async createPublicOrder({
+    senderPhoneNumber,
+    recipientPhoneNumber,
+  }: {
+    senderPhoneNumber: string;
+    recipientPhoneNumber: string;
+  }): Promise<Order> {
+
+    // GENERATE REFERENCE ID
+    let referenceId: string = generateReferenceNumber({
+      prefix: 'O',
+      length: 6,
+    });
+
+    // CHECK IF REFERENCE ID IS UNIQUE
+    while (await this.getOrderByReferenceId(referenceId)) {
+      referenceId = generateReferenceNumber({
+        prefix: 'O',
+        length: 6,
+      });
+    }
+
+    let sender = await this.userRepository.findOne({
+      where: { phoneNumber: senderPhoneNumber },
+    });
+
+    if (!sender) {
+      sender = await this.userService.createUser({
+        phoneNumber: senderPhoneNumber,
+      });
+    }
+
+    let recipient = await this.userRepository.findOne({
+      where: { phoneNumber: recipientPhoneNumber },
+    });
+
+    if (!recipient) {
+      recipient = await this.userService.createUser({
+        phoneNumber: recipientPhoneNumber,
+      });
+    }
+
+    // CREATE ORDER
+    const createdOrder = await this.orderRepository.save({
+      referenceId,
+      senderId: sender?.id,
+      recipientId: recipient?.id,
+      createdById: sender?.id,
+      status: OrderStatus.CREATED,
+      initialFee: 1500,
+    });
+
+    return createdOrder;
+  }
+
   // GET ORDER BY REFERENCE ID
   async getOrderByReferenceId(referenceId: string): Promise<Order | null> {
     return this.orderRepository.findOne({
@@ -71,6 +133,7 @@ export class OrderService {
       relations: {
         createdBy: true,
         recipient: true,
+        sender: true,
         conversation: {
           recipient: true,
         },
@@ -131,6 +194,7 @@ export class OrderService {
       relations: {
         recipient: true,
         createdBy: true,
+        sender: true,
       },
     });
   }
