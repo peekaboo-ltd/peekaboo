@@ -52,7 +52,6 @@ export const sendMessage = async ({
     );
     return response;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
