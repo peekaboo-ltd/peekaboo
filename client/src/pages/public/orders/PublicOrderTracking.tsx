@@ -5,19 +5,12 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { OrderStatus } from '@/types/order.type';
 import { useGetOrder } from '@/hooks/orders/orders.hooks';
-import type { IconProp } from '@fortawesome/fontawesome-svg-core';
-import {
-  faClock,
-  faMoneyBill1,
-  faTruck,
-  faBox,
-  faTrophy,
-} from '@fortawesome/free-solid-svg-icons';
 import { faCopy, faCheckCircle } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { OrderActivity } from '@/types/orderActivity.type';
 import OrderDetails from '@/containers/orders/OrderDetails';
 import { toast } from 'sonner';
+import { workflowStatuses } from '@/constants/order.constants';
 
 const PublicOrderTracking = () => {
   // STATE VARIABLES
@@ -59,51 +52,6 @@ const PublicOrderTracking = () => {
       setCurrentStatus(orderActivitiesList?.[0]);
     }
   }, [orderActivitiesList]);
-
-  // Normal workflow statuses (excluding CANCELLED)
-  const workflowStatuses: {
-    key: OrderStatus;
-    label: string;
-    description: string;
-    icon: IconProp;
-  }[] = [
-    {
-      key: OrderStatus.CREATED,
-      label: 'Created',
-      description: 'Your order has been placed',
-      icon: faClock,
-    },
-    {
-      key: OrderStatus.PAID,
-      label: 'Paid',
-      description: 'Payment has been processed successfully',
-      icon: faMoneyBill1,
-    },
-    {
-      key: OrderStatus.CONFIRMED,
-      label: 'Confirmed',
-      description: 'Order has been verified and confirmed',
-      icon: faCheckCircle,
-    },
-    {
-      key: OrderStatus.IN_TRANSIT,
-      label: 'In Transit',
-      description: 'Package is on its way to you',
-      icon: faTruck,
-    },
-    {
-      key: OrderStatus.DELIVERED,
-      label: 'Delivered',
-      description: 'Package has arrived at destination',
-      icon: faBox,
-    },
-    {
-      key: OrderStatus.COMPLETED,
-      label: 'Completed',
-      description: 'Order has been successfully completed',
-      icon: faTrophy,
-    },
-  ];
 
   // Determine current step index
   const currentStepIndex = workflowStatuses.findIndex(
@@ -161,7 +109,7 @@ const PublicOrderTracking = () => {
           {order && (
             <p className="text-xs sm:text-sm text-gray-600 px-2">
               Order Reference:{' '}
-              <span className="break-all">{order.referenceId}</span>{' '}
+              <span className="break-all font-bold">{order.referenceId}</span>{' '}
               <FontAwesomeIcon
                 icon={isCopied ? faCheckCircle : faCopy}
                 className="w-4 h-4 cursor-pointer"
@@ -267,8 +215,8 @@ const PublicOrderTracking = () => {
                     <section className="ml-4 flex-1">
                       <header className="flex items-center justify-between">
                         <hgroup>
-                          <h3
-                            className={`text-sm font-medium ${
+                          <p
+                            className={`text-[13px] font-medium ${
                               isCurrent
                                 ? 'text-primary'
                                 : isCompleted || hasActivity
@@ -277,7 +225,7 @@ const PublicOrderTracking = () => {
                             }`}
                           >
                             {status.label}
-                          </h3>
+                          </p>
                           <p className="text-xs text-gray-500 mt-0.5">
                             {status.description}
                           </p>
@@ -309,20 +257,19 @@ const PublicOrderTracking = () => {
                     {/* Tooltip for Mobile */}
                     {hoveredStatus === (status.key as string) && (
                       <output className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-[11px] rounded-lg shadow-lg whitespace-nowrap z-20 max-w-48">
-                        {(() => {
-                          const activityWithNotes =
+                        {(
+                          activity as OrderActivity & {
+                            notes?: string;
+                            description?: string;
+                          }
+                        )?.notes ||
+                          (
                             activity as OrderActivity & {
                               notes?: string;
                               description?: string;
-                            };
-                          const activityNotes =
-                            activityWithNotes?.notes ||
-                            activityWithNotes?.description;
-                          if (isCurrent && activityNotes) {
-                            return activityNotes;
-                          }
-                          return status?.description;
-                        })()}
+                            }
+                          )?.description ||
+                          status.description}
                         <span className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900" />
                       </output>
                     )}
@@ -404,20 +351,19 @@ const PublicOrderTracking = () => {
                       {/* Tooltip */}
                       {hoveredStatus === (status.key as string) && (
                         <output className="absolute bottom-full mb-2 px-2 sm:px-3 py-1 sm:py-2 bg-gray-900 text-white text-[10px] sm:text-[11px] rounded-lg shadow-lg whitespace-nowrap z-10 max-w-32 sm:max-w-48">
-                          {(() => {
-                            const activityWithNotes =
+                          {(
+                            activity as OrderActivity & {
+                              notes?: string;
+                              description?: string;
+                            }
+                          )?.notes ||
+                            (
                               activity as OrderActivity & {
                                 notes?: string;
                                 description?: string;
-                              };
-                            const activityNotes =
-                              activityWithNotes?.notes ||
-                              activityWithNotes?.description;
-                            if (isCurrent && activityNotes) {
-                              return activityNotes;
-                            }
-                            return status?.description;
-                          })()}
+                              }
+                            )?.description ||
+                            status.description}
                           <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900" />
                         </output>
                       )}
@@ -427,7 +373,7 @@ const PublicOrderTracking = () => {
                         <p
                           className={`text-xs sm:text-sm font-medium truncate px-1 ${
                             isCurrent
-                              ? 'text-primary-600'
+                              ? 'text-primary'
                               : isCompleted || hasActivity
                               ? 'text-primary-500'
                               : 'text-gray-500'
@@ -447,7 +393,7 @@ const PublicOrderTracking = () => {
                           <time
                             className={`block text-[10px] sm:text-xs mt-1 truncate ${
                               isCurrent
-                                ? 'text-primary-600'
+                                ? 'text-primary'
                                 : isCompleted || hasActivity
                                 ? 'text-primary'
                                 : 'text-gray-400'

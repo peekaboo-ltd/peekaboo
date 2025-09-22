@@ -4,7 +4,7 @@ import Router from './routes/Router';
 const App = () => {
   return (
     <>
-      <Toaster />
+      <Toaster duration={2000} />
       <Router />
     </>
   );

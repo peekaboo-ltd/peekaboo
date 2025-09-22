@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   useCreatePublicOrderMutation,
   useUpdateOrderMutation,
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLazyGetOrderQuery } from '@/api/queries/orders.queries';
 import { useAppDispatch } from '@/states/hooks';
 import { setOrder } from '@/states/slices/order.slice';
+import { ORDER_FEE_RANGES } from '@/constants/order.constants';
 
 /**
  *
@@ -68,4 +69,18 @@ export const useUpdateOrder = () => {
   }, [data, isSuccess, dispatch, reset]);
 
   return { updateOrder, data, error, isLoading, isSuccess, reset };
+};
+
+export const useGetOrderFees = () => {
+  const [orderFee, setOrderFee] = useState<number | undefined>(undefined);
+
+  // STATE VARIABLES
+  const getOrderFee = useCallback((distance: number) => {
+    const fee = ORDER_FEE_RANGES.find(
+      (range) => distance >= range.min && distance <= range.max
+    )?.fee;
+    setOrderFee(fee ?? 0);
+  }, []);
+
+  return { getOrderFee, orderFee };
 };

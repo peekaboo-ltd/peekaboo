@@ -1,16 +1,17 @@
 import PlaceSearch from '@/components/inputs/PlaceSearch';
-import { useGetOrder, useUpdateOrder } from '@/hooks/orders/orders.hooks';
+import { useGetOrder, useGetOrderFees, useUpdateOrder } from '@/hooks/orders/orders.hooks';
 import { useAppSelector } from '@/states/hooks';
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import RouteCalculator from '@/containers/locations/RouteCalculator';
 import AdministrativeLocation from '@/containers/locations/AdministrativeLocation';
 import { useCreateOrderAssignment } from '@/hooks/orders/orderAssignments.hooks';
 import Button from '@/components/inputs/Button';
+import { formatCurrency } from '@/utils/strings.util';
 
 const PublicOrderDetails = () => {
   // STATE VARIABLES
@@ -29,6 +30,7 @@ const PublicOrderDetails = () => {
   // ORDER HOOKS
   const { getOrder } = useGetOrder();
   const { updateOrder } = useUpdateOrder();
+  const { getOrderFee, orderFee } = useGetOrderFees();
 
   // CREATE ORDER ASSIGNMENT HOOKS
   const {
@@ -74,6 +76,12 @@ const PublicOrderDetails = () => {
     setEstimatedTime(calculatedTime);
   };
 
+  useEffect(() => {
+    if (distance) {
+      getOrderFee(distance);
+    }
+  }, [distance, getOrderFee]);
+
   return (
     <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY}>
       {order?.locationFrom && order?.locationTo && (
@@ -116,7 +124,7 @@ const PublicOrderDetails = () => {
           <menu className="grid grid-cols-2 gap-6">
             <li className="bg-white rounded-lg shadow-sm p-6 flex flex-col items-start border border-gray-100">
               <span className="text-xs font-semibold text-gray-500 uppercase mb-2 tracking-wide">
-                Location From
+                Origin Location
               </span>
               <ul className="flex flex-col gap-2">
                 <AdministrativeLocation location={order?.locationFrom} />
@@ -124,7 +132,7 @@ const PublicOrderDetails = () => {
             </li>
             <li className="bg-white rounded-lg shadow-sm p-6 flex flex-col items-start border border-gray-100">
               <span className="text-xs font-semibold text-gray-500 uppercase mb-2 tracking-wide">
-                Location To
+                Destination
               </span>
               <ul className="flex flex-col gap-2">
                 <AdministrativeLocation location={order?.locationTo} />
@@ -136,7 +144,7 @@ const PublicOrderDetails = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4 font-sans">
                 Route Information
               </h3>
-              <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <dl className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <article className="flex items-center gap-3">
                   <span className="text-green-600" aria-hidden="true">
                     📏
@@ -167,22 +175,56 @@ const PublicOrderDetails = () => {
                     </dd>
                   </section>
                 </article>
+                <article className="flex items-center gap-3">
+                  <section>
+                    <dt className="text-sm text-gray-700 font-medium font-sans">
+                      Estimated Fee
+                    </dt>
+                    <dd className="text-lg font-bold text-gray-900 font-sans">
+                      {orderFee !== undefined && orderFee > 0 ? (
+                        <span>
+                          {formatCurrency(orderFee)}
+                          <span className="ml-1 text-xs text-gray-500 font-normal">
+                            (incl. VAT)
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">Calculating...</span>
+                      )}
+                    </dd>
+                  </section>
+                </article>
               </dl>
               <p className="text-xs text-gray-600 mt-3 font-sans">
                 * Route calculated using Google Maps. Two-wheeler time is 15%
                 faster than driving due to better traffic navigation.
               </p>
+              {orderFee !== undefined && orderFee > 0 && (
+                <p className="text-xs text-primary mt-1 font-sans">
+                  ** The fee shown is based on the distance between the origin
+                  and destination.{' '}
+                  <Link to="/p/orders/fees" className="text-primary underline">
+                    Click here
+                  </Link>{' '}
+                  to see the full fee breakdown.
+                </p>
+              )}
             </section>
           )}
         </section>
-        <Button primary isLoading={createOrderAssignmentIsLoading} onClick={(e) => {
-          e.preventDefault();
-          if (order?.id) {
-          createOrderAssignment({
-              orderId: order?.id,
-            });
-          }
-        }}>
+        <Button
+          primary
+          isLoading={createOrderAssignmentIsLoading}
+          onClick={(e) => {
+            e.preventDefault();
+            if (order?.id) {
+              createOrderAssignment({
+                orderId: order?.id,
+              });
+            }
+          }}
+          className='self-end'
+        >
           Continue
         </Button>
       </main>
