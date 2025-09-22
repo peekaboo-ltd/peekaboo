@@ -4,11 +4,13 @@ import { useAppSelector } from '@/states/hooks';
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import RouteCalculator from '@/containers/locations/RouteCalculator';
 import AdministrativeLocation from '@/containers/locations/AdministrativeLocation';
+import { useCreateOrderAssignment } from '@/hooks/orders/orderAssignments.hooks';
+import Button from '@/components/inputs/Button';
 
 const PublicOrderDetails = () => {
   // STATE VARIABLES
@@ -18,6 +20,7 @@ const PublicOrderDetails = () => {
 
   // NAVIGATION
   const { id } = useParams();
+  const navigate = useNavigate();
 
   /**
    * HOOKS
@@ -26,6 +29,19 @@ const PublicOrderDetails = () => {
   // ORDER HOOKS
   const { getOrder } = useGetOrder();
   const { updateOrder } = useUpdateOrder();
+
+  // CREATE ORDER ASSIGNMENT HOOKS
+  const {
+    createOrderAssignment,
+    isSuccess: createOrderAssignmentIsSuccess,
+    isLoading: createOrderAssignmentIsLoading,
+  } = useCreateOrderAssignment();
+
+  useEffect(() => {
+    if (createOrderAssignmentIsSuccess) {
+      navigate(`/p/orders/${order?.id}/tracking`);
+    }
+  }, [createOrderAssignmentIsSuccess, navigate, order?.id]);
 
   // GET CURRENT LOCATION
   useEffect(() => {
@@ -122,7 +138,9 @@ const PublicOrderDetails = () => {
               </h3>
               <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <article className="flex items-center gap-3">
-                  <span className="text-green-600" aria-hidden="true">📏</span>
+                  <span className="text-green-600" aria-hidden="true">
+                    📏
+                  </span>
                   <section>
                     <dt className="text-sm text-gray-700 font-medium font-sans">
                       Distance
@@ -133,7 +151,9 @@ const PublicOrderDetails = () => {
                   </section>
                 </article>
                 <article className="flex items-center gap-3">
-                  <span className="text-orange-600" aria-hidden="true">🏍️</span>
+                  <span className="text-orange-600" aria-hidden="true">
+                    🏍️
+                  </span>
                   <section>
                     <dt className="text-sm text-gray-700 font-medium font-sans">
                       Estimated Time (Two-wheeler)
@@ -155,6 +175,16 @@ const PublicOrderDetails = () => {
             </section>
           )}
         </section>
+        <Button primary isLoading={createOrderAssignmentIsLoading} onClick={(e) => {
+          e.preventDefault();
+          if (order?.id) {
+          createOrderAssignment({
+              orderId: order?.id,
+            });
+          }
+        }}>
+          Continue
+        </Button>
       </main>
     </APIProvider>
   );

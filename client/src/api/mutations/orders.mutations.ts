@@ -33,5 +33,7 @@ export const ordersMutationApiSlice = createApi({
   }),
 });
 
-export const { useCreatePublicOrderMutation, useUpdateOrderMutation } =
-  ordersMutationApiSlice;
+export const {
+  useCreatePublicOrderMutation,
+  useUpdateOrderMutation,
+} = ordersMutationApiSlice;

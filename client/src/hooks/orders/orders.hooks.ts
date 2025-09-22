@@ -22,7 +22,7 @@ export const useCreatePublicOrder = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      navigate(`/public/orders/${data?.data?.id}`);
+      navigate(`/p/orders/${data?.data?.id}`);
       reset();
     }
   }, [data, isSuccess, navigate, reset]);

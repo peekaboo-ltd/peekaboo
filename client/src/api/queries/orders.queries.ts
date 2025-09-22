@@ -17,7 +17,12 @@ export const ordersQueriesApiSlice = createApi({
     getOrder: builder.query({
       query: ({ id }: { id: UUID }) => `/orders/${id}`,
     }),
+
+    // GET ORDER TRACKING
+    getOrderTracking: builder.query({
+      query: ({ id }: { id: UUID }) => `/orders/${id}/tracking`,
+    }),
   }),
 });
 
-export const { useLazyFetchOrdersQuery, useLazyGetOrderQuery } = ordersQueriesApiSlice;
+export const { useLazyFetchOrdersQuery, useLazyGetOrderQuery, useLazyGetOrderTrackingQuery } = ordersQueriesApiSlice;

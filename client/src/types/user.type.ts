@@ -1,0 +1,19 @@
+import type { BaseDomain, UUID } from './index';
+import { UserStatus } from '../constants/user.constants';
+import type { Order } from './order.type';
+import type { OrderAssignment } from './orderAssignment.type';
+
+export interface User extends BaseDomain {
+  id: UUID;
+  name?: string;
+  email?: string;
+  phoneNumber: string;
+  dateOfBirth?: Date;
+  status: UserStatus;
+  nationality?: string;
+  passwordHash?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  assignments: OrderAssignment[];
+  orders: Order[];
+}

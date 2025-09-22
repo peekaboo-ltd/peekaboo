@@ -25,20 +25,6 @@ export const formatDate = (
 };
 
 /**
- * FORMAT DATE AND TIME
- * @param date - The date to format
- * @param format - The format to use
- * @returns The formatted date and time
- */
-export const formatDateTime = (
-  date: string | Date | undefined,
-  format: string = 'YYYY-MM-DD HH:mm:ss'
-) => {
-  if (!date) return '';
-  return moment(date).format(format);
-};
-
-/**
  * FORMAT TIME
  * @param time - The time to format
  * @param format - The format to use

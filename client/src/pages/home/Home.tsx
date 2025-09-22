@@ -46,7 +46,7 @@ const Home = () => {
             render={({ field }) => (
               <label className="w-full flex flex-col gap-4">
                 <p className="text-sm">Your phone number</p>
-                <Input {...field} />
+                <Input {...field} placeholder="Enter your phone number" />
               </label>
             )}
           />
@@ -56,7 +56,7 @@ const Home = () => {
             render={({ field }) => (
               <label className="w-full flex flex-col gap-4">
                 <p className="text-sm">Recipient's phone number</p>
-                <Input {...field} />
+                <Input {...field} placeholder="Enter the recipient's phone number" />
               </label>
             )}
           />
@@ -65,6 +65,7 @@ const Home = () => {
           className="w-full bg-primary-900 p-4 rounded-lg cursor-pointer"
           isLoading={isLoading}
           type="submit"
+          primary
         >
           Continue
         </Button>
