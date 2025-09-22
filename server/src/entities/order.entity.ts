@@ -38,16 +38,6 @@ export class  Order extends AbstractEntity {
   })
   type: OrderType;
 
-  // STATUS
-  @Column({
-    name: "status",
-    type: "enum",
-    nullable: false,
-    enum: OrderStatus,
-    default: OrderStatus.CREATED,
-  })
-  status: OrderStatus;
-
   // DISCOUNT
   @Column({ name: "discount", type: "numeric", nullable: true, default: 0 })
   discount: number;

@@ -217,17 +217,6 @@ export class WhatsappService {
             [RoleTypes.CUSTOMER]
           );
 
-          if (orderExists && orderRecipientExists) {
-            // UPDATE ORDER TO ADD RECIPIENT ID
-            await this.orderService.updateOrder(
-              orderExists?.id,
-              {
-                recipientId: orderRecipientExists?.id,
-                status: OrderStatus.PENDING,
-              },
-              { createdById: conversationRecipientExists?.id }
-            );
-          }
 
           // SEND MESSAGE
           await sendMessage({
@@ -281,14 +270,6 @@ export class WhatsappService {
          */
         case ConversationStep.ORDER_CONFIRMATION:
           if (orderExists) {
-            // UPDATE ORDER STATUS TO CONFIRMED
-            await this.orderService.updateOrder(
-              orderExists?.id,
-              {
-                status: OrderStatus.CONFIRMED,
-              },
-              { createdById: conversationRecipientExists?.id }
-            );
 
             // SEND MESSAGE TO THE ORDER RECIPIENT
             await sendMessage({
@@ -322,17 +303,6 @@ export class WhatsappService {
         case ConversationStep.ORDER_ACCEPTANCE:
           // UPDATE ORDER EXISTS
           orderExists = await this.orderService.getOrderById(id);
-
-          if (orderExists) {
-            // ACCEPT ORDER (status update)
-            await this.orderService.updateOrder(
-              orderExists?.id,
-              {
-                status: OrderStatus.ACCEPTED,
-              },
-              { createdById: orderExists?.recipient?.id }
-            );
-          }
 
           // SEND MESSAGE
           await sendMessage({

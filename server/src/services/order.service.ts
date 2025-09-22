@@ -1,27 +1,30 @@
-import { FindOptionsWhere, Repository } from "typeorm";
-import { Order } from "../entities/order.entity";
-import { AppDataSource } from "../data-source";
-import { generateReferenceNumber } from "../helpers/string.helper";
-import { UUID } from "../types";
-import { NotFoundError } from "../helpers/errors.helper";
-import { LogReferenceTypes } from "../constants/logs.constants";
+import { FindOptionsWhere, Repository } from 'typeorm';
+import { Order } from '../entities/order.entity';
+import { AppDataSource } from '../data-source';
+import { generateReferenceNumber } from '../helpers/string.helper';
+import { UUID } from '../types';
+import { NotFoundError } from '../helpers/errors.helper';
+import { LogReferenceTypes } from '../constants/logs.constants';
 import {
   OrderAssignmentStatus,
   OrderStatus,
-} from "../constants/order.constants";
-import { ConversationStep } from "../constants/conversation.constants";
-import { ConversationService } from "./conversation.service";
-import { sendMessage } from "../helpers/whatsapp.helper";
+} from '../constants/order.constants';
+import { ConversationStep } from '../constants/conversation.constants';
+import { ConversationService } from './conversation.service';
+import { sendMessage } from '../helpers/whatsapp.helper';
 import {
   getPagination,
   getPagingData,
   Pagination,
-} from "../helpers/pagination.helper";
-import { OrderAssignmentService } from "./orderAssignment.service";
-import { AuditUpdate } from "../decorators/auditLog.decorator";
-import { AuditLogEntityTypes } from "../constants/auditLog.constants";
-import { User } from "../entities/user.entity";
-import { UserService } from "./user.service";
+} from '../helpers/pagination.helper';
+import { OrderAssignmentService } from './orderAssignment.service';
+import { AuditUpdate } from '../decorators/auditLog.decorator';
+import { AuditLogEntityTypes } from '../constants/auditLog.constants';
+import { User } from '../entities/user.entity';
+import { UserService } from './user.service';
+import { AuditLogService } from './auditLog.service';
+import { OrderActivityService } from './orderActivity.service';
+import { OrderActivity } from '../entities/orderActivity.entity';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -29,6 +32,9 @@ export class OrderService {
   private readonly orderAssignmentService: OrderAssignmentService;
   private readonly userRepository: Repository<User>;
   private readonly userService: UserService;
+  private readonly auditLogService: AuditLogService;
+  private readonly orderActivityService: OrderActivityService;
+  private readonly orderActivityRepository: Repository<OrderActivity>;
 
   constructor() {
     this.orderRepository = AppDataSource.getRepository(Order);
@@ -36,20 +42,22 @@ export class OrderService {
     this.orderAssignmentService = new OrderAssignmentService();
     this.userRepository = AppDataSource.getRepository(User);
     this.userService = new UserService();
+    this.auditLogService = new AuditLogService();
+    this.orderActivityService = new OrderActivityService();
   }
 
   // CREATE ORDER
   async createOrder(order: Partial<Order>): Promise<Order> {
     // GENERATE REFERENCE ID
     let referenceId: string = generateReferenceNumber({
-      prefix: 'O',
+      prefix: 'P',
       length: 6,
     });
 
     // CHECK IF REFERENCE ID IS UNIQUE
     while (await this.getOrderByReferenceId(referenceId)) {
       referenceId = generateReferenceNumber({
-        prefix: 'O',
+        prefix: 'P',
         length: 6,
       });
     }
@@ -59,6 +67,13 @@ export class OrderService {
 
     // CREATE ORDER
     const createdOrder = await this.orderRepository.save(order);
+
+    // CREATE ORDER STATUS
+    await this.orderActivityService.createOrderActivity({
+      orderId: createdOrder.id,
+      status: OrderStatus.CREATED,
+      createdById: createdOrder?.createdById,
+    });
 
     return createdOrder;
   }
@@ -71,17 +86,16 @@ export class OrderService {
     senderPhoneNumber: string;
     recipientPhoneNumber: string;
   }): Promise<Order> {
-
     // GENERATE REFERENCE ID
     let referenceId: string = generateReferenceNumber({
-      prefix: 'O',
+      prefix: 'P',
       length: 6,
     });
 
     // CHECK IF REFERENCE ID IS UNIQUE
     while (await this.getOrderByReferenceId(referenceId)) {
       referenceId = generateReferenceNumber({
-        prefix: 'O',
+        prefix: 'P',
         length: 6,
       });
     }
@@ -114,6 +128,13 @@ export class OrderService {
       createdById: sender?.id,
       status: OrderStatus.CREATED,
       initialFee: 1500,
+    });
+
+    // CREATE ORDER STATUS
+    await this.orderActivityService.createOrderActivity({
+      orderId: createdOrder.id,
+      status: OrderStatus.CREATED,
+      createdById: createdOrder?.createdById,
     });
 
     return createdOrder;
@@ -154,7 +175,11 @@ export class OrderService {
   async cancelOrder(id: UUID, createdById?: UUID): Promise<Order> {
     const order = await this.getOrderById(id);
 
-    order.status = OrderStatus.CANCELLED;
+    await this.orderActivityService.createOrderActivity({
+      orderId: order.id,
+      status: OrderStatus.CANCELLED,
+      createdById: createdById || order?.createdById,
+    });
 
     await this.orderRepository.save(order);
 
@@ -171,7 +196,7 @@ export class OrderService {
     entityType: AuditLogEntityTypes.ORDER,
     getEntityId: (args) => args[0],
     getEntity: (args) => args[1],
-    getUserId: (args) => args[2] || args[1]?.createdById,
+    getUserId: (args) => args[2]?.createdById || args[1]?.createdById,
   })
   async updateOrder(
     id: UUID,
@@ -204,8 +229,11 @@ export class OrderService {
     const orderExists = await this.getOrderById(id);
 
     // CREATE ORDER ACTIVITY
-    orderExists.status = OrderStatus.ACCEPTED;
-    await this.orderRepository.save(orderExists);
+    await this.orderActivityService.createOrderActivity({
+      orderId: orderExists.id,
+      status: OrderStatus.ACCEPTED,
+      createdById: createdById || orderExists?.createdById,
+    });
 
     // CREATE ORDER ASSIGNMENT
     const orderAssignment =

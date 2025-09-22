@@ -80,9 +80,16 @@ export class OrderAssignmentService {
             },
           },
           status: UserStatus.ACTIVE,
+          assignments: {
+            status: OrderAssignmentStatus.ACTIVE,
+          }
         },
         relations: ["userRoles.role", "assignments"],
       });
+
+      if (availableRiders?.rows.length === 0) {
+        throw new NotFoundError("No available riders found");
+      }
 
       // SORT BY ASSIGNMENTS
       availableRiders?.rows.sort((a, b) => {

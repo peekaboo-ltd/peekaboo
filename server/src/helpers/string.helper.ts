@@ -33,5 +33,5 @@ export const generateReferenceNumber = ({
   length?: number;
 }): string => {
   const digits = Math.floor(Math.random() * Math.pow(10, length)).toString().padStart(length, '0');
-  return `${prefix}-${digits}`;
+  return `${prefix}${digits}`;
 };
