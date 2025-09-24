@@ -1,7 +1,7 @@
 import { useFetchOrderActivities } from '@/hooks/orders/orderActivities.hooks';
 import { useAppSelector } from '@/states/hooks';
 import type { UUID } from '@/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { OrderStatus } from '@/types/order.type';
 import { useGetOrder } from '@/hooks/orders/orders.hooks';
@@ -14,6 +14,36 @@ import { workflowStatuses } from '@/constants/order.constants';
 import Button from '@/components/inputs/Button';
 
 const PublicOrderTracking = () => {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-fade-in-up');
+            entry.target.classList.remove('opacity-0', 'translate-y-8');
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px',
+      }
+    );
+
+    const animatedElements = document.querySelectorAll('.animate-on-scroll');
+    animatedElements.forEach((el) => {
+      observerRef.current?.observe(el);
+    });
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
+
   // STATE VARIABLES
   const { orderActivitiesList } = useAppSelector(
     (state) => state.orderActivity
@@ -101,12 +131,44 @@ const PublicOrderTracking = () => {
   };
 
   return (
-    <main className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4">
-      <section className="max-w-7xl mx-auto">
-        <header className="text-center mb-6 sm:mb-8">
-          <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-primary mb-2 px-2">
-            Track Your Order
-          </h1>
+    <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          .animate-fade-in-up {
+            animation: fadeInUp 1.2s ease-out forwards;
+          }
+
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(50px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+
+          html {
+            scroll-behavior: smooth;
+          }
+        `,
+        }}
+      />
+
+      <main className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4">
+        <section className="max-w-7xl mx-auto">
+          <header className="text-center mb-6 sm:mb-8 animate-on-scroll">
+            <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-primary mb-2 px-2">
+              Track Your Order
+            </h1>
           {order && (
             <p className="text-xs sm:text-sm text-gray-600 px-2">
               Order Reference:{' '}
@@ -130,7 +192,7 @@ const PublicOrderTracking = () => {
 
         {/* Order Details Section */}
         {order && (
-          <article className="bg-white rounded-lg shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8">
+          <article className="bg-white rounded-sm shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8">
             <h2 className="text-sm sm:text-md text-center uppercase font-semibold text-primary mb-3 sm:mb-4">
               Order Details
             </h2>
@@ -141,7 +203,7 @@ const PublicOrderTracking = () => {
         )}
 
         {/* Horizontal Timeline */}
-        <article className="bg-white rounded-lg shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8">
+        <article className="bg-white rounded-sm shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 animate-on-scroll">
           <h2 className="text-sm sm:text-md text-center uppercase font-semibold text-gray-800 mb-4 sm:mb-6 lg:mb-8">
             Order Progress
           </h2>
@@ -234,7 +296,7 @@ const PublicOrderTracking = () => {
 
                         <aside className="text-right">
                           {isCurrent && (
-                            <mark className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary text-white mb-1">
+                            <mark className="inline-flex items-center px-2 py-1 rounded-sm text-xs font-medium bg-primary text-white mb-1">
                               Current
                             </mark>
                           )}
@@ -257,7 +319,7 @@ const PublicOrderTracking = () => {
 
                     {/* Tooltip for Mobile */}
                     {hoveredStatus === (status.key as string) && (
-                      <output className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-[11px] rounded-lg shadow-lg whitespace-nowrap z-20 max-w-48">
+                      <output className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-[11px] rounded-sm shadow-lg whitespace-nowrap z-20 max-w-48">
                         {(
                           activity as OrderActivity & {
                             notes?: string;
@@ -351,7 +413,7 @@ const PublicOrderTracking = () => {
 
                       {/* Tooltip */}
                       {hoveredStatus === (status.key as string) && (
-                        <output className="absolute bottom-full mb-2 px-2 sm:px-3 py-1 sm:py-2 bg-gray-900 text-white text-[10px] sm:text-[11px] rounded-lg shadow-lg whitespace-nowrap z-10 max-w-32 sm:max-w-48">
+                        <output className="absolute bottom-full mb-2 px-2 sm:px-3 py-1 sm:py-2 bg-gray-900 text-white text-[10px] sm:text-[11px] rounded-sm shadow-lg whitespace-nowrap z-10 max-w-32 sm:max-w-48">
                           {(
                             activity as OrderActivity & {
                               notes?: string;
@@ -384,7 +446,7 @@ const PublicOrderTracking = () => {
                           {status.label}
                         </p>
                         {isCurrent && (
-                          <mark className="mt-1 inline-flex items-center px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-primary text-white">
+                          <mark className="mt-1 inline-flex items-center px-1 sm:px-2 py-0.5 sm:py-1 rounded-sm text-[10px] sm:text-xs font-medium bg-primary text-white">
                             Current
                           </mark>
                         )}
@@ -412,13 +474,14 @@ const PublicOrderTracking = () => {
             </section>
           </nav>
         </article>
-      </section>
-      <menu className='flex items-center justify-between max-w-7xl mx-auto'>
-        <Button route={`/p/orders/${order?.id}`}>
-          Back
-        </Button>
-      </menu>
-    </main>
+        </section>
+        <menu className='flex items-center justify-between max-w-7xl mx-auto animate-on-scroll'>
+          <Button route={`/p/orders/${order?.id}`}>
+            Back
+          </Button>
+        </menu>
+      </main>
+    </>
   );
 };
 
