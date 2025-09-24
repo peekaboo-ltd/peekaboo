@@ -11,6 +11,7 @@ import type { OrderActivity } from '@/types/orderActivity.type';
 import OrderDetails from '@/containers/orders/OrderDetails';
 import { toast } from 'sonner';
 import { workflowStatuses } from '@/constants/order.constants';
+import Button from '@/components/inputs/Button';
 
 const PublicOrderTracking = () => {
   // STATE VARIABLES
@@ -100,7 +101,7 @@ const PublicOrderTracking = () => {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8 px-2 sm:px-4">
+    <main className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4">
       <section className="max-w-7xl mx-auto">
         <header className="text-center mb-6 sm:mb-8">
           <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-primary mb-2 px-2">
@@ -412,6 +413,11 @@ const PublicOrderTracking = () => {
           </nav>
         </article>
       </section>
+      <menu className='flex items-center justify-between max-w-7xl mx-auto'>
+        <Button route={`/p/orders/${order?.id}`}>
+          Back
+        </Button>
+      </menu>
     </main>
   );
 };

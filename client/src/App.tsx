@@ -1,5 +1,5 @@
 import { Toaster } from './components/ui/sonner';
-import Router from './routes/Router';
+import { Router } from './routes';
 
 const App = () => {
   return (

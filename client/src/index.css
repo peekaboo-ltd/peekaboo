@@ -131,8 +131,11 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14px;
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 14px;
   }
 }

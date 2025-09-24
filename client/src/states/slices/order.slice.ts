@@ -5,12 +5,16 @@ export interface OrderState {
   ordersList: Order[];
   order?: Order;
   selectedOrder?: Order;
+  updateOrderLocationFromModal: boolean;
+  updateOrderLocationToModal: boolean;
 }
 
 const initialState: OrderState = {
   ordersList: [],
   order: undefined,
   selectedOrder: undefined,
+  updateOrderLocationFromModal: false,
+  updateOrderLocationToModal: false,
 };
 
 const orderSlice = createSlice({
@@ -26,9 +30,15 @@ const orderSlice = createSlice({
     setSelectedOrder: (state, action) => {
       state.selectedOrder = action.payload;
     },
+    setUpdateOrderLocationFromModal: (state, action) => {
+      state.updateOrderLocationFromModal = action.payload;
+    },
+    setUpdateOrderLocationToModal: (state, action) => {
+      state.updateOrderLocationToModal = action.payload;
+    },
   },
 });
 
-export const { setOrdersList, setOrder, setSelectedOrder } = orderSlice.actions;
+export const { setOrdersList, setOrder, setSelectedOrder, setUpdateOrderLocationFromModal, setUpdateOrderLocationToModal } = orderSlice.actions;
 
 export default orderSlice.reducer;
