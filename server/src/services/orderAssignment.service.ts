@@ -80,9 +80,6 @@ export class OrderAssignmentService {
             },
           },
           status: UserStatus.ACTIVE,
-          assignments: {
-            status: OrderAssignmentStatus.ACTIVE,
-          }
         },
         relations: ["userRoles.role", "assignments"],
       });
