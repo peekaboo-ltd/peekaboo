@@ -26,53 +26,34 @@ class AuthService {
 
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
-      // TODO: Replace with actual API call when backend auth is implemented
-      // Mock authentication for development
-      const mockUser = {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        name: 'Admin User',
-        email: credentials.email,
-        phoneNumber: '+1234567890',
-        status: 'ACTIVE' as any,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userRoles: [
-          {
-            id: '1',
-            userId: '123e4567-e89b-12d3-a456-426614174000',
-            roleId: '1',
-            role: {
-              id: '1',
-              name: 'ADMIN' as any,
-              description: 'Administrator',
-              label: 'Admin',
-              status: 'ACTIVE' as any,
-            }
-          }
-        ]
-      };
+      const response = await api.post<{
+        message: string;
+        data: {
+          user: User;
+          token: string;
+        };
+      }>('/auth/login', credentials);
 
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      const response = { token: mockToken, user: mockUser };
+      const { user, token } = response.data.data;
       
       // Store token and user
-      this.token = mockToken;
-      localStorage.setItem(AUTH_TOKEN_KEY, mockToken);
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(mockUser));
+      this.token = token;
+      localStorage.setItem(AUTH_TOKEN_KEY, token);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
       
       // Set auth header for future requests
-      this.setAuthHeader(mockToken);
+      this.setAuthHeader(token);
 
       // Handle remember me
       if (!credentials.rememberMe) {
         // If not remember me, store in sessionStorage instead
-        sessionStorage.setItem(AUTH_TOKEN_KEY, mockToken);
-        sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(mockUser));
+        sessionStorage.setItem(AUTH_TOKEN_KEY, token);
+        sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
         localStorage.removeItem(AUTH_TOKEN_KEY);
         localStorage.removeItem(AUTH_USER_KEY);
       }
 
-      return response;
+      return { token, user };
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Login failed');
     }
@@ -80,8 +61,25 @@ class AuthService {
 
   async register(userData: RegisterRequest): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/auth/register', userData);
-      return response.data;
+      const response = await api.post<{
+        message: string;
+        data: {
+          user: User;
+          token: string;
+        };
+      }>('/auth/register', userData);
+      
+      const { user, token } = response.data.data;
+      
+      // Store token and user
+      this.token = token;
+      localStorage.setItem(AUTH_TOKEN_KEY, token);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+      
+      // Set auth header for future requests
+      this.setAuthHeader(token);
+      
+      return { token, user };
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Registration failed');
     }
@@ -98,8 +96,11 @@ class AuthService {
 
   async getCurrentUser(): Promise<User> {
     try {
-      const response = await api.get<User>('/auth/me');
-      return response.data;
+      const response = await api.get<{
+        message: string;
+        data: User;
+      }>('/auth/me');
+      return response.data.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to fetch user');
     }
@@ -107,8 +108,11 @@ class AuthService {
 
   async refreshToken(): Promise<string> {
     try {
-      const response = await api.post<{ token: string }>('/auth/refresh');
-      const { token } = response.data;
+      const response = await api.post<{
+        message: string;
+        data: { token: string };
+      }>('/auth/refresh');
+      const { token } = response.data.data;
       
       this.token = token;
       localStorage.setItem(AUTH_TOKEN_KEY, token);

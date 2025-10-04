@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import authRoutes from './auth.routes';
 import whatsappRoutes from './whatsapp.routes';
 import orderRoutes from './order.routes';
 import userRoutes from './user.routes';
@@ -9,6 +10,9 @@ import orderActivityRoutes from './orderActivity.routes';
 
 // CREATE ROUTER
 const routes = Router();
+
+// AUTH ROUTES
+routes.use('/auth', authRoutes);
 
 // WHATSAPP ROUTES
 routes.use('/whatsapp', whatsappRoutes);

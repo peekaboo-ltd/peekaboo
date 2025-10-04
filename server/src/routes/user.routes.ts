@@ -1,8 +1,39 @@
 import { Router } from "express";
 import { UserController } from "../controllers/user.controller";
+import { authenticate } from "../middlewares/auth.middleware";
+import { authorize } from "../middlewares/authorize.middleware";
+import { RoleTypes } from "../constants/role.constants";
 
 const router = Router();
 
-router.post("/", UserController.createUser);
+// All routes require authentication
+router.use(authenticate);
+
+// GET all users with filters (ADMIN only)
+router.get("/", authorize([RoleTypes.ADMIN]), UserController.getUsers);
+
+// GET user by ID (ADMIN or own profile)
+router.get("/:id", UserController.getUserById);
+
+// CREATE new user (ADMIN only)
+router.post("/", authorize([RoleTypes.ADMIN]), UserController.createUser);
+
+// UPDATE user (ADMIN or own profile)
+router.patch("/:id", UserController.updateUser);
+
+// UPDATE user status (ADMIN only)
+router.patch("/:id/status", authorize([RoleTypes.ADMIN]), UserController.updateUserStatus);
+
+// DELETE user (ADMIN only)
+router.delete("/:id", authorize([RoleTypes.ADMIN]), UserController.deleteUser);
+
+// RESET user password (ADMIN only)
+router.post("/:id/reset-password", authorize([RoleTypes.ADMIN]), UserController.resetPassword);
+
+// GET user orders (ADMIN or own orders)
+router.get("/:id/orders", UserController.getUserOrders);
+
+// GET user assignments (ADMIN or own assignments for RIDER)
+router.get("/:id/assignments", UserController.getUserAssignments);
 
 export default router;

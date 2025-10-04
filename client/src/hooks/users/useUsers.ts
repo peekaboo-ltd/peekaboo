@@ -1,31 +1,31 @@
 import { useState, useCallback, useEffect } from 'react';
+import { userService, UserFilters } from '../../services/user.service';
+import { User } from '../../types/user.type';
 import { toast } from 'sonner';
-import userService, { UserFilters, UsersResponse } from '../../services/user.service';
-import type { User } from '../../types/user.type';
-import type { UserStatus } from '../../constants/user.constants';
 
 interface UseUsersResult {
   users: User[];
   isLoading: boolean;
   error: string | null;
+  total: number;
   pageCount: number;
   filters: UserFilters;
   setFilters: (filters: UserFilters) => void;
   refetch: () => Promise<void>;
-  updateUserStatus: (userId: string, status: UserStatus) => Promise<void>;
-  deleteUser: (userId: string) => Promise<void>;
-  resetPassword: (userId: string) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
+  updateUserStatus: (id: string, status: string) => Promise<void>;
 }
 
 export const useUsers = (initialFilters: UserFilters = {}): UseUsersResult => {
   const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pageCount, setPageCount] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
   const [filters, setFilters] = useState<UserFilters>({
     page: 1,
     limit: 10,
-    ...initialFilters,
+    ...initialFilters
   });
 
   const fetchUsers = useCallback(async () => {
@@ -33,52 +33,39 @@ export const useUsers = (initialFilters: UserFilters = {}): UseUsersResult => {
     setError(null);
     
     try {
-      const response: UsersResponse = await userService.getUsers(filters);
+      const response = await userService.getUsers(filters);
       setUsers(response.data);
+      setTotal(response.total);
       setPageCount(response.totalPages);
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to fetch users';
-      setError(errorMessage);
-      toast.error(errorMessage);
+      setError(err.message);
+      toast.error(err.message || 'Failed to fetch users');
     } finally {
       setIsLoading(false);
     }
   }, [filters]);
 
-  const updateUserStatus = async (userId: string, status: UserStatus) => {
+  const deleteUser = useCallback(async (id: string) => {
     try {
-      await userService.updateUserStatus(userId, status);
-      toast.success('User status updated successfully');
-      await fetchUsers();
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to update user status';
-      toast.error(errorMessage);
-      throw err;
-    }
-  };
-
-  const deleteUser = async (userId: string) => {
-    try {
-      await userService.deleteUser(userId);
+      await userService.deleteUser(id);
       toast.success('User deleted successfully');
       await fetchUsers();
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to delete user';
-      toast.error(errorMessage);
+      toast.error(err.message || 'Failed to delete user');
       throw err;
     }
-  };
+  }, [fetchUsers]);
 
-  const resetPassword = async (userId: string) => {
+  const updateUserStatus = useCallback(async (id: string, status: string) => {
     try {
-      await userService.resetPassword(userId);
-      toast.success('Password reset email sent successfully');
+      await userService.updateUserStatus(id, status as any);
+      toast.success('User status updated successfully');
+      await fetchUsers();
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to reset password';
-      toast.error(errorMessage);
+      toast.error(err.message || 'Failed to update user status');
       throw err;
     }
-  };
+  }, [fetchUsers]);
 
   useEffect(() => {
     fetchUsers();
@@ -88,12 +75,111 @@ export const useUsers = (initialFilters: UserFilters = {}): UseUsersResult => {
     users,
     isLoading,
     error,
+    total,
     pageCount,
     filters,
     setFilters,
     refetch: fetchUsers,
-    updateUserStatus,
     deleteUser,
-    resetPassword,
+    updateUserStatus
+  };
+};
+
+// Hook for single user
+interface UseUserResult {
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+  updateUser: (data: any) => Promise<void>;
+  userOrders: any[];
+  userAssignments: any[];
+  isLoadingOrders: boolean;
+  isLoadingAssignments: boolean;
+}
+
+export const useUser = (userId: string): UseUserResult => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [userOrders, setUserOrders] = useState<any[]>([]);
+  const [userAssignments, setUserAssignments] = useState<any[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [isLoadingAssignments, setIsLoadingAssignments] = useState(false);
+
+  const fetchUser = useCallback(async () => {
+    if (!userId) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const userData = await userService.getUserById(userId);
+      setUser(userData);
+    } catch (err: any) {
+      setError(err.message);
+      toast.error(err.message || 'Failed to fetch user');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
+
+  const fetchUserOrders = useCallback(async () => {
+    if (!userId) return;
+    
+    setIsLoadingOrders(true);
+    
+    try {
+      const orders = await userService.getUserOrders(userId);
+      setUserOrders(orders);
+    } catch (err: any) {
+      console.error('Failed to fetch user orders:', err);
+    } finally {
+      setIsLoadingOrders(false);
+    }
+  }, [userId]);
+
+  const fetchUserAssignments = useCallback(async () => {
+    if (!userId) return;
+    
+    setIsLoadingAssignments(true);
+    
+    try {
+      const assignments = await userService.getUserAssignments(userId);
+      setUserAssignments(assignments);
+    } catch (err: any) {
+      console.error('Failed to fetch user assignments:', err);
+    } finally {
+      setIsLoadingAssignments(false);
+    }
+  }, [userId]);
+
+  const updateUser = useCallback(async (data: any) => {
+    try {
+      await userService.updateUser(userId, data);
+      toast.success('User updated successfully');
+      await fetchUser();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update user');
+      throw err;
+    }
+  }, [userId, fetchUser]);
+
+  useEffect(() => {
+    fetchUser();
+    fetchUserOrders();
+    fetchUserAssignments();
+  }, [fetchUser, fetchUserOrders, fetchUserAssignments]);
+
+  return {
+    user,
+    isLoading,
+    error,
+    refetch: fetchUser,
+    updateUser,
+    userOrders,
+    userAssignments,
+    isLoadingOrders,
+    isLoadingAssignments
   };
 };

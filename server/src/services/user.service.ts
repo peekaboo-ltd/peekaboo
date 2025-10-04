@@ -1,4 +1,4 @@
-import { FindOptionsWhere, Repository } from "typeorm";
+import { FindOptionsWhere, Repository, Like, In, ILike } from "typeorm";
 import { AppDataSource } from "../data-source";
 import { User } from "../entities/user.entity";
 import { UUID } from "../types";
@@ -9,6 +9,11 @@ import { RoleTypes } from "../constants/role.constants";
 import { getPagingData } from "../helpers/pagination.helper";
 import { Pagination } from "../helpers/pagination.helper";
 import { getPagination } from "../helpers/pagination.helper";
+import { UserStatus } from "../constants/user.constants";
+import { OrderService } from "./order.service";
+import { AssignmentService } from "./assignment.service";
+import { hashPassword } from "../helpers/auth.helper";
+import { EmailService } from "./email.service";
 
 export class UserService {
   private readonly userRepository: Repository<User>;
@@ -111,6 +116,145 @@ export class UserService {
       data: users,
       page,
       size,
+    });
+  }
+
+  // GET USERS WITH PAGINATION AND FILTERS
+  async getUsersWithPagination({
+    page,
+    limit,
+    filters,
+  }: {
+    page: number;
+    limit: number;
+    filters: {
+      search?: string;
+      roles?: RoleTypes[];
+      status?: UserStatus;
+      phoneNumber?: string;
+      name?: string;
+      email?: string;
+    };
+  }): Promise<Pagination<User>> {
+    const { take, skip } = getPagination({ page, size: limit });
+
+    // Build query
+    const query = this.userRepository
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("user.userRoles", "userRole")
+      .leftJoinAndSelect("userRole.role", "role");
+
+    // Apply search filter
+    if (filters.search) {
+      query.andWhere(
+        "(user.name ILIKE :search OR user.email ILIKE :search OR user.phoneNumber ILIKE :search)",
+        { search: `%${filters.search}%` }
+      );
+    }
+
+    // Apply specific filters
+    if (filters.name) {
+      query.andWhere("user.name ILIKE :name", { name: `%${filters.name}%` });
+    }
+
+    if (filters.email) {
+      query.andWhere("user.email ILIKE :email", { email: `%${filters.email}%` });
+    }
+
+    if (filters.phoneNumber) {
+      query.andWhere("user.phoneNumber ILIKE :phoneNumber", {
+        phoneNumber: `%${filters.phoneNumber}%`,
+      });
+    }
+
+    if (filters.status) {
+      query.andWhere("user.status = :status", { status: filters.status });
+    }
+
+    // Apply role filter
+    if (filters.roles && filters.roles.length > 0) {
+      query.andWhere("role.name IN (:...roles)", { roles: filters.roles });
+    }
+
+    // Apply pagination
+    query.skip(skip).take(take);
+
+    // Execute query
+    const [users, total] = await query.getManyAndCount();
+
+    return getPagingData({
+      data: [users, total],
+      page,
+      size: limit,
+    });
+  }
+
+  // UPDATE USER STATUS
+  async updateUserStatus(id: UUID, status: UserStatus): Promise<User> {
+    const user = await this.getUserById(id);
+    
+    user.status = status;
+    
+    return this.userRepository.save(user);
+  }
+
+  // DELETE USER (SOFT DELETE)
+  async deleteUser(id: UUID): Promise<void> {
+    const user = await this.getUserById(id);
+    
+    // Soft delete by setting status to SUSPENDED
+    user.status = UserStatus.SUSPENDED;
+    user.deletedAt = new Date();
+    
+    await this.userRepository.save(user);
+  }
+
+  // RESET USER PASSWORD
+  async resetPassword(id: UUID): Promise<void> {
+    const user = await this.getUserById(id);
+    
+    // Generate temporary password
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await hashPassword(tempPassword);
+    
+    // Update user password
+    user.password = hashedPassword;
+    await this.userRepository.save(user);
+    
+    // Send email with temporary password
+    const emailService = new EmailService();
+    await emailService.sendPasswordResetEmail(user.email || user.phoneNumber, tempPassword);
+  }
+
+  // GET USER ORDERS
+  async getUserOrders(
+    userId: UUID,
+    pagination: { page: number; limit: number }
+  ): Promise<Pagination<any>> {
+    const orderService = new OrderService();
+    
+    return orderService.fetchOrders({
+      page: pagination.page,
+      size: pagination.limit,
+      condition: {
+        createdById: userId,
+      },
+    });
+  }
+
+  // GET USER ASSIGNMENTS (FOR RIDERS)
+  async getUserAssignments(
+    userId: UUID,
+    pagination: { page: number; limit: number }
+  ): Promise<Pagination<any>> {
+    const assignmentService = new AssignmentService();
+    
+    return assignmentService.fetchAssignments({
+      page: pagination.page,
+      size: pagination.limit,
+      condition: {
+        riderId: userId,
+      },
     });
   }
 }
