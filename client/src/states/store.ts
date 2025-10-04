@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { ordersMutationApiSlice } from '../api/mutations/orders.mutations';
 import orderSlice from './slices/order.slice';
+import authReducer from './slices/auth.slice';
 import { ordersQueriesApiSlice } from '../api/queries/orders.queries';
 import { externalMutationsApiSlice } from '../api/mutations/external.mutations';
 import { orderAssignmentsMutationsApiSlice } from '../api/mutations/orderAssignments.mutations';
@@ -14,6 +15,7 @@ export const store = configureStore({
     [orderAssignmentsMutationsApiSlice.reducerPath]: orderAssignmentsMutationsApiSlice.reducer,
     order: orderSlice,
     orderActivity: orderActivitySlice,
+    auth: authReducer,
     [ordersQueriesApiSlice.reducerPath]: ordersQueriesApiSlice.reducer,
     [orderActivityQueriesApiSlice.reducerPath]: orderActivityQueriesApiSlice.reducer,
   },

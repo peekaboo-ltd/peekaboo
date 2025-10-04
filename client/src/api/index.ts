@@ -3,7 +3,14 @@ import { ENVIRONMENTS } from '../constants/environments.constants';
 import { localStorageUtil } from '../utils/localStorage.util';
 
 const prepareHeaders = (headers: Headers) => {
-  const token = localStorageUtil.getItem('token');
+  let token = localStorageUtil.getItem('token');
+  if (!token) {
+    try {
+      token = sessionStorage.getItem('token');
+    } catch {
+      // ignore
+    }
+  }
   if (token) {
     headers.set('authorization', `Bearer ${token}`);
   }
