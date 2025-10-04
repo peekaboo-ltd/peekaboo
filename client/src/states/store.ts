@@ -6,9 +6,11 @@ import { externalMutationsApiSlice } from '../api/mutations/external.mutations';
 import { orderAssignmentsMutationsApiSlice } from '../api/mutations/orderAssignments.mutations';
 import orderActivitySlice from './slices/orderActivity.slice';
 import { orderActivityQueriesApiSlice } from '../api/queries/orderActivity.queries';
+import authSlice from './slices/auth.slice';
 
 export const store = configureStore({
   reducer: {
+    auth: authSlice,
     [ordersMutationApiSlice.reducerPath]: ordersMutationApiSlice.reducer,
     [externalMutationsApiSlice.reducerPath]: externalMutationsApiSlice.reducer,
     [orderAssignmentsMutationsApiSlice.reducerPath]: orderAssignmentsMutationsApiSlice.reducer,
