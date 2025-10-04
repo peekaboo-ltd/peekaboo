@@ -12,6 +12,7 @@ import { CustomerDashboard } from '../pages/customer';
 import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayout';
 import { OrdersList, OrderDetails } from '../pages/admin/orders';
 import { UsersList, UserDetails, CreateUser } from '../pages/admin/users';
+import { AuditLogsList } from '../pages/admin/audit-logs';
 
 const Router = () => {
   return (
@@ -62,6 +63,11 @@ const Router = () => {
         <Route path="/admin/users/:id" element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
             <UserDetails />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/audit-logs" element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <AuditLogsList />
           </ProtectedRoute>
         } />
         <Route path="/rider" element={

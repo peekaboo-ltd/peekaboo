@@ -113,7 +113,7 @@ class OrderService {
 
   async updateOrderStatus(id: string, status: OrderStatus): Promise<Order> {
     try {
-      const response = await api.patch<Order>(`/orders/${id}/status`, { status });
+      const response = await api.patch<Order>(`/orders/${id}`, { order: { status } });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to update order status');
