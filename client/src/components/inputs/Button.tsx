@@ -2,7 +2,7 @@ import { type IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { type FC, type MouseEventHandler, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import Loader from './Loader.tsx';
+import { Loader } from './Loader.tsx';
 
 interface ButtonProps {
   route?: string;

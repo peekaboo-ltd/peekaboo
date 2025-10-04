@@ -102,4 +102,5 @@ export const FormSkeletonLoader = () => {
   );
 };
 
+export { Loader };
 export default Loader;
