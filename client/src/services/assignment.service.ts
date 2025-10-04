@@ -45,7 +45,7 @@ class AssignmentService {
 
   async createAssignment(data: CreateAssignmentData): Promise<OrderAssignment> {
     try {
-      const response = await api.post<OrderAssignment>('/assignments', data);
+      const response = await api.post<OrderAssignment>('/order-assignments', data);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to create assignment');

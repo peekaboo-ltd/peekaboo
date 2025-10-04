@@ -26,31 +26,53 @@ class AuthService {
 
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/auth/login', {
+      // TODO: Replace with actual API call when backend auth is implemented
+      // Mock authentication for development
+      const mockUser = {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        name: 'Admin User',
         email: credentials.email,
-        password: credentials.password,
-      });
+        phoneNumber: '+1234567890',
+        status: 'ACTIVE' as any,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userRoles: [
+          {
+            id: '1',
+            userId: '123e4567-e89b-12d3-a456-426614174000',
+            roleId: '1',
+            role: {
+              id: '1',
+              name: 'ADMIN' as any,
+              description: 'Administrator',
+              label: 'Admin',
+              status: 'ACTIVE' as any,
+            }
+          }
+        ]
+      };
 
-      const { token, user } = response.data;
+      const mockToken = 'mock-jwt-token-' + Date.now();
+      const response = { token: mockToken, user: mockUser };
       
       // Store token and user
-      this.token = token;
-      localStorage.setItem(AUTH_TOKEN_KEY, token);
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+      this.token = mockToken;
+      localStorage.setItem(AUTH_TOKEN_KEY, mockToken);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(mockUser));
       
       // Set auth header for future requests
-      this.setAuthHeader(token);
+      this.setAuthHeader(mockToken);
 
       // Handle remember me
       if (!credentials.rememberMe) {
         // If not remember me, store in sessionStorage instead
-        sessionStorage.setItem(AUTH_TOKEN_KEY, token);
-        sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+        sessionStorage.setItem(AUTH_TOKEN_KEY, mockToken);
+        sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(mockUser));
         localStorage.removeItem(AUTH_TOKEN_KEY);
         localStorage.removeItem(AUTH_USER_KEY);
       }
 
-      return response.data;
+      return response;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Login failed');
     }
