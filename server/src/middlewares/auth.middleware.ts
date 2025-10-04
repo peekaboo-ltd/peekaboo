@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { AuthRequest } from "../types/auth.type";
+import { AuthRequest } from "../types/auth.types";
 import { UserService } from "../services/user.service";
 
 const userService = new UserService();
@@ -38,7 +38,7 @@ export const authenticate = async (
 
       // Attach user to request
       req.user = user;
-      req.userId = user.id;
+      req.user.id = user.id;
 
       next();
     } catch (error) {

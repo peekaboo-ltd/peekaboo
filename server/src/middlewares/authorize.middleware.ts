@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { AuthRequest } from "../types/auth.type";
+import { AuthRequest } from "../types/auth.types";
 import { RoleTypes } from "../constants/role.constants";
 import { ForbiddenError } from "../helpers/errors.helper";
 

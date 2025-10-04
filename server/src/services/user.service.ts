@@ -11,7 +11,7 @@ import { Pagination } from "../helpers/pagination.helper";
 import { getPagination } from "../helpers/pagination.helper";
 import { UserStatus } from "../constants/user.constants";
 import { OrderService } from "./order.service";
-import { AssignmentService } from "./assignment.service";
+import { OrderAssignmentService } from "./orderAssignment.service";
 import { hashPassword } from "../helpers/auth.helper";
 import { EmailService } from "./email.service";
 
@@ -40,7 +40,8 @@ export class UserService {
 
   // GET USER BY CONDITION
   async getUserByCondition(
-    condition: FindOptionsWhere<User> | FindOptionsWhere<User>[]
+    condition: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+    includePassword: boolean = false
   ): Promise<User | null> {
     const user = await this.userRepository.findOne({
       where: condition,
@@ -50,7 +51,20 @@ export class UserService {
         },
         assignments: true,
       },
+      select: includePassword ? {
+        id: true,
+        name: true,
+        email: true,
+        phoneNumber: true,
+        dateOfBirth: true,
+        status: true,
+        nationality: true,
+        passwordHash: true,
+        createdAt: true,
+        updatedAt: true,
+      } : undefined,
     });
+    console.log(user);
     return user;
   }
 
@@ -74,9 +88,10 @@ export class UserService {
 
     const createdUser = await this.userRepository.save(user);
 
-    if (roles && roles.length > 0) {
-      await this.userRoleService.assignRolesToUser(createdUser?.id, roles);
-    }
+    // Assign default CUSTOMER role if no roles provided
+    const rolesToAssign = roles && roles.length > 0 ? roles : [RoleTypes.CUSTOMER];
+    await this.userRoleService.assignRolesToUser(createdUser?.id, rolesToAssign);
+
     return createdUser;
   }
 
@@ -203,8 +218,8 @@ export class UserService {
     const user = await this.getUserById(id);
     
     // Soft delete by setting status to SUSPENDED
-    user.status = UserStatus.SUSPENDED;
-    user.deletedAt = new Date();
+    user.status = UserStatus.INACTIVE;
+    user.updatedAt = new Date();
     
     await this.userRepository.save(user);
   }
@@ -212,15 +227,15 @@ export class UserService {
   // RESET USER PASSWORD
   async resetPassword(id: UUID): Promise<void> {
     const user = await this.getUserById(id);
-    
+
     // Generate temporary password
     const tempPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await hashPassword(tempPassword);
-    
+
     // Update user password
-    user.password = hashedPassword;
+    user.passwordHash = hashedPassword;
     await this.userRepository.save(user);
-    
+
     // Send email with temporary password
     const emailService = new EmailService();
     await emailService.sendPasswordResetEmail(user.email || user.phoneNumber, tempPassword);
@@ -247,13 +262,13 @@ export class UserService {
     userId: UUID,
     pagination: { page: number; limit: number }
   ): Promise<Pagination<any>> {
-    const assignmentService = new AssignmentService();
+    const assignmentService = new OrderAssignmentService();
     
-    return assignmentService.fetchAssignments({
+    return assignmentService.fetchOrderAssignments({
       page: pagination.page,
       size: pagination.limit,
       condition: {
-        riderId: userId,
+        assignedToId: userId,
       },
     });
   }

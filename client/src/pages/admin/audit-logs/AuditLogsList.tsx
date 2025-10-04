@@ -46,9 +46,9 @@ const actionTypes = [
 ];
 
 export const AuditLogsList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [entityTypeFilter, setEntityTypeFilter] = useState<string>('');
-  const [actionFilter, setActionFilter] = useState<string>('');
+  const [, setSearchTerm] = useState('');
+  const [entityTypeFilter, setEntityTypeFilter] = useState<string>('all');
+  const [actionFilter, setActionFilter] = useState<string>('all');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
@@ -123,13 +123,14 @@ export const AuditLogsList: React.FC = () => {
         const hasChanges = row.changes && 
           row.changes.before && 
           row.changes.after && 
+          Object.keys(row.changes.before).length > 0 &&
           Object.keys(row.changes.after).length > 0;
         
         return (
           <div className="flex items-center gap-2">
             {hasChanges && (
               <Badge variant="secondary" className="text-xs">
-                {Object.keys(row.changes.after).length} changes
+                {Object.keys(row.changes?.after || {}).length} changes
               </Badge>
             )}
             <Button
@@ -157,20 +158,20 @@ export const AuditLogsList: React.FC = () => {
   };
 
   const handleSearchChange = () => {
-    const newFilters: any = { ...filters, page: 1 };
-    
-    if (entityTypeFilter) newFilters.entityType = entityTypeFilter;
+    const newFilters: Record<string, string | number | boolean> = { ...filters, page: 1 };
+
+    if (entityTypeFilter && entityTypeFilter !== 'all') newFilters.entityType = entityTypeFilter;
     else delete newFilters.entityType;
-    
-    if (actionFilter) newFilters.action = actionFilter;
+
+    if (actionFilter && actionFilter !== 'all') newFilters.action = actionFilter;
     else delete newFilters.action;
-    
+
     if (startDate) newFilters.startDate = startDate;
     else delete newFilters.startDate;
-    
+
     if (endDate) newFilters.endDate = endDate;
     else delete newFilters.endDate;
-    
+
     setFilters(newFilters);
   };
 
@@ -180,8 +181,8 @@ export const AuditLogsList: React.FC = () => {
 
   const handleClearFilters = () => {
     setSearchTerm('');
-    setEntityTypeFilter('');
-    setActionFilter('');
+    setEntityTypeFilter('all');
+    setActionFilter('all');
     setStartDate('');
     setEndDate('');
     setFilters({ page: 1, limit: filters.limit || 20 });
@@ -217,7 +218,7 @@ export const AuditLogsList: React.FC = () => {
                   <SelectValue placeholder="All entity types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All entity types</SelectItem>
+                  <SelectItem value="all">All entity types</SelectItem>
                   {entityTypes.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
                       {type.label}
@@ -233,7 +234,7 @@ export const AuditLogsList: React.FC = () => {
                   <SelectValue placeholder="All actions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All actions</SelectItem>
+                  <SelectItem value="all">All actions</SelectItem>
                   {actionTypes.map((action) => (
                     <SelectItem key={action.value} value={action.value}>
                       {action.label}
@@ -282,7 +283,7 @@ export const AuditLogsList: React.FC = () => {
       <Card>
         <CardContent className="p-0">
           <DataTable
-            data={auditLogs}
+            data={auditLogs?.rows || []}
             columns={columns}
             pageCount={pageCount}
             pageIndex={(filters.page || 1) - 1}

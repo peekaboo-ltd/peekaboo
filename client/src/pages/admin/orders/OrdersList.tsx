@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { DataTable } from '../../../components/tables/DataTable';
@@ -15,18 +15,16 @@ import {
   SelectValue,
 } from '../../../components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Plus, Filter, Download } from 'lucide-react';
+import { Plus, Download } from 'lucide-react';
 import { useOrdersManagement } from '../../../hooks/orders/useOrdersManagement';
 import { OrderStatus, OrderType } from '../../../types/order.type';
 import type { Column } from '../../../types/table.types';
 import type { Order } from '../../../types/order.type';
 import { toast } from 'sonner';
+import { UUID } from '@/types';
 
 export const OrdersList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('');
-  const [typeFilter, setTypeFilter] = useState<keyof typeof OrderType | ''>('');
 
   const {
     orders,
@@ -114,20 +112,18 @@ export const OrdersList: React.FC = () => {
   };
 
   const handleStatusFilterChange = (status: string) => {
-    setStatusFilter(status as OrderStatus | '');
-    setFilters({ 
-      ...filters, 
-      status: status ? status as OrderStatus : undefined,
-      page: 1 
+    setFilters({
+      ...filters,
+      status: status === 'all' ? undefined : status as OrderStatus,
+      page: 1
     });
   };
 
   const handleTypeFilterChange = (type: string) => {
-    setTypeFilter(type as keyof typeof OrderType | '');
-    setFilters({ 
-      ...filters, 
-      type: type ? type as keyof typeof OrderType : undefined,
-      page: 1 
+    setFilters({
+      ...filters,
+      type: type === 'all' ? undefined : type as typeof OrderType[keyof typeof OrderType],
+      page: 1
     });
   };
 
@@ -137,28 +133,31 @@ export const OrdersList: React.FC = () => {
 
   const handleUpdateStatus = async (order: Order, status: OrderStatus) => {
     try {
-      await updateOrderStatus(order.id, status);
+      await updateOrderStatus(order.id as UUID, status);
     } catch (error) {
       // Error is handled in the hook
+      console.error(error);
     }
   };
 
   const handleDeleteOrder = async (order: Order) => {
     if (window.confirm('Are you sure you want to delete this order?')) {
       try {
-        await deleteOrder(order.id);
+        await deleteOrder(order.id as UUID);
       } catch (error) {
         // Error is handled in the hook
-      }
+        console.error(error);
+    }
     }
   };
 
   const handleCancelOrder = async (order: Order) => {
     if (window.confirm('Are you sure you want to cancel this order?')) {
       try {
-        await updateOrderStatus(order.id, OrderStatus.CANCELLED);
+        await updateOrderStatus(order.id as UUID, OrderStatus.CANCELLED);
       } catch (error) {
         // Error is handled in the hook
+        console.error(error);
       }
     }
   };
@@ -193,28 +192,23 @@ export const OrdersList: React.FC = () => {
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-3">
             <div>
               <label className="text-sm font-medium mb-1 block">Search</label>
               <Input
                 placeholder="Search by ID, sender, recipient..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSearchChange(searchTerm);
-                  }
-                }}
+                value={filters.search || ''}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Status</label>
-              <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+              <Select value={filters.status || 'all'} onValueChange={handleStatusFilterChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   {Object.values(OrderStatus).map((status) => (
                     <SelectItem key={status} value={status}>
                       {status.replace(/_/g, ' ')}
@@ -225,25 +219,16 @@ export const OrdersList: React.FC = () => {
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Type</label>
-              <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
+              <Select value={filters.type || 'all'} onValueChange={handleTypeFilterChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All types</SelectItem>
-                  <SelectItem value="SEND">Send</SelectItem>
-                  <SelectItem value="RECEIVE">Receive</SelectItem>
+                  <SelectItem value="all">All types</SelectItem>
+                  <SelectItem value={OrderType.SEND}>Send</SelectItem>
+                  <SelectItem value={OrderType.RECEIVE}>Receive</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="flex items-end">
-              <Button 
-                className="w-full"
-                onClick={() => handleSearchChange(searchTerm)}
-              >
-                <Filter className="mr-2 h-4 w-4" />
-                Apply Filters
-              </Button>
             </div>
           </div>
         </CardContent>

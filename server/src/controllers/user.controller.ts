@@ -2,8 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import { UserService } from "../services/user.service";
 import { RoleTypes } from "../constants/role.constants";
 import { UserStatus } from "../constants/user.constants";
-import { AuthRequest } from "../types/auth.type";
+import { AuthRequest } from "../types/auth.types";
 import { In } from "typeorm";
+import { UUID } from "../types";
 
 const userService = new UserService();
 
@@ -70,7 +71,7 @@ export const UserController = {
     try {
       const { id } = req.params;
       
-      const user = await userService.getUserById(id);
+      const user = await userService.getUserById(id as UUID);
       
       if (!user) {
         return res.status(404).json({
@@ -95,7 +96,7 @@ export const UserController = {
         roles, 
         name, 
         email, 
-        password,
+        passwordHash,
         status = UserStatus.ACTIVE,
         nationality,
         dateOfBirth
@@ -107,7 +108,7 @@ export const UserController = {
           phoneNumber,
           name,
           email,
-          password,
+          passwordHash,
           status,
           nationality,
           dateOfBirth,
@@ -131,7 +132,7 @@ export const UserController = {
       const { id } = req.params;
       const updateData = req.body;
 
-      const user = await userService.updateUser(id, updateData);
+      const user = await userService.updateUser(id as UUID, updateData);
 
       return res.status(200).json({
         message: "User updated successfully",
@@ -154,7 +155,7 @@ export const UserController = {
         });
       }
 
-      const user = await userService.updateUserStatus(id, status);
+      const user = await userService.updateUserStatus(id as UUID, status);
 
       return res.status(200).json({
         message: "User status updated successfully",
@@ -170,7 +171,7 @@ export const UserController = {
     try {
       const { id } = req.params;
 
-      await userService.deleteUser(id);
+      await userService.deleteUser(id as UUID);
 
       return res.status(200).json({
         message: "User deleted successfully",
@@ -185,7 +186,7 @@ export const UserController = {
     try {
       const { id } = req.params;
 
-      await userService.resetPassword(id);
+      await userService.resetPassword(id as UUID);
 
       return res.status(200).json({
         message: "Password reset email sent successfully",
@@ -201,7 +202,7 @@ export const UserController = {
       const { id } = req.params;
       const { page = 1, limit = 10 } = req.query;
 
-      const orders = await userService.getUserOrders(id, {
+      const orders = await userService.getUserOrders(id as UUID, {
         page: Number(page),
         limit: Number(limit),
       });
@@ -221,7 +222,7 @@ export const UserController = {
       const { id } = req.params;
       const { page = 1, limit = 10 } = req.query;
 
-      const assignments = await userService.getUserAssignments(id, {
+      const assignments = await userService.getUserAssignments(id as UUID, {
         page: Number(page),
         limit: Number(limit),
       });

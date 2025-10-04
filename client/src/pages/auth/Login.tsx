@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../states/hooks';
 import { login, clearError } from '../../states/slices/auth.slice';
@@ -10,11 +10,10 @@ import { Button } from '../../components/ui/button';
 import { Checkbox } from '../../components/ui/checkbox';
 import { Loader } from '../../components/inputs/Loader';
 import { toast } from 'sonner';
-import type { LoginRequest } from '../../types/auth.type';
+import { RoleTypes, type LoginRequest } from '../../types/auth.type';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const dispatch = useAppDispatch();
   const { loading, error, isAuthenticated, user } = useAppSelector((state) => state.auth);
 
@@ -26,24 +25,20 @@ export const Login: React.FC = () => {
     },
   });
 
-  const from = location.state?.from?.pathname || '/';
-
   useEffect(() => {
     if (isAuthenticated && user) {
       // Redirect based on user role
       const userRoles = user.userRoles?.map(ur => ur.role.name) || [];
       
-      if (userRoles.includes('ADMIN')) {
+      if (userRoles.includes(RoleTypes.ADMIN)) {
         navigate('/admin');
-      } else if (userRoles.includes('RIDER')) {
+      } else if (userRoles.includes(RoleTypes.RIDER)) {
         navigate('/rider');
-      } else if (userRoles.includes('CUSTOMER')) {
+      } else if (userRoles.includes(RoleTypes.CUSTOMER)) {
         navigate('/customer');
-      } else {
-        navigate(from);
       }
     }
-  }, [isAuthenticated, user, navigate, from]);
+  }, [isAuthenticated, user, navigate]);
 
   useEffect(() => {
     if (error) {
@@ -56,8 +51,8 @@ export const Login: React.FC = () => {
     try {
       await dispatch(login(data)).unwrap();
       toast.success('Login successful!');
-    } catch (err: any) {
-      toast.error(err.message || 'Login failed');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Login failed');
     }
   };
 

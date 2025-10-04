@@ -1,5 +1,6 @@
 import { UUID } from 'crypto';
 import { Request } from 'express';
+import { User } from '../entities/user.entity';
 
 export interface AuthenticatedRequest extends Request {
   user: {
@@ -7,4 +8,8 @@ export interface AuthenticatedRequest extends Request {
     email: string;
     role: string;
   };
+}
+
+export interface AuthRequest extends Request {
+  user?: User;
 }

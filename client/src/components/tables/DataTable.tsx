@@ -27,13 +27,12 @@ import {
   ArrowUp,
   ArrowDown,
   Search,
-  MoreHorizontal,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { DataTableProps, SortingState } from '../../types/table.types';
 
-function DataTableComponent<T extends Record<string, any>>({
-  data,
+function DataTableComponent<T extends Record<string, unknown>>({
+  data, 
   columns,
   pageCount = 1,
   pageIndex = 0,
@@ -47,7 +46,7 @@ function DataTableComponent<T extends Record<string, any>>({
   onSearchChange,
   selectedRows = [],
   onSelectionChange,
-  getRowId = (row: T) => row.id || JSON.stringify(row),
+  getRowId = (row: T) => row.id as string || JSON.stringify(row),
   emptyMessage = 'No data available',
   actions,
 }: DataTableProps<T>) {
@@ -90,7 +89,7 @@ function DataTableComponent<T extends Record<string, any>>({
 
   // Handle row selection
   const handleRowSelection = (rowId: string, checked: boolean) => {
-    if (!onSelectionChange) return;
+    if (!onSelectionChange || !Array.isArray(data)) return;
 
     const newSelection = new Set(localSelectedRows);
     if (checked) {
@@ -98,7 +97,7 @@ function DataTableComponent<T extends Record<string, any>>({
     } else {
       newSelection.delete(rowId);
     }
-    
+
     setLocalSelectedRows(newSelection);
     const selectedData = data.filter(row => newSelection.has(getRowId(row)));
     onSelectionChange(selectedData);
@@ -106,7 +105,7 @@ function DataTableComponent<T extends Record<string, any>>({
 
   // Handle select all
   const handleSelectAll = (checked: boolean) => {
-    if (!onSelectionChange) return;
+    if (!onSelectionChange || !Array.isArray(data)) return;
 
     if (checked) {
       const allIds = new Set(data.map(row => getRowId(row)));
@@ -119,12 +118,12 @@ function DataTableComponent<T extends Record<string, any>>({
   };
 
   const isAllSelected = useMemo(() => {
-    if (data.length === 0) return false;
+    if (!Array.isArray(data) || data.length === 0) return false;
     return data.every(row => localSelectedRows.has(getRowId(row)));
   }, [data, localSelectedRows, getRowId]);
 
   const isPartiallySelected = useMemo(() => {
-    if (data.length === 0) return false;
+    if (!Array.isArray(data) || data.length === 0) return false;
     return data.some(row => localSelectedRows.has(getRowId(row))) && !isAllSelected;
   }, [data, localSelectedRows, getRowId, isAllSelected]);
 
@@ -236,7 +235,7 @@ function DataTableComponent<T extends Record<string, any>>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.length === 0 ? (
+            {!Array.isArray(data) || data.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length + (onSelectionChange ? 1 : 0) + (actions ? 1 : 0)}
@@ -263,7 +262,7 @@ function DataTableComponent<T extends Record<string, any>>({
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={isSelected}
-                          onCheckedChange={(checked) => 
+                          onCheckedChange={(checked: boolean) => 
                             handleRowSelection(rowId, checked as boolean)
                           }
                         />
@@ -273,7 +272,7 @@ function DataTableComponent<T extends Record<string, any>>({
                       let value;
                       if (column.accessor) {
                         if (typeof column.accessor === 'function') {
-                          value = column.accessor(row);
+                          value = column.accessor?.(row);
                         } else {
                           value = row[column.accessor as string];
                         }
@@ -302,7 +301,7 @@ function DataTableComponent<T extends Record<string, any>>({
       </div>
 
       {/* Pagination */}
-      {data.length > 0 && (onPageChange || onPageSizeChange) && (
+      {Array.isArray(data) && data.length > 0 && (onPageChange || onPageSizeChange) && (
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center space-x-2">
             <p className="text-sm text-muted-foreground">
@@ -379,6 +378,6 @@ function DataTableComponent<T extends Record<string, any>>({
 }
 
 // Export with type assertion to maintain generic type
-export const DataTable = DataTableComponent as <T extends Record<string, any>>(
+export const DataTable = DataTableComponent as <T extends Record<string, unknown>>(
   props: DataTableProps<T>
 ) => React.ReactElement;

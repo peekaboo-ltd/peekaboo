@@ -54,12 +54,12 @@ export const Register: React.FC = () => {
     }
 
     try {
-      const { confirmPassword, ...registerData } = data;
+      const { ...registerData } = data;
       await dispatch(registerUser(registerData)).unwrap();
       toast.success('Registration successful! Please login.');
       navigate('/login');
-    } catch (err: any) {
-      toast.error(err.message || 'Registration failed');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Registration failed');
     }
   };
 
@@ -143,7 +143,7 @@ export const Register: React.FC = () => {
                   rules={{
                     required: 'Phone number is required',
                     pattern: {
-                      value: /^[+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+                      value: /^[+]?[(]?[0-9]{3}[)]?[-\s]?[0-9]{3}[-\s]?[0-9]{4,6}$/,
                       message: 'Invalid phone number',
                     },
                   }}

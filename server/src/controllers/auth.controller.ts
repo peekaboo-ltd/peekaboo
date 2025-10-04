@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { UserService } from "../services/user.service";
-import { AuthRequest } from "../types/auth.type";
+import { AuthRequest } from "../types/auth.types";
 import { comparePassword, hashPassword } from "../helpers/auth.helper";
 import { RoleTypes } from "../constants/role.constants";
 import { UserStatus } from "../constants/user.constants";
@@ -21,7 +21,8 @@ export const AuthController = {
 
       // Find user by email or phone number
       const user = await userService.getUserByCondition(
-        email ? { email } : { phoneNumber }
+        email ? { email } : { phoneNumber },
+        true // Include password for authentication
       );
 
       if (!user) {
@@ -34,7 +35,7 @@ export const AuthController = {
       }
 
       // Verify password
-      const isValidPassword = await comparePassword(password, user.password);
+      const isValidPassword = await comparePassword(password, user.passwordHash!);
       if (!isValidPassword) {
         throw new UnauthorizedError("Invalid credentials");
       }
@@ -51,13 +52,16 @@ export const AuthController = {
         { expiresIn: "24h" }
       );
 
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
+      // Remove password from response and ensure userRoles are included
+      const { passwordHash: _, ...userWithoutPassword } = user;
 
       return res.status(200).json({
         message: "Login successful",
         data: {
-          user: userWithoutPassword,
+          user: {
+            ...userWithoutPassword,
+            roles: user.userRoles?.map(ur => ur.role.name) || []
+          },
           token
         }
       });
@@ -100,31 +104,37 @@ export const AuthController = {
           name,
           email,
           phoneNumber,
-          password: hashedPassword,
+          passwordHash: hashedPassword,
           status: UserStatus.ACTIVE
         },
         [role]
       );
 
+      // Fetch user with roles
+      const userWithRoles = await userService.getUserByCondition({ id: user.id });
+
       // Generate JWT token
       const token = jwt.sign(
-        { 
-          id: user.id, 
+        {
+          id: user.id,
           email: user.email,
           phoneNumber: user.phoneNumber,
-          roles: [role]
+          roles: userWithRoles?.userRoles?.map(ur => ur.role.name) || [role]
         },
         process.env.JWT_SECRET || "default_secret",
         { expiresIn: "24h" }
       );
 
       // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
+      const { passwordHash: _, ...userWithoutPassword } = userWithRoles || user;
 
       return res.status(201).json({
         message: "Registration successful",
         data: {
-          user: userWithoutPassword,
+          user: {
+            ...userWithoutPassword,
+            roles: userWithRoles?.userRoles?.map(ur => ur.role.name) || [role]
+          },
           token
         }
       });
@@ -144,7 +154,7 @@ export const AuthController = {
       const user = await userService.getUserById(req.user.id);
 
       // Remove password from response
-      const { password, ...userWithoutPassword } = user;
+      const { passwordHash, ...userWithoutPassword } = user;
 
       return res.status(200).json({
         message: "User fetched successfully",
@@ -181,7 +191,7 @@ export const AuthController = {
           id: req.user.id, 
           email: req.user.email,
           phoneNumber: req.user.phoneNumber,
-          roles: req.user.userRoles?.map(ur => ur.role.name) || []
+          roles: req.user.userRoles?.map((ur: { role: { name: string } }) => ur.role.name) || []
         },
         process.env.JWT_SECRET || "default_secret",
         { expiresIn: "24h" }
