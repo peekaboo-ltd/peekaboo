@@ -19,6 +19,12 @@ export enum OrderStatus {
   CANCELLED = 'CANCELLED',
 };
 
+export interface OrderLocation {
+  latitude: number | null;
+  longitude: number | null;
+  address?: string;
+}
+
 export interface Order extends BaseDomain {
   referenceId: string;
   recipientId?: UUID | null;
@@ -30,14 +36,15 @@ export interface Order extends BaseDomain {
   discount?: number | null;
   finalFee?: number | null;
   conversationId?: UUID | null;
-  locationFrom?: {
-    latitude: number | null;
-    longitude: number | null;
-  } | null;
-  locationTo?: {
-    latitude: number | null;
-    longitude: number | null;
-  } | null;
+  locationFrom?: OrderLocation | null;
+  locationTo?: OrderLocation | null;
+  senderName?: string;
+  senderPhoneNumber?: string;
+  recipientName?: string;
+  recipientPhoneNumber?: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
 
   // Relations
   recipient?: User;

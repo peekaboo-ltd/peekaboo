@@ -2,6 +2,14 @@ import type { BaseDomain, UUID } from './index';
 import { UserStatus } from '../constants/user.constants';
 import type { Order } from './order.type';
 import type { OrderAssignment } from './orderAssignment.type';
+import type { Role } from './auth.type';
+
+export interface UserRole {
+  id: UUID;
+  userId: UUID;
+  roleId: UUID;
+  role: Role;
+}
 
 export interface User extends BaseDomain {
   id: UUID;
@@ -16,4 +24,5 @@ export interface User extends BaseDomain {
   updatedAt: Date;
   assignments: OrderAssignment[];
   orders: Order[];
+  userRoles?: UserRole[];
 }
