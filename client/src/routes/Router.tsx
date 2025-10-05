@@ -13,15 +13,14 @@ import Register from '@/pages/auth/Register';
 const Router = () => {
   return (
     <Routes>
-      {/* Public routes */}
-      <Route path="/auth">
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="forgot-password" element={<p>Forgot Password</p>} />
-      </Route>
-
       {/* Public layout routes */}
       <Route path="/" element={<PublicLayout />}>
+        {/* Public routes */}
+        <Route path="auth">
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="forgot-password" element={<p>Forgot Password</p>} />
+        </Route>
         <Route path="" element={<Home />} />
       </Route>
       <Route path="/p" element={<PublicLayout />}>

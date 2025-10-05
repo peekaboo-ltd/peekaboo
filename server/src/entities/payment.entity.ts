@@ -17,6 +17,10 @@ export class Payment extends AbstractEntity {
   @Column({ name: "amount", type: "numeric", nullable: false })
   amount: number;
 
+  // CURRENCY
+  @Column({ name: "currency", type: "varchar", nullable: false })
+  currency: 'RWF' | 'USD';
+
   // EXTERNAL REFERENCE ID
   @Column({ name: "external_reference_id", type: "varchar", nullable: true })
   externalReferenceId: string;
