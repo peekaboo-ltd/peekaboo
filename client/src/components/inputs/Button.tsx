@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { type FC, type MouseEventHandler, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader } from './Loader.tsx';
+import { Button as ButtonUI } from '../ui/button';
 
 interface ButtonProps {
   route?: string;
@@ -37,7 +38,7 @@ const Button: FC<ButtonProps> = ({
 }) => {
   if (submit || type === 'submit') {
     return (
-      <button
+      <ButtonUI
         type={type || 'submit'}
         onClick={onClick as MouseEventHandler<HTMLButtonElement> | undefined}
         className={`py-[6px] flex items-center gap-2 justify-center text-center border-[1px] border-primary px-4 rounded-sm text-[13px] text-primary bg-white hover:bg-primary hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] max-[800px]:!text-[13px] max-md:!py-2 ${
@@ -64,7 +65,7 @@ const Button: FC<ButtonProps> = ({
             {children || value}
           </>
         )}
-      </button>
+        </ButtonUI>
     );
   }
 

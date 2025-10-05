@@ -3,8 +3,7 @@ import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
-import { cn } from '../../lib/utils';
-import type { AuditLog } from '../../services/auditLog.service';
+import type { AuditLog } from '@/services/auditLog.service';
 
 interface AuditLogDetailsProps {
   log: AuditLog;

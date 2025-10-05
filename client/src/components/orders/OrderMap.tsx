@@ -7,7 +7,6 @@ import {
 } from '@vis.gl/react-google-maps';
 import type { Order } from '../../types/order.type';
 import { ENVIRONMENTS } from '../../constants/environments.constants';
-import { MapPin, Navigation } from 'lucide-react';
 
 interface OrderMapProps {
   order: Order;

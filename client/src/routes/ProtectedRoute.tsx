@@ -1,38 +1,30 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../states/hooks';
-import authService from '../services/auth.service';
-import { Loader } from '../components/inputs/Loader';
+import { UserRole } from '@/types/user.type';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: string[];
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  allowedRoles = [] 
-}) => {
+export const ProtectedRoute = ({
+  children,
+  allowedRoles = []
+}: ProtectedRouteProps) => {
   const location = useLocation();
-  const { isAuthenticated, loading, user } = useAppSelector((state) => state.auth);
-
-  // Show loader while checking authentication
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader />
-      </div>
-    );
-  }
+  const { token, user } = useAppSelector((state) => state.auth);
 
   // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!token) {
+    return <Navigate to="/auth/login" state={{ from: location }} />;
   }
 
+  console.log(user);
+
   // Check role-based access
-  if (allowedRoles.length > 0 && !authService.hasAnyRole(allowedRoles)) {
-    return <Navigate to="/unauthorized" replace />;
+  if (allowedRoles.length > 0 && !user?.userRoles?.some((role: UserRole) => allowedRoles.includes(role.role.name))) {
+    return <Navigate to="/unauthorized" />;
   }
 
   return <>{children}</>;

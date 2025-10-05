@@ -1,178 +1,67 @@
-import React, { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { useAppDispatch, useAppSelector } from '../../states/hooks';
-import { login, clearError } from '../../states/slices/auth.slice';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
-import { Input } from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
-import { Checkbox } from '../../components/ui/checkbox';
-import { Loader } from '../../components/inputs/Loader';
-import { toast } from 'sonner';
-import { RoleTypes, type LoginRequest } from '../../types/auth.type';
+import { Link } from 'react-router-dom';
+import { Controller, useForm } from 'react-hook-form';
+import Input from '@/components/inputs/Input';
+import { Checkbox } from '@/components/ui/checkbox';
+import Button from '@/components/inputs/Button';
+import { useLogin } from '@/hooks/auth/auth.hooks';
 
-export const Login: React.FC = () => {
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const { loading, error, isAuthenticated, user } = useAppSelector((state) => state.auth);
+export const Login = () => {
 
-  const form = useForm<LoginRequest>({
-    defaultValues: {
-      email: '',
-      password: '',
-      rememberMe: false,
-    },
+  const { control, handleSubmit, formState: { errors } } = useForm();
+
+  const { login, isLoading } = useLogin();
+
+  // HANDLE FORM SUBMISSION
+  const onSubmit = handleSubmit((data) => {
+    login({ username: data?.username, password: data.password });
   });
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      // Redirect based on user role
-      const userRoles = user.userRoles?.map(ur => ur.role.name) || [];
-      
-      if (userRoles.includes(RoleTypes.ADMIN)) {
-        navigate('/admin');
-      } else if (userRoles.includes(RoleTypes.RIDER)) {
-        navigate('/rider');
-      } else if (userRoles.includes(RoleTypes.CUSTOMER)) {
-        navigate('/customer');
-      }
-    }
-  }, [isAuthenticated, user, navigate]);
-
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(clearError());
-    }
-  }, [error, dispatch]);
-
-  const onSubmit = async (data: LoginRequest) => {
-    try {
-      await dispatch(login(data)).unwrap();
-      toast.success('Login successful!');
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Login failed');
-    }
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 py-6 px-4 sm:py-12 sm:px-6 lg:px-8">
+      <form className="flex flex-col gap-4 w-full max-w-md sm:min-w-[400px]" onSubmit={onSubmit}>
+        <header>
+          <h2 className="mt-2 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
             Sign in to Peekaboo
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
-            <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link to="/auth/register" className="font-medium hover:underline text-primary hover:text-primary/80">
               create a new account
             </Link>
           </p>
-        </div>
+        </header>
 
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Login</CardTitle>
-            <CardDescription>Enter your credentials to access your account</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  rules={{
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
-                    },
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="email@example.com"
-                          autoComplete="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  rules={{
-                    required: 'Password is required',
-                    minLength: {
-                      value: 6,
-                      message: 'Password must be at least 6 characters',
-                    },
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Enter your password"
-                          autoComplete="current-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="rememberMe"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Remember me</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader className="mr-2 h-4 w-4" />
-                      Signing in...
-                    </>
-                  ) : (
-                    'Sign in'
-                  )}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
-              Forgot your password?
+        <fieldset className='w-full grid grid-cols-1 gap-4'>
+          <Controller name="username" control={control} render={({ field }) => {
+            return (
+              <Input {...field} label='Username' placeholder='Enter email or username' required errorMessage={errors?.username?.message} />
+            )
+          }} />
+          <Controller name="password" control={control} render={({ field }) => {
+            return (
+              <Input {...field} label='Password' placeholder='Enter password' required errorMessage={errors?.password?.message} />
+            )
+          }} />
+          <nav className='w-full flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 justify-between'>
+            <Controller name="rememberMe" control={control} render={({ field }) => {
+              return (
+                <label className='flex items-center gap-2'>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className='cursor-pointer'
+                  />
+                  <span className="text-sm">Remember me</span>
+                </label>
+              )
+            }} />
+            <Link to="/forgot-password" className="font-medium text-sm sm:text-[13px] hover:underline text-primary hover:text-primary/80">
+              Forgot password?
             </Link>
-          </CardFooter>
-        </Card>
-      </div>
-    </div>
+          </nav>
+        </fieldset>
+        <Button type="submit" primary isLoading={isLoading}>Login</Button>
+      </form>
+    </main>
   );
 };

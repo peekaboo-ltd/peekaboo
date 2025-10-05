@@ -7,25 +7,30 @@ import { orderAssignmentsMutationsApiSlice } from '../api/mutations/orderAssignm
 import orderActivitySlice from './slices/orderActivity.slice';
 import { orderActivityQueriesApiSlice } from '../api/queries/orderActivity.queries';
 import authSlice from './slices/auth.slice';
+import { authMutationApiSlice } from '../api/mutations/auth.mutations';
 
 export const store = configureStore({
   reducer: {
     auth: authSlice,
+    [authMutationApiSlice.reducerPath]: authMutationApiSlice.reducer,
     [ordersMutationApiSlice.reducerPath]: ordersMutationApiSlice.reducer,
     [externalMutationsApiSlice.reducerPath]: externalMutationsApiSlice.reducer,
-    [orderAssignmentsMutationsApiSlice.reducerPath]: orderAssignmentsMutationsApiSlice.reducer,
+    [orderAssignmentsMutationsApiSlice.reducerPath]:
+      orderAssignmentsMutationsApiSlice.reducer,
     order: orderSlice,
     orderActivity: orderActivitySlice,
     [ordersQueriesApiSlice.reducerPath]: ordersQueriesApiSlice.reducer,
-    [orderActivityQueriesApiSlice.reducerPath]: orderActivityQueriesApiSlice.reducer,
+    [orderActivityQueriesApiSlice.reducerPath]:
+      orderActivityQueriesApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
+      authMutationApiSlice.middleware,
       ordersMutationApiSlice.middleware,
       ordersQueriesApiSlice.middleware,
       externalMutationsApiSlice.middleware,
       orderAssignmentsMutationsApiSlice.middleware,
-      orderActivityQueriesApiSlice.middleware,
+      orderActivityQueriesApiSlice.middleware
     ),
   devTools: true,
 });

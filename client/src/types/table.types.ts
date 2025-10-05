@@ -3,8 +3,8 @@ import { ReactNode } from 'react';
 export interface Column<T> {
   id: string;
   header: string | ReactNode;
-  accessor?: keyof T | ((row: T) => any);
-  cell?: (info: { row: T; value: any }) => ReactNode;
+  accessor?: keyof T | ((row: T) => unknown);
+  cell?: (info: { row: T; value: unknown }) => ReactNode;
   sortable?: boolean;
   className?: string;
   headerClassName?: string;
