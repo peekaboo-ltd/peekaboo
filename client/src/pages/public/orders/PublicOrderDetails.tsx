@@ -1,6 +1,6 @@
 import { useGetOrder, useGetOrderFees, useUpdateOrder } from '@/hooks/orders/orders.hooks';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
-import { setUpdateOrderLocationFromModal, setUpdateOrderLocationToModal } from '@/states/slices/order.slice';
+import { setOrderPaymentModal, setSelectedOrder, setUpdateOrderLocationFromModal, setUpdateOrderLocationToModal } from '@/states/slices/order.slice';
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
 import { useCallback, useEffect, useState, useRef } from 'react';
@@ -16,6 +16,9 @@ import UpdateOrderLocationFrom from '@/components/modals/UpdateOrderLocationFrom
 import UpdateOrderLocationTo from '@/components/modals/UpdateOrderLocationTo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
+import OrderPayment from '@/components/modals/OrderPayment';
+import { useFetchPayments } from '@/hooks/payments/payment.hooks';
+import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 
 const PublicOrderDetails = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -51,9 +54,19 @@ const PublicOrderDetails = () => {
   // STATE VARIABLES
   const dispatch = useAppDispatch();
   const { order } = useAppSelector((state) => state.order);
+  const { paymentsList } = useAppSelector((state) => state.payment);
   const [distance, setDistance] = useState<number | null>(null);
   const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
   const [gettingCurrentLocation, setGettingCurrentLocation] = useState(false);
+
+  // FETCH PAYMENTS
+  const { fetchPayments } = useFetchPayments();
+
+  useEffect(() => {
+    if (order?.id) {
+      fetchPayments({ entityId: order?.id, paymentType: PaymentType.ORDER });
+    }
+  }, [fetchPayments, order?.id]);
 
   // NAVIGATION
   const { id } = useParams();
@@ -123,6 +136,17 @@ const PublicOrderDetails = () => {
       getOrderFee(distance);
     }
   }, [distance, getOrderFee]);
+
+  useEffect(() => {
+    if (orderFee && order?.id) {
+      updateOrder({
+        id: order?.id,
+        order: {
+          finalFee: orderFee,
+        },
+      });
+    }
+  }, [order?.id, orderFee, updateOrder]);
 
   return (
     <>
@@ -314,8 +338,8 @@ const PublicOrderDetails = () => {
                       {estimatedTime < 60
                         ? Math.round(estimatedTime)
                         : `${Math.floor(estimatedTime / 60)}:${String(
-                            Math.round(estimatedTime % 60)
-                          ).padStart(2, '0')}`}
+                          Math.round(estimatedTime % 60)
+                        ).padStart(2, '0')}`}
                     </p>
                     <p className="text-sm text-gray-500">
                       {estimatedTime < 60 ? 'minutes' : 'hours'} • Two-wheeler
@@ -367,8 +391,13 @@ const PublicOrderDetails = () => {
               </section>
             )}
           </section>
+          {paymentsList?.filter((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL).length > 0 && <menu className='w-full flex flex-col gap-4'>
+            <p className='text-sm text-green-700'>
+              Payment with Reference Code: <Link to={`https://kpay.co.rw/transactions/${paymentsList?.find((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL)?.externalReferenceId}`} target='_blank' className='text-primary text-sm underline underline-offset-2'>{paymentsList?.find((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL)?.externalReferenceId}</Link> has been successful. Click the button below to track your order.
+            </p>
+          </menu>}
           <footer className="mt-8 flex justify-end animate-on-scroll">
-            <Button
+            {paymentsList?.filter((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL).length > 0 ? <Button
               primary
               isLoading={createOrderAssignmentIsLoading}
               disabled={!order?.locationFrom || !order?.locationTo}
@@ -385,12 +414,24 @@ const PublicOrderDetails = () => {
               {!order?.locationFrom || !order?.locationTo
                 ? 'Set Both Locations to Continue'
                 : 'Track Order'}
-            </Button>
+            </Button> : <Button
+              primary
+              isLoading={createOrderAssignmentIsLoading}
+              disabled={!order?.locationFrom || !order?.locationTo}
+              onClick={(e) => {
+                e.preventDefault();
+                dispatch(setSelectedOrder(order));
+                dispatch(setOrderPaymentModal(true));
+              }}
+            >
+              Complete Payment
+            </Button>}
           </footer>
 
           {/* Modal Components */}
           <UpdateOrderLocationFrom />
           <UpdateOrderLocationTo />
+          <OrderPayment />
         </main>
       </APIProvider>
     </>

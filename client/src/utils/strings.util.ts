@@ -1,3 +1,4 @@
+import { COUNTRIES_LIST } from '@/constants/countries.constants';
 import moment from 'moment';
 
 /**
@@ -5,9 +6,17 @@ import moment from 'moment';
  * @param phone - The phone number to format
  * @returns The formatted phone number
  */
-export const formatPhone = (phone: string) => {
+export const formatPhone = (phone: string, countryCode: string = 'RW') => {
   if (!phone || phone === 'null') return '';
-  return `+250${phone?.slice(-9)}`;
+  if (countryCode) {
+    const dialCode = COUNTRIES_LIST.find((country) => country.code === countryCode)?.dial_code;
+    if (dialCode) {
+      return `${dialCode?.replace('+', '')}${phone?.slice(-9)}`;
+    } else {
+      return `250${phone?.slice(-9)}`;
+    }
+  }
+  return `250${phone?.slice(-9)}`;
 };
 
 /**

@@ -9,6 +9,9 @@ import { orderActivityQueriesApiSlice } from '../api/queries/orderActivity.queri
 import authSlice from './slices/auth.slice';
 import { authMutationApiSlice } from '../api/mutations/auth.mutations';
 import sidebarSlice from './slices/sidebar.slice';
+import { paymentsQueriesApiSlice } from '../api/queries/payments.queries';
+import paymentSlice from './slices/payment.slice';
+import { paymentsMutationsApiSlice } from '../api/mutations/payments.mutations';
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +27,9 @@ export const store = configureStore({
     [orderActivityQueriesApiSlice.reducerPath]:
       orderActivityQueriesApiSlice.reducer,
     sidebar: sidebarSlice,
+    [paymentsQueriesApiSlice.reducerPath]: paymentsQueriesApiSlice.reducer,
+    payment: paymentSlice,
+    [paymentsMutationsApiSlice.reducerPath]: paymentsMutationsApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -32,7 +38,9 @@ export const store = configureStore({
       ordersQueriesApiSlice.middleware,
       externalMutationsApiSlice.middleware,
       orderAssignmentsMutationsApiSlice.middleware,
-      orderActivityQueriesApiSlice.middleware
+      orderActivityQueriesApiSlice.middleware,
+      paymentsQueriesApiSlice.middleware,
+      paymentsMutationsApiSlice.middleware
     ),
   devTools: true,
 });

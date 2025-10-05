@@ -7,6 +7,7 @@ export interface OrderState {
   selectedOrder?: Order;
   updateOrderLocationFromModal: boolean;
   updateOrderLocationToModal: boolean;
+  orderPaymentModal: boolean;
 }
 
 const initialState: OrderState = {
@@ -15,6 +16,7 @@ const initialState: OrderState = {
   selectedOrder: undefined,
   updateOrderLocationFromModal: false,
   updateOrderLocationToModal: false,
+  orderPaymentModal: false,
 };
 
 const orderSlice = createSlice({
@@ -36,9 +38,19 @@ const orderSlice = createSlice({
     setUpdateOrderLocationToModal: (state, action) => {
       state.updateOrderLocationToModal = action.payload;
     },
+    setOrderPaymentModal: (state, action) => {
+      state.orderPaymentModal = action.payload;
+    },
   },
 });
 
-export const { setOrdersList, setOrder, setSelectedOrder, setUpdateOrderLocationFromModal, setUpdateOrderLocationToModal } = orderSlice.actions;
+export const {
+  setOrdersList,
+  setOrder,
+  setSelectedOrder,
+  setUpdateOrderLocationFromModal,
+  setUpdateOrderLocationToModal,
+  setOrderPaymentModal,
+} = orderSlice.actions;
 
 export default orderSlice.reducer;

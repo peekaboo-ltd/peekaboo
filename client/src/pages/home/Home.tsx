@@ -3,6 +3,7 @@ import Input from '../../components/inputs/Input';
 import { useCreatePublicOrder } from '../../hooks/orders/orders.hooks';
 import Button from '@/components/inputs/Button';
 import { useEffect, useRef } from 'react';
+import { formatPhone } from '@/utils/strings.util';
 
 const Home = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -44,8 +45,8 @@ const Home = () => {
   // HANDLE FORM SUBMISSION
   const onSubmit = handleSubmit((data: FieldValues) => {
     createPublicOrder({
-      senderPhoneNumber: data?.senderPhoneNumber,
-      recipientPhoneNumber: data?.recipientPhoneNumber,
+      senderPhoneNumber: formatPhone(data?.senderPhoneNumber),
+      recipientPhoneNumber: formatPhone(data?.recipientPhoneNumber),
     });
   });
 
