@@ -11,13 +11,13 @@ import { User } from "../entities/user.entity";
 
 export class UserRoleService {
   private readonly userRoleRepository: Repository<UserRole>;
-  private readonly userService: UserService;
   private readonly roleService: RoleService;
+  private readonly userRepository: Repository<User>;
 
-  constructor(userService: UserService) {
+  constructor() {
     this.userRoleRepository = AppDataSource.getRepository(UserRole);
-    this.userService = userService;
     this.roleService = new RoleService();
+    this.userRepository = AppDataSource.getRepository(User);
   }
 
   // CREATE USER ROLE
@@ -27,7 +27,11 @@ export class UserRoleService {
     }
 
     // CHECK IF USER EXISTS
-    const user = await this.userService.getUserById(userRole?.userId);
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userRole?.userId,
+      },
+    });
 
     // CHECK IF ROLE EXISTS
     const role = await this.roleService.getRoleById(userRole?.roleId);
@@ -49,7 +53,11 @@ export class UserRoleService {
 
   // ASSIGN ROLES TO USER
   async assignRolesToUser(userId: UUID, roles: Partial<RoleTypes>[]): Promise<void> {
-    const user = await this.userService.getUserById(userId);
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
 
     const rolesList = await this.roleService.getRolesByNames(roles);
 

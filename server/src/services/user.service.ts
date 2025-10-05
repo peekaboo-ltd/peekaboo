@@ -21,7 +21,7 @@ export class UserService {
 
   constructor() {
     this.userRepository = AppDataSource.getRepository(User);
-    this.userRoleService = new UserRoleService(this);
+    this.userRoleService = new UserRoleService();
   }
 
   // GET USER BY ID
