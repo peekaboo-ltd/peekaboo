@@ -1,29 +1,33 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useAppSelector } from '@/states/hooks';  
-import { SidebarProvider, SidebarInset } from '../../components/ui/sidebar';
-import { Loader } from '@/components/inputs/Loader';
+import { useAppSelector } from '@/states/hooks';
+import AuthenticatedSidebar from './AuthenticatedSidebar';
+import AuthenticatedNavbar from './AuthenticatedNavbar';
 
-export const AuthenticatedLayout: React.FC = () => {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader />
-      </div>
-    );
-  }
+export const AuthenticatedLayout = () => {
+  const { isOpen: sidebarOpen } = useAppSelector((state) => state.sidebar);
 
   return (
-    <SidebarProvider>
-      <section className="flex h-screen w-full">
-        <SidebarInset className="flex flex-col w-full">
-          <main className="flex-1 overflow-y-auto bg-gray-50">
-            <Outlet />
-          </main>
-        </SidebarInset>
-      </section>
-    </SidebarProvider>
+    <section className="flex h-screen w-full overflow-hidden">
+      <AuthenticatedNavbar />
+      <AuthenticatedSidebar />
+      <main
+        className={`
+          flex-1
+          overflow-y-auto
+          bg-gray-50
+          transition-all
+          duration-300
+          ease-in-out
+          w-full
+          min-h-screen
+          ${sidebarOpen ? 'ml-[280px] sm:ml-[300px]' : 'ml-16'}
+          md:ml-[${sidebarOpen ? '18vw' : '6vw'}]
+        `}
+      >
+        <section className="container h-[91vh] mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          <Outlet />
+        </section>
+      </main>
+    </section>
   );
 };

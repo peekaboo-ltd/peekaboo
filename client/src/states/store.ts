@@ -8,6 +8,7 @@ import orderActivitySlice from './slices/orderActivity.slice';
 import { orderActivityQueriesApiSlice } from '../api/queries/orderActivity.queries';
 import authSlice from './slices/auth.slice';
 import { authMutationApiSlice } from '../api/mutations/auth.mutations';
+import sidebarSlice from './slices/sidebar.slice';
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     [ordersQueriesApiSlice.reducerPath]: ordersQueriesApiSlice.reducer,
     [orderActivityQueriesApiSlice.reducerPath]:
       orderActivityQueriesApiSlice.reducer,
+    sidebar: sidebarSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
