@@ -7,6 +7,7 @@ import roleRoutes from './role.routes';
 import auditLogRoutes from './auditLog.routes';
 import orderAssignmentRoutes from './orderAssignment.routes';
 import orderActivityRoutes from './orderActivity.routes';
+import paymentRoutes from './payment.routes';
 
 // CREATE ROUTER
 const routes = Router();
@@ -34,5 +35,8 @@ routes.use('/order-assignments', orderAssignmentRoutes);
 
 // ORDER ACTIVITY ROUTES
 routes.use('/order-activities', orderActivityRoutes);
+
+// PAYMENT ROUTES
+routes.use('/payments', paymentRoutes);
 
 export default routes;
