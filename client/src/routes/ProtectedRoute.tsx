@@ -20,8 +20,6 @@ export const ProtectedRoute = ({
     return <Navigate to="/auth/login" state={{ from: location }} />;
   }
 
-  console.log(user);
-
   // Check role-based access
   if (allowedRoles.length > 0 && !user?.userRoles?.some((role: UserRole) => allowedRoles.includes(role.role.name))) {
     return <Navigate to="/unauthorized" />;

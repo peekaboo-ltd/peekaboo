@@ -6,6 +6,8 @@ import { localStorageUtil } from '@/utils/localStorage.util';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAppDispatch } from '@/states/hooks';
+import { setToken, setUser, setIsAuthenticated } from '@/states/slices/auth.slice';
 
 /**
  *
@@ -20,6 +22,7 @@ import { toast } from 'sonner';
 export const useLogin = () => {
   // NAVIGATION
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const [login, { data, error, isLoading, isSuccess, reset, isError }] =
     useLoginMutation();
@@ -29,6 +32,9 @@ export const useLogin = () => {
       reset();
       localStorageUtil.setItem('token', data?.data?.token);
       localStorageUtil.setItem('user', data?.data?.user);
+      dispatch(setToken(data?.data?.token));
+      dispatch(setUser(data?.data?.user));
+      dispatch(setIsAuthenticated(true));
       navigate('/dashboard');
     } else if (isError) {
       toast.error(
@@ -42,7 +48,7 @@ export const useLogin = () => {
       );
       reset();
     }
-  }, [isSuccess, navigate, reset, data, isError, error]);
+  }, [isSuccess, navigate, reset, data, isError, error, dispatch]);
 
   return { login, data, error, isLoading, isSuccess, reset };
 };
@@ -60,6 +66,7 @@ export const useLogin = () => {
 export const useRegister = () => {
   // NAVIGATION
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const [register, { data, error, isLoading, isSuccess, reset, isError }] =
     useRegisterMutation();
@@ -68,6 +75,9 @@ export const useRegister = () => {
     if (isSuccess) {
       localStorageUtil.setItem('token', data?.data?.token);
       localStorageUtil.setItem('user', data?.data?.user);
+      dispatch(setToken(data?.data?.token));
+      dispatch(setUser(data?.data?.user));
+      dispatch(setIsAuthenticated(true));
       reset();
       navigate('/dashboard');
     } else if (isError) {
@@ -96,6 +106,7 @@ export const useRegister = () => {
   }, [
     data?.data?.token,
     data?.data?.user,
+    dispatch,
     isSuccess,
     navigate,
     reset,

@@ -39,7 +39,7 @@ export const Login = () => {
           }} />
           <Controller name="password" control={control} render={({ field }) => {
             return (
-              <Input {...field} label='Password' placeholder='Enter password' required errorMessage={errors?.password?.message} />
+              <Input {...field} label='Password' type='password' placeholder='Enter password' required errorMessage={errors?.password?.message} />
             )
           }} />
           <nav className='w-full flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 justify-between'>

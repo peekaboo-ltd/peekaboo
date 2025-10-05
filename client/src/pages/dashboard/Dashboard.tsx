@@ -8,8 +8,6 @@ const Dashboard = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
 
-  console.log(user);
-
   return (
     <main className="w-full h-screen flex items-center justify-center text-black">Remy {user?.userRoles?.map((role: UserRole) => role.role.name).join(', ')} <Link to="/logout" onClick={(e) => {
       e.preventDefault();
