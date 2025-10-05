@@ -1,12 +1,12 @@
 import { UUID } from ".";
 import { PaymentType } from "../constants/payment.constants";
-import { KpayPaymentStatus } from "./kpay.types";
+import { KpayCurrency, KpayPaymentStatus } from "./kpay.types";
 
 // Payment creation DTO
 export interface CreatePaymentDto {
   entityId: UUID;
   amount: number;
-  currency: 'RWF' | 'USD';
+  currency: KpayCurrency;
   type: PaymentType;
   description?: string;
   customerEmail: string;

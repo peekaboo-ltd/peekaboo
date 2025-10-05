@@ -1,4 +1,4 @@
-import logger from "../helpers/logger.helper";
+import logger from "../../helpers/logger.helper";
 
 export class EmailService {
   async sendPasswordResetEmail(to: string, tempPassword: string): Promise<void> {

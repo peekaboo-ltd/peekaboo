@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { UUID } from '../types';
 import { AuthenticatedRequest } from '../types/auth.types';
+import logger from '../helpers/logger.helper';
 
 /**
  * A namespace for storing request-specific data that can be accessed
@@ -58,9 +59,9 @@ export namespace AuditContext {
    * Debug method to log the current state of the context storage
    */
   export function printContextState(): void {
-    console.log(`AuditContext state: ${asyncLocalStorage.size} entries`);
+    logger.debug(`AuditContext state: ${asyncLocalStorage.size} entries`);
     asyncLocalStorage.forEach((value, key) => {
-      console.log(`Request ${key}: User ${value}`);
+      logger.debug(`Request ${key}: User ${value}`);
     });
   }
 }

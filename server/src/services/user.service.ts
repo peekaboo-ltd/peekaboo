@@ -1,19 +1,19 @@
-import { FindOptionsWhere, Repository, Like, In, ILike } from "typeorm";
-import { AppDataSource } from "../data-source";
-import { User } from "../entities/user.entity";
-import { UUID } from "../types";
-import { LogReferenceTypes } from "../constants/logs.constants";
-import { NotFoundError, ValidationError } from "../helpers/errors.helper";
-import { UserRoleService } from "./userRole.service";
-import { RoleTypes } from "../constants/role.constants";
-import { getPagingData } from "../helpers/pagination.helper";
-import { Pagination } from "../helpers/pagination.helper";
-import { getPagination } from "../helpers/pagination.helper";
-import { UserStatus } from "../constants/user.constants";
-import { OrderService } from "./order.service";
-import { OrderAssignmentService } from "./orderAssignment.service";
-import { hashPassword } from "../helpers/auth.helper";
-import { EmailService } from "./email.service";
+import { FindOptionsWhere, Repository, Like, In, ILike } from 'typeorm';
+import { AppDataSource } from '../data-source';
+import { User } from '../entities/user.entity';
+import { UUID } from '../types';
+import { LogReferenceTypes } from '../constants/logs.constants';
+import { NotFoundError, ValidationError } from '../helpers/errors.helper';
+import { UserRoleService } from './userRole.service';
+import { RoleTypes } from '../constants/role.constants';
+import { getPagingData } from '../helpers/pagination.helper';
+import { Pagination } from '../helpers/pagination.helper';
+import { getPagination } from '../helpers/pagination.helper';
+import { UserStatus } from '../constants/user.constants';
+import { OrderService } from './order.service';
+import { OrderAssignmentService } from './orderAssignment.service';
+import { hashPassword } from '../helpers/auth.helper';
+import { EmailService } from '../integrations/emails/email.service';
 
 export class UserService {
   private readonly userRepository: Repository<User>;
@@ -29,7 +29,7 @@ export class UserService {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
-      throw new NotFoundError("User not found", {
+      throw new NotFoundError('User not found', {
         referenceId: id,
         referenceType: LogReferenceTypes.USER,
       });
@@ -51,20 +51,21 @@ export class UserService {
         },
         assignments: true,
       },
-      select: includePassword ? {
-        id: true,
-        name: true,
-        email: true,
-        phoneNumber: true,
-        dateOfBirth: true,
-        status: true,
-        nationality: true,
-        passwordHash: true,
-        createdAt: true,
-        updatedAt: true,
-      } : undefined,
+      select: includePassword
+        ? {
+            id: true,
+            name: true,
+            email: true,
+            phoneNumber: true,
+            dateOfBirth: true,
+            status: true,
+            nationality: true,
+            passwordHash: true,
+            createdAt: true,
+            updatedAt: true,
+          }
+        : undefined,
     });
-    console.log(user);
     return user;
   }
 
@@ -74,7 +75,7 @@ export class UserService {
     roles?: Partial<RoleTypes>[]
   ): Promise<User> {
     if (!user?.phoneNumber) {
-      throw new ValidationError("Phone number is required");
+      throw new ValidationError('Phone number is required');
     }
 
     // CHECK IF USER EXISTS
@@ -89,8 +90,12 @@ export class UserService {
     const createdUser = await this.userRepository.save(user);
 
     // Assign default CUSTOMER role if no roles provided
-    const rolesToAssign = roles && roles.length > 0 ? roles : [RoleTypes.CUSTOMER];
-    await this.userRoleService.assignRolesToUser(createdUser?.id, rolesToAssign);
+    const rolesToAssign =
+      roles && roles.length > 0 ? roles : [RoleTypes.CUSTOMER];
+    await this.userRoleService.assignRolesToUser(
+      createdUser?.id,
+      rolesToAssign
+    );
 
     return createdUser;
   }
@@ -110,7 +115,7 @@ export class UserService {
     page,
     size,
     condition,
-    relations = ["userRoles.role"],
+    relations = ['userRoles.role'],
   }: {
     page: number;
     size: number;
@@ -155,40 +160,42 @@ export class UserService {
 
     // Build query
     const query = this.userRepository
-      .createQueryBuilder("user")
-      .leftJoinAndSelect("user.userRoles", "userRole")
-      .leftJoinAndSelect("userRole.role", "role");
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.userRoles', 'userRole')
+      .leftJoinAndSelect('userRole.role', 'role');
 
     // Apply search filter
     if (filters.search) {
       query.andWhere(
-        "(user.name ILIKE :search OR user.email ILIKE :search OR user.phoneNumber ILIKE :search)",
+        '(user.name ILIKE :search OR user.email ILIKE :search OR user.phoneNumber ILIKE :search)',
         { search: `%${filters.search}%` }
       );
     }
 
     // Apply specific filters
     if (filters.name) {
-      query.andWhere("user.name ILIKE :name", { name: `%${filters.name}%` });
+      query.andWhere('user.name ILIKE :name', { name: `%${filters.name}%` });
     }
 
     if (filters.email) {
-      query.andWhere("user.email ILIKE :email", { email: `%${filters.email}%` });
+      query.andWhere('user.email ILIKE :email', {
+        email: `%${filters.email}%`,
+      });
     }
 
     if (filters.phoneNumber) {
-      query.andWhere("user.phoneNumber ILIKE :phoneNumber", {
+      query.andWhere('user.phoneNumber ILIKE :phoneNumber', {
         phoneNumber: `%${filters.phoneNumber}%`,
       });
     }
 
     if (filters.status) {
-      query.andWhere("user.status = :status", { status: filters.status });
+      query.andWhere('user.status = :status', { status: filters.status });
     }
 
     // Apply role filter
     if (filters.roles && filters.roles.length > 0) {
-      query.andWhere("role.name IN (:...roles)", { roles: filters.roles });
+      query.andWhere('role.name IN (:...roles)', { roles: filters.roles });
     }
 
     // Apply pagination
@@ -207,20 +214,20 @@ export class UserService {
   // UPDATE USER STATUS
   async updateUserStatus(id: UUID, status: UserStatus): Promise<User> {
     const user = await this.getUserById(id);
-    
+
     user.status = status;
-    
+
     return this.userRepository.save(user);
   }
 
   // DELETE USER (SOFT DELETE)
   async deleteUser(id: UUID): Promise<void> {
     const user = await this.getUserById(id);
-    
+
     // Soft delete by setting status to SUSPENDED
     user.status = UserStatus.INACTIVE;
     user.updatedAt = new Date();
-    
+
     await this.userRepository.save(user);
   }
 
@@ -238,7 +245,10 @@ export class UserService {
 
     // Send email with temporary password
     const emailService = new EmailService();
-    await emailService.sendPasswordResetEmail(user.email || user.phoneNumber, tempPassword);
+    await emailService.sendPasswordResetEmail(
+      user.email || user.phoneNumber,
+      tempPassword
+    );
   }
 
   // GET USER ORDERS
@@ -247,7 +257,7 @@ export class UserService {
     pagination: { page: number; limit: number }
   ): Promise<Pagination<any>> {
     const orderService = new OrderService();
-    
+
     return orderService.fetchOrders({
       page: pagination.page,
       size: pagination.limit,
@@ -263,7 +273,7 @@ export class UserService {
     pagination: { page: number; limit: number }
   ): Promise<Pagination<any>> {
     const assignmentService = new OrderAssignmentService();
-    
+
     return assignmentService.fetchOrderAssignments({
       page: pagination.page,
       size: pagination.limit,
