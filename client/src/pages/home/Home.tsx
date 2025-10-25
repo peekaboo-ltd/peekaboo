@@ -83,11 +83,11 @@ const Home = () => {
         }}
       />
 
-      <main className="h-screen w-screen overflow-hidden bg-gray-100 fixed top-0 left-0">
-        <section className="h-full w-full max-w-[1330px] mx-auto flex items-center justify-between px-12 pt-20">
+      <main className="min-h-screen w-full bg-gray-100">
+        <section className="min-h-screen w-full max-w-[1330px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-12 py-8 sm:py-12 lg:py-20">
           <article className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <section className="w-full flex flex-col gap-6 text-center lg:text-left animate-on-scroll">
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 Fast & Reliable
                 <span className="text-primary block">Package Delivery</span>
               </h1>
@@ -100,7 +100,7 @@ const Home = () => {
             <aside className="w-full flex justify-center lg:justify-end animate-on-scroll">
               <form
                 onSubmit={onSubmit}
-                className="w-full max-w-xl bg-white rounded-sm shadow-xl p-8 border border-gray-100"
+                className="w-full max-w-xl bg-white rounded-sm shadow-xl p-8 sm:p-6 lg:p-10 border border-gray-100"
               >
                 <header className="w-full flex flex-col gap-4 mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">

@@ -49,7 +49,6 @@ const UpdateOrderLocationFrom = () => {
       onOpenChange={handleClose}
       title="Update Origin Location"
       description="Search and select the pickup location for your order"
-      className="min-w-4xl"
     >
       <article className="space-y-6">
         <section className="space-y-4">

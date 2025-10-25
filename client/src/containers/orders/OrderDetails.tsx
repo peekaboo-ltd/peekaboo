@@ -37,7 +37,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
           Final Fee
         </dt>
         <dd className="text-xs sm:text-sm font-semibold text-primary">
-          {order?.finalFee ? `$${order.finalFee}` : 'TBD'}
+          {order?.finalFee ? `${formatCurrency(order.finalFee)}` : 'TBD'}
         </dd>
       </figure>
       <figure className="space-y-1 sm:space-y-1">

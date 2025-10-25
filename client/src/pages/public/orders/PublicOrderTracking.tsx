@@ -163,7 +163,7 @@ const PublicOrderTracking = () => {
         }}
       />
 
-      <main className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4">
+      <main className="py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-12">
         <section className="max-w-7xl mx-auto">
           <header className="text-center mb-6 sm:mb-8 animate-on-scroll">
             <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-primary mb-2 px-2">
