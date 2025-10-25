@@ -16,7 +16,6 @@ export class Payment extends AbstractEntity {
     name: 'internal_reference_id',
     type: 'varchar',
     nullable: false,
-    unique: true,
   })
   internalReferenceId?: string;
 
