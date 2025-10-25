@@ -195,24 +195,4 @@ export const UserController = {
       next(error);
     }
   },
-
-  // GET USER ASSIGNMENTS (FOR RIDERS)
-  async getUserAssignments(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const { page = 1, limit = 10 } = req.query;
-
-      const assignments = await userService.getUserAssignments(id as UUID, {
-        page: Number(page),
-        limit: Number(limit),
-      });
-
-      return res.status(200).json({
-        message: "User assignments fetched successfully",
-        ...assignments,
-      });
-    } catch (error) {
-      next(error);
-    }
-  },
 };

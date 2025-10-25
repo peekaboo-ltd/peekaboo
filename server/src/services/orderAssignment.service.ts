@@ -12,6 +12,7 @@ import { User } from "../entities/user.entity";
 import { UserStatus } from "../constants/user.constants";
 import { UUID } from "../types";
 import { LogReferenceTypes } from "../constants/logs.constants";
+import { Request } from "express";
 
 export class OrderAssignmentService {
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
@@ -107,36 +108,52 @@ export class OrderAssignmentService {
   }
 
   // FETCH ORDER ASSIGNMENTS
-  async fetchOrderAssignments({
-    page,
-    size,
-    condition,
-  }: {
-    page: number;
-    size: number;
-    condition:
-      | FindOptionsWhere<OrderAssignment>
-      | FindOptionsWhere<OrderAssignment>[];
-  }): Promise<Pagination> {
-    const { take, skip } = getPagination({ page, size });
+  async fetchOrderAssignments(query: Request['query']): Promise<Pagination> {
+
+    const { page = 0, size = 10, orderId, assignedToId, status } = query;
+
+    let condition: FindOptionsWhere<OrderAssignment> | FindOptionsWhere<OrderAssignment>[] = {};
+
+    if (orderId) {
+      condition.orderId = orderId as UUID;
+    }
+    
+    if (assignedToId) {
+      condition.assignedToId = assignedToId as UUID;
+    }
+
+    if (status) {
+      condition.status = status as OrderAssignmentStatus;
+    }
+
+    const { take, skip } = getPagination({ page: Number(page), size: Number(size) });
 
     const orderAssignments = await this.orderAssignmentRepository.findAndCount({
       where: condition,
       skip,
       take,
+      relations: {
+        order: true,
+        assignedTo: true,
+        createdBy: true,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
-    return getPagingData({
-      page,
-      size,
-      data: orderAssignments,
-    });
+    return getPagingData({ data: orderAssignments, page: Number(page), size: Number(size) });
   }
 
   // GET ORDER ASSIGNMENT BY ID
   async getOrderAssignmentById(id: UUID): Promise<OrderAssignment> {
     const orderAssignment = await this.orderAssignmentRepository.findOne({
       where: { id },
+      relations: {
+        order: true,
+        assignedTo: true,
+        createdBy: true,
+      }
     });
 
     if (!orderAssignment) {
@@ -161,6 +178,31 @@ export class OrderAssignmentService {
       ...orderAssignmentExists,
       ...orderAssignment,
     });
+  }
+
+  // ACCEPT ORDER ASSIGNMENT
+  async acceptOrderAssignment(id: UUID): Promise<OrderAssignment> {
+    const orderAssignment = await this.getOrderAssignmentById(id);
+    return this.orderAssignmentRepository.save({
+      ...orderAssignment,
+      status: OrderAssignmentStatus.ACTIVE,
+    });
+  }
+
+  // REJECT ORDER ASSIGNMENT
+  async rejectOrderAssignment(id: UUID): Promise<OrderAssignment> {
+    const orderAssignment = await this.getOrderAssignmentById(id);
+    const updatedOrderAssignment = await this.orderAssignmentRepository.save({
+      ...orderAssignment,
+      status: OrderAssignmentStatus.REJECTED,
+    });
+
+    // HANDLE ORDER ASSIGNMENT
+    const newOrderAssignment = await this.handleOrderAssignment({
+      orderId: updatedOrderAssignment?.orderId,
+    });
+
+    return newOrderAssignment;
   }
 
   // HANDLE ORDER ASSIGNMENT

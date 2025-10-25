@@ -30,7 +30,4 @@ router.delete("/:id", authorize([RoleTypes.ADMIN]), UserController.deleteUser);
 // RESET user password (ADMIN only)
 router.post("/:id/reset-password", authorize([RoleTypes.ADMIN]), UserController.resetPassword);
 
-// GET user assignments (ADMIN or own assignments for RIDER)
-router.get("/:id/assignments", UserController.getUserAssignments);
-
 export default router;

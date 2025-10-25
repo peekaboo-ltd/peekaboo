@@ -21,4 +21,5 @@ export enum OrderAssignmentStatus {
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
   PENDING = "PENDING",
+  REJECTED = "REJECTED",
 }

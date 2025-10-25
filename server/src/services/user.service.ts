@@ -250,20 +250,4 @@ export class UserService {
       tempPassword
     );
   }
-
-  // GET USER ASSIGNMENTS (FOR RIDERS)
-  async getUserAssignments(
-    userId: UUID,
-    pagination: { page: number; limit: number }
-  ): Promise<Pagination<any>> {
-    const assignmentService = new OrderAssignmentService();
-
-    return assignmentService.fetchOrderAssignments({
-      page: pagination.page,
-      size: pagination.limit,
-      condition: {
-        assignedToId: userId,
-      },
-    });
-  }
 }
