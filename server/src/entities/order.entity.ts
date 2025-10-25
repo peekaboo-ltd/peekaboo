@@ -5,6 +5,7 @@ import { UUID } from "../types";
 import { OrderStatus, OrderType } from "../constants/order.constants";
 import { Conversation } from "./conversation.entity";
 import { OrderAssignment } from "./orderAssignment.entity";
+import { OrderActivity } from "./orderActivity.entity";
 
 @Entity("orders")
 export class  Order extends AbstractEntity {
@@ -82,6 +83,10 @@ export class  Order extends AbstractEntity {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: "sender_id" })
   sender: User;
+
+  // ORDER ACTIVITIES
+  @OneToMany(() => OrderActivity, (orderActivity) => orderActivity.order)
+  activities: OrderActivity[];
 
   // ASSIGNMENTS
   @OneToMany(() => OrderAssignment, (orderAssignment) => orderAssignment.order)

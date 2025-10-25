@@ -116,4 +116,21 @@ export const OrderController = {
       next(error);
     }
   },
+
+  // FETCH ORDERS
+  async fetchOrders(req: Request, res: Response, next: NextFunction) {
+    try {
+
+      // FETCH ORDERS
+      const fetchedOrders = await orderService.fetchOrders(req.query);
+
+      // RETURN ORDERS
+      return res.status(200).json({
+        message: 'Orders fetched successfully',
+        data: fetchedOrders,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };

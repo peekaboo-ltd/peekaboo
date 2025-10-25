@@ -251,22 +251,6 @@ export class UserService {
     );
   }
 
-  // GET USER ORDERS
-  async getUserOrders(
-    userId: UUID,
-    pagination: { page: number; limit: number }
-  ): Promise<Pagination<any>> {
-    const orderService = new OrderService();
-
-    return orderService.fetchOrders({
-      page: pagination.page,
-      size: pagination.limit,
-      condition: {
-        createdById: userId,
-      },
-    });
-  }
-
   // GET USER ASSIGNMENTS (FOR RIDERS)
   async getUserAssignments(
     userId: UUID,

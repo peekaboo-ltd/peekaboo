@@ -196,26 +196,6 @@ export const UserController = {
     }
   },
 
-  // GET USER ORDERS
-  async getUserOrders(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const { page = 1, limit = 10 } = req.query;
-
-      const orders = await userService.getUserOrders(id as UUID, {
-        page: Number(page),
-        limit: Number(limit),
-      });
-
-      return res.status(200).json({
-        message: "User orders fetched successfully",
-        ...orders,
-      });
-    } catch (error) {
-      next(error);
-    }
-  },
-
   // GET USER ASSIGNMENTS (FOR RIDERS)
   async getUserAssignments(req: AuthRequest, res: Response, next: NextFunction) {
     try {

@@ -13,4 +13,6 @@ router.post("/public", OrderController.createPublicOrder);
 
 router.get("/:id", OrderController.getOrderById);
 
+router.get("/", OrderController.fetchOrders);
+
 export default router;

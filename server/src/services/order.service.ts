@@ -9,7 +9,6 @@ import {
   OrderAssignmentStatus,
   OrderStatus,
 } from '../constants/order.constants';
-import { ConversationStep } from '../constants/conversation.constants';
 import { ConversationService } from './conversation.service';
 import { sendMessage } from '../helpers/whatsapp.helper';
 import {
@@ -25,6 +24,7 @@ import { UserService } from './user.service';
 import { AuditLogService } from './auditLog.service';
 import { OrderActivityService } from './orderActivity.service';
 import { OrderActivity } from '../entities/orderActivity.entity';
+import { Request } from 'express';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -259,28 +259,45 @@ export class OrderService {
   }
 
   // FETCH ORDERS
-  async fetchOrders({
-    page,
-    size,
-    condition,
-  }: {
-    page: number;
-    size: number;
-    condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[];
-  }): Promise<Pagination> {
-    // GET PAGINATION
-    const { take, skip } = getPagination({ page, size });
+  async fetchOrders(query: Request['query']): Promise<Pagination<Order>> {
+    
+    const { page = 0, size = 10, senderId, recipientId, status } = query;
 
+    let condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[] = {};
+
+    if (senderId) {
+      condition.senderId = senderId as UUID;
+    }
+
+    if (recipientId) {
+      condition.recipientId = recipientId as UUID;
+    }
+
+    const { take, skip } = getPagination({
+      page: Number(page),
+      size: Number(size),
+    });
+
+    // GET PAGINATION
     const orders = await this.orderRepository.findAndCount({
       where: condition,
       skip,
       take,
+      relations: {
+        createdBy: true,
+        recipient: true,
+        sender: true,
+        activities: true,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     return getPagingData({
-      page,
-      size,
       data: orders,
+      page: Number(page),
+      size: Number(size),
     });
   }
 }
