@@ -5,11 +5,12 @@ import { Link } from "react-router-dom";
 
 export interface TableUserLabelProps {
     user?: User;
+    label?: string;
 }
 
-const TableUserLabel = ({ user }: TableUserLabelProps) => {
+const TableUserLabel = ({ user, label }: TableUserLabelProps) => {
     return (
-        <Link to={`/users/${user?.id}`} className="text-sm bg-gray-100 text-primary px-4 py-2 rounded-md hover:bg-gray-200"><FontAwesomeIcon icon={faUser} /> {user?.phoneNumber?.slice(-10)}</Link>
+        <Link to={`/users/${user?.id}`} className="text-sm bg-gray-100 text-primary px-4 py-2 rounded-md hover:bg-gray-200"><FontAwesomeIcon icon={faUser} /> {label || user?.phoneNumber?.slice(-10)}</Link>
     )
 }
 

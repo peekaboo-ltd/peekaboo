@@ -91,7 +91,7 @@ export const useFetchOrders = () => {
   const dispatch = useAppDispatch();
 
   // PAGINATION
-  const { page, setPage, size, setSize, totalPages, setTotalPages, totalElements, setTotalElements } = usePagination();
+  const { page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount } = usePagination();
 
   const [fetchOrders, { data, error, isFetching, reset, isSuccess }] =
     useLazyFetchOrdersQuery();
@@ -100,9 +100,9 @@ export const useFetchOrders = () => {
       if (isSuccess) {
         dispatch(setOrdersList(data?.data?.rows));
         setTotalPages(data?.data?.totalPages);
-        setTotalElements(data?.data?.totalElements);
+        setTotalCount(data?.data?.totalCount);
       }
-    }, [data, isSuccess, dispatch, setTotalPages, setTotalElements]);
+    }, [data, isSuccess, dispatch, setTotalPages, setTotalCount]);
 
-  return { fetchOrders, data, error, isFetching, reset, isSuccess, page, setPage, size, setSize, totalPages, setTotalPages, totalElements, setTotalElements };
+  return { fetchOrders, data, error, isFetching, reset, isSuccess, page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount };
 };

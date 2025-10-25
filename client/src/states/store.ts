@@ -4,6 +4,8 @@ import orderSlice from './slices/order.slice';
 import { ordersQueriesApiSlice } from '../api/queries/orders.queries';
 import { externalMutationsApiSlice } from '../api/mutations/external.mutations';
 import { orderAssignmentsMutationsApiSlice } from '../api/mutations/orderAssignments.mutations';
+import { orderAssignmentQueriesApiSlice } from '../api/queries/orderAssignment.queries';
+import orderAssignmentSlice from './slices/orderAssignment.slice';
 import orderActivitySlice from './slices/orderActivity.slice';
 import { orderActivityQueriesApiSlice } from '../api/queries/orderActivity.queries';
 import authSlice from './slices/auth.slice';
@@ -21,7 +23,10 @@ export const store = configureStore({
     [externalMutationsApiSlice.reducerPath]: externalMutationsApiSlice.reducer,
     [orderAssignmentsMutationsApiSlice.reducerPath]:
       orderAssignmentsMutationsApiSlice.reducer,
+    [orderAssignmentQueriesApiSlice.reducerPath]:
+      orderAssignmentQueriesApiSlice.reducer,
     order: orderSlice,
+    orderAssignment: orderAssignmentSlice,
     orderActivity: orderActivitySlice,
     [ordersQueriesApiSlice.reducerPath]: ordersQueriesApiSlice.reducer,
     [orderActivityQueriesApiSlice.reducerPath]:
@@ -38,6 +43,7 @@ export const store = configureStore({
       ordersQueriesApiSlice.middleware,
       externalMutationsApiSlice.middleware,
       orderAssignmentsMutationsApiSlice.middleware,
+      orderAssignmentQueriesApiSlice.middleware,
       orderActivityQueriesApiSlice.middleware,
       paymentsQueriesApiSlice.middleware,
       paymentsMutationsApiSlice.middleware

@@ -19,8 +19,27 @@ export const orderAssignmentsMutationsApiSlice = createApi({
         body: { orderId, assignedToId },
       }),
     }),
+
+    // ACCEPT ORDER ASSIGNMENT
+    acceptOrderAssignment: builder.mutation({
+      query: ({ id }: { id: UUID }) => ({
+        url: `/order-assignments/${id}/accept`,
+        method: 'PATCH',
+      }),
+    }),
+
+    // REJECT ORDER ASSIGNMENT
+    rejectOrderAssignment: builder.mutation({
+      query: ({ id }: { id: UUID }) => ({
+        url: `/order-assignments/${id}/reject`,
+        method: 'PATCH',
+      }),
+    }),
   }),
 });
 
-export const { useCreateOrderAssignmentMutation } =
-  orderAssignmentsMutationsApiSlice;
+export const {
+  useCreateOrderAssignmentMutation,
+  useAcceptOrderAssignmentMutation,
+  useRejectOrderAssignmentMutation,
+} = orderAssignmentsMutationsApiSlice;

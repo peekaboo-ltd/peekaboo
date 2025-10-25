@@ -5,12 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { UnknownAction } from "@reduxjs/toolkit";
 import { Table } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { formatNumbers } from "@/utils/strings.util";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
   page?: number;
   size?: number;
-  totalElements?: number;
+  totalCount?: number;
   totalPages?: number;
   setPage?: (page: number) => UnknownAction;
   setSize?: (size: number) => UnknownAction;
@@ -20,7 +21,7 @@ export function DataTablePagination<TData>({
   table,
   page = 1,
   size = 10,
-  totalElements = 0,
+  totalCount = 0,
   totalPages = 0,
   setPage,
   setSize,
@@ -41,15 +42,15 @@ export function DataTablePagination<TData>({
       value: 50,
     }];
 
-    if (totalElements > 50) {
+    if (totalCount > 50) {
       options.push({
         label: 'All',
-        value: totalElements,
+        value: totalCount,
       });
     }
 
     return options;
-  }, [totalElements]);
+  }, [totalCount]);
 
   return (
     <footer className="flex flex-col items-center gap-4 px-2 mt-4 
@@ -57,14 +58,14 @@ export function DataTablePagination<TData>({
       <article className="flex flex-col gap-1 w-full text-center 
                       md:w-auto md:text-left">
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
-                      <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {table.getFilteredSelectedRowModel().rows.length} of{' '}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </span>
         )}
-        {totalElements > 0 && (
+        {totalCount > 0 && (
           <span className="text-xs">
-            Total records: {totalElements}
+            Total records: {formatNumbers(totalCount)}
           </span>
         )}
       </article>
@@ -101,13 +102,13 @@ export function DataTablePagination<TData>({
 
         <section className="flex items-center gap-2">
           <span className="text-sm font-medium whitespace-nowrap">
-            Page {page} of {totalPages || 1}
+            Page {page + 1} of {totalPages || 1}
           </span>
           <input
             type="number"
             min={1}
             max={totalPages || 1}
-            defaultValue={page}
+            defaultValue={page + 1}
             className="w-12 text-center placeholder:text-xs text-xs py-1 px-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             onChange={(e) => {
               const targetPage = e.target.value ? Number(e.target.value) : 0;
@@ -120,12 +121,12 @@ export function DataTablePagination<TData>({
                 // Allow clearing or handle as needed
               } else {
                 // Optional: Reset to current page if invalid
-                e.target.value = String(page);
+                e.target.value = String(page + 1);
               }
             }}
             onBlur={(e) => {
               if (!e.target.value || Number(e.target.value) < 1 || Number(e.target.value) > (totalPages || 1)) {
-                e.target.value = String(page);
+                e.target.value = String(page + 1);
               }
             }}
             aria-label="Go to page number"
@@ -140,7 +141,7 @@ export function DataTablePagination<TData>({
               table.setPageIndex(0);
               if (setPage) setPage(1);
             }}
-            disabled={page === 1}
+            disabled={page === 0}
           >
             <span className="sr-only">Go to first page</span>
             <DoubleArrowLeftIcon className="w-4 h-4" />
@@ -152,7 +153,7 @@ export function DataTablePagination<TData>({
               table.previousPage();
               if (setPage) setPage(page - 1);
             }}
-            disabled={page === 1}
+            disabled={page === 0}
           >
             <span className="sr-only">Go to previous page</span>
             <ChevronLeftIcon className="w-4 h-4" />
@@ -162,7 +163,7 @@ export function DataTablePagination<TData>({
             className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
               table.nextPage();
-              if (setPage) setPage(page + 1);
+              if (setPage) setPage(page + 1 as unknown as number);
             }}
             disabled={page === (totalPages || 1)}
           >
@@ -174,7 +175,7 @@ export function DataTablePagination<TData>({
             className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
               table.setPageIndex((totalPages || 1) - 1);
-              if (setPage) setPage(totalPages || 1);
+              if (setPage) setPage(totalPages || 1 as unknown as number);
             }}
             disabled={page === (totalPages || 1)}
           >

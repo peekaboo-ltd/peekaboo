@@ -21,7 +21,8 @@ export const StatusBadge = ({ status }: { status?: string }) => {
             className = 'bg-blue-700 text-white';
             break;
         case 'CANCELLED':
-            className = 'bg-red-700 text-white';
+        case 'REJECTED':
+            className = 'bg-red-800 text-white';
             break;
         case 'CREATED':
             className = 'bg-gray-700 text-white';

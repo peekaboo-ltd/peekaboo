@@ -2,10 +2,10 @@ import { UnknownAction } from '@reduxjs/toolkit';
 import { useState } from 'react';
 
 export const usePagination = () => {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalElements, setTotalElements] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   return {
     page,
@@ -14,7 +14,7 @@ export const usePagination = () => {
     setSize: setSize as (size: number) => UnknownAction,
     totalPages,
     setTotalPages,
-    totalElements,
-    setTotalElements,
+    totalCount,
+    setTotalCount,
   };
 };

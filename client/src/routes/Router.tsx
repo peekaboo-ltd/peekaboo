@@ -10,6 +10,7 @@ import { Dashboard } from '@/pages/dashboard';
 import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayout';
 import Register from '@/pages/auth/Register';
 import { OrdersPage } from '@/pages/orders';
+import { OrderAssignmentsPage } from '@/pages/order-assignments';
 
 const Router = () => {
   return (
@@ -41,6 +42,11 @@ const Router = () => {
         <Route path="/orders" element={
           <ProtectedRoute allowedRoles={['ADMIN', 'RIDER', 'CUSTOMER']}>
             <OrdersPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/assignments" element={
+          <ProtectedRoute allowedRoles={['ADMIN', 'RIDER']}>
+            <OrderAssignmentsPage />
           </ProtectedRoute>
         } />
       </Route>

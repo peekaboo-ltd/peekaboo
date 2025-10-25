@@ -25,6 +25,7 @@ import {
 import { DataTablePagination } from './TablePagination';
 import { ReactNode, useState } from 'react';
 import { UnknownAction } from '@reduxjs/toolkit';
+import { SkeletonLoader } from '../inputs/Loader';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,7 +36,7 @@ interface DataTableProps<TData, TValue> {
   showExport?: boolean;
   page?: number;
   size?: number;
-  totalElements?: number;
+  totalCount?: number;
   totalPages?: number;
   setPage?: (page: number) => UnknownAction;
   setSize?: (size: number) => UnknownAction;
@@ -51,7 +52,7 @@ export default function Table<TData, TValue>({
   showPagination = true,
   page = 1,
   size = 10,
-  totalElements = 0,
+  totalCount = 0,
   totalPages = 1,
   setPage,
   setSize,
@@ -122,14 +123,7 @@ export default function Table<TData, TValue>({
                 <TableRow key={`skeleton-row-${rowIdx}`}>
                   {columns.map((_, cellIdx) => (
                     <TableCell key={`skeleton-cell-${cellIdx}`} className="p-4">
-                      <figure
-                        className={`animate-pulse rounded-[4px]`}
-                        style={{
-                          width: `${Math.random() * (70 - 50) + 50}%`,
-                          height: '0.75rem',
-                          animationDuration: '1.4s',
-                        }}
-                      />
+                      <SkeletonLoader type="text" height='0.8rem' />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -199,7 +193,7 @@ export default function Table<TData, TValue>({
         <DataTablePagination
           page={page}
           size={size}
-          totalElements={totalElements}
+          totalCount={totalCount}
           totalPages={totalPages}
           table={table}
           setPage={setPage}
