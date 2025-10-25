@@ -47,10 +47,6 @@ const AuthenticatedNavbar = ({ className }: Props) => {
     return (
         <header
             className={`w-full fixed top-0 z-[1000] bg-white shadow-lg transition-all duration-300
-        ${pathname.includes('services')
-                    ? 'px-4 sm:px-6 md:px-[7%]'
-                    : 'px-4 sm:px-6 md:px-[2%]'
-                }
         py-2 sm:py-3 h-[9vh] flex items-center justify-between ${className}`}
         >
             <Link to="/" className="flex-shrink-0">

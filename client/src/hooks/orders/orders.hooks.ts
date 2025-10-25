@@ -4,10 +4,11 @@ import {
   useUpdateOrderMutation,
 } from '../../api/mutations/orders.mutations';
 import { useNavigate } from 'react-router-dom';
-import { useLazyGetOrderQuery } from '@/api/queries/orders.queries';
+import { useLazyFetchOrdersQuery, useLazyGetOrderQuery } from '@/api/queries/orders.queries';
 import { useAppDispatch } from '@/states/hooks';
-import { setOrder } from '@/states/slices/order.slice';
+import { setOrder, setOrdersList } from '@/states/slices/order.slice';
 import { ORDER_FEE_RANGES } from '@/constants/order.constants';
+import { usePagination } from '../common/pagination.hooks';
 
 /**
  *
@@ -83,4 +84,25 @@ export const useGetOrderFees = () => {
   }, []);
 
   return { getOrderFee, orderFee };
+};
+
+export const useFetchOrders = () => {
+
+  const dispatch = useAppDispatch();
+
+  // PAGINATION
+  const { page, setPage, size, setSize, totalPages, setTotalPages, totalElements, setTotalElements } = usePagination();
+
+  const [fetchOrders, { data, error, isFetching, reset, isSuccess }] =
+    useLazyFetchOrdersQuery();
+
+    useEffect(() => {
+      if (isSuccess) {
+        dispatch(setOrdersList(data?.data?.rows));
+        setTotalPages(data?.data?.totalPages);
+        setTotalElements(data?.data?.totalElements);
+      }
+    }, [data, isSuccess, dispatch, setTotalPages, setTotalElements]);
+
+  return { fetchOrders, data, error, isFetching, reset, isSuccess, page, setPage, size, setSize, totalPages, setTotalPages, totalElements, setTotalElements };
 };

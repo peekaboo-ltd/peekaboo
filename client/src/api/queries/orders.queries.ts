@@ -14,6 +14,7 @@ export const ordersQueriesApiSlice = createApi({
         };
       },
     }),
+    
     getOrder: builder.query({
       query: ({ id }: { id: UUID }) => `/orders/${id}`,
     }),

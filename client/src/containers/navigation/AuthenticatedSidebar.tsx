@@ -133,7 +133,7 @@ const AuthenticatedSidebar = () => {
                           ${sidebarOpen ? 'px-4 py-3' : 'p-3 justify-center'}
                           hover:bg-white/90 hover:text-primary
                           ${isLinkActive
-                                        ? 'bg-primary text-white font-semibold'
+                                        ? 'bg-white text-primary font-semibold'
                                         : 'text-white'
                                     }`}
                                 onClick={(e) => {

@@ -1,0 +1,34 @@
+import { faCheckCircle, faCopy } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useState } from "react";
+import { toast } from "sonner";
+
+export interface ReferenceIdInputProps {
+    label?: string;
+    referenceId?: string;
+}
+
+export const ReferenceIdInput = ({ label }: ReferenceIdInputProps) => {
+
+    const [isCopied, setIsCopied] = useState(false);
+
+    return (
+        <p className="text-xs sm:text-sm text-gray-600 px-2 flex items-center gap-1">
+        {label}
+        <FontAwesomeIcon
+          icon={isCopied ? faCheckCircle : faCopy}
+          className="w-4 h-4 cursor-pointer"
+          onClick={(e) => {
+            e.preventDefault();
+            if (!label) return;
+            navigator.clipboard.writeText(label);
+            toast.success(`${label} copied to clipboard`);
+            setIsCopied(true);
+            setTimeout(() => {
+              setIsCopied(false);
+            }, 2000);
+          }}
+        />
+      </p>
+    )
+}

@@ -9,6 +9,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { Dashboard } from '@/pages/dashboard';
 import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayout';
 import Register from '@/pages/auth/Register';
+import { OrdersPage } from '@/pages/orders';
 
 const Router = () => {
   return (
@@ -35,6 +36,11 @@ const Router = () => {
         <Route path="/dashboard" element={
           <ProtectedRoute allowedRoles={['ADMIN', 'RIDER', 'CUSTOMER']}>
             <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/orders" element={
+          <ProtectedRoute allowedRoles={['ADMIN', 'RIDER', 'CUSTOMER']}>
+            <OrdersPage />
           </ProtectedRoute>
         } />
       </Route>

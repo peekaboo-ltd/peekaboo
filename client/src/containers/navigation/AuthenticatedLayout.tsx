@@ -14,7 +14,6 @@ export const AuthenticatedLayout = () => {
         className={`
           flex-1
           overflow-y-auto
-          bg-gray-50
           transition-all
           duration-300
           ease-in-out
@@ -24,7 +23,7 @@ export const AuthenticatedLayout = () => {
           md:ml-[${sidebarOpen ? '18vw' : '6vw'}]
         `}
       >
-        <section className="container h-[91vh] mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <section className="h-[91vh] mt-[9vh] w-full mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <Outlet />
         </section>
       </main>
