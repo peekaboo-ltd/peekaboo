@@ -1,12 +1,15 @@
-import logger from "../../helpers/logger.helper";
+import logger from '../../helpers/logger.helper';
 
 export class EmailService {
-  async sendPasswordResetEmail(to: string, tempPassword: string): Promise<void> {
+  async sendPasswordResetEmail(
+    to: string,
+    tempPassword: string
+  ): Promise<void> {
     // In a real implementation, you would use a service like SendGrid, AWS SES, etc.
     // For now, we'll just log the password reset
     logger.info(`Password reset email sent to ${to}`);
     logger.info(`Temporary password: ${tempPassword}`);
-    
+
     // TODO: Implement actual email sending
     // Example with nodemailer:
     // const transporter = nodemailer.createTransport({...});
@@ -25,6 +28,11 @@ export class EmailService {
 
   async sendOrderConfirmationEmail(to: string, orderId: string): Promise<void> {
     logger.info(`Order confirmation email sent to ${to} for order ${orderId}`);
+    // TODO: Implement actual email sending
+  }
+
+  async sendPaymentReceiptEmail(to: string, paymentId: string): Promise<void> {
+    logger.info(`Payment receipt email sent to ${to} for payment ${paymentId}`);
     // TODO: Implement actual email sending
   }
 }

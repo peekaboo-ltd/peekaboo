@@ -1,6 +1,8 @@
 // Kpay Payment Gateway Types and Interfaces
 // Based on Kpay API Documentation (pay.esicia.rw)
 
+import { UUID } from ".";
+
 export interface KpayConfig {
   username: string;
   password: string;
@@ -55,7 +57,7 @@ export interface KpayPaymentResponse {
 // Webhook/Postback Payload (from Kpay to your returl)
 export interface KpayWebhookPayload {
   tid: string; // Kpay internal payment reference
-  refid: string; // Your payment reference
+  refid: UUID; // Your payment reference
   momtransactionid: string; // Transaction ID from financial institution
   payaccount?: string; // Bank account/mobile number used to pay
   statusid: string; // '01' = successful, '02' = failed, other = error codes
