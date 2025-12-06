@@ -1,67 +1,278 @@
-import { Link } from 'react-router-dom';
-import { Controller, useForm } from 'react-hook-form';
-import Input from '@/components/inputs/Input';
-import { Checkbox } from '@/components/ui/checkbox';
-import Button from '@/components/inputs/Button';
-import { useLogin } from '@/hooks/auth/auth.hooks';
+import { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Phone } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContextSecure';
 
 export const Login = () => {
-
-  const { control, handleSubmit, formState: { errors } } = useForm();
-
-  const { login, isLoading } = useLogin();
-
-  // HANDLE FORM SUBMISSION
-  const onSubmit = handleSubmit((data) => {
-    login({ username: data?.username, password: data.password });
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    rememberMe: false,
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({});
+
+    // Basic validation
+    const newErrors: Record<string, string> = {};
+    if (!formData.username) {
+      newErrors.username = loginMethod === 'email' 
+        ? 'Email is required' 
+        : 'Phone number is required';
+    }
+    
+    if (loginMethod === 'email' && formData.username && !/\S+@\S+\.\S+/.test(formData.username)) {
+      newErrors.username = 'Please enter a valid email';
+    }
+
+    if (!formData.password) newErrors.password = 'Password is required';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // The backend accepts either email or phone number in the username field
+      const result = await login(formData.username, formData.password);
+
+      if (result.success) {
+        console.log('✅ Login result:', result);
+        // Redirect to the intended page or role-appropriate dashboard
+        const from = new URLSearchParams(location.search).get('from');
+        
+        if (from && from !== '/auth/login' && from !== '/auth/register') {
+          // If there's a specific page they were trying to access, go there
+          navigate(from, { replace: true });
+        } else {
+          // Otherwise, redirect based on user role returned from login (fallbacks to 'customer')
+          const userRole =
+            (result as any)?.role ?? (result as any)?.user?.role ?? 'customer';
+          console.log('🔄 Redirecting with role:', userRole);
+          const redirectPath = (() => {
+            switch (userRole) {
+              case 'admin':
+                return '/admin';
+              case 'staff':
+                return '/staff/dashboard';
+              case 'rider':
+                return '/rider/dashboard';
+              case 'customer':
+              default:
+                return '/dashboard';
+            }
+          })();
+          console.log('📍 Redirect path:', redirectPath);
+          navigate(redirectPath, { replace: true });
+        }
+      } else {
+        setErrors({ general: result.error || 'Login failed' });
+      }
+    } catch {
+      setErrors({ general: 'An error occurred. Please try again.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+
 
   return (
-    <main className="h-full flex items-center justify-center bg-gray-50 py-6 px-4 sm:py-12 sm:px-6 lg:px-8">
-      <form className="flex flex-col gap-8 py-12 w-full sm:min-w-[30vw] max-w-[500px] shadow-2xl rounded-lg p-6" onSubmit={onSubmit}>
-        <header className='flex flex-col gap-2'>
-          <h2 className="mt-2 sm:mt-6 text-center text-lg sm:text-xl font-extrabold text-gray-900">
-            Sign in to Peekaboo
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link to="/auth/register" className="font-medium hover:underline text-primary hover:text-primary/80">
-              create a new account
-            </Link>
-          </p>
-        </header>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-2 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-lg">P</span>
+            </div>
+            <span className="text-2xl font-bold text-gray-900">Peekaboo</span>
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
+          <p className="text-gray-600">Please sign in to your account</p>
+        </div>
 
-        <fieldset className='w-full grid grid-cols-1 gap-4'>
-          <Controller name="username" control={control} render={({ field }) => {
-            return (
-              <Input {...field} label='Username' placeholder='Enter email or username' required errorMessage={errors?.username?.message} />
-            )
-          }} />
-          <Controller name="password" control={control} render={({ field }) => {
-            return (
-              <Input {...field} label='Password' type='password' placeholder='Enter password' required errorMessage={errors?.password?.message} />
-            )
-          }} />
-          <nav className='w-full flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 justify-between'>
-            <Controller name="rememberMe" control={control} render={({ field }) => {
-              return (
-                <label className='flex items-center gap-2'>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className='cursor-pointer'
-                  />
-                  <span className="text-sm">Remember me</span>
-                </label>
-              )
-            }} />
-            <Link to="/forgot-password" className="font-medium text-sm sm:text-[13px] hover:underline text-primary hover:text-primary/80">
-              Forgot password?
-            </Link>
-          </nav>
-        </fieldset>
-        <Button type="submit" primary isLoading={isLoading}>Login</Button>
-      </form>
-    </main>
+        {/* Form Container */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+          {errors.general && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              {errors.general}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Login Method Toggle */}
+            <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setLoginMethod('email')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                  loginMethod === 'email'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Email
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginMethod('phone')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                  loginMethod === 'phone'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Phone
+              </button>
+            </div>
+
+            {/* Username Field (Email or Phone) */}
+            <div>
+              <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
+                {loginMethod === 'email' ? 'Email Address' : 'Phone Number'}
+              </label>
+              <div className="relative">
+                {loginMethod === 'email' ? (
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                ) : (
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                )}
+                <input
+                  id="username"
+                  name="username"
+                  type={loginMethod === 'email' ? 'email' : 'tel'}
+                  autoComplete={loginMethod === 'email' ? 'email' : 'tel'}
+                  value={formData.username}
+                  onChange={(e) => handleInputChange('username', e.target.value)}
+                  className={`w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                    errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  placeholder={
+                    loginMethod === 'email' 
+                      ? 'Enter your email address' 
+                      : 'Enter your phone number (e.g., +250788123456)'
+                  }
+                />
+              </div>
+              {errors.username && <p className="text-red-500 text-sm mt-2">{errors.username}</p>}
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  className={`w-full pl-11 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                    errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-red-500 text-sm mt-2">{errors.password}</p>}
+            </div>
+
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={formData.rememberMe}
+                  onChange={(e) => handleInputChange('rememberMe', e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+              </label>
+              <Link
+                to="/auth/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <p className="text-center text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link
+                to="/auth/register"
+                className="font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                Sign up for free
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        {/* Back to Home */}
+        <div className="text-center mt-6">
+          <Link
+            to="/"
+            className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            ← Back to home
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 };

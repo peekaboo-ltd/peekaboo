@@ -18,9 +18,18 @@ export const AuthController = {
       const { username, password } = req.body;
       const { user, token } = await authService.login({ username, password });
 
+      // Set JWT as HTTP-only cookie
+      res.cookie('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        path: '/'
+      });
+
       return res.status(200).json({
         message: 'Login successful',
-        data: { user, token },
+        data: { user },
       });
     } catch (error) {
       next(error);
@@ -39,9 +48,18 @@ export const AuthController = {
         roles,
       });
 
+      // Set JWT as HTTP-only cookie
+      res.cookie('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        path: '/'
+      });
+
       return res.status(201).json({
         message: 'User registered successfully',
-        data: { user, token },
+        data: { user }, 
       });
     } catch (error) {
       next(error);
@@ -73,8 +91,14 @@ export const AuthController = {
   // LOGOUT
   async logout(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      // In a JWT-based system, logout is typically handled on the client side
-      // by removing the token. Here we just return a success response.
+      // Clear the HTTP-only cookie
+      res.clearCookie('auth-token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/'
+      });
+
       return res.status(200).json({
         message: 'Logout successful',
       });
@@ -105,9 +129,18 @@ export const AuthController = {
         { expiresIn: '24h' }
       );
 
+      // Set new JWT as HTTP-only cookie
+      res.cookie('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        path: '/'
+      });
+
       return res.status(200).json({
         message: 'Token refreshed successfully',
-        data: { token },
+        data: { user: req.user }, // Return user data instead of token
       });
     } catch (error) {
       next(error);

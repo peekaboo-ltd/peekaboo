@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import { Navbar } from '../../components/Navbar';
 
 interface PublicLayoutProps {
   children?: ReactNode;
@@ -7,12 +8,10 @@ interface PublicLayoutProps {
 
 const PublicLayout = ({ children }: PublicLayoutProps) => {
 
-  // NAVIGATION
-  const { pathname } = useLocation();
-
   return (
-    <main className="h-screen bg-gray-50 relative">
-      <section className={`relative h-[calc(100vh-9vh)] ${pathname === '/' ? 'pt-0' : 'pt-22'}`}>
+    <main className="min-h-screen bg-gray-50 relative">
+      <Navbar />
+      <section className="relative pt-16">
         {children || <Outlet />}
       </section>
     </main>

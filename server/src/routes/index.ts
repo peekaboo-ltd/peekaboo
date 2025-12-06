@@ -13,6 +13,14 @@ import webhookRoutes from './webhook.routes';
 // CREATE ROUTER
 const routes = Router();
 
+routes.get('/health', (req, res) => {
+  res.json({ 
+    message: 'Server is running', 
+    timestamp: new Date().toISOString(),
+    cors: 'configured'
+  });
+});
+
 // AUTH ROUTES
 routes.use('/auth', authRoutes);
 

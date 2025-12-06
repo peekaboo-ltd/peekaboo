@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Package, Clock, CheckCircle, XCircle, Plus } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
+import { useAuth } from '../../contexts/AuthContextSecure';
 
 interface Order {
   id: string;
@@ -13,18 +13,14 @@ interface Order {
 }
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get user from localStorage
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-
-    // Mock orders data
+    // Simulate loading time and set mock data
+    const timer = setTimeout(() => {
+      // Mock orders data
     const mockOrders: Order[] = [
       {
         id: '001',
@@ -54,8 +50,11 @@ const Dashboard = () => {
       },
     ];
 
-    setOrders(mockOrders);
-    setLoading(false);
+      setOrders(mockOrders);
+      setLoading(false);
+    }, 500); // Small delay to simulate loading
+
+    return () => clearTimeout(timer);
   }, []);
 
   const getStatusColor = (status: Order['status']) => {
@@ -91,24 +90,20 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar user={user} />
-        <div className="flex items-center justify-center py-20">
-          <div className="text-gray-600">Loading...</div>
-        </div>
+      <div className="flex items-center justify-center py-20">
+        <div className="text-gray-600">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar user={user} />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Welcome back, {((user as any)?.name) || user?.email || 'User'}!
+            </h1>
             <p className="text-gray-600">Track and manage your deliveries</p>
           </div>
           <a
@@ -238,7 +233,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

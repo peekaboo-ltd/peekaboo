@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Package, Users, DollarSign, TrendingUp, Clock, CheckCircle } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
+import { useAuth } from '../../contexts/AuthContextSecure';
 
 interface AdminStats {
   totalOrders: number;
@@ -12,6 +12,7 @@ interface AdminStats {
 }
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
   const [stats, setStats] = useState<AdminStats>({
     totalOrders: 0,
     activeUsers: 0,
@@ -20,15 +21,9 @@ const AdminDashboard = () => {
     pendingOrders: 0,
     completedToday: 0,
   });
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get user from localStorage
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
 
     // Mock admin stats
     setTimeout(() => {
@@ -46,23 +41,19 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar user={user} />
-        <div className="flex items-center justify-center py-20">
-          <div className="text-gray-600">Loading...</div>
-        </div>
+      <div className="flex items-center justify-center py-20">
+        <div className="text-gray-600">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar user={user} />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Welcome Admin, {(user as any)?.name || 'Admin'}!
+          </h1>
           <p className="text-gray-600">Overview of platform performance</p>
         </div>
 
@@ -173,7 +164,6 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
