@@ -90,7 +90,7 @@ export const HeroOrderForm = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Sender Phone */}
         <div>
-          <label htmlFor="senderPhone" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="senderPhone" className="block text-sm font-medium text-gray-900 mb-2">
             <Phone className="inline w-4 h-4 mr-2" />
             {orderFormContent.senderLabel}
           </label>
@@ -100,7 +100,7 @@ export const HeroOrderForm = () => {
             placeholder={orderFormContent.senderPlaceholder}
             value={formData.senderPhone}
             onChange={(e) => handleInputChange('senderPhone', e.target.value)}
-            className={`w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition-colors ${errors.senderPhone ? 'border-red-500' : ''}`}
+            className={`w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-500 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition-colors ${errors.senderPhone ? 'border-red-500' : ''}`}
             disabled={isLoading}
           />
           <AnimatePresence>
@@ -114,7 +114,7 @@ export const HeroOrderForm = () => {
 
         {/* Receiver Phone */}
         <div>
-          <label htmlFor="receiverPhone" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="receiverPhone" className="block text-sm font-medium text-gray-900 mb-2">
             <Phone className="inline w-4 h-4 mr-2" />
             {orderFormContent.receiverLabel}
           </label>
@@ -124,7 +124,7 @@ export const HeroOrderForm = () => {
             placeholder={orderFormContent.receiverPlaceholder}
             value={formData.receiverPhone}
             onChange={(e) => handleInputChange('receiverPhone', e.target.value)}
-            className={`w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition-colors ${errors.receiverPhone ? 'border-red-500' : ''}`}
+            className={`w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-500 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 transition-colors ${errors.receiverPhone ? 'border-red-500' : ''}`}
             disabled={isLoading}
           />
           <AnimatePresence>
