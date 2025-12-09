@@ -1,5 +1,5 @@
 import { stats, heroContent } from '../constants/hero.constants';
-import { HeroOrderForm } from './HeroOrderForm';
+import { MultiStepOrderForm } from '@/pages/home/components/MultiStepOrderForm/index';
 
 export const HeroSection = () => {
   return (
@@ -66,7 +66,7 @@ export const HeroSection = () => {
 
           {/* Right Content - Order Form */}
           <div className="flex items-center justify-center order-1 lg:order-2">
-            <HeroOrderForm />
+            <MultiStepOrderForm />
           </div>
         </div>
       </div>

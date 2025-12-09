@@ -57,12 +57,25 @@ export const OrderController = {
   // CREATE PUBLIC ORDER
   async createPublicOrder(req: Request, res: Response, next: NextFunction) {
     try {
-      const { senderPhoneNumber, recipientPhoneNumber } = req.body;
+      const { 
+        senderPhoneNumber, 
+        recipientPhoneNumber,
+        pickupLocation,
+        deliveryLocation,
+        distance,
+        finalFee,
+        riderId
+      } = req.body;
 
       // CREATE PUBLIC ORDER
       const createdOrder = await orderService.createPublicOrder({
         senderPhoneNumber,
         recipientPhoneNumber,
+        pickupLocation,
+        deliveryLocation,
+        distance,
+        finalFee,
+        riderId,
       });
 
       // RETURN ORDER

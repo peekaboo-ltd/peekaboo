@@ -12,13 +12,31 @@ export const ordersMutationApiSlice = createApi({
       query: ({
         senderPhoneNumber,
         recipientPhoneNumber,
+        pickupLocation,
+        deliveryLocation,
+        distance,
+        finalFee,
+        riderId,
       }: {
         senderPhoneNumber: string;
         recipientPhoneNumber: string;
+        pickupLocation?: { address: string; lat: number; lng: number };
+        deliveryLocation?: { address: string; lat: number; lng: number };
+        distance?: number;
+        finalFee?: number;
+        riderId?: string;
       }) => ({
         url: '/orders/public',
         method: 'POST',
-        body: { senderPhoneNumber, recipientPhoneNumber },
+        body: { 
+          senderPhoneNumber, 
+          recipientPhoneNumber,
+          pickupLocation,
+          deliveryLocation,
+          distance,
+          finalFee,
+          riderId,
+        },
       }),
     }),
 

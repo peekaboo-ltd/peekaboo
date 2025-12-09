@@ -65,6 +65,30 @@ export class  Order extends AbstractEntity {
     longitude: number;
   };
 
+  // PICKUP LOCATION (Address)
+  @Column({ name: "pickup_location", type: "text", nullable: true })
+  pickupLocation: string;
+
+  // DELIVERY LOCATION (Address)
+  @Column({ name: "delivery_location", type: "text", nullable: true })
+  deliveryLocation: string;
+
+  // PICKUP COORDINATES
+  @Column({ name: "pickup_coordinates", type: "varchar", length: 100, nullable: true })
+  pickupCoordinates: string; // Format: "lat,lng"
+
+  // DELIVERY COORDINATES
+  @Column({ name: "delivery_coordinates", type: "varchar", length: 100, nullable: true })
+  deliveryCoordinates: string; // Format: "lat,lng"
+
+  // DISTANCE (in kilometers)
+  @Column({ name: "distance", type: "numeric", nullable: true })
+  distance: number;
+
+  // RIDER ID
+  @Column({ name: "rider_id", type: "uuid", nullable: true })
+  riderId: UUID;
+
   /**
    * RELATIONS
    */
