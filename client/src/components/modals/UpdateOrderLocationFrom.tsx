@@ -46,8 +46,8 @@ const UpdateOrderLocationFrom = () => {
   return (
     <Modal
       isOpen={updateOrderLocationFromModal}
-      onOpenChange={handleClose}
-      title="Update Origin Location"
+      onClose={handleClose}
+      heading="Update Origin Location"
       description="Search and select the pickup location for your order"
     >
       <article className="space-y-6">

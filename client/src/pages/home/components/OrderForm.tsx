@@ -51,14 +51,14 @@ export const OrderForm = () => {
       }).unwrap();
 
       toast.success('Order created successfully! Redirecting to tracking...');
-      
+
       // Redirect to public order tracking page
       setTimeout(() => {
         navigate(`/p/orders/${result.data.id}`);
       }, 1500);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Order creation error:', error);
-      toast.error(error?.data?.message || 'Failed to create order. Please try again.');
+      toast.error((error as Error).message || 'Failed to create order. Please try again.');
     }
   };
 
