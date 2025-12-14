@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import type { StepProps } from './types';
 
 export const Step5Confirmation = ({ formData }: StepProps) => {
@@ -13,7 +14,7 @@ export const Step5Confirmation = ({ formData }: StepProps) => {
     >
       <div className="text-center">
         <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Check className="w-8 h-8 text-white" />
+          <FontAwesomeIcon icon={faCheck} className="w-8 h-8 text-white" />
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Your Order</h3>
         <p className="text-gray-600 text-sm">Review your order details before confirming</p>

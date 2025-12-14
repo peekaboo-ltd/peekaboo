@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Phone } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPhone } from '@fortawesome/free-solid-svg-icons';
 import type { StepProps } from './types';
 
 export const Step1PhoneNumbers = ({ formData, setFormData, errors }: StepProps) => {
@@ -16,7 +17,7 @@ export const Step1PhoneNumbers = ({ formData, setFormData, errors }: StepProps) 
       {/* Sender Phone */}
       <div>
         <label className="block text-sm font-medium text-gray-900 mb-2">
-          <Phone className="inline w-4 h-4 mr-2" />
+          <FontAwesomeIcon icon={faPhone} className="inline w-4 h-4 mr-2" />
           Your Phone Number
         </label>
         <input
@@ -24,7 +25,7 @@ export const Step1PhoneNumbers = ({ formData, setFormData, errors }: StepProps) 
           placeholder="+250 78 123 4567"
           value={formData.senderPhone}
           onChange={(e) => setFormData({ ...formData, senderPhone: e.target.value })}
-          className={`w-full px-4 py-3 bg-white text-gray-900 border-2 rounded-lg focus:outline-none focus:border-blue-500 ${
+          className={`w-full px-4 py-3 bg-white text-gray-900 border-2 rounded-lg focus:outline-none focus:border-primary-500 ${
             errors.senderPhone ? 'border-red-500' : 'border-gray-200'
           }`}
         />
@@ -34,7 +35,7 @@ export const Step1PhoneNumbers = ({ formData, setFormData, errors }: StepProps) 
       {/* Recipient Phone */}
       <div>
         <label className="block text-sm font-medium text-gray-900 mb-2">
-          <Phone className="inline w-4 h-4 mr-2" />
+          <FontAwesomeIcon icon={faPhone} className="inline w-4 h-4 mr-2" />
           Recipient Phone Number
         </label>
         <input
@@ -42,15 +43,15 @@ export const Step1PhoneNumbers = ({ formData, setFormData, errors }: StepProps) 
           placeholder="+250 78 765 4321"
           value={formData.recipientPhone}
           onChange={(e) => setFormData({ ...formData, recipientPhone: e.target.value })}
-          className={`w-full px-4 py-3 bg-white text-gray-900 border-2 rounded-lg focus:outline-none focus:border-blue-500 ${
+          className={`w-full px-4 py-3 bg-white text-gray-900 border-2 rounded-lg focus:outline-none focus:border-primary-500 ${
             errors.recipientPhone ? 'border-red-500' : 'border-gray-200'
           }`}
         />
         {errors.recipientPhone && <p className="text-red-500 text-sm mt-1">{errors.recipientPhone}</p>}
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-        <p className="text-xs text-blue-800">
+      <div className="bg-primary-50 border border-primary-200 p-3 rounded-lg">
+        <p className="text-xs text-primary-800">
           <strong>Note:</strong> Both you and the recipient will receive login credentials via WhatsApp if you're new users.
         </p>
       </div>

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { ctaContent } from '../constants/cta.constants';
 
 export const CTASection = () => {
@@ -77,7 +78,7 @@ export const CTASection = () => {
               className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-primary-700 rounded-xl font-semibold shadow-2xl hover:shadow-3xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
             >
               {ctaContent.primaryButtonText}
-              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4 sm:w-5 sm:h-5" />
             </motion.button>
 
             <motion.a

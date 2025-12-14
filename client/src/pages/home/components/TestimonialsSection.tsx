@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Star, Quote } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar, faQuoteLeft } from '@fortawesome/free-solid-svg-icons';
 import { testimonials, testimonialsContent, containerVariants, itemVariants } from '../constants/testimonials.constants';
 
 export const TestimonialsSection = () => {
@@ -36,12 +37,12 @@ export const TestimonialsSection = () => {
               className="bg-white rounded-2xl p-5 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative"
             >
               <div className="absolute -top-3 -left-3 sm:-top-4 sm:-left-4 w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-full flex items-center justify-center shadow-lg" aria-hidden="true">
-                <Quote className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                <FontAwesomeIcon icon={faQuoteLeft} className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
 
               <div className="flex gap-1 mb-3 sm:mb-4" role="img" aria-label={`${testimonial.rating} stars`}>
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-400 text-yellow-400" />
+                  <FontAwesomeIcon key={i} icon={faStar} className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
                 ))}
               </div>
 

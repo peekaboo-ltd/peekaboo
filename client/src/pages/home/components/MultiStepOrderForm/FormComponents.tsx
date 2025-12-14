@@ -1,4 +1,5 @@
-import { Check, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck, faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 interface ProgressBarProps {
   currentStep: number;
@@ -18,18 +19,18 @@ export const ProgressBar = ({ currentStep, totalSteps }: ProgressBarProps) => {
                 step < currentStep
                   ? 'bg-green-500 text-white'
                   : step === currentStep
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-primary-600 text-white'
                   : 'bg-gray-200 text-gray-500'
               }`}
             >
-              {step < currentStep ? <Check className="w-4 h-4" /> : step}
+              {step < currentStep ? <FontAwesomeIcon icon={faCheck} className="w-4 h-4" /> : step}
             </div>
           );
         })}
       </div>
       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="h-full bg-blue-600 transition-all duration-300"
+          className="h-full bg-primary-600 transition-all duration-300"
           style={{ width: `${(currentStep / totalSteps) * 100}%` }}
         />
       </div>
@@ -55,9 +56,9 @@ export const NavigationButtons = ({ currentStep, totalSteps, isLoading, onBack, 
         <button
           onClick={onBack}
           disabled={isLoading}
-          className="flex-1 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+          className="flex-1 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4" />
           Back
         </button>
       )}
@@ -65,27 +66,27 @@ export const NavigationButtons = ({ currentStep, totalSteps, isLoading, onBack, 
       <button
         onClick={onNext}
         disabled={isLoading}
-        className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+        className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
       >
         {isLoading ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             Processing...
           </>
         ) : currentStep === totalSteps ? (
           <>
             Confirm Order
-            <Check className="w-4 h-4" />
+            <FontAwesomeIcon icon={faCheck} className="w-4 h-4" />
           </>
         ) : currentStep === 3 ? (
           <>
             Pay with Kpay
-            <ArrowRight className="w-4 h-4" />
+            <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
           </>
         ) : (
           <>
             Continue
-            <ArrowRight className="w-4 h-4" />
+            <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
           </>
         )}
       </button>
