@@ -64,6 +64,7 @@ export const MultiStepOrderForm = () => {
 
   const createOrderBeforePayment = async () => {
     setIsLoading(true);
+    setErrors({});
     try {
       const result: any = await createPublicOrder({
         senderPhoneNumber: formatPhoneNumber(formData.senderPhone),
@@ -78,10 +79,23 @@ export const MultiStepOrderForm = () => {
         setCreatedOrderId(result.data.id);
         setCurrentStep(3);
         toast.success('Order details saved! Please proceed with payment.');
+      } else {
+        toast.error('Failed to create order. Please try again.');
       }
     } catch (error: any) {
       console.error('Order creation error:', error);
-      toast.error(error?.data?.message || 'Failed to save order. Please try again.');
+      const errorMessage = error?.data?.message || error?.message || 'Failed to save order. Please try again.';
+
+      // Handle specific backend error fields
+      if (error?.data?.errors) {
+        const backendErrors: Record<string, string> = {};
+        Object.entries(error.data.errors).forEach(([key, value]) => {
+          backendErrors[key] = Array.isArray(value) ? value[0] : String(value);
+        });
+        setErrors(backendErrors);
+      }
+
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -95,11 +109,13 @@ export const MultiStepOrderForm = () => {
 
     const phoneToUse = paymentPhone || formData.senderPhone;
     if (!validatePhone(phoneToUse)) {
+      setErrors({ paymentPhone: 'Please enter a valid phone number for payment.' });
       toast.error('Please enter a valid phone number for payment.');
       return;
     }
 
     setIsLoading(true);
+    setErrors({});
     try {
       const paymentResult: any = await createPayment({
         entityId: createdOrderId,
@@ -122,7 +138,18 @@ export const MultiStepOrderForm = () => {
       }
     } catch (error: any) {
       console.error('Payment error:', error);
-      toast.error(error?.data?.message || 'Payment failed. Please try again.');
+      const errorMessage = error?.data?.message || error?.message || 'Payment failed. Please try again.';
+
+      // Handle specific backend error fields
+      if (error?.data?.errors) {
+        const backendErrors: Record<string, string> = {};
+        Object.entries(error.data.errors).forEach(([key, value]) => {
+          backendErrors[key] = Array.isArray(value) ? value[0] : String(value);
+        });
+        setErrors(backendErrors);
+      }
+
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -130,6 +157,7 @@ export const MultiStepOrderForm = () => {
 
   const handleSubmit = async () => {
     setIsLoading(true);
+    setErrors({});
     try {
       const result: any = await createPublicOrder({
         senderPhoneNumber: formatPhoneNumber(formData.senderPhone),
@@ -148,7 +176,18 @@ export const MultiStepOrderForm = () => {
       }
     } catch (error: any) {
       console.error('Order creation error:', error);
-      toast.error(error?.data?.message || 'Failed to place order. Please try again.');
+      const errorMessage = error?.data?.message || error?.message || 'Failed to place order. Please try again.';
+
+      // Handle specific backend error fields
+      if (error?.data?.errors) {
+        const backendErrors: Record<string, string> = {};
+        Object.entries(error.data.errors).forEach(([key, value]) => {
+          backendErrors[key] = Array.isArray(value) ? value[0] : String(value);
+        });
+        setErrors(backendErrors);
+      }
+
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

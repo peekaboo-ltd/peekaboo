@@ -100,22 +100,22 @@ export const Login = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100/30 flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+        <header className="text-center mb-6 sm:mb-8">
+          <Link to="/" className="inline-flex items-center gap-2 mb-4 sm:mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-lg">P</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">Peekaboo</span>
+            <span className="text-xl sm:text-2xl font-bold text-gray-900">Peekaboo</span>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
-          <p className="text-gray-600">Please sign in to your account</p>
-        </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
+          <p className="text-sm sm:text-base text-gray-600">Please sign in to your account</p>
+        </header>
 
         {/* Form Container */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <section className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
           {errors.general && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
               {errors.general}
@@ -167,7 +167,7 @@ export const Login = () => {
                   autoComplete={loginMethod === 'email' ? 'email' : 'tel'}
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
-                  className={`w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm sm:text-base ${
                     errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
                   }`}
                   placeholder={
@@ -194,7 +194,7 @@ export const Login = () => {
                   autoComplete="current-password"
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`w-full pl-11 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full pl-11 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm sm:text-base ${
                     errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
                   }`}
                   placeholder="Enter your password"
@@ -217,13 +217,13 @@ export const Login = () => {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={(e) => handleInputChange('rememberMe', e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
               <Link
                 to="/auth/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                className="text-sm text-primary-600 hover:text-primary-800 font-medium transition-colors"
               >
                 Forgot password?
               </Link>
@@ -233,7 +233,7 @@ export const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-semibold hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               {isLoading ? (
                 <>
@@ -250,29 +250,29 @@ export const Login = () => {
           </form>
 
           {/* Divider */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
+          <footer className="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
             <p className="text-center text-sm text-gray-600">
               Don't have an account?{' '}
               <Link
                 to="/auth/register"
-                className="font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                className="font-semibold text-primary-600 hover:text-primary-800 transition-colors"
               >
                 Sign up for free
               </Link>
             </p>
-          </div>
-        </div>
+          </footer>
+        </section>
 
         {/* Back to Home */}
-        <div className="text-center mt-6">
+        <nav className="text-center mt-4 sm:mt-6">
           <Link
             to="/"
             className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             ← Back to home
           </Link>
-        </div>
+        </nav>
       </div>
-    </div>
+    </main>
   );
 };

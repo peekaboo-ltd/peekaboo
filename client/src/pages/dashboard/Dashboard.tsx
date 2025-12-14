@@ -60,7 +60,7 @@ const Dashboard = () => {
   const getStatusColor = (status: Order['status']) => {
     switch (status) {
       case 'delivered': return 'text-green-600 bg-green-50';
-      case 'in-transit': return 'text-blue-600 bg-blue-50';
+      case 'in-transit': return 'text-primary-600 bg-primary-50';
       case 'picked-up': return 'text-yellow-600 bg-yellow-50';
       case 'pending': return 'text-gray-600 bg-gray-50';
       case 'cancelled': return 'text-red-600 bg-red-50';
@@ -97,110 +97,110 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
               Welcome back, {((user as any)?.name) || user?.email || 'User'}!
             </h1>
-            <p className="text-gray-600">Track and manage your deliveries</p>
+            <p className="text-sm sm:text-base text-gray-600">Track and manage your deliveries</p>
           </div>
           <a
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm sm:text-base"
           >
             <Plus className="w-4 h-4" />
             New Order
           </a>
-        </div>
+        </header>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8" aria-label="Order statistics">
+          <article className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center" aria-hidden="true">
+                <Package className="w-5 h-5 text-primary-600" />
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Total Orders</p>
-                <p className="text-2xl font-bold text-gray-900">{orders.length}</p>
+                <p className="text-gray-600 text-xs sm:text-sm">Total Orders</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{orders.length}</p>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
+          </article>
+
+          <article className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center" aria-hidden="true">
                 <CheckCircle className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Delivered</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-gray-600 text-xs sm:text-sm">Delivered</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {orders.filter(o => o.status === 'delivered').length}
                 </p>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
+          </article>
+
+          <article className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center" aria-hidden="true">
                 <Clock className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-gray-600 text-sm">In Progress</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-gray-600 text-xs sm:text-sm">In Progress</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {orders.filter(o => ['pending', 'picked-up', 'in-transit'].includes(o.status)).length}
                 </p>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
+          </article>
+
+          <article className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <span className="text-purple-600 font-bold text-sm">RWF</span>
+              <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center" aria-hidden="true">
+                <span className="text-primary-600 font-bold text-sm">RWF</span>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Total Spent</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-gray-600 text-xs sm:text-sm">Total Spent</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {orders.reduce((sum, o) => sum + (o.cost || 0), 0).toLocaleString()}
                 </p>
               </div>
             </div>
-          </div>
-        </div>
+          </article>
+        </section>
 
         {/* Orders List */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
-          </div>
-          
+        <section className="bg-white rounded-lg shadow-sm border">
+          <header className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Recent Orders</h2>
+          </header>
+
           <div className="divide-y divide-gray-200">
             {orders.length === 0 ? (
-              <div className="px-6 py-12 text-center">
-                <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No orders yet</p>
+              <div className="px-4 sm:px-6 py-8 sm:py-12 text-center">
+                <Package className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" aria-hidden="true" />
+                <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">No orders yet</p>
                 <a
                   href="/"
-                  className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-block px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm sm:text-base"
                 >
                   Place your first order
                 </a>
               </div>
             ) : (
               orders.map((order) => (
-                <div key={order.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Package className="w-5 h-5 text-blue-600" />
+                <article key={order.id} className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                      <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0" aria-hidden="true">
+                        <Package className="w-5 h-5 text-primary-600" />
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Order #{order.id}</p>
-                        <p className="text-sm text-gray-600">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">Order #{order.id}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">
                           {order.senderPhone} → {order.recipientPhone}
                         </p>
                         <p className="text-xs text-gray-500">
@@ -208,10 +208,10 @@ const Dashboard = () => {
                         </p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">
+
+                    <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                      <div className="text-left sm:text-right">
+                        <p className="font-medium text-gray-900 text-sm sm:text-base">
                           {order.cost ? `RWF ${order.cost.toLocaleString()}` : 'Pending'}
                         </p>
                         {order.estimatedDelivery && (
@@ -220,19 +220,19 @@ const Dashboard = () => {
                           </p>
                         )}
                       </div>
-                      
-                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+
+                      <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)}`}>
                         {getStatusIcon(order.status)}
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('-', ' ')}
+                        <span className="hidden sm:inline">{order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('-', ' ')}</span>
                       </div>
                     </div>
                   </div>
-                </div>
+                </article>
               ))
             )}
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
   );
 };
 
