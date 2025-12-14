@@ -1,5 +1,4 @@
 import { User } from '@/types/user.type';
-import { localStorageUtil } from '@/utils/localStorage.util';
 import { createSlice } from '@reduxjs/toolkit';
 
 export interface InitialState {
@@ -9,9 +8,9 @@ export interface InitialState {
 }
 
 const initialState: InitialState = {
-  user: localStorageUtil.getItem('user') as User | undefined,
-  token: localStorageUtil.getItem('token') as string | undefined,
-  isAuthenticated: localStorageUtil.getItem('token') ? true : false,
+  user: undefined, 
+  token: undefined, 
+  isAuthenticated: false, 
 };
 
 const authSlice = createSlice({
@@ -31,8 +30,6 @@ const authSlice = createSlice({
       state.user = undefined;
       state.token = undefined;
       state.isAuthenticated = false;
-      localStorageUtil.removeItem('user');
-      localStorageUtil.removeItem('token');
       window.location.href = '/auth/login';
     },
   },

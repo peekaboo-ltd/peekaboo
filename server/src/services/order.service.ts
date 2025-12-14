@@ -25,6 +25,7 @@ import { AuditLogService } from './auditLog.service';
 import { OrderActivityService } from './orderActivity.service';
 import { OrderActivity } from '../entities/orderActivity.entity';
 import { Request } from 'express';
+import { WhatsAppNotificationService } from './whatsappNotification.service';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -35,6 +36,7 @@ export class OrderService {
   private readonly auditLogService: AuditLogService;
   private readonly orderActivityService: OrderActivityService;
   private readonly orderActivityRepository: Repository<OrderActivity>;
+  private readonly whatsappNotificationService: WhatsAppNotificationService;
 
   constructor() {
     this.orderRepository = AppDataSource.getRepository(Order);
@@ -44,6 +46,7 @@ export class OrderService {
     this.userService = new UserService();
     this.auditLogService = new AuditLogService();
     this.orderActivityService = new OrderActivityService();
+    this.whatsappNotificationService = new WhatsAppNotificationService();
   }
 
   // CREATE ORDER
@@ -82,9 +85,19 @@ export class OrderService {
   async createPublicOrder({
     senderPhoneNumber,
     recipientPhoneNumber,
+    pickupLocation,
+    deliveryLocation,
+    distance,
+    finalFee,
+    riderId,
   }: {
     senderPhoneNumber: string;
     recipientPhoneNumber: string;
+    pickupLocation?: { address: string; lat: number; lng: number };
+    deliveryLocation?: { address: string; lat: number; lng: number };
+    distance?: number;
+    finalFee?: number;
+    riderId?: UUID;
   }): Promise<Order> {
     // GENERATE REFERENCE ID
     let referenceId: string = generateReferenceNumber({
@@ -100,24 +113,30 @@ export class OrderService {
       });
     }
 
+    // Check if sender exists
     let sender = await this.userRepository.findOne({
       where: { phoneNumber: senderPhoneNumber },
     });
 
+    let senderIsNew = false;
     if (!sender) {
-      sender = await this.userService.createUser({
-        phoneNumber: senderPhoneNumber,
-      });
+      sender = await this.whatsappNotificationService.createUserWithCredentials(
+        senderPhoneNumber
+      );
+      senderIsNew = true;
     }
 
+    // Check if recipient exists
     let recipient = await this.userRepository.findOne({
       where: { phoneNumber: recipientPhoneNumber },
     });
 
+    let recipientIsNew = false;
     if (!recipient) {
-      recipient = await this.userService.createUser({
-        phoneNumber: recipientPhoneNumber,
-      });
+      recipient = await this.whatsappNotificationService.createUserWithCredentials(
+        recipientPhoneNumber
+      );
+      recipientIsNew = true;
     }
 
     // CREATE ORDER
@@ -128,6 +147,13 @@ export class OrderService {
       createdById: sender?.id,
       status: OrderStatus.CREATED,
       initialFee: 1500,
+      finalFee: finalFee || 1500,
+      pickupLocation: pickupLocation?.address,
+      pickupCoordinates: pickupLocation ? `${pickupLocation.lat},${pickupLocation.lng}` : undefined,
+      deliveryLocation: deliveryLocation?.address,
+      deliveryCoordinates: deliveryLocation ? `${deliveryLocation.lat},${deliveryLocation.lng}` : undefined,
+      distance: distance,
+      riderId: riderId,
     });
 
     // CREATE ORDER STATUS
@@ -136,6 +162,13 @@ export class OrderService {
       status: OrderStatus.CREATED,
       createdById: createdOrder?.createdById,
     });
+
+    // Get full order with relations for WhatsApp messages
+    const orderWithRelations = await this.getOrderById(createdOrder.id);
+
+    // Send order confirmations via WhatsApp
+    await this.whatsappNotificationService.sendOrderConfirmationToSender(orderWithRelations);
+    await this.whatsappNotificationService.sendOrderNotificationToRecipient(orderWithRelations);
 
     return createdOrder;
   }
