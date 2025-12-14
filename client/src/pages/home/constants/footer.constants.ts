@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram } from 'lucide-react';
+import { faFacebookF, faTwitter, faInstagram } from '@fortawesome/free-brands-svg-icons';
 
 export const footerLinks = {
   company: [
@@ -22,9 +22,9 @@ export const footerLinks = {
 };
 
 export const socialLinks = [
-  { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-  { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
-  { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
+  { icon: faFacebookF, href: 'https://facebook.com', label: 'Facebook' },
+  { icon: faTwitter, href: 'https://twitter.com', label: 'Twitter' },
+  { icon: faInstagram, href: 'https://instagram.com', label: 'Instagram' },
 ];
 
 export const contactInfo = {

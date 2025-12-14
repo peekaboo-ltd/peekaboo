@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { steps, howItWorksContent, containerVariants, itemVariants } from '../constants/howItWorks.constants';
 
 export const HowItWorksSection = () => {
@@ -48,7 +49,7 @@ export const HowItWorksSection = () => {
                 className={`w-12 h-12 sm:w-14 sm:h-14 ${step.color} rounded-xl flex items-center justify-center mb-3 sm:mb-4`}
                 aria-hidden="true"
               >
-                <step.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                <FontAwesomeIcon icon={step.icon} className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
               </motion.div>
 
               {/* Content */}

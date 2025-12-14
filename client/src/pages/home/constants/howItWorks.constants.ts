@@ -1,29 +1,29 @@
-import { MapPin, DollarSign, Truck, CheckCircle } from 'lucide-react';
+import { faMapMarkerAlt, faDollarSign, faTruck, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 
 export const steps = [
   {
-    icon: MapPin,
+    icon: faMapMarkerAlt,
     title: 'Enter Locations',
     description: 'Provide pickup and drop-off addresses with contact numbers',
     color: 'bg-blue-500',
     delay: 0,
   },
   {
-    icon: DollarSign,
+    icon: faDollarSign,
     title: 'Choose Rider',
     description: 'Select from available riders based on ETA and ratings',
     color: 'bg-green-500',
     delay: 0.1,
   },
   {
-    icon: Truck,
+    icon: faTruck,
     title: 'Pay Securely',
     description: 'Complete payment before rider starts delivery',
     color: 'bg-purple-500',
     delay: 0.2,
   },
   {
-    icon: CheckCircle,
+    icon: faCheckCircle,
     title: 'Track Delivery',
     description: 'Follow your order in real-time until delivery',
     color: 'bg-orange-500',

@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { stats, heroContent } from '../constants/hero.constants';
 import { MultiStepOrderForm } from '@/pages/home/components/MultiStepOrderForm/index';
 
@@ -46,7 +47,7 @@ export const HeroSection = () => {
                   key={stat.label}
                   className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-2 sm:p-3 lg:p-4 text-center"
                 >
-                  <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mx-auto mb-1 sm:mb-2 ${stat.color}`} aria-hidden="true" />
+                  <FontAwesomeIcon icon={stat.icon} className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mx-auto mb-1 sm:mb-2 ${stat.color}`} aria-hidden="true" />
                   <div className="text-lg sm:text-xl lg:text-2xl font-bold">{stat.value}</div>
                   <div className="text-xs text-primary-200 mt-0.5 sm:mt-1">{stat.label}</div>
                 </div>
@@ -57,7 +58,7 @@ export const HeroSection = () => {
             <nav className="flex flex-wrap gap-4 lg:hidden">
               <a
                 href="#how-it-works"
-                className="px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-xl font-semibold hover:bg-white/20 transition-colors text-sm sm:text-base"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-xl font-semibold hover:bg-white/20 transition-colors text-sm sm:text-base cursor-pointer"
               >
                 {heroContent.secondaryButtonText}
               </a>

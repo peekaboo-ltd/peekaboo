@@ -74,7 +74,7 @@ export const CTASection = () => {
               whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}
               whileTap={{ scale: 0.95 }}
               onClick={() => document.getElementById('order-form')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-primary-700 rounded-xl font-semibold shadow-2xl hover:shadow-3xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
+              className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-primary-700 rounded-xl font-semibold shadow-2xl hover:shadow-3xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
             >
               {ctaContent.primaryButtonText}
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -84,7 +84,7 @@ export const CTASection = () => {
               href={ctaContent.secondaryButtonHref}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white rounded-xl font-semibold hover:bg-white/20 transition-all text-sm sm:text-base"
+              className="px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white rounded-xl font-semibold hover:bg-white/20 transition-all text-sm sm:text-base cursor-pointer"
             >
               {ctaContent.secondaryButtonText}
             </motion.a>

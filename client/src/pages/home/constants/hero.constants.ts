@@ -1,26 +1,26 @@
-import { MapPin, Clock, Shield, Package } from 'lucide-react';
+import { faMapMarkerAlt, faClock, faShieldAlt, faBox } from '@fortawesome/free-solid-svg-icons';
 
 export const stats = [
   {
-    icon: MapPin,
+    icon: faMapMarkerAlt,
     label: 'Active Riders',
     value: '200+',
     color: 'text-blue-600',
   },
   {
-    icon: Clock,
+    icon: faClock,
     label: 'Avg Delivery',
     value: '30 min',
     color: 'text-green-600',
   },
   {
-    icon: Shield,
+    icon: faShieldAlt,
     label: 'Secure Payment',
     value: '100%',
     color: 'text-purple-600',
   },
   {
-    icon: Package,
+    icon: faBox,
     label: 'Orders Daily',
     value: '500+',
     color: 'text-orange-600',

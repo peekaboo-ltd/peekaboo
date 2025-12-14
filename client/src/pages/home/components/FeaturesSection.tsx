@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { features, featuresContent, containerVariants, itemVariants } from '../constants/features.constants';
 
 export const FeaturesSection = () => {
@@ -42,7 +43,7 @@ export const FeaturesSection = () => {
                 className={`relative w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-3 sm:mb-4 shadow-lg`}
                 aria-hidden="true"
               >
-                <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                <FontAwesomeIcon icon={feature.icon} className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
               </motion.div>
               <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary transition-colors">
                 {feature.title}

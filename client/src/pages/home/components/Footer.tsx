@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelope, faPhone, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 import { footerLinks, socialLinks, contactInfo, companyInfo } from '../constants/footer.constants';
 
 export const Footer = () => {
@@ -19,19 +20,19 @@ export const Footer = () => {
             </p>
             <address className="space-y-2 sm:space-y-3 not-italic">
               <div className="flex items-center gap-3 text-xs sm:text-sm">
-                <Mail className="w-4 h-4 text-primary-500" aria-hidden="true" />
+                <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4 text-primary-500" aria-hidden="true" />
                 <a href={`mailto:${contactInfo.email}`} className="hover:text-white transition-colors">
                   {contactInfo.email}
                 </a>
               </div>
               <div className="flex items-center gap-3 text-xs sm:text-sm">
-                <Phone className="w-4 h-4 text-primary-500" aria-hidden="true" />
+                <FontAwesomeIcon icon={faPhone} className="w-4 h-4 text-primary-500" aria-hidden="true" />
                 <a href={`tel:${contactInfo.phone.replace(/\s/g, '')}`} className="hover:text-white transition-colors">
                   {contactInfo.phone}
                 </a>
               </div>
               <div className="flex items-center gap-3 text-xs sm:text-sm">
-                <MapPin className="w-4 h-4 text-primary-500" aria-hidden="true" />
+                <FontAwesomeIcon icon={faMapMarkerAlt} className="w-4 h-4 text-primary-500" aria-hidden="true" />
                 <span>{contactInfo.location}</span>
               </div>
             </address>
@@ -96,7 +97,7 @@ export const Footer = () => {
                 className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors"
                 aria-label={social.label}
               >
-                <social.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <FontAwesomeIcon icon={social.icon} className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             ))}
           </nav>
