@@ -11,9 +11,16 @@ import { Register } from '../pages/auth/Register';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { PublicRoute } from '../components/PublicRoute';
 import { Dashboard } from '@/pages/dashboard';
-import { AdminDashboard } from '@/pages/admin';
-import { OrdersPage } from '@/pages/orders';
+import { AdminDashboard, AdminSettingsPage } from '@/pages/admin';
+import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
+import { AdminRidersPage } from '@/pages/admin/AdminRidersPage';
+import { AdminOrdersPage } from '@/pages/admin/AdminOrdersPage';
+import { AdminOrderDetailPage } from '@/pages/admin/AdminOrderDetailPage';
+import { OrdersPage, OrderDetailPage } from '@/pages/orders';
 import { OrderAssignmentsPage } from '@/pages/order-assignments';
+import { RiderDashboard } from '@/pages/rider/RiderDashboard';
+import StaffDashboard from '@/pages/staff/StaffDashboard';
+import StaffOrderDetailPage from '@/pages/staff/StaffOrderDetailPage';
 
 const Router = () => {
   return (
@@ -44,6 +51,11 @@ const Router = () => {
           </Route>
         </Route>
 
+        <Route path="/orders" element={<PublicLayout />}>
+          <Route index element={<OrdersPage />} />
+          <Route path=":id" element={<OrderDetailPage />} />
+        </Route>
+
         {/* Protected routes with AuthenticatedLayout */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -55,41 +67,65 @@ const Router = () => {
         
         <Route path="/admin" element={
           <ProtectedRoute requiredRole="admin">
-            <AuthenticatedLayout>
-              <AdminDashboard />
-            </AuthenticatedLayout>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/users" element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminUsersPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/riders" element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminRidersPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/orders" element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminOrdersPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/orders/:id" element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminOrderDetailPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/settings" element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminSettingsPage />
           </ProtectedRoute>
         } />
 
         <Route path="/staff/dashboard" element={
           <ProtectedRoute requiredRole="staff">
-            <AuthenticatedLayout>
-              <Dashboard />
-            </AuthenticatedLayout>
+            <StaffDashboard />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/staff/orders/:id" element={
+          <ProtectedRoute requiredRole="staff">
+            <StaffOrderDetailPage />
           </ProtectedRoute>
         } />
 
         <Route path="/rider/dashboard" element={
           <ProtectedRoute requiredRole="rider">
             <AuthenticatedLayout>
-              <Dashboard />
+              <RiderDashboard />
             </AuthenticatedLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/orders" element={
-          <ProtectedRoute>
-            <AuthenticatedLayout>
-              <OrdersPage />
-            </AuthenticatedLayout>
-          </ProtectedRoute>
-        } />
+
         
         <Route path="/assignments" element={
           <ProtectedRoute requiredRole="staff">
-            <AuthenticatedLayout>
-              <OrderAssignmentsPage />
-            </AuthenticatedLayout>
+            <OrderAssignmentsPage />
           </ProtectedRoute>
         } />
         

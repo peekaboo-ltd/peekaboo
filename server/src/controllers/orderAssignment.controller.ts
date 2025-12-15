@@ -57,7 +57,6 @@ export const OrderAssignmentController = {
       const orderAssignment =
         await orderAssignmentService.getOrderAssignmentById(id as UUID);
 
-      // RETURN ORDER ASSIGNMENT
       return res.status(200).json({
         message: 'Order assignment fetched successfully',
         data: orderAssignment,
@@ -99,6 +98,51 @@ export const OrderAssignmentController = {
       return res.status(200).json({
         message: 'Order assignment rejected successfully',
         data: rejectedOrderAssignment,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // COMPLETE ORDER ASSIGNMENT
+  async completeOrderAssignment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      // COMPLETE ORDER ASSIGNMENT
+      const completedOrderAssignment =
+        await orderAssignmentService.completeOrderAssignment(id as UUID);
+
+      // RETURN ORDER ASSIGNMENT
+      return res.status(200).json({
+        message: 'Order assignment completed successfully',
+        data: completedOrderAssignment,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET AVAILABLE RIDERS
+  async getAvailableRiders(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { latitude, longitude, limit } = req.query;
+
+      if (!latitude || !longitude) {
+        return res.status(400).json({
+          message: 'Latitude and longitude are required',
+        });
+      }
+
+      const availableRiders = await orderAssignmentService.getAvailableRiders({
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+        limit: limit ? Number(limit) : undefined,
+      });
+
+      return res.status(200).json({
+        message: 'Available riders fetched successfully',
+        data: availableRiders,
       });
     } catch (error) {
       next(error);

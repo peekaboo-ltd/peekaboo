@@ -33,10 +33,10 @@ export const ProtectedRoute = ({
   }
 
   // Get user role only after confirming user exists
-  const userRole = getUserRole();
+  const userRole = getUserRole()?.toLowerCase();
 
   // Check role-based access if required
-  if (requiredRole && userRole !== requiredRole) {
+  if (requiredRole && userRole !== requiredRole.toLowerCase()) {
     const redirectPath = (() => {
       switch (userRole) {
         case 'admin':

@@ -16,7 +16,7 @@ export const ordersMutationApiSlice = createApi({
         deliveryLocation,
         distance,
         finalFee,
-        riderId,
+        assignedToId,
       }: {
         senderPhoneNumber: string;
         recipientPhoneNumber: string;
@@ -24,7 +24,7 @@ export const ordersMutationApiSlice = createApi({
         deliveryLocation?: { address: string; lat: number; lng: number };
         distance?: number;
         finalFee?: number;
-        riderId?: string;
+        assignedToId?: UUID;
       }) => ({
         url: '/orders/public',
         method: 'POST',
@@ -35,7 +35,7 @@ export const ordersMutationApiSlice = createApi({
           deliveryLocation,
           distance,
           finalFee,
-          riderId,
+          assignedToId,
         },
       }),
     }),

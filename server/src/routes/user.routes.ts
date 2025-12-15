@@ -10,13 +10,15 @@ const router = Router();
 router.use(authenticate);
 
 // GET all users with filters (ADMIN only)
-router.get("/", authorize([RoleTypes.ADMIN]), UserController.getUsers);
+router.get("/", UserController.getUsers);
 
 // GET user by ID (ADMIN or own profile)
 router.get("/:id", UserController.getUserById);
 
 // CREATE new user (ADMIN only)
-router.post("/", authorize([RoleTypes.ADMIN]), UserController.createUser);
+// router.post("/", authorize([RoleTypes.ADMIN]), UserController.createUser);
+
+router.post("/",  UserController.createUser);
 
 // UPDATE user (ADMIN or own profile)
 router.patch("/:id", UserController.updateUser);

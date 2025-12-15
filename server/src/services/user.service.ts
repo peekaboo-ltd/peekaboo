@@ -78,6 +78,10 @@ export class UserService {
       throw new ValidationError('Phone number is required');
     }
 
+    if (!user?.passwordHash) {
+      throw new ValidationError('Password is required');
+    }
+
     // CHECK IF USER EXISTS
     const existingUser = await this.userRepository.findOne({
       where: { phoneNumber: user?.phoneNumber },
@@ -87,7 +91,18 @@ export class UserService {
       return existingUser;
     }
 
-    const createdUser = await this.userRepository.save(user);
+    // Explicitly prepare user data to ensure all fields are included
+    const userToCreate: Partial<User> = {
+      phoneNumber: user.phoneNumber,
+      passwordHash: user.passwordHash,
+      name: user.name || undefined,
+      email: user.email || undefined,
+      status: user.status || UserStatus.ACTIVE,
+      nationality: user.nationality || undefined,
+      dateOfBirth: user.dateOfBirth || undefined,
+    };
+
+    const createdUser = await this.userRepository.save(userToCreate);
 
     // Assign default CUSTOMER role if no roles provided
     const rolesToAssign =
@@ -154,9 +169,11 @@ export class UserService {
       phoneNumber?: string;
       name?: string;
       email?: string;
+      createdFrom?: string;
+      createdTo?: string;
     };
   }): Promise<Pagination<User>> {
-    const { take, skip } = getPagination({ page, size: limit });
+    const { take, skip, currentPage } = getPagination({ page, size: limit });
 
     // Build query
     const query = this.userRepository
@@ -193,20 +210,27 @@ export class UserService {
       query.andWhere('user.status = :status', { status: filters.status });
     }
 
+    // Apply createdAt date range filter
+    if (filters.createdFrom || filters.createdTo) {
+      const from = filters.createdFrom ? new Date(filters.createdFrom) : new Date(0);
+      const to = filters.createdTo ? new Date(filters.createdTo) : new Date();
+      query.andWhere('user.createdAt BETWEEN :from AND :to', { from, to });
+    }
+
     // Apply role filter
     if (filters.roles && filters.roles.length > 0) {
       query.andWhere('role.name IN (:...roles)', { roles: filters.roles });
     }
 
-    // Apply pagination
-    query.skip(skip).take(take);
+    // Apply ordering and pagination
+    query.orderBy('user.createdAt', 'DESC').skip(skip).take(take);
 
     // Execute query
     const [users, total] = await query.getManyAndCount();
 
     return getPagingData({
       data: [users, total],
-      page,
+      page: currentPage,
       size: limit,
     });
   }

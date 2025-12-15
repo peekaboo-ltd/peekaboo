@@ -36,13 +36,10 @@ Need help? Reply to this message.`;
       });
     } catch (error) {
       console.error('Failed to send WhatsApp welcome message:', error);
-      // Don't throw - we don't want to fail the order creation if WhatsApp fails
     }
   }
 
-  /**
-   * Send order confirmation to sender
-   */
+
   async sendOrderConfirmationToSender(order: any): Promise<void> {
     try {
       const message = `✅ *Order Confirmed* - ${order.referenceId}

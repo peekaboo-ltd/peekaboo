@@ -35,6 +35,14 @@ export const orderAssignmentsMutationsApiSlice = createApi({
         method: 'PATCH',
       }),
     }),
+
+    // COMPLETE ORDER ASSIGNMENT
+    completeOrderAssignment: builder.mutation({
+      query: ({ id }: { id: UUID }) => ({
+        url: `/order-assignments/${id}/complete`,
+        method: 'PATCH',
+      }),
+    }),
   }),
 });
 
@@ -42,4 +50,5 @@ export const {
   useCreateOrderAssignmentMutation,
   useAcceptOrderAssignmentMutation,
   useRejectOrderAssignmentMutation,
+  useCompleteOrderAssignmentMutation,
 } = orderAssignmentsMutationsApiSlice;

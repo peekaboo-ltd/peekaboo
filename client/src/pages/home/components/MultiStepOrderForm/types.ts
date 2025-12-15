@@ -34,4 +34,5 @@ export interface StepProps {
   errors: Record<string, string>;
   paymentPhone?: string;
   setPaymentPhone?: (phone: string) => void;
+  createdOrderId?: string | null;
 }

@@ -15,9 +15,10 @@ export const getPagination = ({
   size?: number;
 }) => {
   const take = size ? +size : 10;
-  const skip = page ? page * take : 0;
+  const currentPage = page && page > 0 ? +page : 1;
+  const skip = (currentPage - 1) * take;
 
-  return { take, skip };
+  return { take, skip, currentPage };
 };
 
 export const getPagingData = ({
@@ -33,6 +34,6 @@ export const getPagingData = ({
     rows: data && data[0],
     totalCount: data && data[1],
     totalPages: Math.ceil(data && Number(data[1]) / Number(size)),
-    currentPage: Number(page) + 1,
+    currentPage: Number(page) || 1,
   };
 };

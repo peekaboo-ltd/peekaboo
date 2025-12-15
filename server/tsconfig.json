@@ -7,7 +7,8 @@
     // es5: Basic JavaScript features
     // es6: ES2015 features like classes, modules, etc.
     // ES2018: Latest JavaScript features
-    "lib": ["es5", "es6", "ES2018"],
+    // DOM: DOM types for HTMLElement, Document, etc.
+    "lib": ["es5", "es6", "ES2018", "DOM"],
     
     // Enables experimental support for decorators
     // Used for features like @Component, @Injectable, etc.

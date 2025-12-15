@@ -50,7 +50,7 @@ export class OrderService {
   }
 
   // CREATE ORDER
-  async createOrder(order: Partial<Order>): Promise<Order> {
+  async createOrder(order: Partial<Order>, assignedToId?: UUID): Promise<Order> {
     // GENERATE REFERENCE ID
     let referenceId: string = generateReferenceNumber({
       prefix: 'P',
@@ -78,6 +78,13 @@ export class OrderService {
       createdById: createdOrder?.createdById,
     });
 
+    // AUTO-ASSIGN rider (explicit rider if provided, otherwise first available)
+    await this.orderAssignmentService.createOrderAssignment({
+      orderId: createdOrder.id,
+      assignedToId,
+      status: OrderAssignmentStatus.PENDING,
+    });
+
     return createdOrder;
   }
 
@@ -89,7 +96,7 @@ export class OrderService {
     deliveryLocation,
     distance,
     finalFee,
-    riderId,
+    assignedToId,
   }: {
     senderPhoneNumber: string;
     recipientPhoneNumber: string;
@@ -97,7 +104,7 @@ export class OrderService {
     deliveryLocation?: { address: string; lat: number; lng: number };
     distance?: number;
     finalFee?: number;
-    riderId?: UUID;
+    assignedToId?: UUID;
   }): Promise<Order> {
     // GENERATE REFERENCE ID
     let referenceId: string = generateReferenceNumber({
@@ -153,7 +160,6 @@ export class OrderService {
       deliveryLocation: deliveryLocation?.address,
       deliveryCoordinates: deliveryLocation ? `${deliveryLocation.lat},${deliveryLocation.lng}` : undefined,
       distance: distance,
-      riderId: riderId,
     });
 
     // CREATE ORDER STATUS
@@ -161,6 +167,13 @@ export class OrderService {
       orderId: createdOrder.id,
       status: OrderStatus.CREATED,
       createdById: createdOrder?.createdById,
+    });
+
+    // AUTO-ASSIGN rider (explicit rider if provided, otherwise first available)
+    await this.orderAssignmentService.createOrderAssignment({
+      orderId: createdOrder.id,
+      assignedToId,
+      status: OrderAssignmentStatus.PENDING,
     });
 
     // Get full order with relations for WhatsApp messages
@@ -188,6 +201,10 @@ export class OrderService {
         createdBy: true,
         recipient: true,
         sender: true,
+        activities: true,
+        assignments: {
+          assignedTo: true,
+        },
         conversation: {
           recipient: true,
         },
@@ -294,16 +311,24 @@ export class OrderService {
   // FETCH ORDERS
   async fetchOrders(query: Request['query']): Promise<Pagination<Order>> {
     
-    const { page = 0, size = 10, senderId, recipientId, status } = query;
+    const { page = 0, size = 10, senderId, recipientId, status, search } = query;
 
     let condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[] = {};
 
-    if (senderId) {
-      condition.senderId = senderId as UUID;
-    }
-
-    if (recipientId) {
-      condition.recipientId = recipientId as UUID;
+      // If both senderId and recipientId are provided with same value, use OR condition
+      // This allows customers to see orders where they are either sender OR recipient
+      if (senderId && recipientId && senderId === recipientId) {
+        condition = [
+          { senderId: senderId as UUID },
+          { recipientId: recipientId as UUID }
+        ];
+      } else {
+        if (senderId) {
+          condition.senderId = senderId as UUID;
+        }
+        if (recipientId) {
+          condition.recipientId = recipientId as UUID;
+        }
     }
 
     const { take, skip } = getPagination({
@@ -311,26 +336,60 @@ export class OrderService {
       size: Number(size),
     });
 
-    // GET PAGINATION
-    const orders = await this.orderRepository.findAndCount({
-      where: condition,
-      skip,
-      take,
-      relations: {
-        createdBy: true,
-        recipient: true,
-        sender: true,
-        activities: true,
-      },
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+    // Build where condition
+    const whereCondition: any = condition;
 
-    return getPagingData({
-      data: orders,
-      page: Number(page),
-      size: Number(size),
-    });
+    // GET PAGINATION
+    const queryBuilder = this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.createdBy', 'createdBy')
+      .leftJoinAndSelect('order.recipient', 'recipient')
+      .leftJoinAndSelect('order.sender', 'sender')
+      .leftJoinAndSelect('order.activities', 'activities')
+      .leftJoinAndSelect('order.assignments', 'assignments')
+      .leftJoinAndSelect('assignments.assignedTo', 'assignedTo')
+      .skip(skip)
+      .take(take)
+      .orderBy('order.createdAt', 'DESC');
+
+    // Apply sender/recipient filters
+    if (senderId && recipientId && senderId === recipientId) {
+      queryBuilder.where('(order.senderId = :userId OR order.recipientId = :userId)', { userId: senderId });
+    } else {
+      if (senderId) {
+        queryBuilder.andWhere('order.senderId = :senderId', { senderId });
+      }
+      if (recipientId) {
+        queryBuilder.andWhere('order.recipientId = :recipientId', { recipientId });
+      }
+    }
+
+    // Apply search filter
+    if (search) {
+      queryBuilder.andWhere('order.referenceId ILIKE :search', { search: `%${search}%` });
+    }
+
+    // Apply status filter - need to filter by activities
+    if (status) {
+      queryBuilder.andWhere((qb) => {
+        const subQuery = qb.subQuery()
+          .select('act.orderId')
+          .from('order_activities', 'act')
+          .where('act.orderId = order.id')
+          .andWhere('act.status = :status')
+          .orderBy('act.createdAt', 'DESC')
+          .limit(1)
+          .getQuery();
+        return `order.id IN ${subQuery}`;
+      }).setParameter('status', status);
+    }
+
+    const [orders, count] = await queryBuilder.getManyAndCount();
+
+    return {
+      rows: orders,
+      totalCount: count,
+      totalPages: Math.ceil(count / Number(size)),
+      currentPage: Number(page),
+    };
   }
 }

@@ -85,10 +85,6 @@ export class  Order extends AbstractEntity {
   @Column({ name: "distance", type: "numeric", nullable: true })
   distance: number;
 
-  // RIDER ID
-  @Column({ name: "rider_id", type: "uuid", nullable: true })
-  riderId: UUID;
-
   /**
    * RELATIONS
    */

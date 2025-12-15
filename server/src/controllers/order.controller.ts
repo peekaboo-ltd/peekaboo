@@ -39,10 +39,10 @@ export const OrderController = {
   // CREATE ORDER
   async createOrder(req: Request, res: Response, next: NextFunction) {
     try {
-      const { order } = req.body;
+      const { order, assignedToId } = req.body;
 
       // CREATE ORDER
-      const createdOrder = await orderService.createOrder(order);
+      const createdOrder = await orderService.createOrder(order, assignedToId);
 
       // RETURN ORDER
       return res.status(201).json({
@@ -64,7 +64,7 @@ export const OrderController = {
         deliveryLocation,
         distance,
         finalFee,
-        riderId
+        assignedToId,
       } = req.body;
 
       // CREATE PUBLIC ORDER
@@ -75,7 +75,7 @@ export const OrderController = {
         deliveryLocation,
         distance,
         finalFee,
-        riderId,
+        assignedToId,
       });
 
       // RETURN ORDER

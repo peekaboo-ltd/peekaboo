@@ -48,8 +48,6 @@ export const Login = () => {
       const result = await login(formData.username, formData.password);
 
       if (result.success) {
-        console.log('✅ Login result:', result);
-        // Redirect to the intended page or role-appropriate dashboard
         const from = new URLSearchParams(location.search).get('from');
         
         if (from && from !== '/auth/login' && from !== '/auth/register') {
@@ -59,7 +57,6 @@ export const Login = () => {
           // Otherwise, redirect based on user role returned from login (fallbacks to 'customer')
           const userRole =
             (result as any)?.role ?? (result as any)?.user?.role ?? 'customer';
-          console.log('🔄 Redirecting with role:', userRole);
           const redirectPath = (() => {
             switch (userRole) {
               case 'admin':
@@ -73,7 +70,6 @@ export const Login = () => {
                 return '/dashboard';
             }
           })();
-          console.log('📍 Redirect path:', redirectPath);
           navigate(redirectPath, { replace: true });
         }
       } else {

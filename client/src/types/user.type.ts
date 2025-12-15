@@ -26,3 +26,6 @@ export interface User extends BaseDomain {
   orders: Order[];
   userRoles?: UserRole[];
 }
+
+// Rider is a User with RIDER role
+export type Rider = User;

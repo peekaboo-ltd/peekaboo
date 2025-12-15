@@ -19,7 +19,7 @@ export const Step5Confirmation = ({ formData }: StepProps) => {
         <p className="text-gray-600 text-sm">Review your order details before confirming</p>
       </div>
 
-      <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+      <div className="p-4 text-black rounded-lg space-y-2 text-sm">
         <div><strong>Sender:</strong> {formData.senderPhone}</div>
         <div><strong>Recipient:</strong> {formData.recipientPhone}</div>
         <div><strong>Pickup:</strong> {formData.pickupLocation?.address}</div>

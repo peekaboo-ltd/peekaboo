@@ -97,12 +97,12 @@ export const useFetchOrders = () => {
     useLazyFetchOrdersQuery();
 
     useEffect(() => {
-      if (isSuccess) {
-        dispatch(setOrdersList(data?.data?.rows));
-        setTotalPages(data?.data?.totalPages);
-        setTotalCount(data?.data?.totalCount);
+      if (data?.data?.rows) {
+        dispatch(setOrdersList(data.data.rows));
+        setTotalPages(data.data.totalPages ?? 1);
+        setTotalCount(data.data.totalCount ?? 0);
       }
-    }, [data, isSuccess, dispatch, setTotalPages, setTotalCount]);
+    }, [data, dispatch, setTotalPages, setTotalCount]);
 
   return { fetchOrders, data, error, isFetching, reset, isSuccess, page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount };
 };

@@ -73,6 +73,7 @@ export const MultiStepOrderForm = () => {
         deliveryLocation: formData.deliveryLocation!,
         distance: formData.distance,
         finalFee: formData.finalFee,
+        assignedToId: formData.selectedRider || undefined,
       }).unwrap();
 
       if (result?.data?.id) {
@@ -156,6 +157,14 @@ export const MultiStepOrderForm = () => {
   };
 
   const handleSubmit = async () => {
+    // Order already created at step 2, just navigate to order details
+    if (createdOrderId) {
+      toast.success('Order placed successfully! Check WhatsApp for confirmation.');
+      navigate(`/orders/${createdOrderId}`);
+      return;
+    }
+
+    // Fallback: If somehow no order was created yet, create it now
     setIsLoading(true);
     setErrors({});
     try {
@@ -166,13 +175,13 @@ export const MultiStepOrderForm = () => {
         deliveryLocation: formData.deliveryLocation!,
         distance: formData.distance,
         finalFee: formData.finalFee,
-        riderId: formData.selectedRider || undefined,
+        assignedToId: formData.selectedRider || undefined,
       }).unwrap();
 
       toast.success('Order placed successfully! Check WhatsApp for confirmation.');
 
       if (result?.data?.id) {
-        navigate(`/p/orders/${result.data.id}`);
+        navigate(`/orders/${result.data.id}`);
       }
     } catch (error: any) {
       console.error('Order creation error:', error);
@@ -248,7 +257,12 @@ export const MultiStepOrderForm = () => {
         )}
 
         {currentStep === 4 && (
-          <Step4RiderSelection formData={formData} setFormData={setFormData} errors={errors} />
+          <Step4RiderSelection
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
+            createdOrderId={createdOrderId}
+          />
         )}
 
         {currentStep === 5 && (

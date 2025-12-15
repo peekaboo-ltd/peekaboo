@@ -43,122 +43,133 @@ class AuthManager {
     return fetch(url, config);
   }
 
-  async login(email: string, password: string): Promise<{ success: boolean; user?: User; error?: string }> {
+  async login(username: string, password: string): Promise<{ success: boolean; user?: User; error?: string }> {
     try {
       const response = await this.makeRequest('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Login failed' }));
-        console.error('❌ Login failed:', errorData);
         return { success: false, error: errorData.message || 'Login failed' };
       }
 
       const data = await response.json();
-      console.log('📦 Server response:', data);
       
-      // Extract user from nested response structure
       let user = data.data?.user || data.user || data.data || data;
       
       if (user && user.id) {
+        // Extract role from userRoles array (first role) or direct role field
+        let userRole = user.role;
+        if (!userRole && user.userRoles && Array.isArray(user.userRoles) && user.userRoles.length > 0) {
+          userRole = user.userRoles[0]?.role?.name || 'customer';
+        }
+        
+        // Normalize role to lowercase for consistency
+        userRole = (userRole || 'customer').toLowerCase();
+        
         // Map server response fields to User interface
         const mappedUser: User = {
           id: user.id,
-          email: user.email,
+          email: user.username || user.email,
           firstName: user.firstName || user.name?.split(' ')[0] || '',
           lastName: user.lastName || user.name?.split(' ')[1] || '',
-          role: user.role || (user.userRoles && user.userRoles[0]) || 'customer',
+          role: userRole,
         };
-        console.log('✅ User data extracted:', mappedUser);
         return { success: true, user: mappedUser };
       } else {
-        console.log('⚠️ No user data in response');
         return { success: false, error: 'No user data received from server' };
       }
     } catch (error) {
-      console.error('💥 Login error:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Network error' };
     }
   }
 
   async register(userData: any): Promise<{ success: boolean; user?: User; error?: string }> {
     try {
+      // Transform frontend payload to match backend expectations
+      const backendPayload = {
+        name: `${userData.firstName || ''} ${userData.lastName || ''}`.trim(),
+        email: userData.email,
+        phoneNumber: userData.phone, // Map 'phone' to 'phoneNumber'
+        password: userData.password,
+        roles: userData.role ? [userData.role.toUpperCase()] : ['CUSTOMER'], // Transform to uppercase array
+      };
       
       const response = await this.makeRequest('/auth/register', {
         method: 'POST',
-        body: JSON.stringify(userData),
+        body: JSON.stringify(backendPayload),
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Registration failed' }));
-        console.error('❌ Registration failed:', errorData);
         return { success: false, error: errorData.message || 'Registration failed' };
       }
       const data = await response.json();
-      console.log('📦 Registration response:', data);
-      
-      // Extract user from nested response structure
       let user = data.data?.user || data.user || data.data || data;
       
       if (user && user.id) {
+        // Extract role from userRoles array (first role) or direct role field
+        let userRole = user.role;
+        if (!userRole && user.userRoles && Array.isArray(user.userRoles) && user.userRoles.length > 0) {
+          userRole = user.userRoles[0]?.role?.name || 'customer';
+        }
+        
+        // Normalize role to lowercase for consistency
+        userRole = (userRole || 'customer').toLowerCase();
+        
         // Map server response fields to User interface
         const mappedUser: User = {
           id: user.id,
-          email: user.email,
+          email: user.email || user.username,
           firstName: user.firstName || user.name?.split(' ')[0] || '',
           lastName: user.lastName || user.name?.split(' ')[1] || '',
-          role: user.role || (user.userRoles && user.userRoles[0]) || 'customer',
+          role: userRole,
         };
-        console.log('✅ User data extracted from registration:', mappedUser);
         return { success: true, user: mappedUser };
       } else {
-        console.log('⚠️ No user data in registration response');
         return { success: false, error: 'No user data received from server' };
       }
     } catch (error) {
-      console.error('💥 Registration error:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Network error' };
     }
   }
 
   async checkAuth(): Promise<{ success: boolean; user?: User; error?: string }> {
     try {
-      console.log('🔍 Checking auth with /auth/me...');
       const response = await this.makeRequest('/auth/me', {
         method: 'GET',
       });
 
-      console.log('📡 /auth/me response status:', response.status);
-
       if (!response.ok) {
-        console.log('⚠️ Not authenticated, status:', response.status);
         return { success: false, error: 'Not authenticated' };
       }
 
       const data = await response.json();
-      console.log('📦 Check auth response:', data);
-      
-      // Extract user from nested response structure
       let user = data.data?.user || data.user || data.data || data;
       
       if (user && user.id) {
-        // Map server response fields to User interface
+        // Extract role from userRoles array (first role) or direct role field
+        let userRole = user.role;
+        if (!userRole && user.userRoles && Array.isArray(user.userRoles) && user.userRoles.length > 0) {
+          userRole = user.userRoles[0]?.role?.name || 'customer';
+        }
+        
+        // Normalize role to lowercase for consistency
+        userRole = (userRole || 'customer').toLowerCase();
+        
         const mappedUser: User = {
           id: user.id,
-          email: user.email,
+          email: user.email || user.username,
           firstName: user.firstName || user.name?.split(' ')[0] || '',
           lastName: user.lastName || user.name?.split(' ')[1] || '',
-          role: user.role || (user.userRoles && user.userRoles[0]) || 'customer',
+          role: userRole,
         };
-        console.log('✅ User session restored:', mappedUser);
         return { success: true, user: mappedUser };
       } else {
-        console.log('⚠️ No user data in /auth/me response');
         return { success: false, error: 'No user data in response' };
       }
     } catch (error) {
-      console.error('💥 Check auth error:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Network error' };
     }
   }
@@ -174,16 +185,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Initialize auth state on mount - check if user is already authenticated
   useEffect(() => {
     const initializeAuth = async () => {
+      setLoading(true);
       try {
         const result = await authManager.checkAuth();
         if (result.success && result.user) {
-          console.log('✅ User session restored on app load');
           setUser(result.user);
         } else {
-          console.log('ℹ️ No active session, user needs to login');
+          setUser(null);
         }
       } catch (error) {
-        console.error('Error checking auth:', error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -198,7 +209,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const result = await authManager.login(email, password);
     
     if (result.success && result.user) {
-      console.log('✅ Login successful, setting user:', result.user);
       setUser(result.user);
       // Return user data for redirection logic
       setLoading(false);
@@ -209,7 +219,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
     }
     
-    console.log('❌ Login failed:', result.error);
     setLoading(false);
     return { success: result.success, error: result.error };
   };

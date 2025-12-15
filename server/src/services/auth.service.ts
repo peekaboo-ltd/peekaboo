@@ -63,9 +63,13 @@ export class AuthService {
       throw new NotFoundError('Account is not active');
     }
 
+    if (!user.passwordHash) {
+      throw new ValidationError('User account is not properly configured. Please contact support.');
+    }
+
     const isValidPassword = await comparePassword(
       password,
-      user?.passwordHash!
+      user.passwordHash
     );
 
     if (!isValidPassword) {

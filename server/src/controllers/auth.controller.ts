@@ -30,6 +30,7 @@ export const AuthController = {
       return res.status(200).json({
         message: 'Login successful',
         data: { user },
+        token,
       });
     } catch (error) {
       next(error);
@@ -73,8 +74,12 @@ export const AuthController = {
         throw new UnauthorizedError('User not authenticated');
       }
 
-      // Get fresh user data
-      const user = await userService.getUserById(req.user.id);
+      // Get fresh user data with roles
+      const user = await userService.getUserByCondition({ id: req.user.id }, false);
+
+      if (!user) {
+        throw new UnauthorizedError('User not found');
+      }
 
       // Remove password from response
       const { passwordHash, ...userWithoutPassword } = user;

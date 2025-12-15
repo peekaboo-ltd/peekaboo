@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import AcceptOrderAssignment from './AcceptOrderAssignment';
 import RejectOrderAssignment from './RejectOrderAssignment';
 import ReassignOrderAssignment from './ReassignOrderAssignment';
+import StaffLayout from '@/components/staff/StaffLayout';
 
 const OrderAssignmentsPage = () => {
 
@@ -24,12 +25,20 @@ const OrderAssignmentsPage = () => {
     const { orderAssignmentsColumns } = useOrderAssignmentsColumns();
 
     return (
-        <main className='w-full flex flex-col gap-4'>
-            <Table columns={orderAssignmentsColumns} data={orderAssignmentsList} showPagination={true} page={page} setPage={setPage} size={size} setSize={setSize} totalPages={totalPages} totalCount={totalCount} isLoading={isFetching} />
-            <AcceptOrderAssignment />
-            <RejectOrderAssignment />
-            <ReassignOrderAssignment />
-        </main>
+        <StaffLayout>
+            <div className="p-6 space-y-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Order Assignments</h1>
+                    <p className="text-sm text-gray-600">Handle rider acceptances and reassignments.</p>
+                </div>
+                <main className='w-full flex flex-col gap-4'>
+                    <Table columns={orderAssignmentsColumns} data={orderAssignmentsList} showPagination={true} page={page} setPage={setPage} size={size} setSize={setSize} totalPages={totalPages} totalCount={totalCount} isLoading={isFetching} />
+                    <AcceptOrderAssignment />
+                    <RejectOrderAssignment />
+                    <ReassignOrderAssignment />
+                </main>
+            </div>
+        </StaffLayout>
     )
 }
 

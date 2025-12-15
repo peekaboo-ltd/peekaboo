@@ -60,7 +60,11 @@ export const Register = () => {
       // Ensure phone number has country code
       let phoneNumber = formData.phone.trim();
       if (!phoneNumber.startsWith('+')) {
-        // Add Rwanda country code if not present
+        // Remove leading 0 if present (common in Rwanda: 0780123456 -> 780123456)
+        if (phoneNumber.startsWith('0')) {
+          phoneNumber = phoneNumber.substring(1);
+        }
+        // Add Rwanda country code
         phoneNumber = `+250${phoneNumber}`;
       }
 

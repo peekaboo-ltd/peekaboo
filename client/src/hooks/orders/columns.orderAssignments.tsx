@@ -53,21 +53,22 @@ export const useOrderAssignmentsColumns = () => {
             header: 'Actions',
             accessorKey: 'actions',
             cell: ({ row }) => {
+                const orderId = row.original.orderId || row.original.order?.id;
                 return (
                     <CustomPopover trigger={<FontAwesomeIcon icon={faEllipsisH} className={ellipsisHClassName} />}>
                         <menu className="w-full flex flex-col gap-1">
-                            <ActionButton icon={faCircleInfo} route={`/order-assignments/${row.original.id}`} label="View details" />
-                            <ActionButton icon={faCircleCheck} route={`/order-assignments/${row.original.id}`} label="Accept" iconClassName="text-green-700" onClick={(e) => {
+                            <ActionButton icon={faCircleInfo} route={orderId ? `/staff/orders/${orderId}` : undefined} label="View details" />
+                            <ActionButton icon={faCircleCheck} route={orderId ? `/staff/orders/${orderId}` : undefined} label="Accept" iconClassName="text-green-700" onClick={(e) => {
                                 e.preventDefault();
                                 dispatch(setSelectedOrderAssignment(row.original));
                                 dispatch(setAcceptOrderAssignmentModal(true));
                             }} />
-                            <ActionButton icon={faCircleXmark} route={`/order-assignments/${row.original.id}`} label="Reject" iconClassName="text-red-700" onClick={(e) => {
+                            <ActionButton icon={faCircleXmark} route={orderId ? `/staff/orders/${orderId}` : undefined} label="Reject" iconClassName="text-red-700" onClick={(e) => {
                                 e.preventDefault();
                                 dispatch(setSelectedOrderAssignment(row.original));
                                 dispatch(setRejectOrderAssignmentModal(true));
                             }} />
-                            <ActionButton icon={faPenToSquare} route={`/order-assignments/${row.original.id}`} label="Reassign" iconClassName="text-primary" />
+                            <ActionButton icon={faPenToSquare} route={orderId ? `/staff/orders/${orderId}` : undefined} label="Reassign" iconClassName="text-primary" />
                         </menu>
                     </CustomPopover>
                 )

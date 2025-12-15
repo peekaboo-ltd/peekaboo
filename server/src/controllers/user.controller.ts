@@ -5,6 +5,7 @@ import { UserStatus } from "../constants/user.constants";
 import { AuthRequest } from "../types/auth.types";
 import { In } from "typeorm";
 import { UUID } from "../types";
+import { hashPassword } from "../helpers/auth.helper";
 
 const userService = new UserService();
 
@@ -21,6 +22,8 @@ export const UserController = {
         phoneNumber,
         name,
         email,
+        createdFrom,
+        createdTo,
       } = req.query;
 
       // Build filters
@@ -49,6 +52,14 @@ export const UserController = {
       
       if (email) {
         filters.email = email as string;
+      }
+
+      if (createdFrom) {
+        filters.createdFrom = createdFrom as string;
+      }
+
+      if (createdTo) {
+        filters.createdTo = createdTo as string;
       }
 
       const users = await userService.getUsersWithPagination({
@@ -96,11 +107,26 @@ export const UserController = {
         roles, 
         name, 
         email, 
+        password,
         passwordHash,
         status = UserStatus.ACTIVE,
         nationality,
         dateOfBirth
       } = req.body;
+
+      // Accept either 'password' (plain text) or 'passwordHash' (pre-hashed)
+      let finalPasswordHash = passwordHash;
+
+      if (!finalPasswordHash && password) {
+        // Hash the plain text password
+        finalPasswordHash = await hashPassword(password);
+      }
+
+      if (!finalPasswordHash) {
+        return res.status(400).json({
+          message: "Password is required (provide either 'password' or 'passwordHash')",
+        });
+      }
 
       // CREATE USER
       const user = await userService.createUser(
@@ -108,7 +134,7 @@ export const UserController = {
           phoneNumber,
           name,
           email,
-          passwordHash,
+          passwordHash: finalPasswordHash,
           status,
           nationality,
           dateOfBirth,

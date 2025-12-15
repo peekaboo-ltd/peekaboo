@@ -1,94 +1,64 @@
-import { useState, useEffect } from 'react';
-import { Package, Clock, CheckCircle, XCircle, Plus } from 'lucide-react';
+import { useEffect } from 'react';
+import { Package, Clock, CheckCircle, XCircle, Plus, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContextSecure';
-
-interface Order {
-  id: string;
-  senderPhone: string;
-  recipientPhone: string;
-  status: 'pending' | 'picked-up' | 'in-transit' | 'delivered' | 'cancelled';
-  createdAt: string;
-  estimatedDelivery?: string;
-  cost?: number;
-}
+import { useLazyFetchOrdersQuery } from '@/api/queries/orders.queries';
+import { useAppSelector, useAppDispatch } from '@/states/hooks';
+import { setOrdersList } from '@/states/slices/order.slice';
+import { Link } from 'react-router-dom';
+import { formatCurrency, formatDate as formatDateUtil } from '@/utils/strings.util';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { ordersList } = useAppSelector((state) => state.order);
+  const [fetchOrders, { isLoading }] = useLazyFetchOrdersQuery();
 
   useEffect(() => {
-    // Simulate loading time and set mock data
-    const timer = setTimeout(() => {
-      // Mock orders data
-    const mockOrders: Order[] = [
-      {
-        id: '001',
-        senderPhone: '+250788123456',
-        recipientPhone: '+250788654321',
-        status: 'delivered',
-        createdAt: '2024-12-01T10:00:00Z',
-        estimatedDelivery: '2024-12-01T11:30:00Z',
-        cost: 2500,
-      },
-      {
-        id: '002',
-        senderPhone: '+250788123456',
-        recipientPhone: '+250788111222',
-        status: 'in-transit',
-        createdAt: '2024-12-02T14:00:00Z',
-        estimatedDelivery: '2024-12-02T15:30:00Z',
-        cost: 3000,
-      },
-      {
-        id: '003',
-        senderPhone: '+250788123456',
-        recipientPhone: '+250788333444',
-        status: 'pending',
-        createdAt: '2024-12-02T16:00:00Z',
-        cost: 2000,
-      },
-    ];
+    if (user?.id) {
+      fetchOrders({ page: 1, size: 10, senderId: user.id, recipientId: user.id }).then((res) => {
+        if (res?.data?.data?.rows) {
+          dispatch(setOrdersList(res.data.data.rows));
+        }
+      });
+    }
+  }, [user?.id, fetchOrders, dispatch]);
 
-      setOrders(mockOrders);
-      setLoading(false);
-    }, 500); // Small delay to simulate loading
+  const orders = ordersList || [];
 
-    return () => clearTimeout(timer);
-  }, []);
+  const getLatestStatus = (activities: any[] = []) => {
+    if (!activities || activities.length === 0) return 'PENDING';
+    return activities[activities.length - 1]?.status || 'PENDING';
+  };
 
-  const getStatusColor = (status: Order['status']) => {
-    switch (status) {
-      case 'delivered': return 'text-green-600 bg-green-50';
-      case 'in-transit': return 'text-primary-600 bg-primary-50';
-      case 'picked-up': return 'text-yellow-600 bg-yellow-50';
-      case 'pending': return 'text-gray-600 bg-gray-50';
-      case 'cancelled': return 'text-red-600 bg-red-50';
+  const getStatusColor = (status: string) => {
+    const upperStatus = status?.toUpperCase();
+    switch (upperStatus) {
+      case 'DELIVERED': 
+      case 'COMPLETED': return 'text-green-600 bg-green-50';
+      case 'IN_TRANSIT': return 'text-blue-600 bg-blue-50';
+      case 'ACCEPTED': return 'text-yellow-600 bg-yellow-50';
+      case 'PENDING':
+      case 'CREATED': return 'text-gray-600 bg-gray-50';
+      case 'CANCELLED': return 'text-red-600 bg-red-50';
       default: return 'text-gray-600 bg-gray-50';
     }
   };
 
-  const getStatusIcon = (status: Order['status']) => {
-    switch (status) {
-      case 'delivered': return <CheckCircle className="w-4 h-4" />;
-      case 'in-transit': return <Clock className="w-4 h-4" />;
-      case 'picked-up': return <Package className="w-4 h-4" />;
-      case 'pending': return <Clock className="w-4 h-4" />;
-      case 'cancelled': return <XCircle className="w-4 h-4" />;
+  const getStatusIcon = (status: string) => {
+    const upperStatus = status?.toUpperCase();
+    switch (upperStatus) {
+      case 'DELIVERED':
+      case 'COMPLETED': return <CheckCircle className="w-4 h-4" />;
+      case 'IN_TRANSIT': return <Clock className="w-4 h-4" />;
+      case 'ACCEPTED': return <Package className="w-4 h-4" />;
+      case 'PENDING':
+      case 'CREATED': return <Clock className="w-4 h-4" />;
+      case 'CANCELLED': return <XCircle className="w-4 h-4" />;
       default: return <Clock className="w-4 h-4" />;
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-gray-600">Loading...</div>
@@ -101,18 +71,18 @@ const Dashboard = () => {
         {/* Header */}
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Welcome back, {((user as any)?.name) || user?.email || 'User'}!
+            <h1 className="text-2xl font-bold text-gray-900">
+              Welcome back, {user?.firstName || user?.email || 'User'}!
             </h1>
             <p className="text-sm sm:text-base text-gray-600">Track and manage your deliveries</p>
           </div>
-          <a
-            href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm sm:text-base"
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             New Order
-          </a>
+          </Link>
         </header>
 
         {/* Stats Cards */}
@@ -135,9 +105,9 @@ const Dashboard = () => {
                 <CheckCircle className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm">Delivered</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {orders.filter(o => o.status === 'delivered').length}
+                <p className="text-gray-600 text-sm">Delivered</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {orders.filter((o: any) => ['DELIVERED', 'COMPLETED'].includes(getLatestStatus(o.activities))).length}
                 </p>
               </div>
             </div>
@@ -149,9 +119,9 @@ const Dashboard = () => {
                 <Clock className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm">In Progress</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {orders.filter(o => ['pending', 'picked-up', 'in-transit'].includes(o.status)).length}
+                <p className="text-gray-600 text-sm">In Progress</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {orders.filter((o: any) => ['PENDING', 'CREATED', 'ACCEPTED', 'IN_TRANSIT'].includes(getLatestStatus(o.activities))).length}
                 </p>
               </div>
             </div>
@@ -163,9 +133,9 @@ const Dashboard = () => {
                 <span className="text-primary-600 font-bold text-sm">RWF</span>
               </div>
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm">Total Spent</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {orders.reduce((sum, o) => sum + (o.cost || 0), 0).toLocaleString()}
+                <p className="text-gray-600 text-sm">Total Spent</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(orders.reduce((sum: number, o: any) => sum + (Number(o.finalFee) || 0), 0), 'RWF')}
                 </p>
               </div>
             </div>
@@ -173,65 +143,78 @@ const Dashboard = () => {
         </section>
 
         {/* Orders List */}
-        <section className="bg-white rounded-lg shadow-sm border">
-          <header className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Recent Orders</h2>
-          </header>
-
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
+            <Link
+              to="/orders"
+              className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              View all
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          
           <div className="divide-y divide-gray-200">
             {orders.length === 0 ? (
-              <div className="px-4 sm:px-6 py-8 sm:py-12 text-center">
-                <Package className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" aria-hidden="true" />
-                <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">No orders yet</p>
-                <a
-                  href="/"
-                  className="inline-block px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm sm:text-base"
+              <div className="px-6 py-12 text-center">
+                <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">No orders yet</p>
+                <Link
+                  to="/"
+                  className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Place your first order
-                </a>
+                </Link>
               </div>
             ) : (
-              orders.map((order) => (
-                <article key={order.id} className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-                      <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0" aria-hidden="true">
-                        <Package className="w-5 h-5 text-primary-600" />
+              orders.slice(0, 5).map((order: any) => {
+                const status = getLatestStatus(order.activities);
+                return (
+                <Link
+                  key={order.id}
+                  to={`/orders/${order.id}`}
+                  className="block px-6 py-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Package className="w-5 h-5 text-blue-600" />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 text-sm sm:text-base">Order #{order.id}</p>
-                        <p className="text-xs sm:text-sm text-gray-600 truncate">
-                          {order.senderPhone} → {order.recipientPhone}
+                      <div>
+                        <p className="font-medium text-gray-900">Order #{order.referenceId}</p>
+                        <p className="text-sm text-gray-600">
+                          {order.sender?.phoneNumber || 'N/A'} → {order.recipient?.phoneNumber || 'N/A'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Created: {formatDate(order.createdAt)}
+                          Created: {formatDateUtil(order.createdAt, 'MMM DD, YYYY HH:mm')}
                         </p>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                      <div className="text-left sm:text-right">
-                        <p className="font-medium text-gray-900 text-sm sm:text-base">
-                          {order.cost ? `RWF ${order.cost.toLocaleString()}` : 'Pending'}
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="font-medium text-gray-900">
+                          {order.finalFee ? formatCurrency(order.finalFee, 'RWF') : 'Pending'}
                         </p>
-                        {order.estimatedDelivery && (
+                        {order.distance && (
                           <p className="text-xs text-gray-500">
-                            ETA: {formatDate(order.estimatedDelivery)}
+                            {order.distance} km
                           </p>
                         )}
                       </div>
-
-                      <div className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)}`}>
-                        {getStatusIcon(order.status)}
-                        <span className="hidden sm:inline">{order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('-', ' ')}</span>
+                      
+                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(status)}`}>
+                        {getStatusIcon(status)}
+                        {status}
                       </div>
                     </div>
                   </div>
-                </article>
-              ))
+                </Link>
+              )})
             )}
           </div>
-        </section>
+        </div>
       </main>
   );
 };

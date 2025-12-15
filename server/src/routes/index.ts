@@ -9,6 +9,7 @@ import orderAssignmentRoutes from './orderAssignment.routes';
 import orderActivityRoutes from './orderActivity.routes';
 import paymentRoutes from './payment.routes';
 import webhookRoutes from './webhook.routes';
+import riderLocationRoutes from './riderLocation.routes';
 
 // CREATE ROUTER
 const routes = Router();
@@ -47,6 +48,9 @@ routes.use('/order-activities', orderActivityRoutes);
 
 // PAYMENT ROUTES
 routes.use('/payments', paymentRoutes);
+
+// RIDER LOCATION ROUTES
+routes.use('/rider-locations', riderLocationRoutes);
 
 // WEBHOOK ROUTES
 routes.use('/webhooks', webhookRoutes);

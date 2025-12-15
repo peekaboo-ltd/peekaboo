@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContextSecure';
 import { useState, useEffect } from 'react';
 
 export const Navbar = () => {
-  const { user, logout, getUserRole } = useAuth();
+  const { user, getUserRole, logout } = useAuth();
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -27,10 +27,7 @@ export const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/', { replace: true });
-  };
+ 
 
   const userRole = getUserRole();
   const displayName = user ? ((user as any).lastName ?? (user as any).email ?? 'Account') : null;
@@ -74,7 +71,10 @@ export const Navbar = () => {
                   </Link>
                   
                   <button
-                    onClick={handleLogout}
+                    onClick={async () => {
+                      await logout();
+                      navigate('/', { replace: true });
+                    }}
                     className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-red-600 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
