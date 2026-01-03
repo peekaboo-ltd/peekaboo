@@ -9,6 +9,7 @@ import orderAssignmentRoutes from './orderAssignment.routes';
 import orderActivityRoutes from './orderActivity.routes';
 import paymentRoutes from './payment.routes';
 import webhookRoutes from './webhook.routes';
+import dashboardRoutes from './dashboard.routes';
 
 // CREATE ROUTER
 const routes = Router();
@@ -42,5 +43,8 @@ routes.use('/payments', paymentRoutes);
 
 // WEBHOOK ROUTES
 routes.use('/webhooks', webhookRoutes);
+
+// DASHBOARD ROUTES
+routes.use('/dashboard', dashboardRoutes);
 
 export default routes;

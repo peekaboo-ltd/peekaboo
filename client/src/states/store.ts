@@ -15,10 +15,14 @@ import { paymentsQueriesApiSlice } from '../api/queries/payments.queries';
 import paymentSlice from './slices/payment.slice';
 import { paymentsMutationsApiSlice } from '../api/mutations/payments.mutations';
 import { usersQueriesApiSlice } from '../api/queries/users.queries';
+import { usersMutationsApiSlice } from '../api/mutations/users.mutations';
+import userSlice from './slices/user.slice';
+import { dashboardQueriesApiSlice } from '../api/queries/dashboard.queries';
 
 export const store = configureStore({
   reducer: {
     auth: authSlice,
+    user: userSlice,
     [authMutationApiSlice.reducerPath]: authMutationApiSlice.reducer,
     [ordersMutationApiSlice.reducerPath]: ordersMutationApiSlice.reducer,
     [externalMutationsApiSlice.reducerPath]: externalMutationsApiSlice.reducer,
@@ -37,6 +41,8 @@ export const store = configureStore({
     payment: paymentSlice,
     [paymentsMutationsApiSlice.reducerPath]: paymentsMutationsApiSlice.reducer,
     [usersQueriesApiSlice.reducerPath]: usersQueriesApiSlice.reducer,
+    [usersMutationsApiSlice.reducerPath]: usersMutationsApiSlice.reducer,
+    [dashboardQueriesApiSlice.reducerPath]: dashboardQueriesApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -49,7 +55,9 @@ export const store = configureStore({
       orderActivityQueriesApiSlice.middleware,
       paymentsQueriesApiSlice.middleware,
       paymentsMutationsApiSlice.middleware,
-      usersQueriesApiSlice.middleware
+      usersQueriesApiSlice.middleware,
+      usersMutationsApiSlice.middleware,
+      dashboardQueriesApiSlice.middleware
     ),
   devTools: true,
 });

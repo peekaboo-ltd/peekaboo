@@ -11,6 +11,8 @@ import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayou
 import Register from '@/pages/auth/Register';
 import { OrdersPage } from '@/pages/orders';
 import { OrderAssignmentsPage } from '@/pages/order-assignments';
+import { UsersPage } from '@/pages/users';
+import { About } from '@/pages/about';
 
 const Router = () => {
   return (
@@ -24,6 +26,7 @@ const Router = () => {
           <Route path="forgot-password" element={<p>Forgot Password</p>} />
         </Route>
         <Route path="" element={<Home />} />
+        <Route path="about" element={<About />} />
       </Route>
       <Route path="/p" element={<PublicLayout />}>
         <Route path="orders">
@@ -47,6 +50,11 @@ const Router = () => {
         <Route path="/assignments" element={
           <ProtectedRoute allowedRoles={['ADMIN', 'RIDER']}>
             <OrderAssignmentsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/users" element={
+          <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+            <UsersPage />
           </ProtectedRoute>
         } />
       </Route>
