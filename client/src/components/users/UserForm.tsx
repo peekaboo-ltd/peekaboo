@@ -269,20 +269,20 @@ export const UserForm: React.FC<UserFormProps> = ({
           />
         </div>
 
-        <div className="space-y-4">
-          <div>
+        <fieldset className="space-y-4">
+          <legend>
             <Label>Roles *</Label>
             <FormDescription>
               Select one or more roles for this user
             </FormDescription>
-          </div>
+          </legend>
           <div className="grid gap-3 md:grid-cols-2">
             {Object.values(RoleTypes).map((role) => (
               <div key={role} className="flex items-center space-x-2">
                 <Checkbox
                   id={role}
                   checked={selectedRoles.includes(role)}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     handleRoleToggle(role, checked as boolean)
                   }
                 />
@@ -300,9 +300,9 @@ export const UserForm: React.FC<UserFormProps> = ({
               Please select at least one role
             </p>
           )}
-        </div>
+        </fieldset>
 
-        <div className="flex justify-end gap-3">
+        <footer className="flex justify-end gap-3">
           <Button
             type="button"
             variant="outline"
@@ -321,7 +321,7 @@ export const UserForm: React.FC<UserFormProps> = ({
               <>{isEdit ? 'Update User' : 'Create User'}</>
             )}
           </Button>
-        </div>
+        </footer>
       </form>
     </Form>
   );

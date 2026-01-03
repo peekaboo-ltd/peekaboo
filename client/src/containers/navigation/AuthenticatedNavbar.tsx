@@ -79,18 +79,18 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         aria-expanded={isOpen}
                         aria-haspopup="true"
                     >
-                        <figure className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
                             {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
-                        </figure>
+                        </div>
 
-                        <article className="hidden sm:flex flex-col items-start">
+                        <div className="hidden sm:flex flex-col items-start">
                             <span className="text-sm font-medium text-gray-800 truncate max-w-[150px] sm:max-w-[170px]">
                                 {user?.name}
                             </span>
                             <span className="text-xs text-gray-500 truncate max-w-[150px] sm:max-w-[170px]">
                                 {user?.email}
                             </span>
-                        </article>
+                        </div>
 
                         <FontAwesomeIcon
                             className={`text-gray-400 mb-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
@@ -104,14 +104,14 @@ const AuthenticatedNavbar = ({ className }: Props) => {
 
             <NavDropdown isOpen={isOpen}>
                 <section className="py-2 w-full rounded-lg shadow-lg bg-white border border-gray-100">
-                    <article className="sm:hidden p-4 border-b border-gray-100">
+                    <div className="sm:hidden p-4 border-b border-gray-100">
                         <h3 className="font-medium text-gray-800">
                             {user?.name}
                         </h3>
                         <p className="text-sm text-gray-500 truncate">
                             {user?.email}
                         </p>
-                    </article>
+                    </div>
 
                     <nav className="py-2">
                         {navDropdown?.map((nav, index) => (
@@ -173,19 +173,19 @@ const AuthenticatedNavbar = ({ className }: Props) => {
 
                     <section className="py-2">
                         <header className="px-3 py-3 border-b border-gray-100 bg-gradient-to-r from-primary/5 to-transparent">
-                            <figure className="flex items-center gap-2.5">
+                            <div className="flex items-center gap-2.5">
                                 <span className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-base">
                                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
                                 </span>
-                                <figcaption>
+                                <div>
                                     <p className="font-medium text-gray-800 text-sm">
                                         {user?.name}
                                     </p>
                                     <p className="text-xs text-gray-500 truncate max-w-[160px]">
                                         {user?.email}
                                     </p>
-                                </figcaption>
-                            </figure>
+                                </div>
+                            </div>
                         </header>
 
                         <nav className="py-2">
