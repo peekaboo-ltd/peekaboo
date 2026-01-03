@@ -6,6 +6,7 @@ import { useInlineRiderAssignment } from '@/hooks/orders/useInlineRiderAssignmen
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { OrderAssignmentStatus } from '@/types/orderAssignment.type';
+import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 
 interface InlineRiderSelectProps {
   order: Order;
@@ -127,7 +128,7 @@ const InlineRiderSelect = ({ order }: InlineRiderSelectProps) => {
     if (activeAssignment) {
       return (
         <span className="text-xs w-full text-center">
-          {formatRiderDisplay(activeAssignment.assignedTo)}
+          {formatRiderDisplay(activeAssignment?.assignedTo)} <FontAwesomeIcon icon={faPenToSquare} />
         </span>
       );
     }

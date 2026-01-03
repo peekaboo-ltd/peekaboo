@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import { OrderService } from "../services/order.service";
-import { UUID } from "../types";
-import { UserService } from "../services/user.service";
-import { AuthenticatedRequest } from "../types/auth.types";
+import { Request, Response, NextFunction } from 'express';
+import { OrderService } from '../services/order.service';
+import { UUID } from '../types';
+import { UserService } from '../services/user.service';
+import { AuthenticatedRequest } from '../types/auth.types';
 
 const orderService = new OrderService();
 const userService = new UserService();
@@ -28,7 +28,7 @@ export const OrderController = {
 
       // RETURN ORDER
       return res.status(200).json({
-        message: "Order accepted",
+        message: 'Order accepted',
         data: order,
       });
     } catch (error) {
@@ -46,7 +46,7 @@ export const OrderController = {
 
       // RETURN ORDER
       return res.status(201).json({
-        message: "Order created successfully",
+        message: 'Order created successfully',
         data: createdOrder,
       });
     } catch (error) {
@@ -67,7 +67,7 @@ export const OrderController = {
 
       // RETURN ORDER
       return res.status(201).json({
-        message: "Order created successfully",
+        message: 'Order created successfully',
         data: createdOrder,
       });
     } catch (error) {
@@ -85,7 +85,7 @@ export const OrderController = {
 
       // RETURN ORDER
       return res.status(200).json({
-        message: "Order fetched successfully",
+        message: 'Order fetched successfully',
         data: order,
       });
     } catch (error) {
@@ -111,7 +111,6 @@ export const OrderController = {
         message: 'Order updated successfully',
         data: updatedOrder,
       });
-
     } catch (error) {
       next(error);
     }
@@ -120,7 +119,6 @@ export const OrderController = {
   // FETCH ORDERS
   async fetchOrders(req: Request, res: Response, next: NextFunction) {
     try {
-
       // FETCH ORDERS
       const fetchedOrders = await orderService.fetchOrders(req.query);
 

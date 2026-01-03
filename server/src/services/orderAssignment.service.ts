@@ -1,29 +1,33 @@
-import { FindOptionsWhere, Repository } from "typeorm";
-import { OrderAssignment } from "../entities/orderAssignment.entity";
-import { AppDataSource } from "../data-source";
-import { getPagination, getPagingData } from "../helpers/pagination.helper";
-import { Pagination } from "../helpers/pagination.helper";
-import { OrderAssignmentStatus } from "../constants/order.constants";
-import { Order } from "../entities/order.entity";
-import { NotFoundError } from "../helpers/errors.helper";
-import { UserService } from "./user.service";
-import { RoleTypes } from "../constants/role.constants";
-import { User } from "../entities/user.entity";
-import { UserStatus } from "../constants/user.constants";
-import { UUID } from "../types";
-import { LogReferenceTypes } from "../constants/logs.constants";
-import { Request } from "express";
+import { FindOptionsWhere, Repository } from 'typeorm';
+import { OrderAssignment } from '../entities/orderAssignment.entity';
+import { AppDataSource } from '../data-source';
+import { getPagination, getPagingData } from '../helpers/pagination.helper';
+import { Pagination } from '../helpers/pagination.helper';
+import {
+  OrderAssignmentStatus,
+  OrderStatus,
+} from '../constants/order.constants';
+import { Order } from '../entities/order.entity';
+import { NotFoundError } from '../helpers/errors.helper';
+import { UserService } from './user.service';
+import { RoleTypes } from '../constants/role.constants';
+import { UserStatus } from '../constants/user.constants';
+import { UUID } from '../types';
+import { LogReferenceTypes } from '../constants/logs.constants';
+import { Request } from 'express';
+import { OrderActivityService } from './orderActivity.service';
 
 export class OrderAssignmentService {
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
   private readonly orderRepository: Repository<Order>;
   private readonly userService: UserService;
-
+  private readonly orderActivityService: OrderActivityService;
   constructor() {
     this.orderAssignmentRepository =
       AppDataSource.getRepository(OrderAssignment);
     this.orderRepository = AppDataSource.getRepository(Order);
     this.userService = new UserService();
+    this.orderActivityService = new OrderActivityService();
   }
 
   // CREATE ORDER ASSIGNMENT
@@ -39,7 +43,7 @@ export class OrderAssignmentService {
     });
 
     if (!orderExists) {
-      throw new NotFoundError("Order not found");
+      throw new NotFoundError('Order not found');
     }
 
     if (orderExists?.assignments?.length >= 0) {
@@ -82,11 +86,11 @@ export class OrderAssignmentService {
           },
           status: UserStatus.ACTIVE,
         },
-        relations: ["userRoles.role", "assignments"],
+        relations: ['userRoles.role', 'assignments'],
       });
 
       if (availableRiders?.rows.length === 0) {
-        throw new NotFoundError("No available riders found");
+        throw new NotFoundError('No available riders found');
       }
 
       // SORT BY ASSIGNMENTS
@@ -109,15 +113,16 @@ export class OrderAssignmentService {
 
   // FETCH ORDER ASSIGNMENTS
   async fetchOrderAssignments(query: Request['query']): Promise<Pagination> {
-
     const { page = 0, size = 10, orderId, assignedToId, status } = query;
 
-    let condition: FindOptionsWhere<OrderAssignment> | FindOptionsWhere<OrderAssignment>[] = {};
+    let condition:
+      | FindOptionsWhere<OrderAssignment>
+      | FindOptionsWhere<OrderAssignment>[] = {};
 
     if (orderId) {
       condition.orderId = orderId as UUID;
     }
-    
+
     if (assignedToId) {
       condition.assignedToId = assignedToId as UUID;
     }
@@ -126,7 +131,10 @@ export class OrderAssignmentService {
       condition.status = status as OrderAssignmentStatus;
     }
 
-    const { take, skip } = getPagination({ page: Number(page), size: Number(size) });
+    const { take, skip } = getPagination({
+      page: Number(page),
+      size: Number(size),
+    });
 
     const orderAssignments = await this.orderAssignmentRepository.findAndCount({
       where: condition,
@@ -138,11 +146,15 @@ export class OrderAssignmentService {
         createdBy: true,
       },
       order: {
-        createdAt: 'DESC',
+        updatedAt: 'DESC',
       },
     });
 
-    return getPagingData({ data: orderAssignments, page: Number(page), size: Number(size) });
+    return getPagingData({
+      data: orderAssignments,
+      page: Number(page),
+      size: Number(size),
+    });
   }
 
   // GET ORDER ASSIGNMENT BY ID
@@ -150,14 +162,16 @@ export class OrderAssignmentService {
     const orderAssignment = await this.orderAssignmentRepository.findOne({
       where: { id },
       relations: {
-        order: true,
+        order: {
+          activities: true,
+        },
         assignedTo: true,
         createdBy: true,
-      }
+      },
     });
 
     if (!orderAssignment) {
-      throw new NotFoundError("Order assignment not found", {
+      throw new NotFoundError('Order assignment not found', {
         referenceId: id,
         referenceType: LogReferenceTypes.ORDER_ASSIGNMENT,
       });
@@ -174,19 +188,45 @@ export class OrderAssignmentService {
     // CHECK IF ORDER ASSIGNMENT EXISTS
     const orderAssignmentExists = await this.getOrderAssignmentById(id);
 
-    return this.orderAssignmentRepository.save({
+    const updatedOrderAssignment = await this.orderAssignmentRepository.save({
       ...orderAssignmentExists,
       ...orderAssignment,
     });
+
+    if (
+      orderAssignmentExists?.order?.activities?.shift()?.status ===
+        OrderStatus.PAID &&
+      orderAssignmentExists?.status === OrderAssignmentStatus.ACTIVE
+    ) {
+      await this.orderActivityService.createOrderActivity({
+        orderId: orderAssignmentExists?.orderId,
+        status: OrderStatus.CONFIRMED,
+        createdById: orderAssignmentExists?.createdById,
+      });
+    }
+
+    return updatedOrderAssignment;
   }
 
   // ACCEPT ORDER ASSIGNMENT
   async acceptOrderAssignment(id: UUID): Promise<OrderAssignment> {
     const orderAssignment = await this.getOrderAssignmentById(id);
-    return this.orderAssignmentRepository.save({
+    const updatedOrderAssignment = await this.orderAssignmentRepository.save({
       ...orderAssignment,
       status: OrderAssignmentStatus.ACTIVE,
     });
+
+    if (
+      orderAssignment?.order?.activities?.shift()?.status === OrderStatus.PAID
+    ) {
+      await this.orderActivityService.createOrderActivity({
+        orderId: orderAssignment?.orderId,
+        status: OrderStatus.CONFIRMED,
+        createdById: orderAssignment?.createdById,
+      });
+    }
+
+    return updatedOrderAssignment;
   }
 
   // REJECT ORDER ASSIGNMENT
@@ -218,11 +258,12 @@ export class OrderAssignmentService {
       where: { id: orderId },
       relations: {
         assignments: true,
+        activities: true,
       },
     });
 
     if (!orderExists) {
-      throw new NotFoundError("Order not found");
+      throw new NotFoundError('Order not found');
     }
 
     if (orderExists?.assignments?.length >= 0) {
@@ -249,30 +290,30 @@ export class OrderAssignmentService {
       },
       status: UserStatus.ACTIVE,
     });
-  
-      /**
-       * HANDLE RIDER ASSIGNMENT
-       */
-      if (!assignedToExists) {
-        let availableRiders = await this.userService.fetchUsers({
-          page: 0,
-          size: 10,
-          condition: {
-            userRoles: {
-              role: {
-                name: RoleTypes.RIDER,
-              },
+
+    /**
+     * HANDLE RIDER ASSIGNMENT
+     */
+    if (!assignedToExists) {
+      let availableRiders = await this.userService.fetchUsers({
+        page: 0,
+        size: 10,
+        condition: {
+          userRoles: {
+            role: {
+              name: RoleTypes.RIDER,
             },
-            status: UserStatus.ACTIVE,
           },
-          relations: ["userRoles.role", "assignments"],
-        });
-  
-        // SORT BY ASSIGNMENTS
-        availableRiders?.rows.sort((a, b) => {
-          return a.assignments.length - b.assignments.length;
-        });
-  
+          status: UserStatus.ACTIVE,
+        },
+        relations: ['userRoles.role', 'assignments'],
+      });
+
+      // SORT BY ASSIGNMENTS
+      availableRiders?.rows.sort((a, b) => {
+        return a.assignments.length - b.assignments.length;
+      });
+
       assignedToExists = availableRiders?.rows[0];
     }
 
@@ -280,6 +321,14 @@ export class OrderAssignmentService {
       orderId,
       assignedToId: assignedToExists?.id,
     });
+
+    if (orderExists?.activities?.shift()?.status === OrderStatus.PAID) {
+      await this.orderActivityService.createOrderActivity({
+        orderId,
+        status: OrderStatus.ACCEPTED,
+        createdById: orderExists?.createdById,
+      });
+    }
 
     return createdOrderAssignment;
   }

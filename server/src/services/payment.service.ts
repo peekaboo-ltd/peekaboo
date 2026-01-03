@@ -67,9 +67,9 @@ export class PaymentService {
     if (result && result.success && result.data?.transactionId) {
       newPayment.externalReferenceId = result.data?.transactionId;
       newPayment.status = result.data?.status as KpayPaymentStatus;
-      await this.paymentRepository.update(newPayment.id, newPayment);
+      await this.paymentRepository.update(newPayment?.id, newPayment);
       this.updatePaymentStatus(
-        newPayment.id,
+        newPayment?.id as UUID,
         result.data?.status as KpayPaymentStatus
       );
       return newPayment;
@@ -150,10 +150,7 @@ export class PaymentService {
     }
 
     payment.status = status as KpayPaymentStatus;
-    const updatedPayment = await this.paymentRepository.update(
-      payment.id,
-      payment
-    );
+    await this.paymentRepository.update(payment?.id as UUID, payment);
 
     let orderActivity: OrderActivity | undefined;
     if (status === KpayPaymentStatus.SUCCESSFUL) {

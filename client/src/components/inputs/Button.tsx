@@ -1,19 +1,18 @@
 import { type IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { type FC, type MouseEventHandler, type ReactNode } from 'react';
+import { type FC, type MouseEventHandler, type ReactNode, type HTMLAttributes } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader } from './Loader.tsx';
 import { Button as ButtonUI } from '../ui/button';
 
-interface ButtonProps {
+interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchorElement>, 'onClick'> {
   route?: string;
   value?: ReactNode;
-  onClick?: MouseEventHandler<HTMLAnchorElement>;
+  onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
   type?: 'submit' | 'button' | 'reset';
   disabled?: boolean;
   primary?: boolean;
   styled?: boolean;
-  className?: string;
   submit?: boolean;
   danger?: boolean;
   icon?: IconProp;
@@ -35,8 +34,9 @@ const Button: FC<ButtonProps> = ({
   icon = undefined,
   isLoading = false,
   children,
+  ...rest
 }) => {
-  if (submit || type === 'submit') {
+  if (submit || type === 'submit' || type === 'button' || type === 'reset') {
     return (
       <ButtonUI
         type={type || 'submit'}
@@ -56,6 +56,7 @@ const Button: FC<ButtonProps> = ({
           '!bg-secondary !shadow-none hover:!scale-[1] !cursor-default hover:!bg-secondary hover:text-opacity-80 !duration-0 text-white text-opacity-80 !border-none text-center transition-all'
         }`}
         disabled={disabled}
+        {...rest}
       >
         {isLoading ? (
           <Loader className={primary ? 'text-white' : 'text-primary'} />
@@ -95,6 +96,7 @@ const Button: FC<ButtonProps> = ({
         disabled &&
         '!bg-secondary !shadow-none hover:!scale-[1] !cursor-default hover:!bg-secondary hover:text-opacity-80 !duration-0 text-white text-opacity-80 !border-none text-center transition-all'
       }`}
+      {...rest}
     >
       {isLoading ? (
         <Loader className={primary ? 'text-white' : 'text-primary'} />

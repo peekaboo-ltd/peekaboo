@@ -7,10 +7,10 @@ export const orderAssignmentQueriesApiSlice = createApi({
   baseQuery: createBaseQuery(),
   endpoints: (builder) => ({
     fetchOrderAssignments: builder.query({
-      query: ({ page, size }: { page: number; size: number }) => {
+      query: ({ page, size, assignedToId }: { page: number; size: number; assignedToId?: UUID }) => {
         return {
           url: '/order-assignments',
-          params: { page, size },
+          params: { page, size, assignedToId },
         };
       },
     }),

@@ -1,33 +1,31 @@
-import CustomPopover from "@/components/inputs/CustomPopover";
+import CustomTooltip from "@/components/inputs/CustomTooltip";
 import { StatusBadge } from "@/components/inputs/StatusBadge";
-import { ActionButton, ReferenceIdInput } from "@/components/inputs/TableInputs";
+import { ReferenceIdInput } from "@/components/inputs/TableInputs";
 import TableUserLabel from "@/components/users/TableUserLabel";
-import { ellipsisHClassName } from "@/constants/inputs.constants";
 import { useAppDispatch } from "@/states/hooks";
-import { setAcceptOrderAssignmentModal, setRejectOrderAssignmentModal, setSelectedOrderAssignment } from "@/states/slices/orderAssignment.slice";
+import { setAcceptOrderAssignmentModal, setReassignOrderAssignmentModal, setRejectOrderAssignmentModal, setSelectedOrderAssignment } from "@/states/slices/orderAssignment.slice";
 import { OrderAssignment } from "@/types/orderAssignment.type";
-import { capitalizeString, formatDate } from "@/utils/strings.util";
+import { formatDate } from "@/utils/strings.util";
 import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
-import { faCircleCheck, faCircleInfo, faCircleXmark, faEllipsisH } from "@fortawesome/free-solid-svg-icons";
+import { faCircleCheck, faCircleInfo, faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const useOrderAssignmentsColumns = () => {
 
     // STATE VARIABLES
     const dispatch = useAppDispatch();
 
+    // NAVIGATION
+    const navigate = useNavigate();
+
     const orderAssignmentsColumns: ColumnDef<OrderAssignment>[] = useMemo(() => [
         {
             header: 'Order Reference',
             accessorKey: 'order.referenceId',
             cell: ({ row }) => <ReferenceIdInput label={row.original?.order?.referenceId} />,
-        },
-        {
-            header: 'Order Type',
-            accessorKey: 'order.type',
-            cell: ({ row }) => capitalizeString(row?.original?.order?.type),
         },
         {
             header: 'Assignment Status',
@@ -37,43 +35,51 @@ export const useOrderAssignmentsColumns = () => {
         {
             header: 'Assigned To',
             accessorKey: 'assignedTo',
-            cell: ({ row }) => <TableUserLabel user={row.original?.assignedTo} label={row.original?.assignedTo?.name} />,
+            cell: ({ row }) => {
+                return (<menu className="w-full flex items-center gap-3"><TableUserLabel user={row.original?.assignedTo} label={row.original?.assignedTo?.name} /> {!['ACTIVE'].includes(row.original?.status as unknown as string) && <CustomTooltip label="Reassign">
+                    <FontAwesomeIcon icon={faPenToSquare} onClick={(e) => {
+                        e.stopPropagation();
+                        dispatch(setReassignOrderAssignmentModal(true));
+                        dispatch(setSelectedOrderAssignment(row.original));
+                    }} className="text-primary cursor-pointer" /></CustomTooltip>}</menu>)
+            },
         },
         {
-            header: 'Date Created',
+            header: 'Date Assigned',
             accessorKey: 'createdAt',
             cell: ({ row }) => formatDate(row.original.createdAt, 'DD/MM/YYYY HH:mm'),
-        },
-        {
-            header: 'Last Updated',
-            accessorKey: 'updatedAt',
-            cell: ({ row }) => formatDate(row.original.updatedAt, 'DD/MM/YYYY HH:mm'),
         },
         {
             header: 'Actions',
             accessorKey: 'actions',
             cell: ({ row }) => {
                 return (
-                    <CustomPopover trigger={<FontAwesomeIcon icon={faEllipsisH} className={ellipsisHClassName} />}>
-                        <menu className="w-full flex flex-col gap-1">
-                            <ActionButton icon={faCircleInfo} route={`/order-assignments/${row.original.id}`} label="View details" />
-                            <ActionButton icon={faCircleCheck} route={`/order-assignments/${row.original.id}`} label="Accept" iconClassName="text-green-700" onClick={(e) => {
-                                e.preventDefault();
-                                dispatch(setSelectedOrderAssignment(row.original));
+                    <menu className="w-full flex items-center gap-3">
+                        <CustomTooltip label="Accept">
+                            <FontAwesomeIcon onClick={(e) => {
+                                e.stopPropagation();
                                 dispatch(setAcceptOrderAssignmentModal(true));
-                            }} />
-                            <ActionButton icon={faCircleXmark} route={`/order-assignments/${row.original.id}`} label="Reject" iconClassName="text-red-700" onClick={(e) => {
-                                e.preventDefault();
                                 dispatch(setSelectedOrderAssignment(row.original));
+                            }} icon={faCircleCheck} size="lg" className="cursor-pointer text-green-700" />
+                        </CustomTooltip>
+                        <CustomTooltip label="Reject">
+                            <FontAwesomeIcon onClick={(e) => {
+                                e.stopPropagation();
                                 dispatch(setRejectOrderAssignmentModal(true));
-                            }} />
-                            <ActionButton icon={faPenToSquare} route={`/order-assignments/${row.original.id}`} label="Reassign" iconClassName="text-primary" />
-                        </menu>
-                    </CustomPopover>
+                                dispatch(setSelectedOrderAssignment(row.original));
+                            }} icon={faCircleXmark} size="lg" className="cursor-pointer text-red-700" />
+                        </CustomTooltip>
+                        <CustomTooltip label="Info">
+                            <FontAwesomeIcon onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/assignments/${row.original.id}`);
+                            }} icon={faCircleInfo} size="lg" className="cursor-pointer text-gray-500" />
+                        </CustomTooltip>
+                    </menu>
                 )
             },
         }
-    ], [dispatch]);
+    ], [dispatch, navigate]);
 
     return { orderAssignmentsColumns };
 }

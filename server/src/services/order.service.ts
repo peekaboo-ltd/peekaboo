@@ -21,28 +21,21 @@ import { AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { User } from '../entities/user.entity';
 import { UserService } from './user.service';
-import { AuditLogService } from './auditLog.service';
 import { OrderActivityService } from './orderActivity.service';
-import { OrderActivity } from '../entities/orderActivity.entity';
 import { Request } from 'express';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
-  private readonly conversationService: ConversationService;
   private readonly orderAssignmentService: OrderAssignmentService;
   private readonly userRepository: Repository<User>;
   private readonly userService: UserService;
-  private readonly auditLogService: AuditLogService;
   private readonly orderActivityService: OrderActivityService;
-  private readonly orderActivityRepository: Repository<OrderActivity>;
 
   constructor() {
     this.orderRepository = AppDataSource.getRepository(Order);
-    this.conversationService = new ConversationService();
     this.orderAssignmentService = new OrderAssignmentService();
     this.userRepository = AppDataSource.getRepository(User);
     this.userService = new UserService();
-    this.auditLogService = new AuditLogService();
     this.orderActivityService = new OrderActivityService();
   }
 
@@ -126,7 +119,6 @@ export class OrderService {
       senderId: sender?.id,
       recipientId: recipient?.id,
       createdById: sender?.id,
-      status: OrderStatus.CREATED,
       initialFee: 1500,
     });
 
@@ -157,6 +149,11 @@ export class OrderService {
         sender: true,
         conversation: {
           recipient: true,
+        },
+        activities: true,
+        assignments: {
+          assignedTo: true,
+          createdBy: true,
         },
       },
     });
@@ -206,10 +203,23 @@ export class OrderService {
     // CHECK IF ORDER EXISTS
     const orderExists = await this.getOrderById(id);
 
-    return this.orderRepository.save({
+    const updatedOrder = await this.orderRepository.save({
       ...orderExists,
       ...order,
     });
+
+    if (
+      (order?.locationTo || order?.locationFrom) &&
+      orderExists?.activities?.shift()?.status === OrderStatus.CREATED
+    ) {
+      this.orderActivityService.createOrderActivity({
+        orderId: updatedOrder.id,
+        status: OrderStatus.PENDING,
+        createdById: createdById || orderExists?.createdById,
+      });
+    }
+
+    return updatedOrder;
   }
 
   // GET ORDER BY CONVERSATION ID
@@ -260,7 +270,6 @@ export class OrderService {
 
   // FETCH ORDERS
   async fetchOrders(query: Request['query']): Promise<Pagination<Order>> {
-    
     const { page = 0, size = 10, senderId, recipientId, status } = query;
 
     let condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[] = {};

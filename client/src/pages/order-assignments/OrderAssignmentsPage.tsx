@@ -6,20 +6,28 @@ import { useEffect } from 'react'
 import AcceptOrderAssignment from './AcceptOrderAssignment';
 import RejectOrderAssignment from './RejectOrderAssignment';
 import ReassignOrderAssignment from './ReassignOrderAssignment';
+import { UUID } from '@/types';
 
 const OrderAssignmentsPage = () => {
 
     // STATE VARIABLES
     const { orderAssignmentsList, acceptOrderAssignmentModal, rejectOrderAssignmentModal, reassignOrderAssignmentModal } = useAppSelector((state) => state.orderAssignment);
+    const { user } = useAppSelector((state) => state.auth);
 
     // ORDER ASSIGMENT HOOKS
     const { fetchOrderAssignments, page, setPage, size, setSize, totalPages, totalCount, isFetching } = useFetchOrderAssignments();
 
     useEffect(() => {
         if (!acceptOrderAssignmentModal && !rejectOrderAssignmentModal && !reassignOrderAssignmentModal) {
-            fetchOrderAssignments({ page, size });
+            let userId: UUID | undefined = undefined;
+
+            if (user?.userRoles?.some((role) => ['RIDER'].includes(role.role.name))) {
+                userId = user?.id;
+            }
+
+            fetchOrderAssignments({ page, size, assignedToId: userId });
         }
-    }, [fetchOrderAssignments, page, size, acceptOrderAssignmentModal, rejectOrderAssignmentModal, reassignOrderAssignmentModal]);
+    }, [fetchOrderAssignments, page, size, acceptOrderAssignmentModal, rejectOrderAssignmentModal, reassignOrderAssignmentModal, user?.userRoles, user?.id]);
 
     const { orderAssignmentsColumns } = useOrderAssignmentsColumns();
 
