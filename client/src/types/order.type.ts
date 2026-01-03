@@ -2,6 +2,7 @@ import { type UUID } from '../types';
 import { type BaseDomain } from './base';
 import { OrderActivity } from './orderActivity.type';
 import type { User } from './user.type';
+import type { OrderAssignment } from './orderAssignment.type';
 
 export const OrderType = {
   SEND: 'SEND',
@@ -52,4 +53,5 @@ export interface Order extends BaseDomain {
   createdBy?: User;
   sender?: User;
   activities?: OrderActivity[];
+  assignments?: OrderAssignment[];
 }

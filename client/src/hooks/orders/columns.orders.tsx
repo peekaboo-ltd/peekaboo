@@ -1,8 +1,9 @@
 import { StatusBadge } from "@/components/inputs/StatusBadge";
 import { ReferenceIdInput } from "@/components/inputs/TableInputs";
 import TableUserLabel from "@/components/users/TableUserLabel";
+import InlineRiderSelect from "@/components/orders/InlineRiderSelect";
 import { Order } from "@/types/order.type";
-import { capitalizeString, formatCurrency, formatDate } from "@/utils/strings.util";
+import { formatCurrency, formatDate } from "@/utils/strings.util";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 
@@ -14,14 +15,13 @@ export const useOrdersColumns = () => {
             cell: ({ row }) => <ReferenceIdInput label={row.original.referenceId} />,
         },
         {
-            header: 'Type',
-            accessorKey: 'type',
-            cell: ({ row }) => capitalizeString(row?.original?.type),
-        },
-        {
             header: 'Status',
             accessorKey: 'status',
-            cell: ({ row }) => <StatusBadge status={row?.original?.activities?.[row?.original?.activities?.length - 1]?.status} />,
+            cell: ({ row }) => {
+                const activities = row?.original?.activities ? [...row.original.activities] : [];
+                const firstActivity = activities.shift();
+                return <StatusBadge status={firstActivity?.status ?? ''} />;
+            },
         },
         {
             header: 'Final Fee',
@@ -32,6 +32,11 @@ export const useOrdersColumns = () => {
             header: 'Created By',
             accessorKey: 'createdById',
             cell: ({ row }) => <TableUserLabel user={row.original?.createdBy} />,
+        },
+        {
+            header: 'Assigned To',
+            accessorKey: 'assignments',
+            cell: ({ row }) => <InlineRiderSelect order={row.original} />,
         },
         {
             header: 'Date added',

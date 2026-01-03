@@ -14,7 +14,7 @@ export interface OrderAssignment {
   orderId: UUID;
   assignedToId?: UUID;
   createdById?: UUID;
-  status: typeof OrderAssignmentStatus;
+  status: (typeof OrderAssignmentStatus)[keyof typeof OrderAssignmentStatus];
   description?: string;
   createdAt: Date;
   updatedAt: Date;

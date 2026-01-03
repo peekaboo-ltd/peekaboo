@@ -22,16 +22,19 @@ import { LogReferenceTypes } from '../constants/logs.constants';
 import { OrderActivityService } from './orderActivity.service';
 import { OrderStatus } from '../constants/order.constants';
 import { OrderActivity } from '../entities/orderActivity.entity';
+import { OrderAssignmentService } from './orderAssignment.service';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
   private readonly kpayService: KpayService;
   private readonly orderActivityService: OrderActivityService;
+  private readonly orderAssignmentService: OrderAssignmentService;
 
   constructor() {
     this.paymentRepository = AppDataSource.getRepository(Payment);
     this.kpayService = new KpayService();
     this.orderActivityService = new OrderActivityService();
+    this.orderAssignmentService = new OrderAssignmentService();
   }
 
   // CREATE PAYMENT
@@ -65,9 +68,13 @@ export class PaymentService {
       newPayment.externalReferenceId = result.data?.transactionId;
       newPayment.status = result.data?.status as KpayPaymentStatus;
       await this.paymentRepository.update(newPayment.id, newPayment);
+      this.updatePaymentStatus(
+        newPayment.id,
+        result.data?.status as KpayPaymentStatus
+      );
       return newPayment;
     }
-    
+
     return newPayment;
   }
 
@@ -131,8 +138,9 @@ export class PaymentService {
     paymentId: UUID,
     status: KpayPaymentStatus
   ): Promise<Payment> {
-
-    const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
+    const payment = await this.paymentRepository.findOne({
+      where: { id: paymentId },
+    });
 
     if (!payment) {
       throw new NotFoundError('Payment not found', {
@@ -142,7 +150,10 @@ export class PaymentService {
     }
 
     payment.status = status as KpayPaymentStatus;
-    const updatedPayment = await this.paymentRepository.update(payment.id, payment);
+    const updatedPayment = await this.paymentRepository.update(
+      payment.id,
+      payment
+    );
 
     let orderActivity: OrderActivity | undefined;
     if (status === KpayPaymentStatus.SUCCESSFUL) {
@@ -151,6 +162,9 @@ export class PaymentService {
         status: OrderStatus.PAID,
         notes: payment?.externalReferenceId ?? undefined,
         createdById: payment?.createdById ?? undefined,
+      });
+      await this.orderAssignmentService.handleOrderAssignment({
+        orderId: payment?.entityId as UUID,
       });
     }
 

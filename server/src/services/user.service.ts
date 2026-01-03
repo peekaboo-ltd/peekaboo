@@ -10,10 +10,9 @@ import { getPagingData } from '../helpers/pagination.helper';
 import { Pagination } from '../helpers/pagination.helper';
 import { getPagination } from '../helpers/pagination.helper';
 import { UserStatus } from '../constants/user.constants';
-import { OrderService } from './order.service';
-import { OrderAssignmentService } from './orderAssignment.service';
 import { hashPassword } from '../helpers/auth.helper';
 import { EmailService } from '../integrations/emails/email.service';
+import { Request } from 'express';
 
 export class UserService {
   private readonly userRepository: Repository<User>;
@@ -26,7 +25,7 @@ export class UserService {
 
   // GET USER BY ID
   async getUserById(id: UUID): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({ where: { id }, relations: { userRoles: { role: true } } });
 
     if (!user) {
       throw new NotFoundError('User not found', {
@@ -140,75 +139,128 @@ export class UserService {
   }
 
   // GET USERS WITH PAGINATION AND FILTERS
-  async getUsersWithPagination({
-    page,
-    limit,
-    filters,
-  }: {
-    page: number;
-    limit: number;
-    filters: {
-      search?: string;
-      roles?: RoleTypes[];
-      status?: UserStatus;
-      phoneNumber?: string;
-      name?: string;
-      email?: string;
-    };
-  }): Promise<Pagination<User>> {
-    const { take, skip } = getPagination({ page, size: limit });
+  async getUsersWithPagination(
+    query: Request['query']
+  ): Promise<Pagination<User>> {
+    const {
+      page = 0,
+      size = 10,
+      search,
+      roles,
+      status,
+      phoneNumber,
+      name,
+      email,
+    } = query;
 
-    // Build query
-    const query = this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.userRoles', 'userRole')
-      .leftJoinAndSelect('userRole.role', 'role');
+    // Check if we need query builder for complex filters (search or roles)
+    const needsQueryBuilder =
+      search || (roles && Array.isArray(roles) ? roles.length > 0 : roles);
 
-    // Apply search filter
-    if (filters.search) {
-      query.andWhere(
-        '(user.name ILIKE :search OR user.email ILIKE :search OR user.phoneNumber ILIKE :search)',
-        { search: `%${filters.search}%` }
-      );
-    }
+    if (needsQueryBuilder) {
+      // Use query builder for complex filters
+      const { take, skip } = getPagination({
+        page: Number(page),
+        size: Number(size),
+      });
 
-    // Apply specific filters
-    if (filters.name) {
-      query.andWhere('user.name ILIKE :name', { name: `%${filters.name}%` });
-    }
+      const queryBuilder = this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.userRoles', 'userRole')
+        .leftJoinAndSelect('userRole.role', 'role');
 
-    if (filters.email) {
-      query.andWhere('user.email ILIKE :email', {
-        email: `%${filters.email}%`,
+      // Apply search filter
+      if (search) {
+        queryBuilder.andWhere(
+          '(user.name ILIKE :search OR user.email ILIKE :search OR user.phoneNumber ILIKE :search)',
+          { search: `%${search}%` }
+        );
+      }
+
+      // Apply specific filters
+      if (name) {
+        queryBuilder.andWhere('user.name ILIKE :name', { name: `%${name}%` });
+      }
+
+      if (email) {
+        queryBuilder.andWhere('user.email ILIKE :email', {
+          email: `%${email}%`,
+        });
+      }
+
+      if (phoneNumber) {
+        queryBuilder.andWhere('user.phoneNumber ILIKE :phoneNumber', {
+          phoneNumber: `%${phoneNumber}%`,
+        });
+      }
+
+      if (status) {
+        queryBuilder.andWhere('user.status = :status', { status });
+      }
+
+      // Apply role filter
+      if (roles) {
+        const roleArray = Array.isArray(roles) ? roles : [roles];
+        queryBuilder.andWhere('role.name IN (:...roles)', { roles: roleArray });
+      }
+
+      // Apply pagination and ordering
+      queryBuilder.skip(skip).take(take).orderBy('user.createdAt', 'DESC');
+
+      // Execute query
+      const [users, total] = await queryBuilder.getManyAndCount();
+
+      return getPagingData({
+        data: [users, total],
+        page: Number(page),
+        size: Number(size),
+      });
+    } else {
+      // Use findAndCount for simple filters (matching fetchOrders pattern)
+      let condition: FindOptionsWhere<User> | FindOptionsWhere<User>[] = {};
+
+      if (status) {
+        condition.status = status as UserStatus;
+      }
+
+      if (phoneNumber) {
+        condition.phoneNumber = ILike(`%${phoneNumber}%`);
+      }
+
+      if (name) {
+        condition.name = ILike(`%${name}%`);
+      }
+
+      if (email) {
+        condition.email = ILike(`%${email}%`);
+      }
+
+      const { take, skip } = getPagination({
+        page: Number(page),
+        size: Number(size),
+      });
+
+      // GET PAGINATION
+      const users = await this.userRepository.findAndCount({
+        where: condition,
+        skip,
+        take,
+        relations: {
+          userRoles: {
+            role: true,
+          },
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+
+      return getPagingData({
+        data: users,
+        page: Number(page),
+        size: Number(size),
       });
     }
-
-    if (filters.phoneNumber) {
-      query.andWhere('user.phoneNumber ILIKE :phoneNumber', {
-        phoneNumber: `%${filters.phoneNumber}%`,
-      });
-    }
-
-    if (filters.status) {
-      query.andWhere('user.status = :status', { status: filters.status });
-    }
-
-    // Apply role filter
-    if (filters.roles && filters.roles.length > 0) {
-      query.andWhere('role.name IN (:...roles)', { roles: filters.roles });
-    }
-
-    // Apply pagination
-    query.skip(skip).take(take);
-
-    // Execute query
-    const [users, total] = await query.getManyAndCount();
-
-    return getPagingData({
-      data: [users, total],
-      page,
-      size: limit,
-    });
   }
 
   // UPDATE USER STATUS

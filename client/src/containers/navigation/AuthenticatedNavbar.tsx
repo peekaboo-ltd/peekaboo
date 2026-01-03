@@ -46,10 +46,10 @@ const AuthenticatedNavbar = ({ className }: Props) => {
 
     return (
         <header
-            className={`w-full fixed top-0 z-[1000] bg-white shadow-lg transition-all duration-300
+            className={`w-full fixed top-0 z-1000 bg-white shadow-lg transition-all duration-300
         py-2 sm:py-3 h-[9vh] flex items-center justify-between ${className}`}
         >
-            <Link to="/" className="flex-shrink-0">
+            <Link to="/" className="w-full shrink-0 mx-auto">
                 <img
                     src={`${import.meta.env.VITE_PEEKABOO_LOGO}`}
                     className="h-8 w-auto sm:h-10 md:h-12 max-w-[100px] sm:max-w-[130px] md:max-w-[180px]"

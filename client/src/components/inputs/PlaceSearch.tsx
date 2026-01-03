@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 
 export interface PlaceSearchResult {
@@ -32,6 +33,9 @@ const PlaceSearch = ({
   const [predictions, setPredictions] = useState<
     google.maps.places.AutocompletePrediction[]
   >([]);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLUListElement>(null);
   const places = useMapsLibrary('places');
 
   const handlePlaceSelect = useCallback(
@@ -65,6 +69,17 @@ const PlaceSearch = ({
     }
   }, [value]);
 
+  const updateDropdownPosition = () => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
@@ -74,6 +89,7 @@ const PlaceSearch = ({
     }
 
     if (newValue.length > 2 && places) {
+      updateDropdownPosition();
       const service = new places.AutocompleteService();
       service.getQueryPredictions(
         { input: newValue },
@@ -85,6 +101,7 @@ const PlaceSearch = ({
             setPredictions(
               predictions as google.maps.places.AutocompletePrediction[]
             );
+            updateDropdownPosition();
           } else {
             setPredictions([]);
           }
@@ -95,9 +112,26 @@ const PlaceSearch = ({
     }
   };
 
+  useEffect(() => {
+    if (predictions.length > 0) {
+      updateDropdownPosition();
+      const handleResize = () => updateDropdownPosition();
+      const handleScroll = () => updateDropdownPosition();
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('scroll', handleScroll, true);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('scroll', handleScroll, true);
+      };
+    }
+  }, [predictions.length]);
+
   const handleSuggestionClick = (
-    prediction: google.maps.places.AutocompletePrediction
+    prediction: google.maps.places.AutocompletePrediction,
+    e: React.MouseEvent
   ) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!places) return;
 
     const service = new places.PlacesService(document.createElement('div'));
@@ -109,47 +143,77 @@ const PlaceSearch = ({
       (place, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && place) {
           handlePlaceSelect(place);
+          setPredictions([]);
+          setDropdownPosition(null);
         }
       }
     );
   };
 
-  return (
-    <section className={`place-search ${className}`}>
-      <input
-        type="text"
-        value={inputValue}
-        onChange={handleInputChange}
-        onBlur={() => setTimeout(() => setPredictions([]), 200)}
-        placeholder={placeholder}
-        disabled={disabled}
-        autoComplete="off"
-        className="w-full px-3 py-2 placeholder:text-[13px] text-[14px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent"
-      />
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Check if the focus is moving to the dropdown
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (dropdownRef.current && dropdownRef.current.contains(relatedTarget)) {
+      return; // Don't close if clicking on dropdown
+    }
+    // Delay closing to allow click events to fire
+    setTimeout(() => {
+      setPredictions([]);
+      setDropdownPosition(null);
+    }, 200);
+  };
 
-      {predictions.length > 0 && (
-        <ul
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
-          role="listbox"
+  const dropdownContent = predictions.length > 0 && dropdownPosition ? (
+    <ul
+      ref={dropdownRef}
+      className="fixed z-[10000] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto pointer-events-auto"
+      role="listbox"
+      style={{
+        top: `${dropdownPosition.top}px`,
+        left: `${dropdownPosition.left}px`,
+        width: `${dropdownPosition.width}px`,
+      }}
+      onMouseDown={(e) => {
+        // Prevent input blur when clicking on dropdown
+        e.preventDefault();
+      }}
+    >
+      {predictions.map((prediction) => (
+        <li
+          key={prediction.place_id}
+          className="px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+          onMouseDown={(e) => handleSuggestionClick(prediction, e)}
+          role="option"
         >
-          {predictions.map((prediction) => (
-            <li
-              key={prediction.place_id}
-              className="px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
-              onClick={() => handleSuggestionClick(prediction)}
-              role="option"
-            >
-              <strong className="font-medium text-gray-900 text-[14px]">
-                {prediction.structured_formatting?.main_text}
-              </strong>
-              <address className="text-sm text-gray-600 not-italic text-[14px]">
-                {prediction.structured_formatting?.secondary_text}
-              </address>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+          <strong className="font-medium text-gray-900 text-[14px]">
+            {prediction.structured_formatting?.main_text}
+          </strong>
+          <address className="text-sm text-gray-600 not-italic text-[14px]">
+            {prediction.structured_formatting?.secondary_text}
+          </address>
+        </li>
+      ))}
+    </ul>
+  ) : null;
+
+  return (
+    <>
+      <section className={`place-search ${className} relative`}>
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={updateDropdownPosition}
+          onBlur={handleInputBlur}
+          placeholder={placeholder}
+          disabled={disabled}
+          autoComplete="off"
+          className="w-full px-3 py-2 placeholder:text-[13px] text-[14px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent"
+        />
+      </section>
+      {dropdownContent && createPortal(dropdownContent, document.body)}
+    </>
   );
 };
 

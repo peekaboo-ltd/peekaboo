@@ -46,14 +46,14 @@ const UpdateOrderLocationFrom = () => {
   return (
     <Modal
       isOpen={updateOrderLocationFromModal}
-      onOpenChange={handleClose}
-      title="Update Origin Location"
+      onClose={handleClose}
+      heading="Update Origin Location"
       description="Search and select the pickup location for your order"
     >
       <article className="space-y-6">
         <section className="space-y-4">
           <header>
-            <h3 className="text-lg font-medium text-gray-900">Search Location</h3>
+            <h4 className="text-lg font-medium text-gray-900">Search Location</h4>
             <p className="text-sm text-gray-600">
               Enter the address or location name where the package should be picked up
             </p>
@@ -68,7 +68,7 @@ const UpdateOrderLocationFrom = () => {
 
         {selectedLocation && (
           <aside className="p-4 bg-gray-50 rounded-lg border">
-            <h4 className="text-sm font-medium text-gray-900 mb-2">Selected Location:</h4>
+            <h5 className="text-sm font-medium text-gray-900 mb-2">Selected Location:</h5>
             <address className="text-sm text-gray-700 not-italic">
               <strong>{selectedLocation.name}</strong>
               <br />

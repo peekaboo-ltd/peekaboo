@@ -204,11 +204,11 @@ const PublicOrderTracking = () => {
 
         {/* Horizontal Timeline */}
         <article className="bg-white rounded-sm shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 animate-on-scroll">
-          <h2 className="text-sm sm:text-md text-center uppercase font-semibold text-gray-800 mb-4 sm:mb-6 lg:mb-8">
+          <h2 className="text-sm sm:text-md text-center uppercase font-semibold text-gray-800 mb-4 sm:mb-6 lg:mb-8 relative z-0">
             Order Progress
           </h2>
 
-          <nav className="relative">
+          <nav className="relative z-10">
             {/* Mobile/Small Screen Vertical Layout */}
             <ol className="block sm:hidden space-y-4">
               {/* Vertical Progress Line Background */}
@@ -319,7 +319,7 @@ const PublicOrderTracking = () => {
 
                     {/* Tooltip for Mobile */}
                     {hoveredStatus === (status.key as string) && (
-                      <output className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-[11px] rounded-sm shadow-lg whitespace-nowrap z-20 max-w-48">
+                      <output className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-[11px] rounded-sm shadow-lg whitespace-nowrap z-50 max-w-48">
                         {(
                           activity as OrderActivity & {
                             notes?: string;
@@ -413,7 +413,7 @@ const PublicOrderTracking = () => {
 
                       {/* Tooltip */}
                       {hoveredStatus === (status.key as string) && (
-                        <output className="absolute bottom-full mb-2 px-2 sm:px-3 py-1 sm:py-2 bg-gray-900 text-white text-[10px] sm:text-[11px] rounded-sm shadow-lg whitespace-nowrap z-10 max-w-32 sm:max-w-48">
+                        <output className="absolute bottom-full mb-2 px-2 sm:px-3 py-1 sm:py-2 bg-gray-900 text-white text-[10px] sm:text-[11px] rounded-sm shadow-lg whitespace-nowrap z-50 max-w-32 sm:max-w-48">
                           {(
                             activity as OrderActivity & {
                               notes?: string;

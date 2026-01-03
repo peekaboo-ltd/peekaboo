@@ -8,10 +8,8 @@ export const StatusBadge = ({ status }: { status?: string }) => {
         case 'COMPLETED':
         case 'ACCEPTED':
         case 'DELIVERED':
-            className = 'bg-green-700 text-white';
-            break;
         case 'PAID':
-            className = 'bg-primary text-white';
+            className = 'bg-green-700 text-white';
             break;
         case 'CONFIRMED':
         case 'PENDING':

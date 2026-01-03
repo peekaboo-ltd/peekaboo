@@ -12,54 +12,13 @@ export const UserController = {
   // GET ALL USERS WITH FILTERS
   async getUsers(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        search,
-        roles,
-        status,
-        phoneNumber,
-        name,
-        email,
-      } = req.query;
+      // FETCH USERS
+      const users = await userService.getUsersWithPagination(req.query);
 
-      // Build filters
-      const filters: any = {};
-      
-      if (search) {
-        filters.search = search as string;
-      }
-      
-      if (roles) {
-        const roleArray = Array.isArray(roles) ? roles : [roles];
-        filters.roles = roleArray as RoleTypes[];
-      }
-      
-      if (status) {
-        filters.status = status as UserStatus;
-      }
-      
-      if (phoneNumber) {
-        filters.phoneNumber = phoneNumber as string;
-      }
-      
-      if (name) {
-        filters.name = name as string;
-      }
-      
-      if (email) {
-        filters.email = email as string;
-      }
-
-      const users = await userService.getUsersWithPagination({
-        page: Number(page),
-        limit: Number(limit),
-        filters,
-      });
-
+      // RETURN USERS
       return res.status(200).json({
         message: "Users fetched successfully",
-        ...users,
+        data: users,
       });
     } catch (error) {
       next(error);

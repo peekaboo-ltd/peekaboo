@@ -3,7 +3,6 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faFileLines } from '@fortawesome/free-regular-svg-icons';
 import {
   faChartLine,
-  faUserCheck,
   faUserGroup,
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -29,24 +28,10 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     permissions: Object.values(RoleTypes),
   },
   {
-    label: 'Couriers',
-    path: '#',
+    label: 'Orders',
+    path: '/orders',
     icon: faFileLines,
     permissions: Object.values(RoleTypes),
-    subcategories: [
-      {
-        label: 'Orders',
-        path: '/orders',
-        icon: faFileLines,
-        permissions: Object.values(RoleTypes),
-      },
-      {
-        label: 'Assignments',
-        path: '/assignments',
-        icon: faUserCheck,
-        permissions: Object.values(RoleTypes),
-      },
-    ],
   },
   {
     label: 'Users',

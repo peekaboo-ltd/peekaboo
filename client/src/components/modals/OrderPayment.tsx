@@ -136,7 +136,7 @@ const OrderPayment = () => {
   }, [payerType]);
 
   return (
-    <Modal isOpen={orderPaymentModal} onOpenChange={closeModal} className='min-w-[50vw]' title="Order Payment" description="Payment for the order">
+    <Modal isOpen={orderPaymentModal} onClose={closeModal} className='min-w-[50vw]' heading="Order Payment" description="Payment for the order">
       <article className='w-full flex flex-col gap-4'>
         <p className='text-sm'>
           Select who will make the payment for this order:

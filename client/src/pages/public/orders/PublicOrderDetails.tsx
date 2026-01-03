@@ -219,7 +219,7 @@ const PublicOrderDetails = () => {
                       <Button
                         onClick={handleGetCurrentLocation}
                         isLoading={gettingCurrentLocation}
-                        className="!py-1 !px-3 !text-xs"
+                      className="py-1! px-3! text-xs"
                         primary
                       >
                         Use Current
@@ -228,7 +228,7 @@ const PublicOrderDetails = () => {
                         onClick={() =>
                           dispatch(setUpdateOrderLocationFromModal(true))
                         }
-                        className="!py-1 !px-3 !text-xs"
+                        className="py-1! px-3! text-xs"
                       >
                         Set Location
                       </Button>
@@ -409,7 +409,7 @@ const PublicOrderDetails = () => {
                   });
                 }
               }}
-              className="!px-8 !py-3 font-semibold"
+              className="px-8! py-3! font-semibold"
             >
               {!order?.locationFrom || !order?.locationTo
                 ? 'Set Both Locations to Continue'

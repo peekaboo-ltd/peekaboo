@@ -14,6 +14,7 @@ import sidebarSlice from './slices/sidebar.slice';
 import { paymentsQueriesApiSlice } from '../api/queries/payments.queries';
 import paymentSlice from './slices/payment.slice';
 import { paymentsMutationsApiSlice } from '../api/mutations/payments.mutations';
+import { usersQueriesApiSlice } from '../api/queries/users.queries';
 
 export const store = configureStore({
   reducer: {
@@ -35,6 +36,7 @@ export const store = configureStore({
     [paymentsQueriesApiSlice.reducerPath]: paymentsQueriesApiSlice.reducer,
     payment: paymentSlice,
     [paymentsMutationsApiSlice.reducerPath]: paymentsMutationsApiSlice.reducer,
+    [usersQueriesApiSlice.reducerPath]: usersQueriesApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -46,7 +48,8 @@ export const store = configureStore({
       orderAssignmentQueriesApiSlice.middleware,
       orderActivityQueriesApiSlice.middleware,
       paymentsQueriesApiSlice.middleware,
-      paymentsMutationsApiSlice.middleware
+      paymentsMutationsApiSlice.middleware,
+      usersQueriesApiSlice.middleware
     ),
   devTools: true,
 });

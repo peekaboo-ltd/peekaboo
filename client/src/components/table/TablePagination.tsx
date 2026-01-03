@@ -139,7 +139,7 @@ export function DataTablePagination<TData>({
             className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
               table.setPageIndex(0);
-              if (setPage) setPage(1);
+              if (setPage) setPage(0);
             }}
             disabled={page === 0}
           >
@@ -151,7 +151,7 @@ export function DataTablePagination<TData>({
             className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
               table.previousPage();
-              if (setPage) setPage(page - 1);
+              if (setPage) setPage((page - 1) as unknown as number);
             }}
             disabled={page === 0}
           >
@@ -163,9 +163,9 @@ export function DataTablePagination<TData>({
             className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
               table.nextPage();
-              if (setPage) setPage(page + 1 as unknown as number);
+              if (setPage) setPage((page + 1) as unknown as number);
             }}
-            disabled={page === (totalPages || 1)}
+            disabled={page === ((totalPages - 1) || 1)}
           >
             <span className="sr-only">Go to next page</span>
             <ChevronRightIcon className="w-4 h-4" />
@@ -174,10 +174,10 @@ export function DataTablePagination<TData>({
             variant="outline"
             className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
-              table.setPageIndex((totalPages || 1) - 1);
-              if (setPage) setPage(totalPages || 1 as unknown as number);
+              table.setPageIndex((totalPages - 1) || 1);
+              if (setPage) setPage((totalPages - 1) || 1 as unknown as number);
             }}
-            disabled={page === (totalPages || 1)}
+            disabled={page === ((totalPages - 1) || 1)}
           >
             <span className="sr-only">Go to last page</span>
             <DoubleArrowRightIcon className="w-4 h-4" />

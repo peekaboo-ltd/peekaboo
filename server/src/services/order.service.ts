@@ -288,6 +288,10 @@ export class OrderService {
         recipient: true,
         sender: true,
         activities: true,
+        assignments: {
+          assignedTo: true,
+          createdBy: true,
+        },
       },
       order: {
         createdAt: 'DESC',
