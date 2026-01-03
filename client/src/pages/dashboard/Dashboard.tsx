@@ -51,12 +51,14 @@ const Dashboard = () => {
           <Skeleton className="h-8 w-64 mb-2" />
           <Skeleton className="h-4 w-48" />
         </header>
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <section aria-label="Loading metrics" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[...Array(8)].map((_, i) => (
             <Skeleton key={i} className="h-28" />
           ))}
         </section>
-        <Skeleton className="h-64" />
+        <section aria-label="Loading recent activity">
+          <Skeleton className="h-64" />
+        </section>
       </main>
     );
   }
@@ -94,7 +96,7 @@ const Dashboard = () => {
         </p>
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <section aria-label="Dashboard metrics" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {metricCards.map((card, index) => (
           <MetricCard
             key={index}
@@ -102,11 +104,13 @@ const Dashboard = () => {
             value={card.value}
             trend={card.trend}
             colorClass={card.colorClass}
+            href={card.href}
+            icon={card.icon}
           />
         ))}
       </section>
 
-      <section>
+      <section aria-label="Recent activity">
         <RecentActivityCard activities={recentActivity} />
       </section>
     </main>

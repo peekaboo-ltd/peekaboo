@@ -1,114 +1,169 @@
-import { AdminMetrics, RiderMetrics, CustomerMetrics, MetricCardData } from '@/types/dashboard.type';
+import {
+  AdminMetrics,
+  RiderMetrics,
+  CustomerMetrics,
+  MetricCardData,
+} from '@/types/dashboard.type';
+import {
+  faShoppingCart,
+  faDollarSign,
+  faChartLine,
+  faClipboardList,
+  faMotorcycle,
+  faUsers,
+  faClock,
+  faCheckCircle,
+  faTruck,
+  faPercent,
+  faHourglassHalf,
+} from '@fortawesome/free-solid-svg-icons';
+import { formatCurrency, formatNumbers } from './strings.util';
 
-export const formatCurrency = (amount: number, currency = 'RWF'): string => {
-  return new Intl.NumberFormat('en-RW', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
-
-export const getAdminMetricCards = (metrics: AdminMetrics): MetricCardData[] => [
+export const getAdminMetricCards = (
+  metrics: AdminMetrics
+): MetricCardData[] => [
   {
     label: 'Total Orders',
-    value: metrics.totalOrders,
-    colorClass: 'text-primary-500',
+    value: formatNumbers(metrics.totalOrders),
+    colorClass: 'text-blue-600',
+    href: '/orders',
+    icon: faShoppingCart,
   },
   {
     label: 'Revenue This Month',
     value: formatCurrency(metrics.revenueThisMonth),
     colorClass: 'text-green-600',
+    href: '/orders',
+    icon: faChartLine,
   },
   {
     label: 'Total Revenue',
     value: formatCurrency(metrics.totalRevenue),
-    colorClass: 'text-primary-900',
+    colorClass: 'text-blue-700',
+    href: '/orders',
+    icon: faDollarSign,
   },
   {
     label: 'Active Assignments',
-    value: metrics.activeAssignments,
+    value: formatNumbers(metrics.activeAssignments),
     colorClass: 'text-amber-600',
+    href: '/assignments',
+    icon: faClipboardList,
   },
   {
     label: 'Active Riders',
-    value: metrics.activeRiders,
+    value: formatNumbers(metrics.activeRiders),
     colorClass: 'text-purple-600',
+    href: '/users',
+    icon: faMotorcycle,
   },
   {
     label: 'Total Customers',
-    value: metrics.totalCustomers,
+    value: formatNumbers(metrics.totalCustomers),
     colorClass: 'text-pink-600',
+    href: '/users',
+    icon: faUsers,
   },
   {
     label: 'Pending Payments',
-    value: metrics.pendingPayments,
+    value: formatNumbers(metrics.pendingPayments),
     colorClass: 'text-amber-600',
+    href: '/orders',
+    icon: faClock,
   },
   {
     label: 'Completed Payments',
-    value: metrics.completedPayments,
+    value: formatNumbers(metrics.completedPayments),
     colorClass: 'text-green-600',
+    href: '/orders',
+    icon: faCheckCircle,
   },
 ];
 
-export const getRiderMetricCards = (metrics: RiderMetrics): MetricCardData[] => [
+export const getRiderMetricCards = (
+  metrics: RiderMetrics
+): MetricCardData[] => [
   {
     label: 'Active Assignments',
-    value: metrics.activeAssignments,
-    colorClass: 'text-primary-500',
+    value: formatNumbers(metrics.activeAssignments),
+    colorClass: 'text-blue-600',
+    href: '/assignments',
+    icon: faClipboardList,
   },
   {
     label: 'Completed Deliveries',
-    value: metrics.completedDeliveries,
+    value: formatNumbers(metrics.completedDeliveries),
     colorClass: 'text-green-600',
+    href: '/assignments',
+    icon: faCheckCircle,
   },
   {
     label: 'Earnings This Month',
     value: formatCurrency(metrics.earningsThisMonth),
-    colorClass: 'text-primary-900',
+    colorClass: 'text-blue-700',
+    href: '/assignments',
+    icon: faChartLine,
   },
   {
     label: 'Total Earnings',
     value: formatCurrency(metrics.totalEarnings),
     colorClass: 'text-green-600',
+    href: '/assignments',
+    icon: faDollarSign,
   },
   {
     label: 'Acceptance Rate',
-    value: `${metrics.acceptanceRate}%`,
-    colorClass: metrics.acceptanceRate >= 80 ? 'text-green-600' : 'text-amber-600',
+    value: `${formatNumbers(metrics.acceptanceRate)}%`,
+    colorClass:
+      metrics.acceptanceRate >= 80 ? 'text-green-600' : 'text-amber-600',
+    href: '/assignments',
+    icon: faPercent,
   },
   {
     label: 'Pending Assignments',
-    value: metrics.pendingAssignments,
+    value: formatNumbers(metrics.pendingAssignments),
     colorClass: 'text-amber-600',
+    href: '/assignments',
+    icon: faHourglassHalf,
   },
 ];
 
-export const getCustomerMetricCards = (metrics: CustomerMetrics): MetricCardData[] => [
+export const getCustomerMetricCards = (
+  metrics: CustomerMetrics
+): MetricCardData[] => [
   {
     label: 'Total Orders',
-    value: metrics.totalOrders,
-    colorClass: 'text-primary-500',
+    value: formatNumbers(metrics.totalOrders),
+    colorClass: 'text-blue-600',
+    href: '/orders',
+    icon: faShoppingCart,
   },
   {
     label: 'Active Orders',
-    value: metrics.activeOrders,
+    value: formatNumbers(metrics.activeOrders),
     colorClass: 'text-amber-600',
+    href: '/orders',
+    icon: faTruck,
   },
   {
     label: 'Completed Orders',
-    value: metrics.completedOrders,
+    value: formatNumbers(metrics.completedOrders),
     colorClass: 'text-green-600',
+    href: '/orders',
+    icon: faCheckCircle,
   },
   {
     label: 'Total Spent',
     value: formatCurrency(metrics.totalSpent),
-    colorClass: 'text-primary-900',
+    colorClass: 'text-blue-700',
+    href: '/orders',
+    icon: faDollarSign,
   },
   {
     label: 'Pending Payments',
-    value: metrics.pendingPayments,
+    value: formatNumbers(metrics.pendingPayments),
     colorClass: 'text-amber-600',
+    href: '/orders',
+    icon: faClock,
   },
 ];

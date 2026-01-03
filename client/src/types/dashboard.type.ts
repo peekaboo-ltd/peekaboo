@@ -65,6 +65,8 @@ export interface DashboardMetrics {
   metrics: AdminMetrics | RiderMetrics | CustomerMetrics;
 }
 
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+
 export interface MetricCardData {
   label: string;
   value: string | number;
@@ -73,4 +75,6 @@ export interface MetricCardData {
     isPositive: boolean;
   };
   colorClass?: string;
+  href?: string;
+  icon?: IconProp;
 }

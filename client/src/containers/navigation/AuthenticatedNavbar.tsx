@@ -45,14 +45,15 @@ const AuthenticatedNavbar = ({ className }: Props) => {
     ];
 
     return (
+        <nav className="w-full fixed top-0 z-1000 bg-white shadow-md">
         <header
-            className={`w-full fixed top-0 z-1000 bg-white shadow-lg transition-all duration-300
+            className={`w-[90%] mx-auto transition-all duration-300
         py-2 sm:py-3 h-[9vh] flex items-center justify-between ${className}`}
         >
-            <Link to="/" className="w-full shrink-0 mx-auto">
+            <Link to="/" className="w-fit shrink-0">
                 <img
-                    src={`${import.meta.env.VITE_PEEKABOO_LOGO}`}
-                    className="h-8 w-auto sm:h-10 md:h-12 max-w-[100px] sm:max-w-[130px] md:max-w-[180px]"
+                    src="/peekaboo.jpg"
+                    className="h-12 w-auto sm:h-16 md:h-20 max-w-[200px] sm:max-w-[230px] md:max-w-[280px]"
                     alt="Peekaboo Logo"
                 />
             </Link>
@@ -220,6 +221,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                 </nav>
             </aside>
         </header>
+        </nav>
     );
 };
 

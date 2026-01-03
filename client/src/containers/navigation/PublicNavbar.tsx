@@ -23,9 +23,13 @@ const PublicNavbar = () => {
           {/* Logo */}
           <Link
             to="/"
-            className="text-xl font-bold text-primary transition-colors duration-200"
+            className="flex items-center transition-colors duration-200"
           >
-            Peekaboo
+            <img
+              src="/peekaboo.jpg"
+              className="h-12 w-auto sm:h-16 md:h-20 max-w-[200px] sm:max-w-[230px] md:max-w-[280px]"
+              alt="Peekaboo Logo"
+            />
           </Link>
 
           {/* Desktop Navigation */}

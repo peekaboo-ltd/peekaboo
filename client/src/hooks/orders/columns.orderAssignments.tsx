@@ -53,22 +53,23 @@ export const useOrderAssignmentsColumns = () => {
             header: 'Actions',
             accessorKey: 'actions',
             cell: ({ row }) => {
+
                 return (
-                    <menu className="w-full flex items-center gap-3">
-                        <CustomTooltip label="Accept">
+                    <menu className="w-full flex items-center gap-3 justify-center">
+                        {['PENDING'].includes(row.original?.status as unknown as string) && <> <CustomTooltip label="Accept">
                             <FontAwesomeIcon onClick={(e) => {
                                 e.stopPropagation();
                                 dispatch(setAcceptOrderAssignmentModal(true));
                                 dispatch(setSelectedOrderAssignment(row.original));
                             }} icon={faCircleCheck} size="lg" className="cursor-pointer text-green-700" />
                         </CustomTooltip>
-                        <CustomTooltip label="Reject">
-                            <FontAwesomeIcon onClick={(e) => {
-                                e.stopPropagation();
-                                dispatch(setRejectOrderAssignmentModal(true));
-                                dispatch(setSelectedOrderAssignment(row.original));
-                            }} icon={faCircleXmark} size="lg" className="cursor-pointer text-red-700" />
-                        </CustomTooltip>
+                            <CustomTooltip label="Reject">
+                                <FontAwesomeIcon onClick={(e) => {
+                                    e.stopPropagation();
+                                    dispatch(setRejectOrderAssignmentModal(true));
+                                    dispatch(setSelectedOrderAssignment(row.original));
+                                }} icon={faCircleXmark} size="lg" className="cursor-pointer text-red-700" />
+                            </CustomTooltip></>}
                         <CustomTooltip label="Info">
                             <FontAwesomeIcon onClick={(e) => {
                                 e.stopPropagation();
