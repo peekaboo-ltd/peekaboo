@@ -122,6 +122,17 @@ The audit log service ([auditLog.service.ts](src/services/auditLog.service.ts)) 
 - Audit trail for compliance
 - Search and filter capabilities
 
+### Payment Service
+The payment service ([payment.service.ts](src/services/payment.service.ts)) manages payment processing with Kpay integration:
+- Payment initiation and processing
+- Support for multiple payment methods (Mobile Money, Credit Cards, SPENN, SmartCash)
+- Payment status tracking and updates
+- Webhook handling for payment notifications
+- Automatic order status updates on successful payment
+- Payer selection (Sender, Recipient, or Custom phone number)
+- Rwanda phone number formatting (250XXXXXXXXX)
+- Integration with Kpay payment gateway ([kpay.service.ts](src/integrations/kpay/kpay.service.ts))
+
 ## 🔄 Order Workflow
 
 ### Current Implementation
@@ -150,12 +161,15 @@ The application currently supports the following order trajectory:
 
 The following features are planned for implementation:
 
-#### 1. **Payment Processing** (Before Rider Assignment)
-   - Integration with payment gateway
-   - Payment verification and confirmation
-   - Order status update to `PAID`
-   - Payment receipt generation
-   - **Reference**: [payment.entity.ts](src/entities/payment.entity.ts)
+#### 1. **Payment Processing** ✅ (Implemented with Kpay)
+   - ✅ Integration with Kpay payment gateway
+   - ✅ Payment initiation and verification
+   - ✅ Order status update to `PAID`
+   - ✅ Webhook handling for payment notifications
+   - ✅ Support for multiple payment methods (Mobile Money, Cards, SPENN, SmartCash)
+   - ✅ Payer selection (Sender, Recipient, or Custom)
+   - ✅ Phone number formatting for Rwanda
+   - **Reference**: [payment.entity.ts](src/entities/payment.entity.ts), [kpay.service.ts](src/integrations/kpay/kpay.service.ts)
 
 #### 2. **Order Re-assignment**
    - Ability to reassign order to different rider
