@@ -143,7 +143,8 @@ const OrderPayment = () => {
         </p>
 
         {/* PAYER SELECTION */}
-        <div className='flex flex-col gap-3'>
+        <fieldset className='flex flex-col gap-3'>
+          <legend className='sr-only'>Select payer</legend>
           <label className='flex items-center gap-2 cursor-pointer'>
             <input
               type='radio'
@@ -187,11 +188,11 @@ const OrderPayment = () => {
             />
             <span className='text-sm'>Other</span>
           </label>
-        </div>
+        </fieldset>
 
         {/* CUSTOM PHONE INPUT */}
         {payerType === 'other' && (
-          <div className='flex flex-col gap-2'>
+          <fieldset className='flex flex-col gap-2'>
             <label htmlFor='customPhone' className='text-sm font-medium'>
               Phone Number
             </label>
@@ -209,7 +210,7 @@ const OrderPayment = () => {
             <p className='text-xs text-gray-500'>
               Enter a Rwandan phone number (e.g., 788123456 or 250788123456)
             </p>
-          </div>
+          </fieldset>
         )}
 
         <Button primary onClick={(e) => {

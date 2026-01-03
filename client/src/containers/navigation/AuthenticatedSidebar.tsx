@@ -94,9 +94,9 @@ const AuthenticatedSidebar = () => {
                  md:w-[${sidebarOpen ? '18vw' : '6vw'
                 }] md:p-4 md:shadow-none md:z-auto overflow-y-auto`}
         >
-            <figure
-                className={`flex items-center w-full mb-4 
-                   ${sidebarOpen ? 'justify-end pr-0' : 'justify-center pt-2'} 
+            <div
+                className={`flex items-center w-full mb-4
+                   ${sidebarOpen ? 'justify-end pr-0' : 'justify-center pt-2'}
                    md:justify-end md:pr-0 md:pt-0`}
             >
                 <FontAwesomeIcon
@@ -109,7 +109,7 @@ const AuthenticatedSidebar = () => {
                         }`}
                     aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
                 />
-            </figure>
+            </div>
 
             <ul
                 className={`flex flex-col items-start w-full gap-2 ${sidebarOpen ? 'overflow-y-auto flex-1' : 'overflow-hidden'

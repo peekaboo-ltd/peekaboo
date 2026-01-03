@@ -475,11 +475,11 @@ const PublicOrderTracking = () => {
           </nav>
         </article>
         </section>
-        <menu className='flex items-center justify-between max-w-7xl mx-auto animate-on-scroll'>
+        <footer className='flex items-center justify-between max-w-7xl mx-auto animate-on-scroll'>
           <Button route={`/p/orders/${order?.id}`}>
             Back
           </Button>
-        </menu>
+        </footer>
       </main>
     </>
   );
