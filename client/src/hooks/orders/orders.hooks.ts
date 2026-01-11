@@ -5,10 +5,13 @@ import {
 } from '../../api/mutations/orders.mutations';
 import { useNavigate } from 'react-router-dom';
 import { useLazyFetchOrdersQuery, useLazyGetOrderQuery } from '@/api/queries/orders.queries';
-import { useAppDispatch } from '@/states/hooks';
+import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrder, setOrdersList } from '@/states/slices/order.slice';
+import { setToken, setUser, setIsAuthenticated } from '@/states/slices/auth.slice';
+import { localStorageUtil } from '@/utils/localStorage.util';
 import { ORDER_FEE_RANGES } from '@/constants/order.constants';
 import { usePagination } from '../common/pagination.hooks';
+import { RoleTypes } from '@/types/auth.type';
 
 /**
  *
@@ -18,16 +21,29 @@ export const useCreatePublicOrder = () => {
   // STATE VARIABLES
   // NAVIGATION
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const [createPublicOrder, { data, error, isLoading, reset, isSuccess }] =
     useCreatePublicOrderMutation();
 
   useEffect(() => {
-    if (isSuccess) {
-      navigate(`/p/orders/${data?.data?.id}`);
+    if (isSuccess && data?.data) {
+      const { order, auth } = data.data;
+
+      // Store auth data in localStorage
+      localStorageUtil.setItem('token', auth.token);
+      localStorageUtil.setItem('user', auth.user);
+
+      // Update Redux state
+      dispatch(setToken(auth.token));
+      dispatch(setUser(auth.user));
+      dispatch(setIsAuthenticated(true));
+
+      // Navigate to order details
+      navigate(`/p/orders/${order.id}`);
       reset();
     }
-  }, [data, isSuccess, navigate, reset]);
+  }, [data, isSuccess, navigate, reset, dispatch]);
 
   return { createPublicOrder, data, error, isLoading, reset, isSuccess };
 };
@@ -89,6 +105,7 @@ export const useGetOrderFees = () => {
 export const useFetchOrders = () => {
 
   const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
 
   // PAGINATION
   const { page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount } = usePagination();
@@ -104,5 +121,21 @@ export const useFetchOrders = () => {
       }
     }, [data, isSuccess, dispatch, setTotalPages, setTotalCount]);
 
-  return { fetchOrders, data, error, isFetching, reset, isSuccess, page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount };
+  // Check if user is a customer
+  const isCustomer = user?.userRoles?.some(
+    (userRole) => userRole.role.name === RoleTypes.CUSTOMER
+  );
+
+  // Wrap fetchOrders to add createdById for customers
+  const wrappedFetchOrders = useCallback(
+    (params: { page: number; size: number }) => {
+      const queryParams = isCustomer && user?.id
+        ? { ...params, createdById: user.id }
+        : params;
+      return fetchOrders(queryParams);
+    },
+    [fetchOrders, isCustomer, user?.id]
+  );
+
+  return { fetchOrders: wrappedFetchOrders, data, error, isFetching, reset, isSuccess, page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount };
 };

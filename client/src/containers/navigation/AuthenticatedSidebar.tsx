@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { motion, useAnimation } from 'framer-motion';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UserRole } from '@/types/user.type';
@@ -101,7 +101,7 @@ const AuthenticatedSidebar = () => {
             >
                 <FontAwesomeIcon
                     icon={faBars}
-                    onClick={(e) => {
+                    onClick={(e: MouseEvent<HTMLDivElement>) => {
                         e.preventDefault();
                         handleSidebarToggle();
                     }}

@@ -23,6 +23,7 @@ import { User } from '../entities/user.entity';
 import { UserService } from './user.service';
 import { OrderActivityService } from './orderActivity.service';
 import { Request } from 'express';
+import jwt from 'jsonwebtoken';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -78,7 +79,7 @@ export class OrderService {
   }: {
     senderPhoneNumber: string;
     recipientPhoneNumber: string;
-  }): Promise<Order> {
+  }): Promise<{ order: Order; auth: { token: string; user: User } }> {
     // GENERATE REFERENCE ID
     let referenceId: string = generateReferenceNumber({
       prefix: 'P',
@@ -129,7 +130,24 @@ export class OrderService {
       createdById: createdOrder?.createdById,
     });
 
-    return createdOrder;
+    // GENERATE AUTHENTICATION TOKEN FOR THE SENDER
+    const token = jwt.sign(
+      { id: sender.id },
+      process.env.JWT_SECRET || 'default_secret',
+      { expiresIn: '24h' }
+    );
+
+    // FETCH COMPLETE USER DETAILS WITH ROLES
+    const userWithRoles = await this.userService.getUserById(sender.id);
+
+    // RETURN ORDER AND AUTH DATA
+    return {
+      order: createdOrder,
+      auth: {
+        token,
+        user: userWithRoles,
+      },
+    };
   }
 
   // GET ORDER BY REFERENCE ID
@@ -270,7 +288,7 @@ export class OrderService {
 
   // FETCH ORDERS
   async fetchOrders(query: Request['query']): Promise<Pagination<Order>> {
-    const { page = 0, size = 10, senderId, recipientId, status } = query;
+    const { page = 0, size = 10, senderId, recipientId, status, createdById } = query;
 
     let condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[] = {};
 
@@ -280,6 +298,10 @@ export class OrderService {
 
     if (recipientId) {
       condition.recipientId = recipientId as UUID;
+    }
+
+    if (createdById) {
+      condition.createdById = createdById as UUID;
     }
 
     const { take, skip } = getPagination({

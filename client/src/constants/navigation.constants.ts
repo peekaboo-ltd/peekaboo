@@ -38,7 +38,7 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     label: 'Assignments',
     path: '/assignments',
     icon: faUserCheck,
-    permissions: Object.values(RoleTypes),
+    permissions: [RoleTypes.ADMIN, RoleTypes.RIDER],
   },
   {
     label: 'Users',

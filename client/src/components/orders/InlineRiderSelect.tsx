@@ -10,9 +10,10 @@ import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 
 interface InlineRiderSelectProps {
   order: Order;
+  isCustomer?: boolean;
 }
 
-const InlineRiderSelect = ({ order }: InlineRiderSelectProps) => {
+const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps) => {
   const {
     searchTerm,
     setSearchTerm,
@@ -128,7 +129,7 @@ const InlineRiderSelect = ({ order }: InlineRiderSelectProps) => {
     if (activeAssignment) {
       return (
         <span className="text-xs w-full text-center">
-          {formatRiderDisplay(activeAssignment?.assignedTo)} <FontAwesomeIcon icon={faPenToSquare} />
+          {formatRiderDisplay(activeAssignment?.assignedTo)} {!isCustomer && <FontAwesomeIcon icon={faPenToSquare} />}
         </span>
       );
     }
@@ -194,6 +195,17 @@ const InlineRiderSelect = ({ order }: InlineRiderSelectProps) => {
         </menu>
       </section>
     ) : null;
+
+  // If user is a customer, show read-only assignment status
+  if (isCustomer) {
+    return (
+      <div
+        className={`text-sm text-primary px-4 py-2 rounded-md ${getStatusBackgroundColor(activeAssignment?.status)}`}
+      >
+        {renderAssignmentStatus()}
+      </div>
+    );
+  }
 
   return (
     <>

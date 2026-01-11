@@ -479,6 +479,9 @@ const PublicOrderTracking = () => {
           <Button route={`/p/orders/${order?.id}`}>
             Back
           </Button>
+          <Button route="/dashboard" primary>
+            Continue to Dashboard
+          </Button>
         </footer>
       </main>
     </>

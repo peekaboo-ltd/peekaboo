@@ -59,16 +59,16 @@ export const OrderController = {
     try {
       const { senderPhoneNumber, recipientPhoneNumber } = req.body;
 
-      // CREATE PUBLIC ORDER
-      const createdOrder = await orderService.createPublicOrder({
+      // CREATE PUBLIC ORDER (returns order + auth)
+      const result = await orderService.createPublicOrder({
         senderPhoneNumber,
         recipientPhoneNumber,
       });
 
-      // RETURN ORDER
+      // RETURN ORDER AND AUTH DATA
       return res.status(201).json({
         message: 'Order created successfully',
-        data: createdOrder,
+        data: result,
       });
     } catch (error) {
       next(error);

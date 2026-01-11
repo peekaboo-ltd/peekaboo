@@ -38,7 +38,7 @@ const PublicNavbar = () => {
               if (label === 'MY_ACCOUNT') {
                 return (
                   <li key={index}>
-                    <Button route={link} primary className="!py-2 !px-6">
+                    <Button route={link} primary className="py-2! px-6!">
                       {capitalizeString(label)}
                     </Button>
                   </li>
@@ -89,9 +89,8 @@ const PublicNavbar = () => {
 
         {/* Mobile Navigation */}
         <section
-          className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-            isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-          }`}
+          className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+            }`}
         >
           <ul className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
             {Object.entries(NAVIGATION_LINKS).map(([label, link], index) => {

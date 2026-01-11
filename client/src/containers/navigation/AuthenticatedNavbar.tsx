@@ -59,6 +59,13 @@ const AuthenticatedNavbar = ({ className }: Props) => {
             </Link>
 
             <section className="flex items-center gap-2 sm:gap-3 ml-auto">
+                    {pathname === '/' && <Link
+                    to="/dashboard"
+                    className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors duration-200"
+                >
+                    Dashboard
+                </Link>}
+
                 <button
                     className="md:hidden p-2 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors duration-200"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -81,15 +88,15 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         aria-haspopup="true"
                     >
                         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                            {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
+                            {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                         </div>
 
                         <div className="hidden sm:flex flex-col items-start">
                             <span className="text-sm font-medium text-gray-800 truncate max-w-[150px] sm:max-w-[170px]">
-                                {user?.name}
+                                {user?.name || user?.phoneNumber}
                             </span>
                             <span className="text-xs text-gray-500 truncate max-w-[150px] sm:max-w-[170px]">
-                                {user?.email}
+                                {user?.email || user?.phoneNumber}
                             </span>
                         </div>
 
@@ -107,10 +114,10 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                 <section className="py-2 w-full rounded-lg shadow-lg bg-white border border-gray-100">
                     <div className="sm:hidden p-4 border-b border-gray-100">
                         <h3 className="font-medium text-gray-800">
-                            {user?.name}
+                            {user?.name || user?.phoneNumber}
                         </h3>
                         <p className="text-sm text-gray-500 truncate">
-                            {user?.email}
+                            {user?.email || user?.phoneNumber}
                         </p>
                     </div>
 
@@ -148,7 +155,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
             </NavDropdown>
 
             <aside
-                className={`md:hidden fixed inset-0 z-[1001] transition-all duration-300 ${isMobileMenuOpen ? 'visible' : 'invisible'
+                className={`md:hidden fixed inset-0 z-1001 transition-all duration-300 ${isMobileMenuOpen ? 'visible' : 'invisible'
                     }`}
             >
                 <section
@@ -173,17 +180,17 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                     </header>
 
                     <section className="py-2">
-                        <header className="px-3 py-3 border-b border-gray-100 bg-gradient-to-r from-primary/5 to-transparent">
+                        <header className="px-3 py-3 border-b border-gray-100 bg-linear-to-r from-primary/5 to-transparent">
                             <div className="flex items-center gap-2.5">
                                 <span className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-base">
-                                    {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
+                                    {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                                 </span>
                                 <div>
                                     <p className="font-medium text-gray-800 text-sm">
-                                        {user?.name}
+                                        {user?.name || user?.phoneNumber}
                                     </p>
                                     <p className="text-xs text-gray-500 truncate max-w-[160px]">
-                                        {user?.email}
+                                        {user?.email || user?.phoneNumber}
                                     </p>
                                 </div>
                             </div>
@@ -191,6 +198,19 @@ const AuthenticatedNavbar = ({ className }: Props) => {
 
                         <nav className="py-2">
                             <ul className="space-y-0.5">
+                                <li>
+                                    <Link
+                                        to="/dashboard"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-primary transition-all duration-200"
+                                    >
+                                        <FontAwesomeIcon
+                                            icon={faUser}
+                                            className="w-4 h-4 text-gray-400"
+                                        />
+                                        Dashboard
+                                    </Link>
+                                </li>
                                 {navDropdown?.map((nav, index) => (
                                     <li key={index}>
                                         <Link

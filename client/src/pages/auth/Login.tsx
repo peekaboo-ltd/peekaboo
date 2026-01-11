@@ -1,11 +1,22 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import Input from '@/components/inputs/Input';
 import { Checkbox } from '@/components/ui/checkbox';
 import Button from '@/components/inputs/Button';
 import { useLogin } from '@/hooks/auth/auth.hooks';
+import { useAppSelector } from '@/states/hooks';
+import { useEffect } from 'react';
 
 export const Login = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const { control, handleSubmit, formState: { errors } } = useForm();
 
