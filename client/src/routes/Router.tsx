@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { Home } from '../pages/home';
 import { PublicOrderDetails } from '../pages/public/orders';
 import PublicOrderTracking from '@/pages/public/orders/PublicOrderTracking';
+import PublicOrderPaymentSuccess from '@/pages/public/orders/PublicOrderPaymentSuccess';
 import PublicLayout from '@/containers/navigation/PublicLayout';
 import { NotFoundPage } from '../pages/common';
 import { Login } from '@/pages/auth';
@@ -31,6 +32,7 @@ const Router = () => {
       <Route path="/p" element={<PublicLayout />}>
         <Route path="orders">
           <Route path=":id" element={<PublicOrderDetails />} />
+          <Route path=":id/payment-success" element={<PublicOrderPaymentSuccess />} />
           <Route path=":id/tracking" element={<PublicOrderTracking />} />
         </Route>
       </Route>

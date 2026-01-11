@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import Modal from '../Modal';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrderPaymentModal, setSelectedOrder } from '@/states/slices/order.slice';
@@ -13,6 +14,7 @@ const OrderPayment = () => {
 
   // STATE VARIABLES
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { orderPaymentModal, selectedOrder } = useAppSelector((state) => state.order);
   const [payerType, setPayerType] = useState<PayerType>('sender');
   const [customPhone, setCustomPhone] = useState<string>('');
@@ -125,9 +127,12 @@ const OrderPayment = () => {
 
   useEffect(() => {
     if (isSuccess) {
+      const orderId = selectedOrder?.id;
       closeModal();
+      // Navigate to payment success page
+      navigate(`/p/orders/${orderId}/payment-success`);
     }
-  }, [isSuccess, closeModal]);
+  }, [isSuccess, closeModal, navigate, selectedOrder?.id]);
 
   // RESET PHONE ERROR WHEN CHANGING PAYER TYPE
   useEffect(() => {

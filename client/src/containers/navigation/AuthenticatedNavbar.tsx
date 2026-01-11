@@ -52,7 +52,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
         >
             <Link to="/" className="w-fit shrink-0">
                 <img
-                    src="/peekaboo.jpg"
+                    src="/peekaboo.png"
                     className="h-12 w-auto sm:h-16 md:h-20 max-w-[200px] sm:max-w-[230px] md:max-w-[280px]"
                     alt="Peekaboo Logo"
                 />

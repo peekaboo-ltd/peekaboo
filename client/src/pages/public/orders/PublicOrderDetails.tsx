@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrderPaymentModal, setSelectedOrder, setUpdateOrderLocationFromModal, setUpdateOrderLocationToModal } from '@/states/slices/order.slice';
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, MouseEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
@@ -238,7 +238,7 @@ const PublicOrderDetails = () => {
                     <FontAwesomeIcon
                       icon={faPenToSquare}
                       className="w-4 h-4 cursor-pointer"
-                      onClick={(e) => {
+                      onClick={(e: MouseEvent<HTMLDivElement>) => {
                         e.preventDefault();
                         dispatch(setUpdateOrderLocationFromModal(true));
                       }}
@@ -271,7 +271,7 @@ const PublicOrderDetails = () => {
                   <FontAwesomeIcon
                     icon={faPenToSquare}
                     className="w-4 h-4 cursor-pointer"
-                    onClick={(e) => {
+                    onClick={(e: MouseEvent<HTMLDivElement>) => {
                       e.preventDefault();
                       dispatch(setUpdateOrderLocationToModal(true));
                     }}
@@ -391,41 +391,39 @@ const PublicOrderDetails = () => {
               </section>
             )}
           </section>
-          {paymentsList?.filter((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL).length > 0 && <menu className='w-full flex flex-col gap-4'>
-            <p className='text-sm text-green-700'>
-              Payment with Reference Code: <Link to={`https://kpay.co.rw/transactions/${paymentsList?.find((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL)?.externalReferenceId}`} target='_blank' className='text-primary text-sm underline underline-offset-2'>{paymentsList?.find((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL)?.externalReferenceId}</Link> has been successful. Click the button below to track your order.
-            </p>
-          </menu>}
           <footer className="mt-8 flex justify-end animate-on-scroll">
-            {paymentsList?.filter((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL).length > 0 ? <Button
-              primary
-              isLoading={createOrderAssignmentIsLoading}
-              disabled={!order?.locationFrom || !order?.locationTo}
-              onClick={(e) => {
-                e.preventDefault();
-                if (order?.id) {
-                  createOrderAssignment({
-                    orderId: order?.id,
-                  });
-                }
-              }}
-              className="px-8! py-3! font-semibold"
-            >
-              {!order?.locationFrom || !order?.locationTo
-                ? 'Set Both Locations to Continue'
-                : 'Track Order'}
-            </Button> : <Button
-              primary
-              isLoading={createOrderAssignmentIsLoading}
-              disabled={!order?.locationFrom || !order?.locationTo}
-              onClick={(e) => {
-                e.preventDefault();
-                dispatch(setSelectedOrder(order));
-                dispatch(setOrderPaymentModal(true));
-              }}
-            >
-              Complete Payment
-            </Button>}
+            {paymentsList?.filter((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL).length > 0 ? (
+              <Button
+                primary
+                isLoading={createOrderAssignmentIsLoading}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (order?.id) {
+                    createOrderAssignment({
+                      orderId: order?.id,
+                    });
+                  }
+                }}
+                className="px-8! py-3! font-semibold"
+              >
+                Track Order
+              </Button>
+            ) : (
+              <Button
+                primary
+                disabled={!order?.locationFrom || !order?.locationTo}
+                onClick={(e) => {
+                  e.preventDefault();
+                  dispatch(setSelectedOrder(order));
+                  dispatch(setOrderPaymentModal(true));
+                }}
+                className="px-8! py-3! font-semibold"
+              >
+                {!order?.locationFrom || !order?.locationTo
+                  ? 'Set Both Locations to Continue'
+                  : 'Complete Payment'}
+              </Button>
+            )}
           </footer>
 
           {/* Modal Components */}
