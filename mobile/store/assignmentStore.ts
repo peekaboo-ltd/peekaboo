@@ -1,0 +1,213 @@
+import { create } from 'zustand';
+import { Assignment, OrderAssignmentStatus } from '../types';
+import { assignmentsAPI } from '../services/api/assignments';
+import { handleAPIError, getErrorMessage } from '../utils/errorHandler';
+
+interface AssignmentState {
+  assignments: Assignment[];
+  selectedAssignment: Assignment | null;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: string | null;
+  filter: OrderAssignmentStatus | 'ALL';
+  
+  // Pagination
+  page: number;
+  totalPages: number;
+  hasMore: boolean;
+  
+  // Actions
+  fetchAssignments: (filter?: OrderAssignmentStatus | 'ALL') => Promise<void>;
+  fetchMoreAssignments: () => Promise<void>;
+  fetchAssignmentById: (id: string) => Promise<Assignment | null>;
+  acceptAssignment: (id: string) => Promise<boolean>;
+  rejectAssignment: (id: string, reason?: string) => Promise<boolean>;
+  refreshAssignments: () => Promise<void>;
+  setFilter: (filter: OrderAssignmentStatus | 'ALL') => void;
+  setSelectedAssignment: (assignment: Assignment | null) => void;
+  clearError: () => void;
+}
+
+export const useAssignmentStore = create<AssignmentState>((set, get) => ({
+  assignments: [],
+  selectedAssignment: null,
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  filter: 'ALL',
+  page: 1,
+  totalPages: 1,
+  hasMore: false,
+
+  fetchAssignments: async (filter?: OrderAssignmentStatus | 'ALL'): Promise<void> => {
+    const currentFilter = filter ?? get().filter;
+    set({ isLoading: true, error: null, filter: currentFilter, page: 1 });
+    
+    try {
+      const params = currentFilter !== 'ALL' 
+        ? { status: currentFilter, page: 1, limit: 20 } 
+        : { page: 1, limit: 20 };
+      
+      const response = await assignmentsAPI.getAll(params);
+      
+      set({
+        assignments: response.data,
+        totalPages: response.totalPages,
+        hasMore: response.page < response.totalPages,
+        isLoading: false,
+      });
+    } catch (error) {
+      const appError = handleAPIError(error);
+      set({
+        isLoading: false,
+        error: getErrorMessage(appError),
+      });
+    }
+  },
+
+  fetchMoreAssignments: async (): Promise<void> => {
+    const { page, hasMore, filter, isLoading } = get();
+    
+    if (!hasMore || isLoading) return;
+    
+    set({ isLoading: true });
+    
+    try {
+      const nextPage = page + 1;
+      const params = filter !== 'ALL' 
+        ? { status: filter, page: nextPage, limit: 20 } 
+        : { page: nextPage, limit: 20 };
+      
+      const response = await assignmentsAPI.getAll(params);
+      
+      set(state => ({
+        assignments: [...state.assignments, ...response.data],
+        page: nextPage,
+        hasMore: nextPage < response.totalPages,
+        isLoading: false,
+      }));
+    } catch (error) {
+      const appError = handleAPIError(error);
+      set({
+        isLoading: false,
+        error: getErrorMessage(appError),
+      });
+    }
+  },
+
+  fetchAssignmentById: async (id: string): Promise<Assignment | null> => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const assignment = await assignmentsAPI.getById(id);
+      set({
+        selectedAssignment: assignment,
+        isLoading: false,
+      });
+      return assignment;
+    } catch (error) {
+      const appError = handleAPIError(error);
+      set({
+        isLoading: false,
+        error: getErrorMessage(appError),
+      });
+      return null;
+    }
+  },
+
+  acceptAssignment: async (id: string): Promise<boolean> => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const response = await assignmentsAPI.accept(id);
+      
+      // Update assignment in list
+      set(state => ({
+        assignments: state.assignments.map(a => 
+          a.id === id ? { ...a, status: OrderAssignmentStatus.ACTIVE } : a
+        ),
+        selectedAssignment: state.selectedAssignment?.id === id 
+          ? { ...state.selectedAssignment, status: OrderAssignmentStatus.ACTIVE }
+          : state.selectedAssignment,
+        isLoading: false,
+      }));
+      
+      return true;
+    } catch (error) {
+      const appError = handleAPIError(error);
+      set({
+        isLoading: false,
+        error: getErrorMessage(appError),
+      });
+      return false;
+    }
+  },
+
+  rejectAssignment: async (id: string, reason?: string): Promise<boolean> => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      await assignmentsAPI.reject(id, reason);
+      
+      // Update assignment in list
+      set(state => ({
+        assignments: state.assignments.map(a => 
+          a.id === id ? { ...a, status: OrderAssignmentStatus.REJECTED } : a
+        ),
+        selectedAssignment: state.selectedAssignment?.id === id 
+          ? { ...state.selectedAssignment, status: OrderAssignmentStatus.REJECTED }
+          : state.selectedAssignment,
+        isLoading: false,
+      }));
+      
+      return true;
+    } catch (error) {
+      const appError = handleAPIError(error);
+      set({
+        isLoading: false,
+        error: getErrorMessage(appError),
+      });
+      return false;
+    }
+  },
+
+  refreshAssignments: async (): Promise<void> => {
+    set({ isRefreshing: true });
+    
+    try {
+      const { filter } = get();
+      const params = filter !== 'ALL' 
+        ? { status: filter, page: 1, limit: 20 } 
+        : { page: 1, limit: 20 };
+      
+      const response = await assignmentsAPI.getAll(params);
+      
+      set({
+        assignments: response.data,
+        page: 1,
+        totalPages: response.totalPages,
+        hasMore: response.page < response.totalPages,
+        isRefreshing: false,
+      });
+    } catch (error) {
+      const appError = handleAPIError(error);
+      set({
+        isRefreshing: false,
+        error: getErrorMessage(appError),
+      });
+    }
+  },
+
+  setFilter: (filter: OrderAssignmentStatus | 'ALL'): void => {
+    set({ filter });
+    get().fetchAssignments(filter);
+  },
+
+  setSelectedAssignment: (assignment: Assignment | null): void => {
+    set({ selectedAssignment: assignment });
+  },
+
+  clearError: (): void => {
+    set({ error: null });
+  },
+}));
