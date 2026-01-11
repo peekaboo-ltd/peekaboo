@@ -1,38 +1,38 @@
-import React, { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 import { useAuth } from '../../hooks/useAuth';
-import { colors, typography, spacing } from '../../utils/constants';
-import { getPhoneError, getPasswordError } from '../../utils/validators';
+import { colors, spacing, typography } from '../../utils/constants';
+import { getPasswordError, getUsernameError } from '../../utils/validators';
 
 export default function LoginScreen() {
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const { login, isLoading, error, clearError } = useAuth();
 
   const validateInputs = (): boolean => {
-    const phoneErr = getPhoneError(phoneNumber);
+    const usernameErr = getUsernameError(username);
     const passErr = getPasswordError(password);
 
-    setPhoneError(phoneErr);
+    setUsernameError(usernameErr);
     setPasswordError(passErr);
 
-    return !phoneErr && !passErr;
+    return !usernameErr && !passErr;
   };
 
   const handleLogin = async () => {
@@ -42,7 +42,7 @@ export default function LoginScreen() {
       return;
     }
 
-    const success = await login({ phoneNumber, password });
+    const success = await login({ username, password });
 
     if (success) {
       router.replace('/(tabs)/dashboard');
@@ -68,23 +68,24 @@ export default function LoginScreen() {
               <Ionicons name="bicycle" size={48} color={colors.primary} />
             </View>
             <Text style={styles.title}>Peekaboo Rider</Text>
-            <Text style={styles.subtitle}>Sign in to manage your deliveries</Text>
+            <Text style={styles.subtitle}>Sign in to manage your assignments</Text>
           </View>
 
           {/* Login Form */}
           <View style={styles.form}>
             <Input
-              value={phoneNumber}
+              value={username}
               onChangeText={(text) => {
-                setPhoneNumber(text);
-                setPhoneError(null);
+                setUsername(text);
+                setUsernameError(null);
               }}
-              label="Phone Number"
-              placeholder="Enter your phone number"
-              keyboardType="phone-pad"
+              label="Username or Email"
+              placeholder="Enter your username or email"
+              keyboardType="email-address"
               autoCapitalize="none"
-              error={phoneError || undefined}
-              icon={<Ionicons name="call-outline" size={20} color={colors.text.secondary} />}
+              autoCorrect={false}
+              error={usernameError || undefined}
+              icon={<Ionicons name="person-outline" size={20} color={colors.text.secondary} />}
             />
 
             <Input

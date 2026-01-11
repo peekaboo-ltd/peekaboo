@@ -15,6 +15,27 @@ interface PaginatedResponse<T> {
 }
 
 /**
+ * API response structure for paginated endpoints
+ */
+interface ApiPaginatedResponse<T> {
+  message: string;
+  data: {
+    rows: T[];
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+/**
+ * API response structure for single assignment endpoint
+ */
+interface AssignmentApiResponse {
+  message: string;
+  data: Assignment;
+}
+
+/**
  * Assignments API endpoints
  */
 export const assignmentsAPI = {
@@ -22,16 +43,25 @@ export const assignmentsAPI = {
    * Get all assignments for current rider
    */
   getAll: async (params?: AssignmentListParams): Promise<PaginatedResponse<Assignment>> => {
-    const response = await apiClient.get<PaginatedResponse<Assignment>>('/order-assignments', { params });
-    return response.data;
+    const response = await apiClient.get<ApiPaginatedResponse<Assignment>>('/order-assignments', { params });
+    // Transform API response to expected format
+    const apiData = response.data.data;
+    return {
+      data: apiData.rows,
+      total: apiData.totalCount,
+      page: apiData.currentPage,
+      limit: params?.limit || 20,
+      totalPages: apiData.totalPages,
+    };
   },
 
   /**
    * Get assignment by ID
    */
   getById: async (id: string): Promise<Assignment> => {
-    const response = await apiClient.get<Assignment>(`/order-assignments/${id}`);
-    return response.data;
+    const response = await apiClient.get<AssignmentApiResponse>(`/order-assignments/${id}`);
+    // Extract assignment from nested response structure
+    return response.data.data;
   },
 
   /**
@@ -54,19 +84,19 @@ export const assignmentsAPI = {
    * Get pending assignments
    */
   getPending: async (): Promise<Assignment[]> => {
-    const response = await apiClient.get<PaginatedResponse<Assignment>>('/order-assignments', { 
+    const response = await apiClient.get<ApiPaginatedResponse<Assignment>>('/order-assignments', { 
       params: { status: 'PENDING' } 
     });
-    return response.data.data;
+    return response.data.data.rows;
   },
 
   /**
    * Get active assignments
    */
   getActive: async (): Promise<Assignment[]> => {
-    const response = await apiClient.get<PaginatedResponse<Assignment>>('/order-assignments', { 
+    const response = await apiClient.get<ApiPaginatedResponse<Assignment>>('/order-assignments', { 
       params: { status: 'ACTIVE' } 
     });
-    return response.data.data;
+    return response.data.data.rows;
   },
 };

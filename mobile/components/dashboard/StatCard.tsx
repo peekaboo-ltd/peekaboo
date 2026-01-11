@@ -25,10 +25,10 @@ export const StatCard: React.FC<StatCardProps> = ({
   trend,
 }) => {
   return (
-    <Card style={styles.card} elevation="md">
+    <Card style={styles.card} elevation="lg">
       <View style={styles.header}>
         <View style={[styles.iconContainer, { backgroundColor: `${iconColor}15` }]}>
-          <Ionicons name={icon} size={20} color={iconColor} />
+          <Ionicons name={icon} size={22} color={iconColor} />
         </View>
         {trend && (
           <View style={[styles.trend, trend.isPositive ? styles.trendPositive : styles.trendNegative]}>
@@ -55,17 +55,18 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: '45%',
     marginBottom: spacing.md,
+    marginHorizontal: spacing.xs, // Add horizontal spacing between cards
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
   iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },

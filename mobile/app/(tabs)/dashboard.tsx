@@ -6,7 +6,7 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatCard } from '../../components/dashboard/StatCard';
@@ -20,6 +20,7 @@ import { formatCurrency } from '../../utils/formatters';
 
 export default function DashboardScreen() {
   const { user, logout } = useAuthStore();
+  const insets = useSafeAreaInsets();
   const { 
     stats, 
     recentActivity, 
@@ -61,7 +62,10 @@ export default function DashboardScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: spacing.xxl + 60 + insets.bottom }
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -190,13 +194,17 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.md,
-    paddingBottom: spacing.xxl,
   },
   alertCard: {
     backgroundColor: '#FFFBEB',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
     borderWidth: 1,
     borderColor: colors.warning,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   alertContent: {
     flexDirection: 'row',
@@ -228,18 +236,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text.primary,
     marginBottom: spacing.md,
-    marginTop: spacing.sm,
+    marginTop: spacing.lg,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
+    marginHorizontal: -spacing.xs, // Negative margin to offset card margins
   },
   quickActions: {
     flexDirection: 'row',
     gap: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   actionCard: {
     flex: 1,

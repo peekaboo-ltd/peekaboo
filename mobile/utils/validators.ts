@@ -58,6 +58,34 @@ export const isRequired = (value: string): boolean => {
 };
 
 /**
+ * Validate username (alphanumeric, underscore, hyphen, 3-30 chars)
+ */
+export const isValidUsername = (username: string): boolean => {
+  const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/;
+  return usernameRegex.test(username);
+};
+
+/**
+ * Validate username or email
+ */
+export const isValidUsernameOrEmail = (value: string): boolean => {
+  return isValidEmail(value) || isValidUsername(value);
+};
+
+/**
+ * Get username/email validation error
+ */
+export const getUsernameError = (username: string): string | null => {
+  if (username.length === 0) {
+    return 'Username or email is required';
+  }
+  if (!isValidUsernameOrEmail(username)) {
+    return 'Please enter a valid email address or username';
+  }
+  return null;
+};
+
+/**
  * Get required field error
  */
 export const getRequiredError = (value: string, fieldName: string): string | null => {

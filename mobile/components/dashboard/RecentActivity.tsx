@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
   },
   separator: {
-    height: spacing.sm,
+    height: spacing.md,
   },
   emptyContainer: {
     alignItems: 'center',

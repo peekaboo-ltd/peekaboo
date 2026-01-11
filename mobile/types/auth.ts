@@ -1,3 +1,13 @@
+export interface Role {
+  id: string;
+  name: string;
+}
+
+export interface UserRole {
+  id: string;
+  role: Role;
+}
+
 export interface User {
   id: string;
   name?: string;
@@ -6,6 +16,7 @@ export interface User {
   dateOfBirth?: string;
   status: UserStatus;
   nationality?: string;
+  userRoles?: UserRole[];
   createdAt: string;
   updatedAt: string;
 }
@@ -17,10 +28,24 @@ export enum UserStatus {
 }
 
 export interface LoginCredentials {
-  phoneNumber: string;
+  username: string;
   password: string;
 }
 
+/**
+ * API response structure for login endpoint
+ */
+export interface LoginApiResponse {
+  message: string;
+  data: {
+    user: User;
+    token: string;
+  };
+}
+
+/**
+ * Transformed response structure used internally
+ */
 export interface AuthResponse {
   user: User;
   token: string;

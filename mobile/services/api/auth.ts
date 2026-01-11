@@ -1,16 +1,21 @@
 import apiClient from './client';
-import { LoginCredentials, AuthResponse, User } from '../../types';
+import { LoginCredentials, AuthResponse, LoginApiResponse, User } from '../../types';
 
 /**
  * Auth API endpoints
  */
 export const authAPI = {
   /**
-   * Login with phone number and password
+   * Login with username/email and password
    */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-    return response.data;
+    const response = await apiClient.post<LoginApiResponse>('/auth/login', credentials);
+    // Extract user and token from nested response structure
+    const { user, token } = response.data.data;
+    return {
+      user,
+      token,
+    };
   },
 
   /**

@@ -1,13 +1,43 @@
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import { STORAGE_KEYS } from '../../utils/constants';
 import { User } from '../../types';
+
+// Check if we're on web platform
+const isWeb = Platform.OS === 'web';
+
+// Web fallback using localStorage
+const webStorage = {
+  setItem: (key: string, value: string): Promise<void> => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(key, value);
+    }
+    return Promise.resolve();
+  },
+  getItem: (key: string): Promise<string | null> => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return Promise.resolve(window.localStorage.getItem(key));
+    }
+    return Promise.resolve(null);
+  },
+  removeItem: (key: string): Promise<void> => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem(key);
+    }
+    return Promise.resolve();
+  },
+};
 
 /**
  * Save auth token securely
  */
 export const saveToken = async (token: string): Promise<void> => {
   try {
-    await SecureStore.setItemAsync(STORAGE_KEYS.AUTH_TOKEN, token);
+    if (isWeb) {
+      await webStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+    } else {
+      await SecureStore.setItemAsync(STORAGE_KEYS.AUTH_TOKEN, token);
+    }
   } catch (error) {
     console.error('Error saving token:', error);
     throw error;
@@ -19,7 +49,11 @@ export const saveToken = async (token: string): Promise<void> => {
  */
 export const getToken = async (): Promise<string | null> => {
   try {
-    return await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_TOKEN);
+    if (isWeb) {
+      return await webStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    } else {
+      return await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_TOKEN);
+    }
   } catch (error) {
     console.error('Error getting token:', error);
     return null;
@@ -31,7 +65,11 @@ export const getToken = async (): Promise<string | null> => {
  */
 export const removeToken = async (): Promise<void> => {
   try {
-    await SecureStore.deleteItemAsync(STORAGE_KEYS.AUTH_TOKEN);
+    if (isWeb) {
+      await webStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    } else {
+      await SecureStore.deleteItemAsync(STORAGE_KEYS.AUTH_TOKEN);
+    }
   } catch (error) {
     console.error('Error removing token:', error);
     throw error;
@@ -43,7 +81,11 @@ export const removeToken = async (): Promise<void> => {
  */
 export const saveRefreshToken = async (token: string): Promise<void> => {
   try {
-    await SecureStore.setItemAsync(STORAGE_KEYS.REFRESH_TOKEN, token);
+    if (isWeb) {
+      await webStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
+    } else {
+      await SecureStore.setItemAsync(STORAGE_KEYS.REFRESH_TOKEN, token);
+    }
   } catch (error) {
     console.error('Error saving refresh token:', error);
     throw error;
@@ -55,7 +97,11 @@ export const saveRefreshToken = async (token: string): Promise<void> => {
  */
 export const getRefreshToken = async (): Promise<string | null> => {
   try {
-    return await SecureStore.getItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
+    if (isWeb) {
+      return await webStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    } else {
+      return await SecureStore.getItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
+    }
   } catch (error) {
     console.error('Error getting refresh token:', error);
     return null;
@@ -67,7 +113,11 @@ export const getRefreshToken = async (): Promise<string | null> => {
  */
 export const removeRefreshToken = async (): Promise<void> => {
   try {
-    await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
+    if (isWeb) {
+      await webStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+    } else {
+      await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
+    }
   } catch (error) {
     console.error('Error removing refresh token:', error);
     throw error;
@@ -79,7 +129,12 @@ export const removeRefreshToken = async (): Promise<void> => {
  */
 export const saveUserData = async (user: User): Promise<void> => {
   try {
-    await SecureStore.setItemAsync(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+    const userString = JSON.stringify(user);
+    if (isWeb) {
+      await webStorage.setItem(STORAGE_KEYS.USER_DATA, userString);
+    } else {
+      await SecureStore.setItemAsync(STORAGE_KEYS.USER_DATA, userString);
+    }
   } catch (error) {
     console.error('Error saving user data:', error);
     throw error;
@@ -91,7 +146,9 @@ export const saveUserData = async (user: User): Promise<void> => {
  */
 export const getUserData = async (): Promise<User | null> => {
   try {
-    const data = await SecureStore.getItemAsync(STORAGE_KEYS.USER_DATA);
+    const data = isWeb
+      ? await webStorage.getItem(STORAGE_KEYS.USER_DATA)
+      : await SecureStore.getItemAsync(STORAGE_KEYS.USER_DATA);
     return data ? JSON.parse(data) : null;
   } catch (error) {
     console.error('Error getting user data:', error);
@@ -104,7 +161,11 @@ export const getUserData = async (): Promise<User | null> => {
  */
 export const removeUserData = async (): Promise<void> => {
   try {
-    await SecureStore.deleteItemAsync(STORAGE_KEYS.USER_DATA);
+    if (isWeb) {
+      await webStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    } else {
+      await SecureStore.deleteItemAsync(STORAGE_KEYS.USER_DATA);
+    }
   } catch (error) {
     console.error('Error removing user data:', error);
     throw error;

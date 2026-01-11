@@ -3,57 +3,89 @@ import { format, formatDistanceToNow, parseISO, isToday, isYesterday } from 'dat
 /**
  * Format currency value
  */
-export const formatCurrency = (amount: number, currency: string = 'RWF'): string => {
-  return `${currency} ${amount.toLocaleString()}`;
+export const formatCurrency = (amount: number | string | null | undefined, currency: string = 'RWF'): string => {
+  if (amount === null || amount === undefined) return `${currency} 0`;
+  
+  // Convert string to number if needed
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  
+  if (isNaN(numAmount)) return `${currency} 0`;
+  
+  return `${currency} ${numAmount.toLocaleString()}`;
 };
 
 /**
  * Format date to readable string
  */
-export const formatDate = (dateString: string): string => {
-  const date = parseISO(dateString);
-  return format(date, 'MMM dd, yyyy');
+export const formatDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = parseISO(dateString);
+    return format(date, 'MMM dd, yyyy');
+  } catch {
+    return 'Invalid Date';
+  }
 };
 
 /**
  * Format time to readable string
  */
-export const formatTime = (dateString: string): string => {
-  const date = parseISO(dateString);
-  return format(date, 'HH:mm');
+export const formatTime = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = parseISO(dateString);
+    return format(date, 'HH:mm');
+  } catch {
+    return 'Invalid Time';
+  }
 };
 
 /**
  * Format date and time
  */
-export const formatDateTime = (dateString: string): string => {
-  const date = parseISO(dateString);
-  return format(date, 'MMM dd, yyyy HH:mm');
+export const formatDateTime = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = parseISO(dateString);
+    return format(date, 'MMM dd, yyyy HH:mm');
+  } catch {
+    return 'Invalid Date';
+  }
 };
 
 /**
  * Format relative time (e.g., "2 hours ago")
  */
-export const formatRelativeTime = (dateString: string): string => {
-  const date = parseISO(dateString);
-  return formatDistanceToNow(date, { addSuffix: true });
+export const formatRelativeTime = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = parseISO(dateString);
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch {
+    return 'Invalid Date';
+  }
 };
 
 /**
  * Format smart date (Today, Yesterday, or date)
  */
-export const formatSmartDate = (dateString: string): string => {
-  const date = parseISO(dateString);
-  
-  if (isToday(date)) {
-    return `Today, ${format(date, 'HH:mm')}`;
+export const formatSmartDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = parseISO(dateString);
+    
+    if (isToday(date)) {
+      return `Today, ${format(date, 'HH:mm')}`;
+    }
+    
+    if (isYesterday(date)) {
+      return `Yesterday, ${format(date, 'HH:mm')}`;
+    }
+    
+    return format(date, 'MMM dd, HH:mm');
+  } catch {
+    return 'Invalid Date';
   }
-  
-  if (isYesterday(date)) {
-    return `Yesterday, ${format(date, 'HH:mm')}`;
-  }
-  
-  return format(date, 'MMM dd, HH:mm');
 };
 
 /**

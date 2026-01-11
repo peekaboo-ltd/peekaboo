@@ -34,7 +34,7 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
   isLoading: false,
   isRefreshing: false,
   error: null,
-  filter: 'ALL',
+  filter: OrderAssignmentStatus.PENDING,
   page: 1,
   totalPages: 1,
   hasMore: false,
@@ -51,7 +51,7 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
       const response = await assignmentsAPI.getAll(params);
       
       set({
-        assignments: response.data,
+        assignments: Array.isArray(response.data) ? response.data : [],
         totalPages: response.totalPages,
         hasMore: response.page < response.totalPages,
         isLoading: false,
@@ -80,8 +80,9 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
       
       const response = await assignmentsAPI.getAll(params);
       
+      const newAssignments = Array.isArray(response.data) ? response.data : [];
       set(state => ({
-        assignments: [...state.assignments, ...response.data],
+        assignments: [...state.assignments, ...newAssignments],
         page: nextPage,
         hasMore: nextPage < response.totalPages,
         isLoading: false,
@@ -183,7 +184,7 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
       const response = await assignmentsAPI.getAll(params);
       
       set({
-        assignments: response.data,
+        assignments: Array.isArray(response.data) ? response.data : [],
         page: 1,
         totalPages: response.totalPages,
         hasMore: response.page < response.totalPages,
