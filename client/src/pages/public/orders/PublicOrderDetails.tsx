@@ -332,7 +332,7 @@ const PublicOrderDetails = () => {
                           Delivery Time
                         </h4>
                         <p className="text-xs text-gray-500">
-                          Estimated duration (includes buffer)
+                          Estimated duration
                         </p>
                       </header>
                     </header>
@@ -342,11 +342,11 @@ const PublicOrderDetails = () => {
                         // Minimum delivery time range is 20-30 minutes
                         const calculatedBaseTime = Math.round(estimatedTime);
                         const calculatedBufferTime = calculatedBaseTime + 15;
-                        
+
                         // Apply minimum range of 20-30 minutes
                         const baseTime = calculatedBaseTime < 20 ? 20 : calculatedBaseTime;
                         const bufferTime = calculatedBufferTime < 30 ? 30 : calculatedBufferTime;
-                        
+
                         if (bufferTime < 60) {
                           // Both times under 60 minutes
                           return `${baseTime}–${bufferTime}`;
@@ -405,10 +405,10 @@ const PublicOrderDetails = () => {
                   </p>
                   {((orderFee !== undefined && orderFee > 0) || (order?.finalFee !== null && order?.finalFee !== undefined && order?.finalFee > 0)) && (
                     <p className="text-xs text-gray-700">
-                      ** The fee is based on distance between locations.{' '} {order?.finalFee !== undefined && order?.finalFee !== null && order?.finalFee > 0 ? 'Final fee: ' + formatCurrency(order?.finalFee ?? 0) : ''}
+                      ** The fee is based on distance between locations.{' '} {order?.finalFee !== undefined && order?.finalFee !== null && order?.finalFee > 0 ? 'Final fee: ' + formatCurrency(order?.finalFee ?? 0) : ''} {orderFee !== undefined && orderFee > 0 ? 'Order fee: ' + formatCurrency(orderFee ?? 0) : ''}. {' '}
                       <Link
-                        to="/p/orders/fees"
-                        className="text-primary text-sm underline hover:text-primary-600"
+                        to="/about/orders/fees"
+                        className="text-primary text-[11px] underline underline-offset-2 hover:text-primary-600"
                       >
                         View fee breakdown
                       </Link>
