@@ -137,24 +137,24 @@ export const Login = () => {
             {authMode === 'login' ? (
               <>
                 Don't have an account?{' '}
-                <button
-                  type="button"
+                <Link
+                  to="#"
                   onClick={toggleAuthMode}
-                  className="font-medium hover:underline text-primary hover:text-primary/80"
+                  className="font-medium text-[13px] hover:underline text-primary hover:text-primary/80"
                 >
                   Create one
-                </button>
+                </Link>
               </>
             ) : (
               <>
                 Already have an account?{' '}
-                <button
-                  type="button"
+                <Link
+                  to="#"
                   onClick={toggleAuthMode}
-                  className="font-medium hover:underline text-primary hover:text-primary/80"
+                  className="font-medium text-[13px] hover:underline text-primary hover:text-primary/80"
                 >
                   Sign in
-                </button>
+                </Link>
               </>
             )}
           </p>
@@ -165,7 +165,7 @@ export const Login = () => {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+            className="w-full cursor-pointer flex items-center justify-center gap-3 py-2.5 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path

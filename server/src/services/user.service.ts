@@ -296,10 +296,11 @@ export class UserService {
     await this.userRepository.save(user);
 
     // Send email with temporary password
+    const contactMethod = user.email || user.phoneNumber;
+    if (!contactMethod) {
+      throw new Error('User has no email or phone number for password reset');
+    }
     const emailService = new EmailService();
-    await emailService.sendPasswordResetEmail(
-      user.email || user.phoneNumber,
-      tempPassword
-    );
+    await emailService.sendPasswordResetEmail(contactMethod, tempPassword);
   }
 }

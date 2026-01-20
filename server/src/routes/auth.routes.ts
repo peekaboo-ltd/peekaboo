@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, RequestHandler } from 'express';
 import passport from 'passport';
 import { AuthController } from '../controllers/auth.controller';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -24,16 +24,16 @@ router.get(
   '/google/callback',
   passport.authenticate('google', {
     session: false,
-    failureRedirect: process.env.FRONTEND_AUTH_FAILURE_URL || '/auth/login?error=google_auth_failed',
+    failureRedirect: process.env.FRONTEND_AUTH_FAILURE_URL || 'http://localhost:5173/auth/login?error=google_auth_failed',
   }),
   AuthController.googleAuthCallback
 );
 
 // PROTECTED ROUTES
 router.use(authenticate);
-router.get('/me', AuthController.getCurrentUser);
-router.post('/logout', AuthController.logout);
-router.post('/refresh', AuthController.refreshToken);
-router.patch('/add-phone', AuthController.addPhoneNumber);
+router.get('/me', AuthController.getCurrentUser as RequestHandler);
+router.post('/logout', AuthController.logout as RequestHandler);
+router.post('/refresh', AuthController.refreshToken as RequestHandler);
+router.patch('/add-phone', AuthController.addPhoneNumber as RequestHandler);
 
 export default router;

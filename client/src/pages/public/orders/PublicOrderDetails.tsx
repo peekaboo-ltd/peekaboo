@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrderPaymentModal, setSelectedOrder, setUpdateOrderLocationFromModal, setUpdateOrderLocationToModal } from '@/states/slices/order.slice';
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
-import { useCallback, useEffect, useState, useRef, MouseEvent } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
@@ -79,7 +79,9 @@ const PublicOrderDetails = () => {
   // ORDER HOOKS
   const { getOrder } = useGetOrder();
   const { updateOrder } = useUpdateOrder();
-  const { getOrderFee, orderFee } = useGetOrderFees();
+  const { getOrderFee, orderFee } = useGetOrderFees(
+    order?.finalFee !== null && order?.finalFee !== undefined ? order.finalFee : undefined
+  );
 
   // CREATE ORDER ASSIGNMENT HOOKS
   const {
@@ -132,7 +134,7 @@ const PublicOrderDetails = () => {
   };
 
   useEffect(() => {
-    if (distance) {
+    if (distance !== null && distance > 0) {
       getOrderFee(distance);
     }
   }, [distance, getOrderFee]);
@@ -219,7 +221,7 @@ const PublicOrderDetails = () => {
                       <Button
                         onClick={handleGetCurrentLocation}
                         isLoading={gettingCurrentLocation}
-                      className="py-1! px-3! text-xs"
+                        className="py-1! px-3! text-xs"
                         primary
                       >
                         Use Current
@@ -238,7 +240,7 @@ const PublicOrderDetails = () => {
                     <FontAwesomeIcon
                       icon={faPenToSquare}
                       className="w-4 h-4 cursor-pointer"
-                      onClick={(e: MouseEvent<HTMLDivElement>) => {
+                      onClick={(e) => {
                         e.preventDefault();
                         dispatch(setUpdateOrderLocationFromModal(true));
                       }}
@@ -271,7 +273,7 @@ const PublicOrderDetails = () => {
                   <FontAwesomeIcon
                     icon={faPenToSquare}
                     className="w-4 h-4 cursor-pointer"
-                    onClick={(e: MouseEvent<HTMLDivElement>) => {
+                    onClick={(e) => {
                       e.preventDefault();
                       dispatch(setUpdateOrderLocationToModal(true));
                     }}
@@ -354,11 +356,11 @@ const PublicOrderDetails = () => {
                         <p className="text-xs text-gray-500">Estimated cost</p>
                       </header>
                     </header>
-                    <section>
-                      {orderFee !== undefined && orderFee > 0 ? (
+                    <section className='flex items-center gap-2'>
+                      {(orderFee !== undefined && orderFee > 0) || (order?.finalFee !== null && order?.finalFee !== undefined && order.finalFee > 0) ? (
                         <section>
                           <p className="text-3xl font-bold text-primary mb-1">
-                            {formatCurrency(orderFee)}
+                            {formatCurrency(orderFee ?? (order?.finalFee ?? 0))}
                           </p>
                           <p className="text-sm text-gray-500">including VAT</p>
                         </section>
@@ -376,9 +378,9 @@ const PublicOrderDetails = () => {
                     * Route calculated using Google Maps. Two-wheeler time is 15%
                     faster than driving due to better traffic navigation.
                   </p>
-                  {orderFee !== undefined && orderFee > 0 && (
+                  {((orderFee !== undefined && orderFee > 0) || (order?.finalFee !== null && order?.finalFee !== undefined && order?.finalFee > 0)) && (
                     <p className="text-xs text-gray-700">
-                      ** The fee is based on distance between locations.{' '}
+                      ** The fee is based on distance between locations.{' '} {order?.finalFee !== undefined && order?.finalFee !== null && order?.finalFee > 0 ? 'Final fee: ' + formatCurrency(order?.finalFee ?? 0) : ''}
                       <Link
                         to="/p/orders/fees"
                         className="text-primary text-sm underline hover:text-primary-600"

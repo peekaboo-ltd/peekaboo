@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { DashboardService } from '../services/dashboard.service';
 import { AuthRequest } from '../types/auth.types';
 import { RoleTypes } from '../constants/role.constants';
@@ -6,10 +6,11 @@ import { RoleTypes } from '../constants/role.constants';
 const dashboardService = new DashboardService();
 
 export const DashboardController = {
-  async getDashboardMetrics(req: AuthRequest, res: Response, next: NextFunction) {
+  async getDashboardMetrics(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user?.id;
-      const userRoles = req.user?.userRoles?.map((ur) => ur.role.name as RoleTypes) || [];
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+      const userRoles = authReq.user?.userRoles?.map((ur) => ur.role.name as RoleTypes) || [];
 
       if (!userId) {
         return res.status(401).json({

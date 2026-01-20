@@ -269,8 +269,7 @@ export class WhatsappService {
          * 5. PENDING ORDER CONFIRMATION
          */
         case ConversationStep.ORDER_CONFIRMATION:
-          if (orderExists) {
-
+          if (orderExists && orderExists?.recipient?.phoneNumber) {
             // SEND MESSAGE TO THE ORDER RECIPIENT
             await sendMessage({
               phoneNumber: orderExists?.recipient?.phoneNumber,

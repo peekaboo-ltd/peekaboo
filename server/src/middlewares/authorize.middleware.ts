@@ -1,18 +1,19 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import { AuthRequest } from "../types/auth.types";
 import { RoleTypes } from "../constants/role.constants";
 import { ForbiddenError } from "../helpers/errors.helper";
 
-export const authorize = (allowedRoles: RoleTypes[]) => {
-  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authorize = (allowedRoles: RoleTypes[]): RequestHandler => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const authReq = req as AuthRequest;
     try {
-      if (!req.user) {
+      if (!authReq.user) {
         return res.status(401).json({
           message: "Unauthorized",
         });
       }
 
-      const userRoles = req.user.userRoles?.map(ur => ur.role.name) || [];
+      const userRoles = authReq.user.userRoles?.map((ur) => ur.role.name) || [];
       const hasPermission = allowedRoles.some(role => userRoles.includes(role));
 
       if (!hasPermission) {

@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { UserService } from "../services/user.service";
 import { RoleTypes } from "../constants/role.constants";
 import { UserStatus } from "../constants/user.constants";
-import { AuthRequest } from "../types/auth.types";
 import { In } from "typeorm";
 import { UUID } from "../types";
 
@@ -10,7 +9,7 @@ const userService = new UserService();
 
 export const UserController = {
   // GET ALL USERS WITH FILTERS
-  async getUsers(req: AuthRequest, res: Response, next: NextFunction) {
+  async getUsers(req: Request, res: Response, next: NextFunction) {
     try {
       // FETCH USERS
       const users = await userService.getUsersWithPagination(req.query);
@@ -26,12 +25,12 @@ export const UserController = {
   },
 
   // GET USER BY ID
-  async getUserById(req: AuthRequest, res: Response, next: NextFunction) {
+  async getUserById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      
+
       const user = await userService.getUserById(id as UUID);
-      
+
       if (!user) {
         return res.status(404).json({
           message: "User not found",
@@ -48,13 +47,13 @@ export const UserController = {
   },
 
   // CREATE USER
-  async createUser(req: AuthRequest, res: Response, next: NextFunction) {
+  async createUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const { 
-        phoneNumber, 
-        roles, 
-        name, 
-        email, 
+      const {
+        phoneNumber,
+        roles,
+        name,
+        email,
         passwordHash,
         status = UserStatus.ACTIVE,
         nationality,
@@ -86,7 +85,7 @@ export const UserController = {
   },
 
   // UPDATE USER
-  async updateUser(req: AuthRequest, res: Response, next: NextFunction) {
+  async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -103,7 +102,7 @@ export const UserController = {
   },
 
   // UPDATE USER STATUS
-  async updateUserStatus(req: AuthRequest, res: Response, next: NextFunction) {
+  async updateUserStatus(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -126,7 +125,7 @@ export const UserController = {
   },
 
   // DELETE USER (SOFT DELETE)
-  async deleteUser(req: AuthRequest, res: Response, next: NextFunction) {
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
 
@@ -141,7 +140,7 @@ export const UserController = {
   },
 
   // RESET USER PASSWORD
-  async resetPassword(req: AuthRequest, res: Response, next: NextFunction) {
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
 

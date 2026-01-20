@@ -271,7 +271,7 @@ export class OrderService {
       });
 
     // UPDATE CONVERSATION STEP
-    if (orderExists?.conversation) {
+    if (orderExists?.conversation && orderExists?.conversation?.recipient?.phoneNumber) {
       // SEND MESSAGE TO THE CONVERSATION RECIPIENT
       await sendMessage({
         phoneNumber: orderExists?.conversation?.recipient?.phoneNumber,

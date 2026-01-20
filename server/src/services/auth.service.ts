@@ -13,6 +13,7 @@ import { RoleTypes } from '../constants/role.constants';
 import { UserRoleService } from './userRole.service';
 import { UserService } from './user.service';
 import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
+import { UUID } from '../types';
 
 export class AuthService {
   private readonly userRepository: Repository<User>;
@@ -81,9 +82,14 @@ export class AuthService {
       throw new NotFoundError('Account is not active');
     }
 
+    // Check if user has a password (OAuth-only users don't have passwordHash)
+    if (!user.passwordHash) {
+      throw new NotFoundError('Username or password is incorrect');
+    }
+
     const isValidPassword = await comparePassword(
       password,
-      user?.passwordHash!
+      user.passwordHash
     );
 
     if (!isValidPassword) {
@@ -219,9 +225,9 @@ export class AuthService {
     token: string;
     isNewUser: boolean;
   }> {
-    // Try to find existing user by email
+    // Search by googleId first (primary identifier for OAuth users)
     let user = await this.userRepository.findOne({
-      where: { email },
+      where: { googleId },
       relations: {
         userRoles: {
           role: true,
@@ -231,32 +237,55 @@ export class AuthService {
 
     let isNewUser = false;
 
-    if (!user) {
-      // Create new user from Google profile
-      user = await this.userRepository.save({
-        email,
-        name,
-        googleId,
-        status: UserStatus.ACTIVE,
-      });
-
-      // Assign default CUSTOMER role
-      await this.userRoleService.assignRolesToUser(user.id, [RoleTypes.CUSTOMER]);
-      isNewUser = true;
-
-      // Reload user with roles
+    if (user) {
+      // User found by googleId - update email if it has changed
+      if (user.email !== email) {
+        user.email = email;
+        await this.userRepository.save(user);
+      }
+      // Update name if provided and different
+      if (name && user.name !== name) {
+        user.name = name;
+        await this.userRepository.save(user);
+      }
+    } else {
+      // Not found by googleId - try to find by email (for linking existing accounts)
       user = await this.userRepository.findOne({
-        where: { id: user.id },
+        where: { email },
         relations: {
           userRoles: {
             role: true,
           },
         },
       });
-    } else if (!user.googleId) {
-      // Link Google account to existing user
-      user.googleId = googleId;
-      await this.userRepository.save(user);
+
+      if (user) {
+        // Link Google account to existing user
+        user.googleId = googleId;
+        await this.userRepository.save(user);
+      } else {
+        // Create new user from Google profile
+        user = await this.userRepository.save({
+          email,
+          name,
+          googleId,
+          status: UserStatus.ACTIVE,
+        });
+
+        // Assign default CUSTOMER role
+        await this.userRoleService.assignRolesToUser(user.id, [RoleTypes.CUSTOMER]);
+        isNewUser = true;
+
+        // Reload user with roles
+        user = await this.userRepository.findOne({
+          where: { id: user.id },
+          relations: {
+            userRoles: {
+              role: true,
+            },
+          },
+        });
+      }
     }
 
     if (!user) {
@@ -279,7 +308,7 @@ export class AuthService {
 
   // ADD PHONE NUMBER TO USER (for Google auth users)
   async addPhoneNumber(
-    userId: string,
+    userId: UUID,
     phoneNumber: string
   ): Promise<User> {
     // Validate and format phone number
