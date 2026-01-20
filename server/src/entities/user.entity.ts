@@ -30,9 +30,20 @@ export class User extends AbstractEntity {
     name: 'phone_number',
     type: 'varchar',
     length: 255,
-    nullable: false,
+    nullable: true,
+    unique: true,
   })
-  phoneNumber!: string;
+  phoneNumber?: string;
+
+  // GOOGLE ID (for OAuth users)
+  @Column({
+    name: 'google_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    unique: true,
+  })
+  googleId?: string;
 
   // DATE OF BIRTH
   @Column({

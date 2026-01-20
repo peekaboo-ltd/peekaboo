@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from '../pages/home';
 import { PublicOrderDetails } from '../pages/public/orders';
 import PublicOrderTracking from '@/pages/public/orders/PublicOrderTracking';
@@ -6,10 +6,10 @@ import PublicOrderPaymentSuccess from '@/pages/public/orders/PublicOrderPaymentS
 import PublicLayout from '@/containers/navigation/PublicLayout';
 import { NotFoundPage } from '../pages/common';
 import { Login } from '@/pages/auth';
+import AuthCallback from '@/pages/auth/AuthCallback';
 import { ProtectedRoute } from './ProtectedRoute';
 import { Dashboard } from '@/pages/dashboard';
 import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayout';
-import Register from '@/pages/auth/Register';
 import { OrdersPage } from '@/pages/orders';
 import { OrderAssignmentsPage } from '@/pages/order-assignments';
 import { UsersPage } from '@/pages/users';
@@ -23,7 +23,8 @@ const Router = () => {
         {/* Public routes */}
         <Route path="auth">
           <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
+          <Route path="register" element={<Navigate to="/auth/login" replace />} />
+          <Route path="callback" element={<AuthCallback />} />
           <Route path="forgot-password" element={<p>Forgot Password</p>} />
         </Route>
         <Route path="" element={<Home />} />

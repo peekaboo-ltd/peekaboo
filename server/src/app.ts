@@ -1,10 +1,12 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import 'dotenv/config';
+import passport from 'passport';
 import { AppDataSource } from './data-source';
 import errorHandler from './middlewares/errors.middleware';
 import routes from './routes';
 import logger from './helpers/logger.helper';
+import { configureGoogleAuth } from './config/passport.config';
 
 // CREATE EXPRESS APP
 const app: Application = express();
@@ -13,6 +15,13 @@ const app: Application = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
+
+// Initialize Passport
+app.use(passport.initialize());
+
+// Configure Google OAuth
+configureGoogleAuth();
+
 app.use('/api/v1', routes);
 app.use(errorHandler);
 
