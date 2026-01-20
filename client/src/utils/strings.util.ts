@@ -90,7 +90,7 @@ export function capitalizeCamelCase(string: string) {
  * @returns The formatted number
  */
 export const formatNumbers = (number?: number | string) => {
-  if (!number) return '';
+  if (number === undefined || number === null || number === '') return '';
   return new Intl.NumberFormat().format(Number(number));
 };
 
@@ -113,7 +113,7 @@ export const formatCurrency = (
   amount: number | string | undefined,
   currency: string = 'RWF'
 ) => {
-  if (!amount) return '';
+  if (amount === undefined || amount === null || amount === '') return '';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,

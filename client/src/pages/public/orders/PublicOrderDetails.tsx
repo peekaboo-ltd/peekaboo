@@ -332,19 +332,45 @@ const PublicOrderDetails = () => {
                           Delivery Time
                         </h4>
                         <p className="text-xs text-gray-500">
-                          Estimated duration
+                          Estimated duration (includes buffer)
                         </p>
                       </header>
                     </header>
                     <p className="text-3xl font-bold text-gray-700 mb-1">
-                      {estimatedTime < 60
-                        ? Math.round(estimatedTime)
-                        : `${Math.floor(estimatedTime / 60)}:${String(
-                          Math.round(estimatedTime % 60)
-                        ).padStart(2, '0')}`}
+                      {(() => {
+                        // Calculate delivery time range with +15 minutes buffer
+                        // Minimum delivery time range is 20-30 minutes
+                        const calculatedBaseTime = Math.round(estimatedTime);
+                        const calculatedBufferTime = calculatedBaseTime + 15;
+                        
+                        // Apply minimum range of 20-30 minutes
+                        const baseTime = calculatedBaseTime < 20 ? 20 : calculatedBaseTime;
+                        const bufferTime = calculatedBufferTime < 30 ? 30 : calculatedBufferTime;
+                        
+                        if (bufferTime < 60) {
+                          // Both times under 60 minutes
+                          return `${baseTime}–${bufferTime}`;
+                        } else if (baseTime < 60) {
+                          // Base time under 60, buffer over 60
+                          const bufferHours = Math.floor(bufferTime / 60);
+                          const bufferMins = bufferTime % 60;
+                          return `${baseTime} min – ${bufferHours}:${String(bufferMins).padStart(2, '0')} hr`;
+                        } else {
+                          // Both times over 60 minutes
+                          const baseHours = Math.floor(baseTime / 60);
+                          const baseMins = baseTime % 60;
+                          const bufferHours = Math.floor(bufferTime / 60);
+                          const bufferMins = bufferTime % 60;
+                          return `${baseHours}:${String(baseMins).padStart(2, '0')} – ${bufferHours}:${String(bufferMins).padStart(2, '0')}`;
+                        }
+                      })()}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {estimatedTime < 60 ? 'minutes' : 'hours'} • Two-wheeler
+                      {(() => {
+                        const calculatedBufferTime = Math.round(estimatedTime) + 15;
+                        const bufferTime = calculatedBufferTime < 30 ? 30 : calculatedBufferTime;
+                        return bufferTime < 60 ? 'minutes' : 'hours';
+                      })()} • Two-wheeler
                     </p>
                   </article>
                   <article className="bg-white rounded-sm p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -375,8 +401,7 @@ const PublicOrderDetails = () => {
                 </dl>
                 <footer className="mt-6 pt-4 border-t border-gray-300">
                   <p className="text-xs text-gray-600 mb-2">
-                    * Route calculated using Google Maps. Two-wheeler time is 15%
-                    faster than driving due to better traffic navigation.
+                    * Route calculated using Google Maps. Delivery time includes a +15 minute buffer for unexpected circumstances. Minimum delivery time is 20–30 minutes.
                   </p>
                   {((orderFee !== undefined && orderFee > 0) || (order?.finalFee !== null && order?.finalFee !== undefined && order?.finalFee > 0)) && (
                     <p className="text-xs text-gray-700">
