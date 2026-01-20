@@ -22,7 +22,20 @@ export const authMutationApiSlice = createApi({
         body: { username, password },
       }),
     }),
+
+    // ADD PHONE NUMBER (for Google auth users)
+    addPhone: builder.mutation({
+      query: ({ phoneNumber }) => ({
+        url: '/auth/add-phone',
+        method: 'PATCH',
+        body: { phoneNumber },
+      }),
+    }),
   }),
 });
 
-export const { useRegisterMutation, useLoginMutation } = authMutationApiSlice;
+export const {
+  useRegisterMutation,
+  useLoginMutation,
+  useAddPhoneMutation,
+} = authMutationApiSlice;

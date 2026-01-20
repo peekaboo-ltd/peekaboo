@@ -113,4 +113,59 @@ export const AuthController = {
       next(error);
     }
   },
+
+  // GOOGLE AUTH CALLBACK
+  async googleAuthCallback(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = req.user as {
+        id: string;
+        token: string;
+        isNewUser: boolean;
+        phoneNumber?: string;
+      };
+
+      if (!user) {
+        return res.redirect(
+          `${process.env.FRONTEND_AUTH_FAILURE_URL || 'http://localhost:5173/auth/login'}?error=authentication_failed`
+        );
+      }
+
+      // Build redirect URL with token
+      const frontendSuccessUrl =
+        process.env.FRONTEND_AUTH_SUCCESS_URL ||
+        'http://localhost:5173/auth/callback';
+
+      // Include isNewUser flag so frontend knows if phone collection is needed
+      const redirectUrl = `${frontendSuccessUrl}?token=${user.token}&isNewUser=${user.isNewUser}&needsPhone=${!user.phoneNumber}`;
+
+      return res.redirect(redirectUrl);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // ADD PHONE NUMBER (for Google auth users)
+  async addPhoneNumber(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { phoneNumber } = req.body;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw new UnauthorizedError('User not authenticated');
+      }
+
+      if (!phoneNumber) {
+        throw new ValidationError('Phone number is required');
+      }
+
+      const updatedUser = await authService.addPhoneNumber(userId, phoneNumber);
+
+      return res.status(200).json({
+        message: 'Phone number added successfully',
+        data: updatedUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
