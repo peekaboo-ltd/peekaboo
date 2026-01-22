@@ -3,6 +3,7 @@ export enum RoleTypes {
   CUSTOMER = 'CUSTOMER',
   STAFF = 'STAFF',
   ADMIN = 'ADMIN',
+  BUSINESS = 'BUSINESS',
 }
 
 export enum RoleStatus {

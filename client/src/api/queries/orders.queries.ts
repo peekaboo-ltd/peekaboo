@@ -7,10 +7,37 @@ export const ordersQueriesApiSlice = createApi({
   baseQuery: createBaseQuery(),
   endpoints: (builder) => ({
     fetchOrders: builder.query({
-      query: ({ page, size }: { page: number; size: number }) => {
+      query: ({
+        page,
+        size,
+        createdById,
+        senderId,
+        recipientId,
+        status,
+        statusGroup,
+        referenceId,
+      }: {
+        page: number;
+        size: number;
+        createdById?: UUID;
+        senderId?: UUID;
+        recipientId?: UUID;
+        status?: string;
+        statusGroup?: 'recent' | 'pending' | 'active' | 'completed';
+        referenceId?: string;
+      }) => {
         return {
           url: '/orders',
-          params: { page, size },
+          params: {
+            page,
+            size,
+            createdById,
+            senderId,
+            recipientId,
+            status,
+            statusGroup,
+            referenceId,
+          },
         };
       },
     }),

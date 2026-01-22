@@ -39,7 +39,8 @@ export enum RoleTypes {
   RIDER = 'RIDER',
   CUSTOMER = 'CUSTOMER',
   STAFF = 'STAFF',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
+  BUSINESS = 'BUSINESS',
 }
 
 export enum RoleStatus {

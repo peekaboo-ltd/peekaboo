@@ -150,19 +150,31 @@ export const useFetchOrders = () => {
     }, [data, isSuccess, dispatch, setTotalPages, setTotalCount]);
 
   // Check if user is a customer
-  const isCustomer = user?.userRoles?.some(
-    (userRole) => userRole.role.name === RoleTypes.CUSTOMER
+  const isCustomerOrBusiness = user?.userRoles?.some(
+    (userRole) =>
+      userRole.role.name === RoleTypes.CUSTOMER ||
+      userRole.role.name === RoleTypes.BUSINESS
   );
 
   // Wrap fetchOrders to add createdById for customers
   const wrappedFetchOrders = useCallback(
-    (params: { page: number; size: number }) => {
-      const queryParams = isCustomer && user?.id
-        ? { ...params, createdById: user.id }
-        : params;
+    (params: {
+      page: number;
+      size: number;
+      createdById?: string;
+      senderId?: string;
+      recipientId?: string;
+      status?: string;
+      statusGroup?: 'recent' | 'pending' | 'active' | 'completed';
+      referenceId?: string;
+    }) => {
+      const queryParams =
+        isCustomerOrBusiness && user?.id
+          ? { ...params, createdById: params.createdById ?? user.id }
+          : params;
       return fetchOrders(queryParams);
     },
-    [fetchOrders, isCustomer, user?.id]
+    [fetchOrders, isCustomerOrBusiness, user?.id]
   );
 
   return { fetchOrders: wrappedFetchOrders, data, error, isFetching, reset, isSuccess, page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount };

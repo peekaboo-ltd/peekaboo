@@ -142,7 +142,7 @@ export const UserForm: React.FC<UserFormProps> = ({
             rules={{
               required: 'Phone number is required',
               pattern: {
-                value: /^[+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+                value: /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/,
                 message: 'Invalid phone number',
               },
             }}

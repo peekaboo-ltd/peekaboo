@@ -1,19 +1,28 @@
 import { useAppSelector } from '@/states/hooks';
-import { useGetDashboardMetricsQuery } from '@/api/queries/dashboard.queries';
+import {
+  useGetDashboardMetricsQuery,
+  useGetOrderChartDataQuery,
+  useGetRevenueChartDataQuery,
+} from '@/api/queries/dashboard.queries';
 import { RoleTypes } from '@/types/auth.type';
 import {
   AdminMetrics,
   RiderMetrics,
   CustomerMetrics,
+  BusinessMetrics,
   MetricCardData,
 } from '@/types/dashboard.type';
 import {
   getAdminMetricCards,
   getRiderMetricCards,
   getCustomerMetricCards,
+  getBusinessMetricCards,
 } from '@/utils/dashboard.util';
 import MetricCard from '@/components/dashboard/MetricCard';
 import RecentActivityCard from '@/components/dashboard/RecentActivityCard';
+import OrdersBarChart from '@/components/dashboard/OrdersBarChart';
+import RevenueLineChart from '@/components/dashboard/RevenueLineChart';
+import OrderSearchBar from '@/components/dashboard/OrderSearchBar';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard = () => {
@@ -21,6 +30,19 @@ const Dashboard = () => {
   const { data, isLoading, error } = useGetDashboardMetricsQuery({});
 
   const dashboardData = data?.data;
+  const showCharts =
+    dashboardData?.role === RoleTypes.ADMIN ||
+    dashboardData?.role === RoleTypes.STAFF ||
+    dashboardData?.role === RoleTypes.BUSINESS;
+
+  const { data: ordersChartResp } = useGetOrderChartDataQuery(
+    { period: 'month' },
+    { skip: !showCharts }
+  );
+  const { data: revenueChartResp } = useGetRevenueChartDataQuery(
+    { period: 'month' },
+    { skip: !showCharts }
+  );
 
   const getMetricCards = (): MetricCardData[] => {
     if (!dashboardData) return [];
@@ -31,6 +53,8 @@ const Dashboard = () => {
       case RoleTypes.ADMIN:
       case RoleTypes.STAFF:
         return getAdminMetricCards(metrics as AdminMetrics);
+      case RoleTypes.BUSINESS:
+        return getBusinessMetricCards(metrics as BusinessMetrics);
       case RoleTypes.RIDER:
         return getRiderMetricCards(metrics as RiderMetrics);
       case RoleTypes.CUSTOMER:
@@ -81,19 +105,35 @@ const Dashboard = () => {
 
   const metricCards = getMetricCards();
   const recentActivity = getRecentActivity();
+  const ordersChartData = (
+    (ordersChartResp as unknown as { data?: Array<{ label: string; value: number }> })?.data || []
+  ).map((p) => ({
+    name: p.label,
+    value: p.value,
+  }));
+  const revenueChartData = (
+    (revenueChartResp as unknown as { data?: Array<{ label: string; value: number }> })?.data || []
+  ).map((p) => ({
+    name: p.label,
+    value: p.value,
+  }));
 
   return (
     <main className="w-full max-w-7xl mx-auto px-4 py-6">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-primary">
-          Welcome back, {user?.name || 'User'}
-        </h1>
-        <p className="text-muted-foreground">
-          Here&apos;s an overview of your{' '}
-          {dashboardData?.role === RoleTypes.ADMIN || dashboardData?.role === RoleTypes.STAFF
-            ? 'platform'
-            : 'account'}
-        </p>
+      <header className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+        <article>
+          <h1 className="text-2xl font-bold text-primary">
+            Welcome back, {user?.name || 'User'}
+          </h1>
+          <p className="text-muted-foreground">
+            Here&apos;s an overview of your{' '}
+            {dashboardData?.role === RoleTypes.ADMIN ||
+            dashboardData?.role === RoleTypes.STAFF
+              ? 'platform'
+              : 'account'}
+          </p>
+        </article>
+        <OrderSearchBar />
       </header>
 
       <section aria-label="Dashboard metrics" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -109,6 +149,13 @@ const Dashboard = () => {
           />
         ))}
       </section>
+
+      {showCharts && (
+        <section aria-label="Dashboard charts" className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+          <OrdersBarChart data={ordersChartData} title="Orders (Last 30 days)" />
+          <RevenueLineChart data={revenueChartData} title="Revenue (Last 30 days)" />
+        </section>
+      )}
 
       <section aria-label="Recent activity">
         <RecentActivityCard activities={recentActivity} />

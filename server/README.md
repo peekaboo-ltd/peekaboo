@@ -44,6 +44,19 @@ npm run typeorm:run-migrations
 npm run dev
 ```
 
+## 🔐 Admin credentials (local testing)
+
+You can seed a local admin account using:
+
+```bash
+npm run seed:admin
+```
+
+Defaults (override via `.env`):
+- **email**: `admin@peekaboo.local`
+- **phone**: `0780000000`
+- **password**: `Admin123!`
+
 ## 🏗️ Project Structure
 
 ```

@@ -60,9 +60,27 @@ export interface CustomerMetrics {
   recentActivity: RecentActivity[];
 }
 
+export interface ChartDataPoint {
+  name: string;
+  value: number;
+}
+
+export interface BusinessMetrics {
+  totalOrders: number;
+  activeOrders: number;
+  completedOrders: number;
+  totalSpent: number;
+  pendingPayments: number;
+  ordersByStatus: OrderStatusCount[];
+  recentActivity: RecentActivity[];
+  monthlyOrderVolume: { label: string; value: number }[] | ChartDataPoint[];
+  averageOrderValue: number;
+  deliverySuccessRate: number;
+}
+
 export interface DashboardMetrics {
   role: RoleTypes;
-  metrics: AdminMetrics | RiderMetrics | CustomerMetrics;
+  metrics: AdminMetrics | RiderMetrics | CustomerMetrics | BusinessMetrics;
 }
 
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
