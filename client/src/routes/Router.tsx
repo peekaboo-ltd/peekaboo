@@ -41,12 +41,12 @@ const Router = () => {
       {/* Protected routes */}
       <Route element={<AuthenticatedLayout />}>
         <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'RIDER', 'CUSTOMER']}>
+          <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'BUSINESS', 'RIDER', 'CUSTOMER']}>
             <Dashboard />
           </ProtectedRoute>
         } />
         <Route path="/orders" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'RIDER', 'CUSTOMER']}>
+          <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'BUSINESS', 'RIDER', 'CUSTOMER']}>
             <OrdersPage />
           </ProtectedRoute>
         } />
