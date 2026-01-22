@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/states/store';
 import { FC, useState } from 'react';
 import { setLogout } from '@/states/slices/auth.slice';
+import LanguageSelector from '@/components/inputs/LanguageSelector';
 
 interface Props {
     className?: string;
@@ -65,6 +66,8 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                 >
                     Dashboard
                 </Link>}
+
+                <LanguageSelector />
 
                 <button
                     className="md:hidden p-2 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors duration-200"
@@ -198,6 +201,9 @@ const AuthenticatedNavbar = ({ className }: Props) => {
 
                         <nav className="py-2">
                             <ul className="space-y-0.5">
+                                <li className="px-3 py-2">
+                                    <LanguageSelector />
+                                </li>
                                 <li>
                                     <Link
                                         to="/dashboard"

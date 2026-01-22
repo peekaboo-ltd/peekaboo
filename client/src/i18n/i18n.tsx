@@ -65,6 +65,7 @@ export const I18nProvider = ({
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useI18n = (): I18nContextValue => {
   const ctx = useContext(I18nContext);
   if (!ctx) {

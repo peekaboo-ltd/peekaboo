@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Button from '../../components/inputs/Button';
 import { NAVIGATION_LINKS } from '@/constants/navigation.constants';
 import { capitalizeString } from '@/utils/strings.util';
+import LanguageSelector from '@/components/inputs/LanguageSelector';
 
 const PublicNavbar = () => {
 
@@ -34,6 +35,9 @@ const PublicNavbar = () => {
 
           {/* Desktop Navigation */}
           <ul className="hidden md:flex items-center space-x-8">
+            <li>
+              <LanguageSelector />
+            </li>
             {Object.entries(NAVIGATION_LINKS).map(([label, link], index) => {
               if (label === 'MY_ACCOUNT') {
                 return (
@@ -93,6 +97,9 @@ const PublicNavbar = () => {
             }`}
         >
           <ul className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+            <li className="px-3 py-2">
+              <LanguageSelector />
+            </li>
             {Object.entries(NAVIGATION_LINKS).map(([label, link], index) => {
               if (label === 'MY_ACCOUNT') {
                 return (

@@ -13,13 +13,13 @@ import {
   faMapLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
 import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
-import { useI18n, type Language } from '@/i18n/i18n';
+import { useI18n } from '@/i18n/i18n';
 
 const Home = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const { data: landingStats } = useGetLandingStatsQuery();
-  const { t, language, setLanguage } = useI18n();
+  const { t } = useI18n();
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -156,21 +156,6 @@ const Home = () => {
         <section className="min-h-screen w-full max-w-[1330px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-12 py-8 sm:py-12 lg:py-20">
           <article className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <section className="w-full flex flex-col gap-6 text-center lg:text-left animate-on-scroll">
-              <header className="w-full flex justify-center lg:justify-start">
-                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
-                  <span className="font-medium">{t('home.language.label')}</span>
-                  <select
-                    className="border border-gray-200 rounded-md px-3 py-2 bg-white text-gray-900"
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value as Language)}
-                  >
-                    <option value="en">{t('home.language.en')}</option>
-                    <option value="rw">{t('home.language.rw')}</option>
-                    <option value="fr">{t('home.language.fr')}</option>
-                  </select>
-                </label>
-              </header>
-
               <span className="inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium w-fit mx-auto lg:mx-0">
                 {typeof landingStats?.activeCustomers === 'number'
                   ? t('home.hero.badgeWithCount', { count: landingStats.activeCustomers })
@@ -183,23 +168,6 @@ const Home = () => {
               <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto lg:mx-0">
                 {t('home.hero.subtitle')}
               </p>
-
-              <dl className="grid grid-cols-2 gap-4 max-w-md mx-auto lg:mx-0">
-                <dt className="text-xs uppercase tracking-wide text-gray-500">
-                  {t('home.stats.activeCustomers')}
-                </dt>
-                <dd className="text-lg font-semibold text-gray-900">
-                  {typeof landingStats?.activeCustomers === 'number' ? landingStats.activeCustomers : '—'}
-                </dd>
-                <dt className="text-xs uppercase tracking-wide text-gray-500">
-                  {t('home.stats.customersWithOrders')}
-                </dt>
-                <dd className="text-lg font-semibold text-gray-900">
-                  {typeof landingStats?.customersWithOrders === 'number'
-                    ? landingStats.customersWithOrders
-                    : '—'}
-                </dd>
-              </dl>
 
               <nav className="flex gap-4 justify-center lg:justify-start">
                 <Link
