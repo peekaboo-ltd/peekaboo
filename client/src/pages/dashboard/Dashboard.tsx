@@ -105,16 +105,18 @@ const Dashboard = () => {
 
   const metricCards = getMetricCards();
   const recentActivity = getRecentActivity();
-  const ordersChartData =
-    (ordersChartResp as any)?.data?.map((p: any) => ({
-      name: p.label,
-      value: p.value,
-    })) || [];
-  const revenueChartData =
-    (revenueChartResp as any)?.data?.map((p: any) => ({
-      name: p.label,
-      value: p.value,
-    })) || [];
+  const ordersChartData = (
+    (ordersChartResp as unknown as { data?: Array<{ label: string; value: number }> })?.data || []
+  ).map((p) => ({
+    name: p.label,
+    value: p.value,
+  }));
+  const revenueChartData = (
+    (revenueChartResp as unknown as { data?: Array<{ label: string; value: number }> })?.data || []
+  ).map((p) => ({
+    name: p.label,
+    value: p.value,
+  }));
 
   return (
     <main className="w-full max-w-7xl mx-auto px-4 py-6">

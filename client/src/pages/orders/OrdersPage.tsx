@@ -19,15 +19,17 @@ const OrdersPage = () => {
     const statusGroup = (searchParams.get('statusGroup') || '') as OrderStatusTab | '';
     const activeTab: OrderStatusTab = (['recent', 'pending', 'active', 'completed'].includes(statusGroup) ? statusGroup : 'all') as OrderStatusTab;
     const referenceId = searchParams.get('referenceId') || '';
+    const statusGroupParam: Exclude<OrderStatusTab, 'all'> | undefined =
+      activeTab === 'all' ? undefined : activeTab;
 
     useEffect(() => {
         fetchOrders({
           page,
           size,
-          statusGroup: activeTab === 'all' ? undefined : (activeTab as any),
+          statusGroup: statusGroupParam,
           referenceId: referenceId || undefined,
         });
-    }, [fetchOrders, page, size, activeTab, referenceId]);
+    }, [fetchOrders, page, size, statusGroupParam, referenceId]);
 
     const { ordersColumns } = useOrdersColumns();
 
