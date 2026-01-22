@@ -12,9 +12,14 @@ import {
   faClock,
   faMapLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
+import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
+import { useI18n, type Language } from '@/i18n/i18n';
 
 const Home = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const { data: landingStats } = useGetLandingStatsQuery();
+  const { t, language, setLanguage } = useI18n();
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -57,69 +62,59 @@ const Home = () => {
   const features = [
     {
       icon: faTruck,
-      title: 'Fast Delivery',
-      description:
-        'Same-day delivery within Kigali. Get your packages delivered in hours, not days.',
+      title: t('home.features.fastDelivery.title'),
+      description: t('home.features.fastDelivery.desc'),
     },
     {
       icon: faShieldHalved,
-      title: 'Secure & Safe',
-      description:
-        'All our riders are verified and trained. Your packages are in trusted hands.',
+      title: t('home.features.secure.title'),
+      description: t('home.features.secure.desc'),
     },
     {
       icon: faClock,
-      title: 'Real-time Tracking',
-      description:
-        'Track your package in real-time from pickup to delivery. Stay informed every step.',
+      title: t('home.features.tracking.title'),
+      description: t('home.features.tracking.desc'),
     },
     {
       icon: faMapLocationDot,
-      title: 'City-wide Coverage',
-      description:
-        'We cover all areas in Kigali. No location is too far for our dedicated riders.',
+      title: t('home.features.coverage.title'),
+      description: t('home.features.coverage.desc'),
     },
   ];
 
   const howItWorks = [
     {
       step: '01',
-      title: 'Enter Details',
-      description:
-        'Provide your phone number and the recipient\'s number to get started.',
+      title: t('home.howItWorks.step1.title'),
+      description: t('home.howItWorks.step1.desc'),
     },
     {
       step: '02',
-      title: 'Get Matched',
-      description:
-        'We\'ll match you with a verified rider in your area instantly.',
+      title: t('home.howItWorks.step2.title'),
+      description: t('home.howItWorks.step2.desc'),
     },
     {
       step: '03',
-      title: 'Track & Receive',
-      description:
-        'Track your package in real-time until it reaches its destination.',
+      title: t('home.howItWorks.step3.title'),
+      description: t('home.howItWorks.step3.desc'),
     },
   ];
 
   const testimonials = [
     {
-      name: 'Marie Claire N.',
-      role: 'Business Owner',
-      content:
-        'Peekaboo has transformed how I deliver products to my customers. Fast, reliable, and professional service every time.',
+      name: t('home.testimonials.t1.name'),
+      role: t('home.testimonials.t1.role'),
+      content: t('home.testimonials.t1.content'),
     },
     {
-      name: 'Jean Pierre M.',
-      role: 'E-commerce Seller',
-      content:
-        'The real-time tracking feature gives my customers peace of mind. I\'ve seen a significant increase in repeat orders.',
+      name: t('home.testimonials.t2.name'),
+      role: t('home.testimonials.t2.role'),
+      content: t('home.testimonials.t2.content'),
     },
     {
-      name: 'Alice K.',
-      role: 'Regular Customer',
-      content:
-        'I use Peekaboo to send packages to my family. It\'s so convenient and the riders are always courteous.',
+      name: t('home.testimonials.t3.name'),
+      role: t('home.testimonials.t3.role'),
+      content: t('home.testimonials.t3.content'),
     },
   ];
 
@@ -161,23 +156,57 @@ const Home = () => {
         <section className="min-h-screen w-full max-w-[1330px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-12 py-8 sm:py-12 lg:py-20">
           <article className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <section className="w-full flex flex-col gap-6 text-center lg:text-left animate-on-scroll">
+              <header className="w-full flex justify-center lg:justify-start">
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <span className="font-medium">{t('home.language.label')}</span>
+                  <select
+                    className="border border-gray-200 rounded-md px-3 py-2 bg-white text-gray-900"
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value as Language)}
+                  >
+                    <option value="en">{t('home.language.en')}</option>
+                    <option value="rw">{t('home.language.rw')}</option>
+                    <option value="fr">{t('home.language.fr')}</option>
+                  </select>
+                </label>
+              </header>
+
               <span className="inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium w-fit mx-auto lg:mx-0">
-                Trusted by 1000+ customers in Kigali
+                {typeof landingStats?.activeCustomers === 'number'
+                  ? t('home.hero.badgeWithCount', { count: landingStats.activeCustomers })
+                  : t('home.hero.badgeLoading')}
               </span>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Fast & Reliable
-                <span className="text-primary block">Package Delivery</span>
+                {t('home.hero.title1')}
+                <span className="text-primary block">{t('home.hero.title2')}</span>
               </h1>
               <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto lg:mx-0">
-                Connect with trusted riders in your area for quick and secure
-                package delivery services. Same-day delivery across Kigali.
+                {t('home.hero.subtitle')}
               </p>
+
+              <dl className="grid grid-cols-2 gap-4 max-w-md mx-auto lg:mx-0">
+                <dt className="text-xs uppercase tracking-wide text-gray-500">
+                  {t('home.stats.activeCustomers')}
+                </dt>
+                <dd className="text-lg font-semibold text-gray-900">
+                  {typeof landingStats?.activeCustomers === 'number' ? landingStats.activeCustomers : '—'}
+                </dd>
+                <dt className="text-xs uppercase tracking-wide text-gray-500">
+                  {t('home.stats.customersWithOrders')}
+                </dt>
+                <dd className="text-lg font-semibold text-gray-900">
+                  {typeof landingStats?.customersWithOrders === 'number'
+                    ? landingStats.customersWithOrders
+                    : '—'}
+                </dd>
+              </dl>
+
               <nav className="flex gap-4 justify-center lg:justify-start">
                 <Link
                   to="/about"
                   className="text-primary-700 font-medium hover:text-primary-800 transition-colors"
                 >
-                  Learn more about us
+                  {t('home.hero.learnMore')}
                 </Link>
               </nav>
             </section>
@@ -189,11 +218,10 @@ const Home = () => {
               >
                 <header className="w-full flex flex-col gap-4 mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    Send a package
+                    {t('home.form.title')}
                   </h2>
                   <p className="text-sm text-gray-600">
-                    Enter your phone number and the recipient's to get matched
-                    with one of our riders.
+                    {t('home.form.subtitle')}
                   </p>
                 </header>
 
@@ -204,9 +232,9 @@ const Home = () => {
                     render={({ field }) => (
                       <label className="w-full flex flex-col gap-2">
                         <span className="text-sm font-medium text-gray-700">
-                          Your phone number
+                          {t('home.form.senderLabel')}
                         </span>
-                        <Input {...field} placeholder="Enter your phone number" />
+                        <Input {...field} placeholder={t('home.form.senderPlaceholder')} />
                       </label>
                     )}
                   />
@@ -216,11 +244,11 @@ const Home = () => {
                     render={({ field }) => (
                       <label className="w-full flex flex-col gap-2">
                         <span className="text-sm font-medium text-gray-700">
-                          Recipient's phone number
+                          {t('home.form.recipientLabel')}
                         </span>
                         <Input
                           {...field}
-                          placeholder="Enter the recipient's phone number"
+                          placeholder={t('home.form.recipientPlaceholder')}
                         />
                       </label>
                     )}
@@ -233,7 +261,7 @@ const Home = () => {
                   type="submit"
                   primary
                 >
-                  Continue
+                  {t('home.form.continue')}
                 </Button>
               </form>
             </aside>
@@ -245,11 +273,10 @@ const Home = () => {
           <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12">
             <header className="text-center mb-12 animate-on-scroll">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                Why Choose Peekaboo?
+                {t('home.features.title')}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                We provide reliable and efficient delivery services that help you
-                connect with your customers faster.
+                {t('home.features.subtitle')}
               </p>
             </header>
 
@@ -282,10 +309,10 @@ const Home = () => {
           <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12">
             <header className="text-center mb-12 animate-on-scroll">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                How It Works
+                {t('home.howItWorks.title')}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Sending a package is as easy as 1-2-3. Get started in minutes.
+                {t('home.howItWorks.subtitle')}
               </p>
             </header>
 
@@ -312,11 +339,10 @@ const Home = () => {
           <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12">
             <header className="text-center mb-12 animate-on-scroll">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                What Our Customers Say
+                {t('home.testimonials.title')}
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Don't just take our word for it. Here's what our customers have
-                to say about Peekaboo.
+                {t('home.testimonials.subtitle')}
               </p>
             </header>
 
@@ -354,18 +380,17 @@ const Home = () => {
         <section className="w-full bg-primary-900 py-16 lg:py-20">
           <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12 text-center animate-on-scroll">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Ready to Send Your First Package?
+              {t('home.cta.title')}
             </h2>
             <p className="text-lg text-primary-200 max-w-2xl mx-auto mb-8">
-              Join thousands of satisfied customers who trust Peekaboo for their
-              delivery needs.
+              {t('home.cta.subtitle')}
             </p>
             <Button
               primary
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="bg-white text-primary-900 hover:bg-gray-100 mx-auto w-fit"
             >
-              Get Started Now
+              {t('home.cta.button')}
             </Button>
           </article>
         </section>
