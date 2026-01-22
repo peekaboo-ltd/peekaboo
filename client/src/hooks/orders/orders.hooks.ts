@@ -4,7 +4,7 @@ import {
   useUpdateOrderMutation,
 } from '../../api/mutations/orders.mutations';
 import { useNavigate } from 'react-router-dom';
-import { useLazyFetchOrdersQuery, useLazyGetOrderQuery } from '@/api/queries/orders.queries';
+import { useLazyFetchOrdersQuery, useLazyGetOrderQuery, useLazyGetOrderByReferenceIdQuery } from '@/api/queries/orders.queries';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrder, setOrdersList } from '@/states/slices/order.slice';
 import { setToken, setUser, setIsAuthenticated } from '@/states/slices/auth.slice';
@@ -128,6 +128,24 @@ export const useGetOrderFees = (initialFee?: number) => {
   }, [initialFee]);
 
   return { getOrderFee, orderFee };
+};
+
+/**
+ * @returns {Object} - The get order by reference ID hook
+ */
+export const useGetOrderByReferenceId = () => {
+  const dispatch = useAppDispatch();
+
+  const [getOrderByReferenceId, { data, error, isFetching, reset, isSuccess, isError }] =
+    useLazyGetOrderByReferenceIdQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setOrder(data?.data));
+    }
+  }, [data, isSuccess, dispatch]);
+
+  return { getOrderByReferenceId, data, error, isFetching, reset, isSuccess, isError };
 };
 
 export const useFetchOrders = () => {

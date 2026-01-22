@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from '../pages/home';
-import { PublicOrderDetails } from '../pages/public/orders';
+import { PublicOrderDetails, TrackOrder } from '../pages/public/orders';
 import PublicOrderTracking from '@/pages/public/orders/PublicOrderTracking';
 import PublicOrderPaymentSuccess from '@/pages/public/orders/PublicOrderPaymentSuccess';
 import PublicLayout from '@/containers/navigation/PublicLayout';
@@ -29,6 +29,7 @@ const Router = () => {
         </Route>
         <Route path="" element={<Home />} />
         <Route path="about" element={<About />} />
+        <Route path="track" element={<TrackOrder />} />
       </Route>
       <Route path="/p" element={<PublicLayout />}>
         <Route path="orders">

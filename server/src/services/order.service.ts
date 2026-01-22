@@ -158,6 +158,32 @@ export class OrderService {
     });
   }
 
+  // GET ORDER BY REFERENCE ID WITH RELATIONS (FOR PUBLIC ACCESS)
+  async getOrderByReferenceIdWithRelations(referenceId: string): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: { referenceId },
+      relations: {
+        createdBy: true,
+        recipient: true,
+        sender: true,
+        activities: true,
+        assignments: {
+          assignedTo: true,
+          createdBy: true,
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundError('Order not found', {
+        referenceId,
+        referenceType: LogReferenceTypes.ORDER,
+      });
+    }
+
+    return order;
+  }
+
   // GET ORDER BY ID
   async getOrderById(id: UUID): Promise<Order> {
     const order = await this.orderRepository.findOne({
