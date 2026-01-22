@@ -223,6 +223,7 @@ const Home = () => {
                   />
                 </fieldset>
 
+                <ul className='w-full flex flex-col gap-2'>
                 <Button
                   className="w-full bg-primary-900 p-4 rounded-xs cursor-pointer"
                   isLoading={isLoading}
@@ -231,6 +232,13 @@ const Home = () => {
                 >
                   {t('home.form.continue')}
                 </Button>
+                <Link
+                  to="/track"
+                  className="text-primary-900 text-center text-sm underline underline-offset-2 font-medium transition-colors transition-transform duration-200 ease-in-out hover:text-primary-800 hover:scale-105 hover:underline hover:underline-offset-4"
+                >
+                  Track your order
+                </Link>
+                </ul>
               </form>
             </aside>
           </article>

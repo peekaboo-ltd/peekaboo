@@ -56,7 +56,6 @@ const Footer = () => {
     () => [
       { to: '/about', labelKey: 'footer.aboutUs' },
       { to: '/auth/login', labelKey: 'footer.signIn' },
-      { to: '/auth/register', labelKey: 'footer.register' },
       { to: '/track', labelKey: 'footer.trackOrder' },
     ],
     []

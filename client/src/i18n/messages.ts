@@ -300,7 +300,7 @@ export const messages: Record<Language, Record<string, string>> = {
 
     'home.cta.title': 'Witeguye kohereza paki yawe ya mbere?',
     'home.cta.subtitle':
-      'Injira mu bihumbi by'abakiriya banyuzwe bizerwa Peekaboo ku gutwara paki zabo.',
+    "Injira mu bihumbi by'abakiriya banyuzwe bizerwa Peekaboo ku gutwara paki zabo.",
     'home.cta.button': 'Tangira nonaha',
 
     // Track Order
