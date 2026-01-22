@@ -234,7 +234,7 @@ const Home = () => {
                 </Button>
                 <Link
                   to="/track"
-                  className="text-primary-900 text-center text-sm underline underline-offset-2 font-medium transition-colors transition-transform duration-200 ease-in-out hover:text-primary-800 hover:scale-105 hover:underline hover:underline-offset-4"
+                  className="text-primary-900 text-center text-sm underline underline-offset-2 font-medium transition-transform duration-200 ease-in-out hover:text-primary-800 hover:scale-105 hover:underline hover:underline-offset-4"
                 >
                   Track your order
                 </Link>

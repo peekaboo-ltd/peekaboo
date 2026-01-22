@@ -122,7 +122,7 @@ export default function AssignmentsScreen() {
       <FlatList
         data={assignments}
         renderItem={renderAssignment}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
