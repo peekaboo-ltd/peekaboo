@@ -76,6 +76,43 @@ export const messages: Record<Language, Record<string, string>> = {
     'home.cta.subtitle':
       'Join thousands of satisfied customers who trust Peekaboo for their delivery needs.',
     'home.cta.button': 'Get Started Now',
+
+    // Track Order
+    'trackOrder.title': 'Track Your Order',
+    'trackOrder.subtitle': 'Enter your order ID to track the status of your delivery.',
+    'trackOrder.orderIdLabel': 'Order ID',
+    'trackOrder.orderIdPlaceholder': 'e.g., P123456',
+    'trackOrder.searchButton': 'Track Order',
+    'trackOrder.notFound': 'Order not found. Please check the order ID and try again.',
+    'trackOrder.enterOrderId': 'Please enter an order ID.',
+    'trackOrder.hint': 'Your order ID was provided when you placed your order. It starts with "P" followed by numbers.',
+
+    // Footer
+    'footer.description': 'Fast and reliable package delivery services in Kigali. Connecting senders with trusted riders.',
+    'footer.quickLinks': 'Quick Links',
+    'footer.aboutUs': 'About Us',
+    'footer.signIn': 'Sign In',
+    'footer.register': 'Register',
+    'footer.trackOrder': 'Track Order',
+    'footer.services': 'Services',
+    'footer.sameDayDelivery': 'Same-Day Delivery',
+    'footer.expressDelivery': 'Express Delivery',
+    'footer.businessSolutions': 'Business Solutions',
+    'footer.courierServices': 'Courier Services',
+    'footer.contactUs': 'Contact Us',
+    'footer.copyright': 'Peekaboo Ltd. All rights reserved.',
+    'footer.language': 'Language',
+
+    // Dashboard
+    'dashboard.welcome': 'Welcome back, {name}',
+    'dashboard.welcomeDefault': 'Welcome back, User',
+    'dashboard.platformOverview': "Here's an overview of your platform",
+    'dashboard.accountOverview': "Here's an overview of your account",
+    'dashboard.searchPlaceholder': 'Search by Order ID...',
+    'dashboard.failedToLoad': 'Failed to load dashboard',
+    'dashboard.tryRefreshing': 'Please try refreshing the page or contact support if the problem persists.',
+    'dashboard.ordersChart': 'Orders (Last 30 days)',
+    'dashboard.revenueChart': 'Revenue (Last 30 days)',
   },
   fr: {
     'home.language.label': 'Langue',
@@ -152,6 +189,43 @@ export const messages: Record<Language, Record<string, string>> = {
     'home.cta.subtitle':
       'Rejoignez des milliers de clients satisfaits qui font confiance à Peekaboo pour leurs livraisons.',
     'home.cta.button': 'Commencer maintenant',
+
+    // Track Order
+    'trackOrder.title': 'Suivre votre commande',
+    'trackOrder.subtitle': 'Entrez votre numéro de commande pour suivre le statut de votre livraison.',
+    'trackOrder.orderIdLabel': 'Numéro de commande',
+    'trackOrder.orderIdPlaceholder': 'ex: P123456',
+    'trackOrder.searchButton': 'Suivre la commande',
+    'trackOrder.notFound': 'Commande introuvable. Veuillez vérifier le numéro et réessayer.',
+    'trackOrder.enterOrderId': 'Veuillez entrer un numéro de commande.',
+    'trackOrder.hint': 'Votre numéro de commande vous a été fourni lors de la création de votre commande. Il commence par "P" suivi de chiffres.',
+
+    // Footer
+    'footer.description': 'Services de livraison de colis rapides et fiables à Kigali. Connecter les expéditeurs avec des coursiers de confiance.',
+    'footer.quickLinks': 'Liens rapides',
+    'footer.aboutUs': 'À propos',
+    'footer.signIn': 'Connexion',
+    'footer.register': "S'inscrire",
+    'footer.trackOrder': 'Suivre commande',
+    'footer.services': 'Services',
+    'footer.sameDayDelivery': 'Livraison le jour même',
+    'footer.expressDelivery': 'Livraison express',
+    'footer.businessSolutions': 'Solutions entreprise',
+    'footer.courierServices': 'Services de coursier',
+    'footer.contactUs': 'Contactez-nous',
+    'footer.copyright': 'Peekaboo Ltd. Tous droits réservés.',
+    'footer.language': 'Langue',
+
+    // Dashboard
+    'dashboard.welcome': 'Bienvenue, {name}',
+    'dashboard.welcomeDefault': 'Bienvenue, Utilisateur',
+    'dashboard.platformOverview': "Voici un aperçu de votre plateforme",
+    'dashboard.accountOverview': "Voici un aperçu de votre compte",
+    'dashboard.searchPlaceholder': 'Rechercher par numéro de commande...',
+    'dashboard.failedToLoad': 'Échec du chargement du tableau de bord',
+    'dashboard.tryRefreshing': 'Veuillez actualiser la page ou contacter le support si le problème persiste.',
+    'dashboard.ordersChart': 'Commandes (30 derniers jours)',
+    'dashboard.revenueChart': 'Revenus (30 derniers jours)',
   },
   rw: {
     'home.language.label': 'Ururimi',
@@ -226,8 +300,45 @@ export const messages: Record<Language, Record<string, string>> = {
 
     'home.cta.title': 'Witeguye kohereza paki yawe ya mbere?',
     'home.cta.subtitle':
-      'Injira mu bihumbi by’abakiriya banyuzwe bizerwa Peekaboo ku gutwara paki zabo.',
+      'Injira mu bihumbi by'abakiriya banyuzwe bizerwa Peekaboo ku gutwara paki zabo.',
     'home.cta.button': 'Tangira nonaha',
+
+    // Track Order
+    'trackOrder.title': 'Kurikirana paki yawe',
+    'trackOrder.subtitle': 'Injiza nomero ya paki yawe kugira ngo umenye aho igeze.',
+    'trackOrder.orderIdLabel': 'Nomero ya paki',
+    'trackOrder.orderIdPlaceholder': 'urugero: P123456',
+    'trackOrder.searchButton': 'Kurikirana paki',
+    'trackOrder.notFound': 'Paki ntabwo yabonetse. Reba neza nomero ugerageze ukundi.',
+    'trackOrder.enterOrderId': 'Injiza nomero ya paki.',
+    'trackOrder.hint': 'Nomero ya paki yawe wayihawe igihe woherezaga paki. Itangirira ku "P" hakurikiraho imibare.',
+
+    // Footer
+    'footer.description': 'Serivisi yo gutwara paki yihuse kandi yizewe muri Kigali. Guhuza abohereza n\'abamotari bizerwa.',
+    'footer.quickLinks': 'Aho wagana vuba',
+    'footer.aboutUs': 'Abo turi bo',
+    'footer.signIn': 'Injira',
+    'footer.register': 'Iyandikishe',
+    'footer.trackOrder': 'Kurikirana paki',
+    'footer.services': 'Serivisi',
+    'footer.sameDayDelivery': 'Gutanga ku munsi umwe',
+    'footer.expressDelivery': 'Gutanga vuba cyane',
+    'footer.businessSolutions': 'Serivisi z\'ubucuruzi',
+    'footer.courierServices': 'Serivisi z\'abamotari',
+    'footer.contactUs': 'Twandikire',
+    'footer.copyright': 'Peekaboo Ltd. Uburenganzira bwose burabitswe.',
+    'footer.language': 'Ururimi',
+
+    // Dashboard
+    'dashboard.welcome': 'Murakaza neza, {name}',
+    'dashboard.welcomeDefault': 'Murakaza neza, Umukoresha',
+    'dashboard.platformOverview': "Dore incamake y'urubuga rwawe",
+    'dashboard.accountOverview': "Dore incamake y'konti yawe",
+    'dashboard.searchPlaceholder': 'Shakisha ukoresheje nomero ya paki...',
+    'dashboard.failedToLoad': 'Byanze gufungura dashboard',
+    'dashboard.tryRefreshing': 'Gerageza kongera gufungura paji cyangwa twandikire niba ikibazo gikomeje.',
+    'dashboard.ordersChart': 'Paki (Iminsi 30 ishize)',
+    'dashboard.revenueChart': 'Amafaranga yinjiye (Iminsi 30 ishize)',
   },
 };
 

@@ -24,8 +24,10 @@ import OrdersBarChart from '@/components/dashboard/OrdersBarChart';
 import RevenueLineChart from '@/components/dashboard/RevenueLineChart';
 import OrderSearchBar from '@/components/dashboard/OrderSearchBar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useI18n } from '@/i18n/i18n';
 
 const Dashboard = () => {
+  const { t } = useI18n();
   const { user } = useAppSelector((state) => state.auth);
   const { data, isLoading, error } = useGetDashboardMetricsQuery({});
 
@@ -92,11 +94,10 @@ const Dashboard = () => {
       <main className="w-full max-w-7xl mx-auto px-4 py-6">
         <article className="text-center py-12">
           <h2 className="text-xl font-semibold text-destructive mb-2">
-            Failed to load dashboard
+            {t('dashboard.failedToLoad')}
           </h2>
           <p className="text-muted-foreground">
-            Please try refreshing the page or contact support if the problem
-            persists.
+            {t('dashboard.tryRefreshing')}
           </p>
         </article>
       </main>
@@ -123,17 +124,16 @@ const Dashboard = () => {
       <header className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <article>
           <h1 className="text-2xl font-bold text-primary">
-            Welcome back, {user?.name || 'User'}
+            {user?.name ? t('dashboard.welcome', { name: user.name }) : t('dashboard.welcomeDefault')}
           </h1>
           <p className="text-muted-foreground">
-            Here&apos;s an overview of your{' '}
             {dashboardData?.role === RoleTypes.ADMIN ||
             dashboardData?.role === RoleTypes.STAFF
-              ? 'platform'
-              : 'account'}
+              ? t('dashboard.platformOverview')
+              : t('dashboard.accountOverview')}
           </p>
         </article>
-        <OrderSearchBar />
+        <OrderSearchBar placeholder={t('dashboard.searchPlaceholder')} />
       </header>
 
       <section aria-label="Dashboard metrics" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -152,8 +152,8 @@ const Dashboard = () => {
 
       {showCharts && (
         <section aria-label="Dashboard charts" className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-          <OrdersBarChart data={ordersChartData} title="Orders (Last 30 days)" />
-          <RevenueLineChart data={revenueChartData} title="Revenue (Last 30 days)" />
+          <OrdersBarChart data={ordersChartData} title={t('dashboard.ordersChart')} />
+          <RevenueLineChart data={revenueChartData} title={t('dashboard.revenueChart')} />
         </section>
       )}
 

@@ -11,6 +11,8 @@ router.patch("/:id/accept", OrderController.acceptOrder);
 
 router.post("/public", OrderController.createPublicOrder);
 
+router.get("/public/reference/:referenceId", OrderController.getOrderByReferenceId);
+
 router.get("/:id", OrderController.getOrderById);
 
 router.get("/", OrderController.fetchOrders);

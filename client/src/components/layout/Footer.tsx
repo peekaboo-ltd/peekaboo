@@ -5,6 +5,8 @@ import {
   faLocationDot,
   faPhone,
   faEnvelope,
+  faGlobe,
+  faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faInstagram,
@@ -12,15 +14,22 @@ import {
   faWhatsapp,
 } from '@fortawesome/free-brands-svg-icons';
 import type { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core';
+import { useI18n, type Language } from '@/i18n/i18n';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface QuickLink {
   to: string;
-  label: string;
+  labelKey: string;
 }
 
 interface Service {
   to: string;
-  label: string;
+  labelKey: string;
 }
 
 interface ContactInfo {
@@ -34,23 +43,31 @@ interface SocialMedia {
   label: string;
 }
 
+const LANGUAGES: { code: Language; labelKey: string }[] = [
+  { code: 'en', labelKey: 'home.language.en' },
+  { code: 'fr', labelKey: 'home.language.fr' },
+  { code: 'rw', labelKey: 'home.language.rw' },
+];
+
 const Footer = () => {
-  // Memoized arrays
+  const { t, language, setLanguage } = useI18n();
+
   const quickLinks = useMemo<QuickLink[]>(
     () => [
-      { to: '/about', label: 'About Us' },
-      { to: '/auth/login', label: 'Sign In' },
-      { to: '/auth/register', label: 'Register' },
+      { to: '/about', labelKey: 'footer.aboutUs' },
+      { to: '/auth/login', labelKey: 'footer.signIn' },
+      { to: '/auth/register', labelKey: 'footer.register' },
+      { to: '/track', labelKey: 'footer.trackOrder' },
     ],
     []
   );
 
   const services = useMemo<Service[]>(
     () => [
-      { to: '#', label: 'Same-Day Delivery' },
-      { to: '#', label: 'Express Delivery' },
-      { to: '#', label: 'Business Solutions' },
-      { to: '#', label: 'Courier Services' },
+      { to: '#', labelKey: 'footer.sameDayDelivery' },
+      { to: '#', labelKey: 'footer.expressDelivery' },
+      { to: '#', labelKey: 'footer.businessSolutions' },
+      { to: '#', labelKey: 'footer.courierServices' },
     ],
     []
   );
@@ -73,6 +90,8 @@ const Footer = () => {
     []
   );
 
+  const currentLanguageLabel = LANGUAGES.find((l) => l.code === language)?.labelKey || 'home.language.en';
+
   return (
     <footer className="w-full bg-gray-900 text-gray-300 py-12">
       <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12">
@@ -80,8 +99,7 @@ const Footer = () => {
           <article>
             <h3 className="text-xl font-bold text-white mb-4">Peekaboo</h3>
             <p className="text-sm leading-relaxed mb-4">
-              Fast and reliable package delivery services in Kigali. Connecting
-              senders with trusted riders.
+              {t('footer.description')}
             </p>
             <nav className="flex items-center gap-4">
               {socialMedia?.length > 0 && socialMedia?.map((social) => (
@@ -100,7 +118,7 @@ const Footer = () => {
           </article>
 
           <nav>
-            <h4 className="font-semibold text-white mb-4">Quick Links</h4>
+            <h4 className="font-semibold text-white mb-4">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2 text-sm">
               {quickLinks.map((link) => (
                 <li key={link.to}>
@@ -108,7 +126,7 @@ const Footer = () => {
                     to={link.to}
                     className="hover:text-white transition-colors"
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 </li>
               ))}
@@ -116,15 +134,15 @@ const Footer = () => {
           </nav>
 
           <nav>
-            <h4 className="font-semibold text-white mb-4">Services</h4>
+            <h4 className="font-semibold text-white mb-4">{t('footer.services')}</h4>
             <ul className="space-y-2 text-sm">
               {services.map((service) => (
-                <li key={service.label}>
+                <li key={service.labelKey}>
                   <Link
                     to={service.to}
                     className="hover:text-white transition-colors"
                   >
-                    {service.label}
+                    {t(service.labelKey)}
                   </Link>
                 </li>
               ))}
@@ -132,7 +150,7 @@ const Footer = () => {
           </nav>
 
           <address className="not-italic">
-            <h4 className="font-semibold text-white mb-4">Contact Us</h4>
+            <h4 className="font-semibold text-white mb-4">{t('footer.contactUs')}</h4>
             <ul className="space-y-2 text-sm">
               {contactInfo.map((contact, index) => (
                 <li key={index} className="flex items-center gap-2">
@@ -150,7 +168,28 @@ const Footer = () => {
         <hr className="border-gray-700 mb-6" />
 
         <section className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-          <p>&copy; {new Date().getFullYear()} Peekaboo Ltd. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {t('footer.copyright')}</p>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer">
+              <FontAwesomeIcon icon={faGlobe} className="w-4 h-4" />
+              <span>{t(currentLanguageLabel)}</span>
+              <FontAwesomeIcon icon={faChevronDown} className="w-3 h-3" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+              {LANGUAGES.map((lang) => (
+                <DropdownMenuItem
+                  key={lang.code}
+                  onClick={() => setLanguage(lang.code)}
+                  className={`cursor-pointer text-gray-300 hover:text-white hover:bg-gray-700 ${
+                    language === lang.code ? 'bg-gray-700 text-white' : ''
+                  }`}
+                >
+                  {t(lang.labelKey)}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </section>
       </article>
     </footer>

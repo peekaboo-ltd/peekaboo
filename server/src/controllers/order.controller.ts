@@ -93,6 +93,24 @@ export const OrderController = {
     }
   },
 
+  // GET ORDER BY REFERENCE ID (PUBLIC)
+  async getOrderByReferenceId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { referenceId } = req.params;
+
+      // GET ORDER BY REFERENCE ID
+      const order = await orderService.getOrderByReferenceIdWithRelations(referenceId);
+
+      // RETURN ORDER
+      return res.status(200).json({
+        message: 'Order fetched successfully',
+        data: order,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // UPDATE ORDER
   async updateOrder(req: Request, res: Response, next: NextFunction) {
     try {
