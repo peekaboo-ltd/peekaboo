@@ -8,6 +8,21 @@ export interface OrderStatusCount {
   count: number;
 }
 
+export interface ChartDataPoint {
+  label: string;
+  value: number;
+}
+
+export interface OrderTrendData {
+  period: string;
+  data: ChartDataPoint[];
+}
+
+export interface RevenueTrendData {
+  period: string;
+  data: ChartDataPoint[];
+}
+
 export interface AssignmentStatusCount {
   status: OrderAssignmentStatus;
   count: number;
@@ -62,7 +77,20 @@ export interface CustomerMetrics {
   recentActivity: RecentActivity[];
 }
 
+export interface BusinessMetrics {
+  totalOrders: number;
+  activeOrders: number;
+  completedOrders: number;
+  totalSpent: number;
+  pendingPayments: number;
+  ordersByStatus: OrderStatusCount[];
+  recentActivity: RecentActivity[];
+  monthlyOrderVolume: ChartDataPoint[];
+  averageOrderValue: number;
+  deliverySuccessRate: number;
+}
+
 export interface DashboardMetrics {
   role: RoleTypes;
-  metrics: AdminMetrics | RiderMetrics | CustomerMetrics;
+  metrics: AdminMetrics | RiderMetrics | CustomerMetrics | BusinessMetrics;
 }

@@ -1,4 +1,4 @@
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, Repository, ILike } from 'typeorm';
 import { Order } from '../entities/order.entity';
 import { AppDataSource } from '../data-source';
 import { generateReferenceNumber } from '../helpers/string.helper';
@@ -24,6 +24,7 @@ import { UserService } from './user.service';
 import { OrderActivityService } from './orderActivity.service';
 import { Request } from 'express';
 import jwt from 'jsonwebtoken';
+import { OrderActivity } from '../entities/orderActivity.entity';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -288,28 +289,107 @@ export class OrderService {
 
   // FETCH ORDERS
   async fetchOrders(query: Request['query']): Promise<Pagination<Order>> {
-    const { page = 0, size = 10, senderId, recipientId, status, createdById } = query;
-
-    let condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[] = {};
-
-    if (senderId) {
-      condition.senderId = senderId as UUID;
-    }
-
-    if (recipientId) {
-      condition.recipientId = recipientId as UUID;
-    }
-
-    if (createdById) {
-      condition.createdById = createdById as UUID;
-    }
+    const {
+      page = 0,
+      size = 10,
+      senderId,
+      recipientId,
+      createdById,
+      status,
+      statusGroup,
+      referenceId,
+    } = query as Request['query'] & {
+      status?: string;
+      statusGroup?: 'recent' | 'pending' | 'active' | 'completed';
+      referenceId?: string;
+    };
 
     const { take, skip } = getPagination({
       page: Number(page),
       size: Number(size),
     });
 
-    // GET PAGINATION
+    const needsQueryBuilder = Boolean(status || statusGroup || referenceId);
+
+    // Use query builder when filtering by latest status / statusGroup or referenceId search
+    if (needsQueryBuilder) {
+      const qb = this.orderRepository
+        .createQueryBuilder('order')
+        .leftJoinAndSelect('order.createdBy', 'createdBy')
+        .leftJoinAndSelect('order.recipient', 'recipient')
+        .leftJoinAndSelect('order.sender', 'sender')
+        .leftJoinAndSelect('order.activities', 'activities')
+        .leftJoinAndSelect('order.assignments', 'assignments')
+        .leftJoinAndSelect('assignments.assignedTo', 'assignedTo')
+        .leftJoinAndSelect('assignments.createdBy', 'assignmentCreatedBy')
+        .leftJoin(OrderActivity, 'latestActivity', 'latestActivity.orderId = order.id')
+        .andWhere((subQb) => {
+          const subQuery = subQb
+            .subQuery()
+            .select('MAX(sub.createdAt)')
+            .from(OrderActivity, 'sub')
+            .where('sub.orderId = order.id')
+            .getQuery();
+          return 'latestActivity.createdAt = ' + subQuery;
+        })
+        .distinct(true);
+
+      if (senderId) qb.andWhere('order.senderId = :senderId', { senderId });
+      if (recipientId) qb.andWhere('order.recipientId = :recipientId', { recipientId });
+      if (createdById) qb.andWhere('order.createdById = :createdById', { createdById });
+
+      if (referenceId) {
+        qb.andWhere('order.referenceId ILIKE :referenceId', {
+          referenceId: `%${referenceId}%`,
+        });
+      }
+
+      if (statusGroup) {
+        if (statusGroup === 'recent') {
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+          qb.andWhere('order.createdAt >= :sevenDaysAgo', { sevenDaysAgo });
+        } else {
+          const statusGroups: Record<string, OrderStatus[]> = {
+            pending: [OrderStatus.CREATED, OrderStatus.PENDING, OrderStatus.CONFIRMED],
+            active: [
+              OrderStatus.ACCEPTED,
+              OrderStatus.PAID,
+              OrderStatus.ACTIVE,
+              OrderStatus.IN_TRANSIT,
+            ],
+            completed: [OrderStatus.DELIVERED, OrderStatus.COMPLETED],
+          };
+          const statuses = statusGroups[statusGroup] || [];
+          if (statuses.length > 0) {
+            qb.andWhere('latestActivity.status IN (:...statuses)', { statuses });
+          }
+        }
+      }
+
+      if (status) {
+        qb.andWhere('latestActivity.status = :status', { status });
+      }
+
+      qb.orderBy('order.createdAt', 'DESC').skip(skip).take(take);
+
+      const orders = await qb.getManyAndCount();
+
+      return getPagingData({
+        data: orders,
+        page: Number(page),
+        size: Number(size),
+      });
+    }
+
+    // Default (simple) path
+    let condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[] = {};
+
+    if (senderId) condition.senderId = senderId as UUID;
+    if (recipientId) condition.recipientId = recipientId as UUID;
+    if (createdById) condition.createdById = createdById as UUID;
+    if (referenceId) condition.referenceId = ILike(`%${referenceId}%`);
+
     const orders = await this.orderRepository.findAndCount({
       where: condition,
       skip,

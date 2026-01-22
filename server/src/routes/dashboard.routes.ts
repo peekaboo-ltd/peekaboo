@@ -10,4 +10,11 @@ router.use(authenticate);
 // GET dashboard metrics
 router.get('/', DashboardController.getDashboardMetrics);
 
+// Charts
+router.get('/charts/orders', DashboardController.getOrderChartData);
+router.get('/charts/revenue', DashboardController.getRevenueChartData);
+
+// Quick order lookup
+router.get('/orders/search', DashboardController.searchOrderByReferenceId);
+
 export default router;

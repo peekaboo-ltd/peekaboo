@@ -13,6 +13,8 @@ import {
   RiderMetrics,
   CustomerMetrics,
   RecentActivity,
+  BusinessMetrics,
+  ChartDataPoint,
 } from '../types/dashboard.types';
 import { UUID } from '../types';
 import { UserRole } from '../entities/userRole.entity';
@@ -27,10 +29,16 @@ export class DashboardService {
 
   /**
    * Determine the primary role for dashboard display
-   * Priority: ADMIN > STAFF > RIDER > CUSTOMER
+   * Priority: ADMIN > STAFF > BUSINESS > RIDER > CUSTOMER
    */
   private determinePrimaryRole(roles: RoleTypes[]): RoleTypes {
-    const rolePriority = [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.RIDER, RoleTypes.CUSTOMER];
+    const rolePriority = [
+      RoleTypes.ADMIN,
+      RoleTypes.STAFF,
+      RoleTypes.BUSINESS,
+      RoleTypes.RIDER,
+      RoleTypes.CUSTOMER,
+    ];
     for (const role of rolePriority) {
       if (roles.includes(role)) {
         return role;
@@ -45,12 +53,15 @@ export class DashboardService {
   async getDashboardMetrics(userId: UUID, userRoles: RoleTypes[]): Promise<DashboardMetrics> {
     const primaryRole = this.determinePrimaryRole(userRoles);
 
-    let metrics: AdminMetrics | RiderMetrics | CustomerMetrics;
+    let metrics: AdminMetrics | RiderMetrics | CustomerMetrics | BusinessMetrics;
 
     switch (primaryRole) {
       case RoleTypes.ADMIN:
       case RoleTypes.STAFF:
         metrics = await this.getAdminMetrics();
+        break;
+      case RoleTypes.BUSINESS:
+        metrics = await this.getBusinessMetrics(userId);
         break;
       case RoleTypes.RIDER:
         metrics = await this.getRiderMetrics(userId);
@@ -212,6 +223,261 @@ export class DashboardService {
       ordersByStatus,
       recentActivity,
     };
+  }
+
+  /**
+   * Get business metrics (B2B user-specific)
+   * Currently based on orders created by / sent by the business user, plus payment spend.
+   */
+  private async getBusinessMetrics(userId: UUID): Promise<BusinessMetrics> {
+    // Total orders by this business (as sender or creator)
+    const totalOrders = await this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.senderId = :userId OR order.createdById = :userId', { userId })
+      .getCount();
+
+    const ordersByStatus = await this.getCustomerOrdersByStatus(userId);
+
+    const activeStatuses = [
+      OrderStatus.CREATED,
+      OrderStatus.PENDING,
+      OrderStatus.CONFIRMED,
+      OrderStatus.ACCEPTED,
+      OrderStatus.PAID,
+      OrderStatus.ACTIVE,
+      OrderStatus.IN_TRANSIT,
+    ];
+    const activeOrders = ordersByStatus
+      .filter((s) => activeStatuses.includes(s.status))
+      .reduce((sum, s) => sum + s.count, 0);
+
+    const deliveredCount = ordersByStatus.find((s) => s.status === OrderStatus.DELIVERED)?.count || 0;
+    const completedCount = ordersByStatus.find((s) => s.status === OrderStatus.COMPLETED)?.count || 0;
+    const completedOrders = deliveredCount + completedCount;
+
+    // Total spent
+    const totalSpentResult = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .select('COALESCE(SUM(payment.amount), 0)', 'total')
+      .where('payment.createdById = :userId', { userId })
+      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .getRawOne();
+
+    const totalSpent = parseFloat(totalSpentResult?.total || '0');
+
+    // Pending payments
+    const pendingPayments = await this.paymentRepository.count({
+      where: { createdById: userId, status: KpayPaymentStatus.PENDING },
+    });
+
+    const averageOrderValue =
+      completedOrders > 0 ? Math.round((totalSpent / completedOrders) * 100) / 100 : 0;
+
+    const deliverySuccessRate =
+      totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+
+    const monthlyOrderVolume = await this.getMonthlyOrderVolume(userId);
+
+    const recentActivity = await this.getCustomerRecentActivity(userId);
+
+    return {
+      totalOrders,
+      activeOrders,
+      completedOrders,
+      totalSpent,
+      pendingPayments,
+      ordersByStatus,
+      recentActivity,
+      monthlyOrderVolume,
+      averageOrderValue,
+      deliverySuccessRate,
+    };
+  }
+
+  private async getMonthlyOrderVolume(userId: UUID): Promise<ChartDataPoint[]> {
+    // last 6 months including current
+    const start = new Date();
+    start.setMonth(start.getMonth() - 5);
+    start.setDate(1);
+    start.setHours(0, 0, 0, 0);
+
+    const rows = await this.orderRepository
+      .createQueryBuilder('order')
+      .select(`TO_CHAR(DATE_TRUNC('month', order.createdAt), 'YYYY-MM')`, 'label')
+      .addSelect('COUNT(*)', 'value')
+      .where('(order.senderId = :userId OR order.createdById = :userId)', { userId })
+      .andWhere('order.createdAt >= :start', { start })
+      .groupBy(`DATE_TRUNC('month', order.createdAt)`)
+      .orderBy(`DATE_TRUNC('month', order.createdAt)`, 'ASC')
+      .getRawMany();
+
+    const byLabel = new Map<string, number>(
+      rows.map((r: { label: string; value: string }) => [r.label, parseInt(r.value, 10)])
+    );
+
+    const result: ChartDataPoint[] = [];
+    const cursor = new Date(start);
+    const end = new Date();
+    end.setDate(1);
+    end.setHours(0, 0, 0, 0);
+
+    while (cursor <= end) {
+      const label = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`;
+      result.push({ label, value: byLabel.get(label) || 0 });
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    return result;
+  }
+
+  /**
+   * Chart data: orders count over time
+   */
+  async getOrderChartData(userId: UUID, userRoles: RoleTypes[], period: string): Promise<ChartDataPoint[]> {
+    const scopeIsAdmin = userRoles.includes(RoleTypes.ADMIN) || userRoles.includes(RoleTypes.STAFF);
+
+    const normalizedPeriod = ['week', 'month', 'year'].includes(period) ? period : 'month';
+
+    const now = new Date();
+    let start: Date;
+    let truncUnit: 'day' | 'month';
+    let format: string;
+
+    if (normalizedPeriod === 'week') {
+      start = new Date(now);
+      start.setDate(start.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+      truncUnit = 'day';
+      format = 'YYYY-MM-DD';
+    } else if (normalizedPeriod === 'year') {
+      start = new Date(now);
+      start.setMonth(start.getMonth() - 11, 1);
+      start.setHours(0, 0, 0, 0);
+      truncUnit = 'month';
+      format = 'YYYY-MM';
+    } else {
+      // month
+      start = new Date(now);
+      start.setDate(start.getDate() - 29);
+      start.setHours(0, 0, 0, 0);
+      truncUnit = 'day';
+      format = 'YYYY-MM-DD';
+    }
+
+    const qb = this.orderRepository
+      .createQueryBuilder('order')
+      .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', order.createdAt), '${format}')`, 'label')
+      .addSelect('COUNT(*)', 'value')
+      .where('order.createdAt >= :start', { start });
+
+    if (!scopeIsAdmin) {
+      qb.andWhere('(order.senderId = :userId OR order.createdById = :userId)', { userId });
+    }
+
+    const rows = await qb
+      .groupBy(`DATE_TRUNC('${truncUnit}', order.createdAt)`)
+      .orderBy(`DATE_TRUNC('${truncUnit}', order.createdAt)`, 'ASC')
+      .getRawMany();
+
+    return this.fillTimeSeries(rows, start, now, normalizedPeriod);
+  }
+
+  /**
+   * Chart data: revenue over time (successful payments)
+   */
+  async getRevenueChartData(userId: UUID, userRoles: RoleTypes[], period: string): Promise<ChartDataPoint[]> {
+    const scopeIsAdmin = userRoles.includes(RoleTypes.ADMIN) || userRoles.includes(RoleTypes.STAFF);
+
+    const normalizedPeriod = ['week', 'month', 'year'].includes(period) ? period : 'month';
+
+    const now = new Date();
+    let start: Date;
+    let truncUnit: 'day' | 'month';
+    let format: string;
+
+    if (normalizedPeriod === 'week') {
+      start = new Date(now);
+      start.setDate(start.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+      truncUnit = 'day';
+      format = 'YYYY-MM-DD';
+    } else if (normalizedPeriod === 'year') {
+      start = new Date(now);
+      start.setMonth(start.getMonth() - 11, 1);
+      start.setHours(0, 0, 0, 0);
+      truncUnit = 'month';
+      format = 'YYYY-MM';
+    } else {
+      start = new Date(now);
+      start.setDate(start.getDate() - 29);
+      start.setHours(0, 0, 0, 0);
+      truncUnit = 'day';
+      format = 'YYYY-MM-DD';
+    }
+
+    const qb = this.paymentRepository
+      .createQueryBuilder('payment')
+      .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', payment.createdAt), '${format}')`, 'label')
+      .addSelect('COALESCE(SUM(payment.amount), 0)', 'value')
+      .where('payment.createdAt >= :start', { start })
+      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL });
+
+    if (!scopeIsAdmin) {
+      qb.andWhere('payment.createdById = :userId', { userId });
+    }
+
+    const rows = await qb
+      .groupBy(`DATE_TRUNC('${truncUnit}', payment.createdAt)`)
+      .orderBy(`DATE_TRUNC('${truncUnit}', payment.createdAt)`, 'ASC')
+      .getRawMany();
+
+    return this.fillTimeSeries(rows, start, now, normalizedPeriod, true);
+  }
+
+  private fillTimeSeries(
+    rows: Array<{ label: string; value: string }>,
+    start: Date,
+    end: Date,
+    period: string,
+    parseAsFloat: boolean = false
+  ): ChartDataPoint[] {
+    const byLabel = new Map<string, number>(
+      rows.map((r) => [r.label, parseAsFloat ? parseFloat(r.value) : parseInt(r.value, 10)])
+    );
+
+    const result: ChartDataPoint[] = [];
+
+    if (period === 'year') {
+      const cursor = new Date(start);
+      cursor.setDate(1);
+      cursor.setHours(0, 0, 0, 0);
+      const endCursor = new Date(end);
+      endCursor.setDate(1);
+      endCursor.setHours(0, 0, 0, 0);
+
+      while (cursor <= endCursor) {
+        const label = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`;
+        result.push({ label, value: byLabel.get(label) || 0 });
+        cursor.setMonth(cursor.getMonth() + 1);
+      }
+      return result;
+    }
+
+    // week/month -> daily
+    const cursor = new Date(start);
+    cursor.setHours(0, 0, 0, 0);
+    const endCursor = new Date(end);
+    endCursor.setHours(0, 0, 0, 0);
+
+    while (cursor <= endCursor) {
+      const label = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(
+        cursor.getDate()
+      ).padStart(2, '0')}`;
+      result.push({ label, value: byLabel.get(label) || 0 });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    return result;
   }
 
   /**
