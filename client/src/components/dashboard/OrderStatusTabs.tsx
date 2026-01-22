@@ -12,11 +12,11 @@ export default function OrderStatusTabs({
   return (
     <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as OrderStatusTab)}>
       <TabsList className="w-full flex-wrap">
-        <TabsTrigger value="all">All</TabsTrigger>
-        <TabsTrigger value="recent">Recent</TabsTrigger>
-        <TabsTrigger value="pending">Pending</TabsTrigger>
-        <TabsTrigger value="active">Active</TabsTrigger>
-        <TabsTrigger value="completed">Completed</TabsTrigger>
+        <TabsTrigger className='cursor-pointer' value="all">All</TabsTrigger>
+        <TabsTrigger className='cursor-pointer' value="recent">Recent</TabsTrigger>
+        <TabsTrigger className='cursor-pointer' value="pending">Pending</TabsTrigger>
+        <TabsTrigger className='cursor-pointer' value="active">Active</TabsTrigger>
+        <TabsTrigger className='cursor-pointer' value="completed">Completed</TabsTrigger>
       </TabsList>
     </Tabs>
   );
