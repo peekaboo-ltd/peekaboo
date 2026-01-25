@@ -25,18 +25,17 @@ export interface Assignment {
 
 export interface AssignmentListParams {
   status?: OrderAssignmentStatus;
+  orderId?: string;
+  assignedToId?: string;
   page?: number;
-  limit?: number;
+  size?: number;
 }
 
-export interface AcceptAssignmentResponse {
-  success: boolean;
-  assignment: Assignment;
-  message?: string;
+export interface AssignmentApiResponse {
+  message: string;
+  data: Assignment;
 }
 
-export interface RejectAssignmentResponse {
-  success: boolean;
-  assignment: Assignment;
-  message?: string;
-}
+export interface AcceptAssignmentResponse extends AssignmentApiResponse {}
+
+export interface RejectAssignmentResponse extends AssignmentApiResponse {}
