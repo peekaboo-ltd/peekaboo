@@ -41,25 +41,25 @@ const Button: FC<ButtonProps> = ({
       <ButtonUI
         type={type || 'submit'}
         onClick={onClick as MouseEventHandler<HTMLButtonElement> | undefined}
-        className={`py-[6px] flex items-center gap-2 justify-center text-center border-[1px] border-primary px-4 rounded-sm text-[13px] text-primary bg-white hover:bg-primary hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] max-[800px]:!text-[13px] max-md:!py-2 ${
+        className={`py-[6px] flex items-center gap-2 justify-center text-center border-[1px] border-primary-900 px-4 rounded-sm text-[13px] text-primary-900 bg-white hover:bg-primary-900 hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] max-[800px]:!text-[13px] max-md:!py-2 ${
           !styled &&
-          '!bg-transparent !shadow-none !text-primary hover:!scale-[1.005] !py-0 !px-0 !border-none hover:!bg-transparent hover:!text-primary'
+          '!bg-transparent !shadow-none !text-primary-900 hover:!scale-[1.005] !py-0 !px-0 !border-none hover:!bg-transparent hover:!text-primary-900'
         } ${className} ${
           primary &&
-          '!bg-primary !text-white hover:!bg-primary hover:!text-white !shadow-sm'
+          '!bg-primary-900 !text-white hover:!bg-primary-800 hover:!text-white !shadow-sm !border-primary-900'
         }
         ${
           danger &&
           '!bg-red-700 !border-none !text-white hover:!bg-red-700 hover:!text-white !shadow-sm'
         } ${
           disabled &&
-          '!bg-secondary !shadow-none hover:!scale-[1] !cursor-default hover:!bg-secondary hover:text-opacity-80 !duration-0 text-white text-opacity-80 !border-none text-center transition-all'
+          '!bg-secondary !shadow-none hover:!scale-[1] !cursor-not-allowed hover:!bg-secondary hover:text-opacity-80 !duration-0 text-white text-opacity-80 !border-none text-center transition-all'
         }`}
         disabled={disabled}
         {...rest}
       >
         {isLoading ? (
-          <Loader className={primary ? 'text-white' : 'text-primary'} />
+          <Loader className={primary ? 'text-white' : 'text-primary-900'} />
         ) : (
           <>
             {icon && <FontAwesomeIcon icon={icon} />}
@@ -82,12 +82,12 @@ const Button: FC<ButtonProps> = ({
           onClick(e);
         }
       }}
-      className={`py-[6px] text-center flex items-center gap-2 justify-center border-[1px] border-primary px-4 rounded-sm text-[13px] text-primary bg-white hover:bg-primary hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] max-[800px]:!text-[13px] max-md:!py-2 ${
+      className={`py-[6px] text-center flex items-center gap-2 justify-center border-[1px] border-primary-900 px-4 rounded-sm text-[13px] text-primary-900 bg-white hover:bg-primary-900 hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] max-[800px]:!text-[13px] max-md:!py-2 ${
         !styled &&
-        '!bg-transparent !shadow-none !text-primary hover:!scale-[1.005] !py-0 !px-0 !border-none hover:!bg-transparent hover:!text-primary'
+        '!bg-transparent !shadow-none !text-primary-900 hover:!scale-[1.005] !py-0 !px-0 !border-none hover:!bg-transparent hover:!text-primary-900'
       } ${className} ${
         primary &&
-        '!bg-primary !text-white hover:!bg-primary hover:!text-white !shadow-sm'
+        '!bg-primary-900 !text-white hover:!bg-primary-800 hover:!text-white !shadow-sm !border-primary-900'
       }
       ${
         danger &&
@@ -99,7 +99,7 @@ const Button: FC<ButtonProps> = ({
       {...rest}
     >
       {isLoading ? (
-        <Loader className={primary ? 'text-white' : 'text-primary'} />
+        <Loader className={primary ? 'text-white' : 'text-primary-900'} />
       ) : (
         <>
           {icon && <FontAwesomeIcon icon={icon} />}

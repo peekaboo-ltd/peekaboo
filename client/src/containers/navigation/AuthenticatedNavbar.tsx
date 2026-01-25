@@ -62,7 +62,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
             <section className="flex items-center gap-2 sm:gap-3 ml-auto">
                     {pathname === '/' && <Link
                     to="/dashboard"
-                    className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors duration-200"
+                    className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-900 hover:bg-primary-900/10 rounded-lg transition-colors duration-200"
                 >
                     Dashboard
                 </Link>}
@@ -90,7 +90,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         aria-expanded={isOpen}
                         aria-haspopup="true"
                     >
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-900/10 flex items-center justify-center text-primary-900 font-medium">
                             {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                         </div>
 
@@ -139,7 +139,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                     navigate(`${nav?.link}`);
                                     setIsOpen(false);
                                 }}
-                                className={`flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors duration-200
+                                className={`flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-900 transition-colors duration-200
                   ${['Theme', 'Notifications'].includes(nav?.title)
                                         ? 'min-[450px]:hidden'
                                         : ''
@@ -183,9 +183,9 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                     </header>
 
                     <section className="py-2">
-                        <header className="px-3 py-3 border-b border-gray-100 bg-linear-to-r from-primary/5 to-transparent">
+                        <header className="px-3 py-3 border-b border-gray-100 bg-linear-to-r from-primary-900/5 to-transparent">
                             <div className="flex items-center gap-2.5">
-                                <span className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-base">
+                                <span className="w-10 h-10 rounded-full bg-primary-900/10 flex items-center justify-center text-primary-900 font-medium text-base">
                                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                                 </span>
                                 <div>
@@ -208,7 +208,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                     <Link
                                         to="/dashboard"
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-primary transition-all duration-200"
+                                        className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
                                     >
                                         <FontAwesomeIcon
                                             icon={faUser}
@@ -231,7 +231,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                                 }
                                                 navigate(`${nav?.link}`);
                                             }}
-                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-primary transition-all duration-200"
+                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
                                         >
                                             <FontAwesomeIcon
                                                 icon={nav.icon}

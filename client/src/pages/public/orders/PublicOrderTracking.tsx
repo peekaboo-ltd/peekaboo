@@ -1,7 +1,7 @@
 import { useFetchOrderActivities } from '@/hooks/orders/orderActivities.hooks';
 import { useAppSelector } from '@/states/hooks';
 import type { UUID } from '@/types';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { OrderStatus } from '@/types/order.type';
 import { useGetOrder } from '@/hooks/orders/orders.hooks';
@@ -12,38 +12,9 @@ import OrderDetails from '@/containers/orders/OrderDetails';
 import { toast } from 'sonner';
 import { workflowStatuses } from '@/constants/order.constants';
 import Button from '@/components/inputs/Button';
+import { motion, Variants } from 'framer-motion';
 
 const PublicOrderTracking = () => {
-  const observerRef = useRef<IntersectionObserver | null>(null);
-
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in-up');
-            entry.target.classList.remove('opacity-0', 'translate-y-8');
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px',
-      }
-    );
-
-    const animatedElements = document.querySelectorAll('.animate-on-scroll');
-    animatedElements.forEach((el) => {
-      observerRef.current?.observe(el);
-    });
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, []);
-
   // STATE VARIABLES
   const { orderActivitiesList } = useAppSelector(
     (state) => state.orderActivity
@@ -130,106 +101,109 @@ const PublicOrderTracking = () => {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
+
   return (
-    <>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-          .animate-fade-in-up {
-            animation: fadeInUp 1.2s ease-out forwards;
-          }
-
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(50px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-
-          .animate-on-scroll {
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-          }
-
-          html {
-            scroll-behavior: smooth;
-          }
-        `,
-        }}
-      />
-
-      <main className="py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-12">
-        <section className="max-w-7xl mx-auto">
-          <header className="text-center mb-6 sm:mb-8 animate-on-scroll">
-            <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-primary mb-2 px-2">
-              Track Your Order
-            </h1>
+    <motion.main
+      className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-12"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <section className="max-w-5xl mx-auto">
+        {/* Header */}
+        <motion.header className="text-center mb-8 sm:mb-10" variants={itemVariants as unknown as Variants}>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-2xl mb-4">
+            <img src="/peekaboo.png" alt="Peekaboo" className="w-10 h-10 object-contain" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            Track Your Order
+          </h1>
           {order && (
-            <p className="text-xs sm:text-sm text-gray-600 px-2">
-              Order Reference:{' '}
-              <span className="break-all font-bold">{order.referenceId}</span>{' '}
-              <FontAwesomeIcon
-                icon={isCopied ? faCheckCircle : faCopy}
-                className="w-4 h-4 cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
+            <div className="flex items-center justify-center gap-2 text-gray-600">
+              <span className="text-sm">Order Reference:</span>
+              <code className="bg-gray-100 px-3 py-1 rounded-lg text-sm font-mono font-semibold text-primary-700">
+                {order.referenceId}
+              </code>
+              <button
+                onClick={() => {
                   navigator.clipboard.writeText(order.referenceId);
                   toast.success('Reference ID copied to clipboard');
                   setIsCopied(true);
-                  setTimeout(() => {
-                    setIsCopied(false);
-                  }, 2000);
+                  setTimeout(() => setIsCopied(false), 2000);
                 }}
-              />
-            </p>
+                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                aria-label="Copy reference ID"
+              >
+                <FontAwesomeIcon
+                  icon={isCopied ? faCheckCircle : faCopy}
+                  className={`w-4 h-4 ${isCopied ? 'text-green-500' : 'text-gray-400'}`}
+                />
+              </button>
+            </div>
           )}
-        </header>
+        </motion.header>
 
         {/* Order Details Section */}
         {order && (
-          <article className="bg-white rounded-sm shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8">
-            <h2 className="text-sm sm:text-md text-center uppercase font-semibold text-primary mb-3 sm:mb-4">
+          <motion.article
+            className="bg-white rounded-2xl shadow-lg shadow-gray-900/5 border border-gray-100 p-6 sm:p-8 mb-6"
+            variants={itemVariants as unknown as Variants}
+          >
+            <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-primary-600 rounded-full"></span>
               Order Details
             </h2>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               <OrderDetails order={order} />
             </dl>
-          </article>
+          </motion.article>
         )}
 
-        {/* Horizontal Timeline */}
-        <article className="bg-white rounded-sm shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 animate-on-scroll">
-          <h2 className="text-sm sm:text-md text-center uppercase font-semibold text-gray-800 mb-4 sm:mb-6 lg:mb-8 relative z-0">
+        {/* Order Progress Timeline */}
+        <motion.article
+          className="bg-white rounded-2xl shadow-lg shadow-gray-900/5 border border-gray-100 p-6 sm:p-8 mb-6"
+          variants={itemVariants as unknown as Variants}
+        >
+          <h2 className="text-lg font-semibold text-gray-900 mb-8 flex items-center gap-2">
+            <span className="w-1.5 h-6 bg-primary-600 rounded-full"></span>
             Order Progress
           </h2>
 
-          <nav className="relative z-10">
+          <nav className="relative">
             {/* Mobile/Small Screen Vertical Layout */}
-            <ol className="block sm:hidden space-y-4">
+            <ol className="block sm:hidden space-y-6">
               {/* Vertical Progress Line Background */}
               <span
-                className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"
+                className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200 rounded-full"
                 aria-hidden="true"
               />
 
               {/* Vertical Progress Line Fill */}
-              <span
-                className="absolute left-6 top-0 w-0.5 bg-primary transition-all duration-500 ease-in-out"
-                style={{
-                  height:
-                    furthestActivityIndex >= 0
-                      ? `${
-                          ((furthestActivityIndex + 1) /
-                            workflowStatuses.length) *
-                          100
-                        }%`
-                      : '0%',
+              <motion.span
+                className="absolute left-6 top-0 w-0.5 bg-primary-600 rounded-full"
+                initial={{ height: 0 }}
+                animate={{
+                  height: furthestActivityIndex >= 0
+                    ? `${((furthestActivityIndex + 1) / workflowStatuses.length) * 100}%`
+                    : '0%',
                 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                 aria-label="Order progress"
               />
 
@@ -240,53 +214,44 @@ const PublicOrderTracking = () => {
                 const activity = statusActivityMap.get(status.key);
 
                 return (
-                  <li
+                  <motion.li
                     key={status.key}
-                    className="flex items-center relative group"
+                    className="flex items-start relative group"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
                   >
                     {/* Status Circle */}
                     <button
-                      className={`relative flex items-center justify-center w-12 h-12 rounded-full border-4 border-white shadow-lg transition-all duration-300 z-10 ${
+                      className={`relative flex items-center justify-center w-12 h-12 rounded-xl border-2 shadow-sm transition-all duration-300 z-10 cursor-pointer ${
                         isCompleted
-                          ? 'bg-slate-600 text-white'
+                          ? 'bg-primary-600 border-primary-600 text-white'
                           : isCurrent
-                          ? 'bg-primary text-white ring-4 ring-primary-100'
+                          ? 'bg-primary-600 border-primary-600 text-white ring-4 ring-primary-100'
                           : hasActivity
-                          ? 'bg-slate-200 text-white'
-                          : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
+                          ? 'bg-primary-100 border-primary-200 text-primary-600'
+                          : 'bg-gray-100 border-gray-200 text-gray-400 hover:bg-gray-200'
                       }`}
-                      onMouseEnter={() =>
-                        setHoveredStatus(status.key as string)
-                      }
+                      onMouseEnter={() => setHoveredStatus(status.key as string)}
                       onMouseLeave={() => setHoveredStatus(null)}
                       aria-label={`${status.label}: ${status.description}`}
                     >
                       {isCompleted ? (
-                        <FontAwesomeIcon
-                          icon={faCheckCircle}
-                          className="w-5 h-5"
-                        />
+                        <FontAwesomeIcon icon={faCheckCircle} className="w-5 h-5" />
                       ) : (
-                        <FontAwesomeIcon
-                          icon={status.icon}
-                          className="w-5 h-5"
-                        />
+                        <FontAwesomeIcon icon={status.icon} className="w-5 h-5" />
                       )}
                     </button>
 
-                    {/* Status Label and Info (Right Side) */}
-                    <section className="ml-4 flex-1">
-                      <header className="flex items-center justify-between">
-                        <hgroup>
-                          <p
-                            className={`text-[13px] font-medium ${
-                              isCurrent
-                                ? 'text-primary'
-                                : isCompleted || hasActivity
-                                ? 'text-primary'
-                                : 'text-gray-500'
-                            }`}
-                          >
+                    {/* Status Label and Info */}
+                    <section className="ml-4 flex-1 min-w-0">
+                      <header className="flex items-start justify-between gap-2">
+                        <hgroup className="min-w-0">
+                          <p className={`text-sm font-semibold truncate ${
+                            isCurrent || isCompleted || hasActivity
+                              ? 'text-gray-900'
+                              : 'text-gray-500'
+                          }`}>
                             {status.label}
                           </p>
                           <p className="text-xs text-gray-500 mt-0.5">
@@ -294,22 +259,18 @@ const PublicOrderTracking = () => {
                           </p>
                         </hgroup>
 
-                        <aside className="text-right">
+                        <aside className="flex-shrink-0 text-right">
                           {isCurrent && (
-                            <mark className="inline-flex items-center px-2 py-1 rounded-sm text-xs font-medium bg-primary text-white mb-1">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary-100 text-primary-700">
                               Current
-                            </mark>
+                            </span>
                           )}
                           {activity?.createdAt && (
-                            <time
-                              className={`block text-xs ${
-                                isCurrent
-                                  ? 'text-primary'
-                                  : isCompleted || hasActivity
-                                  ? 'text-primary'
-                                  : 'text-gray-400'
-                              }`}
-                            >
+                            <time className={`block text-xs mt-1 ${
+                              isCurrent || isCompleted || hasActivity
+                                ? 'text-primary-600 font-medium'
+                                : 'text-gray-400'
+                            }`}>
                               {formatTimestamp(activity.createdAt)}
                             </time>
                           )}
@@ -317,59 +278,44 @@ const PublicOrderTracking = () => {
                       </header>
                     </section>
 
-                    {/* Tooltip for Mobile */}
+                    {/* Tooltip */}
                     {hoveredStatus === (status.key as string) && (
-                      <output className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-[11px] rounded-sm shadow-lg whitespace-nowrap z-50 max-w-48">
-                        {(
-                          activity as OrderActivity & {
-                            notes?: string;
-                            description?: string;
-                          }
-                        )?.notes ||
-                          (
-                            activity as OrderActivity & {
-                              notes?: string;
-                              description?: string;
-                            }
-                          )?.description ||
+                      <output className="absolute left-full ml-4 top-0 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50 max-w-48">
+                        {(activity as OrderActivity & { notes?: string; description?: string })?.notes ||
+                          (activity as OrderActivity & { notes?: string; description?: string })?.description ||
                           status.description}
-                        <span className="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900" />
+                        <span className="absolute right-full top-3 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-900" />
                       </output>
                     )}
-                  </li>
+                  </motion.li>
                 );
               })}
             </ol>
 
             {/* Desktop/Tablet Horizontal Layout */}
-            <section className="hidden sm:block overflow-x-auto">
+            <section className="hidden sm:block overflow-x-auto pb-4">
               {/* Horizontal Progress Line Background */}
               <span
-                className="absolute top-4 sm:top-5 lg:top-6 left-3 sm:left-4 lg:left-6 right-3 sm:right-4 lg:right-6 h-0.5 bg-gray-200"
+                className="absolute top-6 left-6 right-6 h-0.5 bg-gray-200 rounded-full"
                 aria-hidden="true"
               />
 
               {/* Horizontal Progress Line Fill */}
-              <span
-                className="absolute top-4 sm:top-5 lg:top-6 h-0.5 bg-primary transition-all duration-500 ease-in-out"
-                style={{
-                  left: '0.75rem',
-                  right:
-                    furthestActivityIndex >= 0
-                      ? `calc(${
-                          ((workflowStatuses.length -
-                            1 -
-                            furthestActivityIndex) /
-                            (workflowStatuses.length - 1)) *
-                          100
-                        }% * (100% - 1.5rem) / 100% + 0.75rem)`
-                      : 'calc(100% - 0.75rem)',
+              <motion.span
+                className="absolute top-6 h-0.5 bg-primary-600 rounded-full"
+                style={{ left: '1.5rem' }}
+                initial={{ width: 0 }}
+                animate={{
+                  width: furthestActivityIndex >= 0
+                    ? `calc(${((furthestActivityIndex) / (workflowStatuses.length - 1)) * 100}% - 3rem)`
+                    : '0%',
                 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                 aria-label="Order progress"
               />
 
               {/* Horizontal Status Steps */}
-              <ol className="flex justify-between relative min-w-max sm:min-w-0 gap-2 sm:gap-0">
+              <ol className="flex justify-between relative">
                 {workflowStatuses.map((status, index) => {
                   const hasActivity = statusActivityMap.has(status.key);
                   const isCurrent = index === currentStepIndex;
@@ -377,114 +323,96 @@ const PublicOrderTracking = () => {
                   const activity = statusActivityMap.get(status.key);
 
                   return (
-                    <li
+                    <motion.li
                       key={status.key}
-                      className="flex flex-col items-center relative group min-w-0 flex-1 sm:flex-initial"
+                      className="flex flex-col items-center relative group flex-1"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
                     >
                       {/* Status Circle */}
                       <button
-                        className={`relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full border-2 sm:border-3 lg:border-4 border-white shadow-lg transition-all duration-300 ${
+                        className={`relative flex items-center justify-center w-12 h-12 rounded-xl border-2 shadow-sm transition-all duration-300 cursor-pointer ${
                           isCompleted
-                            ? 'bg-slate-600 text-white'
+                            ? 'bg-primary-600 border-primary-600 text-white'
                             : isCurrent
-                            ? 'bg-primary text-white ring-2 sm:ring-3 lg:ring-4 ring-primary-100'
+                            ? 'bg-primary-600 border-primary-600 text-white ring-4 ring-primary-100'
                             : hasActivity
-                            ? 'bg-slate-200 text-white'
-                            : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
+                            ? 'bg-primary-100 border-primary-200 text-primary-600'
+                            : 'bg-gray-100 border-gray-200 text-gray-400 hover:bg-gray-200'
                         }`}
-                        onMouseEnter={() =>
-                          setHoveredStatus(status.key as string)
-                        }
+                        onMouseEnter={() => setHoveredStatus(status.key as string)}
                         onMouseLeave={() => setHoveredStatus(null)}
                         aria-label={`${status.label}: ${status.description}`}
                       >
                         {isCompleted ? (
-                          <FontAwesomeIcon
-                            icon={faCheckCircle}
-                            className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5"
-                          />
+                          <FontAwesomeIcon icon={faCheckCircle} className="w-5 h-5" />
                         ) : (
-                          <FontAwesomeIcon
-                            icon={status.icon}
-                            className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5"
-                          />
+                          <FontAwesomeIcon icon={status.icon} className="w-5 h-5" />
                         )}
                       </button>
 
                       {/* Tooltip */}
                       {hoveredStatus === (status.key as string) && (
-                        <output className="absolute bottom-full mb-2 px-2 sm:px-3 py-1 sm:py-2 bg-gray-900 text-white text-[10px] sm:text-[11px] rounded-sm shadow-lg whitespace-nowrap z-50 max-w-32 sm:max-w-48">
-                          {(
-                            activity as OrderActivity & {
-                              notes?: string;
-                              description?: string;
-                            }
-                          )?.notes ||
-                            (
-                              activity as OrderActivity & {
-                                notes?: string;
-                                description?: string;
-                              }
-                            )?.description ||
+                        <output className="absolute bottom-full mb-3 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50 max-w-48 text-center">
+                          {(activity as OrderActivity & { notes?: string; description?: string })?.notes ||
+                            (activity as OrderActivity & { notes?: string; description?: string })?.description ||
                             status.description}
                           <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900" />
                         </output>
                       )}
 
                       {/* Status Label */}
-                      <footer className="mt-2 sm:mt-3 text-center min-w-0">
-                        <p
-                          className={`text-xs sm:text-sm font-medium truncate px-1 ${
-                            isCurrent
-                              ? 'text-primary'
-                              : isCompleted || hasActivity
-                              ? 'text-primary-500'
-                              : 'text-gray-500'
-                          }`}
-                          title={status.label}
-                        >
+                      <footer className="mt-4 text-center max-w-[100px]">
+                        <p className={`text-xs font-semibold truncate ${
+                          isCurrent || isCompleted || hasActivity
+                            ? 'text-gray-900'
+                            : 'text-gray-500'
+                        }`} title={status.label}>
                           {status.label}
                         </p>
+
                         {isCurrent && (
-                          <mark className="mt-1 inline-flex items-center px-1 sm:px-2 py-0.5 sm:py-1 rounded-sm text-[10px] sm:text-xs font-medium bg-primary text-white">
+                          <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-primary-100 text-primary-700">
                             Current
-                          </mark>
+                          </span>
                         )}
 
-                        {/* Timestamp for all statuses with activities */}
                         {activity?.createdAt && (
-                          <time
-                            className={`block text-[10px] sm:text-xs mt-1 truncate ${
-                              isCurrent
-                                ? 'text-primary'
-                                : isCompleted || hasActivity
-                                ? 'text-primary'
-                                : 'text-gray-400'
-                            }`}
-                            title={formatTimestamp(activity.createdAt)}
-                          >
+                          <time className={`block text-[10px] mt-1 ${
+                            isCurrent || isCompleted || hasActivity
+                              ? 'text-primary-600 font-medium'
+                              : 'text-gray-400'
+                          }`} title={formatTimestamp(activity.createdAt)}>
                             {formatTimestamp(activity.createdAt)}
                           </time>
                         )}
                       </footer>
-                    </li>
+                    </motion.li>
                   );
                 })}
               </ol>
             </section>
           </nav>
-        </article>
-        </section>
-        <footer className='flex items-center justify-between max-w-7xl mx-auto animate-on-scroll'>
-          <Button route={`/p/orders/${order?.id}`}>
+        </motion.article>
+
+        {/* Action Buttons */}
+        <motion.footer
+          className="flex items-center justify-between gap-4"
+          variants={itemVariants as unknown as Variants}
+        >
+          <Button
+            route={`/p/orders/${order?.id}`}
+            className="!bg-white !text-gray-700 !border-gray-200 hover:!bg-gray-50 cursor-pointer"
+          >
             Back
           </Button>
-          <Button route="/dashboard" primary>
+          <Button route="/dashboard" primary className="cursor-pointer">
             Continue to Dashboard
           </Button>
-        </footer>
-      </main>
-    </>
+        </motion.footer>
+      </section>
+    </motion.main>
   );
 };
 

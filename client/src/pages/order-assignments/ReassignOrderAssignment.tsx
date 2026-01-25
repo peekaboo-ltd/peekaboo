@@ -231,10 +231,10 @@ const ReassignOrderAssignment = () => {
 
                             <article className="flex-1 bg-gray-50 rounded-lg border border-gray-200 p-6">
                                 <figure className="flex items-start space-x-4">
-                                    <span className="shrink-0 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center" role="img" aria-label="Rider avatar">
+                                    <span className="shrink-0 w-16 h-16 bg-primary-900/10 rounded-full flex items-center justify-center" role="img" aria-label="Rider avatar">
                                         <FontAwesomeIcon
                                             icon={faUser}
-                                            className="w-8 h-8 text-primary"
+                                            className="w-8 h-8 text-primary-900"
                                             aria-hidden="true"
                                         />
                                     </span>

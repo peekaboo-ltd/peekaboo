@@ -16,7 +16,7 @@ const NotFoundPage = () => {
         {/* 404 Number Display */}
         <header className="space-y-4">
           <figure className="relative">
-            <h1 className="text-9xl sm:text-[12rem] font-bold text-primary/10 select-none">
+            <h1 className="text-9xl sm:text-[12rem] font-bold text-primary-900/10 select-none">
               404
             </h1>
             <span
@@ -25,7 +25,7 @@ const NotFoundPage = () => {
             >
               <FontAwesomeIcon
                 icon={faExclamationTriangle}
-                className="text-6xl sm:text-8xl text-primary/20"
+                className="text-6xl sm:text-8xl text-primary-900/20"
                 aria-hidden="true"
               />
             </span>
@@ -54,7 +54,7 @@ const NotFoundPage = () => {
         <nav className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link
             to="/"
-            className="group inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[200px] justify-center"
+            className="group inline-flex items-center gap-2 bg-primary-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-800 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[200px] justify-center"
           >
             <FontAwesomeIcon icon={faHome} className="text-sm" aria-hidden="true" />
             <span>Go Home</span>
@@ -62,7 +62,7 @@ const NotFoundPage = () => {
 
           <Link
             to="/about"
-            className="group inline-flex items-center gap-2 border-2 border-primary text-primary px-6 py-3 rounded-lg font-medium hover:bg-primary hover:text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[200px] justify-center"
+            className="group inline-flex items-center gap-2 border-2 border-primary-900 text-primary-900 px-6 py-3 rounded-lg font-medium hover:bg-primary-900 hover:text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[200px] justify-center"
           >
             <FontAwesomeIcon icon={faInfoCircle} className="text-sm" aria-hidden="true" />
             <span>About Us</span>
@@ -77,21 +77,21 @@ const NotFoundPage = () => {
           <nav className="flex flex-wrap justify-center gap-4 sm:gap-6">
             <Link
               to="/auth/login"
-              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors text-sm"
+              className="inline-flex items-center gap-2 text-primary-900 hover:text-primary-800 font-medium transition-colors text-sm"
             >
               <FontAwesomeIcon icon={faSignInAlt} className="text-xs" aria-hidden="true" />
               <span>Login</span>
             </Link>
             <Link
               to="/auth/register"
-              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors text-sm"
+              className="inline-flex items-center gap-2 text-primary-900 hover:text-primary-800 font-medium transition-colors text-sm"
             >
               <FontAwesomeIcon icon={faUserPlus} className="text-xs" aria-hidden="true" />
               <span>Register</span>
             </Link>
             <Link
               to="/about"
-              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors text-sm"
+              className="inline-flex items-center gap-2 text-primary-900 hover:text-primary-800 font-medium transition-colors text-sm"
             >
               <FontAwesomeIcon icon={faInfoCircle} className="text-xs" aria-hidden="true" />
               <span>About</span>

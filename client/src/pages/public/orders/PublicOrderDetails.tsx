@@ -221,7 +221,7 @@ const PublicOrderDetails = () => {
                       <Button
                         onClick={handleGetCurrentLocation}
                         isLoading={gettingCurrentLocation}
-                        className="py-1! px-3! text-xs"
+                        className="py-1! px-3! text-xs cursor-pointer"
                         primary
                       >
                         Use Current
@@ -230,7 +230,7 @@ const PublicOrderDetails = () => {
                         onClick={() =>
                           dispatch(setUpdateOrderLocationFromModal(true))
                         }
-                        className="py-1! px-3! text-xs"
+                        className="py-1! px-3! text-xs cursor-pointer"
                       >
                         Set Location
                       </Button>
@@ -431,7 +431,7 @@ const PublicOrderDetails = () => {
                     });
                   }
                 }}
-                className="px-8! py-3! font-semibold"
+                className="px-8! py-3! font-semibold cursor-pointer"
               >
                 Track Order
               </Button>
@@ -444,7 +444,7 @@ const PublicOrderDetails = () => {
                   dispatch(setSelectedOrder(order));
                   dispatch(setOrderPaymentModal(true));
                 }}
-                className="px-8! py-3! font-semibold"
+                className="px-8! py-3! font-semibold cursor-pointer"
               >
                 {!order?.locationFrom || !order?.locationTo
                   ? 'Set Both Locations to Continue'

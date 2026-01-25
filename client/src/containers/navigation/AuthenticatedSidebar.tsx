@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { motion, useAnimation } from 'framer-motion';
-import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UserRole } from '@/types/user.type';
@@ -85,7 +85,7 @@ const AuthenticatedSidebar = () => {
     return (
         <motion.div
             className={`fixed top-[9vh] left-0 h-[calc(100vh-9vh)] flex flex-col 
-                 bg-primary border-r border-[color:var(--primary)] transition-all duration-300 ease-in-out 
+                 bg-primary-900 border-r border-primary-900 transition-all duration-300 ease-in-out 
                  ${sidebarOpen ? 'z-[999]' : 'z-10'}
                  ${sidebarOpen
                     ? 'w-[280px] sm:w-[300px] shadow-sm p-4'
@@ -101,11 +101,11 @@ const AuthenticatedSidebar = () => {
             >
                 <FontAwesomeIcon
                     icon={faBars}
-                    onClick={(e: MouseEvent<HTMLDivElement>) => {
+                    onClick={(e) => {
                         e.preventDefault();
                         handleSidebarToggle();
                     }}
-                    className={`cursor-pointer p-2 px-[8.2px] rounded-full bg-primary text-white hover:bg-primary-dark transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 ${!sidebarOpen ? 'mx-auto' : ''
+                    className={`cursor-pointer p-2 px-[8.2px] rounded-full bg-primary-900 text-white hover:bg-primary-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-900 focus:ring-opacity-50 ${!sidebarOpen ? 'mx-auto' : ''
                         }`}
                     aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
                 />

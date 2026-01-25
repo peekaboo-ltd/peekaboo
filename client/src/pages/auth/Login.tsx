@@ -252,7 +252,7 @@ export const Login = () => {
                 </Link>
               </nav>
             </fieldset>
-            <Button type="submit" primary isLoading={isLoginLoading}>
+            <Button type="submit" primary isLoading={isLoginLoading} className="cursor-pointer">
               Sign In
             </Button>
           </form>
@@ -350,7 +350,7 @@ export const Login = () => {
                 )}
               />
             </fieldset>
-            <Button type="submit" primary isLoading={isRegisterLoading}>
+            <Button type="submit" primary isLoading={isRegisterLoading} className="cursor-pointer">
               Create Account
             </Button>
           </form>

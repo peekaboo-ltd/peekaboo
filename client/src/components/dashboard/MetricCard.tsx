@@ -3,8 +3,24 @@ import { MetricCardData } from '@/types/dashboard.type';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  ResponsiveContainer,
+} from 'recharts';
 
-const MetricCard = ({ label, value, trend, colorClass, href, icon }: MetricCardData) => {
+const MetricCard = ({
+  label,
+  value,
+  trend,
+  colorClass,
+  href,
+  icon,
+  sparklineData,
+  sparklineType,
+}: MetricCardData) => {
   // Map text color classes to background color classes
   const getBgColorClass = (textColorClass?: string) => {
     if (!textColorClass) return 'bg-primary/10';
@@ -15,12 +31,65 @@ const MetricCard = ({ label, value, trend, colorClass, href, icon }: MetricCardD
       'text-amber-600': 'bg-amber-600/10',
       'text-purple-600': 'bg-purple-600/10',
       'text-pink-600': 'bg-pink-600/10',
+      'text-emerald-600': 'bg-emerald-600/10',
+      'text-teal-600': 'bg-teal-600/10',
+      'text-cyan-600': 'bg-cyan-600/10',
+      'text-indigo-600': 'bg-indigo-600/10',
       'text-primary': 'bg-primary/10',
     };
     return colorMap[textColorClass] || 'bg-primary/10';
   };
 
+  // Map text color classes to stroke/fill colors for charts
+  const getChartColor = (textColorClass?: string) => {
+    if (!textColorClass) return 'hsl(var(--primary))';
+    const colorMap: Record<string, string> = {
+      'text-blue-600': '#2563eb',
+      'text-blue-700': '#1d4ed8',
+      'text-green-600': '#16a34a',
+      'text-amber-600': '#d97706',
+      'text-purple-600': '#9333ea',
+      'text-pink-600': '#db2777',
+      'text-emerald-600': '#059669',
+      'text-teal-600': '#0d9488',
+      'text-cyan-600': '#0891b2',
+      'text-indigo-600': '#4f46e5',
+      'text-primary': 'hsl(var(--primary))',
+    };
+    return colorMap[textColorClass] || 'hsl(var(--primary))';
+  };
+
   const bgColorClass = getBgColorClass(colorClass);
+  const chartColor = getChartColor(colorClass);
+
+  // Format sparkline data for recharts
+  const chartData = sparklineData?.map((val, idx) => ({ value: val, index: idx })) || [];
+
+  const renderSparkline = () => {
+    if (!sparklineData || sparklineData.length === 0 || !sparklineType) return null;
+
+    return (
+      <div className="h-10 w-20 ml-auto">
+        <ResponsiveContainer width="100%" height="100%">
+          {sparklineType === 'line' ? (
+            <LineChart data={chartData}>
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke={chartColor}
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          ) : (
+            <BarChart data={chartData}>
+              <Bar dataKey="value" fill={chartColor} radius={[2, 2, 0, 0]} />
+            </BarChart>
+          )}
+        </ResponsiveContainer>
+      </div>
+    );
+  };
   
   const cardContent = (
     <Card
@@ -67,26 +136,31 @@ const MetricCard = ({ label, value, trend, colorClass, href, icon }: MetricCardD
           )}
         </header>
         <section className="flex items-end justify-between">
-          <p
-            className={`text-3xl font-bold leading-tight ${
-              colorClass || 'text-primary'
-            }`}
-            aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
-          >
-            {value}
-          </p>
-          {href && (
-            <span
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              aria-hidden="true"
+          <div className="flex flex-col">
+            <p
+              className={`text-3xl font-bold leading-tight ${
+                colorClass || 'text-primary'
+              }`}
+              aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
             >
-              <FontAwesomeIcon
-                icon={faArrowRight}
-                className={`text-sm ${colorClass || 'text-primary'} transform group-hover:translate-x-1 transition-transform duration-300`}
+              {value}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {renderSparkline()}
+            {href && (
+              <span
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 aria-hidden="true"
-              />
-            </span>
-          )}
+              >
+                <FontAwesomeIcon
+                  icon={faArrowRight}
+                  className={`text-sm ${colorClass || 'text-primary'} transform group-hover:translate-x-1 transition-transform duration-300`}
+                  aria-hidden="true"
+                />
+              </span>
+            )}
+          </div>
         </section>
       </CardContent>
     </Card>

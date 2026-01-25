@@ -263,7 +263,7 @@ const PublicOrderPaymentSuccess = () => {
             </header>
             <ol className="space-y-2 text-sm text-gray-700">
               <li className="flex items-start gap-2">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-primary-900 text-white flex items-center justify-center text-xs font-bold">
                   1
                 </span>
                 <span>
@@ -271,7 +271,7 @@ const PublicOrderPaymentSuccess = () => {
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-primary-900 text-white flex items-center justify-center text-xs font-bold">
                   2
                 </span>
                 <span>
@@ -279,7 +279,7 @@ const PublicOrderPaymentSuccess = () => {
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-primary-900 text-white flex items-center justify-center text-xs font-bold">
                   3
                 </span>
                 <span>
@@ -287,7 +287,7 @@ const PublicOrderPaymentSuccess = () => {
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-primary-900 text-white flex items-center justify-center text-xs font-bold">
                   4
                 </span>
                 <span>
@@ -299,10 +299,10 @@ const PublicOrderPaymentSuccess = () => {
 
           {/* Footer Actions */}
           <footer className="flex flex-col sm:flex-row items-center justify-between gap-4 animate-on-scroll">
-            <Button route={`/p/orders/${order?.id}`}>
+            <Button route={`/p/orders/${order?.id}`} className="cursor-pointer">
               View Order Details
             </Button>
-            <Button primary route={`/p/orders/${order?.id}/tracking`}>
+            <Button primary route={`/p/orders/${order?.id}/tracking`} className="cursor-pointer">
               Track Order
             </Button>
           </footer>

@@ -79,7 +79,7 @@ const OrderPayment = () => {
           ? formatPhone(selectedOrder.sender.phoneNumber, 'RW')
           : selectedOrder?.senderPhoneNumber
             ? formatPhone(selectedOrder.senderPhoneNumber, 'RW')
-            : '250788478652',
+            : '250794892784',
         email: selectedOrder?.sender?.email || 'info@peekaboo.co.rw',
         name: selectedOrder?.sender?.name || selectedOrder?.senderName || 'Sender',
       };
@@ -89,7 +89,7 @@ const OrderPayment = () => {
           ? formatPhone(selectedOrder.recipient.phoneNumber, 'RW')
           : selectedOrder?.recipientPhoneNumber
             ? formatPhone(selectedOrder.recipientPhoneNumber, 'RW')
-            : '250788478652',
+            : '250794892784',
         email: selectedOrder?.recipient?.email || 'info@peekaboo.co.rw',
         name: selectedOrder?.recipient?.name || selectedOrder?.recipientName || 'Recipient',
       };
@@ -121,7 +121,7 @@ const OrderPayment = () => {
       description: selectedOrder?.notes,
       customerEmail: payerInfo.email,
       customerName: payerInfo.name,
-      customerPhone: payerInfo.phone || '250788478652'
+      customerPhone: payerInfo.phone || '250794892784'
     })
   }, [createPaymentMutation, selectedOrder, getPayerInfo, payerType]);
 

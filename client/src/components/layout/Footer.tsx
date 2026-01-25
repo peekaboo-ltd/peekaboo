@@ -83,7 +83,7 @@ const Footer = () => {
   const socialMedia = useMemo<SocialMedia[]>(
     () => [
       { icon: faInstagram as IconProp | IconDefinition, url: 'https://www.instagram.com/peekaboo.delivery/', label: 'Instagram' },
-      { icon: faWhatsapp as IconProp | IconDefinition, url: 'https://wa.me/250788478652?text=Hello, I have a question about Peekaboo', label: 'WhatsApp' },
+      { icon: faWhatsapp as IconProp | IconDefinition, url: 'https://wa.me/250794892784?text=Hello, I have a question about Peekaboo', label: 'WhatsApp' },
       { icon: faTiktok as IconProp | IconDefinition, url: 'https://www.tiktok.com/@peekaboo.delivery', label: 'TikTok' },
     ],
     []

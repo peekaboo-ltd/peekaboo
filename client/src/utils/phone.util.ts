@@ -16,10 +16,10 @@ export interface PhoneValidationResult {
  * Validates and formats a phone number to local format (0XXXXXXXXX)
  *
  * Accepts formats:
- * - 0788478652 (local format - already correct)
- * - 250788478652 (with country code)
- * - +250788478652 (with + and country code)
- * - +2500788478652 (with + and country code including leading 0)
+ * - 0794892784 (local format - already correct)
+ * - 250794892784 (with country code)
+ * - +250794892784 (with + and country code)
+ * - +2500794892784 (with + and country code including leading 0)
  *
  * @param input - The phone number to validate and format
  * @returns PhoneValidationResult with isValid, formattedNumber, and error
@@ -54,16 +54,16 @@ export function validateAndFormatPhoneNumber(
 
   // Normalize to remove country code prefixes
   if (normalizedNumber.startsWith('+2500')) {
-    // Format: +2500788478652 -> 0788478652
+    // Format: +2500794892784 -> 0794892784
     normalizedNumber = normalizedNumber.slice(4);
   } else if (normalizedNumber.startsWith('+250')) {
-    // Format: +250788478652 -> 0788478652
+    // Format: +250794892784 -> 0794892784
     normalizedNumber = '0' + normalizedNumber.slice(4);
   } else if (normalizedNumber.startsWith('2500')) {
-    // Format: 2500788478652 -> 0788478652
+    // Format: 2500794892784 -> 0794892784
     normalizedNumber = normalizedNumber.slice(3);
   } else if (normalizedNumber.startsWith('250')) {
-    // Format: 250788478652 -> 0788478652
+    // Format: 250794892784 -> 0794892784
     normalizedNumber = '0' + normalizedNumber.slice(3);
   }
   // If starts with '0', keep as is

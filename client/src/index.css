@@ -5,22 +5,29 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary-50: #f0f9ff;
-  --color-primary-100: #e0f2fe;
-  --color-primary-200: #bae6fd;
-  --color-primary-300: #7dd3fc;
-  --color-primary-400: #38bdf8;
-  --color-primary-500: #0ea5e9;
-  --color-primary-600: #0284c7;
-  --color-primary-700: #0369a1;
-  --color-primary-800: #075985;
-  --color-primary-900: #0c4a6e;
-  --color-primary-950: #082f49;
+  /* Cool Blue/Teal Color Palette - Color Hunt Palette #061e29 #1d546d #5f9598 #f3f4f4 */
+  --color-primary-50: #f3f4f4;
+  --color-primary-100: #e8ebeb;
+  --color-primary-200: #d1d7d7;
+  --color-primary-300: #a8b8b9;
+  --color-primary-400: #7fa0a2;
+  --color-primary-500: #5f9598;
+  --color-primary-600: #4d7a7d;
+  --color-primary-700: #3d6165;
+  --color-primary-800: #1d546d;
+  --color-primary-900: #0f3a4a;
+  --color-primary-950: #061e29;
 }
 
 * {
   font-family: 'Work Sans', sans-serif;
   box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 @theme inline {
@@ -69,7 +76,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #082f49;
+  --primary: #5f9598;
   --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -103,8 +110,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #0ea5e9;
-  --primary-foreground: #082f49;
+  --primary: #5f9598;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -140,4 +147,44 @@
     @apply bg-background text-foreground;
     font-size: 14px;
   }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Work Sans', sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #5f9598, #4d7a7d);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4d7a7d, #3d6165);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(95, 149, 152, 0.3);
+  color: #061e29;
+}
+
+/* Focus visible styles */
+:focus-visible {
+  outline: 2px solid #5f9598;
+  outline-offset: 2px;
 }

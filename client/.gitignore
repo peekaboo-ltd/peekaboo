@@ -24,3 +24,10 @@ dist-ssr
 *.sw?
 
 .claude
+
+# Skills
+skills.md
+.agent*/
+.cursor/
+.kiro/
+.gemini/

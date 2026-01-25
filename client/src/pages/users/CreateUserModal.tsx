@@ -152,7 +152,7 @@ const CreateUserModal = () => {
                   onClick={() => handleRoleToggle(role)}
                   className={`px-3 py-1.5 rounded text-sm font-medium transition-colors cursor-pointer ${
                     selectedRoles.includes(role)
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary-900 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >

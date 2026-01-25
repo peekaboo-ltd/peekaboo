@@ -95,4 +95,36 @@ export interface MetricCardData {
   colorClass?: string;
   href?: string;
   icon?: IconProp;
+  sparklineData?: number[];
+  sparklineType?: 'line' | 'bar';
+}
+
+// Fleet efficiency chart data
+export interface FleetEfficiencyData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+// Vehicle status chart data
+export interface VehicleStatusData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+// Fleet metrics for dashboard
+export interface FleetMetrics {
+  efficiencyPercentage: number;
+  onTheMove: number;
+  unutilized: number;
+  inMaintenance: number;
+}
+
+// Vehicle metrics for dashboard
+export interface VehicleMetrics {
+  totalVehicles: number;
+  onRoad: number;
+  parked: number;
+  inService: number;
 }
