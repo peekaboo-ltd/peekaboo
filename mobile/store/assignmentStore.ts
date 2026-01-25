@@ -45,8 +45,8 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     
     try {
       const params = currentFilter !== 'ALL' 
-        ? { status: currentFilter, page: 1, limit: 20 } 
-        : { page: 1, limit: 20 };
+        ? { status: currentFilter, page: 1, size: 20 } 
+        : { page: 1, size: 20 };
       
       const response = await assignmentsAPI.getAll(params);
       
@@ -75,8 +75,8 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     try {
       const nextPage = page + 1;
       const params = filter !== 'ALL' 
-        ? { status: filter, page: nextPage, limit: 20 } 
-        : { page: nextPage, limit: 20 };
+        ? { status: filter, page: nextPage, size: 20 } 
+        : { page: nextPage, size: 20 };
       
       const response = await assignmentsAPI.getAll(params);
       
@@ -118,21 +118,21 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
 
   acceptAssignment: async (id: string): Promise<boolean> => {
     set({ isLoading: true, error: null });
-    
+
     try {
-      const response = await assignmentsAPI.accept(id);
-      
-      // Update assignment in list
+      const updatedAssignment = await assignmentsAPI.accept(id);
+
+      // Update assignment in list with server response data
       set(state => ({
-        assignments: state.assignments.map(a => 
-          a.id === id ? { ...a, status: OrderAssignmentStatus.ACTIVE } : a
+        assignments: state.assignments.map(a =>
+          a.id === id ? { ...a, ...updatedAssignment } : a
         ),
-        selectedAssignment: state.selectedAssignment?.id === id 
-          ? { ...state.selectedAssignment, status: OrderAssignmentStatus.ACTIVE }
+        selectedAssignment: state.selectedAssignment?.id === id
+          ? { ...state.selectedAssignment, ...updatedAssignment }
           : state.selectedAssignment,
         isLoading: false,
       }));
-      
+
       return true;
     } catch (error) {
       const appError = handleAPIError(error);
@@ -146,21 +146,22 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
 
   rejectAssignment: async (id: string, reason?: string): Promise<boolean> => {
     set({ isLoading: true, error: null });
-    
+
     try {
-      await assignmentsAPI.reject(id, reason);
-      
-      // Update assignment in list
+      // Server returns the newly created assignment after rejection (auto-reassigned)
+      const newAssignment = await assignmentsAPI.reject(id, reason);
+
+      // Update rejected assignment in list and remove from pending view
       set(state => ({
-        assignments: state.assignments.map(a => 
+        assignments: state.assignments.map(a =>
           a.id === id ? { ...a, status: OrderAssignmentStatus.REJECTED } : a
         ),
-        selectedAssignment: state.selectedAssignment?.id === id 
+        selectedAssignment: state.selectedAssignment?.id === id
           ? { ...state.selectedAssignment, status: OrderAssignmentStatus.REJECTED }
           : state.selectedAssignment,
         isLoading: false,
       }));
-      
+
       return true;
     } catch (error) {
       const appError = handleAPIError(error);
@@ -178,8 +179,8 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     try {
       const { filter } = get();
       const params = filter !== 'ALL' 
-        ? { status: filter, page: 1, limit: 20 } 
-        : { page: 1, limit: 20 };
+        ? { status: filter, page: 1, size: 20 }
+        : { page: 1, size: 20 };
       
       const response = await assignmentsAPI.getAll(params);
       
