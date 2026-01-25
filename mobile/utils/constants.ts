@@ -9,28 +9,29 @@ export const STORAGE_KEYS = {
   USER_DATA: 'user_data',
 } as const;
 
-// Colors - Minimalistic Design
+// Colors - Color Hunt Palette: #061E29 #1D546D #5F9598 #F3F4F4
+// Reference: https://colorhunt.co/palette/061e291d546d5f9598f3f4f4
 export const colors = {
-  primary: '#2563EB',
-  primaryLight: '#3B82F6',
-  primaryDark: '#1D4ED8',
-  success: '#10B981',
+  primary: '#1D546D', // Dark teal - main brand color
+  primaryLight: '#5F9598', // Lighter muted teal
+  primaryDark: '#061E29', // Very dark blue
+  success: '#10B981', // Keep for success states
   successLight: '#34D399',
-  warning: '#F59E0B',
+  warning: '#F59E0B', // Keep for warning states
   warningLight: '#FBBF24',
-  danger: '#EF4444',
+  danger: '#EF4444', // Keep for error states
   dangerLight: '#F87171',
-  background: '#FFFFFF',
-  surface: '#F9FAFB',
-  surfaceHover: '#F3F4F6',
+  background: '#F3F4F4', // Very light gray
+  surface: '#FFFFFF', // White for cards/surfaces
+  surfaceHover: '#E5E7EB', // Slightly darker for hover states
   text: {
-    primary: '#111827',
-    secondary: '#6B7280',
-    disabled: '#9CA3AF',
-    inverse: '#FFFFFF',
+    primary: '#061E29', // Very dark blue for main text
+    secondary: '#1D546D', // Dark teal for secondary text
+    disabled: '#5F9598', // Muted teal for disabled text
+    inverse: '#FFFFFF', // White for text on dark backgrounds
   },
-  border: '#E5E7EB',
-  borderDark: '#D1D5DB',
+  border: '#5F9598', // Muted teal for borders (can use with opacity)
+  borderDark: '#1D546D', // Darker teal for stronger borders
 } as const;
 
 // Typography

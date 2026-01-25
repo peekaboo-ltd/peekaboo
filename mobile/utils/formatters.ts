@@ -144,17 +144,18 @@ export const formatOrderRef = (referenceId: string): string => {
 
 /**
  * Get status color
+ * Using Color Hunt Palette: #061E29 #1D546D #5F9598 #F3F4F4
  */
 export const getStatusColor = (status: string): string => {
   const statusColors: Record<string, string> = {
-    PENDING: '#F59E0B',
-    ACTIVE: '#2563EB',
-    COMPLETED: '#10B981',
-    CANCELLED: '#EF4444',
-    REJECTED: '#EF4444',
-    IN_TRANSIT: '#3B82F6',
-    DELIVERED: '#10B981',
+    PENDING: '#F59E0B', // Keep warning color
+    ACTIVE: '#1D546D', // Dark teal - primary color
+    COMPLETED: '#10B981', // Keep success color
+    CANCELLED: '#EF4444', // Keep danger color
+    REJECTED: '#EF4444', // Keep danger color
+    IN_TRANSIT: '#5F9598', // Lighter muted teal
+    DELIVERED: '#10B981', // Keep success color
   };
   
-  return statusColors[status] || '#6B7280';
+  return statusColors[status] || '#5F9598'; // Default to muted teal
 };

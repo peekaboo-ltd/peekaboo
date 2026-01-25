@@ -60,7 +60,7 @@ export const registerForPushNotifications = async (): Promise<string | null> => 
         name: 'Default',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#2563EB',
+        lightColor: '#1D546D', // Dark teal - primary color
       });
 
       await Notifications.setNotificationChannelAsync('assignments', {
@@ -68,7 +68,7 @@ export const registerForPushNotifications = async (): Promise<string | null> => 
         importance: Notifications.AndroidImportance.HIGH,
         description: 'Notifications for new assignments',
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#2563EB',
+        lightColor: '#1D546D', // Dark teal - primary color
       });
     }
 
