@@ -1,12 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { AbstractEntity } from './index';
 import { Organization } from './organization.entity';
-
-export enum BusinessPlanStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  ARCHIVED = 'ARCHIVED',
-}
+import { BusinessPlanStatus } from '../constants/businessPlan.constants';
 
 @Entity('business_plans')
 export class BusinessPlan extends AbstractEntity {

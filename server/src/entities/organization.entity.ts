@@ -5,12 +5,7 @@ import { BusinessPlan } from './businessPlan.entity';
 import { OrganizationMembership } from './organizationMembership.entity';
 import { Order } from './order.entity';
 import { OrganizationBilling } from './organizationBilling.entity';
-
-export enum OrganizationStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  SUSPENDED = 'SUSPENDED',
-}
+import { OrganizationStatus } from '../constants/organization.constants';
 
 @Entity('organizations')
 export class Organization extends AbstractEntity {

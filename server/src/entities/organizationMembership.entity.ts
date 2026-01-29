@@ -3,17 +3,7 @@ import { AbstractEntity } from './index';
 import { UUID } from '../types';
 import { User } from './user.entity';
 import { Organization } from './organization.entity';
-
-export enum OrganizationRole {
-  ADMIN = 'ADMIN',
-  MEMBER = 'MEMBER',
-}
-
-export enum MembershipStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  REMOVED = 'REMOVED',
-}
+import { OrganizationRole, MembershipStatus } from '../constants/organization.constants';
 
 @Entity('organization_memberships')
 @Unique(['userId']) // User can only belong to one organization

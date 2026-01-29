@@ -4,19 +4,7 @@ import { UUID } from '../types';
 import { Organization } from './organization.entity';
 import { Order } from './order.entity';
 import { User } from './user.entity';
-
-export enum BillingStatus {
-  PENDING = 'PENDING',
-  INVOICED = 'INVOICED',
-  PAID = 'PAID',
-  OVERDUE = 'OVERDUE',
-  CANCELLED = 'CANCELLED',
-}
-
-export enum BillingPeriod {
-  WEEKLY = 'WEEKLY',
-  MONTHLY = 'MONTHLY',
-}
+import { BillingStatus, BillingPeriod } from '../constants/organization.constants';
 
 @Entity('organization_billings')
 export class OrganizationBilling extends AbstractEntity {
