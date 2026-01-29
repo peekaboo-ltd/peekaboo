@@ -48,6 +48,7 @@ export class OrganizationDashboardService {
       relations: {
         activities: true,
         createdBy: true,
+        organizationBilling: true,
       },
       order: {
         createdAt: 'DESC',
@@ -60,6 +61,7 @@ export class OrganizationDashboardService {
     let completedOrders = 0;
     let cancelledOrders = 0;
     let totalSpent = 0;
+    let pendingBilling = 0;
 
     const ordersByStatus: Map<string, number> = new Map();
 
@@ -84,16 +86,8 @@ export class OrganizationDashboardService {
 
       // Calculate total spent
       totalSpent += Number(order.finalFee || order.initialFee || 0);
-    }
 
-    // Get pending billing (orders not yet in a paid billing period)
-    const pendingOrders = await this.orderRepository.find({
-      where: { organizationId },
-      relations: { organizationBilling: true },
-    });
-
-    let pendingBilling = 0;
-    for (const order of pendingOrders) {
+      // Calculate pending billing (orders not yet in a paid billing period)
       if (
         !order.organizationBilling ||
         order.organizationBilling.status === 'PENDING'

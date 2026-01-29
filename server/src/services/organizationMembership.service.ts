@@ -41,12 +41,6 @@ export class OrganizationMembershipService {
     role?: OrganizationRole;
     addedById?: UUID;
   }): Promise<OrganizationMembership> {
-    // Check if user already has a membership
-    const existingMembership = await this.membershipRepository.findOne({
-      where: { userId: data.user.phoneNumber as any },
-      relations: { user: true },
-    });
-
     // Try to find user by phone number
     let user = await this.userService.getUserByCondition({
       phoneNumber: data.user.phoneNumber,
