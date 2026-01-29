@@ -104,6 +104,6 @@ export class User extends AbstractEntity {
   orders: Order[];
 
   // ORGANIZATION MEMBERSHIP (user can belong to at most one organization)
-  @OneToOne(() => OrganizationMembership, (membership) => membership.user)
-  organizationMembership?: OrganizationMembership;
+  @OneToMany(() => OrganizationMembership, (membership) => membership.user)
+  organizationMembership?: OrganizationMembership[];
 }

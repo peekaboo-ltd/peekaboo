@@ -36,7 +36,7 @@ export class OrganizationBillingService {
       // Weekly billing - start of week (Monday)
       const day = now.getDay();
       const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-      periodStart = new Date(now.setDate(diff));
+      periodStart = new Date(now.getFullYear(), now.getMonth(), diff);
       periodStart.setHours(0, 0, 0, 0);
       // End of week (Sunday)
       periodEnd = new Date(periodStart);
