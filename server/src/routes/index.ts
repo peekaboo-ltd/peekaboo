@@ -10,6 +10,8 @@ import orderActivityRoutes from './orderActivity.routes';
 import paymentRoutes from './payment.routes';
 import webhookRoutes from './webhook.routes';
 import dashboardRoutes from './dashboard.routes';
+import businessPlanRoutes from './businessPlan.routes';
+import organizationRoutes from './organization.routes';
 
 // CREATE ROUTER
 const routes = Router();
@@ -46,5 +48,11 @@ routes.use('/webhooks', webhookRoutes);
 
 // DASHBOARD ROUTES
 routes.use('/dashboard', dashboardRoutes);
+
+// BUSINESS PLAN ROUTES
+routes.use('/business-plans', businessPlanRoutes);
+
+// ORGANIZATION ROUTES
+routes.use('/organizations', organizationRoutes);
 
 export default routes;
