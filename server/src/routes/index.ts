@@ -11,6 +11,8 @@ import paymentRoutes from './payment.routes';
 import webhookRoutes from './webhook.routes';
 import dashboardRoutes from './dashboard.routes';
 import landingRoutes from './landing.routes';
+import businessPlanRoutes from './businessPlan.routes';
+import organizationRoutes from './organization.routes';
 
 // CREATE ROUTER
 const routes = Router();
@@ -50,5 +52,10 @@ routes.use('/dashboard', dashboardRoutes);
 
 // LANDING ROUTES (public)
 routes.use('/landing', landingRoutes);
+// BUSINESS PLAN ROUTES
+routes.use('/business-plans', businessPlanRoutes);
+
+// ORGANIZATION ROUTES
+routes.use('/organizations', organizationRoutes);
 
 export default routes;
