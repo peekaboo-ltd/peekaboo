@@ -1,11 +1,12 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { AbstractEntity } from './index';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { COUNTRIES } from '../constants/countries.constants';
 import { UserRole } from './userRole.entity';
 import { Order } from './order.entity';
 import { UserStatus } from '../constants/user.constants';
 import { OrderAssignment } from './orderAssignment.entity';
+import { OrganizationMembership } from './organizationMembership.entity';
 
 @Entity('users')
 export class User extends AbstractEntity {
@@ -101,4 +102,8 @@ export class User extends AbstractEntity {
   // ORDERS
   @OneToMany(() => Order, (order) => order.createdBy)
   orders: Order[];
+
+  // ORGANIZATION MEMBERSHIP (user can belong to at most one organization)
+  @OneToMany(() => OrganizationMembership, (membership) => membership.user)
+  organizationMembership?: OrganizationMembership[];
 }

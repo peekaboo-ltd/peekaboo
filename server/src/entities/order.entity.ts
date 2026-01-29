@@ -6,6 +6,8 @@ import { OrderStatus, OrderType } from "../constants/order.constants";
 import { Conversation } from "./conversation.entity";
 import { OrderAssignment } from "./orderAssignment.entity";
 import { OrderActivity } from "./orderActivity.entity";
+import { Organization } from "./organization.entity";
+import { OrganizationBilling } from "./organizationBilling.entity";
 
 @Entity("orders")
 export class  Order extends AbstractEntity {
@@ -65,6 +67,22 @@ export class  Order extends AbstractEntity {
     longitude: number;
   };
 
+  // ORGANIZATION ID (null for individual/B2C orders)
+  @Column({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: UUID;
+
+  // ORGANIZATION BILLING ID (links order to billing period)
+  @Column({ name: 'organization_billing_id', type: 'uuid', nullable: true })
+  organizationBillingId?: UUID;
+
+  // IS BUSINESS ORDER (quick flag to identify B2B orders)
+  @Column({ name: 'is_business_order', type: 'boolean', default: false })
+  isBusinessOrder: boolean;
+
+  // BUSINESS PLAN PRICE (price locked at time of order creation)
+  @Column({ name: 'business_plan_price', type: 'numeric', nullable: true })
+  businessPlanPrice?: number;
+
   /**
    * RELATIONS
    */
@@ -96,4 +114,14 @@ export class  Order extends AbstractEntity {
   @ManyToOne(() => Conversation, (conversation) => conversation.id)
   @JoinColumn({ name: "conversation_id" })
   conversation: Conversation;
+
+  // ORGANIZATION
+  @ManyToOne(() => Organization, (organization) => organization.orders)
+  @JoinColumn({ name: 'organization_id' })
+  organization?: Organization;
+
+  // ORGANIZATION BILLING
+  @ManyToOne(() => OrganizationBilling, (billing) => billing.orders)
+  @JoinColumn({ name: 'organization_billing_id' })
+  organizationBilling?: OrganizationBilling;
 }

@@ -25,6 +25,8 @@ import { OrderActivityService } from './orderActivity.service';
 import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { OrderActivity } from '../entities/orderActivity.entity';
+import { OrganizationService } from './organization.service';
+import { OrganizationBillingService } from './organizationBilling.service';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -32,6 +34,8 @@ export class OrderService {
   private readonly userRepository: Repository<User>;
   private readonly userService: UserService;
   private readonly orderActivityService: OrderActivityService;
+  private readonly organizationService: OrganizationService;
+  private readonly organizationBillingService: OrganizationBillingService;
 
   constructor() {
     this.orderRepository = AppDataSource.getRepository(Order);
@@ -39,6 +43,8 @@ export class OrderService {
     this.userRepository = AppDataSource.getRepository(User);
     this.userService = new UserService();
     this.orderActivityService = new OrderActivityService();
+    this.organizationService = new OrganizationService();
+    this.organizationBillingService = new OrganizationBillingService();
   }
 
   // CREATE ORDER
@@ -60,6 +66,27 @@ export class OrderService {
     // SET REFERENCE ID
     order.referenceId = referenceId;
 
+    // CHECK IF USER BELONGS TO ORGANIZATION
+    if (order.createdById) {
+      const membership = await this.organizationService.getUserMembership(
+        order.createdById
+      );
+
+      if (membership && membership.organization) {
+        // This is a business order
+        order.organizationId = membership.organization.id;
+        order.isBusinessOrder = true;
+
+        // Apply business plan pricing if available
+        if (membership.organization.businessPlan) {
+          const businessPlan = membership.organization.businessPlan;
+          order.businessPlanPrice = Number(businessPlan.pricePerOrder);
+          order.initialFee = Number(businessPlan.pricePerOrder);
+          order.finalFee = Number(businessPlan.pricePerOrder);
+        }
+      }
+    }
+
     // CREATE ORDER
     const createdOrder = await this.orderRepository.save(order);
 
@@ -69,6 +96,14 @@ export class OrderService {
       status: OrderStatus.CREATED,
       createdById: createdOrder?.createdById,
     });
+
+    // ADD TO BILLING IF BUSINESS ORDER
+    if (createdOrder.isBusinessOrder && createdOrder.organizationId) {
+      await this.organizationBillingService.addOrderToBilling(
+        createdOrder.id,
+        Number(createdOrder.finalFee || createdOrder.initialFee)
+      );
+    }
 
     return createdOrder;
   }
@@ -415,6 +450,48 @@ export class OrderService {
     if (recipientId) condition.recipientId = recipientId as UUID;
     if (createdById) condition.createdById = createdById as UUID;
     if (referenceId) condition.referenceId = ILike(`%${referenceId}%`);
+
+    const orders = await this.orderRepository.findAndCount({
+      where: condition,
+      skip,
+      take,
+      relations: {
+        createdBy: true,
+        recipient: true,
+        sender: true,
+        activities: true,
+        assignments: {
+          assignedTo: true,
+          createdBy: true,
+        },
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return getPagingData({
+      data: orders,
+      page: Number(page),
+      size: Number(size),
+    });
+  }
+
+  // FETCH ORGANIZATION ORDERS
+  async fetchOrganizationOrders(
+    organizationId: UUID,
+    query: Request['query']
+  ): Promise<Pagination<Order>> {
+    const { page = 0, size = 10, status } = query;
+
+    let condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[] = {
+      organizationId,
+    };
+
+    const { take, skip } = getPagination({
+      page: Number(page),
+      size: Number(size),
+    });
 
     const orders = await this.orderRepository.findAndCount({
       where: condition,
