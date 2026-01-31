@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { BusinessPlanService } from '../services/businessPlan.service';
 import { UUID } from '../types';
+import { BusinessPlanQuery } from '../types/b2b.types';
 
 const businessPlanService = new BusinessPlanService();
 
@@ -75,7 +76,7 @@ export const BusinessPlanController = {
   async fetchBusinessPlans(req: Request, res: Response, next: NextFunction) {
     try {
       const businessPlans = await businessPlanService.fetchBusinessPlans(
-        req.query
+        req.query as BusinessPlanQuery
       );
 
       return res.status(200).json({
@@ -95,6 +96,52 @@ export const BusinessPlanController = {
       return res.status(200).json({
         message: 'Active business plans fetched successfully',
         data: plans,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET ACTIVE PLANS WITH STATS (ADMIN)
+  async getActivePlansWithStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      const plans = await businessPlanService.getActivePlansWithStats();
+
+      return res.status(200).json({
+        message: 'Active business plans with stats fetched successfully',
+        data: plans,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET AVAILABLE PLANS FOR BUSINESS USERS
+  async getAvailablePlansForBusiness(req: Request, res: Response, next: NextFunction) {
+    try {
+      const plans = await businessPlanService.getAvailablePlansForBusiness();
+
+      return res.status(200).json({
+        message: 'Available business plans fetched successfully',
+        data: plans,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET ORGANIZATION COUNT FOR PLAN
+  async getOrganizationCountForPlan(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const count = await businessPlanService.getOrganizationCountForPlan(
+        id as UUID
+      );
+
+      return res.status(200).json({
+        message: 'Organization count fetched successfully',
+        data: { count },
       });
     } catch (error) {
       next(error);

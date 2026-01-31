@@ -8,6 +8,7 @@ import { UUID } from '../types';
 import { AuthRequest } from '../types/auth.types';
 import jwt from 'jsonwebtoken';
 import { UserService } from '../services/user.service';
+import { OrganizationQuery, MembershipQuery, BillingQuery } from '../types/b2b.types';
 
 const organizationService = new OrganizationService();
 const membershipService = new OrganizationMembershipService();
@@ -137,7 +138,7 @@ export const OrganizationController = {
   async fetchOrganizations(req: Request, res: Response, next: NextFunction) {
     try {
       const organizations = await organizationService.fetchOrganizations(
-        req.query
+        req.query as OrganizationQuery
       );
 
       return res.status(200).json({
@@ -619,6 +620,232 @@ export const OrganizationController = {
       return res.status(200).json({
         message: 'Dashboard metrics fetched successfully',
         data: metrics,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET ORGANIZATION STATISTICS (ADMIN/STAFF)
+  async getOrganizationStatistics(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const statistics = await organizationService.getOrganizationStatistics(
+        id as UUID
+      );
+
+      return res.status(200).json({
+        message: 'Organization statistics fetched successfully',
+        data: statistics,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET MY ORGANIZATION STATISTICS (BUSINESS USER)
+  async getMyOrganizationStatistics(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const organization = await organizationService.getOrganizationByUserId(
+        userId
+      );
+
+      if (!organization) {
+        return res.status(404).json({
+          message: 'You are not a member of any organization',
+        });
+      }
+
+      const statistics = await organizationService.getOrganizationStatistics(
+        organization.id
+      );
+
+      return res.status(200).json({
+        message: 'Organization statistics fetched successfully',
+        data: statistics,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // UPDATE MEMBER DETAILS IN MY ORG (BUSINESS ADMIN)
+  async updateMyOrgMemberDetails(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+      const { membershipId } = req.params;
+      const { name, email } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const organization = await organizationService.getOrganizationByUserId(
+        userId
+      );
+
+      if (!organization) {
+        return res.status(404).json({
+          message: 'You are not a member of any organization',
+        });
+      }
+
+      // Check if user is admin
+      const isAdmin = await membershipService.isOrganizationAdmin(
+        userId,
+        organization.id
+      );
+
+      if (!isAdmin) {
+        return res.status(403).json({
+          message: 'Only organization admins can update member details',
+        });
+      }
+
+      const membership = await membershipService.updateMemberDetails(
+        membershipId as UUID,
+        { name, email },
+        userId
+      );
+
+      return res.status(200).json({
+        message: 'Member details updated successfully',
+        data: membership,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // REACTIVATE MEMBER IN MY ORG (BUSINESS ADMIN)
+  async reactivateMyOrgMember(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+      const { membershipId } = req.params;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const organization = await organizationService.getOrganizationByUserId(
+        userId
+      );
+
+      if (!organization) {
+        return res.status(404).json({
+          message: 'You are not a member of any organization',
+        });
+      }
+
+      // Check if user is admin
+      const isAdmin = await membershipService.isOrganizationAdmin(
+        userId,
+        organization.id
+      );
+
+      if (!isAdmin) {
+        return res.status(403).json({
+          message: 'Only organization admins can reactivate members',
+        });
+      }
+
+      const membership = await membershipService.reactivateMember(
+        membershipId as UUID,
+        userId
+      );
+
+      return res.status(200).json({
+        message: 'Member reactivated successfully',
+        data: membership,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET GLOBAL BILLING SUMMARY (ADMIN)
+  async getGlobalBillingSummary(req: Request, res: Response, next: NextFunction) {
+    try {
+      const summary = await billingService.getGlobalBillingSummary();
+
+      return res.status(200).json({
+        message: 'Global billing summary fetched successfully',
+        data: summary,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET ALL BILLINGS (ADMIN)
+  async getAllBillings(req: Request, res: Response, next: NextFunction) {
+    try {
+      const billings = await billingService.getAllBillings(
+        req.query as BillingQuery
+      );
+
+      return res.status(200).json({
+        message: 'All billings fetched successfully',
+        data: billings,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET ORGANIZATION COUNT (ADMIN)
+  async getOrganizationCount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { status } = req.query;
+
+      const count = await organizationService.getTotalOrganizationCount(
+        status as any
+      );
+
+      return res.status(200).json({
+        message: 'Organization count fetched successfully',
+        data: { count },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET MY MEMBERSHIP DETAILS (BUSINESS USER)
+  async getMyMembership(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const membership = await membershipService.getMembershipByUserId(userId);
+
+      if (!membership) {
+        return res.status(404).json({
+          message: 'You are not a member of any organization',
+        });
+      }
+
+      return res.status(200).json({
+        message: 'Membership fetched successfully',
+        data: membership,
       });
     } catch (error) {
       next(error);

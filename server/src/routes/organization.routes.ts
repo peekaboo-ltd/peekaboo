@@ -19,9 +19,19 @@ router.get(
   OrganizationController.getMyOrganization
 );
 router.get(
+  '/me/membership',
+  authorize([RoleTypes.BUSINESS]),
+  OrganizationController.getMyMembership
+);
+router.get(
   '/me/dashboard',
   authorize([RoleTypes.BUSINESS]),
   OrganizationController.getMyDashboardMetrics
+);
+router.get(
+  '/me/statistics',
+  authorize([RoleTypes.BUSINESS]),
+  OrganizationController.getMyOrganizationStatistics
 );
 router.get(
   '/me/orders',
@@ -55,10 +65,37 @@ router.patch(
   authorize([RoleTypes.BUSINESS]),
   OrganizationController.updateMyOrgMemberRole
 );
+router.patch(
+  '/me/members/:membershipId/details',
+  authorize([RoleTypes.BUSINESS]),
+  OrganizationController.updateMyOrgMemberDetails
+);
+router.post(
+  '/me/members/:membershipId/reactivate',
+  authorize([RoleTypes.BUSINESS]),
+  OrganizationController.reactivateMyOrgMember
+);
 router.delete(
   '/me/members/:membershipId',
   authorize([RoleTypes.BUSINESS]),
   OrganizationController.removeMyOrgMember
+);
+
+// Admin routes for billing summary and count (must come before /:id routes)
+router.get(
+  '/billing/summary',
+  authorize([RoleTypes.ADMIN]),
+  OrganizationController.getGlobalBillingSummary
+);
+router.get(
+  '/billing/all',
+  authorize([RoleTypes.ADMIN]),
+  OrganizationController.getAllBillings
+);
+router.get(
+  '/count',
+  authorize([RoleTypes.ADMIN, RoleTypes.STAFF]),
+  OrganizationController.getOrganizationCount
 );
 
 // Admin routes for managing all organizations
@@ -106,6 +143,11 @@ router.get(
   '/:id/dashboard',
   authorize([RoleTypes.ADMIN, RoleTypes.STAFF]),
   OrganizationController.getDashboardMetrics
+);
+router.get(
+  '/:id/statistics',
+  authorize([RoleTypes.ADMIN, RoleTypes.STAFF]),
+  OrganizationController.getOrganizationStatistics
 );
 router.post(
   '/:id/billing/:billingId/invoice',

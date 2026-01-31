@@ -1,7 +1,7 @@
-import { FindOptionsWhere, Repository, ILike } from 'typeorm';
+import { FindOptionsWhere, Repository, ILike, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { Organization } from '../entities/organization.entity';
-import { OrganizationStatus } from '../constants/organization.constants';
+import { OrganizationStatus, MembershipStatus } from '../constants/organization.constants';
 import { UUID } from '../types';
 import {
   NotFoundError,
@@ -9,12 +9,13 @@ import {
   ConflictError,
 } from '../helpers/errors.helper';
 import { getPagination, getPagingData, Pagination } from '../helpers/pagination.helper';
-import { Request } from 'express';
 import { OrganizationMembershipService } from './organizationMembership.service';
 import { OrganizationRole } from '../constants/organization.constants';
 import { hashPassword } from '../helpers/auth.helper';
 import { UserService } from './user.service';
 import { RoleTypes } from '../constants/role.constants';
+import { OrganizationQuery, OrganizationStatistics } from '../types/b2b.types';
+import { OrganizationMembership } from '../entities/organizationMembership.entity';
 
 export class OrganizationService {
   private readonly organizationRepository: Repository<Organization>;
@@ -178,70 +179,77 @@ export class OrganizationService {
 
   // FETCH ORGANIZATIONS
   async fetchOrganizations(
-    query: Request['query']
-  ): Promise<Pagination<Organization>> {
-    const { page = 0, size = 10, search, status, businessPlanId } = query;
-
-    let condition: FindOptionsWhere<Organization> | FindOptionsWhere<Organization>[] = {};
-
-    if (status) {
-      condition.status = status as OrganizationStatus;
-    }
-
-    if (businessPlanId) {
-      condition.businessPlanId = businessPlanId as UUID;
-    }
+    query: OrganizationQuery
+  ): Promise<Pagination<Organization & { memberCount?: number }>> {
+    const {
+      page = 0,
+      size = 10,
+      search,
+      status,
+      businessPlanId,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      startDate,
+      endDate,
+    } = query;
 
     const { take, skip } = getPagination({
       page: Number(page),
       size: Number(size),
     });
 
+    // Use query builder for all queries to support sorting, date filtering, and member count
+    const queryBuilder = this.organizationRepository
+      .createQueryBuilder('organization')
+      .leftJoinAndSelect('organization.businessPlan', 'businessPlan')
+      .loadRelationCountAndMap('organization.memberCount', 'organization.memberships', 'membership', (qb) =>
+        qb.where('membership.status = :memberStatus', { memberStatus: MembershipStatus.ACTIVE })
+      );
+
     if (search) {
-      // Use query builder for search
-      const queryBuilder = this.organizationRepository
-        .createQueryBuilder('organization')
-        .leftJoinAndSelect('organization.businessPlan', 'businessPlan')
-        .where(
-          '(organization.name ILIKE :search OR organization.email ILIKE :search OR organization.tin ILIKE :search)',
-          { search: `%${search}%` }
-        );
+      queryBuilder.where(
+        '(organization.name ILIKE :search OR organization.email ILIKE :search OR organization.tin ILIKE :search)',
+        { search: `%${search}%` }
+      );
+    }
 
-      if (status) {
-        queryBuilder.andWhere('organization.status = :status', { status });
-      }
+    if (status) {
+      queryBuilder.andWhere('organization.status = :status', { status });
+    }
 
-      if (businessPlanId) {
-        queryBuilder.andWhere('organization.businessPlanId = :businessPlanId', {
-          businessPlanId,
-        });
-      }
-
-      queryBuilder.skip(skip).take(take).orderBy('organization.createdAt', 'DESC');
-
-      const [organizations, total] = await queryBuilder.getManyAndCount();
-
-      return getPagingData({
-        data: [organizations, total],
-        page: Number(page),
-        size: Number(size),
+    if (businessPlanId) {
+      queryBuilder.andWhere('organization.businessPlanId = :businessPlanId', {
+        businessPlanId,
       });
     }
 
-    const organizations = await this.organizationRepository.findAndCount({
-      where: condition,
-      skip,
-      take,
-      relations: {
-        businessPlan: true,
-      },
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+    // Date range filtering
+    if (startDate) {
+      queryBuilder.andWhere('organization.createdAt >= :startDate', {
+        startDate: new Date(startDate as string),
+      });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('organization.createdAt <= :endDate', {
+        endDate: new Date(endDate as string),
+      });
+    }
+
+    // Validate and apply sorting
+    const allowedSortFields = ['createdAt', 'name', 'email', 'status'];
+    const sortField = allowedSortFields.includes(sortBy as string) ? sortBy : 'createdAt';
+    const order = sortOrder === 'ASC' ? 'ASC' : 'DESC';
+
+    queryBuilder
+      .skip(skip)
+      .take(take)
+      .orderBy(`organization.${sortField}`, order);
+
+    const [organizations, total] = await queryBuilder.getManyAndCount();
 
     return getPagingData({
-      data: organizations,
+      data: [organizations, total],
       page: Number(page),
       size: Number(size),
     });
@@ -256,5 +264,62 @@ export class OrganizationService {
   // GET USER MEMBERSHIP
   async getUserMembership(userId: UUID) {
     return this.membershipService.getMembershipByUserId(userId);
+  }
+
+  // GET ORGANIZATION STATISTICS
+  async getOrganizationStatistics(organizationId: UUID): Promise<OrganizationStatistics> {
+    const organization = await this.organizationRepository.findOne({
+      where: { id: organizationId },
+      relations: {
+        businessPlan: true,
+        memberships: true,
+        orders: true,
+        billingRecords: true,
+      },
+    });
+
+    if (!organization) {
+      throw new NotFoundError('Organization not found');
+    }
+
+    const totalMembers = organization.memberships?.length || 0;
+    const activeMembers = organization.memberships?.filter(
+      (m) => m.status === MembershipStatus.ACTIVE
+    ).length || 0;
+    const totalOrders = organization.orders?.length || 0;
+
+    // Calculate total spent from completed billing records
+    const totalSpent = organization.billingRecords
+      ?.filter((b) => b.status === 'PAID')
+      .reduce((sum, b) => sum + Number(b.totalAmount), 0) || 0;
+
+    // Calculate pending billing
+    const pendingBilling = organization.billingRecords
+      ?.filter((b) => b.status === 'PENDING' || b.status === 'INVOICED')
+      .reduce((sum, b) => sum + Number(b.totalAmount), 0) || 0;
+
+    return {
+      totalMembers,
+      activeMembers,
+      totalOrders,
+      totalSpent,
+      pendingBilling,
+      currentPlan: organization.businessPlan
+        ? {
+            id: organization.businessPlan.id,
+            name: organization.businessPlan.name,
+            pricePerOrder: Number(organization.businessPlan.pricePerOrder),
+          }
+        : null,
+    };
+  }
+
+  // GET TOTAL ORGANIZATION COUNT
+  async getTotalOrganizationCount(status?: OrganizationStatus): Promise<number> {
+    const where: FindOptionsWhere<Organization> = {};
+    if (status) {
+      where.status = status;
+    }
+    return this.organizationRepository.count({ where });
   }
 }
