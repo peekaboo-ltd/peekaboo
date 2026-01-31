@@ -197,30 +197,43 @@ const Dashboard = () => {
     value: p.value,
   }));
 
+  const isBusinessView = dashboardData?.role === RoleTypes.BUSINESS;
+
+  const businessShellClass = isBusinessView
+    ? 'bg-slate-50/70 rounded-2xl border border-slate-200/60 shadow-sm'
+    : '';
+  const businessHeaderClass = isBusinessView
+    ? 'bg-white border border-slate-200 rounded-2xl px-6 py-5 shadow-sm'
+    : '';
+  const businessTitleClass = isBusinessView ? 'text-primary-900' : 'text-gray-900';
+  const businessSubtitleClass = isBusinessView ? 'text-slate-500' : 'text-gray-500';
+
   return (
     <motion.main
-      className="w-full max-w-7xl mx-auto px-4 py-6"
+      className={`w-full max-w-7xl mx-auto px-4 py-6 ${businessShellClass}`}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       {/* Header */}
       <motion.header
-        className="mb-8 flex items-start justify-between gap-4 flex-wrap"
+        className={`mb-8 flex items-start justify-between gap-4 flex-wrap ${businessHeaderClass}`}
         variants={itemVariants}
       >
         <article>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className={`text-2xl font-bold ${businessTitleClass}`}>
             {user?.name ? t('dashboard.welcome', { name: user.name }) : t('dashboard.welcomeDefault')}
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className={`${businessSubtitleClass} mt-1`}>
             {dashboardData?.role === RoleTypes.ADMIN ||
             dashboardData?.role === RoleTypes.STAFF
               ? t('dashboard.platformOverview')
               : t('dashboard.accountOverview')}
           </p>
         </article>
-        <OrderSearchBar placeholder={t('dashboard.searchPlaceholder')} />
+        <div className={isBusinessView ? 'w-full max-w-md' : undefined}>
+          <OrderSearchBar placeholder={t('dashboard.searchPlaceholder')} />
+        </div>
       </motion.header>
 
       {/* Primary Metrics */}
@@ -235,7 +248,7 @@ const Dashboard = () => {
               label={card.label}
               value={card.value}
               trend={card.trend}
-              colorClass={card.colorClass}
+              colorClass={isBusinessView ? 'text-primary' : card.colorClass}
               href={card.href}
               icon={card.icon}
               sparklineData={card.sparklineData}
@@ -252,19 +265,19 @@ const Dashboard = () => {
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8"
           variants={containerVariants}
         >
-          {metricCards.slice(5).map((card, index) => (
-            <motion.div key={index + 5} variants={itemVariants}>
-              <MetricCard
-                label={card.label}
-                value={card.value}
-                trend={card.trend}
-                colorClass={card.colorClass}
-                href={card.href}
-                icon={card.icon}
-                sparklineData={card.sparklineData}
-                sparklineType={card.sparklineType}
-              />
-            </motion.div>
+            {metricCards.slice(5).map((card, index) => (
+              <motion.div key={index + 5} variants={itemVariants}>
+                <MetricCard
+                  label={card.label}
+                  value={card.value}
+                  trend={card.trend}
+                  colorClass={isBusinessView ? 'text-primary' : card.colorClass}
+                  href={card.href}
+                  icon={card.icon}
+                  sparklineData={card.sparklineData}
+                  sparklineType={card.sparklineType}
+                />
+              </motion.div>
           ))}
         </motion.section>
       )}

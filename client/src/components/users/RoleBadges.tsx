@@ -28,6 +28,10 @@ const roleConfig: Record<RoleTypes, {
     label: 'Staff',
     className: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
   },
+  [RoleTypes.BUSINESS]: {
+    label: 'Business',
+    className: 'bg-teal-100 text-teal-800 hover:bg-teal-200',
+  },
 };
 
 export const RoleBadges: React.FC<RoleBadgesProps> = ({ 
