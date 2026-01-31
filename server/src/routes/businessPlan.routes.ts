@@ -38,9 +38,24 @@ router.get(
   BusinessPlanController.getActivePlans
 );
 router.get(
+  '/active/stats',
+  authorize([RoleTypes.ADMIN, RoleTypes.STAFF]),
+  BusinessPlanController.getActivePlansWithStats
+);
+router.get(
+  '/available',
+  authorize([RoleTypes.BUSINESS]),
+  BusinessPlanController.getAvailablePlansForBusiness
+);
+router.get(
   '/:id',
   authorize([RoleTypes.ADMIN, RoleTypes.STAFF]),
   BusinessPlanController.getBusinessPlanById
+);
+router.get(
+  '/:id/organization-count',
+  authorize([RoleTypes.ADMIN, RoleTypes.STAFF]),
+  BusinessPlanController.getOrganizationCountForPlan
 );
 
 export default router;

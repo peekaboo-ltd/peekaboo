@@ -4,7 +4,6 @@ export enum RoleTypes {
   BUSINESS = 'BUSINESS',
   STAFF = 'STAFF',
   ADMIN = 'ADMIN',
-  BUSINESS = 'BUSINESS',
 }
 
 export enum RoleStatus {

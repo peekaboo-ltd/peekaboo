@@ -1,21 +1,24 @@
 import { FindOptionsWhere, Repository, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { OrganizationBilling } from '../entities/organizationBilling.entity';
-import { BillingStatus, BillingPeriod } from '../constants/organization.constants';
+import { BillingStatus, BillingPeriod, OrganizationStatus } from '../constants/organization.constants';
 import { UUID } from '../types';
 import { NotFoundError, ValidationError } from '../helpers/errors.helper';
 import { getPagination, getPagingData, Pagination } from '../helpers/pagination.helper';
-import { Request } from 'express';
 import { Order } from '../entities/order.entity';
 import { generateReferenceNumber } from '../helpers/string.helper';
+import { BillingQuery, GlobalBillingSummary } from '../types/b2b.types';
+import { Organization } from '../entities/organization.entity';
 
 export class OrganizationBillingService {
   private readonly billingRepository: Repository<OrganizationBilling>;
   private readonly orderRepository: Repository<Order>;
+  private readonly organizationRepository: Repository<Organization>;
 
   constructor() {
     this.billingRepository = AppDataSource.getRepository(OrganizationBilling);
     this.orderRepository = AppDataSource.getRepository(Order);
+    this.organizationRepository = AppDataSource.getRepository(Organization);
   }
 
   // GET OR CREATE CURRENT BILLING PERIOD
@@ -172,41 +175,64 @@ export class OrganizationBillingService {
   // GET BILLING HISTORY
   async getBillingHistory(
     organizationId: UUID,
-    query: Request['query']
+    query: BillingQuery
   ): Promise<Pagination<OrganizationBilling>> {
-    const { page = 0, size = 10, status, billingPeriod } = query;
-
-    let condition: FindOptionsWhere<OrganizationBilling> = {
-      organizationId,
-    };
-
-    if (status) {
-      condition.status = status as BillingStatus;
-    }
-
-    if (billingPeriod) {
-      condition.billingPeriod = billingPeriod as BillingPeriod;
-    }
+    const {
+      page = 0,
+      size = 10,
+      status,
+      billingPeriod,
+      sortBy = 'periodStart',
+      sortOrder = 'DESC',
+      startDate,
+      endDate,
+    } = query;
 
     const { take, skip } = getPagination({
       page: Number(page),
       size: Number(size),
     });
 
-    const billings = await this.billingRepository.findAndCount({
-      where: condition,
-      skip,
-      take,
-      relations: {
-        createdBy: true,
-      },
-      order: {
-        periodStart: 'DESC',
-      },
-    });
+    const queryBuilder = this.billingRepository
+      .createQueryBuilder('billing')
+      .leftJoinAndSelect('billing.createdBy', 'createdBy')
+      .where('billing.organizationId = :organizationId', { organizationId });
+
+    if (status) {
+      queryBuilder.andWhere('billing.status = :status', { status });
+    }
+
+    if (billingPeriod) {
+      queryBuilder.andWhere('billing.billingPeriod = :billingPeriod', { billingPeriod });
+    }
+
+    // Date range filtering on periodStart
+    if (startDate) {
+      queryBuilder.andWhere('billing.periodStart >= :startDate', {
+        startDate: new Date(startDate as string),
+      });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('billing.periodEnd <= :endDate', {
+        endDate: new Date(endDate as string),
+      });
+    }
+
+    // Validate and apply sorting
+    const allowedSortFields = ['periodStart', 'periodEnd', 'totalAmount', 'status', 'createdAt'];
+    const sortField = allowedSortFields.includes(sortBy as string) ? sortBy : 'periodStart';
+    const order = sortOrder === 'ASC' ? 'ASC' : 'DESC';
+
+    queryBuilder
+      .skip(skip)
+      .take(take)
+      .orderBy(`billing.${sortField}`, order);
+
+    const [billings, total] = await queryBuilder.getManyAndCount();
 
     return getPagingData({
-      data: billings,
+      data: [billings, total],
       page: Number(page),
       size: Number(size),
     });
@@ -249,5 +275,150 @@ export class OrganizationBillingService {
     }
 
     return summary;
+  }
+
+  // GET GLOBAL BILLING SUMMARY (for admin dashboard)
+  async getGlobalBillingSummary(): Promise<GlobalBillingSummary> {
+    // Get all active organizations
+    const organizations = await this.organizationRepository.find({
+      where: { status: OrganizationStatus.ACTIVE },
+      select: { id: true, name: true },
+    });
+
+    // Get all billings
+    const allBillings = await this.billingRepository.find({
+      relations: { organization: true },
+    });
+
+    const summary: GlobalBillingSummary = {
+      totalOrganizations: organizations.length,
+      totalPaid: 0,
+      totalPending: 0,
+      totalOverdue: 0,
+      totalInvoiced: 0,
+      organizationBreakdown: [],
+    };
+
+    // Group billings by organization
+    const orgBillingMap = new Map<UUID, {
+      organizationId: UUID;
+      organizationName: string;
+      totalPaid: number;
+      totalPending: number;
+      totalOverdue: number;
+    }>();
+
+    for (const billing of allBillings) {
+      const amount = Number(billing.totalAmount);
+      const orgId = billing.organizationId;
+      const orgName = billing.organization?.name || 'Unknown';
+
+      // Update global totals
+      switch (billing.status) {
+        case BillingStatus.PAID:
+          summary.totalPaid += amount;
+          break;
+        case BillingStatus.PENDING:
+          summary.totalPending += amount;
+          break;
+        case BillingStatus.OVERDUE:
+          summary.totalOverdue += amount;
+          break;
+        case BillingStatus.INVOICED:
+          summary.totalInvoiced += amount;
+          break;
+      }
+
+      // Update organization breakdown
+      if (!orgBillingMap.has(orgId)) {
+        orgBillingMap.set(orgId, {
+          organizationId: orgId,
+          organizationName: orgName,
+          totalPaid: 0,
+          totalPending: 0,
+          totalOverdue: 0,
+        });
+      }
+
+      const orgData = orgBillingMap.get(orgId)!;
+      switch (billing.status) {
+        case BillingStatus.PAID:
+          orgData.totalPaid += amount;
+          break;
+        case BillingStatus.PENDING:
+        case BillingStatus.INVOICED:
+          orgData.totalPending += amount;
+          break;
+        case BillingStatus.OVERDUE:
+          orgData.totalOverdue += amount;
+          break;
+      }
+    }
+
+    summary.organizationBreakdown = Array.from(orgBillingMap.values())
+      .sort((a, b) => (b.totalPending + b.totalOverdue) - (a.totalPending + a.totalOverdue));
+
+    return summary;
+  }
+
+  // GET ALL BILLINGS WITH PAGINATION (for admin)
+  async getAllBillings(query: BillingQuery): Promise<Pagination<OrganizationBilling>> {
+    const {
+      page = 0,
+      size = 10,
+      status,
+      billingPeriod,
+      sortBy = 'periodStart',
+      sortOrder = 'DESC',
+      startDate,
+      endDate,
+    } = query;
+
+    const { take, skip } = getPagination({
+      page: Number(page),
+      size: Number(size),
+    });
+
+    const queryBuilder = this.billingRepository
+      .createQueryBuilder('billing')
+      .leftJoinAndSelect('billing.organization', 'organization')
+      .leftJoinAndSelect('billing.createdBy', 'createdBy');
+
+    if (status) {
+      queryBuilder.andWhere('billing.status = :status', { status });
+    }
+
+    if (billingPeriod) {
+      queryBuilder.andWhere('billing.billingPeriod = :billingPeriod', { billingPeriod });
+    }
+
+    if (startDate) {
+      queryBuilder.andWhere('billing.periodStart >= :startDate', {
+        startDate: new Date(startDate as string),
+      });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('billing.periodEnd <= :endDate', {
+        endDate: new Date(endDate as string),
+      });
+    }
+
+    const allowedSortFields = ['periodStart', 'periodEnd', 'totalAmount', 'status', 'createdAt'];
+    const sortField = allowedSortFields.includes(sortBy as string) ? sortBy : 'periodStart';
+    const order = sortOrder === 'ASC' ? 'ASC' : 'DESC';
+
+    queryBuilder
+      .skip(skip)
+      .take(take)
+      .orderBy(`billing.${sortField}`, order);
+
+    const [billings, total] = await queryBuilder.getManyAndCount();
+
+    return getPagingData({
+      data: [billings, total],
+      page: Number(page),
+      size: Number(size),
+    });
   }
 }

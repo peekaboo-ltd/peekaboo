@@ -13,10 +13,10 @@ import {
   ForbiddenError,
 } from '../helpers/errors.helper';
 import { getPagination, getPagingData, Pagination } from '../helpers/pagination.helper';
-import { Request } from 'express';
 import { UserService } from './user.service';
 import { RoleTypes } from '../constants/role.constants';
 import { hashPassword } from '../helpers/auth.helper';
+import { MembershipQuery, MemberUpdateData } from '../types/b2b.types';
 
 export class OrganizationMembershipService {
   private readonly membershipRepository: Repository<OrganizationMembership>;
@@ -143,6 +143,11 @@ export class OrganizationMembershipService {
   ): Promise<void> {
     const membership = await this.getMembershipById(membershipId);
 
+    // Prevent self-removal
+    if (membership.userId === removedById) {
+      throw new ValidationError('You cannot remove yourself from the organization');
+    }
+
     // Check if this is the last admin
     if (membership.role === OrganizationRole.ADMIN) {
       const adminCount = await this.membershipRepository.count({
@@ -165,12 +170,102 @@ export class OrganizationMembershipService {
     await this.membershipRepository.save(membership);
   }
 
+  // UPDATE MEMBER DETAILS
+  async updateMemberDetails(
+    membershipId: UUID,
+    data: MemberUpdateData,
+    updatedById: UUID
+  ): Promise<OrganizationMembership> {
+    const membership = await this.getMembershipById(membershipId);
+
+    if (!membership.user) {
+      throw new NotFoundError('User not found');
+    }
+
+    // Update user details
+    if (data.name !== undefined) {
+      membership.user.name = data.name;
+    }
+    if (data.email !== undefined) {
+      membership.user.email = data.email;
+    }
+
+    await this.userService.updateUser(membership.userId, {
+      name: data.name,
+      email: data.email,
+    });
+
+    return this.getMembershipById(membershipId);
+  }
+
+  // REACTIVATE MEMBER
+  async reactivateMember(
+    membershipId: UUID,
+    reactivatedById: UUID
+  ): Promise<OrganizationMembership> {
+    const membership = await this.membershipRepository.findOne({
+      where: { id: membershipId },
+      relations: {
+        user: true,
+        organization: true,
+      },
+    });
+
+    if (!membership) {
+      throw new NotFoundError('Membership not found');
+    }
+
+    if (membership.status === MembershipStatus.ACTIVE) {
+      throw new ValidationError('Member is already active');
+    }
+
+    // Check if user has another active membership
+    const existingActiveMembership = await this.membershipRepository.findOne({
+      where: {
+        userId: membership.userId,
+        status: MembershipStatus.ACTIVE,
+      },
+    });
+
+    if (existingActiveMembership) {
+      throw new ConflictError('User already belongs to another organization');
+    }
+
+    membership.status = MembershipStatus.ACTIVE;
+    await this.membershipRepository.save(membership);
+
+    return this.getMembershipById(membershipId);
+  }
+
+  // GET MEMBER COUNT FOR ORGANIZATION
+  async getMemberCount(
+    organizationId: UUID,
+    status: MembershipStatus = MembershipStatus.ACTIVE
+  ): Promise<number> {
+    return this.membershipRepository.count({
+      where: {
+        organizationId,
+        status,
+      },
+    });
+  }
+
   // GET ORGANIZATION MEMBERS
   async getOrganizationMembers(
     organizationId: UUID,
-    query: Request['query']
+    query: MembershipQuery
   ): Promise<Pagination<OrganizationMembership>> {
-    const { page = 0, size = 10, search, role, status } = query;
+    const {
+      page = 0,
+      size = 10,
+      search,
+      role,
+      status,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      startDate,
+      endDate,
+    } = query;
 
     const { take, skip } = getPagination({
       page: Number(page),
@@ -205,7 +300,34 @@ export class OrganizationMembershipService {
       });
     }
 
-    queryBuilder.skip(skip).take(take).orderBy('membership.createdAt', 'DESC');
+    // Date range filtering
+    if (startDate) {
+      queryBuilder.andWhere('membership.createdAt >= :startDate', {
+        startDate: new Date(startDate as string),
+      });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('membership.createdAt <= :endDate', {
+        endDate: new Date(endDate as string),
+      });
+    }
+
+    // Validate and apply sorting
+    const allowedSortFields = ['createdAt', 'role', 'status'];
+    const userSortFields = ['name', 'email'];
+    const sortField = sortBy as string;
+    const order = sortOrder === 'ASC' ? 'ASC' : 'DESC';
+
+    if (userSortFields.includes(sortField)) {
+      queryBuilder.orderBy(`user.${sortField}`, order);
+    } else if (allowedSortFields.includes(sortField)) {
+      queryBuilder.orderBy(`membership.${sortField}`, order);
+    } else {
+      queryBuilder.orderBy('membership.createdAt', order);
+    }
+
+    queryBuilder.skip(skip).take(take);
 
     const [memberships, total] = await queryBuilder.getManyAndCount();
 
