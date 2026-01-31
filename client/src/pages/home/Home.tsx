@@ -2,7 +2,7 @@ import { Controller, useForm, type FieldValues } from 'react-hook-form';
 import Input from '../../components/inputs/Input';
 import { useCreatePublicOrder } from '../../hooks/orders/orders.hooks';
 import Button from '@/components/inputs/Button';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { formatPhone } from '@/utils/strings.util';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,20 +11,29 @@ import {
   faClock,
   faMapLocationDot,
   faArrowRight,
-  faPlay,
   faQuoteLeft,
   faChevronLeft,
   faChevronRight,
   faBicycle,
+  faBuilding,
+  faChartLine,
+  faHandshake,
+  faRocket,
+  faBoxesStacked,
+  faUserTie,
+  faStore,
+  faCheck,
 } from '@fortawesome/free-solid-svg-icons';
 import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
 import { useI18n } from '@/i18n/i18n';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
+import HeroScene from '@/components/three/HeroScene';
 
 const Home = () => {
   const { data: landingStats } = useGetLandingStatsQuery();
   const { t } = useI18n();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [activeTab, setActiveTab] = useState<'personal' | 'business'>('personal');
   const formRef = useRef<HTMLFormElement>(null);
 
   const { control, handleSubmit } = useForm();
@@ -46,25 +55,44 @@ const Home = () => {
       icon: faBicycle,
       title: t('home.features.fastDelivery.title'),
       description: t('home.features.fastDelivery.desc'),
-      gradient: 'from-primary-700 to-primary-900',
     },
     {
       icon: faShieldHalved,
       title: t('home.features.secure.title'),
       description: t('home.features.secure.desc'),
-      gradient: 'from-primary-600 to-primary-800',
     },
     {
       icon: faClock,
       title: t('home.features.tracking.title'),
       description: t('home.features.tracking.desc'),
-      gradient: 'from-primary-500 to-primary-700',
     },
     {
       icon: faMapLocationDot,
       title: t('home.features.coverage.title'),
       description: t('home.features.coverage.desc'),
-      gradient: 'from-primary-800 to-primary-950',
+    },
+  ];
+
+  const businessFeatures = [
+    {
+      icon: faChartLine,
+      title: t('home.b2b.analytics.title'),
+      description: t('home.b2b.analytics.desc'),
+    },
+    {
+      icon: faBoxesStacked,
+      title: t('home.b2b.bulk.title'),
+      description: t('home.b2b.bulk.desc'),
+    },
+    {
+      icon: faHandshake,
+      title: t('home.b2b.support.title'),
+      description: t('home.b2b.support.desc'),
+    },
+    {
+      icon: faBuilding,
+      title: t('home.b2b.plans.title'),
+      description: t('home.b2b.plans.desc'),
     },
   ];
 
@@ -73,16 +101,19 @@ const Home = () => {
       step: '01',
       title: t('home.howItWorks.step1.title'),
       description: t('home.howItWorks.step1.desc'),
+      icon: faRocket,
     },
     {
       step: '02',
       title: t('home.howItWorks.step2.title'),
       description: t('home.howItWorks.step2.desc'),
+      icon: faBicycle,
     },
     {
       step: '03',
       title: t('home.howItWorks.step3.title'),
       description: t('home.howItWorks.step3.desc'),
+      icon: faCheck,
     },
   ];
 
@@ -91,20 +122,22 @@ const Home = () => {
       name: t('home.testimonials.t1.name'),
       role: t('home.testimonials.t1.role'),
       content: t('home.testimonials.t1.content'),
+      type: 'business',
     },
     {
       name: t('home.testimonials.t2.name'),
       role: t('home.testimonials.t2.role'),
       content: t('home.testimonials.t2.content'),
+      type: 'business',
     },
     {
       name: t('home.testimonials.t3.name'),
       role: t('home.testimonials.t3.role'),
       content: t('home.testimonials.t3.content'),
+      type: 'personal',
     },
   ];
 
-  // Auto-rotate testimonials
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -116,178 +149,265 @@ const Home = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.15, delayChildren: 0.2 },
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
     },
   };
 
   const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
+
+  const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+      transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
+  };
+
+  const scaleIn = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
+
+  const slideInLeft = {
+    hidden: { opacity: 0, x: -60 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
+
+  const slideInRight = {
+    hidden: { opacity: 0, x: 60 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+    },
+  };
+
+  const floatAnimation = {
+    y: [-8, 8, -8],
+    transition: {
+      duration: 4,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  };
+
+  const pulseAnimation = {
+    scale: [1, 1.05, 1],
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: "easeInOut",
     },
   };
 
   return (
-    <main className="min-h-screen w-full bg-gray-50 overflow-x-hidden">
+    <main className="min-h-screen w-full bg-white overflow-x-hidden">
       {/* Hero Section */}
       <section className="relative min-h-screen w-full overflow-hidden">
-        {/* Background Pattern - Speed lines inspired by logo */}
-        <div className="absolute inset-0 overflow-hidden">
-          {/* Speed lines pattern */}
-          <div className="absolute top-0 right-0 w-full h-full opacity-[0.03]">
-            <svg viewBox="0 0 800 600" className="w-full h-full" preserveAspectRatio="xMidYMid slice">
-              <g stroke="currentColor" strokeWidth="2" fill="none" className="text-primary-900">
-                <path d="M-100 200 Q200 180 400 200 T900 180" />
-                <path d="M-100 250 Q200 230 400 250 T900 230" />
-                <path d="M-100 300 Q200 280 400 300 T900 280" />
-                <path d="M-100 350 Q200 330 400 350 T900 330" />
-              </g>
-            </svg>
-          </div>
+        {/* Three.js Background */}
+        <Suspense fallback={null}>
+          <HeroScene />
+        </Suspense>
 
-          {/* Floating gradient orbs */}
-          <motion.div
-            className="absolute top-20 left-[10%] w-72 h-72 rounded-full bg-gradient-to-br from-primary-200/30 to-primary-400/10 blur-3xl"
-            animate={{ y: [0, -30, 0], scale: [1, 1.1, 1] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.div
-            className="absolute bottom-20 right-[15%] w-96 h-96 rounded-full bg-gradient-to-br from-primary-300/20 to-primary-500/10 blur-3xl"
-            animate={{ y: [0, 40, 0], scale: [1, 0.9, 1] }}
-            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.div
-            className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full bg-gradient-to-br from-primary-100/20 to-primary-300/10 blur-3xl"
-            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        </div>
+        {/* Subtle background pattern */}
+        <figure
+          className="absolute inset-0 opacity-[0.02] pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+            backgroundSize: '40px 40px',
+          }}
+          aria-hidden="true"
+        />
 
-        <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16 pt-8 pb-16 lg:pt-16 lg:pb-24">
-          <motion.article
-            className="w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[calc(100vh-8rem)]"
+        <article className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16 pt-8 pb-16 lg:pt-12 lg:pb-20">
+          <motion.section
+            className="w-full flex flex-col lg:flex-row gap-12 lg:gap-16 items-center min-h-[calc(100vh-6rem)]"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
             {/* Left Content */}
-            <motion.section className="w-full flex flex-col gap-8" variants={itemVariants as unknown as Variants}>
-              {/* Trust Badge */}
-              <motion.div
-                className="inline-flex items-center gap-3 w-fit"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: 'spring', stiffness: 400 }}
-              >
-                <span className="relative flex items-center gap-2 bg-primary-50 border border-primary-200/60 text-primary-800 px-5 py-2.5 rounded-full text-sm font-medium shadow-sm">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-600 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-600"></span>
-                  </span>
-                  {typeof landingStats?.activeCustomers === 'number'
-                    ? t('home.hero.badgeWithCount', { count: landingStats.activeCustomers })
-                    : t('home.hero.badgeLoading')}
-                </span>
-              </motion.div>
-
-              {/* Headline */}
-              <div className="space-y-4">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-                  <span className="text-gray-900">{t('home.hero.title1')}</span>
-                  <br />
-                  <span className="relative inline-block">
-                    <span className="relative z-10 bg-gradient-to-r from-primary-800 via-primary-700 to-primary-600 bg-clip-text text-transparent">
-                      {t('home.hero.title2')}
-                    </span>
-                    <motion.span
-                      className="absolute -bottom-2 left-0 w-full h-3 bg-gradient-to-r from-primary-200/60 to-primary-300/40 -skew-x-6 rounded"
-                      initial={{ scaleX: 0, originX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ delay: 0.8, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    />
-                  </span>
-                </h1>
-                <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-xl">
-                  {t('home.hero.subtitle')}
-                </p>
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <motion.button
-                  onClick={scrollToForm}
-                  className="group relative inline-flex items-center gap-3 bg-primary-900 text-white px-8 py-4 rounded-xl text-base font-semibold shadow-xl shadow-primary-900/25 overflow-hidden cursor-pointer"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                >
-                  <span className="absolute inset-0 bg-gradient-to-r from-primary-700 to-primary-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <span className="relative">{t('home.form.title')}</span>
-                  <FontAwesomeIcon icon={faArrowRight} className="relative group-hover:translate-x-1 transition-transform duration-300" />
-                </motion.button>
-
-                <Link
-                  to="/track"
-                  className="group inline-flex items-center gap-3 text-gray-700 hover:text-primary-700 px-6 py-4 rounded-xl text-base font-medium transition-all duration-300 cursor-pointer"
-                >
-                  <span className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 group-hover:bg-primary-100 transition-colors duration-300">
-                    <FontAwesomeIcon icon={faPlay} className="text-sm ml-0.5" />
-                  </span>
-                  Track Order
-                </Link>
-              </div>
-
-              {/* Stats Row */}
-              <motion.div
-                className="flex flex-wrap gap-8 pt-8 border-t border-gray-200/80"
-                variants={itemVariants as unknown as Variants}
-              >
-                {[
-                  { value: '500+', label: 'Daily Deliveries' },
-                  { value: '98%', label: 'On-Time Rate' },
-                  { value: '4.9★', label: 'Customer Rating' },
-                ].map((stat, index) => (
-                  <div key={index} className="flex flex-col">
-                    <span className="text-2xl sm:text-3xl font-bold text-gray-900">{stat.value}</span>
-                    <span className="text-sm text-gray-500">{stat.label}</span>
-                  </div>
-                ))}
-              </motion.div>
-            </motion.section>
-
-            {/* Right - Form Card */}
-            <motion.aside
-              className="w-full flex justify-center lg:justify-end"
+            <motion.header
+              className="w-full lg:w-[45%] flex flex-col gap-6 order-2 lg:order-1"
               variants={itemVariants as unknown as Variants}
             >
-              <motion.form
-                ref={formRef}
-                onSubmit={onSubmit}
-                className="relative w-full max-w-md"
-                whileHover={{ y: -4 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              {/* Customer type tabs */}
+              <nav className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg w-fit" role="tablist">
+                <button
+                  onClick={() => setActiveTab('personal')}
+                  role="tab"
+                  aria-selected={activeTab === 'personal'}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-normal transition-all duration-200 cursor-pointer ${
+                    activeTab === 'personal'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faStore} className="text-xs" />
+                  {t('home.hero.tab.personal')}
+                </button>
+                <button
+                  onClick={() => setActiveTab('business')}
+                  role="tab"
+                  aria-selected={activeTab === 'business'}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-normal transition-all duration-200 cursor-pointer ${
+                    activeTab === 'business'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faUserTie} className="text-xs" />
+                  {t('home.hero.tab.business')}
+                </button>
+              </nav>
+
+              {/* Dynamic headline */}
+              <AnimatePresence mode="wait">
+                <motion.hgroup
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4 }}
+                  className="space-y-4"
+                >
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-slate-900">
+                    {activeTab === 'personal' ? t('home.hero.title1') : t('home.b2b.title1')}
+                    <br />
+                    <span className="text-primary-700">
+                      {activeTab === 'personal' ? t('home.hero.title2') : t('home.b2b.title2')}
+                    </span>
+                  </h1>
+                  <p className="text-lg text-slate-600 leading-relaxed max-w-lg">
+                    {activeTab === 'personal'
+                      ? t('home.hero.subtitle')
+                      : t('home.b2b.subtitle')}
+                  </p>
+                </motion.hgroup>
+              </AnimatePresence>
+
+              {/* Trust indicators */}
+              <motion.figure
+                className="flex items-center gap-6 pt-4"
+                variants={itemVariants as unknown as Variants}
               >
-                {/* Card Glow Effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity" />
+                <figcaption className="flex -space-x-3" aria-label="Customer avatars">
+                  {['JM', 'AK', 'MP', 'CN'].map((initials, i) => (
+                    <span
+                      key={i}
+                      className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-normal text-slate-600"
+                    >
+                      {initials}
+                    </span>
+                  ))}
+                </figcaption>
+                <address className="not-italic flex flex-col">
+                  <strong className="text-sm font-semibold text-slate-900">
+                    {typeof landingStats?.activeCustomers === 'number'
+                      ? `${landingStats.activeCustomers.toLocaleString()}+ customers`
+                      : 'Growing community'}
+                  </strong>
+                  <span className="text-xs text-slate-500 font-normal">Trust Peekaboo daily</span>
+                </address>
+              </motion.figure>
 
-                {/* Card */}
-                <div className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/10 p-8 sm:p-10 border border-gray-100">
-                  {/* Decorative corner accent */}
-                  <div className="absolute top-0 right-0 w-24 h-24 overflow-hidden rounded-tr-2xl">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary-100/40 to-transparent transform rotate-45 translate-x-16 -translate-y-16" />
-                  </div>
+              {/* Business stats */}
+              <AnimatePresence mode="wait">
+                {activeTab === 'business' && (
+                  <motion.ul
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="grid grid-cols-3 gap-4 pt-4"
+                  >
+                    {[
+                      { value: '98%', label: 'On-time' },
+                      { value: '500+', label: 'Daily runs' },
+                      { value: '24/7', label: 'Support' },
+                    ].map((stat, i) => (
+                      <li key={i} className="text-center p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <data className="block text-xl font-bold text-slate-900">{stat.value}</data>
+                        <span className="text-xs text-slate-500">{stat.label}</span>
+                      </li>
+                    ))}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
 
-                  <header className="space-y-3 mb-8">
-                    <div className="flex items-center gap-3">
-                      <img src="/peekaboo.png" alt="Peekaboo" className="w-8 h-8 object-contain" />
-                      <h2 className="text-2xl font-bold text-gray-900">
-                        {t('home.form.title')}
-                      </h2>
-                    </div>
-                    <p className="text-gray-500 text-sm leading-relaxed">
-                      {t('home.form.subtitle')}
-                    </p>
+              {/* Business CTA */}
+              <AnimatePresence mode="wait">
+                {activeTab === 'business' && (
+                  <motion.nav
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="flex flex-wrap gap-3 pt-2"
+                  >
+                    <Link
+                      to="/auth/register"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg text-sm font-normal hover:bg-slate-800 transition-colors"
+                    >
+                      <FontAwesomeIcon icon={faBuilding} />
+                      {t('home.b2b.cta.account')}
+                    </Link>
+                    <button
+                      onClick={scrollToForm}
+                      className="inline-flex items-center gap-2 px-6 py-3 text-slate-700 hover:text-slate-900 text-sm font-normal transition-colors cursor-pointer"
+                    >
+                      {t('home.hero.tryQuickDelivery')}
+                      <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
+                    </button>
+                  </motion.nav>
+                )}
+              </AnimatePresence>
+            </motion.header>
+
+            {/* Right - Form */}
+            <motion.aside
+              className="w-full lg:w-[55%] flex justify-center lg:justify-end order-1 lg:order-2"
+              variants={itemVariants as unknown as Variants}
+            >
+              <motion.article
+                className="relative w-full max-w-lg"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+              >
+                <form
+                  ref={formRef}
+                  onSubmit={onSubmit}
+                  className="relative bg-white rounded-2xl shadow-xl shadow-slate-900/5 p-8 sm:p-10 border border-slate-200"
+                >
+                  <header className="space-y-2 mb-8">
+                    <figure className="flex items-center gap-3">
+                      <mark className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center">
+                        <img src="/peekaboo.png" alt="Peekaboo" className="w-7 h-7 object-contain brightness-0 invert" />
+                      </mark>
+                      <hgroup>
+                        <h2 className="text-2xl font-bold text-slate-900">
+                          {t('home.form.title')}
+                        </h2>
+                        <p className="text-slate-500 text-sm font-normal">
+                          {t('home.hero.quickStart')}
+                        </p>
+                      </hgroup>
+                    </figure>
                   </header>
 
                   <fieldset className="space-y-5 mb-8">
@@ -295,39 +415,41 @@ const Home = () => {
                       name="senderPhoneNumber"
                       control={control}
                       render={({ field }) => (
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
+                        <label className="block space-y-2">
+                          <span className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <mark className="w-5 h-5 rounded-full bg-slate-200 text-slate-900 flex items-center justify-center text-xs font-normal">1</mark>
                             {t('home.form.senderLabel')}
-                          </label>
+                          </span>
                           <Input
                             {...field}
                             placeholder={t('home.form.senderPlaceholder')}
-                            className="!rounded-xl !border-gray-200 focus:!border-primary-500 !bg-gray-50/50 hover:!bg-white transition-colors"
+                            className="!rounded-lg !border-slate-200 focus:!border-slate-900 focus:!ring-1 focus:!ring-slate-900/10 !bg-slate-50 hover:!bg-white transition-all !py-3.5"
                           />
-                        </div>
+                        </label>
                       )}
                     />
                     <Controller
                       name="recipientPhoneNumber"
                       control={control}
                       render={({ field }) => (
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-700">
+                        <label className="block space-y-2">
+                          <span className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            <mark className="w-5 h-5 rounded-full bg-slate-200 text-slate-900 flex items-center justify-center text-xs font-normal">2</mark>
                             {t('home.form.recipientLabel')}
-                          </label>
+                          </span>
                           <Input
                             {...field}
                             placeholder={t('home.form.recipientPlaceholder')}
-                            className="!rounded-xl !border-gray-200 focus:!border-primary-500 !bg-gray-50/50 hover:!bg-white transition-colors"
+                            className="!rounded-lg !border-slate-200 focus:!border-slate-900 focus:!ring-1 focus:!ring-slate-900/10 !bg-slate-50 hover:!bg-white transition-all !py-3.5"
                           />
-                        </div>
+                        </label>
                       )}
                     />
                   </fieldset>
 
-                  <div className="space-y-4">
+                  <footer className="space-y-4">
                     <Button
-                      className="w-full !bg-primary-900 hover:!bg-primary-800 !py-4 !rounded-xl !text-base !font-semibold !shadow-lg !shadow-primary-900/20 transition-all duration-300 cursor-pointer"
+                      className="w-full !bg-slate-900 hover:!bg-slate-800 !py-4 !rounded-lg !text-base !font-normal transition-all duration-200 cursor-pointer !border-0"
                       isLoading={isLoading}
                       type="submit"
                       primary
@@ -335,139 +457,302 @@ const Home = () => {
                       {t('home.form.continue')}
                       <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
                     </Button>
-                    <Link
-                      to="/track"
-                      className="flex items-center justify-center gap-2 text-gray-500 hover:text-primary-700 text-sm font-medium transition-colors py-2"
-                    >
-                      <span>Already have an order?</span>
-                      <span className="text-primary-600 underline underline-offset-2">Track it here</span>
-                    </Link>
-                  </div>
-                </div>
-              </motion.form>
+
+                    <nav className="flex items-center justify-center gap-3 pt-2">
+                      <span className="text-slate-400 text-sm font-normal">{t('home.hero.haveOrder')}</span>
+                      <Link
+                        to="/track"
+                        className="text-slate-900 hover:text-slate-700 text-sm font-normal transition-colors"
+                      >
+                        {t('home.hero.trackHere')} &rarr;
+                      </Link>
+                    </nav>
+                  </footer>
+
+                  <aside className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-center gap-4 text-xs text-slate-500 font-normal">
+                    <span className="flex items-center gap-1.5 text-[12px]">
+                      <FontAwesomeIcon size='xs' icon={faShieldHalved} className="text-slate-400 text-[12px]" />
+                      {t('home.hero.verifiedRiders')}
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-slate-300" aria-hidden="true" />
+                    <span className="flex items-center gap-1.5 text-[12px]">
+                      <FontAwesomeIcon size='xs' icon={faClock} className="text-slate-400 text-[12px]" />
+                      {t('home.hero.realtimeTracking')}
+                    </span>
+                  </aside>
+                </form>
+              </motion.article>
             </motion.aside>
-          </motion.article>
-        </div>
+          </motion.section>
+        </article>
 
         {/* Scroll indicator */}
-        <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 0.8 }}
+        <motion.figure
+          className="absolute bottom-6 left-1/2 -translate-x-1/2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          aria-label="Scroll down"
         >
-          <span className="text-xs text-gray-400 uppercase tracking-widest">Scroll to explore</span>
-          <motion.div
-            className="w-6 h-10 rounded-full border-2 border-gray-300 flex justify-center pt-2"
-            animate={{ y: [0, 5, 0] }}
+          <motion.span
+            className="w-5 h-9 rounded-full border-2 border-slate-300 flex justify-center pt-2"
+            animate={{ y: [0, 4, 0] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
-            <motion.div
-              className="w-1.5 h-1.5 rounded-full bg-gray-400"
-              animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
+            <motion.span
+              className="block w-1 h-1.5 rounded-full bg-slate-400"
+              animate={{ y: [0, 8, 0], opacity: [1, 0.4, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             />
-          </motion.div>
-        </motion.div>
+          </motion.span>
+        </motion.figure>
+      </section>
+
+      {/* Trusted By Section */}
+      <section className="w-full py-12 border-y border-slate-100">
+        <article className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16">
+          <motion.figure 
+            className="flex flex-col md:flex-row items-center justify-between gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+          >
+            <motion.figcaption 
+              className="text-sm text-slate-500 font-medium uppercase tracking-wider"
+              variants={fadeInUp as unknown as Variants}
+            >
+              {t('home.b2b.trustedBy')}
+            </motion.figcaption>
+            <ul className="flex flex-wrap items-center justify-center gap-8 lg:gap-12">
+              {['E-Commerce', 'Restaurants', 'Pharmacies', 'Retail Stores', 'Florists'].map((industry, i) => (
+                <motion.li
+                  key={industry}
+                  className="text-slate-400 font-normal text-sm uppercase tracking-wide hover:text-primary-600 transition-colors cursor-default"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08, duration: 0.5 }}
+                  whileHover={{ scale: 1.1, color: '#5f9598' }}
+                >
+                  {industry}
+                </motion.li>
+              ))}
+            </ul>
+          </motion.figure>
+        </article>
       </section>
 
       {/* Features Section */}
-      <section className="relative w-full py-24 lg:py-32 overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-gray-50" />
-
+      <section className="w-full py-20 lg:py-28">
         <motion.article
-          className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
           variants={containerVariants}
         >
-          <motion.header className="text-center mb-16 lg:mb-20" variants={itemVariants as unknown as Variants}>
-            <span className="inline-block text-primary-600 font-semibold text-sm tracking-wider uppercase mb-4">
-              Our Promise
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp as unknown as Variants}>
+            <motion.span 
+              className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
+              whileInView={{ opacity: [0, 1], y: [20, 0] }}
+              viewport={{ once: true }}
+            >
+              Why Choose Us
+            </motion.span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
               {t('home.features.title')}
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal">
               {t('home.features.subtitle')}
             </p>
           </motion.header>
 
           <motion.ul
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
             variants={containerVariants}
           >
             {features.map((feature, index) => (
               <motion.li
                 key={index}
-                variants={itemVariants as unknown as Variants}
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                variants={scaleIn as unknown as Variants}
+                whileHover={{ 
+                  y: -8, 
+                  scale: 1.02,
+                  transition: { type: 'spring', stiffness: 400, damping: 17 }
+                }}
               >
-                <div className="group relative h-full bg-white rounded-2xl p-8 shadow-lg shadow-gray-900/5 border border-gray-100 hover:shadow-xl hover:shadow-primary-900/10 transition-all duration-500">
-                  {/* Gradient accent on hover */}
-                  <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${feature.gradient} rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-                  <div className={`w-14 h-14 bg-gradient-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500`}>
-                    <FontAwesomeIcon icon={feature.icon} className="text-white text-xl" />
-                  </div>
-
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-700 transition-colors">
+                <article className="group h-full rounded-2xl p-7 border border-slate-200 hover:border-primary-300 hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-500">
+                  <motion.figure 
+                    className="w-14 h-14 bg-primary-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-primary-100 transition-colors duration-300"
+                    whileHover={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <FontAwesomeIcon icon={feature.icon} className="text-primary-600 text-xl" />
+                  </motion.figure>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-primary-700 transition-colors">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed text-sm">
+                  <p className="text-slate-600 text-sm leading-relaxed font-normal">
                     {feature.description}
                   </p>
-                </div>
+                </article>
               </motion.li>
             ))}
           </motion.ul>
         </motion.article>
       </section>
 
-      {/* How It Works Section */}
-      <section className="relative w-full py-24 lg:py-32 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 overflow-hidden">
-        {/* Geometric overlay - speed lines */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <pattern id="speedLines" width="20" height="10" patternUnits="userSpaceOnUse">
-                <path d="M0 5 L20 5" fill="none" stroke="white" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#speedLines)" />
-          </svg>
-        </div>
-
-        {/* Floating shapes */}
-        <motion.div
-          className="absolute top-20 left-10 w-40 h-40 border border-white/10 rounded-full"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-20 w-60 h-60 border border-primary-400/20 rounded-full"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-        />
-
+      {/* Business Solutions Section */}
+      <section className="w-full py-20 lg:py-28 border-y border-slate-100">
         <motion.article
-          className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
           variants={containerVariants}
         >
-          <motion.header className="text-center mb-16 lg:mb-20" variants={itemVariants as unknown as Variants}>
-            <span className="inline-block text-primary-300 font-semibold text-sm tracking-wider uppercase mb-4">
+          <figure className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <motion.figcaption variants={slideInLeft as unknown as Variants}>
+              <motion.span 
+                className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-4"
+                whileInView={{ opacity: [0, 1], x: [-20, 0] }}
+                viewport={{ once: true }}
+              >
+                {t('home.b2b.badge')}
+              </motion.span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-6">
+                {t('home.b2b.title1')}
+                <br />
+                <span className="text-primary-600">
+                  {t('home.b2b.title2')}
+                </span>
+              </h2>
+              <p className="text-lg text-slate-600 mb-8 leading-relaxed font-normal">
+                {t('home.b2b.subtitle')}
+              </p>
+
+              <ul className="space-y-4 mb-10">
+                {businessFeatures.map((feature, i) => (
+                  <motion.li
+                    key={i}
+                    className="group flex items-start gap-4"
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.12, duration: 0.5 }}
+                    whileHover={{ x: 8 }}
+                  >
+                    <motion.mark 
+                      className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0 group-hover:bg-primary-100 transition-colors"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <FontAwesomeIcon icon={feature.icon} className="text-primary-600" />
+                    </motion.mark>
+                    <section>
+                      <h4 className="text-slate-900 font-semibold mb-1 group-hover:text-primary-700 transition-colors">{feature.title}</h4>
+                      <p className="text-slate-500 text-sm font-normal">{feature.description}</p>
+                    </section>
+                  </motion.li>
+                ))}
+              </ul>
+
+              <motion.nav 
+                className="flex flex-wrap gap-4"
+                variants={fadeInUp as unknown as Variants}
+              >
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link
+                    to="/auth/register"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white rounded-xl font-normal hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/25"
+                  >
+                    {t('home.b2b.cta.trial')}
+                    <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                      <FontAwesomeIcon icon={faArrowRight} />
+                    </motion.span>
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link
+                    to="/contact"
+                    className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 hover:border-primary-300 hover:text-primary-700 rounded-xl font-normal transition-all"
+                  >
+                    {t('home.b2b.cta.sales')}
+                  </Link>
+                </motion.div>
+              </motion.nav>
+            </motion.figcaption>
+
+            <motion.aside
+              className="relative"
+              variants={slideInRight as unknown as Variants}
+            >
+              <motion.article 
+                className="rounded-2xl p-8 border border-slate-200 shadow-xl shadow-slate-900/5"
+                animate={floatAnimation}
+              >
+                <ul className="grid grid-cols-2 gap-6">
+                  {[
+                    { value: '10K+', label: t('home.b2b.stats.packages'), icon: faBoxesStacked },
+                    { value: '50+', label: t('home.b2b.stats.partners'), icon: faBuilding },
+                    { value: '99.2%', label: t('home.b2b.stats.success'), icon: faCheck },
+                    { value: '4.9/5', label: t('home.b2b.stats.rating'), icon: faHandshake },
+                  ].map((stat, i) => (
+                    <motion.li
+                      key={i}
+                      className="group text-center p-4 rounded-xl hover:bg-primary-50 transition-colors cursor-default"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.1, type: 'spring', stiffness: 200 }}
+                      whileHover={{ scale: 1.08 }}
+                    >
+                      <motion.figure 
+                        className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary-200 transition-colors"
+                        whileHover={{ rotate: [0, -15, 15, 0] }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <FontAwesomeIcon icon={stat.icon} className="text-primary-600" />
+                      </motion.figure>
+                      <motion.data 
+                        className="block text-2xl font-bold text-slate-900 mb-1"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                      >
+                        {stat.value}
+                      </motion.data>
+                      <span className="text-xs text-slate-500 font-normal">{stat.label}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.article>
+            </motion.aside>
+          </figure>
+        </motion.article>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="w-full py-20 lg:py-28">
+        <motion.article
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-100px' }}
+          variants={containerVariants}
+        >
+          <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp as unknown as Variants}>
+            <motion.span 
+              className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
+              animate={pulseAnimation}
+            >
               Simple Process
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+            </motion.span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
               {t('home.howItWorks.title')}
             </h2>
-            <p className="text-lg text-primary-200 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal">
               {t('home.howItWorks.subtitle')}
             </p>
           </motion.header>
@@ -476,32 +761,68 @@ const Home = () => {
             className="relative grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12"
             variants={containerVariants}
           >
-            {/* Connection line */}
-            <div className="hidden md:block absolute top-24 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-primary-400/0 via-primary-400/50 to-primary-400/0" />
+            {/* Animated connection line */}
+            <motion.hr 
+              className="hidden md:block absolute top-16 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-primary-200 via-primary-400 to-primary-200 border-0 origin-left" 
+              aria-hidden="true"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            />
 
             {howItWorks.map((step, index) => (
               <motion.li
                 key={index}
                 className="relative text-center"
-                variants={itemVariants as unknown as Variants}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.2, duration: 0.6 }}
               >
-                <div className="relative inline-flex items-center justify-center mb-8">
-                  <motion.div
-                    className="absolute w-24 h-24 rounded-full bg-primary-400/10"
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.1, 0.2] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
-                  />
-                  <div className="relative w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-xl">
-                    <span className="text-2xl font-bold text-primary-900">{step.step}</span>
-                  </div>
-                </div>
+                <motion.figure 
+                  className="relative inline-flex items-center justify-center mb-6"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  <motion.mark 
+                    className="relative w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-primary-500/15 border border-primary-100"
+                    whileHover={{ 
+                      boxShadow: '0 20px 40px -10px rgba(95, 149, 152, 0.3)',
+                      borderColor: '#5f9598'
+                    }}
+                  >
+                    <FontAwesomeIcon icon={step.icon} className="text-2xl text-primary-600" />
+                  </motion.mark>
+                  <motion.data 
+                    className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary-600 text-white text-xs font-medium flex items-center justify-center shadow-lg"
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.2 + 0.3, type: 'spring', stiffness: 500 }}
+                  >
+                    {step.step}
+                  </motion.data>
+                </motion.figure>
 
-                <h3 className="text-2xl font-bold text-white mb-4">
+                <motion.h3 
+                  className="text-xl font-bold text-slate-900 mb-3"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.2 + 0.2 }}
+                >
                   {step.title}
-                </h3>
-                <p className="text-primary-200 leading-relaxed max-w-xs mx-auto">
+                </motion.h3>
+                <motion.p 
+                  className="text-slate-600 max-w-xs mx-auto font-normal"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.2 + 0.3 }}
+                >
                   {step.description}
-                </p>
+                </motion.p>
               </motion.li>
             ))}
           </motion.ol>
@@ -509,161 +830,203 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="relative w-full py-24 lg:py-32 bg-gray-50 overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent" />
-
+      <section className="w-full py-20 lg:py-28 border-t border-slate-100">
         <motion.article
-          className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
           variants={containerVariants}
         >
-          <motion.header className="text-center mb-16" variants={itemVariants as unknown as Variants}>
-            <span className="inline-block text-primary-600 font-semibold text-sm tracking-wider uppercase mb-4">
+          <motion.header className="text-center mb-12" variants={fadeInUp as unknown as Variants}>
+            <motion.span 
+              className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
+              whileInView={{ opacity: [0, 1], scale: [0.8, 1] }}
+              viewport={{ once: true }}
+            >
               Testimonials
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            </motion.span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
               {t('home.testimonials.title')}
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal">
               {t('home.testimonials.subtitle')}
             </p>
           </motion.header>
 
-          {/* Testimonial Carousel */}
-          <motion.div className="relative max-w-4xl mx-auto" variants={itemVariants as unknown as Variants}>
-            <div className="relative bg-white rounded-3xl shadow-2xl shadow-gray-900/10 p-8 sm:p-12 lg:p-16 overflow-hidden">
-              {/* Large quote mark */}
-              <FontAwesomeIcon
-                icon={faQuoteLeft}
-                className="absolute top-8 left-8 text-6xl text-gray-100"
-              />
+          <motion.figure 
+            className="relative max-w-4xl mx-auto" 
+            variants={scaleIn as unknown as Variants}
+          >
+            <motion.blockquote 
+              className="rounded-2xl p-8 sm:p-12 lg:p-14 border border-slate-200 shadow-lg shadow-slate-900/5"
+              whileHover={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)' }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3, type: 'spring' }}
+              >
+                <FontAwesomeIcon
+                  icon={faQuoteLeft}
+                  className="absolute top-6 left-6 text-5xl text-primary-100"
+                  aria-hidden="true"
+                />
+              </motion.div>
 
               <AnimatePresence mode="wait">
-                <motion.div
+                <motion.section
                   key={activeTestimonial}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
+                  initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.98 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                   className="relative z-10"
                 >
-                  <blockquote className="text-xl sm:text-2xl lg:text-3xl text-gray-700 font-medium leading-relaxed mb-8">
+                  <p className="text-xl sm:text-2xl text-slate-700 font-normal leading-relaxed mb-8">
                     "{testimonials[activeTestimonial].content}"
-                  </blockquote>
+                  </p>
 
-                  <footer className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-primary-700 to-primary-900 rounded-full flex items-center justify-center shadow-lg">
-                      <span className="text-xl font-bold text-white">
+                  <figcaption className="flex items-center gap-4">
+                    <motion.mark 
+                      className="w-14 h-14 bg-primary-600 rounded-full flex items-center justify-center"
+                      whileHover={{ scale: 1.1, rotate: 10 }}
+                    >
+                      <span className="text-xl font-medium text-white">
                         {testimonials[activeTestimonial].name.charAt(0)}
                       </span>
-                    </div>
-                    <div>
-                      <span className="block text-lg font-bold text-gray-900">
+                    </motion.mark>
+                    <cite className="not-italic">
+                      <strong className="block text-lg font-semibold text-slate-900">
                         {testimonials[activeTestimonial].name}
-                      </span>
-                      <span className="text-gray-500">
+                      </strong>
+                      <span className="flex items-center gap-2 text-slate-500 font-normal">
+                        <FontAwesomeIcon
+                          icon={testimonials[activeTestimonial].type === 'business' ? faBuilding : faStore}
+                          className="text-xs text-primary-500"
+                        />
                         {testimonials[activeTestimonial].role}
                       </span>
-                    </div>
-                  </footer>
-                </motion.div>
+                    </cite>
+                  </figcaption>
+                </motion.section>
               </AnimatePresence>
 
-              {/* Navigation dots */}
-              <div className="flex items-center justify-center gap-3 mt-10">
+              <nav className="flex items-center justify-center gap-2.5 mt-8" aria-label="Testimonial navigation">
                 {testimonials.map((_, index) => (
-                  <button
+                  <motion.button
                     key={index}
                     onClick={() => setActiveTestimonial(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 cursor-pointer ${index === activeTestimonial
+                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                      index === activeTestimonial
                         ? 'bg-primary-600 w-8'
-                        : 'bg-gray-300 hover:bg-gray-400'
-                      }`}
+                        : 'bg-slate-200 hover:bg-primary-300 w-2'
+                    }`}
                     aria-label={`Go to testimonial ${index + 1}`}
+                    aria-current={index === activeTestimonial ? 'true' : undefined}
+                    whileHover={{ scale: 1.3 }}
+                    whileTap={{ scale: 0.9 }}
                   />
                 ))}
-              </div>
-            </div>
+              </nav>
+            </motion.blockquote>
 
-            {/* Navigation arrows */}
-            <button
-              onClick={() => setActiveTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-primary-600 hover:scale-110 transition-all cursor-pointer"
-              aria-label="Previous testimonial"
-            >
-              <FontAwesomeIcon icon={faChevronLeft} />
-            </button>
-            <button
-              onClick={() => setActiveTestimonial((prev) => (prev + 1) % testimonials.length)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-primary-600 hover:scale-110 transition-all cursor-pointer"
-              aria-label="Next testimonial"
-            >
-              <FontAwesomeIcon icon={faChevronRight} />
-            </button>
-          </motion.div>
+            <nav className="flex justify-between absolute left-0 right-0 top-1/2 -translate-y-1/2 pointer-events-none">
+              <motion.button
+                onClick={() => setActiveTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length)}
+                className="pointer-events-auto -translate-x-4 lg:-translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-primary-600 transition-all cursor-pointer border border-slate-200"
+                aria-label="Previous testimonial"
+                whileHover={{ scale: 1.15, x: -4 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <FontAwesomeIcon icon={faChevronLeft} />
+              </motion.button>
+              <motion.button
+                onClick={() => setActiveTestimonial((prev) => (prev + 1) % testimonials.length)}
+                className="pointer-events-auto translate-x-4 lg:translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-primary-600 transition-all cursor-pointer border border-slate-200"
+                aria-label="Next testimonial"
+                whileHover={{ scale: 1.15, x: 4 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <FontAwesomeIcon icon={faChevronRight} />
+              </motion.button>
+            </nav>
+          </motion.figure>
         </motion.article>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative w-full py-24 lg:py-32 overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-800 via-primary-900 to-primary-950" />
-
-        {/* Speed lines pattern overlay */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <pattern id="ctaLines" width="30" height="15" patternUnits="userSpaceOnUse">
-                <path d="M0 7.5 Q15 5 30 7.5" fill="none" stroke="white" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#ctaLines)" />
-          </svg>
-        </div>
-
-        {/* Floating shapes */}
-        <motion.div
-          className="absolute top-10 left-[10%] w-32 h-32 bg-white/5 rounded-full blur-2xl"
-          animate={{ y: [0, -20, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute bottom-10 right-[10%] w-48 h-48 bg-white/5 rounded-full blur-2xl"
-          animate={{ y: [0, 30, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-        />
-
+      {/* Final CTA Section */}
+      <section className="w-full py-20 lg:py-28 border-t border-slate-100">
         <motion.article
-          className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16 text-center"
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
           variants={containerVariants}
         >
-          <motion.div variants={itemVariants as unknown as Variants}>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 drop-shadow-sm">
-              {t('home.cta.title')}
-            </h2>
-            <p className="text-lg sm:text-xl text-primary-200 max-w-2xl mx-auto mb-10 leading-relaxed">
-              {t('home.cta.subtitle')}
-            </p>
-
-            <motion.button
-              onClick={scrollToForm}
-              className="group relative inline-flex items-center gap-3 bg-white text-primary-900 px-10 py-5 rounded-2xl text-lg font-bold shadow-2xl shadow-black/20 overflow-hidden cursor-pointer"
-              whileHover={{ scale: 1.05, y: -3 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          <motion.header
+            className="max-w-3xl mx-auto text-center"
+            variants={fadeInUp as unknown as Variants}
+          >
+            <motion.h2 
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-6"
+              whileInView={{ 
+                opacity: [0, 1],
+                y: [30, 0]
+              }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
             >
-              <span className="absolute inset-0 bg-primary-100 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <span className="relative">{t('home.cta.button')}</span>
-              <FontAwesomeIcon icon={faArrowRight} className="relative group-hover:translate-x-1 transition-transform duration-300" />
-            </motion.button>
-          </motion.div>
+              {t('home.cta.title')}
+            </motion.h2>
+            <motion.p 
+              className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto mb-10 font-normal"
+              whileInView={{ opacity: [0, 1] }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              {t('home.cta.subtitle')}
+            </motion.p>
+
+            <nav className="flex flex-wrap items-center justify-center gap-4">
+              <motion.button
+                onClick={scrollToForm}
+                className="group inline-flex items-center gap-3 bg-primary-600 text-white px-10 py-5 rounded-xl text-lg font-normal hover:bg-primary-700 transition-colors cursor-pointer shadow-xl shadow-primary-500/25"
+                whileHover={{ scale: 1.05, boxShadow: '0 25px 50px -12px rgba(95, 149, 152, 0.4)' }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+              >
+                {t('home.cta.button')}
+                <motion.span
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <FontAwesomeIcon icon={faArrowRight} />
+                </motion.span>
+              </motion.button>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <Link
+                  to="/auth/register"
+                  className="inline-flex items-center gap-2 px-8 py-5 text-slate-700 hover:text-primary-700 text-lg font-normal transition-colors border-2 border-slate-200 hover:border-primary-300 rounded-xl"
+                >
+                  <FontAwesomeIcon icon={faBuilding} />
+                  {t('home.b2b.cta.account')}
+                </Link>
+              </motion.div>
+            </nav>
+          </motion.header>
         </motion.article>
       </section>
     </main>
