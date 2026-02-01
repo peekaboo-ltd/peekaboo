@@ -7,7 +7,9 @@ export interface InputProps {
   type?: string;
   placeholder?: string;
   required?: boolean;
+  value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   className?: string;
   errorMessage?: | string
   | FieldError
@@ -21,7 +23,9 @@ const Input = ({
   type,
   placeholder,
   required,
+  value,
   onChange,
+  onBlur,
   className,
   errorMessage,
 }: InputProps) => {
@@ -38,7 +42,9 @@ const Input = ({
         name={name}
         placeholder={placeholder}
         required={required}
+        value={value}
         onChange={onChange}
+        onBlur={onBlur}
       />
       {errorMessage && (
         <p className="text-sm text-red-500">{String(errorMessage)}</p>

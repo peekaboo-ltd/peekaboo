@@ -21,18 +21,10 @@ import {
 import MetricCard from '@/components/dashboard/MetricCard';
 import OrdersBarChart from '@/components/dashboard/OrdersBarChart';
 import RevenueLineChart from '@/components/dashboard/RevenueLineChart';
-import FleetEfficiencyChart from '@/components/dashboard/FleetEfficiencyChart';
-import VehiclesStatusChart from '@/components/dashboard/VehiclesStatusChart';
 import OrderSearchBar from '@/components/dashboard/OrderSearchBar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useI18n } from '@/i18n/i18n';
-import {
-  fleetEfficiencyMockData,
-  vehiclesOnRoadMockData,
-  fleetMetricsMock,
-  vehicleMetricsMock,
-  sparklineMockData,
-} from '@/data/dashboard.mock';
+import { sparklineMockData } from '@/data/dashboard.mock';
 import { motion } from 'framer-motion';
 
 const Dashboard = () => {
@@ -146,18 +138,10 @@ const Dashboard = () => {
 
         <section
           aria-label="Loading charts"
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
         >
           <Skeleton className="h-72 rounded-xl" />
           <Skeleton className="h-72 rounded-xl" />
-        </section>
-
-        <section
-          aria-label="Loading fleet charts"
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        >
-          <Skeleton className="h-80 rounded-xl" />
-          <Skeleton className="h-80 rounded-xl" />
         </section>
       </main>
     );
@@ -166,16 +150,16 @@ const Dashboard = () => {
   if (error) {
     return (
       <main className="w-full max-w-7xl mx-auto px-4 py-6">
-        <article className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
+        <article className="text-center py-12 bg-white rounded-2xl shadow-sm border border-slate-100">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">
             {t('dashboard.failedToLoad')}
           </h2>
-          <p className="text-gray-500 max-w-md mx-auto">
+          <p className="text-slate-600 max-w-md mx-auto">
             {t('dashboard.tryRefreshing')}
           </p>
         </article>
@@ -199,32 +183,30 @@ const Dashboard = () => {
 
   const isBusinessView = dashboardData?.role === RoleTypes.BUSINESS;
 
-  const businessShellClass = isBusinessView
+  const shellClass = isBusinessView
     ? 'bg-slate-50/70 rounded-2xl border border-slate-200/60 shadow-sm'
     : '';
-  const businessHeaderClass = isBusinessView
+  const headerClass = isBusinessView
     ? 'bg-white border border-slate-200 rounded-2xl px-6 py-5 shadow-sm'
     : '';
-  const businessTitleClass = isBusinessView ? 'text-primary-900' : 'text-gray-900';
-  const businessSubtitleClass = isBusinessView ? 'text-slate-500' : 'text-gray-500';
 
   return (
     <motion.main
-      className={`w-full max-w-7xl mx-auto px-4 py-6 ${businessShellClass}`}
+      className={`w-full max-w-7xl mx-auto px-4 py-6 ${shellClass}`}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       {/* Header */}
       <motion.header
-        className={`mb-8 flex items-start justify-between gap-4 flex-wrap ${businessHeaderClass}`}
+        className={`mb-8 flex items-start justify-between gap-4 flex-wrap ${headerClass}`}
         variants={itemVariants}
       >
         <article>
-          <h1 className={`text-2xl font-bold ${businessTitleClass}`}>
+          <h1 className="text-2xl font-bold text-slate-900">
             {user?.name ? t('dashboard.welcome', { name: user.name }) : t('dashboard.welcomeDefault')}
           </h1>
-          <p className={`${businessSubtitleClass} mt-1`}>
+          <p className="text-slate-600 mt-1">
             {dashboardData?.role === RoleTypes.ADMIN ||
             dashboardData?.role === RoleTypes.STAFF
               ? t('dashboard.platformOverview')
@@ -248,7 +230,7 @@ const Dashboard = () => {
               label={card.label}
               value={card.value}
               trend={card.trend}
-              colorClass={isBusinessView ? 'text-primary' : card.colorClass}
+              colorClass={card.colorClass}
               href={card.href}
               icon={card.icon}
               sparklineData={card.sparklineData}
@@ -265,19 +247,19 @@ const Dashboard = () => {
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8"
           variants={containerVariants}
         >
-            {metricCards.slice(5).map((card, index) => (
-              <motion.div key={index + 5} variants={itemVariants}>
-                <MetricCard
-                  label={card.label}
-                  value={card.value}
-                  trend={card.trend}
-                  colorClass={isBusinessView ? 'text-primary' : card.colorClass}
-                  href={card.href}
-                  icon={card.icon}
-                  sparklineData={card.sparklineData}
-                  sparklineType={card.sparklineType}
-                />
-              </motion.div>
+          {metricCards.slice(5).map((card, index) => (
+            <motion.div key={index + 5} variants={itemVariants}>
+              <MetricCard
+                label={card.label}
+                value={card.value}
+                trend={card.trend}
+                colorClass={card.colorClass}
+                href={card.href}
+                icon={card.icon}
+                sparklineData={card.sparklineData}
+                sparklineType={card.sparklineType}
+              />
+            </motion.div>
           ))}
         </motion.section>
       )}
@@ -286,7 +268,7 @@ const Dashboard = () => {
       {showCharts && (
         <motion.section
           aria-label="Dashboard charts"
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
@@ -294,29 +276,6 @@ const Dashboard = () => {
           </motion.div>
           <motion.div variants={itemVariants}>
             <RevenueLineChart data={revenueChartData} title={t('dashboard.revenueChart')} />
-          </motion.div>
-        </motion.section>
-      )}
-
-      {/* Fleet Charts */}
-      {showCharts && (
-        <motion.section
-          aria-label="Fleet and vehicle charts"
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants}>
-            <FleetEfficiencyChart
-              data={fleetEfficiencyMockData}
-              centerValue={fleetMetricsMock.efficiencyPercentage}
-            />
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <VehiclesStatusChart
-              data={vehiclesOnRoadMockData}
-              totalVehicles={vehicleMetricsMock.totalVehicles}
-              utilizationPercentage={65}
-            />
           </motion.div>
         </motion.section>
       )}

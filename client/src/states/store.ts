@@ -19,6 +19,8 @@ import { usersMutationsApiSlice } from '../api/mutations/users.mutations';
 import userSlice from './slices/user.slice';
 import { dashboardQueriesApiSlice } from '../api/queries/dashboard.queries';
 import { landingQueriesApiSlice } from '../api/queries/landing.queries';
+import onboardingSlice from './slices/onboarding.slice';
+import { organizationMutationApiSlice } from '../api/mutations/organization.mutations';
 
 export const store = configureStore({
   reducer: {
@@ -45,6 +47,8 @@ export const store = configureStore({
     [usersMutationsApiSlice.reducerPath]: usersMutationsApiSlice.reducer,
     [dashboardQueriesApiSlice.reducerPath]: dashboardQueriesApiSlice.reducer,
     [landingQueriesApiSlice.reducerPath]: landingQueriesApiSlice.reducer,
+    onboarding: onboardingSlice,
+    [organizationMutationApiSlice.reducerPath]: organizationMutationApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -60,7 +64,8 @@ export const store = configureStore({
       usersQueriesApiSlice.middleware,
       usersMutationsApiSlice.middleware,
       dashboardQueriesApiSlice.middleware,
-      landingQueriesApiSlice.middleware
+      landingQueriesApiSlice.middleware,
+      organizationMutationApiSlice.middleware
     ),
   devTools: true,
 });
