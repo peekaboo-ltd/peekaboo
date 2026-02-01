@@ -14,6 +14,11 @@ import { OrdersPage } from '@/pages/orders';
 import { OrderAssignmentsPage } from '@/pages/order-assignments';
 import { UsersPage } from '@/pages/users';
 import { About } from '@/pages/about';
+import {
+  OrganizationOnboarding,
+  AdminOnboarding,
+  UserManagementOnboarding,
+} from '@/pages/onboarding';
 
 const Router = () => {
   return (
@@ -26,6 +31,11 @@ const Router = () => {
           <Route path="register" element={<Navigate to="/auth/login" replace />} />
           <Route path="callback" element={<AuthCallback />} />
           <Route path="forgot-password" element={<p>Forgot Password</p>} />
+        </Route>
+        <Route path="onboarding">
+          <Route path="organization" element={<OrganizationOnboarding />} />
+          <Route path="admin" element={<AdminOnboarding />} />
+          <Route path="users" element={<UserManagementOnboarding />} />
         </Route>
         <Route path="" element={<Home />} />
         <Route path="about" element={<About />} />
@@ -57,7 +67,7 @@ const Router = () => {
           </ProtectedRoute>
         } />
         <Route path="/users" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+          <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'BUSINESS']}>
             <UsersPage />
           </ProtectedRoute>
         } />

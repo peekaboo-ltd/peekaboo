@@ -18,7 +18,7 @@ export default function RevenueLineChart({
   title?: string;
 }) {
   return (
-    <Card>
+    <Card className="border-slate-200/70 bg-white">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
@@ -55,4 +55,3 @@ export default function RevenueLineChart({
     </Card>
   );
 }
-

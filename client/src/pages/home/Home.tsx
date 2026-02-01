@@ -96,6 +96,40 @@ const Home = () => {
     },
   ];
 
+  const businessPlans = [
+    {
+      name: t('home.b2b.pricing.starter.name'),
+      price: t('home.b2b.pricing.starter.price'),
+      description: t('home.b2b.pricing.starter.desc'),
+      features: [
+        t('home.b2b.pricing.starter.feature1'),
+        t('home.b2b.pricing.starter.feature2'),
+        t('home.b2b.pricing.starter.feature3'),
+      ],
+    },
+    {
+      name: t('home.b2b.pricing.growth.name'),
+      price: t('home.b2b.pricing.growth.price'),
+      description: t('home.b2b.pricing.growth.desc'),
+      features: [
+        t('home.b2b.pricing.growth.feature1'),
+        t('home.b2b.pricing.growth.feature2'),
+        t('home.b2b.pricing.growth.feature3'),
+      ],
+      isPopular: true,
+    },
+    {
+      name: t('home.b2b.pricing.enterprise.name'),
+      price: t('home.b2b.pricing.enterprise.price'),
+      description: t('home.b2b.pricing.enterprise.desc'),
+      features: [
+        t('home.b2b.pricing.enterprise.feature1'),
+        t('home.b2b.pricing.enterprise.feature2'),
+        t('home.b2b.pricing.enterprise.feature3'),
+      ],
+    },
+  ];
+
   const howItWorks = [
     {
       step: '01',
@@ -145,7 +179,7 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [testimonials.length]);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -153,7 +187,7 @@ const Home = () => {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
@@ -162,7 +196,7 @@ const Home = () => {
     },
   };
 
-  const fadeInUp = {
+  const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 40 },
     visible: {
       opacity: 1,
@@ -171,7 +205,7 @@ const Home = () => {
     },
   };
 
-  const scaleIn = {
+  const scaleIn: Variants = {
     hidden: { opacity: 0, scale: 0.9 },
     visible: {
       opacity: 1,
@@ -180,7 +214,7 @@ const Home = () => {
     },
   };
 
-  const slideInLeft = {
+  const slideInLeft: Variants = {
     hidden: { opacity: 0, x: -60 },
     visible: {
       opacity: 1,
@@ -189,7 +223,7 @@ const Home = () => {
     },
   };
 
-  const slideInRight = {
+  const slideInRight: Variants = {
     hidden: { opacity: 0, x: 60 },
     visible: {
       opacity: 1,
@@ -245,7 +279,7 @@ const Home = () => {
             {/* Left Content */}
             <motion.header
               className="w-full lg:w-[45%] flex flex-col gap-6 order-2 lg:order-1"
-              variants={itemVariants as unknown as Variants}
+              variants={itemVariants}
             >
               {/* Customer type tabs */}
               <nav className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg w-fit" role="tablist">
@@ -305,7 +339,7 @@ const Home = () => {
               {/* Trust indicators */}
               <motion.figure
                 className="flex items-center gap-6 pt-4"
-                variants={itemVariants as unknown as Variants}
+                variants={itemVariants}
               >
                 <figcaption className="flex -space-x-3" aria-label="Customer avatars">
                   {['JM', 'AK', 'MP', 'CN'].map((initials, i) => (
@@ -360,7 +394,7 @@ const Home = () => {
                     className="flex flex-wrap gap-3 pt-2"
                   >
                     <Link
-                      to="/auth/register"
+                      to="/onboarding/organization"
                       className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg text-sm font-normal hover:bg-slate-800 transition-colors"
                     >
                       <FontAwesomeIcon icon={faBuilding} />
@@ -381,7 +415,7 @@ const Home = () => {
             {/* Right - Form */}
             <motion.aside
               className="w-full lg:w-[55%] flex justify-center lg:justify-end order-1 lg:order-2"
-              variants={itemVariants as unknown as Variants}
+              variants={itemVariants}
             >
               <motion.article
                 className="relative w-full max-w-lg"
@@ -520,7 +554,7 @@ const Home = () => {
           >
             <motion.figcaption 
               className="text-sm text-slate-500 font-medium uppercase tracking-wider"
-              variants={fadeInUp as unknown as Variants}
+              variants={fadeInUp}
             >
               {t('home.b2b.trustedBy')}
             </motion.figcaption>
@@ -552,7 +586,7 @@ const Home = () => {
           viewport={{ once: true, margin: '-100px' }}
           variants={containerVariants}
         >
-          <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp as unknown as Variants}>
+            <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp}>
             <motion.span 
               className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
               whileInView={{ opacity: [0, 1], y: [20, 0] }}
@@ -575,7 +609,7 @@ const Home = () => {
             {features.map((feature, index) => (
               <motion.li
                 key={index}
-                variants={scaleIn as unknown as Variants}
+                variants={scaleIn}
                 whileHover={{ 
                   y: -8, 
                   scale: 1.02,
@@ -613,7 +647,7 @@ const Home = () => {
           variants={containerVariants}
         >
           <figure className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <motion.figcaption variants={slideInLeft as unknown as Variants}>
+            <motion.figcaption variants={slideInLeft}>
               <motion.span 
                 className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-4"
                 whileInView={{ opacity: [0, 1], x: [-20, 0] }}
@@ -660,11 +694,11 @@ const Home = () => {
 
               <motion.nav 
                 className="flex flex-wrap gap-4"
-                variants={fadeInUp as unknown as Variants}
+                variants={fadeInUp}
               >
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Link
-                    to="/auth/register"
+                    to="/onboarding/organization"
                     className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white rounded-xl font-normal hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/25"
                   >
                     {t('home.b2b.cta.trial')}
@@ -686,7 +720,7 @@ const Home = () => {
 
             <motion.aside
               className="relative"
-              variants={slideInRight as unknown as Variants}
+              variants={slideInRight}
             >
               <motion.article 
                 className="rounded-2xl p-8 border border-slate-200 shadow-xl shadow-slate-900/5"
@@ -733,6 +767,95 @@ const Home = () => {
         </motion.article>
       </section>
 
+      {/* Business Plans Section */}
+      <section className="w-full py-20 lg:py-28">
+        <motion.article
+          className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-100px' }}
+          variants={containerVariants}
+        >
+          <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp}>
+            <motion.span
+              className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
+              whileInView={{ opacity: [0, 1], y: [20, 0] }}
+              viewport={{ once: true }}
+            >
+              {t('home.b2b.pricing.badge')}
+            </motion.span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+              {t('home.b2b.pricing.title')}
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal">
+              {t('home.b2b.pricing.subtitle')}
+            </p>
+          </motion.header>
+
+          <motion.ul
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            variants={containerVariants}
+          >
+            {businessPlans.map((plan) => (
+              <motion.li
+                key={plan.name}
+                variants={scaleIn}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className={`${plan.isPopular ? 'md:-mt-4' : ''}`}
+              >
+                <article
+                  className={`h-full rounded-2xl border p-6 flex flex-col gap-6 transition-all duration-300 ${
+                    plan.isPopular
+                      ? 'border-primary-300 shadow-xl shadow-primary-500/10 bg-primary-50/40'
+                      : 'border-slate-200 bg-white'
+                  }`}
+                >
+                  <header className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-slate-900">{plan.name}</h3>
+                      <p className="text-sm text-slate-500 mt-2">{plan.description}</p>
+                    </div>
+                    {plan.isPopular && (
+                      <span className="text-xs font-semibold uppercase tracking-wide text-primary-700 bg-primary-100 px-2.5 py-1 rounded-full">
+                        {t('home.b2b.pricing.popular')}
+                      </span>
+                    )}
+                  </header>
+
+                  <div>
+                    <p className="text-3xl font-bold text-slate-900">{plan.price}</p>
+                    <p className="text-xs text-slate-500 mt-1">{t('home.b2b.pricing.perMonth')}</p>
+                  </div>
+
+                  <ul className="space-y-3 text-sm text-slate-600 flex-1">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2">
+                        <span className="mt-0.5 text-primary-600">
+                          <FontAwesomeIcon icon={faCheck} />
+                        </span>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    to="/onboarding/organization"
+                    className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      plan.isPopular
+                        ? 'bg-primary-600 text-white hover:bg-primary-700'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {t('home.b2b.pricing.cta')}
+                    <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
+                  </Link>
+                </article>
+              </motion.li>
+            ))}
+          </motion.ul>
+        </motion.article>
+      </section>
+
       {/* How It Works Section */}
       <section className="w-full py-20 lg:py-28">
         <motion.article
@@ -742,7 +865,7 @@ const Home = () => {
           viewport={{ once: true, margin: '-100px' }}
           variants={containerVariants}
         >
-          <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp as unknown as Variants}>
+          <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp}>
             <motion.span 
               className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
               animate={pulseAnimation}
@@ -838,7 +961,7 @@ const Home = () => {
           viewport={{ once: true, margin: '-100px' }}
           variants={containerVariants}
         >
-          <motion.header className="text-center mb-12" variants={fadeInUp as unknown as Variants}>
+          <motion.header className="text-center mb-12" variants={fadeInUp}>
             <motion.span 
               className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
               whileInView={{ opacity: [0, 1], scale: [0.8, 1] }}
@@ -856,7 +979,7 @@ const Home = () => {
 
           <motion.figure 
             className="relative max-w-4xl mx-auto" 
-            variants={scaleIn as unknown as Variants}
+            variants={scaleIn}
           >
             <motion.blockquote 
               className="rounded-2xl p-8 sm:p-12 lg:p-14 border border-slate-200 shadow-lg shadow-slate-900/5"
@@ -968,7 +1091,7 @@ const Home = () => {
         >
           <motion.header
             className="max-w-3xl mx-auto text-center"
-            variants={fadeInUp as unknown as Variants}
+            variants={fadeInUp}
           >
             <motion.h2 
               className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-6"
@@ -1018,7 +1141,7 @@ const Home = () => {
                 whileHover={{ scale: 1.05 }}
               >
                 <Link
-                  to="/auth/register"
+                    to="/onboarding/organization"
                   className="inline-flex items-center gap-2 px-8 py-5 text-slate-700 hover:text-primary-700 text-lg font-normal transition-colors border-2 border-slate-200 hover:border-primary-300 rounded-xl"
                 >
                   <FontAwesomeIcon icon={faBuilding} />

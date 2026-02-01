@@ -1,5 +1,7 @@
 import { StatusBadge } from '@/components/inputs/StatusBadge';
+import { RoleBadges } from '@/components/users/RoleBadges';
 import { User, UserRole } from '@/types/user.type';
+import { RoleTypes } from '@/types/auth.type';
 import { formatDate } from '@/utils/strings.util';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
@@ -29,22 +31,13 @@ export const useUsersColumns = () => {
         accessorKey: 'userRoles',
         cell: ({ row }) => {
           const roles = row.original.userRoles || [];
-          return (
-            <menu className="flex flex-wrap gap-1">
-              {roles.length > 0 ? (
-                roles.map((userRole: UserRole) => (
-                  <span
-                    key={userRole.id}
-                    className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800"
-                  >
-                    {userRole.role?.name}
-                  </span>
-                ))
-              ) : (
-                <span className="text-gray-400">-</span>
-              )}
-            </menu>
-          );
+          const roleNames = roles
+            .map((userRole: UserRole) => userRole.role?.name)
+            .filter(Boolean) as RoleTypes[];
+          if (roleNames.length === 0) {
+            return <span className="text-gray-400">-</span>;
+          }
+          return <RoleBadges roles={roleNames} />;
         },
       },
       {

@@ -13,15 +13,13 @@ import {
 interface VehiclesStatusChartProps {
   data: VehicleStatusData[];
   title?: string;
-  totalVehicles?: number;
   utilizationPercentage?: number;
 }
 
 const VehiclesStatusChart = ({
   data,
   title,
-  totalVehicles = 100,
-  utilizationPercentage = 65,
+  utilizationPercentage,
 }: VehiclesStatusChartProps) => {
   const { t } = useI18n();
 
@@ -31,6 +29,11 @@ const VehiclesStatusChart = ({
   }));
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
+
+  const onRoadKey: VehicleStatusData['name'] = 'onRoad';
+  const onRoadValue = data.find((item) => item.name === onRoadKey)?.value ?? 0;
+  const computedUtilization =
+    utilizationPercentage ?? (total > 0 ? Math.round((onRoadValue / total) * 100) : 0);
 
   const renderCustomizedLabel = ({
     cx,
@@ -52,7 +55,7 @@ const VehiclesStatusChart = ({
           dy="-0.5em"
           className="text-2xl font-bold fill-foreground"
         >
-          {utilizationPercentage}%
+          {computedUtilization}%
         </tspan>
         <tspan
           x={cx}
@@ -124,7 +127,7 @@ const VehiclesStatusChart = ({
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full border-slate-200/70 bg-white">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">
           {title || t('dashboard.vehiclesOnRoad')}

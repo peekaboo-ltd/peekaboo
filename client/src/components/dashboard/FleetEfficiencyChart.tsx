@@ -122,7 +122,7 @@ const FleetEfficiencyChart = ({
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full border-slate-200/70 bg-white">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">
           {title || t('dashboard.fleetEfficiency')}

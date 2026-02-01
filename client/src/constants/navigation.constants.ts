@@ -44,6 +44,6 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     label: 'Users',
     path: '/users',
     icon: faUserGroup,
-    permissions: [RoleTypes.ADMIN, RoleTypes.STAFF],
+    permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
   },
 ];
