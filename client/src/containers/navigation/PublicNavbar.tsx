@@ -18,8 +18,8 @@ const PublicNavbar = () => {
   const { pathname } = useLocation();
 
   return (
-    <nav className={`absolute top-0 left-0 right-0 z-50 backdrop-blur-sm ${pathname === '/' ? 'bg-transparent' : 'bg-white/90'}`}>
-      <article className="w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-sm transition-colors duration-300 ${pathname === '/' ? 'bg-white/70' : 'bg-white/90'}`}>
+      <article className="w-[100%] mx-auto px-4 sm:px-6 lg:px-8">
         <header className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link
@@ -93,10 +93,10 @@ const PublicNavbar = () => {
 
         {/* Mobile Navigation */}
         <section
-          className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          className={`md:hidden transition-all duration-300 w-full ease-in-out overflow-hidden ${isMobileMenuOpen ? 'h-[100vh] opacity-100' : 'max-h-0 opacity-0'
             }`}
         >
-          <ul className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+          <ul className="px-2 pt-2 pb-3 space-y-1 bg-white w-full border-t border-gray-200">
             <li className="px-3 py-2">
               <LanguageSelector />
             </li>
