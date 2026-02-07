@@ -69,10 +69,20 @@ export class AuthService {
             name: true,
           },
         },
+        organizationMembership: {
+          id: true,
+          organization: {
+            id: true,
+            name: true,
+          },
+        }
       },
       relations: {
         userRoles: {
           role: true,
+        },
+        organizationMembership: {
+          organization: true,
         },
       },
     });

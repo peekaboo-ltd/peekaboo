@@ -16,8 +16,6 @@ import { UsersPage } from '@/pages/users';
 import { About } from '@/pages/about';
 import { ContactUsPage } from '@/pages/contact';
 import { InviteOrganization } from '@/pages/organizations';
-import { ContactUsPage } from '@/pages/contact';
-import { InviteOrganization } from '@/pages/organizations';
 import {
   OrganizationOnboarding,
   AdminOnboarding,

@@ -12,21 +12,25 @@ export const usersQueriesApiSlice = createApi({
         search,
         roles,
         status,
+        organizationId
       }: {
         page: number;
         size: number;
         search?: string;
         roles?: string[];
         status?: string;
+        organizationId?: string;
       }) => {
-        const params: Record<string, unknown> = { page, size };
-        if (search) params.search = search;
-        if (roles) params.roles = roles;
-        if (status) params.status = status;
-
         return {
           url: '/users',
-          params,
+          params: {
+            search,
+            page,
+            size,
+            roles: roles ? roles.join(',') : undefined,
+            status,
+            organizationId,
+          },
         };
       },
     }),

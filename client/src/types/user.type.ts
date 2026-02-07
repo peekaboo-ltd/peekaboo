@@ -3,6 +3,7 @@ import { UserStatus } from '../constants/user.constants';
 import type { Order } from './order.type';
 import type { OrderAssignment } from './orderAssignment.type';
 import type { Role } from './auth.type';
+import { OrganizationMembership } from './organizationMembership.types';
 
 export interface UserRole {
   id: UUID;
@@ -25,4 +26,5 @@ export interface User extends BaseDomain {
   assignments: OrderAssignment[];
   orders: Order[];
   userRoles?: UserRole[];
+  organizationMembership?: OrganizationMembership[];
 }

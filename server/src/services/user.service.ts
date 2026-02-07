@@ -151,11 +151,12 @@ export class UserService {
       phoneNumber,
       name,
       email,
+      organizationId,
     } = query;
 
     // Check if we need query builder for complex filters (search or roles)
     const needsQueryBuilder =
-      search || (roles && Array.isArray(roles) ? roles.length > 0 : roles);
+      search || (roles && Array.isArray(roles) ? roles.length > 0 : roles) || organizationId;
 
     if (needsQueryBuilder) {
       // Use query builder for complex filters
@@ -167,7 +168,9 @@ export class UserService {
       const queryBuilder = this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.userRoles', 'userRole')
-        .leftJoinAndSelect('userRole.role', 'role');
+        .leftJoinAndSelect('userRole.role', 'role')
+        .leftJoinAndSelect('user.organizationMembership', 'membership')
+        .leftJoinAndSelect('membership.organization', 'organization');
 
       // Apply search filter
       if (search) {
@@ -202,6 +205,13 @@ export class UserService {
       if (roles) {
         const roleArray = Array.isArray(roles) ? roles : [roles];
         queryBuilder.andWhere('role.name IN (:...roles)', { roles: roleArray });
+      }
+
+      // Apply organization filter
+      if (organizationId) {
+        queryBuilder.andWhere('membership.organizationId = :organizationId', {
+          organizationId,
+        });
       }
 
       // Apply pagination and ordering
@@ -248,6 +258,9 @@ export class UserService {
         relations: {
           userRoles: {
             role: true,
+          },
+          organizationMembership: {
+            organization: true,
           },
         },
         order: {

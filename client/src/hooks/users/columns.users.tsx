@@ -13,26 +13,26 @@ export const useUsersColumns = () => {
         header: 'Name',
         accessorKey: 'name',
         cell: ({ row }) => (
-          <span className="font-medium">{row.original.name || '-'}</span>
+          <span className="font-normal text-[13px]">{row?.original?.name || '-'}</span>
         ),
       },
       {
         header: 'Phone Number',
         accessorKey: 'phoneNumber',
-        cell: ({ row }) => row.original.phoneNumber || '-',
+        cell: ({ row }) => row?.original?.phoneNumber || '-',
       },
       {
         header: 'Email',
         accessorKey: 'email',
-        cell: ({ row }) => row.original.email || '-',
+        cell: ({ row }) => row?.original?.email || '-',
       },
       {
         header: 'Roles',
         accessorKey: 'userRoles',
         cell: ({ row }) => {
-          const roles = row.original.userRoles || [];
+          const roles = row?.original?.userRoles || [];
           const roleNames = roles
-            .map((userRole: UserRole) => userRole.role?.name)
+            .map((userRole: UserRole) => userRole?.role?.name)
             .filter(Boolean) as RoleTypes[];
           if (roleNames.length === 0) {
             return <span className="text-gray-400">-</span>;
@@ -43,17 +43,17 @@ export const useUsersColumns = () => {
       {
         header: 'Status',
         accessorKey: 'status',
-        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+        cell: ({ row }) => <StatusBadge status={row?.original?.status} />,
       },
       {
         header: 'Date added',
         accessorKey: 'createdAt',
-        cell: ({ row }) => formatDate(row.original.createdAt, 'DD/MM/YYYY HH:mm'),
+        cell: ({ row }) => formatDate(row?.original?.createdAt, 'DD/MM/YYYY HH:mm'),
       },
       {
         header: 'Last updated',
         accessorKey: 'updatedAt',
-        cell: ({ row }) => formatDate(row.original.updatedAt, 'DD/MM/YYYY HH:mm'),
+        cell: ({ row }) => formatDate(row?.original?.updatedAt, 'DD/MM/YYYY HH:mm'),
       },
     ],
     []

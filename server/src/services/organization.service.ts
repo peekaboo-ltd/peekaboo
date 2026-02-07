@@ -402,6 +402,7 @@ export class OrganizationService {
         {
           name: data.adminName,
           email: data.adminEmail,
+          phoneNumber: data?.phoneNumber,
         },
         [RoleTypes.BUSINESS]
       );
@@ -411,7 +412,7 @@ export class OrganizationService {
     const organization = await this.organizationRepository.save({
       name: data.name,
       email: data.email,
-      phoneNumber: data.phoneNumber,
+      phoneNumber: data?.phoneNumber,
       address: data.address,
       createdById,
       status: OrganizationStatus.PENDING,
