@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBuilding,
-  faCheck,
   faLock,
   faPhone,
   faUser,
@@ -38,7 +36,6 @@ const CompleteOnboarding = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const token = searchParams.get('token') || '';
-  const [completed, setCompleted] = useState(false);
 
   const {
     data: tokenData,
@@ -92,18 +89,11 @@ const CompleteOnboarding = () => {
       dispatch(setUser(result.data.auth.user));
       dispatch(setIsAuthenticated(true));
 
-      setCompleted(true);
+      navigate('/dashboard');
     } catch {
       // Error handled by RTK Query
     }
   });
-
-  useEffect(() => {
-    if (completed) {
-      const timer = setTimeout(() => navigate('/dashboard'), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [completed, navigate]);
 
   // No token provided
   if (!token) {
@@ -153,32 +143,6 @@ const CompleteOnboarding = () => {
             {t('onboarding.organization.backHome')}
           </Link>
         </div>
-      </div>
-    );
-  }
-
-  // Completed
-  if (completed) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-        <motion.div
-          className="text-center max-w-md"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-            <FontAwesomeIcon icon={faCheck} className="text-green-600 text-3xl" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            {t('completeOnboarding.successTitle')}
-          </h2>
-          <p className="text-slate-600 mb-6">
-            {t('completeOnboarding.successMessage')}
-          </p>
-          <p className="text-sm text-slate-400">
-            {t('completeOnboarding.redirecting')}
-          </p>
-        </motion.div>
       </div>
     );
   }
