@@ -12,6 +12,8 @@ import { AppDispatch, RootState } from '@/states/store';
 import { FC, useState } from 'react';
 import { setLogout } from '@/states/slices/auth.slice';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
+import { capitalizeString } from '@/utils/strings.util';
+import { UserRole } from '@/types/user.type';
 
 interface Props {
     className?: string;
@@ -99,7 +101,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                 {user?.name || user?.phoneNumber}
                             </span>
                             <span className="text-xs text-gray-500 truncate max-w-[150px] sm:max-w-[170px]">
-                                {user?.email || user?.phoneNumber}
+                                {user?.userRoles?.map((role: UserRole) => capitalizeString(role?.role?.name))?.join(', ')}
                             </span>
                         </div>
 

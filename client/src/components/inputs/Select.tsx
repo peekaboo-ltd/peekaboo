@@ -59,7 +59,7 @@ const Select = ({
         disabled={disabled}
       >
         <SelectTrigger
-          className={`py-[7px] px-4 font-normal w-full rounded-lg border-[1.5px] border-secondary border-opacity-50 outline-none focus:outline-none focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className} ${
+          className={`py-[7px] px-4 font-normal w-full !text-[13px] cursor-pointer rounded-lg border-[1.5px] border-secondary border-opacity-50 outline-none focus:outline-none focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className} ${
             errorMessage ? "border-red-500" : ""
           }`}
         >
@@ -71,7 +71,7 @@ const Select = ({
               key={option.value}
               value={option.value}
               disabled={option.disabled}
-              className="cursor-pointer hover:bg-background"
+              className="cursor-pointer hover:bg-background !text-[13px]"
             >
               {option.label}
             </SelectItem>

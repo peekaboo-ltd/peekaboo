@@ -47,6 +47,7 @@ const UpdateOrderLocationFrom = () => {
     <Modal
       isOpen={updateOrderLocationFromModal}
       onClose={handleClose}
+      className="top-[42%] translate-y-[-42%] sm:top-[50%] sm:translate-y-[-50%]"
       heading="Update Origin Location"
       description="Search and select the pickup location for your order"
     >

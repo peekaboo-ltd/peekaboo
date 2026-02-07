@@ -18,11 +18,11 @@ export default function OrdersBarChart({
   title?: string;
 }) {
   return (
-    <Card className="border-slate-200/70 bg-white">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">{title}</CardTitle>
+    <Card className="border-slate-200 bg-white shadow-none">
+      <CardHeader className="px-4 pt-4 pb-2">
+        <CardTitle className="text-sm font-medium text-slate-700">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="h-56 sm:h-72">
+      <CardContent className="h-56 sm:h-72 px-4 pb-4">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ left: 0, right: 4, top: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -48,7 +48,7 @@ export default function OrdersBarChart({
               }}
               labelStyle={{ color: 'hsl(var(--foreground))' }}
             />
-            <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="value" fill="var(--primary)" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

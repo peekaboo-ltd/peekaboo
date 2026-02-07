@@ -28,8 +28,10 @@ export const useOrdersColumns = () => {
                 header: 'Status',
                 accessorKey: 'status',
                 cell: ({ row }) => {
-                    const activities = row?.original?.activities ? [...row.original.activities] : [];
-                    const firstActivity = activities.shift();
+                    const activities = row?.original?.activities 
+                        ? [...row.original.activities].sort((a, b) => new Date(b?.updatedAt ?? '').getTime() - new Date(a?.updatedAt ?? '').getTime())
+                        : [];
+                    const firstActivity = activities.shift() || { status: row?.original?.status };
                     return <StatusBadge status={firstActivity?.status ?? ''} />;
                 },
             },

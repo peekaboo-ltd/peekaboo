@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/table';
 
 import { DataTablePagination } from './TablePagination';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { UnknownAction } from '@reduxjs/toolkit';
 import { SkeletonLoader } from '../inputs/Loader';
 
@@ -43,6 +43,7 @@ interface DataTableProps<TData, TValue> {
   isLoading?: boolean;
   noDataMessage?: string | ReactNode;
   rowClassName?: string | ((row: TData) => string);
+  manualPagination?: boolean;
 }
 
 export default function Table<TData, TValue>({
@@ -50,7 +51,7 @@ export default function Table<TData, TValue>({
   data = [],
   rowClickHandler = undefined,
   showPagination = true,
-  page = 1,
+  page = 0,
   size = 10,
   totalCount = 0,
   totalPages = 1,
@@ -59,36 +60,70 @@ export default function Table<TData, TValue>({
   isLoading = false,
   noDataMessage = 'No results.',
   rowClassName = '',
+  manualPagination,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: Math.max(0, page),
+    pageSize: size,
+  });
+
+  const resolvedManualPagination =
+    manualPagination ?? Boolean(setPage || setSize);
+
+  useEffect(() => {
+    setPagination({
+      pageIndex: Math.max(0, page),
+      pageSize: size,
+    });
+  }, [page, size]);
+
+  const paginationState = useMemo(
+    () => ({
+      pageIndex: pagination.pageIndex,
+      pageSize: pagination.pageSize,
+    }),
+    [pagination.pageIndex, pagination.pageSize]
+  );
 
   const table = useReactTable({
     data,
     columns,
-    initialState: {
+    state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
-      pagination: {
-        pageIndex: page - 1,
-        pageSize: size,
-      },
+      pagination: paginationState,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: (updater) => {
+      const nextPagination =
+        typeof updater === 'function' ? updater(paginationState) : updater;
+      setPagination(nextPagination);
+      if (setPage) {
+        setPage(nextPagination.pageIndex);
+      }
+      if (setSize) {
+        setSize(nextPagination.pageSize);
+      }
+    },
+    manualPagination: resolvedManualPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    getPaginationRowModel: resolvedManualPagination
+      ? undefined
+      : getPaginationRowModel(),
   });
 
   return (

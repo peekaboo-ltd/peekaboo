@@ -88,8 +88,15 @@ export const useUpdateOrder = () => {
   return { updateOrder, data, error, isLoading, isSuccess, reset };
 };
 
-export const useGetOrderFees = (initialFee?: number) => {
+export const useGetOrderFees = (initialFee?: number, resetKey?: string | number) => {
   const [orderFee, setOrderFee] = useState<number | undefined>(initialFee);
+
+  // Reset fee when the tracked entity changes (e.g., navigating to a different order)
+  useEffect(() => {
+    if (resetKey !== undefined) {
+      setOrderFee(initialFee);
+    }
+  }, [initialFee, resetKey]);
 
   // Sync with initialFee when it changes (e.g., when order loads)
   useEffect(() => {

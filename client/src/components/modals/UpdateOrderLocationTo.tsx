@@ -47,6 +47,7 @@ const UpdateOrderLocationTo = () => {
     <Modal
       isOpen={updateOrderLocationToModal}
       onClose={handleClose}
+      className="top-[42%] translate-y-[-42%] sm:top-[50%] sm:translate-y-[-50%]"
       heading="Update Delivery Location"
       description="Search and select the delivery location for your order"
     >

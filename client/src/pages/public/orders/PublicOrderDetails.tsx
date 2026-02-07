@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrder, setOrderPaymentModal, setSelectedOrder, setUpdateOrderLocationFromModal, setUpdateOrderLocationToModal } from '@/states/slices/order.slice';
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
@@ -59,18 +59,20 @@ const PublicOrderDetails = () => {
   const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
   const [gettingCurrentLocation, setGettingCurrentLocation] = useState(false);
 
+  // NAVIGATION
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const orderId = id as UUID | undefined;
+  const currentOrder = order?.id === orderId ? order : undefined;
+
   // FETCH PAYMENTS
   const { fetchPayments } = useFetchPayments();
 
   useEffect(() => {
-    if (order?.id) {
-      fetchPayments({ entityId: order?.id, paymentType: PaymentType.ORDER });
+    if (currentOrder?.id) {
+      fetchPayments({ entityId: currentOrder?.id, paymentType: PaymentType.ORDER });
     }
-  }, [fetchPayments, order?.id]);
-
-  // NAVIGATION
-  const { id } = useParams();
-  const navigate = useNavigate();
+  }, [fetchPayments, currentOrder?.id]);
 
   /**
    * HOOKS
@@ -80,7 +82,8 @@ const PublicOrderDetails = () => {
   const { getOrder } = useGetOrder();
   const { updateOrder } = useUpdateOrder();
   const { getOrderFee, orderFee } = useGetOrderFees(
-    order?.finalFee !== null && order?.finalFee !== undefined ? order.finalFee : undefined
+    currentOrder?.finalFee !== null && currentOrder?.finalFee !== undefined ? currentOrder.finalFee : undefined,
+    orderId
   );
 
   // CREATE ORDER ASSIGNMENT HOOKS
@@ -92,19 +95,19 @@ const PublicOrderDetails = () => {
 
   useEffect(() => {
     if (createOrderAssignmentIsSuccess) {
-      navigate(`/p/orders/${order?.id}/tracking`);
+      navigate(`/p/orders/${currentOrder?.id}/tracking`);
     }
-  }, [createOrderAssignmentIsSuccess, navigate, order?.id]);
+  }, [createOrderAssignmentIsSuccess, navigate, currentOrder?.id]);
 
   // HANDLE CURRENT LOCATION
   const handleGetCurrentLocation = useCallback(async () => {
-    if (!order?.id) return;
+    if (!currentOrder?.id) return;
 
     setGettingCurrentLocation(true);
     try {
       const location = await getCurrentLocation();
       updateOrder({
-        id: order.id,
+        id: currentOrder.id,
         order: {
           locationFrom: {
             latitude: location?.latitude,
@@ -117,17 +120,29 @@ const PublicOrderDetails = () => {
     } finally {
       setGettingCurrentLocation(false);
     }
-  }, [order?.id, updateOrder]);
+  }, [currentOrder?.id, updateOrder]);
 
-  // Reset stale data when order ID changes
-  useEffect(() => {
-    dispatch(setOrder(undefined));
-    setDistance(null);
-    setEstimatedTime(null);
-    if (id) {
-      getOrder({ id: id as UUID });
+  // Reset stale data when order ID changes before paint to avoid flicker
+  useLayoutEffect(() => {
+    if (order?.id !== orderId) {
+      dispatch(setOrder(undefined));
+      setDistance(null);
+      setEstimatedTime(null);
     }
-  }, [id, getOrder, dispatch]);
+  }, [dispatch, order?.id, orderId]);
+
+  useEffect(() => {
+    if (orderId) {
+      getOrder({ id: orderId });
+    }
+  }, [orderId, getOrder]);
+
+  useEffect(() => {
+    return () => {
+      setDistance(null);
+      setEstimatedTime(null);
+    };
+  }, []);
 
   const handleRouteCalculated = (
     calculatedDistance: number,
@@ -138,21 +153,21 @@ const PublicOrderDetails = () => {
   };
 
   useEffect(() => {
-    if (distance !== null && distance > 0) {
+    if (distance !== null && distance > 0 && currentOrder?.id === orderId) {
       getOrderFee(distance);
     }
-  }, [distance, getOrderFee]);
+  }, [distance, getOrderFee, currentOrder?.id, orderId]);
 
   useEffect(() => {
-    if (orderFee && order?.id) {
+    if (orderFee && currentOrder?.id) {
       updateOrder({
-        id: order?.id,
+        id: currentOrder?.id,
         order: {
           finalFee: orderFee,
         },
       });
     }
-  }, [order?.id, orderFee, updateOrder]);
+  }, [currentOrder?.id, orderFee, updateOrder]);
 
   return (
     <>
@@ -188,15 +203,15 @@ const PublicOrderDetails = () => {
       />
 
       <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY}>
-        {order?.locationFrom && order?.locationTo && (
+        {currentOrder?.locationFrom && currentOrder?.locationTo && (
           <RouteCalculator
             locationFrom={{
-              latitude: order.locationFrom.latitude ?? 0,
-              longitude: order.locationFrom.longitude ?? 0,
+              latitude: currentOrder.locationFrom.latitude ?? 0,
+              longitude: currentOrder.locationFrom.longitude ?? 0,
             }}
             locationTo={{
-              latitude: order.locationTo.latitude ?? 0,
-              longitude: order.locationTo.longitude ?? 0,
+              latitude: currentOrder.locationTo.latitude ?? 0,
+              longitude: currentOrder.locationTo.longitude ?? 0,
             }}
             onRouteCalculated={handleRouteCalculated}
           />
@@ -220,7 +235,7 @@ const PublicOrderDetails = () => {
                       Pickup Location
                     </h3>
                   </header>
-                  {!order?.locationFrom && (
+                  {!currentOrder?.locationFrom && (
                     <nav className="flex gap-2">
                       <Button
                         onClick={handleGetCurrentLocation}
@@ -232,7 +247,7 @@ const PublicOrderDetails = () => {
                       </Button>
                       <Button
                         onClick={() =>
-                          dispatch(setUpdateOrderLocationFromModal(true))
+                        dispatch(setUpdateOrderLocationFromModal(true))
                         }
                         className="py-1! px-3! text-xs cursor-pointer"
                       >
@@ -240,7 +255,7 @@ const PublicOrderDetails = () => {
                       </Button>
                     </nav>
                   )}
-                  {order?.locationFrom && (
+                  {currentOrder?.locationFrom && (
                     <FontAwesomeIcon
                       icon={faPenToSquare}
                       className="w-4 h-4 cursor-pointer"
@@ -251,9 +266,9 @@ const PublicOrderDetails = () => {
                     />
                   )}
                 </header>
-                {order?.locationFrom ? (
+                {currentOrder?.locationFrom ? (
                   <section className="space-y-2">
-                    <AdministrativeLocation location={order?.locationFrom} />
+                    <AdministrativeLocation location={currentOrder?.locationFrom} />
                   </section>
                 ) : (
                   <section className="text-center py-4">
@@ -283,9 +298,9 @@ const PublicOrderDetails = () => {
                     }}
                   />
                 </header>
-                {order?.locationTo ? (
+                {currentOrder?.locationTo ? (
                   <section className="space-y-2">
-                    <AdministrativeLocation location={order?.locationTo} />
+                    <AdministrativeLocation location={currentOrder?.locationTo} />
                   </section>
                 ) : (
                   <section className="text-center py-4">
@@ -387,10 +402,10 @@ const PublicOrderDetails = () => {
                       </header>
                     </header>
                     <section className='flex items-center gap-2'>
-                      {(orderFee !== undefined && orderFee > 0) || (order?.finalFee !== null && order?.finalFee !== undefined && order.finalFee > 0) ? (
+                      {(orderFee !== undefined && orderFee > 0) || (currentOrder?.finalFee !== null && currentOrder?.finalFee !== undefined && currentOrder.finalFee > 0) ? (
                         <section>
                           <p className="text-3xl font-bold text-black mb-1">
-                            {formatCurrency(orderFee ?? (order?.finalFee ?? 0))}
+                            {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
                           </p>
                           <p className="text-sm text-gray-500">including VAT</p>
                         </section>
@@ -407,9 +422,9 @@ const PublicOrderDetails = () => {
                   <p className="text-xs text-gray-600 mb-2">
                     * Route calculated using Google Maps. Delivery time includes a +15 minute buffer for unexpected circumstances. Minimum delivery time is 20–30 minutes.
                   </p>
-                  {((orderFee !== undefined && orderFee > 0) || (order?.finalFee !== null && order?.finalFee !== undefined && order?.finalFee > 0)) && (
+                  {((orderFee !== undefined && orderFee > 0) || (currentOrder?.finalFee !== null && currentOrder?.finalFee !== undefined && currentOrder?.finalFee > 0)) && (
                     <p className="text-xs text-gray-700">
-                      ** The fee is based on distance between locations.{' '} {order?.finalFee !== undefined && order?.finalFee !== null && order?.finalFee > 0 ? 'Final fee: ' + formatCurrency(order?.finalFee ?? 0) : ''} {orderFee !== undefined && orderFee > 0 ? 'Order fee: ' + formatCurrency(orderFee ?? 0) : ''}. {' '}
+                      ** The fee is based on distance between locations.{' '} {currentOrder?.finalFee !== undefined && currentOrder?.finalFee !== null && currentOrder?.finalFee > 0 ? 'Final fee: ' + formatCurrency(currentOrder?.finalFee ?? 0) : ''} {orderFee !== undefined && orderFee > 0 ? 'Order fee: ' + formatCurrency(orderFee ?? 0) : ''}. {' '}
                       <Link
                         to="/about/orders/fees"
                         className="text-primary text-[11px] underline underline-offset-2 hover:text-primary-600"
@@ -429,9 +444,9 @@ const PublicOrderDetails = () => {
                 isLoading={createOrderAssignmentIsLoading}
                 onClick={(e) => {
                   e.preventDefault();
-                  if (order?.id) {
+                  if (currentOrder?.id) {
                     createOrderAssignment({
-                      orderId: order?.id,
+                      orderId: currentOrder?.id,
                     });
                   }
                 }}
@@ -442,15 +457,15 @@ const PublicOrderDetails = () => {
             ) : (
               <Button
                 primary
-                disabled={!order?.locationFrom || !order?.locationTo}
+                disabled={!currentOrder?.locationFrom || !currentOrder?.locationTo}
                 onClick={(e) => {
                   e.preventDefault();
-                  dispatch(setSelectedOrder(order));
+                  dispatch(setSelectedOrder(currentOrder));
                   dispatch(setOrderPaymentModal(true));
                 }}
                 className="px-8! py-3! font-semibold cursor-pointer"
               >
-                {!order?.locationFrom || !order?.locationTo
+                {!currentOrder?.locationFrom || !currentOrder?.locationTo
                   ? 'Set Both Locations to Continue'
                   : 'Complete Payment'}
               </Button>

@@ -5,47 +5,53 @@ import { useAppSelector } from '@/states/hooks';
 import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import OrderSearchBar from '@/components/dashboard/OrderSearchBar';
-import OrderStatusTabs, { type OrderStatusTab } from '@/components/dashboard/OrderStatusTabs';
+import { OrderStatus } from '@/types/order.type';
+import { useStatusFilter } from '@/hooks/common/filters.hooks';
+import { useForm } from 'react-hook-form';
 
 const OrdersPage = () => {
-
   // STATE VARIABLES
   const { ordersList } = useAppSelector((state) => state.order);
 
-  const { fetchOrders, page, setPage, size, setSize, totalPages, totalCount, isFetching } = useFetchOrders();
+  // REACT HOOK FORM
+  const { control, setValue } = useForm();
+
+  const {
+    fetchOrders,
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    totalCount,
+    isFetching,
+  } = useFetchOrders();
 
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const statusGroup = (searchParams.get('statusGroup') || '') as OrderStatusTab | '';
-  const activeTab: OrderStatusTab = (['recent', 'pending', 'active', 'completed'].includes(statusGroup) ? statusGroup : 'all') as OrderStatusTab;
   const referenceId = searchParams.get('referenceId') || '';
-  const statusGroupParam: Exclude<OrderStatusTab, 'all'> | undefined =
-    activeTab === 'all' ? undefined : activeTab;
+
+  const { statusFilter, applicationStatus } = useStatusFilter({
+    control,
+    setValue,
+    label: 'Order Status',
+    applicationStatuses: Object.values(OrderStatus),
+  });
 
   useEffect(() => {
     fetchOrders({
       page,
       size,
-      statusGroup: statusGroupParam,
       referenceId: referenceId || undefined,
+      status: applicationStatus ? applicationStatus?.join(',') : undefined,
     });
-  }, [fetchOrders, page, size, statusGroupParam, referenceId]);
+  }, [page, size, referenceId, applicationStatus, fetchOrders]);
 
   const { ordersColumns } = useOrdersColumns();
-
-  const onTabChange = (tab: OrderStatusTab) => {
-    const next = new URLSearchParams(searchParams);
-    if (tab === 'all') next.delete('statusGroup');
-    else next.set('statusGroup', tab);
-    // keep referenceId if present
-    setSearchParams(next);
-    setPage(0);
-  };
 
   const searchInitial = useMemo(() => referenceId, [referenceId]);
 
   return (
-    <main className='text-primary h-full w-full'>
+    <main className="text-primary h-full w-full">
       <header className="w-full flex flex-col gap-4 mb-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
@@ -65,16 +71,27 @@ const OrdersPage = () => {
           />
         </section>
 
-        <nav aria-label="Order status filters">
-          <OrderStatusTabs activeTab={activeTab} onTabChange={onTabChange} />
-        </nav>
+        <fieldset className="w-full grid grid-cols-4 gap-4 max-md:grid-cols-3 max-sm:grid-cols-2">
+          {statusFilter}
+        </fieldset>
       </header>
 
-      <section aria-label="Orders list" className='w-full flex flex-col gap-4'>
-        <Table columns={ordersColumns} data={ordersList} showPagination={true} page={page} setPage={setPage} size={size} setSize={setSize} totalPages={totalPages} totalCount={totalCount} isLoading={isFetching} />
+      <section aria-label="Orders list" className="w-full flex flex-col gap-4">
+        <Table
+          columns={ordersColumns}
+          data={ordersList}
+          showPagination={true}
+          page={page}
+          setPage={setPage}
+          size={size}
+          setSize={setSize}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          isLoading={isFetching}
+        />
       </section>
     </main>
-  )
-}
+  );
+};
 
 export default OrdersPage;

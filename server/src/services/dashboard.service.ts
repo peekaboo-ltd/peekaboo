@@ -188,7 +188,7 @@ export class DashboardService {
     const ordersByStatus = await this.getCustomerOrdersByStatus(userId);
 
     // Active orders
-    const activeStatuses = [OrderStatus.CREATED, OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.ACCEPTED, OrderStatus.PAID, OrderStatus.ACTIVE, OrderStatus.IN_TRANSIT];
+    const activeStatuses = [OrderStatus.CONFIRMED, OrderStatus.ACCEPTED, OrderStatus.PAID, OrderStatus.ACTIVE, OrderStatus.IN_TRANSIT];
     const activeOrders = ordersByStatus
       .filter((s) => activeStatuses.includes(s.status))
       .reduce((sum, s) => sum + s.count, 0);

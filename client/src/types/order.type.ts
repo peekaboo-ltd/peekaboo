@@ -29,12 +29,12 @@ export interface OrderLocation {
 
 export interface Order extends BaseDomain {
   referenceId: string;
+  status: OrderStatus;
   recipientId?: UUID | null;
   senderId?: UUID | null;
   createdById: UUID;
   initialFee: number;
   type: keyof typeof OrderType;
-  status: OrderStatus;
   discount?: number | null;
   finalFee?: number | null;
   conversationId?: UUID | null;

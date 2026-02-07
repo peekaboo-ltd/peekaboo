@@ -31,6 +31,16 @@ export class  Order extends AbstractEntity {
   @Column({ name: "initial_fee", type: "numeric", nullable: false })
   initialFee: number;
 
+  // STATUS
+  @Column({
+    name: "status",
+    type: "enum",
+    nullable: false,
+    enum: OrderStatus,
+    default: OrderStatus.PENDING,
+  })
+  status: OrderStatus;
+
   // TYPE
   @Column({
     name: "type",

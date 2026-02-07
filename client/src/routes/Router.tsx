@@ -13,7 +13,7 @@ import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayou
 import { OrdersPage } from '@/pages/orders';
 import { OrderAssignmentsPage } from '@/pages/order-assignments';
 import { UsersPage } from '@/pages/users';
-import { About } from '@/pages/about';
+import { About, OrderFees } from '@/pages/about';
 import { ContactUsPage } from '@/pages/contact';
 import { InviteOrganization } from '@/pages/organizations';
 import {
@@ -43,6 +43,7 @@ const Router = () => {
         </Route>
         <Route path="" element={<Home />} />
         <Route path="about" element={<About />} />
+        <Route path="about/orders/fees" element={<OrderFees />} />
         <Route path="contact" element={<ContactUsPage />} />
         <Route path="track" element={<TrackOrder />} />
       </Route>

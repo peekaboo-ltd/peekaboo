@@ -1,0 +1,56 @@
+import { motion, Variants } from 'framer-motion';
+import MetricCard from '@/components/dashboard/MetricCard';
+import type { MetricCardData } from '@/types/dashboard.type';
+
+interface DashboardMetricsSectionProps {
+  cards: MetricCardData[];
+  containerVariants?: Variants;
+  itemVariants?: Variants;
+}
+
+const DashboardMetricsSection = ({
+  cards,
+  containerVariants,
+  itemVariants,
+}: DashboardMetricsSectionProps) => {
+  if (!cards.length) return null;
+
+  const primaryCards = cards.slice(0, 5);
+  const secondaryCards = cards.slice(5);
+
+  return (
+    <>
+      <motion.section
+        aria-label="Dashboard metrics"
+        className="mb-6 sm:mb-8"
+        variants={containerVariants}
+      >
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+          {primaryCards.map((card, index) => (
+            <motion.div key={index} variants={itemVariants}>
+              <MetricCard {...card} />
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+      {secondaryCards.length > 0 && (
+        <motion.section
+          aria-label="Additional metrics"
+          className="mb-6 sm:mb-8"
+          variants={containerVariants}
+        >
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {secondaryCards.map((card, index) => (
+              <motion.div key={index} variants={itemVariants}>
+                <MetricCard {...card} />
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+      )}
+    </>
+  );
+};
+
+export default DashboardMetricsSection;

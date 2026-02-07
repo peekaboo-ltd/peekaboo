@@ -1,3 +1,5 @@
+import { useMemo, useState } from 'react';
+import { motion, Variants } from 'framer-motion';
 import { useAppSelector } from '@/states/hooks';
 import {
   useGetDashboardMetricsQuery,
@@ -7,30 +9,112 @@ import {
 import { RoleTypes } from '@/types/auth.type';
 import {
   AdminMetrics,
-  RiderMetrics,
-  CustomerMetrics,
   BusinessMetrics,
+  CustomerMetrics,
   MetricCardData,
+  RiderMetrics,
+  ChartDataPoint,
 } from '@/types/dashboard.type';
 import {
   getAdminMetricCards,
-  getRiderMetricCards,
-  getCustomerMetricCards,
   getBusinessMetricCards,
+  getCustomerMetricCards,
+  getRiderMetricCards,
 } from '@/utils/dashboard.util';
-import MetricCard from '@/components/dashboard/MetricCard';
-import OrdersBarChart from '@/components/dashboard/OrdersBarChart';
-import RevenueLineChart from '@/components/dashboard/RevenueLineChart';
-import OrderSearchBar from '@/components/dashboard/OrderSearchBar';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useI18n } from '@/i18n/i18n';
 import { sparklineMockData } from '@/data/dashboard.mock';
-import { motion } from 'framer-motion';
+import DashboardHeader from './components/DashboardHeader';
+import DashboardMetricsSection from './components/DashboardMetricsSection';
+import DashboardSummaryChart from './components/DashboardSummaryChart';
+import DashboardChartsSection from './components/DashboardChartsSection';
+import DashboardLoading from './components/DashboardLoading';
+import DashboardError from './components/DashboardError';
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const buildMetricCards = (
+  role: RoleTypes | undefined,
+  metrics: AdminMetrics | BusinessMetrics | RiderMetrics | CustomerMetrics | undefined,
+): MetricCardData[] => {
+  if (!role || !metrics) return [];
+
+  let baseCards: MetricCardData[] = [];
+
+  switch (role) {
+    case RoleTypes.ADMIN:
+    case RoleTypes.STAFF:
+      baseCards = getAdminMetricCards(metrics as AdminMetrics);
+      break;
+    case RoleTypes.BUSINESS:
+      baseCards = getBusinessMetricCards(metrics as BusinessMetrics);
+      break;
+    case RoleTypes.RIDER:
+      baseCards = getRiderMetricCards(metrics as RiderMetrics);
+      break;
+    case RoleTypes.CUSTOMER:
+    default:
+      baseCards = getCustomerMetricCards(metrics as CustomerMetrics);
+      break;
+  }
+
+  if (role === RoleTypes.ADMIN || role === RoleTypes.STAFF || role === RoleTypes.BUSINESS) {
+    return baseCards.map((card, index) => {
+      if (index === 0) {
+        return {
+          ...card,
+          sparklineData: sparklineMockData.orders,
+          sparklineType: 'line' as const,
+        };
+      }
+      if (index === 2) {
+        return {
+          ...card,
+          sparklineData: sparklineMockData.profit,
+          sparklineType: 'bar' as const,
+        };
+      }
+      return card;
+    });
+  }
+
+  return baseCards;
+};
+
+const normalizeChartData = (payload?: Array<{ label?: string; name?: string; value?: number | string }>): ChartDataPoint[] => {
+  if (!payload?.length) return [];
+
+  return payload
+    .map((point, index) => {
+      const name = point.label ?? point.name ?? `P${index + 1}`;
+      const value = Number(point.value ?? 0);
+      return {
+        name,
+        value: Number.isFinite(value) ? value : 0,
+      };
+    })
+    .filter((point) => point.name);
+};
 
 const Dashboard = () => {
-  const { t } = useI18n();
   const { user } = useAppSelector((state) => state.auth);
   const { data, isLoading, error } = useGetDashboardMetricsQuery({});
+
+  const [range, setRange] = useState<'7d' | '30d' | '90d'>('30d');
+  const [metric, setMetric] = useState<'ORDERS' | 'REVENUE' | 'ACTIVE_USERS'>('ORDERS');
 
   const dashboardData = data?.data;
   const showCharts =
@@ -40,245 +124,87 @@ const Dashboard = () => {
 
   const { data: ordersChartResp } = useGetOrderChartDataQuery(
     { period: 'month' },
-    { skip: !showCharts }
+    { skip: !showCharts },
   );
   const { data: revenueChartResp } = useGetRevenueChartDataQuery(
     { period: 'month' },
-    { skip: !showCharts }
+    { skip: !showCharts },
   );
 
-  const getMetricCards = (): MetricCardData[] => {
-    if (!dashboardData) return [];
+  const metricCards = useMemo(
+    () => buildMetricCards(dashboardData?.role, dashboardData?.metrics),
+    [dashboardData?.role, dashboardData?.metrics],
+  );
 
-    const { role, metrics } = dashboardData;
+  const summaryChartData = useMemo(() => {
+    const labelsByRange: Record<'7d' | '30d' | '90d', string[]> = {
+      '7d': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      '30d': ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10'],
+      '90d': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    };
 
-    let baseCards: MetricCardData[] = [];
+    const baseSeries: Record<'ORDERS' | 'REVENUE' | 'ACTIVE_USERS', number[]> = {
+      ORDERS: [12, 16, 14, 18, 20, 19, 17, 22, 21, 24, 23, 25],
+      REVENUE: [28, 30, 29, 34, 36, 33, 31, 37, 35, 39, 38, 42],
+      ACTIVE_USERS: [8, 11, 10, 12, 13, 12, 11, 14, 13, 15, 14, 16],
+    };
 
-    switch (role) {
-      case RoleTypes.ADMIN:
-      case RoleTypes.STAFF:
-        baseCards = getAdminMetricCards(metrics as AdminMetrics);
-        break;
-      case RoleTypes.BUSINESS:
-        baseCards = getBusinessMetricCards(metrics as BusinessMetrics);
-        break;
-      case RoleTypes.RIDER:
-        baseCards = getRiderMetricCards(metrics as RiderMetrics);
-        break;
-      case RoleTypes.CUSTOMER:
-      default:
-        baseCards = getCustomerMetricCards(metrics as CustomerMetrics);
-        break;
-    }
+    const scale = range === '90d' ? 1.2 : range === '7d' ? 0.9 : 1;
+    const labels = labelsByRange[range];
+    const values = baseSeries[metric].slice(0, labels.length);
 
-    // Enhance first few cards with sparklines for Admin/Staff/Business
-    if (
-      role === RoleTypes.ADMIN ||
-      role === RoleTypes.STAFF ||
-      role === RoleTypes.BUSINESS
-    ) {
-      return baseCards.map((card, index) => {
-        if (index === 0) {
-          return {
-            ...card,
-            sparklineData: sparklineMockData.orders,
-            sparklineType: 'line' as const,
-          };
-        }
-        if (index === 2) {
-          return {
-            ...card,
-            sparklineData: sparklineMockData.profit,
-            sparklineType: 'bar' as const,
-          };
-        }
-        return card;
-      });
-    }
+    return labels.map((label, index) => ({
+      name: label,
+      value: Math.round(values[index] * scale),
+    }));
+  }, [range, metric]);
 
-    return baseCards;
-  };
+  const ordersChartData = normalizeChartData((ordersChartResp as { data?: Array<{ label: string; value: number }> })?.data);
+  const revenueChartData = normalizeChartData((revenueChartResp as { data?: Array<{ label: string; value: number }> })?.data);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-    },
-  };
-
-  if (isLoading) {
-    return (
-      <main className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
-        <header className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <article>
-            <Skeleton className="h-8 w-48 sm:w-64 mb-2" />
-            <Skeleton className="h-4 w-36 sm:w-48" />
-          </article>
-          <Skeleton className="h-10 w-full sm:w-64" />
-        </header>
-
-        <section
-          aria-label="Loading metrics"
-          className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8"
-        >
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
-          ))}
-        </section>
-
-        <section
-          aria-label="Loading charts"
-          className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4"
-        >
-          <Skeleton className="h-60 sm:h-72 rounded-xl" />
-          <Skeleton className="h-60 sm:h-72 rounded-xl" />
-        </section>
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
-        <article className="text-center py-8 sm:py-12 bg-white rounded-2xl shadow-sm border border-slate-100 px-4">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">
-            {t('dashboard.failedToLoad')}
-          </h2>
-          <p className="text-slate-600 max-w-md mx-auto">
-            {t('dashboard.tryRefreshing')}
-          </p>
-        </article>
-      </main>
-    );
-  }
-
-  const metricCards = getMetricCards();
-  const ordersChartData = (
-    (ordersChartResp as unknown as { data?: Array<{ label: string; value: number }> })?.data || []
-  ).map((p) => ({
-    name: p.label,
-    value: p.value,
-  }));
-  const revenueChartData = (
-    (revenueChartResp as unknown as { data?: Array<{ label: string; value: number }> })?.data || []
-  ).map((p) => ({
-    name: p.label,
-    value: p.value,
-  }));
-
-  const isBusinessView = dashboardData?.role === RoleTypes.BUSINESS;
-
-  const shellClass = isBusinessView
-    ? 'bg-slate-50/70 rounded-2xl border border-slate-200/60 shadow-sm'
-    : '';
-  const headerClass = isBusinessView
-    ? 'bg-white border border-slate-200 rounded-2xl px-6 py-5 shadow-sm'
-    : '';
+  if (isLoading) return <DashboardLoading />;
+  if (error) return <DashboardError />;
 
   return (
     <motion.main
-      className={`w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6 ${shellClass}`}
+      className="w-full flex flex-col gap-6 max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Header */}
-      <motion.header
-        className={`mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 ${headerClass}`}
+      <span className="absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.22),_transparent_65%)]" />
+
+      <DashboardHeader
+        userName={user?.name}
+        role={dashboardData?.role}
         variants={itemVariants}
-      >
-        <article className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">
-            {user?.name ? t('dashboard.welcome', { name: user.name }) : t('dashboard.welcomeDefault')}
-          </h1>
-          <p className="text-sm sm:text-base text-slate-600 mt-1">
-            {dashboardData?.role === RoleTypes.ADMIN ||
-            dashboardData?.role === RoleTypes.STAFF
-              ? t('dashboard.platformOverview')
-              : t('dashboard.accountOverview')}
-          </p>
-        </article>
-        <div className={isBusinessView ? 'w-full sm:max-w-md' : 'w-full sm:w-auto'}>
-          <OrderSearchBar placeholder={t('dashboard.searchPlaceholder')} />
-        </div>
-      </motion.header>
+      />
 
-      {/* Primary Metrics */}
-      <motion.section
-        aria-label="Dashboard metrics"
-        className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8"
-        variants={containerVariants}
-      >
-        {metricCards.slice(0, 5).map((card, index) => (
-          <motion.div key={index} variants={itemVariants}>
-            <MetricCard
-              label={card.label}
-              value={card.value}
-              trend={card.trend}
-              colorClass={card.colorClass}
-              href={card.href}
-              icon={card.icon}
-              sparklineData={card.sparklineData}
-              sparklineType={card.sparklineType}
-            />
-          </motion.div>
-        ))}
-      </motion.section>
+      <DashboardMetricsSection
+        cards={metricCards}
+        containerVariants={containerVariants}
+        itemVariants={itemVariants}
+      />
 
-      {/* Additional Metrics */}
-      {metricCards.length > 5 && (
-        <motion.section
-          aria-label="Additional metrics"
-          className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
-          variants={containerVariants}
-        >
-          {metricCards.slice(5).map((card, index) => (
-            <motion.div key={index + 5} variants={itemVariants}>
-              <MetricCard
-                label={card.label}
-                value={card.value}
-                trend={card.trend}
-                colorClass={card.colorClass}
-                href={card.href}
-                icon={card.icon}
-                sparklineData={card.sparklineData}
-                sparklineType={card.sparklineType}
-              />
-            </motion.div>
-          ))}
-        </motion.section>
-      )}
+      <DashboardSummaryChart
+        range={range}
+        metric={metric}
+        onRangeChange={setRange}
+        onMetricChange={setMetric}
+        data={summaryChartData}
+        containerVariants={containerVariants}
+        itemVariants={itemVariants}
+      />
 
-      {/* Charts Section */}
-      {showCharts && (
-        <motion.section
-          aria-label="Dashboard charts"
-          className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4"
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants}>
-            <OrdersBarChart data={ordersChartData} title={t('dashboard.ordersChart')} />
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <RevenueLineChart data={revenueChartData} title={t('dashboard.revenueChart')} />
-          </motion.div>
-        </motion.section>
-      )}
+      <DashboardChartsSection
+        showCharts={showCharts}
+        ordersData={ordersChartData}
+        revenueData={revenueChartData}
+        ordersTitle="Orders"
+        revenueTitle="Revenue"
+        containerVariants={containerVariants}
+        itemVariants={itemVariants}
+      />
     </motion.main>
   );
 };

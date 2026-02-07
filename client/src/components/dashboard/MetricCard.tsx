@@ -93,41 +93,37 @@ const MetricCard = ({
   
   const cardContent = (
     <Card
-      className={`group relative overflow-hidden transition-all duration-300 ${
+      className={`group border border-slate-200 bg-white shadow-none transition-all duration-300 ${
         href
-          ? 'hover:shadow-lg hover:-translate-y-1 cursor-pointer border-2 hover:border-primary/50'
-          : 'hover:shadow-md'
+          ? 'hover:-translate-y-0.5 hover:shadow-sm cursor-pointer'
+          : 'hover:shadow-sm'
       }`}
     >
-      <span
-        aria-hidden="true"
-        className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 ${bgColorClass.replace('/10', '')}`}
-      />
-      <CardContent className="p-4 sm:p-6 relative">
+      <CardContent className="p-4 sm:p-5 relative">
         <header className="flex items-start justify-between mb-3 sm:mb-4">
           <span className="flex items-center gap-2 sm:gap-3 min-w-0">
             {icon && (
               <span
-                className={`p-2 sm:p-2.5 rounded-lg ${bgColorClass} group-hover:scale-110 transition-transform duration-300 shrink-0`}
+                className={`p-2 sm:p-2.5 rounded-md ${bgColorClass} group-hover:scale-[1.02] transition-transform duration-300 shrink-0`}
                 aria-hidden="true"
               >
                 <FontAwesomeIcon
                   icon={icon}
-                  className="text-base sm:text-lg text-black"
+                  className="text-base sm:text-lg text-slate-900"
                   aria-hidden="true"
                 />
               </span>
             )}
-            <span className="text-xs sm:text-sm font-medium text-muted-foreground leading-tight truncate">
+            <span className="text-xs sm:text-sm font-medium text-slate-500 leading-tight truncate">
               {label}
             </span>
           </span>
           {trend && (
             <span
-              className={`text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shrink-0 ${
+              className={`text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${
                 trend.isPositive
-                  ? 'text-black bg-green-100'
-                  : 'text-black bg-red-100'
+                  ? 'text-emerald-700 bg-emerald-50'
+                  : 'text-rose-700 bg-rose-50'
               }`}
               aria-label={`Trend: ${trend.isPositive ? 'increasing' : 'decreasing'} by ${Math.abs(trend.value)}%`}
             >
@@ -138,7 +134,7 @@ const MetricCard = ({
         <section className="flex items-end justify-between">
           <div className="flex flex-col min-w-0">
             <p
-              className="text-2xl sm:text-3xl font-bold leading-tight text-black truncate"
+              className="text-2xl sm:text-3xl font-semibold leading-tight text-slate-900 truncate"
               aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
             >
               {value}
@@ -153,7 +149,7 @@ const MetricCard = ({
               >
                 <FontAwesomeIcon
                   icon={faArrowRight}
-                  className="text-sm text-black transform group-hover:translate-x-1 transition-transform duration-300"
+                  className="text-sm text-slate-700 transform group-hover:translate-x-1 transition-transform duration-300"
                   aria-hidden="true"
                 />
               </span>

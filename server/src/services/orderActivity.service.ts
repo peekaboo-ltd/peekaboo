@@ -50,7 +50,27 @@ export class OrderActivityService {
       throw new NotFoundError('Order not found');
     }
 
+    // CHECK IF ACTIVITY FOR THIS STATUS ALREADY EXISTS TO AVOID DUPLICATES
+    const existingActivity = await this.orderActivityRepository.findOne({
+      where: {
+        orderId: orderStatus?.orderId,
+        status: orderStatus?.status as OrderStatus,
+      },
+    });
+
+    if (existingActivity) {
+      await this.orderRepository.update(order.id, {
+        status: orderStatus.status as OrderStatus,
+      });
+      return existingActivity;
+    }
+
     const activity = await this.orderActivityRepository.save(orderStatus);
+
+    if (order) {
+      order.status = orderStatus?.status as OrderStatus;
+      await this.orderRepository.save(order!);
+    }
 
     // Send order status email for key status changes (non-blocking)
     const statusStr = orderStatus.status as string;
@@ -131,9 +151,16 @@ export class OrderActivityService {
       throw new NotFoundError('Order activity not found');
     }
 
-    return this.orderActivityRepository.save({
+    const orderActivity = await this.orderActivityRepository.save({
       ...orderActivityExists,
       ...orderStatus,
     });
+
+    await this.orderRepository.update(orderActivity.orderId, {
+      status: orderStatus.status as OrderStatus,
+    });
+
+    // CHECK IF ORDER EXISTS
+    return orderActivity;
   }
 }
