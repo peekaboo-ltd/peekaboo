@@ -5,8 +5,11 @@ import type {
   AdminFormData,
   TeamMemberFormData,
 } from '@/types/organization.type';
+import { localStorageUtil } from '@/utils/localStorage.util';
 
-const initialState: OnboardingState = {
+const onboardingStorageKey = 'onboardingState';
+
+const baseInitialState: OnboardingState = {
   organization: {
     name: '',
     email: '',
@@ -30,6 +33,50 @@ const initialState: OnboardingState = {
   currentStep: 1,
 };
 
+const loadPersistedState = (): OnboardingState => {
+  if (typeof window === 'undefined') {
+    return baseInitialState;
+  }
+
+  const persisted = localStorageUtil.getItem<Partial<OnboardingState>>(
+    onboardingStorageKey
+  );
+
+  if (!persisted) {
+    return baseInitialState;
+  }
+
+  return {
+    ...baseInitialState,
+    ...persisted,
+    organization: {
+      ...baseInitialState.organization,
+      ...persisted.organization,
+    },
+    admin: {
+      ...baseInitialState.admin,
+      ...persisted.admin,
+    },
+    teamMembers: persisted.teamMembers ?? baseInitialState.teamMembers,
+    currentStep: persisted.currentStep ?? baseInitialState.currentStep,
+  };
+};
+
+const persistOnboardingState = (state: OnboardingState) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  localStorageUtil.setItem(onboardingStorageKey, {
+    organization: state.organization,
+    admin: state.admin,
+    teamMembers: state.teamMembers,
+    currentStep: state.currentStep,
+  });
+};
+
+const initialState: OnboardingState = loadPersistedState();
+
 const onboardingSlice = createSlice({
   name: 'onboarding',
   initialState,
@@ -40,18 +87,25 @@ const onboardingSlice = createSlice({
     ) => {
       state.organization = action.payload;
       state.currentStep = 2;
+      persistOnboardingState(state);
     },
     setAdminData: (state, action: PayloadAction<AdminFormData>) => {
       state.admin = action.payload;
       state.currentStep = 3;
+      persistOnboardingState(state);
     },
     setTeamMembers: (state, action: PayloadAction<TeamMemberFormData[]>) => {
       state.teamMembers = action.payload;
+      persistOnboardingState(state);
     },
     setCurrentStep: (state, action: PayloadAction<1 | 2 | 3>) => {
       state.currentStep = action.payload;
+      persistOnboardingState(state);
     },
-    resetOnboarding: () => initialState,
+    resetOnboarding: () => {
+      localStorageUtil.removeItem(onboardingStorageKey);
+      return baseInitialState;
+    },
   },
 });
 
