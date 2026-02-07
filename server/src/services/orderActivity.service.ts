@@ -8,14 +8,27 @@ import { Request } from 'express';
 import { UUID } from '../types';
 import { AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
+import { OrderStatus } from '../constants/order.constants';
+import { EmailService } from '../integrations/emails/email.service';
+
+const ORDER_STATUS_MESSAGES: Record<string, string> = {
+  [OrderStatus.PAID]: 'Your payment has been received and your order is being processed.',
+  [OrderStatus.CONFIRMED]: 'Your order has been confirmed by the rider.',
+  [OrderStatus.ACTIVE]: 'Your order is now active and being processed.',
+  [OrderStatus.IN_TRANSIT]: 'Your package is on the way!',
+  [OrderStatus.DELIVERED]: 'Your package has been delivered.',
+  [OrderStatus.COMPLETED]: 'Your order has been completed. Thank you for using Peekaboo!',
+};
 
 export class OrderActivityService {
   private readonly orderActivityRepository: Repository<OrderActivity>;
   private readonly orderRepository: Repository<Order>;
+  private readonly emailService: EmailService;
 
   constructor() {
     this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
     this.orderRepository = AppDataSource.getRepository(Order);
+    this.emailService = new EmailService();
   }
 
   // CREATE ORDER STATUS
@@ -25,12 +38,45 @@ export class OrderActivityService {
     // CHECK IF ORDER EXISTS
     const order = await this.orderRepository.findOne({
       where: { id: orderStatus?.orderId },
+      relations: { sender: true, recipient: true },
     });
     if (!order) {
       throw new NotFoundError('Order not found');
     }
 
-    return this.orderActivityRepository.save(orderStatus);
+    const activity = await this.orderActivityRepository.save(orderStatus);
+
+    // Send order status email for key status changes (non-blocking)
+    const statusStr = orderStatus.status as string;
+    if (statusStr && ORDER_STATUS_MESSAGES[statusStr]) {
+      const statusMessage = ORDER_STATUS_MESSAGES[statusStr];
+
+      if (order.sender?.email) {
+        this.emailService
+          .sendOrderStatusEmail({
+            userName: order.sender.name || '',
+            userEmail: order.sender.email,
+            orderReference: order.referenceId || '',
+            status: statusStr,
+            statusMessage,
+          })
+          .catch(() => {});
+      }
+
+      if (order.recipient?.email) {
+        this.emailService
+          .sendOrderStatusEmail({
+            userName: order.recipient.name || '',
+            userEmail: order.recipient.email,
+            orderReference: order.referenceId || '',
+            status: statusStr,
+            statusMessage,
+          })
+          .catch(() => {});
+      }
+    }
+
+    return activity;
   }
 
   // FETCH ORDER STATUSES

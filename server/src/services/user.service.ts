@@ -269,7 +269,25 @@ export class UserService {
 
     user.status = status;
 
-    return this.userRepository.save(user);
+    const updatedUser = await this.userRepository.save(user);
+
+    // Send account status email (non-blocking)
+    if (user.email) {
+      const emailService = new EmailService();
+      const emailStatus =
+        status === UserStatus.ACTIVE
+          ? ('reactivated' as const)
+          : ('suspended' as const);
+      emailService
+        .sendAccountStatusEmail({
+          name: user.name || '',
+          email: user.email,
+          status: emailStatus,
+        })
+        .catch(() => {});
+    }
+
+    return updatedUser;
   }
 
   // DELETE USER (SOFT DELETE)
@@ -281,6 +299,18 @@ export class UserService {
     user.updatedAt = new Date();
 
     await this.userRepository.save(user);
+
+    // Send account deleted email (non-blocking)
+    if (user.email) {
+      const emailService = new EmailService();
+      emailService
+        .sendAccountStatusEmail({
+          name: user.name || '',
+          email: user.email,
+          status: 'deleted',
+        })
+        .catch(() => {});
+    }
   }
 
   // RESET USER PASSWORD

@@ -17,16 +17,19 @@ import { UserService } from './user.service';
 import { RoleTypes } from '../constants/role.constants';
 import { hashPassword } from '../helpers/auth.helper';
 import { MembershipQuery, MemberUpdateData } from '../types/b2b.types';
+import { EmailService } from '../integrations/emails/email.service';
 
 export class OrganizationMembershipService {
   private readonly membershipRepository: Repository<OrganizationMembership>;
   private readonly userService: UserService;
+  private readonly emailService: EmailService;
 
   constructor() {
     this.membershipRepository = AppDataSource.getRepository(
       OrganizationMembership
     );
     this.userService = new UserService();
+    this.emailService = new EmailService();
   }
 
   // ADD MEMBER
@@ -79,7 +82,21 @@ export class OrganizationMembershipService {
       addedById: data.addedById,
     });
 
-    return this.getMembershipById(membership.id);
+    const fullMembership = await this.getMembershipById(membership.id);
+
+    // Send member added email (non-blocking)
+    if (user.email && fullMembership.organization) {
+      this.emailService
+        .sendMemberAddedEmail({
+          organizationName: fullMembership.organization.name,
+          memberName: user.name || '',
+          memberEmail: user.email,
+          role: data.role || OrganizationRole.MEMBER,
+        })
+        .catch(() => {});
+    }
+
+    return fullMembership;
   }
 
   // GET MEMBERSHIP BY ID
@@ -132,8 +149,25 @@ export class OrganizationMembershipService {
       }
     }
 
+    const oldRole = membership.role;
     membership.role = role;
-    return this.membershipRepository.save(membership);
+    const updated = await this.membershipRepository.save(membership);
+
+    // Send role changed email (non-blocking)
+    if (membership.user?.email && membership.organization) {
+      this.emailService
+        .sendMemberRoleChangedEmail({
+          organizationName: membership.organization.name,
+          memberName: membership.user.name || '',
+          memberEmail: membership.user.email,
+          oldRole,
+          newRole: role,
+          changedBy: 'Organization Admin',
+        })
+        .catch(() => {});
+    }
+
+    return updated;
   }
 
   // REMOVE MEMBER
@@ -168,6 +202,17 @@ export class OrganizationMembershipService {
     // Soft delete by setting status to REMOVED
     membership.status = MembershipStatus.REMOVED;
     await this.membershipRepository.save(membership);
+
+    // Send member removed email (non-blocking)
+    if (membership.user?.email && membership.organization) {
+      this.emailService
+        .sendMemberRemovedEmail({
+          organizationName: membership.organization.name,
+          memberName: membership.user.name || '',
+          memberEmail: membership.user.email,
+        })
+        .catch(() => {});
+    }
   }
 
   // UPDATE MEMBER DETAILS

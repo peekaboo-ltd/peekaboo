@@ -16,18 +16,21 @@ import { UUID } from '../types';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import { Request } from 'express';
 import { OrderActivityService } from './orderActivity.service';
+import { EmailService } from '../integrations/emails/email.service';
 
 export class OrderAssignmentService {
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
   private readonly orderRepository: Repository<Order>;
   private readonly userService: UserService;
   private readonly orderActivityService: OrderActivityService;
+  private readonly emailService: EmailService;
   constructor() {
     this.orderAssignmentRepository =
       AppDataSource.getRepository(OrderAssignment);
     this.orderRepository = AppDataSource.getRepository(Order);
     this.userService = new UserService();
     this.orderActivityService = new OrderActivityService();
+    this.emailService = new EmailService();
   }
 
   // CREATE ORDER ASSIGNMENT
@@ -107,6 +110,17 @@ export class OrderAssignmentService {
       assignedToId: assignedToExists?.id,
       assignedTo: assignedToExists,
     });
+
+    // Send rider assigned email (non-blocking)
+    if (assignedToExists?.email && orderExists) {
+      this.emailService
+        .sendRiderAssignedEmail({
+          riderName: assignedToExists.name || '',
+          riderEmail: assignedToExists.email,
+          orderReference: orderExists.referenceId || '',
+        })
+        .catch(() => {});
+    }
 
     return createdOrderAssignment;
   }
