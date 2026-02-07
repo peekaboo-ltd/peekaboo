@@ -19,6 +19,7 @@ interface PlaceSearchProps {
   disabled?: boolean;
   value?: string;
   onChange?: (value: string) => void;
+  country?: string | string[];
 }
 
 const PlaceSearch = ({
@@ -28,12 +29,18 @@ const PlaceSearch = ({
   disabled = false,
   value,
   onChange,
+  country,
 }: PlaceSearchProps) => {
   const [inputValue, setInputValue] = useState(value || '');
   const [predictions, setPredictions] = useState<
     google.maps.places.AutocompletePrediction[]
   >([]);
-  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    maxHeight: number;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
   const places = useMapsLibrary('places');
@@ -69,13 +76,42 @@ const PlaceSearch = ({
     }
   }, [value]);
 
+  const getViewportMetrics = () => {
+    const visualViewport = window.visualViewport;
+    if (visualViewport) {
+      return {
+        height: visualViewport.height,
+        offsetTop: visualViewport.offsetTop,
+        offsetLeft: visualViewport.offsetLeft,
+      };
+    }
+    return {
+      height: window.innerHeight,
+      offsetTop: 0,
+      offsetLeft: 0,
+    };
+  };
+
   const updateDropdownPosition = () => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect();
+      const viewport = getViewportMetrics();
+      const maxDropdownHeight = 240;
+      const availableBelow = viewport.height - rect.bottom;
+      const availableAbove = rect.top;
+      const shouldOpenAbove = availableBelow < 140 && availableAbove > availableBelow;
+      const height = Math.min(
+        maxDropdownHeight,
+        Math.max(availableBelow, availableAbove, 120)
+      );
+
       setDropdownPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
+        top: shouldOpenAbove
+          ? Math.max(viewport.offsetTop, rect.top - height - 6)
+          : Math.max(viewport.offsetTop, rect.bottom + 6),
+        left: rect.left + viewport.offsetLeft,
         width: rect.width,
+        maxHeight: height,
       });
     }
   };
@@ -92,7 +128,10 @@ const PlaceSearch = ({
       updateDropdownPosition();
       const service = new places.AutocompleteService();
       service.getQueryPredictions(
-        { input: newValue },
+        {
+          input: newValue,
+          componentRestrictions: country ? { country } : undefined,
+        },
         (predictions, status) => {
           if (
             status === google.maps.places.PlacesServiceStatus.OK &&
@@ -117,11 +156,20 @@ const PlaceSearch = ({
       updateDropdownPosition();
       const handleResize = () => updateDropdownPosition();
       const handleScroll = () => updateDropdownPosition();
+      const visualViewport = window.visualViewport;
       window.addEventListener('resize', handleResize);
       window.addEventListener('scroll', handleScroll, true);
+      if (visualViewport) {
+        visualViewport.addEventListener('resize', handleResize);
+        visualViewport.addEventListener('scroll', handleScroll);
+      }
       return () => {
         window.removeEventListener('resize', handleResize);
         window.removeEventListener('scroll', handleScroll, true);
+        if (visualViewport) {
+          visualViewport.removeEventListener('resize', handleResize);
+          visualViewport.removeEventListener('scroll', handleScroll);
+        }
       };
     }
   }, [predictions.length]);
@@ -172,6 +220,7 @@ const PlaceSearch = ({
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left}px`,
         width: `${dropdownPosition.width}px`,
+        maxHeight: `${dropdownPosition.maxHeight}px`,
       }}
       onMouseDown={(e) => {
         // Prevent input blur when clicking on dropdown

@@ -21,8 +21,6 @@ const UsersPage = () => {
   const { usersList, createUserModal } = useAppSelector((state) => state.user);
   const { user } = useAppSelector((state) => state.auth);
 
-  console.log(user);
-
   const {
     fetchUsers,
     page,

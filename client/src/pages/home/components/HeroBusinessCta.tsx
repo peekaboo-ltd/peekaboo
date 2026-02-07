@@ -23,7 +23,7 @@ const HeroBusinessCta = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="flex flex-wrap gap-3 pt-2"
+        className="flex flex-wrap gap-3 pt-2 max-lg:items-center max-lg:justify-center"
       >
         <button
           onClick={onContactClick}

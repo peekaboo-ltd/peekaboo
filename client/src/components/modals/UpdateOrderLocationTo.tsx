@@ -63,6 +63,7 @@ const UpdateOrderLocationTo = () => {
             onLocationSelect={handleLocationSelect}
             placeholder="Search for delivery destination..."
             className="relative"
+            country="rw"
           />
         </section>
 

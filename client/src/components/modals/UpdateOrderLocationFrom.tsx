@@ -63,6 +63,7 @@ const UpdateOrderLocationFrom = () => {
             onLocationSelect={handleLocationSelect}
             placeholder="Search for pickup location..."
             className="relative"
+            country="rw"
           />
         </section>
 
