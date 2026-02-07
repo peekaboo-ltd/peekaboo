@@ -3,6 +3,11 @@ import { createBaseQuery } from '..';
 import type {
   CreateOrganizationPayload,
   CreateOrganizationResponse,
+  ContactInquiryPayload,
+  ContactInquiryResponse,
+  ValidateOnboardingTokenResponse,
+  CompleteOnboardingPayload,
+  CompleteOnboardingResponse,
 } from '@/types/organization.type';
 
 export const organizationMutationApiSlice = createApi({
@@ -20,7 +25,47 @@ export const organizationMutationApiSlice = createApi({
         body: data,
       }),
     }),
+
+    // CONTACT INQUIRY (Landing page)
+    submitContactInquiry: builder.mutation<
+      ContactInquiryResponse,
+      ContactInquiryPayload
+    >({
+      query: (data) => ({
+        url: '/organizations/contact',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
+    // VALIDATE ONBOARDING TOKEN
+    validateOnboardingToken: builder.query<
+      ValidateOnboardingTokenResponse,
+      string
+    >({
+      query: (token) => ({
+        url: `/organizations/onboarding/${token}`,
+        method: 'GET',
+      }),
+    }),
+
+    // COMPLETE ONBOARDING
+    completeOnboarding: builder.mutation<
+      CompleteOnboardingResponse,
+      CompleteOnboardingPayload
+    >({
+      query: (data) => ({
+        url: '/organizations/complete-onboarding',
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useCreateOrganizationMutation } = organizationMutationApiSlice;
+export const {
+  useCreateOrganizationMutation,
+  useSubmitContactInquiryMutation,
+  useValidateOnboardingTokenQuery,
+  useCompleteOnboardingMutation,
+} = organizationMutationApiSlice;

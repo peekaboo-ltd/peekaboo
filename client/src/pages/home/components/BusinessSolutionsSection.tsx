@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
 import type { BusinessFeatureItem, BusinessHighlightStat } from '../home.types';
 import { containerVariants, fadeInUp, slideInLeft, slideInRight } from '../home.animations';
 
@@ -14,8 +13,8 @@ interface BusinessSolutionsSectionProps {
   primaryCtaLabel: string;
   secondaryCtaLabel: string;
   stats: BusinessHighlightStat[];
+  onContactClick?: () => void;
 }
-
 
 const BusinessSolutionsSection = ({
   badgeLabel,
@@ -26,6 +25,7 @@ const BusinessSolutionsSection = ({
   primaryCtaLabel,
   secondaryCtaLabel,
   stats,
+  onContactClick,
 }: BusinessSolutionsSectionProps) => (
   <section className="w-full py-20 lg:py-28 border-y border-slate-100">
     <motion.article
@@ -81,9 +81,9 @@ const BusinessSolutionsSection = ({
 
           <motion.nav className="flex flex-wrap gap-4" variants={fadeInUp}>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                to="/onboarding/organization"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white rounded-xl font-normal hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/25"
+              <button
+                onClick={onContactClick}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white rounded-xl font-normal hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/25 cursor-pointer"
               >
                 {primaryCtaLabel}
                 <motion.span
@@ -92,15 +92,15 @@ const BusinessSolutionsSection = ({
                 >
                   <FontAwesomeIcon icon={faArrowRight} />
                 </motion.span>
-              </Link>
+              </button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                to="/contact"
-                className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 hover:border-primary-300 hover:text-primary-700 rounded-xl font-normal transition-all"
+              <button
+                onClick={onContactClick}
+                className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 hover:border-primary-300 hover:text-primary-700 rounded-xl font-normal transition-all cursor-pointer"
               >
                 {secondaryCtaLabel}
-              </Link>
+              </button>
             </motion.div>
           </motion.nav>
         </motion.figcaption>

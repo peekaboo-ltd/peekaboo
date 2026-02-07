@@ -18,6 +18,7 @@ import {
   OrganizationOnboarding,
   AdminOnboarding,
   UserManagementOnboarding,
+  CompleteOnboarding,
 } from '@/pages/onboarding';
 
 const Router = () => {
@@ -36,6 +37,7 @@ const Router = () => {
           <Route path="organization" element={<OrganizationOnboarding />} />
           <Route path="admin" element={<AdminOnboarding />} />
           <Route path="users" element={<UserManagementOnboarding />} />
+          <Route path="complete" element={<CompleteOnboarding />} />
         </Route>
         <Route path="" element={<Home />} />
         <Route path="about" element={<About />} />
