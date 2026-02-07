@@ -7,7 +7,7 @@ import { UserRoleService } from '../services/userRole.service';
 import { RoleTypes } from '../constants/role.constants';
 
 async function main() {
-  const email = process.env.SEED_ADMIN_EMAIL || 'admin@peekaboo.local';
+  const email = process.env.SEED_ADMIN_EMAIL || 'info@peekaboo.co.rw';
   const phoneNumber = process.env.SEED_ADMIN_PHONE || '0780000000';
   const password = process.env.SEED_ADMIN_PASSWORD || 'Admin123!';
   const name = process.env.SEED_ADMIN_NAME || 'Admin';

@@ -53,7 +53,7 @@ npm run seed:admin
 ```
 
 Defaults (override via `.env`):
-- **email**: `admin@peekaboo.local`
+- **email**: `info@peekaboo.co.rw`
 - **phone**: `0780000000`
 - **password**: `Admin123!`
 

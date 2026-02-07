@@ -79,7 +79,7 @@ const BusinessPlansSection = ({
               </div>
 
               <ul className="space-y-3 text-sm text-slate-600 flex-1">
-                {plan.features.map((feature) => (
+                {plan.features.map((feature: string) => (
                   <li key={feature} className="flex items-start gap-2">
                     <span className="mt-0.5 text-primary-600">
                       <FontAwesomeIcon icon={faCheck} />
