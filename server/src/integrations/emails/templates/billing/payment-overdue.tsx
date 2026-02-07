@@ -44,8 +44,8 @@ export const PaymentOverdueEmail = ({
       <Text style={styles.text}>
         If you've already processed this payment, please disregard this notice.
         For questions about billing, contact us at{' '}
-        <a href="mailto:support@peekaboo.rw" style={styles.link}>
-          support@peekaboo.rw
+        <a href="mailto:support@peekaboo.co.rw" style={styles.link}>
+          support@peekaboo.co.rw
         </a>
         .
       </Text>

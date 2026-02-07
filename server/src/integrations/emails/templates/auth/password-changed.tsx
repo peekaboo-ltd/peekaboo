@@ -14,8 +14,8 @@ export const PasswordChangedEmail = ({ name }: PasswordChangedEmailData) => {
       <Text style={styles.text}>
         If you did not make this change, please contact our support team
         immediately at{' '}
-        <a href="mailto:support@peekaboo.rw" style={styles.link}>
-          support@peekaboo.rw
+        <a href="mailto:support@peekaboo.co.rw" style={styles.link}>
+          support@peekaboo.co.rw
         </a>
         .
       </Text>

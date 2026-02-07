@@ -23,7 +23,6 @@ const BusinessSolutionsSection = ({
   subtitle,
   features,
   primaryCtaLabel,
-  secondaryCtaLabel,
   stats,
   onContactClick,
 }: BusinessSolutionsSectionProps) => (
@@ -92,14 +91,6 @@ const BusinessSolutionsSection = ({
                 >
                   <FontAwesomeIcon icon={faArrowRight} />
                 </motion.span>
-              </button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <button
-                onClick={onContactClick}
-                className="inline-flex items-center gap-2 px-8 py-4 border-2 border-slate-200 text-slate-700 hover:border-primary-300 hover:text-primary-700 rounded-xl font-normal transition-all cursor-pointer"
-              >
-                {secondaryCtaLabel}
               </button>
             </motion.div>
           </motion.nav>

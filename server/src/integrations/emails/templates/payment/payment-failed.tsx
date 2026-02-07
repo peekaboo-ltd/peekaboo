@@ -28,8 +28,8 @@ export const PaymentFailedEmail = ({
       <Text style={styles.text}>
         Please try again or use a different payment method. If the issue
         persists, contact our support team at{' '}
-        <a href="mailto:support@peekaboo.rw" style={styles.link}>
-          support@peekaboo.rw
+        <a href="mailto:support@peekaboo.co.rw" style={styles.link}>
+          support@peekaboo.co.rw
         </a>
         .
       </Text>

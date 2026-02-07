@@ -71,9 +71,9 @@ export class EmailService {
 
   constructor() {
     this.resend = new Resend(process.env.RESEND_API_KEY);
-    this.fromEmail = process.env.RESEND_EMAIL || 'noreply@peekaboo.rw';
+    this.fromEmail = process.env.RESEND_EMAIL || 'noreply@peekaboo.co.rw';
     this.adminEmail =
-      process.env.ADMIN_NOTIFICATION_EMAIL || 'admin@peekaboo.rw';
+      process.env.ADMIN_NOTIFICATION_EMAIL || 'info@peekaboo.co.rw';
   }
 
   private async sendEmail({
@@ -199,8 +199,8 @@ export class EmailService {
   ): Promise<void> {
     const html = await render(MemberRoleChangedEmail(data));
     await this.sendEmail({
-      to: data.memberEmail,
-      subject: `Your role in ${data.organizationName} has been updated - Peekaboo`,
+      to: data?.memberEmail,
+      subject: `Your role in ${data?.organizationName} has been updated - Peekaboo`,
       html,
     });
   }
@@ -208,8 +208,8 @@ export class EmailService {
   async sendMemberRemovedEmail(data: MemberRemovedEmailData): Promise<void> {
     const html = await render(MemberRemovedEmail(data));
     await this.sendEmail({
-      to: data.memberEmail,
-      subject: `You've been removed from ${data.organizationName} - Peekaboo`,
+      to: data?.memberEmail,
+      subject: `You've been removed from ${data?.organizationName} - Peekaboo`,
       html,
     });
   }
@@ -219,8 +219,8 @@ export class EmailService {
   ): Promise<void> {
     const html = await render(OrgStatusChangedEmail(data));
     await this.sendEmail({
-      to: data.adminEmail,
-      subject: `Organization ${data.status === 'ACTIVE' ? 'Activated' : 'Suspended'}: ${data.organizationName} - Peekaboo`,
+      to: data?.adminEmail,
+      subject: `Organization ${data?.status === 'ACTIVE' ? 'Activated' : 'Suspended'}: ${data?.organizationName} - Peekaboo`,
       html,
     });
   }
@@ -232,8 +232,8 @@ export class EmailService {
   ): Promise<void> {
     const html = await render(InvoiceGeneratedEmail(data));
     await this.sendEmail({
-      to: data.adminEmail,
-      subject: `Invoice ${data.invoiceNumber} generated - ${data.organizationName}`,
+      to: data?.adminEmail,
+      subject: `Invoice ${data?.invoiceNumber} generated - ${data?.organizationName}`,
       html,
     });
   }
@@ -243,7 +243,7 @@ export class EmailService {
   ): Promise<void> {
     const html = await render(BillingPaymentReceivedEmail(data));
     await this.sendEmail({
-      to: data.adminEmail,
+      to: data?.adminEmail,
       subject: `Payment received for invoice ${data.invoiceNumber} - ${data.organizationName}`,
       html,
     });
@@ -252,8 +252,8 @@ export class EmailService {
   async sendPaymentOverdueEmail(data: PaymentOverdueEmailData): Promise<void> {
     const html = await render(BillingPaymentOverdueEmail(data));
     await this.sendEmail({
-      to: data.adminEmail,
-      subject: `Payment overdue: Invoice ${data.invoiceNumber} - ${data.organizationName}`,
+      to: data?.adminEmail,
+      subject: `Payment overdue: Invoice ${data?.invoiceNumber} - ${data?.organizationName}`,
       html,
     });
   }
@@ -263,8 +263,8 @@ export class EmailService {
   ): Promise<void> {
     const html = await render(MonthlyBillingSummaryEmail(data));
     await this.sendEmail({
-      to: data.adminEmail,
-      subject: `Monthly billing summary: ${data.month} ${data.year} - ${data.organizationName}`,
+      to: data?.adminEmail,
+      subject: `Monthly billing summary: ${data?.month} ${data?.year} - ${data?.organizationName}`,
       html,
     });
   }
@@ -276,8 +276,8 @@ export class EmailService {
   ): Promise<void> {
     const html = await render(PaymentInitiatedEmail(data));
     await this.sendEmail({
-      to: data.customerEmail,
-      subject: `Payment initiated for order ${data.orderReference} - Peekaboo`,
+      to: data?.customerEmail,
+      subject: `Payment initiated for order ${data?.orderReference} - Peekaboo`,
       html,
     });
   }
@@ -287,8 +287,8 @@ export class EmailService {
   ): Promise<void> {
     const html = await render(PaymentSuccessfulEmail(data));
     await this.sendEmail({
-      to: data.customerEmail,
-      subject: `Payment confirmed for order ${data.orderReference} - Peekaboo`,
+      to: data?.customerEmail,
+      subject: `Payment confirmed for order ${data?.orderReference} - Peekaboo`,
       html,
     });
   }
@@ -296,8 +296,8 @@ export class EmailService {
   async sendPaymentFailedEmail(data: PaymentFailedEmailData): Promise<void> {
     const html = await render(PaymentFailedEmail(data));
     await this.sendEmail({
-      to: data.customerEmail,
-      subject: `Payment failed for order ${data.orderReference} - Peekaboo`,
+      to: data?.customerEmail,
+      subject: `Payment failed for order ${data?.orderReference} - Peekaboo`,
       html,
     });
   }
@@ -321,7 +321,7 @@ export class EmailService {
     const html = await render(OrderCreatedRecipientEmail(data));
     await this.sendEmail({
       to: data.recipientEmail,
-      subject: `You have a delivery coming! Order ${data.orderReference} - Peekaboo`,
+      subject: `You have a delivery coming! Order ${data?.orderReference} - Peekaboo`,
       html,
     });
   }
@@ -330,7 +330,7 @@ export class EmailService {
     const html = await render(OrderStatusEmail(data));
     await this.sendEmail({
       to: data.userEmail,
-      subject: `Order ${data.orderReference} - ${data.status} - Peekaboo`,
+      subject: `Order ${data?.orderReference} - ${data?.status} - Peekaboo`,
       html,
     });
   }

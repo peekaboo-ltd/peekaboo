@@ -43,11 +43,11 @@ export const EmailLayout = ({ children, preview }: EmailLayoutProps) => {
             </Text>
             <Text style={styles.footerText}>Kigali, Rwanda</Text>
             <Text style={styles.footerLinks}>
-              <Link href="https://peekaboo.rw" style={styles.footerLink}>
+              <Link href="https://peekaboo.co.rw" style={styles.footerLink}>
                 Website
               </Link>
               {' | '}
-              <Link href="mailto:support@peekaboo.rw" style={styles.footerLink}>
+              <Link href="mailto:support@peekaboo.co.rw" style={styles.footerLink}>
                 Support
               </Link>
             </Text>

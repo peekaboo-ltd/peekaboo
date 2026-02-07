@@ -24,6 +24,7 @@ import { OrderStatus } from '../constants/order.constants';
 import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrderAssignmentService } from './orderAssignment.service';
 import { EmailService } from '../integrations/emails/email.service';
+import { Order } from '../entities/order.entity';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
@@ -73,7 +74,7 @@ export class PaymentService {
       await this.paymentRepository.update(newPayment?.id, newPayment);
       this.updatePaymentStatus(
         newPayment?.id as UUID,
-        result.data?.status as KpayPaymentStatus
+        result.data?.status as KpayPaymentStatus,
       );
       return newPayment;
     }
@@ -152,10 +153,17 @@ export class PaymentService {
   // UPDATE PAYMENT STATUS
   async updatePaymentStatus(
     paymentId: UUID,
-    status: KpayPaymentStatus
+    status: KpayPaymentStatus,
   ): Promise<Payment> {
     const payment = await this.paymentRepository.findOne({
       where: { id: paymentId },
+    });
+
+    // ORDER
+    const order: Order | null = await AppDataSource.getRepository(
+      Order,
+    ).findOne({
+      where: { id: payment?.entityId },
     });
 
     if (!payment) {
@@ -179,30 +187,16 @@ export class PaymentService {
       await this.orderAssignmentService.handleOrderAssignment({
         orderId: payment?.entityId as UUID,
       });
-
-      // Send payment successful email (non-blocking)
-      if (payment.customerEmail) {
-        this.emailService
-          .sendPaymentSuccessfulEmail({
-            customerName: payment.customerName || '',
-            customerEmail: payment.customerEmail,
-            orderReference: payment.entityId as string,
-            amount: Number(payment.amount),
-            currency: 'RWF',
-            transactionId: payment.externalReferenceId || '',
-          })
-          .catch(() => {});
-      }
     }
 
-    if (status === KpayPaymentStatus.FAILED && payment.customerEmail) {
+    if (status === KpayPaymentStatus?.FAILED && payment?.customerEmail) {
       // Send payment failed email (non-blocking)
       this.emailService
         .sendPaymentFailedEmail({
-          customerName: payment.customerName || '',
-          customerEmail: payment.customerEmail,
-          orderReference: payment.entityId as string,
-          amount: Number(payment.amount),
+          customerName: payment?.customerName || '',
+          customerEmail: payment?.customerEmail,
+          orderReference: order?.referenceId || (payment?.entityId as string),
+          amount: Number(payment?.amount),
           currency: 'RWF',
         })
         .catch(() => {});
