@@ -14,6 +14,7 @@ import { OrdersPage } from '@/pages/orders';
 import { OrderAssignmentsPage } from '@/pages/order-assignments';
 import { UsersPage } from '@/pages/users';
 import { About } from '@/pages/about';
+import { ContactUsPage } from '@/pages/contact';
 import {
   OrganizationOnboarding,
   AdminOnboarding,
@@ -41,6 +42,7 @@ const Router = () => {
         </Route>
         <Route path="" element={<Home />} />
         <Route path="about" element={<About />} />
+        <Route path="contact" element={<ContactUsPage />} />
         <Route path="track" element={<TrackOrder />} />
       </Route>
       <Route path="/p" element={<PublicLayout />}>

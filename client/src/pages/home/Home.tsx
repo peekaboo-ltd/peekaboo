@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import {
   faBicycle,
   faBuilding,
@@ -11,6 +11,7 @@ import {
   faClock,
   faMapLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
 import { useI18n } from '@/i18n/i18n';
 import type {
@@ -29,16 +30,18 @@ import BusinessSolutionsSection from './components/BusinessSolutionsSection';
 import HowItWorksSection from './components/HowItWorksSection';
 import TestimonialsSection from './components/TestimonialsSection';
 import FinalCtaSection from './components/FinalCtaSection';
-import ContactUsDialog from './components/ContactUsDialog';
 
 const Home = () => {
   const { data: landingStats } = useGetLandingStatsQuery();
   const { t } = useI18n();
   const formRef = useRef<HTMLFormElement>(null);
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  const handleContactNavigation = () => {
+    navigate('/contact');
   };
 
   const heroCopy: HeroCopy = {
@@ -185,7 +188,7 @@ const Home = () => {
         landingStats={landingStats}
         heroCopy={heroCopy}
         businessStats={heroBusinessStats}
-        onContactClick={() => setContactDialogOpen(true)}
+        onContactClick={handleContactNavigation}
       />
 
       <TrustedBySection label={t('home.b2b.trustedBy')} industries={trustedByIndustries} />
@@ -206,7 +209,7 @@ const Home = () => {
         primaryCtaLabel={t('home.b2b.cta.contact')}
         secondaryCtaLabel={t('home.b2b.cta.sales')}
         stats={businessHighlights}
-        onContactClick={() => setContactDialogOpen(true)}
+        onContactClick={handleContactNavigation}
       />
 
       <HowItWorksSection
@@ -229,12 +232,7 @@ const Home = () => {
         buttonLabel={t('home.cta.button')}
         accountLabel={t('home.b2b.cta.contact')}
         onScrollToForm={scrollToForm}
-        onContactClick={() => setContactDialogOpen(true)}
-      />
-
-      <ContactUsDialog
-        open={contactDialogOpen}
-        onOpenChange={setContactDialogOpen}
+        onContactClick={handleContactNavigation}
       />
     </main>
   );
