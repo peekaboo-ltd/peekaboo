@@ -83,16 +83,24 @@ const AuthenticatedSidebar = () => {
     }, [user?.userRoles]);
 
     return (
+        <>
+        {/* Mobile overlay backdrop */}
+        {sidebarOpen && (
+            <div
+                className="md:hidden fixed inset-0 bg-black/50 z-[998] top-[9vh]"
+                onClick={handleSidebarToggle}
+                aria-hidden="true"
+            />
+        )}
         <motion.div
-            className={`fixed top-[9vh] left-0 h-[calc(100vh-9vh)] flex flex-col 
-                 bg-primary-900 border-r border-primary-900 transition-all duration-300 ease-in-out 
+            className={`fixed top-[9vh] left-0 h-[calc(100vh-9vh)] flex flex-col
+                 bg-primary-900 border-r border-primary-900 transition-all duration-300 ease-in-out
                  ${sidebarOpen ? 'z-[999]' : 'z-10'}
                  ${sidebarOpen
-                    ? 'w-[280px] sm:w-[300px] shadow-sm p-4'
+                    ? 'w-[280px] md:w-[280px] lg:w-[300px] shadow-lg md:shadow-sm p-4'
                     : 'w-16 p-2 shadow-sm'
-                } 
-                 md:w-[${sidebarOpen ? '18vw' : '6vw'
-                }] md:p-4 md:shadow-none md:z-auto overflow-y-auto`}
+                }
+                 overflow-y-auto`}
         >
             <div
                 className={`flex items-center w-full mb-4
@@ -221,6 +229,7 @@ const AuthenticatedSidebar = () => {
                 })}
             </ul>
         </motion.div>
+        </>
     );
 };
 

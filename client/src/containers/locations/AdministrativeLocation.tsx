@@ -26,7 +26,7 @@ const AdministrativeLocation = ({
   }, [location, getAdministrativeDivisions]);
 
   if (administrativeDivisionsIsLoading) {
-    return <Loader className="text-primary" />;
+    return <Loader className="text-black" />;
   }
 
   return (

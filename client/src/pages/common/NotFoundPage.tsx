@@ -16,7 +16,7 @@ const NotFoundPage = () => {
         {/* 404 Number Display */}
         <header className="space-y-4">
           <figure className="relative">
-            <h1 className="text-9xl sm:text-[12rem] font-bold text-primary-900/10 select-none">
+            <h1 className="text-9xl sm:text-[12rem] font-bold text-black/10 select-none">
               404
             </h1>
             <span
@@ -25,7 +25,7 @@ const NotFoundPage = () => {
             >
               <FontAwesomeIcon
                 icon={faExclamationTriangle}
-                className="text-6xl sm:text-8xl text-primary-900/20"
+                className="text-6xl sm:text-8xl text-black/20"
                 aria-hidden="true"
               />
             </span>

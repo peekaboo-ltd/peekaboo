@@ -22,22 +22,23 @@ export default function OrdersBarChart({
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="h-72">
+      <CardContent className="h-56 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+          <BarChart data={data} margin={{ left: 0, right: 4, top: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis
               dataKey="name"
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 12 }}
-              minTickGap={24}
+              tick={{ fontSize: 11 }}
+              minTickGap={16}
             />
             <YAxis
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11 }}
               allowDecimals={false}
+              width={35}
             />
             <Tooltip
               contentStyle={{

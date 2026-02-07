@@ -32,7 +32,7 @@ const HeroHeadline = ({
       <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-slate-900">
         {activeTab === 'personal' ? personalTitle1 : businessTitle1}
         <br />
-        <span className="text-primary-700">
+        <span className="text-black">
           {activeTab === 'personal' ? personalTitle2 : businessTitle2}
         </span>
       </h1>

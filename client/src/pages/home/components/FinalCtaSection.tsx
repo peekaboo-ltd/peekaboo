@@ -78,7 +78,7 @@ const FinalCtaSection = ({
           >
             <button
               onClick={onContactClick}
-              className="inline-flex items-center gap-2 px-8 py-5 text-slate-700 hover:text-primary-700 text-lg font-normal transition-colors border-2 border-slate-200 hover:border-primary-300 rounded-xl cursor-pointer"
+              className="inline-flex items-center gap-2 px-8 py-5 text-slate-700 hover:text-black text-lg font-normal transition-colors border-2 border-slate-200 hover:border-slate-300 rounded-xl cursor-pointer"
             >
               <FontAwesomeIcon icon={faBuilding} />
               {accountLabel}

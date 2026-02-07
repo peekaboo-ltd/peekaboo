@@ -200,7 +200,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
   if (isCustomer) {
     return (
       <div
-        className={`text-sm text-primary px-4 py-2 rounded-md ${getStatusBackgroundColor(activeAssignment?.status)}`}
+        className={`text-sm text-black px-4 py-2 rounded-md ${getStatusBackgroundColor(activeAssignment?.status)}`}
       >
         {renderAssignmentStatus()}
       </div>
@@ -214,7 +214,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
         type="button"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         disabled={isAssigning}
-        className={`text-sm text-primary px-4 py-2 cursor-pointer rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${getStatusBackgroundColor(activeAssignment?.status)}`}
+        className={`text-sm text-black px-4 py-2 cursor-pointer rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${getStatusBackgroundColor(activeAssignment?.status)}`}
         aria-label="Assign rider to order"
         aria-expanded={isDropdownOpen}
         aria-haspopup="true"

@@ -14,15 +14,15 @@ const statusConfig: Record<UserStatus, {
 }> = {
   [UserStatus.ACTIVE]: {
     label: 'Active',
-    className: 'bg-green-100 text-green-800 hover:bg-green-200',
+    className: 'bg-green-100 text-black hover:bg-green-200',
   },
   [UserStatus.INACTIVE]: {
     label: 'Inactive',
-    className: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+    className: 'bg-gray-100 text-black hover:bg-gray-200',
   },
   [UserStatus.SUSPENDED]: {
     label: 'Suspended',
-    className: 'bg-red-100 text-red-800 hover:bg-red-200',
+    className: 'bg-red-100 text-black hover:bg-red-200',
   },
 };
 

@@ -21,7 +21,7 @@ const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSect
     >
       <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp}>
         <motion.span
-          className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
+          className="inline-block text-black font-medium text-sm tracking-wider uppercase mb-3"
           whileInView={{ opacity: [0, 1], y: [20, 0] }}
           viewport={{ once: true }}
         >
@@ -53,9 +53,9 @@ const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSect
                 whileHover={{ rotate: [0, -10, 10, 0] }}
                 transition={{ duration: 0.5 }}
               >
-                <FontAwesomeIcon icon={feature.icon} className="text-primary-600 text-xl" />
+                <FontAwesomeIcon icon={feature.icon} className="text-black text-xl" />
               </motion.figure>
-              <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-primary-700 transition-colors">
+              <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-black transition-colors">
                 {feature.title}
               </h3>
               <p className="text-slate-600 text-sm leading-relaxed font-normal">

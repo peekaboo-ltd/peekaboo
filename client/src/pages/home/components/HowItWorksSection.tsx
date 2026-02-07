@@ -21,7 +21,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
     >
       <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp}>
         <motion.span
-          className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
+          className="inline-block text-black font-medium text-sm tracking-wider uppercase mb-3"
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Infinity, ease: [0.42, 0, 0.58, 1] }}
         >
@@ -65,7 +65,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
                   borderColor: '#5f9598',
                 }}
               >
-                <FontAwesomeIcon icon={step.icon} className="text-2xl text-primary-600" />
+                <FontAwesomeIcon icon={step.icon} className="text-2xl text-black" />
               </motion.mark>
               <motion.data
                 className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary-600 text-white text-xs font-medium flex items-center justify-center shadow-lg"

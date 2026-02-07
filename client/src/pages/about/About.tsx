@@ -41,7 +41,7 @@ const About = () => {
               <figure className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
                 <FontAwesomeIcon
                   icon={faBuilding}
-                  className="text-primary-600 text-xl"
+                  className="text-black text-xl"
                 />
               </figure>
               <h3 className="font-semibold text-gray-900 mb-1">Company Name</h3>
@@ -52,7 +52,7 @@ const About = () => {
               <figure className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
                 <FontAwesomeIcon
                   icon={faTruck}
-                  className="text-primary-600 text-xl"
+                  className="text-black text-xl"
                 />
               </figure>
               <h3 className="font-semibold text-gray-900 mb-1">
@@ -77,7 +77,7 @@ const About = () => {
             <article className="bg-gray-50 rounded-lg p-6 text-center">
               <FontAwesomeIcon
                 icon={faMapLocationDot}
-                className="text-primary-600 text-3xl mb-4"
+                className="text-black text-3xl mb-4"
               />
               <h3 className="font-semibold text-gray-900 mb-2">Address</h3>
               <address className="text-gray-600 not-italic">
@@ -92,7 +92,7 @@ const About = () => {
             <article className="bg-gray-50 rounded-lg p-6 text-center">
               <FontAwesomeIcon
                 icon={faPhone}
-                className="text-primary-600 text-3xl mb-4"
+                className="text-black text-3xl mb-4"
               />
               <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
               <p className="text-gray-600">+250 788 XXX XXX</p>
@@ -101,7 +101,7 @@ const About = () => {
             <article className="bg-gray-50 rounded-lg p-6 text-center">
               <FontAwesomeIcon
                 icon={faEnvelope}
-                className="text-primary-600 text-3xl mb-4"
+                className="text-black text-3xl mb-4"
               />
               <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
               <p className="text-gray-600">info@peekaboo.co.rw</p>

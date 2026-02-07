@@ -48,8 +48,8 @@ const AuthenticatedNavbar = ({ className }: Props) => {
     return (
         <nav className="w-full fixed top-0 z-1000 bg-white shadow-md">
         <header
-            className={`w-[90%] mx-auto transition-all duration-300
-        py-2 sm:py-3 h-[9vh] flex items-center justify-between ${className}`}
+            className={`w-[95%] sm:w-[92%] md:w-[90%] mx-auto transition-all duration-300
+        py-2 sm:py-3 h-[9vh] min-h-[56px] flex items-center justify-between ${className}`}
         >
             <Link to="/" className="w-fit shrink-0">
                 <img
@@ -90,7 +90,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         aria-expanded={isOpen}
                         aria-haspopup="true"
                     >
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-900/10 flex items-center justify-center text-primary-900 font-medium">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-900/10 flex items-center justify-center text-black font-medium">
                             {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                         </div>
 
@@ -185,7 +185,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                     <section className="py-2">
                         <header className="px-3 py-3 border-b border-gray-100 bg-linear-to-r from-primary-900/5 to-transparent">
                             <div className="flex items-center gap-2.5">
-                                <span className="w-10 h-10 rounded-full bg-primary-900/10 flex items-center justify-center text-primary-900 font-medium text-base">
+                                <span className="w-10 h-10 rounded-full bg-primary-900/10 flex items-center justify-center text-black font-medium text-base">
                                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                                 </span>
                                 <div>

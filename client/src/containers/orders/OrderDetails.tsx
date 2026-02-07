@@ -12,7 +12,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         <dt className="text-xs sm:text-sm font-medium text-gray-500">
           Reference ID
         </dt>
-        <dd className="text-xs sm:text-sm font-semibold text-primary break-all">
+        <dd className="text-xs sm:text-sm font-semibold text-black break-all">
           {order?.referenceId}
         </dd>
       </dl>
@@ -20,7 +20,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         <dt className="text-xs sm:text-sm font-medium text-gray-500">
           Order Type
         </dt>
-        <dd className="text-xs sm:text-sm font-semibold text-primary capitalize">
+        <dd className="text-xs sm:text-sm font-semibold text-black capitalize">
           {String(order?.type).toLowerCase()}
         </dd>
       </dl>
@@ -28,7 +28,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         <dt className="text-xs sm:text-sm font-medium text-gray-500">
           Initial Fee
         </dt>
-        <dd className="text-xs sm:text-sm font-semibold text-primary">
+        <dd className="text-xs sm:text-sm font-semibold text-black">
           {formatCurrency(order?.initialFee)}
         </dd>
       </dl>
@@ -36,7 +36,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         <dt className="text-xs sm:text-sm font-medium text-gray-500">
           Final Fee
         </dt>
-        <dd className="text-xs sm:text-sm font-semibold text-primary">
+        <dd className="text-xs sm:text-sm font-semibold text-black">
           {order?.finalFee ? `${formatCurrency(order.finalFee)}` : 'TBD'}
         </dd>
       </dl>
@@ -44,7 +44,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         <dt className="text-xs sm:text-sm font-medium text-gray-500">
           Created
         </dt>
-        <dd className="text-xs sm:text-sm font-semibold text-primary">
+        <dd className="text-xs sm:text-sm font-semibold text-black">
           {formatDate(order?.createdAt, 'DD/MM/YYYY HH:mm')}
         </dd>
       </dl>
@@ -52,7 +52,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         <dt className="text-xs sm:text-sm font-medium text-gray-500">
           Last Updated
         </dt>
-        <dd className="text-xs sm:text-sm font-semibold text-primary">
+        <dd className="text-xs sm:text-sm font-semibold text-black">
           {formatDate(order?.updatedAt, 'DD/MM/YYYY HH:mm')}
         </dd>
       </dl>

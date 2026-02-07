@@ -44,7 +44,7 @@ const TestimonialsSection = ({
       >
         <motion.header className="text-center mb-12" variants={fadeInUp}>
           <motion.span
-            className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
+            className="inline-block text-black font-medium text-sm tracking-wider uppercase mb-3"
             whileInView={{ opacity: [0, 1], scale: [0.8, 1] }}
             viewport={{ once: true }}
           >
@@ -108,7 +108,7 @@ const TestimonialsSection = ({
                             ? faBuilding
                             : faStore
                         }
-                        className="text-xs text-primary-500"
+                        className="text-xs text-black"
                       />
                       {testimonials[activeTestimonial].role}
                     </span>
@@ -143,7 +143,7 @@ const TestimonialsSection = ({
                   (prev) => (prev - 1 + testimonials.length) % testimonials.length
                 )
               }
-              className="pointer-events-auto -translate-x-4 lg:-translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-primary-600 transition-all cursor-pointer border border-slate-200"
+              className="pointer-events-auto -translate-x-4 lg:-translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-black transition-all cursor-pointer border border-slate-200"
               aria-label="Previous testimonial"
               whileHover={{ scale: 1.15, x: -4 }}
               whileTap={{ scale: 0.95 }}
@@ -156,7 +156,7 @@ const TestimonialsSection = ({
                   (prev) => (prev + 1) % testimonials.length
                 )
               }
-              className="pointer-events-auto translate-x-4 lg:translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-primary-600 transition-all cursor-pointer border border-slate-200"
+              className="pointer-events-auto translate-x-4 lg:translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-black transition-all cursor-pointer border border-slate-200"
               aria-label="Next testimonial"
               whileHover={{ scale: 1.15, x: 4 }}
               whileTap={{ scale: 0.95 }}

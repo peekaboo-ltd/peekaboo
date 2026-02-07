@@ -54,7 +54,7 @@ const TrackOrder = () => {
       <article className="w-full max-w-md bg-white rounded-lg shadow-lg p-8 border border-gray-100">
         <header className="text-center mb-8">
           <div className="w-16 h-16 bg-primary-900/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FontAwesomeIcon icon={faBoxOpen} className="w-8 h-8 text-primary-900" />
+            <FontAwesomeIcon icon={faBoxOpen} className="w-8 h-8 text-black" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             {t('trackOrder.title')}
@@ -93,7 +93,7 @@ const TrackOrder = () => {
               />
             </div>
             {errorMessage && (
-              <p className="mt-2 text-sm text-red-600">{errorMessage}</p>
+              <p className="mt-2 text-sm text-black">{errorMessage}</p>
             )}
           </div>
 

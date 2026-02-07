@@ -65,7 +65,7 @@ const UsersPage = () => {
       <header className="flex flex-col gap-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-bold text-primary-900">
+            <h1 className="text-2xl font-bold text-black">
               {t('organization.users.title')}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -114,7 +114,7 @@ const UsersPage = () => {
                   {card.value}
                 </p>
               </div>
-              <span className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600">
+              <span className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center text-black">
                 <FontAwesomeIcon icon={card.icon} />
               </span>
             </article>

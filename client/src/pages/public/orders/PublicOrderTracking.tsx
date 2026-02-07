@@ -137,7 +137,7 @@ const PublicOrderTracking = () => {
           {order && (
             <div className="flex items-center justify-center gap-2 text-gray-600">
               <span className="text-sm">Order Reference:</span>
-              <code className="bg-gray-100 px-3 py-1 rounded-lg text-sm font-mono font-semibold text-primary-700">
+              <code className="bg-gray-100 px-3 py-1 rounded-lg text-sm font-mono font-semibold text-black">
                 {order.referenceId}
               </code>
               <button
@@ -152,7 +152,7 @@ const PublicOrderTracking = () => {
               >
                 <FontAwesomeIcon
                   icon={isCopied ? faCheckCircle : faCopy}
-                  className={`w-4 h-4 ${isCopied ? 'text-green-500' : 'text-gray-400'}`}
+                  className={`w-4 h-4 ${isCopied ? 'text-black' : 'text-gray-400'}`}
                 />
               </button>
             </div>
@@ -229,7 +229,7 @@ const PublicOrderTracking = () => {
                           : isCurrent
                           ? 'bg-primary-600 border-primary-600 text-white ring-4 ring-primary-100'
                           : hasActivity
-                          ? 'bg-primary-100 border-primary-200 text-primary-600'
+                          ? 'bg-primary-100 border-primary-200 text-black'
                           : 'bg-gray-100 border-gray-200 text-gray-400 hover:bg-gray-200'
                       }`}
                       onMouseEnter={() => setHoveredStatus(status.key as string)}
@@ -261,14 +261,14 @@ const PublicOrderTracking = () => {
 
                         <aside className="flex-shrink-0 text-right">
                           {isCurrent && (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary-100 text-primary-700">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary-100 text-black">
                               Current
                             </span>
                           )}
                           {activity?.createdAt && (
                             <time className={`block text-xs mt-1 ${
                               isCurrent || isCompleted || hasActivity
-                                ? 'text-primary-600 font-medium'
+                                ? 'text-black font-medium'
                                 : 'text-gray-400'
                             }`}>
                               {formatTimestamp(activity.createdAt)}
@@ -338,7 +338,7 @@ const PublicOrderTracking = () => {
                             : isCurrent
                             ? 'bg-primary-600 border-primary-600 text-white ring-4 ring-primary-100'
                             : hasActivity
-                            ? 'bg-primary-100 border-primary-200 text-primary-600'
+                            ? 'bg-primary-100 border-primary-200 text-black'
                             : 'bg-gray-100 border-gray-200 text-gray-400 hover:bg-gray-200'
                         }`}
                         onMouseEnter={() => setHoveredStatus(status.key as string)}
@@ -373,7 +373,7 @@ const PublicOrderTracking = () => {
                         </p>
 
                         {isCurrent && (
-                          <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-primary-100 text-primary-700">
+                          <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-primary-100 text-black">
                             Current
                           </span>
                         )}
@@ -381,7 +381,7 @@ const PublicOrderTracking = () => {
                         {activity?.createdAt && (
                           <time className={`block text-[10px] mt-1 ${
                             isCurrent || isCompleted || hasActivity
-                              ? 'text-primary-600 font-medium'
+                              ? 'text-black font-medium'
                               : 'text-gray-400'
                           }`} title={formatTimestamp(activity.createdAt)}>
                             {formatTimestamp(activity.createdAt)}
