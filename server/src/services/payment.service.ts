@@ -23,18 +23,21 @@ import { OrderActivityService } from './orderActivity.service';
 import { OrderStatus } from '../constants/order.constants';
 import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrderAssignmentService } from './orderAssignment.service';
+import { EmailService } from '../integrations/emails/email.service';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
   private readonly kpayService: KpayService;
   private readonly orderActivityService: OrderActivityService;
   private readonly orderAssignmentService: OrderAssignmentService;
+  private readonly emailService: EmailService;
 
   constructor() {
     this.paymentRepository = AppDataSource.getRepository(Payment);
     this.kpayService = new KpayService();
     this.orderActivityService = new OrderActivityService();
     this.orderAssignmentService = new OrderAssignmentService();
+    this.emailService = new EmailService();
   }
 
   // CREATE PAYMENT
@@ -73,6 +76,19 @@ export class PaymentService {
         result.data?.status as KpayPaymentStatus
       );
       return newPayment;
+    }
+
+    // Send payment initiated email (non-blocking)
+    if (payment.customerEmail) {
+      this.emailService
+        .sendPaymentInitiatedEmail({
+          customerName: payment.customerName || '',
+          customerEmail: payment.customerEmail,
+          orderReference: payment.entityId as string,
+          amount: payment.amount,
+          currency: payment.currency || 'RWF',
+        })
+        .catch(() => {});
     }
 
     return newPayment;
@@ -163,6 +179,33 @@ export class PaymentService {
       await this.orderAssignmentService.handleOrderAssignment({
         orderId: payment?.entityId as UUID,
       });
+
+      // Send payment successful email (non-blocking)
+      if (payment.customerEmail) {
+        this.emailService
+          .sendPaymentSuccessfulEmail({
+            customerName: payment.customerName || '',
+            customerEmail: payment.customerEmail,
+            orderReference: payment.entityId as string,
+            amount: Number(payment.amount),
+            currency: 'RWF',
+            transactionId: payment.externalReferenceId || '',
+          })
+          .catch(() => {});
+      }
+    }
+
+    if (status === KpayPaymentStatus.FAILED && payment.customerEmail) {
+      // Send payment failed email (non-blocking)
+      this.emailService
+        .sendPaymentFailedEmail({
+          customerName: payment.customerName || '',
+          customerEmail: payment.customerEmail,
+          orderReference: payment.entityId as string,
+          amount: Number(payment.amount),
+          currency: 'RWF',
+        })
+        .catch(() => {});
     }
 
     return payment;

@@ -14,13 +14,16 @@ import { UserRoleService } from './userRole.service';
 import { UserService } from './user.service';
 import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
 import { UUID } from '../types';
+import { EmailService } from '../integrations/emails/email.service';
 
 export class AuthService {
   private readonly userRepository: Repository<User>;
   private readonly userRoleService: UserRoleService;
+  private readonly emailService: EmailService;
   constructor() {
     this.userRepository = AppDataSource.getRepository(User);
     this.userRoleService = new UserRoleService();
+    this.emailService = new EmailService();
   }
 
   // LOGIN
@@ -208,6 +211,13 @@ export class AuthService {
       phoneNumber: userWithRoles.phoneNumber ?? '',
     };
 
+    // Send welcome email (non-blocking)
+    if (email) {
+      this.emailService
+        .sendWelcomeEmail(email, name || '')
+        .catch(() => {});
+    }
+
     return { user: safeUser, token };
   }
 
@@ -298,6 +308,19 @@ export class AuthService {
       process.env.JWT_SECRET || 'default_secret',
       { expiresIn: '24h' }
     );
+
+    // Send OAuth welcome email for new users (non-blocking)
+    if (isNewUser && email) {
+      const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+      this.emailService
+        .sendOAuthWelcomeEmail({
+          name: name || '',
+          email,
+          provider: 'Google',
+          dashboardUrl: `${baseUrl}/dashboard`,
+        })
+        .catch(() => {});
+    }
 
     return {
       user: { ...user, passwordHash: undefined },

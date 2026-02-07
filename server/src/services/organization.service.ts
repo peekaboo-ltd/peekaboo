@@ -108,6 +108,17 @@ export class OrganizationService {
       addedById: adminUser.id,
     });
 
+    // Notify admin of new organization (non-blocking)
+    this.emailService
+      .sendNewOrganizationAdminEmail({
+        organizationName: organization.name,
+        adminName: adminUser.name || '',
+        email: data.organization.email || adminUser.email || '',
+        phoneNumber: data.organization.phoneNumber,
+        createdAt: new Date(),
+      })
+      .catch(() => {});
+
     return {
       organization,
       adminUserId: adminUser.id,
@@ -168,7 +179,25 @@ export class OrganizationService {
   ): Promise<Organization> {
     const organization = await this.getOrganizationById(id);
     organization.status = status;
-    return this.organizationRepository.save(organization);
+    const updated = await this.organizationRepository.save(organization);
+
+    // Send organization status email to admins (non-blocking)
+    if (
+      organization.email &&
+      (status === OrganizationStatus.ACTIVE ||
+        status === OrganizationStatus.SUSPENDED)
+    ) {
+      this.emailService
+        .sendOrganizationStatusEmail({
+          organizationName: organization.name,
+          adminName: '',
+          adminEmail: organization.email,
+          status,
+        })
+        .catch(() => {});
+    }
+
+    return updated;
   }
 
   // ASSIGN BUSINESS PLAN

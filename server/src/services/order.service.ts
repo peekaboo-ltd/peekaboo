@@ -27,6 +27,7 @@ import jwt from 'jsonwebtoken';
 import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrganizationService } from './organization.service';
 import { OrganizationBillingService } from './organizationBilling.service';
+import { EmailService } from '../integrations/emails/email.service';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -36,6 +37,7 @@ export class OrderService {
   private readonly orderActivityService: OrderActivityService;
   private readonly organizationService: OrganizationService;
   private readonly organizationBillingService: OrganizationBillingService;
+  private readonly emailService: EmailService;
 
   constructor() {
     this.orderRepository = AppDataSource.getRepository(Order);
@@ -45,6 +47,7 @@ export class OrderService {
     this.orderActivityService = new OrderActivityService();
     this.organizationService = new OrganizationService();
     this.organizationBillingService = new OrganizationBillingService();
+    this.emailService = new EmailService();
   }
 
   // CREATE ORDER
@@ -103,6 +106,40 @@ export class OrderService {
         createdOrder.id,
         Number(createdOrder.finalFee || createdOrder.initialFee)
       );
+    }
+
+    // Send order created emails (non-blocking)
+    if (createdOrder.senderId) {
+      const sender = await this.userRepository.findOne({
+        where: { id: createdOrder.senderId },
+      });
+      if (sender?.email) {
+        this.emailService
+          .sendOrderCreatedSenderEmail({
+            senderName: sender.name || '',
+            senderEmail: sender.email,
+            recipientPhone: '',
+            orderReference: createdOrder.referenceId || '',
+            fee: Number(createdOrder.initialFee || 0),
+            currency: 'RWF',
+          })
+          .catch(() => {});
+      }
+    }
+    if (createdOrder.recipientId) {
+      const recipient = await this.userRepository.findOne({
+        where: { id: createdOrder.recipientId },
+      });
+      if (recipient?.email) {
+        this.emailService
+          .sendOrderCreatedRecipientEmail({
+            recipientName: recipient.name || '',
+            recipientEmail: recipient.email,
+            senderPhone: '',
+            orderReference: createdOrder.referenceId || '',
+          })
+          .catch(() => {});
+      }
     }
 
     return createdOrder;
@@ -259,6 +296,30 @@ export class OrderService {
     });
 
     await this.orderRepository.save(order);
+
+    // Send cancellation emails (non-blocking)
+    if (order.sender?.email) {
+      this.emailService
+        .sendOrderStatusEmail({
+          userName: order.sender.name || '',
+          userEmail: order.sender.email,
+          orderReference: order.referenceId || '',
+          status: 'CANCELLED',
+          statusMessage: 'Your order has been cancelled.',
+        })
+        .catch(() => {});
+    }
+    if (order.recipient?.email) {
+      this.emailService
+        .sendOrderStatusEmail({
+          userName: order.recipient.name || '',
+          userEmail: order.recipient.email,
+          orderReference: order.referenceId || '',
+          status: 'CANCELLED',
+          statusMessage: 'The delivery order has been cancelled.',
+        })
+        .catch(() => {});
+    }
 
     return order;
   }

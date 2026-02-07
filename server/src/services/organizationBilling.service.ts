@@ -9,16 +9,19 @@ import { Order } from '../entities/order.entity';
 import { generateReferenceNumber } from '../helpers/string.helper';
 import { BillingQuery, GlobalBillingSummary } from '../types/b2b.types';
 import { Organization } from '../entities/organization.entity';
+import { EmailService } from '../integrations/emails/email.service';
 
 export class OrganizationBillingService {
   private readonly billingRepository: Repository<OrganizationBilling>;
   private readonly orderRepository: Repository<Order>;
   private readonly organizationRepository: Repository<Organization>;
+  private readonly emailService: EmailService;
 
   constructor() {
     this.billingRepository = AppDataSource.getRepository(OrganizationBilling);
     this.orderRepository = AppDataSource.getRepository(Order);
     this.organizationRepository = AppDataSource.getRepository(Organization);
+    this.emailService = new EmailService();
   }
 
   // GET OR CREATE CURRENT BILLING PERIOD
@@ -152,7 +155,25 @@ export class OrganizationBillingService {
     billing.invoicedAt = new Date();
     billing.createdById = createdById;
 
-    return this.billingRepository.save(billing);
+    const savedBilling = await this.billingRepository.save(billing);
+
+    // Send invoice generated email (non-blocking)
+    if (billing.organization?.email) {
+      this.emailService
+        .sendInvoiceGeneratedEmail({
+          organizationName: billing.organization.name,
+          adminEmail: billing.organization.email,
+          invoiceNumber,
+          periodStart: billing.periodStart,
+          periodEnd: billing.periodEnd,
+          totalAmount: Number(billing.totalAmount),
+          currency: billing.currency || 'RWF',
+          totalOrders: billing.totalOrders,
+        })
+        .catch(() => {});
+    }
+
+    return savedBilling;
   }
 
   // MARK AS PAID
@@ -169,7 +190,23 @@ export class OrganizationBillingService {
       billing.notes = notes;
     }
 
-    return this.billingRepository.save(billing);
+    const savedBilling = await this.billingRepository.save(billing);
+
+    // Send payment received email (non-blocking)
+    if (billing.organization?.email && billing.invoiceNumber) {
+      this.emailService
+        .sendBillingPaymentReceivedEmail({
+          organizationName: billing.organization.name,
+          adminEmail: billing.organization.email,
+          invoiceNumber: billing.invoiceNumber,
+          amount: Number(billing.totalAmount),
+          currency: billing.currency || 'RWF',
+          paymentDate: new Date(),
+        })
+        .catch(() => {});
+    }
+
+    return savedBilling;
   }
 
   // GET BILLING HISTORY
