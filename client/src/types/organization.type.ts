@@ -143,3 +143,16 @@ export interface CompleteOnboardingResponse {
     };
   };
 }
+
+export interface InviteOrganizationPayload {
+  name: string;
+  email: string;
+  adminName: string;
+  adminEmail: string;
+  phoneNumber: string;
+  address: string;
+}
+
+export interface InviteOrganizationResponse {
+  message: string;
+}

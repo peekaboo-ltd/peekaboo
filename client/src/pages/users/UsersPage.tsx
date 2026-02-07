@@ -60,14 +60,20 @@ const UsersPage = () => {
               Manage team access, roles, and status for your organization.
             </p>
           </article>
-          <Button
-            primary
-            onClick={() => dispatch(setCreateUserModal(true))}
-            className="flex items-center gap-2"
-          >
-            <FontAwesomeIcon icon={faPlus} />
-            Add User
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button route="/organizations/invite" className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faBuilding} />
+              Invite Organization
+            </Button>
+            <Button
+              primary
+              onClick={() => dispatch(setCreateUserModal(true))}
+              className="flex items-center gap-2"
+            >
+              <FontAwesomeIcon icon={faPlus} />
+              Add User
+            </Button>
+          </div>
         </section>
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
