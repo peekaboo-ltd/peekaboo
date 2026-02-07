@@ -129,12 +129,12 @@ const PublicOrderPaymentSuccess = () => {
                 <FontAwesomeIcon
                   icon={faCheckCircle}
                   size='lg'
-                  className="text-green-600"
+                  className="text-black"
                   aria-hidden="true"
                 />
               </span>
             </figure>
-            <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-primary mb-2 px-2">
+            <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-black mb-2 px-2">
               Payment Successful
             </h1>
             <p className="text-sm sm:text-base text-gray-600">
@@ -193,7 +193,7 @@ const PublicOrderPaymentSuccess = () => {
                   <dt className="text-sm font-medium text-gray-700 mb-1 sm:mb-0">
                     Amount Paid
                   </dt>
-                  <dd className="text-lg font-bold text-primary">
+                  <dd className="text-lg font-bold text-black">
                     {formatCurrency(order?.finalFee ?? order?.initialFee ?? 0)}
                   </dd>
                 </section>
@@ -246,7 +246,7 @@ const PublicOrderPaymentSuccess = () => {
               <section className="bg-gray-50 rounded-sm p-4 sm:p-5">
                   <section className="text-center flex items-center gap-2 justify-between">
                     <dt className="text-xs text-gray-500">Delivery Fee</dt>
-                    <dd className="text-lg font-bold text-primary">
+                    <dd className="text-lg font-bold text-black">
                       {formatCurrency(order?.finalFee ?? order?.initialFee ?? 0)}
                     </dd>
                   </section>

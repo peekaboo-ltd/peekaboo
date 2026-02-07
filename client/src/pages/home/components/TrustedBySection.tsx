@@ -26,7 +26,7 @@ const TrustedBySection = ({ label, industries }: TrustedBySectionProps) => (
           {industries.map((industry, index) => (
             <motion.li
               key={industry}
-              className="text-slate-400 font-normal text-sm uppercase tracking-wide hover:text-primary-600 transition-colors cursor-default"
+              className="text-slate-400 font-normal text-sm uppercase tracking-wide hover:text-black transition-colors cursor-default"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

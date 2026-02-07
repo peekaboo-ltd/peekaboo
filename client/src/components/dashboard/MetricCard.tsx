@@ -103,31 +103,31 @@ const MetricCard = ({
         aria-hidden="true"
         className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 ${bgColorClass.replace('/10', '')}`}
       />
-      <CardContent className="p-6 relative">
-        <header className="flex items-start justify-between mb-4">
-          <span className="flex items-center gap-3">
+      <CardContent className="p-4 sm:p-6 relative">
+        <header className="flex items-start justify-between mb-3 sm:mb-4">
+          <span className="flex items-center gap-2 sm:gap-3 min-w-0">
             {icon && (
               <span
-                className={`p-2.5 rounded-lg ${bgColorClass} group-hover:scale-110 transition-transform duration-300`}
+                className={`p-2 sm:p-2.5 rounded-lg ${bgColorClass} group-hover:scale-110 transition-transform duration-300 shrink-0`}
                 aria-hidden="true"
               >
                 <FontAwesomeIcon
                   icon={icon}
-                  className={`text-lg ${colorClass || 'text-primary'}`}
+                  className="text-base sm:text-lg text-black"
                   aria-hidden="true"
                 />
               </span>
             )}
-            <span className="text-sm font-medium text-muted-foreground leading-tight">
+            <span className="text-xs sm:text-sm font-medium text-muted-foreground leading-tight truncate">
               {label}
             </span>
           </span>
           {trend && (
             <span
-              className={`text-xs font-semibold px-2 py-1 rounded-full ${
+              className={`text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shrink-0 ${
                 trend.isPositive
-                  ? 'text-green-700 bg-green-100'
-                  : 'text-red-700 bg-red-100'
+                  ? 'text-black bg-green-100'
+                  : 'text-black bg-red-100'
               }`}
               aria-label={`Trend: ${trend.isPositive ? 'increasing' : 'decreasing'} by ${Math.abs(trend.value)}%`}
             >
@@ -136,17 +136,15 @@ const MetricCard = ({
           )}
         </header>
         <section className="flex items-end justify-between">
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <p
-              className={`text-3xl font-bold leading-tight ${
-                colorClass || 'text-primary'
-              }`}
+              className="text-2xl sm:text-3xl font-bold leading-tight text-black truncate"
               aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
             >
               {value}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             {renderSparkline()}
             {href && (
               <span
@@ -155,7 +153,7 @@ const MetricCard = ({
               >
                 <FontAwesomeIcon
                   icon={faArrowRight}
-                  className={`text-sm ${colorClass || 'text-primary'} transform group-hover:translate-x-1 transition-transform duration-300`}
+                  className="text-sm text-black transform group-hover:translate-x-1 transition-transform duration-300"
                   aria-hidden="true"
                 />
               </span>

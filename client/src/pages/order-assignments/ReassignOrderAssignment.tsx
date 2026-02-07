@@ -180,7 +180,7 @@ const ReassignOrderAssignment = () => {
                                                             </span>
                                                         </span>
                                                         {isCurrentRider && (
-                                                            <span className="text-xs text-blue-600 font-medium ml-2">
+                                                            <span className="text-xs text-black font-medium ml-2">
                                                                 Current
                                                             </span>
                                                         )}
@@ -234,7 +234,7 @@ const ReassignOrderAssignment = () => {
                                     <span className="shrink-0 w-16 h-16 bg-primary-900/10 rounded-full flex items-center justify-center" role="img" aria-label="Rider avatar">
                                         <FontAwesomeIcon
                                             icon={faUser}
-                                            className="w-8 h-8 text-primary-900"
+                                            className="w-8 h-8 text-black"
                                             aria-hidden="true"
                                         />
                                     </span>
@@ -271,8 +271,8 @@ const ReassignOrderAssignment = () => {
                                             <dt className="sr-only">Status</dt>
                                             <dd className="flex items-center">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedRider.status === UserStatus.ACTIVE
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-gray-100 text-gray-800'
+                                                    ? 'bg-green-100 text-black'
+                                                    : 'bg-gray-100 text-black'
                                                     }`}>
                                                     {selectedRider.status}
                                                 </span>

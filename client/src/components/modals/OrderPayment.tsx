@@ -210,7 +210,7 @@ const OrderPayment = () => {
               className='px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
             />
             {phoneError && (
-              <p className='text-sm text-red-600'>{phoneError}</p>
+              <p className='text-sm text-black'>{phoneError}</p>
             )}
             <p className='text-xs text-gray-500'>
               Enter a Rwandan phone number (e.g., 788123456 or 250788123456)

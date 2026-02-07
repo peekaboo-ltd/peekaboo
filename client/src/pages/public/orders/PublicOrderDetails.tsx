@@ -1,6 +1,6 @@
 import { useGetOrder, useGetOrderFees, useUpdateOrder } from '@/hooks/orders/orders.hooks';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
-import { setOrderPaymentModal, setSelectedOrder, setUpdateOrderLocationFromModal, setUpdateOrderLocationToModal } from '@/states/slices/order.slice';
+import { setOrder, setOrderPaymentModal, setSelectedOrder, setUpdateOrderLocationFromModal, setUpdateOrderLocationToModal } from '@/states/slices/order.slice';
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
 import { useCallback, useEffect, useState, useRef } from 'react';
@@ -119,11 +119,15 @@ const PublicOrderDetails = () => {
     }
   }, [order?.id, updateOrder]);
 
+  // Reset stale data when order ID changes
   useEffect(() => {
+    dispatch(setOrder(undefined));
+    setDistance(null);
+    setEstimatedTime(null);
     if (id) {
       getOrder({ id: id as UUID });
     }
-  }, [id, getOrder]);
+  }, [id, getOrder, dispatch]);
 
   const handleRouteCalculated = (
     calculatedDistance: number,
@@ -199,7 +203,7 @@ const PublicOrderDetails = () => {
         )}
         <main className="w-full flex flex-col gap-8 max-w-6xl mx-auto self-center px-4 py-8">
           <header className="text-center mb-8 animate-on-scroll">
-            <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-primary mb-2 px-2">
+            <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-black mb-2 px-2">
               Order Details
             </h1>{' '}
             <p className="text-gray-600">
@@ -320,7 +324,7 @@ const PublicOrderDetails = () => {
                         </p>
                       </header>
                     </header>
-                    <p className="text-3xl font-bold text-primary mb-1">
+                    <p className="text-3xl font-bold text-black mb-1">
                       {distance.toFixed(2)}
                     </p>
                     <p className="text-sm text-gray-500">kilometers</p>
@@ -385,7 +389,7 @@ const PublicOrderDetails = () => {
                     <section className='flex items-center gap-2'>
                       {(orderFee !== undefined && orderFee > 0) || (order?.finalFee !== null && order?.finalFee !== undefined && order.finalFee > 0) ? (
                         <section>
-                          <p className="text-3xl font-bold text-primary mb-1">
+                          <p className="text-3xl font-bold text-black mb-1">
                             {formatCurrency(orderFee ?? (order?.finalFee ?? 0))}
                           </p>
                           <p className="text-sm text-gray-500">including VAT</p>

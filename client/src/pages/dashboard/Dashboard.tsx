@@ -118,18 +118,18 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <main className="w-full max-w-7xl mx-auto px-4 py-6">
-        <header className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+      <main className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
+        <header className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <article>
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-8 w-48 sm:w-64 mb-2" />
+            <Skeleton className="h-4 w-36 sm:w-48" />
           </article>
-          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-full sm:w-64" />
         </header>
 
         <section
           aria-label="Loading metrics"
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8"
+          className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8"
         >
           {[...Array(5)].map((_, i) => (
             <Skeleton key={i} className="h-28 rounded-xl" />
@@ -138,10 +138,10 @@ const Dashboard = () => {
 
         <section
           aria-label="Loading charts"
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4"
         >
-          <Skeleton className="h-72 rounded-xl" />
-          <Skeleton className="h-72 rounded-xl" />
+          <Skeleton className="h-60 sm:h-72 rounded-xl" />
+          <Skeleton className="h-60 sm:h-72 rounded-xl" />
         </section>
       </main>
     );
@@ -149,10 +149,10 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <main className="w-full max-w-7xl mx-auto px-4 py-6">
-        <article className="text-center py-12 bg-white rounded-2xl shadow-sm border border-slate-100">
+      <main className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
+        <article className="text-center py-8 sm:py-12 bg-white rounded-2xl shadow-sm border border-slate-100 px-4">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-8 h-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
@@ -192,28 +192,28 @@ const Dashboard = () => {
 
   return (
     <motion.main
-      className={`w-full max-w-7xl mx-auto px-4 py-6 ${shellClass}`}
+      className={`w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6 ${shellClass}`}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       {/* Header */}
       <motion.header
-        className={`mb-8 flex items-start justify-between gap-4 flex-wrap ${headerClass}`}
+        className={`mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 ${headerClass}`}
         variants={itemVariants}
       >
-        <article>
-          <h1 className="text-2xl font-bold text-slate-900">
+        <article className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">
             {user?.name ? t('dashboard.welcome', { name: user.name }) : t('dashboard.welcomeDefault')}
           </h1>
-          <p className="text-slate-600 mt-1">
+          <p className="text-sm sm:text-base text-slate-600 mt-1">
             {dashboardData?.role === RoleTypes.ADMIN ||
             dashboardData?.role === RoleTypes.STAFF
               ? t('dashboard.platformOverview')
               : t('dashboard.accountOverview')}
           </p>
         </article>
-        <div className={isBusinessView ? 'w-full max-w-md' : undefined}>
+        <div className={isBusinessView ? 'w-full sm:max-w-md' : 'w-full sm:w-auto'}>
           <OrderSearchBar placeholder={t('dashboard.searchPlaceholder')} />
         </div>
       </motion.header>
@@ -221,7 +221,7 @@ const Dashboard = () => {
       {/* Primary Metrics */}
       <motion.section
         aria-label="Dashboard metrics"
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8"
+        className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8"
         variants={containerVariants}
       >
         {metricCards.slice(0, 5).map((card, index) => (
@@ -244,7 +244,7 @@ const Dashboard = () => {
       {metricCards.length > 5 && (
         <motion.section
           aria-label="Additional metrics"
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
           variants={containerVariants}
         >
           {metricCards.slice(5).map((card, index) => (
@@ -268,7 +268,7 @@ const Dashboard = () => {
       {showCharts && (
         <motion.section
           aria-label="Dashboard charts"
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4"
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>

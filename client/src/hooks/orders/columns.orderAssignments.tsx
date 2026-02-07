@@ -41,7 +41,7 @@ export const useOrderAssignmentsColumns = () => {
                         e.stopPropagation();
                         dispatch(setReassignOrderAssignmentModal(true));
                         dispatch(setSelectedOrderAssignment(row.original));
-                    }} className="text-primary cursor-pointer" /></CustomTooltip>}</menu>)
+                    }} className="text-black cursor-pointer" /></CustomTooltip>}</menu>)
             },
         },
         {
@@ -61,14 +61,14 @@ export const useOrderAssignmentsColumns = () => {
                                 e.stopPropagation();
                                 dispatch(setAcceptOrderAssignmentModal(true));
                                 dispatch(setSelectedOrderAssignment(row.original));
-                            }} icon={faCircleCheck} size="lg" className="cursor-pointer text-green-700" />
+                            }} icon={faCircleCheck} size="lg" className="cursor-pointer text-black" />
                         </CustomTooltip>
                             <CustomTooltip label="Reject">
                                 <FontAwesomeIcon onClick={(e) => {
                                     e.stopPropagation();
                                     dispatch(setRejectOrderAssignmentModal(true));
                                     dispatch(setSelectedOrderAssignment(row.original));
-                                }} icon={faCircleXmark} size="lg" className="cursor-pointer text-red-700" />
+                                }} icon={faCircleXmark} size="lg" className="cursor-pointer text-black" />
                             </CustomTooltip></>}
                         <CustomTooltip label="Info">
                             <FontAwesomeIcon onClick={(e) => {

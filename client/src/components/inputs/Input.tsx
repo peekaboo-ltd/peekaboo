@@ -33,7 +33,7 @@ const Input = ({
     <label className="w-full flex flex-col gap-1">
       {label && (
         <span className="text-sm font-medium">
-          {label} {required && <span className="text-red-500">*</span>}
+          {label} {required && <span className="text-black">*</span>}
         </span>
       )}
       <InputUI
@@ -47,7 +47,7 @@ const Input = ({
         onBlur={onBlur}
       />
       {errorMessage && (
-        <p className="text-sm text-red-500">{String(errorMessage)}</p>
+        <p className="text-sm text-black">{String(errorMessage)}</p>
       )}
     </label>
   );

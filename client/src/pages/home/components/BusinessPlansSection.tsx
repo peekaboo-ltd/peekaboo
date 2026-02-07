@@ -34,7 +34,7 @@ const BusinessPlansSection = ({
     >
       <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp}>
         <motion.span
-          className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-3"
+          className="inline-block text-black font-medium text-sm tracking-wider uppercase mb-3"
           whileInView={{ opacity: [0, 1], y: [20, 0] }}
           viewport={{ once: true }}
         >
@@ -67,7 +67,7 @@ const BusinessPlansSection = ({
                   <p className="text-sm text-slate-500 mt-2">{plan.description}</p>
                 </div>
                 {plan.isPopular && (
-                  <span className="text-xs font-semibold uppercase tracking-wide text-primary-700 bg-primary-100 px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-black bg-primary-100 px-2.5 py-1 rounded-full">
                     {popularLabel}
                   </span>
                 )}
@@ -81,7 +81,7 @@ const BusinessPlansSection = ({
               <ul className="space-y-3 text-sm text-slate-600 flex-1">
                 {plan.features.map((feature: string) => (
                   <li key={feature} className="flex items-start gap-2">
-                    <span className="mt-0.5 text-primary-600">
+                    <span className="mt-0.5 text-black">
                       <FontAwesomeIcon icon={faCheck} />
                     </span>
                     <span>{feature}</span>

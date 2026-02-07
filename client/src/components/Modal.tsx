@@ -42,7 +42,7 @@ const JSX_MODAL: FC<ModalProps> = ({
       >
         <DialogHeader className="shrink-0">
           <DialogTitle
-            className={`text-lg font-semibold text-primary uppercase mt-[-10px] ${
+            className={`text-lg font-semibold text-black uppercase mt-[-10px] ${
               headingClassName ?? ''
             }`}
           >

@@ -37,7 +37,7 @@ const BusinessSolutionsSection = ({
       <figure className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         <motion.figcaption variants={slideInLeft}>
           <motion.span
-            className="inline-block text-primary-600 font-medium text-sm tracking-wider uppercase mb-4"
+            className="inline-block text-black font-medium text-sm tracking-wider uppercase mb-4"
             whileInView={{ opacity: [0, 1], x: [-20, 0] }}
             viewport={{ once: true }}
           >
@@ -46,7 +46,7 @@ const BusinessSolutionsSection = ({
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-6">
             {title1}
             <br />
-            <span className="text-primary-600">{title2}</span>
+            <span className="text-black">{title2}</span>
           </h2>
           <p className="text-lg text-slate-600 mb-8 leading-relaxed font-normal">{subtitle}</p>
 
@@ -66,10 +66,10 @@ const BusinessSolutionsSection = ({
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
                 >
-                  <FontAwesomeIcon icon={feature.icon} className="text-primary-600" />
+                  <FontAwesomeIcon icon={feature.icon} className="text-black" />
                 </motion.mark>
                 <section>
-                  <h4 className="text-slate-900 font-semibold mb-1 group-hover:text-primary-700 transition-colors">
+                  <h4 className="text-slate-900 font-semibold mb-1 group-hover:text-black transition-colors">
                     {feature.title}
                   </h4>
                   <p className="text-slate-500 text-sm font-normal">{feature.description}</p>
@@ -118,7 +118,7 @@ const BusinessSolutionsSection = ({
                     whileHover={{ rotate: [0, -15, 15, 0] }}
                     transition={{ duration: 0.5 }}
                   >
-                    <FontAwesomeIcon icon={stat.icon} className="text-primary-600" />
+                    <FontAwesomeIcon icon={stat.icon} className="text-black" />
                   </motion.figure>
                   <motion.data
                     className="block text-2xl font-bold text-slate-900 mb-1"

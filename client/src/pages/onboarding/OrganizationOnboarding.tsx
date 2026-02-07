@@ -137,7 +137,7 @@ const OrganizationOnboarding = () => {
         </motion.div>
 
         <motion.header variants={itemVariants} className="flex flex-col gap-3">
-          <span className="text-sm font-semibold text-primary-600">
+          <span className="text-sm font-semibold text-black">
             {t('onboarding.step', { step: 1 })}
           </span>
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
@@ -165,7 +165,7 @@ const OrganizationOnboarding = () => {
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
-              <FontAwesomeIcon icon={faBuilding} className="text-primary-600" />
+              <FontAwesomeIcon icon={faBuilding} className="text-black" />
             </motion.span>
             <div>
               <h2 className="text-lg font-semibold">
