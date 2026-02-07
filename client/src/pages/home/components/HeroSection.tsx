@@ -22,6 +22,7 @@ interface HeroSectionProps {
   landingStats?: LandingStats;
   heroCopy: HeroCopy;
   businessStats: HeroBusinessStat[];
+  onContactClick?: () => void;
 }
 
 const HeroSection = ({
@@ -30,6 +31,7 @@ const HeroSection = ({
   landingStats,
   heroCopy,
   businessStats,
+  onContactClick,
 }: HeroSectionProps) => {
   const [activeTab, setActiveTab] = useState<'personal' | 'business'>('personal');
   const {
@@ -106,6 +108,7 @@ const HeroSection = ({
               accountLabel={heroCopy.businessAccountCta}
               tryQuickDeliveryLabel={heroCopy.tryQuickDeliveryLabel}
               onScrollToForm={onScrollToForm}
+              onContactClick={onContactClick}
             />
           </motion.header>
 

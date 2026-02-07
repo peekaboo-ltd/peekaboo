@@ -851,4 +851,127 @@ export const OrganizationController = {
       next(error);
     }
   },
+
+  // CONTACT INQUIRY (PUBLIC - from landing page)
+  async submitContactInquiry(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { contactName, contactEmail, companyName, phoneNumber, message } = req.body;
+
+      if (!contactName || !contactEmail || !companyName) {
+        return res.status(400).json({
+          message: 'Contact name, email, and company name are required',
+        });
+      }
+
+      await organizationService.submitContactInquiry({
+        contactName,
+        contactEmail,
+        companyName,
+        phoneNumber,
+        message,
+      });
+
+      return res.status(200).json({
+        message: 'Thank you for your inquiry. Our team will contact you shortly.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // INVITE ORGANIZATION (ADMIN - manual onboarding)
+  async inviteOrganization(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { name, email, adminName, adminEmail, phoneNumber, address } = req.body;
+
+      if (!name || !email || !adminName || !adminEmail) {
+        return res.status(400).json({
+          message: 'Organization name, email, admin name, and admin email are required',
+        });
+      }
+
+      const result = await organizationService.inviteOrganization(
+        { name, email, adminName, adminEmail, phoneNumber, address },
+        userId
+      );
+
+      return res.status(201).json({
+        message: 'Organization invited successfully. An onboarding email has been sent.',
+        data: {
+          organization: result.organization,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // VALIDATE ONBOARDING TOKEN (PUBLIC)
+  async validateOnboardingToken(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token } = req.params;
+
+      const result = await organizationService.validateOnboardingToken(token);
+
+      return res.status(200).json({
+        message: 'Token is valid',
+        data: {
+          organizationName: result.organization.name,
+          organizationEmail: result.organization.email,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // COMPLETE ONBOARDING (PUBLIC - from invite email)
+  async completeOnboarding(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token, password, phoneNumber, adminName, organizationDetails } = req.body;
+
+      if (!token || !password || !phoneNumber) {
+        return res.status(400).json({
+          message: 'Token, password, and phone number are required',
+        });
+      }
+
+      const result = await organizationService.completeOnboarding({
+        token,
+        password,
+        phoneNumber,
+        adminName,
+        organizationDetails,
+      });
+
+      // Generate JWT token for auto-login
+      const authToken = jwt.sign(
+        { id: result.adminUserId },
+        process.env.JWT_SECRET || 'default_secret',
+        { expiresIn: '24h' }
+      );
+
+      const userWithRoles = await userService.getUserById(result.adminUserId);
+
+      return res.status(200).json({
+        message: 'Onboarding completed successfully. Your account is now active.',
+        data: {
+          organization: result.organization,
+          auth: {
+            token: authToken,
+            user: userWithRoles,
+          },
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };

@@ -69,6 +69,7 @@ export interface Organization extends BaseDomain {
 }
 
 export enum OrganizationStatus {
+  PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
   SUSPENDED = 'SUSPENDED',
@@ -87,6 +88,52 @@ export enum MembershipStatus {
 
 // API response types
 export interface CreateOrganizationResponse {
+  message: string;
+  data: {
+    organization: Organization;
+    auth: {
+      token: string;
+      user: User;
+    };
+  };
+}
+
+// Contact inquiry types
+export interface ContactInquiryPayload {
+  contactName: string;
+  contactEmail: string;
+  companyName: string;
+  phoneNumber?: string;
+  message?: string;
+}
+
+export interface ContactInquiryResponse {
+  message: string;
+}
+
+// Onboarding token validation
+export interface ValidateOnboardingTokenResponse {
+  message: string;
+  data: {
+    organizationName: string;
+    organizationEmail: string;
+  };
+}
+
+// Complete onboarding types
+export interface CompleteOnboardingPayload {
+  token: string;
+  password: string;
+  phoneNumber: string;
+  adminName?: string;
+  organizationDetails?: {
+    address?: string;
+    description?: string;
+    phoneNumber?: string;
+  };
+}
+
+export interface CompleteOnboardingResponse {
   message: string;
   data: {
     organization: Organization;

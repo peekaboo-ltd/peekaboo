@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight, faBuilding } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
 import { containerVariants, fadeInUp } from '../home.animations';
 
 interface FinalCtaSectionProps {
@@ -10,6 +9,7 @@ interface FinalCtaSectionProps {
   buttonLabel: string;
   accountLabel: string;
   onScrollToForm: () => void;
+  onContactClick?: () => void;
 }
 
 const FinalCtaSection = ({
@@ -18,6 +18,7 @@ const FinalCtaSection = ({
   buttonLabel,
   accountLabel,
   onScrollToForm,
+  onContactClick,
 }: FinalCtaSectionProps) => (
   <section className="w-full py-20 lg:py-28 border-t border-slate-100">
     <motion.article
@@ -75,13 +76,13 @@ const FinalCtaSection = ({
             transition={{ delay: 0.4 }}
             whileHover={{ scale: 1.05 }}
           >
-            <Link
-              to="/onboarding/organization"
-              className="inline-flex items-center gap-2 px-8 py-5 text-slate-700 hover:text-primary-700 text-lg font-normal transition-colors border-2 border-slate-200 hover:border-primary-300 rounded-xl"
+            <button
+              onClick={onContactClick}
+              className="inline-flex items-center gap-2 px-8 py-5 text-slate-700 hover:text-primary-700 text-lg font-normal transition-colors border-2 border-slate-200 hover:border-primary-300 rounded-xl cursor-pointer"
             >
               <FontAwesomeIcon icon={faBuilding} />
               {accountLabel}
-            </Link>
+            </button>
           </motion.div>
         </nav>
       </motion.header>

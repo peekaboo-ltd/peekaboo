@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
   faBicycle,
   faBuilding,
@@ -16,7 +16,6 @@ import { useI18n } from '@/i18n/i18n';
 import type {
   BusinessFeatureItem,
   BusinessHighlightStat,
-  BusinessPlan,
   FeatureItem,
   HeroBusinessStat,
   HeroCopy,
@@ -27,15 +26,16 @@ import HeroSection from './components/HeroSection';
 import TrustedBySection from './components/TrustedBySection';
 import FeaturesSection from './components/FeaturesSection';
 import BusinessSolutionsSection from './components/BusinessSolutionsSection';
-import BusinessPlansSection from './components/BusinessPlansSection';
 import HowItWorksSection from './components/HowItWorksSection';
 import TestimonialsSection from './components/TestimonialsSection';
 import FinalCtaSection from './components/FinalCtaSection';
+import ContactUsDialog from './components/ContactUsDialog';
 
 const Home = () => {
   const { data: landingStats } = useGetLandingStatsQuery();
   const { t } = useI18n();
   const formRef = useRef<HTMLFormElement>(null);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -65,7 +65,7 @@ const Home = () => {
     customersLabel: 'customers',
     trustDailyLabel: 'Trust Peekaboo daily',
     growingCommunityLabel: 'Growing community',
-    businessAccountCta: t('home.b2b.cta.account'),
+    businessAccountCta: t('home.b2b.cta.contact'),
   };
 
   const heroBusinessStats: HeroBusinessStat[] = [
@@ -117,40 +117,6 @@ const Home = () => {
       icon: faBuilding,
       title: t('home.b2b.plans.title'),
       description: t('home.b2b.plans.desc'),
-    },
-  ];
-
-  const businessPlans: BusinessPlan[] = [
-    {
-      name: t('home.b2b.pricing.starter.name'),
-      price: t('home.b2b.pricing.starter.price'),
-      description: t('home.b2b.pricing.starter.desc'),
-      features: [
-        t('home.b2b.pricing.starter.feature1'),
-        t('home.b2b.pricing.starter.feature2'),
-        t('home.b2b.pricing.starter.feature3'),
-      ],
-    },
-    {
-      name: t('home.b2b.pricing.growth.name'),
-      price: t('home.b2b.pricing.growth.price'),
-      description: t('home.b2b.pricing.growth.desc'),
-      features: [
-        t('home.b2b.pricing.growth.feature1'),
-        t('home.b2b.pricing.growth.feature2'),
-        t('home.b2b.pricing.growth.feature3'),
-      ],
-      isPopular: true,
-    },
-    {
-      name: t('home.b2b.pricing.enterprise.name'),
-      price: t('home.b2b.pricing.enterprise.price'),
-      description: t('home.b2b.pricing.enterprise.desc'),
-      features: [
-        t('home.b2b.pricing.enterprise.feature1'),
-        t('home.b2b.pricing.enterprise.feature2'),
-        t('home.b2b.pricing.enterprise.feature3'),
-      ],
     },
   ];
 
@@ -219,6 +185,7 @@ const Home = () => {
         landingStats={landingStats}
         heroCopy={heroCopy}
         businessStats={heroBusinessStats}
+        onContactClick={() => setContactDialogOpen(true)}
       />
 
       <TrustedBySection label={t('home.b2b.trustedBy')} industries={trustedByIndustries} />
@@ -236,19 +203,10 @@ const Home = () => {
         title2={t('home.b2b.title2')}
         subtitle={t('home.b2b.subtitle')}
         features={businessFeatures}
-        primaryCtaLabel={t('home.b2b.cta.trial')}
+        primaryCtaLabel={t('home.b2b.cta.contact')}
         secondaryCtaLabel={t('home.b2b.cta.sales')}
         stats={businessHighlights}
-      />
-
-      <BusinessPlansSection
-        badgeLabel={t('home.b2b.pricing.badge')}
-        title={t('home.b2b.pricing.title')}
-        subtitle={t('home.b2b.pricing.subtitle')}
-        popularLabel={t('home.b2b.pricing.popular')}
-        perMonthLabel={t('home.b2b.pricing.perMonth')}
-        ctaLabel={t('home.b2b.pricing.cta')}
-        plans={businessPlans}
+        onContactClick={() => setContactDialogOpen(true)}
       />
 
       <HowItWorksSection
@@ -269,8 +227,14 @@ const Home = () => {
         title={t('home.cta.title')}
         subtitle={t('home.cta.subtitle')}
         buttonLabel={t('home.cta.button')}
-        accountLabel={t('home.b2b.cta.account')}
+        accountLabel={t('home.b2b.cta.contact')}
         onScrollToForm={scrollToForm}
+        onContactClick={() => setContactDialogOpen(true)}
+      />
+
+      <ContactUsDialog
+        open={contactDialogOpen}
+        onOpenChange={setContactDialogOpen}
       />
     </main>
   );

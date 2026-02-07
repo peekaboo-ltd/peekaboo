@@ -16,16 +16,20 @@ import { UserService } from './user.service';
 import { RoleTypes } from '../constants/role.constants';
 import { OrganizationQuery, OrganizationStatistics } from '../types/b2b.types';
 import { OrganizationMembership } from '../entities/organizationMembership.entity';
+import jwt from 'jsonwebtoken';
+import { EmailService } from '../integrations/emails/email.service';
 
 export class OrganizationService {
   private readonly organizationRepository: Repository<Organization>;
   private readonly membershipService: OrganizationMembershipService;
   private readonly userService: UserService;
+  private readonly emailService: EmailService;
 
   constructor() {
     this.organizationRepository = AppDataSource.getRepository(Organization);
     this.membershipService = new OrganizationMembershipService();
     this.userService = new UserService();
+    this.emailService = new EmailService();
   }
 
   // CREATE ORGANIZATION
@@ -321,5 +325,197 @@ export class OrganizationService {
       where.status = status;
     }
     return this.organizationRepository.count({ where });
+  }
+
+  // CONTACT INQUIRY (from landing page)
+  async submitContactInquiry(data: {
+    contactName: string;
+    contactEmail: string;
+    companyName: string;
+    phoneNumber?: string;
+    message?: string;
+  }): Promise<void> {
+    await this.emailService.sendOrganizationInquiryNotification(data);
+  }
+
+  // ADMIN: INVITE ORGANIZATION (manual onboarding)
+  async inviteOrganization(data: {
+    name: string;
+    email: string;
+    adminName: string;
+    adminEmail: string;
+    phoneNumber?: string;
+    address?: string;
+  }, createdById: UUID): Promise<{ organization: Organization; inviteToken: string }> {
+    // Check if an org with this email already exists
+    const existingOrg = await this.organizationRepository.findOne({
+      where: { email: data.email },
+    });
+    if (existingOrg) {
+      throw new ConflictError('An organization with this email already exists');
+    }
+
+    // Check if admin user already exists by email
+    let adminUser = await this.userService.getUserByCondition({
+      email: data.adminEmail,
+    });
+
+    if (adminUser) {
+      const existingMembership = await this.membershipService.getMembershipByUserId(
+        adminUser.id
+      );
+      if (existingMembership) {
+        throw new ConflictError('This user already belongs to an organization');
+      }
+    } else {
+      // Create admin user without password (they'll set it during onboarding completion)
+      adminUser = await this.userService.createUser(
+        {
+          name: data.adminName,
+          email: data.adminEmail,
+        },
+        [RoleTypes.BUSINESS]
+      );
+    }
+
+    // Create organization with PENDING status
+    const organization = await this.organizationRepository.save({
+      name: data.name,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      address: data.address,
+      createdById,
+      status: OrganizationStatus.PENDING,
+    });
+
+    // Create admin membership
+    await this.membershipService.addMember({
+      organizationId: organization.id,
+      user: {
+        phoneNumber: adminUser.phoneNumber || '',
+        name: adminUser.name,
+        email: adminUser.email,
+      },
+      role: OrganizationRole.ADMIN,
+      addedById: createdById,
+    });
+
+    // Generate invite token (JWT valid for 7 days)
+    const inviteToken = jwt.sign(
+      {
+        organizationId: organization.id,
+        adminUserId: adminUser.id,
+        type: 'org_onboarding',
+      },
+      process.env.JWT_SECRET || 'default_secret',
+      { expiresIn: '7d' }
+    );
+
+    // Send invite email
+    await this.emailService.sendOnboardingInviteEmail({
+      to: data.adminEmail,
+      organizationName: data.name,
+      adminName: data.adminName,
+      inviteToken,
+    });
+
+    return { organization, inviteToken };
+  }
+
+  // VALIDATE ONBOARDING TOKEN
+  async validateOnboardingToken(token: string): Promise<{
+    organizationId: UUID;
+    adminUserId: UUID;
+    organization: Organization;
+  }> {
+    try {
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET || 'default_secret'
+      ) as { organizationId: UUID; adminUserId: UUID; type: string };
+
+      if (decoded.type !== 'org_onboarding') {
+        throw new ValidationError('Invalid token type');
+      }
+
+      const organization = await this.organizationRepository.findOne({
+        where: { id: decoded.organizationId },
+      });
+
+      if (!organization) {
+        throw new NotFoundError('Organization not found');
+      }
+
+      if (organization.status !== OrganizationStatus.PENDING) {
+        throw new ValidationError('Organization has already been onboarded');
+      }
+
+      return {
+        organizationId: decoded.organizationId,
+        adminUserId: decoded.adminUserId,
+        organization,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError || error instanceof ValidationError) {
+        throw error;
+      }
+      throw new ValidationError('Invalid or expired onboarding token');
+    }
+  }
+
+  // COMPLETE ONBOARDING (org admin sets password and activates account)
+  async completeOnboarding(data: {
+    token: string;
+    password: string;
+    phoneNumber: string;
+    adminName?: string;
+    organizationDetails?: {
+      address?: string;
+      description?: string;
+      phoneNumber?: string;
+    };
+  }): Promise<{ organization: Organization; adminUserId: UUID }> {
+    const { organizationId, adminUserId } = await this.validateOnboardingToken(data.token);
+
+    // Update admin user with password and phone
+    const passwordHash = await hashPassword(data.password);
+    const adminUser = await this.userService.getUserById(adminUserId);
+    if (!adminUser) {
+      throw new NotFoundError('Admin user not found');
+    }
+
+    await this.userService.updateUser(adminUserId, {
+      passwordHash,
+      phoneNumber: data.phoneNumber,
+      ...(data.adminName && { name: data.adminName }),
+    });
+
+    // Update organization details if provided
+    const orgUpdate: Partial<Organization> = {
+      status: OrganizationStatus.ACTIVE,
+    };
+    if (data.organizationDetails?.address) {
+      orgUpdate.address = data.organizationDetails.address;
+    }
+    if (data.organizationDetails?.description) {
+      orgUpdate.description = data.organizationDetails.description;
+    }
+    if (data.organizationDetails?.phoneNumber) {
+      orgUpdate.phoneNumber = data.organizationDetails.phoneNumber;
+    }
+
+    const organization = await this.organizationRepository.save({
+      id: organizationId,
+      ...orgUpdate,
+    });
+
+    // Send confirmation email
+    await this.emailService.sendOnboardingCompleteEmail({
+      to: adminUser.email!,
+      organizationName: organization.name,
+      adminName: adminUser.name || 'Admin',
+    });
+
+    return { organization, adminUserId };
   }
 }

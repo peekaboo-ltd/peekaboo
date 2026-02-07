@@ -9,6 +9,13 @@ const router = Router();
 // Public route for B2B registration
 router.post('/register', OrganizationController.createOrganization);
 
+// Public route for contact inquiry (landing page)
+router.post('/contact', OrganizationController.submitContactInquiry);
+
+// Public routes for onboarding completion (from invite email)
+router.get('/onboarding/:token', OrganizationController.validateOnboardingToken);
+router.post('/complete-onboarding', OrganizationController.completeOnboarding);
+
 // Protected routes
 router.use(authenticate);
 
@@ -96,6 +103,13 @@ router.get(
   '/count',
   authorize([RoleTypes.ADMIN, RoleTypes.STAFF]),
   OrganizationController.getOrganizationCount
+);
+
+// Admin: Invite organization (manual onboarding)
+router.post(
+  '/invite',
+  authorize([RoleTypes.ADMIN]),
+  OrganizationController.inviteOrganization
 );
 
 // Admin routes for managing all organizations

@@ -46,14 +46,6 @@ export interface BusinessFeatureItem {
   description: string;
 }
 
-export interface BusinessPlan {
-  name: string;
-  price: string;
-  description: string;
-  features: string[];
-  isPopular?: boolean;
-}
-
 export interface BusinessHighlightStat {
   value: string;
   label: string;
