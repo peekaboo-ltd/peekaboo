@@ -8,6 +8,8 @@ import type {
   ValidateOnboardingTokenResponse,
   CompleteOnboardingPayload,
   CompleteOnboardingResponse,
+  InviteOrganizationPayload,
+  InviteOrganizationResponse,
 } from '@/types/organization.type';
 
 export const organizationMutationApiSlice = createApi({
@@ -60,6 +62,18 @@ export const organizationMutationApiSlice = createApi({
         body: data,
       }),
     }),
+
+    // INVITE ORGANIZATION
+    inviteOrganization: builder.mutation<
+      InviteOrganizationResponse,
+      InviteOrganizationPayload
+    >({
+      query: (data) => ({
+        url: '/organizations/invite',
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -68,4 +82,5 @@ export const {
   useSubmitContactInquiryMutation,
   useValidateOnboardingTokenQuery,
   useCompleteOnboardingMutation,
+  useInviteOrganizationMutation,
 } = organizationMutationApiSlice;
