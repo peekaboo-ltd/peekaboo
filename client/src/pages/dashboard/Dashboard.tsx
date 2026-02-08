@@ -30,6 +30,7 @@ import DashboardSummaryChart from './components/DashboardSummaryChart';
 import DashboardChartsSection from './components/DashboardChartsSection';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -114,6 +115,7 @@ const normalizeChartData = (payload?: Array<{ label?: string; name?: string; val
 const Dashboard = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { data, isLoading, error } = useGetDashboardMetricsQuery({});
+  useDocumentTitle('Dashboard');
 
   const [range, setRange] = useState<'7d' | '30d' | '90d'>('30d');
   const [metric, setMetric] = useState<string>('ORDERS');

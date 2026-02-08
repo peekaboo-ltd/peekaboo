@@ -23,6 +23,7 @@ import {
 } from '@/states/slices/auth.slice';
 import { localStorageUtil } from '@/utils/localStorage.util';
 import { useI18n } from '@/i18n/i18n';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 interface CompleteOnboardingFormData {
   adminName: string;
@@ -39,6 +40,7 @@ const CompleteOnboarding = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const token = searchParams.get('token') || '';
+  useDocumentTitle(t('completeOnboarding.title'));
 
   const {
     data: tokenData,

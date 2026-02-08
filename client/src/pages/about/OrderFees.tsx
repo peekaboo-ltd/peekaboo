@@ -2,10 +2,12 @@ import Button from '@/components/inputs/Button';
 import { ORDER_FEE_RANGES } from '@/constants/order.constants';
 import { formatCurrency } from '@/utils/strings.util';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const OrderFees = () => {
   // NAVIGATION
   const navigate = useNavigate();
+  useDocumentTitle('Order Fees');
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -94,17 +96,19 @@ const OrderFees = () => {
                 Track an Order
               </Link>
             </aside>
-            <Button
-              route="#"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(-1);
-              }}
-              primary
-              className='w-fit'
-            >
-              Back
-            </Button>
+            <div className="lg:col-span-3 flex flex-wrap gap-3">
+              <Button
+                route="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(-1);
+                }}
+                primary
+                className="w-fit"
+              >
+                Back
+              </Button>
+            </div>
           </section>
         </article>
       </section>

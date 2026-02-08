@@ -9,6 +9,7 @@ import { localStorageUtil } from '@/utils/localStorage.util';
 import { useEffect, useState, useCallback } from 'react';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 type AuthMode = 'login' | 'register';
 
@@ -31,6 +32,7 @@ export const Login = () => {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [phoneError, setPhoneError] = useState<string | undefined>();
+  useDocumentTitle(authMode === 'login' ? 'Sign In' : 'Create Account');
 
   // Redirect authenticated users to dashboard
   useEffect(() => {

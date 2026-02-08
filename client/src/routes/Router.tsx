@@ -7,6 +7,7 @@ import PublicLayout from '@/containers/navigation/PublicLayout';
 import { NotFoundPage } from '../pages/common';
 import { Login } from '@/pages/auth';
 import AuthCallback from '@/pages/auth/AuthCallback';
+import ForgotPassword from '@/pages/auth/ForgotPassword';
 import { ProtectedRoute } from './ProtectedRoute';
 import { Dashboard } from '@/pages/dashboard';
 import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayout';
@@ -38,7 +39,7 @@ const Router = () => {
               element={<Navigate to="/auth/login" replace />}
             />
             <Route path="callback" element={<AuthCallback />} />
-            <Route path="forgot-password" element={<p>Forgot Password</p>} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
           </Route>
           <Route path="onboarding">
             <Route path="organization" element={<OrganizationOnboarding />} />

@@ -8,8 +8,11 @@ import {
   faUserPlus,
   faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const NotFoundPage = () => {
+  useDocumentTitle('Page Not Found');
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 via-white to-gray-100 px-4 py-12">
       <section className="max-w-2xl w-full text-center space-y-8">

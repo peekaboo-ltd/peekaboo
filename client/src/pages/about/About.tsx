@@ -7,8 +7,10 @@ import {
   faEnvelope,
   faTruck,
 } from '@fortawesome/free-solid-svg-icons';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const About = () => {
+  useDocumentTitle('About');
 
   return (
     <main className="min-h-screen bg-gray-50">

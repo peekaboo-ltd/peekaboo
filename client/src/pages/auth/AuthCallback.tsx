@@ -13,6 +13,7 @@ import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
 import { Controller, useForm } from 'react-hook-form';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 interface AddPhoneFormData {
   phoneNumber: string;
@@ -27,6 +28,9 @@ const AuthCallback = () => {
   const [token, setTokenState] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  useDocumentTitle(
+    isLoading ? 'Signing In' : needsPhone ? 'Add Phone Number' : 'Authenticating',
+  );
 
   const {
     control,

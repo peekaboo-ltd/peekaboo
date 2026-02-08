@@ -19,6 +19,7 @@ import type {
   TeamMemberFormData,
   CreateOrganizationPayload,
 } from '@/types/organization.type';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 // Animation variants
 const containerVariants: Variants = {
@@ -102,6 +103,7 @@ const UserManagementOnboarding = () => {
   );
   const { t } = useI18n();
   const { createOrganization, isLoading } = useCreateOrganization();
+  useDocumentTitle(t('onboarding.users.title'));
 
   // Redirect if previous steps not completed
   useEffect(() => {

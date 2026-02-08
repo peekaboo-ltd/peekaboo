@@ -14,6 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
 import { useI18n } from '@/i18n/i18n';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import type {
   BusinessFeatureItem,
   BusinessHighlightStat,
@@ -36,6 +37,7 @@ const Home = () => {
   const { t } = useI18n();
   const formRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
+  useDocumentTitle('Home');
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });

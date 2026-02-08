@@ -8,10 +8,12 @@ import OrderSearchBar from '@/components/dashboard/OrderSearchBar';
 import { OrderStatus } from '@/types/order.type';
 import { useStatusFilter } from '@/hooks/common/filters.hooks';
 import { useForm } from 'react-hook-form';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const OrdersPage = () => {
   // STATE VARIABLES
   const { ordersList } = useAppSelector((state) => state.order);
+  useDocumentTitle('Orders');
 
   // REACT HOOK FORM
   const { control, setValue } = useForm();

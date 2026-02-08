@@ -19,6 +19,7 @@ import {
 } from '@/states/slices/user.slice';
 import UpdateUserProfileModal from './UpdateUserProfileModal';
 import { faPenToSquare, faUser } from '@fortawesome/free-regular-svg-icons';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -52,6 +53,7 @@ const UserProfilePage = () => {
   const dispatch = useAppDispatch();
   const { user: authUser } = useAppSelector((state) => state.auth);
   const { selectedUser } = useAppSelector((state) => state.user);
+  useDocumentTitle('Profile');
 
   useEffect(() => {
     if (authUser && (!selectedUser || selectedUser.id !== authUser.id)) {
@@ -95,7 +97,7 @@ const UserProfilePage = () => {
 
   return (
     <motion.main
-      className="relative w-full flex flex-col gap-6 max-w-6xl mx-auto"
+      className="relative w-full flex flex-col gap-6 max-w-6xl mx-auto px-4 sm:px-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
