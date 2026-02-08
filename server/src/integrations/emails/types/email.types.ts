@@ -186,6 +186,7 @@ export interface OrderStatusEmailData {
   orderReference: string;
   status: string;
   statusMessage: string;
+  trackingUrl?: string;
   trackingInfo?: {
     riderName?: string;
     riderPhone?: string;
