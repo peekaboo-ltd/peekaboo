@@ -79,6 +79,7 @@ export default function DashboardScreen() {
       <View style={styles.background}>
         <View style={styles.glowTop} />
         <View style={styles.glowMid} />
+        <View style={styles.glowBottom} />
       </View>
       {/* Header */}
       <Animated.View
@@ -108,6 +109,10 @@ export default function DashboardScreen() {
             <Text style={styles.subline}>Ready to take on today’s routes.</Text>
           </View>
           <View style={styles.headerRight}>
+            <View style={styles.statusPill}>
+              <Ionicons name="pulse" size={14} color={colors.success} />
+              <Text style={styles.statusText}>Shift Active</Text>
+            </View>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
                 {(user?.name || 'R')[0]?.toUpperCase()}
@@ -155,8 +160,12 @@ export default function DashboardScreen() {
             },
           ]}
         >
+          <View style={styles.heroHighlight} />
           <View style={styles.heroHeader}>
-            <Text style={styles.heroKicker}>Today’s Focus</Text>
+            <View>
+              <Text style={styles.heroKicker}>Today’s Focus</Text>
+              <Text style={styles.heroSubtitle}>Keep momentum with active stops.</Text>
+            </View>
             <View style={styles.heroBadge}>
               <Ionicons name="time-outline" size={14} color={colors.warning} />
               <Text style={styles.heroBadgeText}>
@@ -215,7 +224,13 @@ export default function DashboardScreen() {
             },
           ]}
         >
-          <Text style={styles.sectionTitle}>Today’s Overview</Text>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionKicker}>Overview</Text>
+              <Text style={styles.sectionTitle}>Today’s Snapshot</Text>
+            </View>
+            <Text style={styles.sectionHint}>Updated just now</Text>
+          </View>
           <View style={styles.statsGrid}>
             <StatCard
               title="Deliveries"
@@ -244,7 +259,13 @@ export default function DashboardScreen() {
           </View>
 
           {/* Quick Actions */}
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionKicker}>Shortcuts</Text>
+              <Text style={styles.sectionTitle}>Quick Actions</Text>
+            </View>
+            <Text style={styles.sectionHint}>Stay on track</Text>
+          </View>
           <View style={styles.quickActions}>
             <Card style={styles.actionCard} onPress={handleViewAssignments}>
               <View style={styles.actionIconContainer}>
@@ -276,7 +297,13 @@ export default function DashboardScreen() {
             },
           ]}
         >
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionKicker}>Timeline</Text>
+              <Text style={styles.sectionTitle}>Recent Activity</Text>
+            </View>
+            <Text style={styles.sectionHint}>Last 7 days</Text>
+          </View>
           <RecentActivity 
             activities={recentActivity || []} 
             onActivityPress={(activity) => {
@@ -331,6 +358,15 @@ const styles = StyleSheet.create({
     top: 180,
     left: -120,
   },
+  glowBottom: {
+    position: 'absolute',
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    bottom: -120,
+    right: -80,
+  },
   header: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
@@ -356,6 +392,24 @@ const styles = StyleSheet.create({
   headerRight: {
     alignItems: 'flex-end',
     gap: spacing.sm,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(16, 185, 129, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
+  },
+  statusText: {
+    fontSize: typography.caption.fontSize,
+    color: colors.text.secondary,
+    fontWeight: '600',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
   kickerRow: {
     flexDirection: 'row',
@@ -436,6 +490,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 24,
     elevation: 4,
+    overflow: 'hidden',
+  },
+  heroHighlight: {
+    position: 'absolute',
+    top: -120,
+    right: -80,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(29, 84, 109, 0.08)',
   },
   heroHeader: {
     flexDirection: 'row',
@@ -449,6 +513,11 @@ const styles = StyleSheet.create({
     letterSpacing: 2.2,
     fontWeight: '600',
     color: colors.text.secondary,
+  },
+  heroSubtitle: {
+    marginTop: spacing.xs,
+    fontSize: typography.caption.fontSize,
+    color: colors.text.disabled,
   },
   heroBadge: {
     flexDirection: 'row',
@@ -537,6 +606,23 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: spacing.md,
     marginTop: 0,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+  },
+  sectionKicker: {
+    fontSize: typography.caption.fontSize,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    color: colors.text.disabled,
+    marginBottom: spacing.xs,
+  },
+  sectionHint: {
+    fontSize: typography.caption.fontSize,
+    color: colors.text.disabled,
   },
   section: {
     marginTop: spacing.lg,
