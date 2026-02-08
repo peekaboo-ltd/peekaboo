@@ -85,7 +85,12 @@ const BusinessSolutionsSection = ({
           <motion.nav className="flex flex-wrap gap-4" variants={fadeInUp}>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                onClick={onContactClick}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onContactClick) {
+                    onContactClick();
+                  }
+                }}
                 primary
               >
                 {primaryCtaLabel}
