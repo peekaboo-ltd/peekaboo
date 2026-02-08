@@ -1,5 +1,14 @@
 // API Configuration
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000/api';
+const apiBaseUrlFromEnv = process.env.EXPO_PUBLIC_API_BASE_URL;
+if (!apiBaseUrlFromEnv) {
+  if (__DEV__) {
+    console.warn('EXPO_PUBLIC_API_BASE_URL is missing; using localhost fallback for development.');
+  } else {
+    console.error('EXPO_PUBLIC_API_BASE_URL is missing in this build. Check EAS env/secrets.');
+  }
+}
+
+export const API_BASE_URL = apiBaseUrlFromEnv || (__DEV__ ? 'http://localhost:3000/api' : '');
 export const API_TIMEOUT = 30000;
 
 // Storage Keys

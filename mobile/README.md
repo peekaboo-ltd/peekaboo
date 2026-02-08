@@ -58,9 +58,11 @@ cp .env.example .env
 Update the environment variables:
 
 ```env
-EXPO_PUBLIC_API_BASE_URL=http://your-backend-url/api
+EXPO_PUBLIC_API_BASE_URL=https://your-backend-url/api/v1
 EXPO_PUBLIC_PROJECT_ID=your-expo-project-id
 ```
+
+For EAS builds, make sure `EXPO_PUBLIC_*` values are provided via `eas.json` `env` or EAS secrets. Local `.env` files are not used in cloud builds.
 
 ### 3. Start Development Server
 
@@ -225,7 +227,7 @@ Run on physical devices for the best experience:
 1. **Metro bundler issues**: Clear cache with `npx expo start -c`
 2. **iOS Simulator not launching**: Run `npx expo run:ios`
 3. **Android emulator issues**: Make sure ANDROID_HOME is set
-4. **API connection issues**: Check API_BASE_URL in .env
+4. **API connection issues**: Check `EXPO_PUBLIC_API_BASE_URL` in `.env` and ensure EAS build env/secrets are configured.
 
 ### Logs
 
