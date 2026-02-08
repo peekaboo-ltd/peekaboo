@@ -1,4 +1,3 @@
-import Loader from '@/components/inputs/Loader';
 import { useGetAdministrativeDivisions } from '@/hooks/locations/location.hooks';
 import type { LocationCoordinates } from '@/utils/locations.util';
 import { capitalizeString } from '@/utils/strings.util';
@@ -26,7 +25,16 @@ const AdministrativeLocation = ({
   }, [location, getAdministrativeDivisions]);
 
   if (administrativeDivisionsIsLoading) {
-    return <Loader className="text-black" />;
+    return (
+      <section className="space-y-3 animate-pulse" aria-live="polite">
+        {[0, 1, 2].map((item) => (
+          <div key={item} className="flex items-center gap-3">
+            <span className="h-3 w-20 rounded-full bg-slate-200" />
+            <span className="h-3 w-40 rounded-full bg-slate-100" />
+          </div>
+        ))}
+      </section>
+    );
   }
 
   return (

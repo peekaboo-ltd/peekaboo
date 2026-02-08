@@ -18,13 +18,25 @@ router.use(authenticate);
 
 router.post(
   '/',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS]),
+  authorize([
+    RoleTypes.CUSTOMER,
+    RoleTypes.BUSINESS,
+    RoleTypes.ADMIN,
+    RoleTypes.STAFF,
+    RoleTypes.RIDER,
+  ]),
   OrderController.createOrder,
 );
 
 router.patch(
   '/:id',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS]),
+  authorize([
+    RoleTypes.CUSTOMER,
+    RoleTypes.BUSINESS,
+    RoleTypes.ADMIN,
+    RoleTypes.STAFF,
+    RoleTypes.RIDER,
+  ]),
   OrderController.updateOrder,
 );
 
@@ -41,6 +53,7 @@ router.patch(
     RoleTypes.BUSINESS,
     RoleTypes.ADMIN,
     RoleTypes.RIDER,
+    RoleTypes.STAFF,
   ]),
   OrderController.acceptOrder,
 );
@@ -52,6 +65,7 @@ router.get(
     RoleTypes.BUSINESS,
     RoleTypes.ADMIN,
     RoleTypes.RIDER,
+    RoleTypes.STAFF,
   ]),
   OrderController.getOrderById,
 );
@@ -63,6 +77,7 @@ router.get(
     RoleTypes.BUSINESS,
     RoleTypes.ADMIN,
     RoleTypes.RIDER,
+    RoleTypes.STAFF,
   ]),
   OrderController.fetchOrders,
 );

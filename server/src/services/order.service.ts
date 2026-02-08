@@ -80,13 +80,13 @@ export class OrderService {
         order.createdById
       );
 
-      if (membership && membership.organization) {
+      if (membership && membership?.organization) {
         // This is a business order
         order.organizationId = membership.organization.id;
         order.isBusinessOrder = true;
 
         // Apply business plan pricing if available
-        if (membership.organization.businessPlan) {
+        if (membership?.organization?.businessPlan) {
           const businessPlan = membership.organization.businessPlan;
           order.businessPlanPrice = Number(businessPlan.pricePerOrder);
           order.initialFee = Number(businessPlan.pricePerOrder);

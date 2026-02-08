@@ -3,8 +3,9 @@ import { Suspense, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import HeroScene from '@/components/three/HeroScene';
-import { useCreatePublicOrder } from '@/hooks/orders/orders.hooks';
+import { useCreateOrder, useCreatePublicOrder } from '@/hooks/orders/orders.hooks';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import { useAppSelector } from '@/states/hooks';
 import type { LandingStats } from '@/types/landing.type';
 import type { HeroCopy, HomeFormValues } from '../home.types';
 import { containerVariants, itemVariants } from '../home.animations';
@@ -36,16 +37,25 @@ const HeroSection = ({
     handleSubmit,
     formState: { errors },
   } = useForm<HomeFormValues>({ mode: 'onChange' });
-  const { createPublicOrder, isLoading } = useCreatePublicOrder();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { createOrder, isLoading: isCreatingOrder } = useCreateOrder();
+  const { createPublicOrder, isLoading: isCreatingPublicOrder } = useCreatePublicOrder();
 
   const onSubmit = handleSubmit((data) => {
     const sender = validateAndFormatPhoneNumber(data.senderPhoneNumber);
     const recipient = validateAndFormatPhoneNumber(data.recipientPhoneNumber);
     if (!sender.formattedNumber || !recipient.formattedNumber) return;
-    createPublicOrder({
-      senderPhoneNumber: sender.formattedNumber,
-      recipientPhoneNumber: recipient.formattedNumber,
-    });
+    if (isAuthenticated) {
+      createOrder({
+        senderPhoneNumber: sender.formattedNumber,
+        recipientPhoneNumber: recipient.formattedNumber,
+      });
+    } else {
+      createPublicOrder({
+        senderPhoneNumber: sender.formattedNumber,
+        recipientPhoneNumber: recipient.formattedNumber,
+      });
+    }
   });
 
   return (
@@ -130,7 +140,7 @@ const HeroSection = ({
                 formRef={formRef}
                 onSubmit={onSubmit}
                 control={control}
-                isLoading={isLoading}
+                isLoading={isCreatingOrder || isCreatingPublicOrder}
                 errors={errors}
                 copy={{
                   formTitle: heroCopy.formTitle,

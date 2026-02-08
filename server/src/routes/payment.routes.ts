@@ -11,14 +11,14 @@ router.use(authenticate);
 // Create payment
 router.post(
   '/',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS]),
+  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.STAFF]),
   PaymentController.createPayment
 );
 
 // Fetch payments
 router.get(
   '/',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER]),
+  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.STAFF]),
   PaymentController.fetchPayments
 );
 

@@ -51,8 +51,41 @@ const HeroForm = ({
   isLoading,
   copy,
   errors,
-}: HeroFormProps) => (
-  <form ref={formRef} onSubmit={onSubmit} className="relative isolate">
+}: HeroFormProps) => {
+  const validateRecipientPhone = (value: string | undefined) => {
+    const baseValidation = validateRwandanPhone(value);
+    if (baseValidation !== true) {
+      return baseValidation;
+    }
+
+    const senderValue = control?._formValues?.senderPhoneNumber as
+      | string
+      | undefined;
+
+    if (!senderValue) {
+      return true;
+    }
+
+    const normalizedSender =
+      validateAndFormatPhoneNumber(senderValue).formattedNumber ||
+      senderValue.trim();
+    const normalizedRecipient =
+      validateAndFormatPhoneNumber(value || '').formattedNumber ||
+      (value || '').trim();
+
+    if (
+      normalizedSender &&
+      normalizedRecipient &&
+      normalizedSender === normalizedRecipient
+    ) {
+      return 'Sender and recipient phone numbers must be different';
+    }
+
+    return true;
+  };
+
+  return (
+    <form ref={formRef} onSubmit={onSubmit} className="relative isolate">
     <span
       className="pointer-events-none absolute -inset-6 rounded-[32px] bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.35),_transparent_70%)] blur-2xl"
       aria-hidden="true"
@@ -116,7 +149,7 @@ const HeroForm = ({
         <Controller
           name="recipientPhoneNumber"
           control={control}
-          rules={{ validate: validateRwandanPhone }}
+          rules={{ validate: validateRecipientPhone }}
           render={({ field }) => (
             <label className="block space-y-2">
               <span className="text-sm font-semibold text-slate-700 flex items-center gap-2">
@@ -185,6 +218,7 @@ const HeroForm = ({
       </aside>
     </div>
   </form>
-);
+  );
+};
 
 export default HeroForm;
