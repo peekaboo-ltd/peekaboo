@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import type { BusinessFeatureItem, BusinessHighlightStat } from '../home.types';
 import { containerVariants, fadeInUp, slideInLeft, slideInRight } from '../home.animations';
+import Button from '@/components/inputs/Button';
 
 interface BusinessSolutionsSectionProps {
   badgeLabel: string;
@@ -11,7 +12,6 @@ interface BusinessSolutionsSectionProps {
   subtitle: string;
   features: BusinessFeatureItem[];
   primaryCtaLabel: string;
-  secondaryCtaLabel: string;
   stats: BusinessHighlightStat[];
   onContactClick?: () => void;
 }
@@ -26,7 +26,7 @@ const BusinessSolutionsSection = ({
   stats,
   onContactClick,
 }: BusinessSolutionsSectionProps) => (
-  <section className="w-full py-20 lg:py-28 border-y border-slate-100">
+  <section className="w-full py-20 lg:py-28 border-y border-slate-100 bg-white">
     <motion.article
       className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
       initial="hidden"
@@ -80,9 +80,9 @@ const BusinessSolutionsSection = ({
 
           <motion.nav className="flex flex-wrap gap-4" variants={fadeInUp}>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <button
+              <Button
                 onClick={onContactClick}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white rounded-xl font-normal hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/25 cursor-pointer"
+                primary
               >
                 {primaryCtaLabel}
                 <motion.span
@@ -91,14 +91,14 @@ const BusinessSolutionsSection = ({
                 >
                   <FontAwesomeIcon icon={faArrowRight} />
                 </motion.span>
-              </button>
+              </Button>
             </motion.div>
           </motion.nav>
         </motion.figcaption>
 
         <motion.aside className="relative" variants={slideInRight}>
           <motion.article
-            className="rounded-2xl p-8 border border-slate-200 shadow-xl shadow-slate-900/5"
+            className="rounded-2xl p-8 border border-slate-200 bg-white/95 shadow-xl shadow-slate-900/5"
             animate={{ y: [-8, 8, -8] }}
             transition={{ duration: 4, repeat: Infinity, ease: [0.42, 0, 0.58, 1] }}
           >

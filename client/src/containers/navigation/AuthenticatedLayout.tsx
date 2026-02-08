@@ -2,9 +2,13 @@ import { Outlet } from 'react-router-dom';
 import { useAppSelector } from '@/states/hooks';
 import AuthenticatedSidebar from './AuthenticatedSidebar';
 import AuthenticatedNavbar from './AuthenticatedNavbar';
+import { useInactivityTimeout } from '@/hooks/common/session.hooks';
 
 export const AuthenticatedLayout = () => {
   const { isOpen: sidebarOpen } = useAppSelector((state) => state.sidebar);
+
+  // INITIALIZE INACTIVITY TIMEOUT
+  useInactivityTimeout();
 
   return (
     <section className="flex h-screen w-full overflow-hidden relative">

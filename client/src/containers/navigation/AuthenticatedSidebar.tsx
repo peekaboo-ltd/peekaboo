@@ -139,9 +139,9 @@ const AuthenticatedSidebar = () => {
                                 to={nav.path}
                                 className={`flex w-full items-center gap-4 font-medium text-[14px] ease-in-out duration-200 rounded-lg 
                           ${sidebarOpen ? 'px-4 py-3' : 'p-3 justify-center'}
-                          hover:bg-white/90 hover:text-primary
+                          hover:bg-white hover:text-slate-900
                           ${isLinkActive
-                                        ? 'bg-white text-primary font-semibold'
+                                        ? 'bg-white text-slate-900 font-semibold'
                                         : 'text-white'
                                     }`}
                                 onClick={(e) => {
@@ -178,7 +178,7 @@ const AuthenticatedSidebar = () => {
                                 {nav.subcategories && sidebarOpen && (
                                     <FontAwesomeIcon
                                         icon={subcategoriesIsOpen ? faChevronUp : faChevronDown}
-                                        className="ml-auto text-base text-gray-400"
+                                        className="ml-auto text-base text-white/70"
                                     />
                                 )}
                             </Link>
@@ -197,9 +197,9 @@ const AuthenticatedSidebar = () => {
                                                 <Link
                                                     to={sub.path}
                                                     className={`flex items-center w-full gap-3 px-4 py-3 font-medium text-[14px] ease-in-out duration-200 rounded-md 
-                                    hover:bg-white hover:text-primary
+                                    hover:bg-white hover:text-slate-900
                                     ${isSubLinkActive
-                                                            ? 'bg-white text-primary font-semibold'
+                                                            ? 'bg-white text-slate-900 font-semibold'
                                                             : 'text-white'
                                                         }`}
                                                     onClick={(e) => {

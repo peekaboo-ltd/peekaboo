@@ -13,6 +13,9 @@ export interface ChartDataPoint {
   value: number;
 }
 
+export type SummaryChartMetric = 'ORDERS' | 'REVENUE' | 'DELIVERIES' | 'ACTIVE_USERS';
+export type SummaryChartPeriod = '7d' | '30d' | '90d';
+
 export interface OrderTrendData {
   period: string;
   data: ChartDataPoint[];
@@ -59,8 +62,8 @@ export interface AdminMetrics {
 export interface RiderMetrics {
   activeAssignments: number;
   completedDeliveries: number;
-  earningsThisMonth: number;
-  totalEarnings: number;
+  deliveriesThisMonth: number;
+  completionRate: number;
   acceptanceRate: number;
   pendingAssignments: number;
   assignmentsByStatus: AssignmentStatusCount[];
@@ -71,8 +74,9 @@ export interface CustomerMetrics {
   totalOrders: number;
   activeOrders: number;
   completedOrders: number;
-  totalSpent: number;
-  pendingPayments: number;
+  ordersThisMonth: number;
+  cancelledOrders: number;
+  deliverySuccessRate: number;
   ordersByStatus: OrderStatusCount[];
   recentActivity: RecentActivity[];
 }
@@ -81,7 +85,8 @@ export interface BusinessMetrics {
   totalOrders: number;
   activeOrders: number;
   completedOrders: number;
-  totalSpent: number;
+  teamMembers: number;
+  ordersThisWeek: number;
   pendingPayments: number;
   ordersByStatus: OrderStatusCount[];
   recentActivity: RecentActivity[];

@@ -17,6 +17,11 @@ import {
   faTruck,
   faPercent,
   faHourglassHalf,
+  faCalendarCheck,
+  faCheckDouble,
+  faBan,
+  faUserGroup,
+  faCalendarWeek,
 } from '@fortawesome/free-solid-svg-icons';
 import { formatCurrency, formatNumbers } from './strings.util';
 
@@ -92,6 +97,13 @@ export const getRiderMetricCards = (
     icon: faClipboardList,
   },
   {
+    label: 'Pending Assignments',
+    value: formatNumbers(metrics.pendingAssignments),
+    colorClass: 'text-amber-600',
+    href: '/assignments',
+    icon: faHourglassHalf,
+  },
+  {
     label: 'Completed Deliveries',
     value: formatNumbers(metrics.completedDeliveries),
     colorClass: 'text-green-600',
@@ -99,18 +111,11 @@ export const getRiderMetricCards = (
     icon: faCheckCircle,
   },
   {
-    label: 'Earnings This Month',
-    value: formatCurrency(metrics.earningsThisMonth),
-    colorClass: 'text-blue-700',
+    label: 'Deliveries This Month',
+    value: formatNumbers(metrics.deliveriesThisMonth),
+    colorClass: 'text-purple-600',
     href: '/assignments',
-    icon: faChartLine,
-  },
-  {
-    label: 'Total Earnings',
-    value: formatCurrency(metrics.totalEarnings),
-    colorClass: 'text-green-600',
-    href: '/assignments',
-    icon: faDollarSign,
+    icon: faCalendarCheck,
   },
   {
     label: 'Acceptance Rate',
@@ -121,11 +126,12 @@ export const getRiderMetricCards = (
     icon: faPercent,
   },
   {
-    label: 'Pending Assignments',
-    value: formatNumbers(metrics.pendingAssignments),
-    colorClass: 'text-amber-600',
+    label: 'Completion Rate',
+    value: `${formatNumbers(metrics.completionRate)}%`,
+    colorClass:
+      metrics.completionRate >= 90 ? 'text-green-600' : 'text-amber-600',
     href: '/assignments',
-    icon: faHourglassHalf,
+    icon: faCheckDouble,
   },
 ];
 
@@ -154,18 +160,26 @@ export const getCustomerMetricCards = (
     icon: faCheckCircle,
   },
   {
-    label: 'Total Spent',
-    value: formatCurrency(metrics.totalSpent),
-    colorClass: 'text-blue-700',
+    label: 'Orders This Month',
+    value: formatNumbers(metrics.ordersThisMonth),
+    colorClass: 'text-purple-600',
     href: '/orders',
-    icon: faDollarSign,
+    icon: faCalendarCheck,
   },
   {
-    label: 'Pending Payments',
-    value: formatNumbers(metrics.pendingPayments),
-    colorClass: 'text-amber-600',
+    label: 'Cancelled Orders',
+    value: formatNumbers(metrics.cancelledOrders),
+    colorClass: 'text-red-500',
     href: '/orders',
-    icon: faClock,
+    icon: faBan,
+  },
+  {
+    label: 'Success Rate',
+    value: `${formatNumbers(metrics.deliverySuccessRate)}%`,
+    colorClass:
+      metrics.deliverySuccessRate >= 90 ? 'text-green-600' : 'text-amber-600',
+    href: '/orders',
+    icon: faPercent,
   },
 ];
 
@@ -203,13 +217,6 @@ export const getBusinessMetricCards = (
     icon: faChartLine,
   },
   {
-    label: 'Average Order Value',
-    value: formatCurrency(metrics.averageOrderValue),
-    colorClass: 'text-blue-700',
-    href: '/orders',
-    icon: faDollarSign,
-  },
-  {
     label: 'Delivery Success Rate',
     value: `${formatNumbers(metrics.deliverySuccessRate)}%`,
     colorClass:
@@ -218,11 +225,18 @@ export const getBusinessMetricCards = (
     icon: faCheckCircle,
   },
   {
-    label: 'Total Spent',
-    value: formatCurrency(metrics.totalSpent),
-    colorClass: 'text-blue-600',
+    label: 'Team Members',
+    value: formatNumbers(metrics.teamMembers),
+    colorClass: 'text-indigo-600',
+    href: '/users',
+    icon: faUserGroup,
+  },
+  {
+    label: 'Orders This Week',
+    value: formatNumbers(metrics.ordersThisWeek),
+    colorClass: 'text-cyan-600',
     href: '/orders',
-    icon: faDollarSign,
+    icon: faCalendarWeek,
   },
   {
     label: 'Pending Payments',

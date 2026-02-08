@@ -47,7 +47,7 @@ const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSect
               transition: { type: 'spring', stiffness: 400, damping: 17 },
             }}
           >
-            <article className="group h-full rounded-2xl p-7 border border-slate-200 hover:border-primary-300 hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-500">
+            <article className="group h-full rounded-2xl p-7 border border-slate-200 bg-white/95 shadow-sm hover:border-primary-300 hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-500">
               <motion.figure
                 className="w-14 h-14 bg-primary-50 rounded-xl flex items-center justify-center mb-5 group-hover:bg-primary-100 transition-colors duration-300"
                 whileHover={{ rotate: [0, -10, 10, 0] }}

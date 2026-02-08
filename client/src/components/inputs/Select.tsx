@@ -1,88 +1,136 @@
-import { FieldError, FieldValues, FieldErrorsImpl, Merge } from "react-hook-form";
 import {
-  Select as SelectUI,
+  Select as SelectComponent,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from '@/components/ui/select';
+import { UUID } from 'crypto';
+import { useState, useRef, useEffect, forwardRef } from 'react';
+import CustomTooltip from './CustomTooltip';
+import useDebounce from '@/hooks/common/debounce.hooks';
+import { SkeletonLoader } from './Loader';
 
-export interface SelectOption {
-  value: string;
-  label: string;
-  disabled?: boolean;
-}
-
-export interface SelectProps {
-  label?: string;
-  name?: string;
+interface SelectProps {
+  label?: string | number | undefined;
+  options?: Array<{
+    label: string | undefined;
+    value: string | UUID;
+    disabled?: boolean;
+  }>;
+  defaultValue?: string | undefined;
   placeholder?: string;
-  required?: boolean;
-  options: SelectOption[];
-  value?: string;
-  defaultValue?: string;
-  onValueChange?: (value: string) => void;
   className?: string;
-  disabled?: boolean;
-  errorMessage?:
-    | string
-    | FieldError
-    | Merge<FieldError, FieldErrorsImpl<FieldValues>>
-    | undefined;
+  onChange?: ((value: string) => void) | undefined;
+  value?: string | undefined;
+  required?: boolean;
+  labelClassName?: string | undefined;
+  name?: string | undefined;
+  searchable?: boolean;
+  readOnly?: boolean;
+  isLoading?: boolean;
 }
 
-const Select = ({
-  label,
-  name,
-  placeholder = "Select an option",
-  required,
-  options,
-  value,
-  defaultValue,
-  onValueChange,
-  className,
-  disabled,
-  errorMessage,
-}: SelectProps) => {
-  return (
-    <label className="w-full flex flex-col gap-1">
-      {label && (
-        <span className="text-sm font-medium">
-          {label} {required && <span className="text-black">*</span>}
-        </span>
-      )}
-      <SelectUI
-        value={value}
-        defaultValue={defaultValue}
-        onValueChange={onValueChange}
-        name={name}
-        disabled={disabled}
-      >
-        <SelectTrigger
-          className={`py-[7px] px-4 font-normal w-full !text-[13px] cursor-pointer rounded-lg border-[1.5px] border-secondary border-opacity-50 outline-none focus:outline-none focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className} ${
-            errorMessage ? "border-red-500" : ""
-          }`}
-        >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-              className="cursor-pointer hover:bg-background !text-[13px]"
+const Select = forwardRef<HTMLInputElement, SelectProps>(
+  (
+    {
+      label = undefined,
+      required = false,
+      labelClassName = undefined,
+      name = undefined,
+      searchable = false,
+      readOnly = false,
+      options = [],
+      defaultValue = undefined,
+      placeholder = 'Select here...',
+      className = undefined,
+      value = '',
+      onChange,
+      isLoading = false,
+    },
+    ref
+  ) => {
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const filteredOptions = searchable
+      ? options.filter((option) =>
+          option.label
+            ?.toLowerCase()
+            .includes(debouncedSearchTerm.toLowerCase())
+        )
+      : options;
+
+    const handleValueChange = (selectedValue: string) => {
+      if (onChange) {
+        onChange(selectedValue);
+      }
+      setSearchTerm('');
+    };
+
+    useEffect(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, [debouncedSearchTerm]);
+
+    return (
+      <label className={`flex flex-col gap-1 w-full ${labelClassName}`}>
+        <p className={label ? 'flex items-center gap-1 text-[14px]' : 'hidden'}>
+          {label}{' '}
+          <CustomTooltip
+            label={required ? `${label} is required` : ''}
+            labelClassName="text-[12px] bg-red-600"
+          >
+            <span className={required ? `text-red-600 cursor-pointer` : 'hidden'}>*</span>
+          </CustomTooltip>
+        </p>
+        {isLoading ? (
+          <SkeletonLoader type="input" />
+        ) : (
+          <SelectComponent
+            onValueChange={handleValueChange}
+            defaultValue={defaultValue}
+            value={value}
+            name={name}
+          >
+            <SelectTrigger
+              className={`w-full focus:ring-transparent ring-0 h-10 ${className}`}
             >
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </SelectUI>
-      {errorMessage && (
-        <p className="text-sm text-black">{String(errorMessage)}</p>
-      )}
-    </label>
-  );
-};
+              <SelectValue
+                className="!text-[10px] truncate"
+                placeholder={
+                  <p className="text-[13px] text-gray-500 truncate">{placeholder}</p>
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {filteredOptions.map((option, index: number) => {
+                  return (
+                    <SelectItem
+                      ref={ref}
+                      key={index}
+                      value={option.value}
+                      disabled={option?.disabled || readOnly}
+                      className="cursor-pointer text-[13px] py-1 hover:bg-background"
+                    >
+                      <p className="text-[13px] py-[3px] truncate">{option.label}</p>
+                    </SelectItem>
+                  );
+                })}
+              </SelectGroup>
+            </SelectContent>
+          </SelectComponent>
+        )}
+      </label>
+    );
+  }
+);
+
+Select.displayName = 'Select';
 
 export default Select;

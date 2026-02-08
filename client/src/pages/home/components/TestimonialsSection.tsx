@@ -58,7 +58,7 @@ const TestimonialsSection = ({
 
         <motion.figure className="relative max-w-4xl mx-auto" variants={scaleIn}>
           <motion.blockquote
-            className="rounded-2xl p-8 sm:p-12 lg:p-14 border border-slate-200 shadow-lg shadow-slate-900/5"
+            className="rounded-2xl p-8 sm:p-12 lg:p-14 border border-slate-200 bg-white/95 shadow-lg shadow-slate-900/5"
             whileHover={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)' }}
             transition={{ duration: 0.3 }}
           >

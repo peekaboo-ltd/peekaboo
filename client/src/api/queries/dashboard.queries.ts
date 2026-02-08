@@ -22,6 +22,18 @@ export const dashboardQueriesApiSlice = createApi({
         params: { period },
       }),
     }),
+    getDeliveryChartData: builder.query({
+      query: ({ period }: { period?: string }) => ({
+        url: '/dashboard/charts/deliveries',
+        params: { period },
+      }),
+    }),
+    getSummaryChartData: builder.query({
+      query: ({ metric, period }: { metric?: string; period?: string }) => ({
+        url: '/dashboard/charts/summary',
+        params: { metric, period },
+      }),
+    }),
   }),
 });
 
@@ -32,4 +44,8 @@ export const {
   useLazyGetOrderChartDataQuery,
   useGetRevenueChartDataQuery,
   useLazyGetRevenueChartDataQuery,
+  useGetDeliveryChartDataQuery,
+  useLazyGetDeliveryChartDataQuery,
+  useGetSummaryChartDataQuery,
+  useLazyGetSummaryChartDataQuery,
 } = dashboardQueriesApiSlice;

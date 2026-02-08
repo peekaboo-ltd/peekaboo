@@ -56,6 +56,7 @@ const Home = () => {
     tryQuickDeliveryLabel: t('home.hero.tryQuickDelivery'),
     quickStartLabel: t('home.hero.quickStart'),
     formTitle: t('home.form.title'),
+    formSubtitle: t('home.form.subtitle'),
     senderLabel: t('home.form.senderLabel'),
     senderPlaceholder: t('home.form.senderPlaceholder'),
     recipientLabel: t('home.form.recipientLabel'),
@@ -66,8 +67,8 @@ const Home = () => {
     verifiedRidersLabel: t('home.hero.verifiedRiders'),
     realtimeTrackingLabel: t('home.hero.realtimeTracking'),
     customersLabel: 'customers',
-    trustDailyLabel: 'Trust Peekaboo daily',
-    growingCommunityLabel: 'Growing community',
+    trustDailyLabel: 'Trusted daily',
+    growingCommunityLabel: 'Growing in Kigali',
     businessAccountCta: t('home.b2b.cta.contact'),
   };
 
@@ -166,10 +167,10 @@ const Home = () => {
   ];
 
   const trustedByIndustries = [
-    'E-Commerce',
+    'E-commerce',
     'Restaurants',
     'Pharmacies',
-    'Retail Stores',
+    'Retail',
     'Florists',
   ];
 
@@ -181,7 +182,11 @@ const Home = () => {
   ];
 
   return (
-    <main className="min-h-screen w-full bg-white overflow-x-hidden max-lg:mt-16">
+    <main className="relative min-h-screen w-full bg-slate-50 overflow-x-hidden max-lg:mt-16">
+      <span
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.2),_transparent_70%)]"
+        aria-hidden="true"
+      />
       <HeroSection
         formRef={formRef}
         onScrollToForm={scrollToForm}
@@ -194,7 +199,7 @@ const Home = () => {
       <TrustedBySection label={t('home.b2b.trustedBy')} industries={trustedByIndustries} />
 
       <FeaturesSection
-        badgeLabel="Why Choose Us"
+        badgeLabel="Why it works"
         title={t('home.features.title')}
         subtitle={t('home.features.subtitle')}
         features={features}
@@ -207,13 +212,12 @@ const Home = () => {
         subtitle={t('home.b2b.subtitle')}
         features={businessFeatures}
         primaryCtaLabel={t('home.b2b.cta.contact')}
-        secondaryCtaLabel={t('home.b2b.cta.sales')}
         stats={businessHighlights}
         onContactClick={handleContactNavigation}
       />
 
       <HowItWorksSection
-        badgeLabel="Simple Process"
+        badgeLabel="Simple steps"
         title={t('home.howItWorks.title')}
         subtitle={t('home.howItWorks.subtitle')}
         steps={howItWorks}
@@ -230,9 +234,7 @@ const Home = () => {
         title={t('home.cta.title')}
         subtitle={t('home.cta.subtitle')}
         buttonLabel={t('home.cta.button')}
-        accountLabel={t('home.b2b.cta.contact')}
         onScrollToForm={scrollToForm}
-        onContactClick={handleContactNavigation}
       />
     </main>
   );

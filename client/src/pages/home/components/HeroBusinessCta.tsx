@@ -27,14 +27,14 @@ const HeroBusinessCta = ({
       >
         <button
           onClick={onContactClick}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg text-sm font-normal hover:bg-slate-800 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors cursor-pointer"
         >
           <FontAwesomeIcon icon={faBuilding} />
           {accountLabel}
         </button>
         <button
           onClick={onScrollToForm}
-          className="inline-flex items-center gap-2 px-6 py-3 text-slate-700 hover:text-slate-900 text-sm font-normal transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 px-2 py-2 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors cursor-pointer hover:underline underline-offset-4"
         >
           {tryQuickDeliveryLabel}
           <FontAwesomeIcon icon={faArrowRight} className="text-xs" />

@@ -18,7 +18,7 @@ const HeroBusinessStats = ({ isActive, stats }: HeroBusinessStatsProps) => (
         {stats.map((stat) => (
           <li
             key={stat.label}
-            className="text-center p-3 bg-slate-50 rounded-lg border border-slate-200"
+            className="text-center p-3 bg-white/95 rounded-lg border border-slate-200 shadow-sm"
           >
             <data className="block text-xl font-bold text-slate-900">{stat.value}</data>
             <span className="text-xs text-slate-500">{stat.label}</span>

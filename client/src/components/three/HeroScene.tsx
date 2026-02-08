@@ -50,9 +50,7 @@ const CityGrid = () => {
               attach="attributes-position"
               count={2}
               array={new Float32Array([...line[0].toArray(), ...line[1].toArray()])}
-              itemSize={3}
-              args={[]}
-            />
+              itemSize={3} args={[]}            />
           </bufferGeometry>
           <lineBasicMaterial color="#94a3b8" transparent opacity={0.06} />
         </line>
@@ -157,6 +155,174 @@ const DeliveryHub = ({
       <mesh ref={ringRef}>
         <ringGeometry args={[size * 1.5, size * 2, 32]} />
         <meshBasicMaterial color={color} transparent opacity={0.2} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+};
+
+// Large service area rings for coverage visualization
+const ServiceAreaRings = ({
+  position,
+  radius,
+  color = '#5f9598',
+  speed = 0.08,
+}: {
+  position: [number, number, number];
+  radius: number;
+  color?: string;
+  speed?: number;
+}) => {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    groupRef.current.rotation.z = state.clock.elapsedTime * speed;
+  });
+
+  return (
+    <group ref={groupRef} position={position} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh>
+        <ringGeometry args={[radius - 0.02, radius, 64]} />
+        <meshBasicMaterial color={color} transparent opacity={0.08} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh>
+        <ringGeometry args={[radius * 0.7 - 0.015, radius * 0.7, 48]} />
+        <meshBasicMaterial color={color} transparent opacity={0.06} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+};
+
+// Warehouse cluster of stacked parcels
+const WarehouseCluster = ({ position }: { position: [number, number, number] }) => {
+  const groupRef = useRef<THREE.Group>(null);
+  const stacks = useMemo(
+    () => [
+      { pos: [-0.4, -0.2, 0], h: 0.35 },
+      { pos: [0.1, -0.3, 0], h: 0.5 },
+      { pos: [0.5, -0.1, 0], h: 0.28 },
+      { pos: [-0.2, 0.3, 0], h: 0.42 },
+      { pos: [0.35, 0.25, 0], h: 0.32 },
+    ],
+    []
+  );
+
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.4) * 0.05;
+  });
+
+  return (
+    <group ref={groupRef} position={position}>
+      {stacks.map((stack, i) => (
+        <mesh key={i} position={[stack.pos[0], stack.pos[1], stack.h / 2]}>
+          <boxGeometry args={[0.35, 0.35, stack.h]} />
+          <meshStandardMaterial color="#f59e0b" transparent opacity={0.25} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0, 0.01]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[1.4, 1.2]} />
+        <meshBasicMaterial color="#94a3b8" transparent opacity={0.06} />
+      </mesh>
+    </group>
+  );
+};
+
+// Fleet of delivery vans moving on a route
+const FleetConvoy = ({
+  curve,
+  count = 3,
+  speed = 0.12,
+  color = '#5f9598',
+}: {
+  curve: THREE.CatmullRomCurve3;
+  count?: number;
+  speed?: number;
+  color?: string;
+}) => {
+  const refs = useRef<THREE.Group[]>([]);
+
+  useFrame((state) => {
+    refs.current.forEach((group, i) => {
+      if (!group) return;
+      const t = (state.clock.elapsedTime * speed * 0.12 + i * (1 / count)) % 1;
+      const pos = curve.getPointAt(t);
+      const lookAt = curve.getPointAt((t + 0.015) % 1);
+      group.position.copy(pos);
+      const dir = new THREE.Vector3().subVectors(lookAt, pos).normalize();
+      group.rotation.z = Math.atan2(dir.y, dir.x);
+    });
+  });
+
+  return (
+    <group>
+      {Array.from({ length: count }).map((_, i) => (
+        <group key={i} ref={(el) => { if (el) refs.current[i] = el; }} scale={0.16}>
+          <mesh position={[0, 0.08, 0]}>
+            <boxGeometry args={[1.2, 0.45, 0.5]} />
+            <meshStandardMaterial color={color} transparent opacity={0.35} metalness={0.4} roughness={0.4} />
+          </mesh>
+          <mesh position={[0.2, 0.3, 0]}>
+            <boxGeometry args={[0.6, 0.25, 0.45]} />
+            <meshStandardMaterial color="#e2e8f0" transparent opacity={0.2} />
+          </mesh>
+          <mesh position={[-0.4, -0.05, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.18, 0.05, 8, 16]} />
+            <meshStandardMaterial color="#475569" transparent opacity={0.35} />
+          </mesh>
+          <mesh position={[0.45, -0.05, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.18, 0.05, 8, 16]} />
+            <meshStandardMaterial color="#475569" transparent opacity={0.35} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+};
+
+// Aerial drone route to show rapid dispatch
+const AerialRoute = ({
+  start,
+  end,
+  apex = 1.4,
+  color = '#7fb3b5',
+  speed = 0.16,
+  offset = 0,
+}: {
+  start: THREE.Vector3;
+  end: THREE.Vector3;
+  apex?: number;
+  color?: string;
+  speed?: number;
+  offset?: number;
+}) => {
+  const droneRef = useRef<THREE.Mesh>(null);
+  const curve = useMemo(() => {
+    const mid = start.clone().lerp(end, 0.5);
+    mid.z += apex;
+    return new THREE.CatmullRomCurve3([start, mid, end]);
+  }, [start, end, apex]);
+
+  const tubeGeo = useMemo(
+    () => new THREE.TubeGeometry(curve, 48, 0.01, 6, false),
+    [curve]
+  );
+
+  useFrame((state) => {
+    if (!droneRef.current) return;
+    const t = (state.clock.elapsedTime * speed + offset) % 1;
+    const pos = curve.getPointAt(t);
+    droneRef.current.position.copy(pos);
+  });
+
+  return (
+    <group>
+      <mesh geometry={tubeGeo}>
+        <meshBasicMaterial color={color} transparent opacity={0.12} />
+      </mesh>
+      <mesh ref={droneRef}>
+        <sphereGeometry args={[0.05, 12, 12]} />
+        <meshBasicMaterial color={color} transparent opacity={0.7} />
       </mesh>
     </group>
   );
@@ -375,9 +541,7 @@ const DataParticles = () => {
           attach="attributes-position"
           count={positions.length / 3}
           array={positions}
-          itemSize={3}
-          args={[]}
-        />
+          itemSize={3} args={[]}        />
       </bufferGeometry>
       <pointsMaterial color="#5f9598" size={0.04} transparent opacity={0.25} sizeAttenuation />
     </points>
@@ -418,9 +582,7 @@ const NetworkLines = ({
                 ...conn.from.toArray(),
                 ...conn.to.toArray(),
               ])}
-              itemSize={3}
-              args={[]}
-            />
+              itemSize={3} args={[]}            />
           </bufferGeometry>
           <lineBasicMaterial color="#5f9598" transparent opacity={0.06} />
         </line>
@@ -538,7 +700,7 @@ const HeroScene = () => {
 
   return (
     <Canvas
-      camera={{ position: [0, 0, 10], fov: 45 }}
+      camera={{ position: [0, 0, 10], fov: 42 }}
       style={{
         position: 'absolute',
         top: 0,
@@ -549,12 +711,18 @@ const HeroScene = () => {
       }}
       gl={{ alpha: true, antialias: true }}
     >
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[10, 10, 5]} intensity={0.4} />
-      <pointLight position={[-10, -10, -5]} intensity={0.2} color="#64748b" />
+      <fog attach="fog" args={['#f8fafc', 6, 18]} />
+      <ambientLight intensity={0.55} />
+      <hemisphereLight color="#e2e8f0" groundColor="#475569" intensity={0.35} />
+      <directionalLight position={[10, 10, 5]} intensity={0.5} />
+      <pointLight position={[-10, -10, -5]} intensity={0.25} color="#64748b" />
 
       {/* City map grid */}
       <CityGrid />
+
+      {/* Coverage rings */}
+      <ServiceAreaRings position={[0, 0, -2.5]} radius={5.4} />
+      <ServiceAreaRings position={[1.5, -1, -2.4]} radius={3.4} color="#7fb3b5" speed={0.12} />
 
       {/* Network connections between hubs */}
       <NetworkLines hubs={hubs} />
@@ -570,6 +738,11 @@ const HeroScene = () => {
         />
       ))}
 
+      {/* Warehouse clusters */}
+      <WarehouseCluster position={[-4.6, -0.8, -1.2]} />
+      <WarehouseCluster position={[4.3, -0.4, -1.2]} />
+      <WarehouseCluster position={[0.5, 3.6, -1.1]} />
+
       {/* Animated delivery routes */}
       {routes.map((route, i) => (
         <DeliveryRoute
@@ -583,6 +756,25 @@ const HeroScene = () => {
 
       {/* Motorbike rider traversing the network */}
       <MotorbikeRider curve={mainRoute} speed={0.12} />
+
+      {/* Fleet convoy */}
+      <FleetConvoy curve={mainRoute} count={3} speed={0.18} color="#5f9598" />
+
+      {/* Aerial drone routes */}
+      <AerialRoute
+        start={new THREE.Vector3(-3, 2, -0.5)}
+        end={new THREE.Vector3(3, -2.5, -0.6)}
+        apex={1.6}
+        offset={0.2}
+      />
+      <AerialRoute
+        start={new THREE.Vector3(4, 0, -0.6)}
+        end={new THREE.Vector3(-4, -1, -0.6)}
+        apex={1.2}
+        color="#5f9598"
+        speed={0.12}
+        offset={0.55}
+      />
 
       {/* Data visualization: bar chart */}
       <DataBars />

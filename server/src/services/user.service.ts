@@ -86,7 +86,15 @@ export class UserService {
       return existingUser;
     }
 
-    const createdUser = await this.userRepository.save(user);
+    // NEW PASSWORD
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await hashPassword(tempPassword);
+
+    // CREATE USER
+    const createdUser = await this.userRepository.save({
+      ...user,
+      passwordHash: hashedPassword,
+    });
 
     // Assign default CUSTOMER role if no roles provided
     const rolesToAssign =
@@ -95,6 +103,19 @@ export class UserService {
       createdUser?.id,
       rolesToAssign
     );
+
+    // SEND ADMIN-CREATED ACCOUNT EMAIL WITH TEMP PASSWORD AND ROLES
+    if (createdUser.email) {
+      const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+      const emailService = new EmailService();
+      await emailService.sendAdminCreatedAccountEmail({
+        name: createdUser.name || '',
+        email: createdUser.email,
+        temporaryPassword: tempPassword,
+        roles: rolesToAssign.map((r) => String(r)),
+        loginUrl: `${baseUrl}/auth/login`,
+      });
+    }
 
     return createdUser;
   }

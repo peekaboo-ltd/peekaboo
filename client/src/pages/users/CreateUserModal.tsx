@@ -7,6 +7,7 @@ import Input from '@/components/inputs/Input';
 import { useCreateUser } from '@/hooks/users/users.hooks';
 import { RoleTypes } from '@/types/auth.type';
 import { Controller, useForm } from 'react-hook-form';
+import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 
 interface CreateUserFormData {
   name: string;
@@ -21,7 +22,13 @@ const CreateUserModal = () => {
   const { createUserModal } = useAppSelector((state) => state.user);
   const [selectedRoles, setSelectedRoles] = useState<RoleTypes[]>([]);
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<CreateUserFormData>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    trigger,
+  } = useForm<CreateUserFormData>({
     defaultValues: {
       name: '',
       email: '',
@@ -30,6 +37,14 @@ const CreateUserModal = () => {
       roles: [],
     },
   });
+
+  const validateRwandanPhone = (value: string | undefined) => {
+    if (!value || !value.trim()) {
+      return 'Phone number is required';
+    }
+    const result = validateAndFormatPhoneNumber(value);
+    return result.isValid ? true : (result.error ?? 'Invalid phone number');
+  };
 
   const closeModal = useCallback(() => {
     dispatch(setCreateUserModal(false));
@@ -41,7 +56,7 @@ const CreateUserModal = () => {
 
   const handleRoleToggle = (role: RoleTypes) => {
     setSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role],
     );
   };
 
@@ -50,7 +65,7 @@ const CreateUserModal = () => {
       name: data.name,
       email: data.email || undefined,
       phoneNumber: data.phoneNumber,
-      passwordHash: data.password || undefined,
+      passwordHash: data?.password || undefined,
       roles: selectedRoles.length > 0 ? selectedRoles : [RoleTypes.CUSTOMER],
     });
   });
@@ -72,14 +87,18 @@ const CreateUserModal = () => {
             rules={{ required: 'Name is required' }}
             render={({ field }) => (
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">Name *</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Name *
+                </span>
                 <Input
                   {...field}
                   placeholder="Enter full name"
                   className={errors.name ? 'border-destructive' : ''}
                 />
                 {errors.name && (
-                  <span className="text-xs text-destructive">{errors.name.message}</span>
+                  <span className="text-xs text-destructive">
+                    {errors.name.message}
+                  </span>
                 )}
               </label>
             )}
@@ -88,12 +107,22 @@ const CreateUserModal = () => {
           <Controller
             name="phoneNumber"
             control={control}
-            rules={{ required: 'Phone number is required' }}
+            rules={{
+              required: 'Phone number is required',
+              validate: validateRwandanPhone,
+            }}
             render={({ field }) => (
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">Phone Number *</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Phone Number *
+                </span>
                 <Input
                   {...field}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    field.onChange(e);
+                    trigger('phoneNumber');
+                  }}
                   placeholder="Enter phone number (e.g., 0788123456)"
                   className={errors.phoneNumber ? 'border-destructive' : ''}
                 />
@@ -117,24 +146,6 @@ const CreateUserModal = () => {
                   type="email"
                   placeholder="Enter email address"
                 />
-              </label>
-            )}
-          />
-
-          <Controller
-            name="password"
-            control={control}
-            render={({ field }) => (
-              <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">Password</span>
-                <Input
-                  {...field}
-                  type="password"
-                  placeholder="Enter password (optional)"
-                />
-                <span className="text-xs text-gray-500">
-                  Leave empty to generate a random password
-                </span>
               </label>
             )}
           />
@@ -169,7 +180,11 @@ const CreateUserModal = () => {
         </fieldset>
 
         <footer className="flex justify-end gap-3 pt-4 border-t">
-          <Button type="button" onClick={closeModal} className="bg-gray-100 text-gray-700">
+          <Button
+            type="button"
+            onClick={closeModal}
+            className="bg-gray-100 text-gray-700"
+          >
             Cancel
           </Button>
           <Button type="submit" primary isLoading={isLoading}>

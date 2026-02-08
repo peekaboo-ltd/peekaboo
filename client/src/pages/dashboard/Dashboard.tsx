@@ -5,6 +5,8 @@ import {
   useGetDashboardMetricsQuery,
   useGetOrderChartDataQuery,
   useGetRevenueChartDataQuery,
+  useGetDeliveryChartDataQuery,
+  useGetSummaryChartDataQuery,
 } from '@/api/queries/dashboard.queries';
 import { RoleTypes } from '@/types/auth.type';
 import {
@@ -114,21 +116,34 @@ const Dashboard = () => {
   const { data, isLoading, error } = useGetDashboardMetricsQuery({});
 
   const [range, setRange] = useState<'7d' | '30d' | '90d'>('30d');
-  const [metric, setMetric] = useState<'ORDERS' | 'REVENUE' | 'ACTIVE_USERS'>('ORDERS');
+  const [metric, setMetric] = useState<string>('ORDERS');
 
   const dashboardData = data?.data;
-  const showCharts =
-    dashboardData?.role === RoleTypes.ADMIN ||
-    dashboardData?.role === RoleTypes.STAFF ||
-    dashboardData?.role === RoleTypes.BUSINESS;
+  const role = dashboardData?.role;
+
+  const isAdminOrStaff = role === RoleTypes.ADMIN || role === RoleTypes.STAFF;
+  const isRider = role === RoleTypes.RIDER;
+  const isBusiness = role === RoleTypes.BUSINESS;
+  const showOrdersChart = isAdminOrStaff || isBusiness;
+  const showRevenueChart = isAdminOrStaff;
+  const showDeliveriesChart = isRider;
+  const showCharts = showOrdersChart || showRevenueChart || showDeliveriesChart;
 
   const { data: ordersChartResp } = useGetOrderChartDataQuery(
     { period: 'month' },
-    { skip: !showCharts },
+    { skip: !showOrdersChart },
   );
   const { data: revenueChartResp } = useGetRevenueChartDataQuery(
     { period: 'month' },
-    { skip: !showCharts },
+    { skip: !showRevenueChart },
+  );
+  const { data: deliveriesChartResp } = useGetDeliveryChartDataQuery(
+    { period: 'month' },
+    { skip: !showDeliveriesChart },
+  );
+  const { data: summaryChartResp, isFetching: summaryChartFetching } = useGetSummaryChartDataQuery(
+    { metric, period: range },
+    { skip: !role },
   );
 
   const metricCards = useMemo(
@@ -136,31 +151,14 @@ const Dashboard = () => {
     [dashboardData?.role, dashboardData?.metrics],
   );
 
-  const summaryChartData = useMemo(() => {
-    const labelsByRange: Record<'7d' | '30d' | '90d', string[]> = {
-      '7d': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      '30d': ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10'],
-      '90d': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    };
-
-    const baseSeries: Record<'ORDERS' | 'REVENUE' | 'ACTIVE_USERS', number[]> = {
-      ORDERS: [12, 16, 14, 18, 20, 19, 17, 22, 21, 24, 23, 25],
-      REVENUE: [28, 30, 29, 34, 36, 33, 31, 37, 35, 39, 38, 42],
-      ACTIVE_USERS: [8, 11, 10, 12, 13, 12, 11, 14, 13, 15, 14, 16],
-    };
-
-    const scale = range === '90d' ? 1.2 : range === '7d' ? 0.9 : 1;
-    const labels = labelsByRange[range];
-    const values = baseSeries[metric].slice(0, labels.length);
-
-    return labels.map((label, index) => ({
-      name: label,
-      value: Math.round(values[index] * scale),
-    }));
-  }, [range, metric]);
+  const summaryChartData = useMemo(
+    () => normalizeChartData((summaryChartResp as { data?: Array<{ label: string; value: number }> })?.data),
+    [summaryChartResp],
+  );
 
   const ordersChartData = normalizeChartData((ordersChartResp as { data?: Array<{ label: string; value: number }> })?.data);
   const revenueChartData = normalizeChartData((revenueChartResp as { data?: Array<{ label: string; value: number }> })?.data);
+  const deliveriesChartData = normalizeChartData((deliveriesChartResp as { data?: Array<{ label: string; value: number }> })?.data);
 
   if (isLoading) return <DashboardLoading />;
   if (error) return <DashboardError />;
@@ -192,6 +190,8 @@ const Dashboard = () => {
         onRangeChange={setRange}
         onMetricChange={setMetric}
         data={summaryChartData}
+        role={role}
+        isLoading={summaryChartFetching}
         containerVariants={containerVariants}
         itemVariants={itemVariants}
       />
@@ -200,8 +200,10 @@ const Dashboard = () => {
         showCharts={showCharts}
         ordersData={ordersChartData}
         revenueData={revenueChartData}
+        deliveriesData={deliveriesChartData}
         ordersTitle="Orders"
         revenueTitle="Revenue"
+        role={role}
         containerVariants={containerVariants}
         itemVariants={itemVariants}
       />

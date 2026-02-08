@@ -7,6 +7,7 @@ import { WelcomeEmail } from './templates/auth/welcome';
 import { PasswordResetEmail } from './templates/auth/password-reset';
 import { PasswordChangedEmail } from './templates/auth/password-changed';
 import { OAuthWelcomeEmail } from './templates/auth/oauth-welcome';
+import { AdminCreatedAccountEmail } from './templates/auth/admin-created-account';
 import { OnboardingInviteEmail } from './templates/organization/onboarding-invite';
 import { OnboardingCompleteEmail } from './templates/organization/onboarding-complete';
 import { InquiryNotificationEmail } from './templates/organization/inquiry-notification';
@@ -38,6 +39,7 @@ import {
   PasswordResetEmailData,
   PasswordChangedEmailData,
   OAuthWelcomeEmailData,
+  AdminCreatedAccountEmailData,
   OnboardingInviteEmailData,
   OnboardingCompleteEmailData,
   OrganizationInquiryEmailData,
@@ -148,6 +150,17 @@ export class EmailService {
     await this.sendEmail({
       to: data.email,
       subject: `Welcome to Peekaboo! (via ${data.provider})`,
+      html,
+    });
+  }
+
+  async sendAdminCreatedAccountEmail(
+    data: AdminCreatedAccountEmailData
+  ): Promise<void> {
+    const html = await render(AdminCreatedAccountEmail(data));
+    await this.sendEmail({
+      to: data.email,
+      subject: 'Your Peekaboo Account Has Been Created',
       html,
     });
   }

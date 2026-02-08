@@ -12,7 +12,7 @@ import { Dashboard } from '@/pages/dashboard';
 import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayout';
 import { OrdersPage } from '@/pages/orders';
 import { OrderAssignmentsPage } from '@/pages/order-assignments';
-import { UsersPage } from '@/pages/users';
+import { UsersPage, UserProfilePage } from '@/pages/users';
 import { About, OrderFees } from '@/pages/about';
 import { ContactUsPage } from '@/pages/contact';
 import { InviteOrganization } from '@/pages/organizations';
@@ -22,70 +22,128 @@ import {
   UserManagementOnboarding,
   CompleteOnboarding,
 } from '@/pages/onboarding';
+import SessionExpiredModal from '@/components/auth/SessionExpiredModal';
 
 const Router = () => {
   return (
-    <Routes>
-      {/* Public layout routes */}
-      <Route path="/" element={<PublicLayout />}>
-        {/* Public routes */}
-        <Route path="auth">
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Navigate to="/auth/login" replace />} />
-          <Route path="callback" element={<AuthCallback />} />
-          <Route path="forgot-password" element={<p>Forgot Password</p>} />
+    <>
+      <Routes>
+        {/* Public layout routes */}
+        <Route path="/" element={<PublicLayout />}>
+          {/* Public routes */}
+          <Route path="auth">
+            <Route path="login" element={<Login />} />
+            <Route
+              path="register"
+              element={<Navigate to="/auth/login" replace />}
+            />
+            <Route path="callback" element={<AuthCallback />} />
+            <Route path="forgot-password" element={<p>Forgot Password</p>} />
+          </Route>
+          <Route path="onboarding">
+            <Route path="organization" element={<OrganizationOnboarding />} />
+            <Route path="admin" element={<AdminOnboarding />} />
+            <Route path="users" element={<UserManagementOnboarding />} />
+            <Route path="complete" element={<CompleteOnboarding />} />
+          </Route>
+          <Route path="" element={<Home />} />
+          <Route path="about" element={<About />} />
+          <Route path="about/orders/fees" element={<OrderFees />} />
+          <Route path="contact" element={<ContactUsPage />} />
+          <Route path="track" element={<TrackOrder />} />
         </Route>
-        <Route path="onboarding">
-          <Route path="organization" element={<OrganizationOnboarding />} />
-          <Route path="admin" element={<AdminOnboarding />} />
-          <Route path="users" element={<UserManagementOnboarding />} />
-          <Route path="complete" element={<CompleteOnboarding />} />
+        <Route path="/p" element={<PublicLayout />}>
+          <Route path="orders">
+            <Route path=":id" element={<PublicOrderDetails />} />
+            <Route
+              path=":id/payment-success"
+              element={<PublicOrderPaymentSuccess />}
+            />
+            <Route path=":id/tracking" element={<PublicOrderTracking />} />
+          </Route>
         </Route>
-        <Route path="" element={<Home />} />
-        <Route path="about" element={<About />} />
-        <Route path="about/orders/fees" element={<OrderFees />} />
-        <Route path="contact" element={<ContactUsPage />} />
-        <Route path="track" element={<TrackOrder />} />
-      </Route>
-      <Route path="/p" element={<PublicLayout />}>
-        <Route path="orders">
-          <Route path=":id" element={<PublicOrderDetails />} />
-          <Route path=":id/payment-success" element={<PublicOrderPaymentSuccess />} />
-          <Route path=":id/tracking" element={<PublicOrderTracking />} />
-        </Route>
-      </Route>
 
-      {/* Protected routes */}
-      <Route element={<AuthenticatedLayout />}>
-        <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'BUSINESS', 'RIDER', 'CUSTOMER']}>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/orders" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'BUSINESS', 'RIDER', 'CUSTOMER']}>
-            <OrdersPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/assignments" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'RIDER']}>
-            <OrderAssignmentsPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/users" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'BUSINESS']}>
-            <UsersPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/organizations/invite" element={
-          <ProtectedRoute allowedRoles={['ADMIN']}>
-            <InviteOrganization />
-          </ProtectedRoute>
-        } />
-      </Route>
-      {/* 404 */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+        {/* Protected routes */}
+        <Route element={<AuthenticatedLayout />}>
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  'ADMIN',
+                  'STAFF',
+                  'BUSINESS',
+                  'RIDER',
+                  'CUSTOMER',
+                ]}
+              >
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  'ADMIN',
+                  'STAFF',
+                  'BUSINESS',
+                  'RIDER',
+                  'CUSTOMER',
+                ]}
+              >
+                <OrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assignments"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'RIDER']}>
+                <OrderAssignmentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'BUSINESS']}>
+                <UsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user-profile"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  'ADMIN',
+                  'STAFF',
+                  'BUSINESS',
+                  'RIDER',
+                  'CUSTOMER',
+                ]}
+              >
+                <UserProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organizations/invite"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <InviteOrganization />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+        {/* 404 */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      {/* Globally accessible components */}
+      <SessionExpiredModal />
+    </>
   );
 };
 

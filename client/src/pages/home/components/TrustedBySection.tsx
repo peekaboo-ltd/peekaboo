@@ -10,7 +10,7 @@ const TrustedBySection = ({ label, industries }: TrustedBySectionProps) => (
   <section className="w-full py-12 border-y border-slate-100">
     <article className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16">
       <motion.figure
-        className="flex flex-col md:flex-row items-center justify-between gap-8"
+        className="flex flex-col md:flex-row items-center justify-between gap-8 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 shadow-sm"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}

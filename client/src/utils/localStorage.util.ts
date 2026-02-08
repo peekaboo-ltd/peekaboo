@@ -34,4 +34,8 @@ export const localStorageUtil = {
       console.error('Error removing localStorage item:', error);
     }
   },
+
+  clearAll: (): void => {
+    localStorage.clear();
+  },
 };

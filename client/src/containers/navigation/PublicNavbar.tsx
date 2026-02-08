@@ -52,7 +52,7 @@ const PublicNavbar = () => {
                 <li key={index}>
                   <Link
                     to={link}
-                    className="text-primary hover:underline underline-offset-4 transition-colors duration-200"
+                    className="text-slate-700 hover:underline underline-offset-4 transition-colors duration-200"
                   >
                     {capitalizeString(label)}
                   </Link>
@@ -66,7 +66,7 @@ const PublicNavbar = () => {
             <button
               type="button"
               onClick={toggleMobileMenu}
-              className="text-gray-700 hover:text-primary focus:outline-none focus:text-primary transition-colors duration-200"
+              className="text-gray-700 hover:text-slate-700 focus:outline-none focus:text-slate-700 transition-colors duration-200"
               aria-label="Toggle navigation menu"
               aria-expanded={isMobileMenuOpen}
             >
@@ -120,7 +120,7 @@ const PublicNavbar = () => {
                   key={index}
                   to={link}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors duration-200 font-medium"
+                  className="block px-3 py-2 text-gray-700 hover:text-slate-700 hover:bg-gray-50 transition-colors duration-200 font-medium"
                 >
                   {capitalizeString(label)}
                 </Link>

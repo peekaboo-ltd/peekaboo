@@ -6,12 +6,14 @@ export interface InitialState {
   user?: User;
   token?: string;
   isAuthenticated?: boolean;
+  sessionExpiredModal: boolean;
 }
 
 const initialState: InitialState = {
   user: localStorageUtil.getItem('user') as User | undefined,
   token: localStorageUtil.getItem('token') as string | undefined,
   isAuthenticated: localStorageUtil.getItem('token') ? true : false,
+  sessionExpiredModal: false,
 };
 
 const authSlice = createSlice({
@@ -35,9 +37,12 @@ const authSlice = createSlice({
       localStorageUtil.removeItem('token');
       window.location.href = '/auth/login';
     },
+    setSessionExpiredModal: (state, action) => {
+      state.sessionExpiredModal = action.payload;
+    },
   },
 });
 
-export const { setUser, setToken, setIsAuthenticated, setLogout } = authSlice.actions;
+export const { setUser, setToken, setIsAuthenticated, setLogout, setSessionExpiredModal } = authSlice.actions;
 
 export default authSlice.reducer;

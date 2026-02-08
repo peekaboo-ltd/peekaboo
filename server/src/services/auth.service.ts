@@ -60,6 +60,7 @@ export class AuthService {
         id: true,
         email: true,
         phoneNumber: true,
+        name: true,
         status: true,
         passwordHash: true,
         userRoles: {

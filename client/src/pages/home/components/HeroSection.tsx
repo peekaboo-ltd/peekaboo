@@ -52,10 +52,19 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden">
+    <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-50">
       <Suspense fallback={null}>
         <HeroScene />
       </Suspense>
+
+      <span
+        className="pointer-events-none absolute inset-x-0 -top-24 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.28),_transparent_70%)]"
+        aria-hidden="true"
+      />
+      <span
+        className="pointer-events-none absolute -right-16 top-24 h-72 w-72 rounded-full bg-primary/10 blur-[120px]"
+        aria-hidden="true"
+      />
 
       <figure
         className="absolute inset-0 opacity-[0.02] pointer-events-none"
@@ -66,7 +75,7 @@ const HeroSection = ({
         aria-hidden="true"
       />
 
-      <article className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16 pt-8 pb-16 lg:pt-12 lg:pb-20">
+      <article className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16 pt-10 pb-16 lg:pt-14 lg:pb-20">
         <motion.section
           className="w-full flex flex-col lg:flex-row gap-12 lg:gap-16 items-center max-lg:justify-center min-h-[calc(100vh-6rem)]"
           variants={containerVariants}
@@ -130,6 +139,7 @@ const HeroSection = ({
                 errors={errors}
                 copy={{
                   formTitle: heroCopy.formTitle,
+                  formSubtitle: heroCopy.formSubtitle,
                   quickStartLabel: heroCopy.quickStartLabel,
                   senderLabel: heroCopy.senderLabel,
                   senderPlaceholder: heroCopy.senderPlaceholder,

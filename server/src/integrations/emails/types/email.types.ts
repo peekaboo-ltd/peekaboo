@@ -24,6 +24,14 @@ export interface OAuthWelcomeEmailData {
   dashboardUrl: string;
 }
 
+export interface AdminCreatedAccountEmailData {
+  name: string;
+  email: string;
+  temporaryPassword: string;
+  roles: string[];
+  loginUrl: string;
+}
+
 // ==================== ORGANIZATION EMAILS ====================
 
 export interface OnboardingInviteEmailData {

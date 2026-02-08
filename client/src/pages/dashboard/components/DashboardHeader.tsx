@@ -31,7 +31,11 @@ const DashboardHeader = ({ userName, role, variants }: DashboardHeaderProps) => 
           <p className="mt-2 text-sm text-slate-600 sm:text-base">
             {role === RoleTypes.ADMIN || role === RoleTypes.STAFF
               ? t('dashboard.platformOverview')
-              : t('dashboard.accountOverview')}
+              : role === RoleTypes.RIDER
+                ? 'Your delivery performance at a glance'
+                : role === RoleTypes.BUSINESS
+                  ? "Your organization's delivery operations"
+                  : 'Track your deliveries'}
           </p>
         </div>
         <div className="w-full sm:max-w-xs">

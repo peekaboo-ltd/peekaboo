@@ -35,7 +35,7 @@ const JSX_MODAL: FC<ModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className={`z-9000 min-w-[45vw] ${className} max-h-[80vh] flex flex-col overflow-hidden`}
+        className={`z-9000 w-[92vw] max-w-[92vw] min-w-0 sm:w-auto sm:max-w-[80vw] sm:min-w-[420px] lg:max-w-[720px] lg:min-w-[520px] max-h-[85vh] sm:max-h-[80vh] ${className} flex flex-col overflow-hidden`}
         onClick={(e) => {
           e.stopPropagation();
         }}
@@ -54,9 +54,9 @@ const JSX_MODAL: FC<ModalProps> = ({
               {description}
             </DialogDescription>
         </DialogHeader>
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <main className="flex-1 overflow-y-auto min-h-0">
           <section className="p-1">{children}</section>
-        </div>
+        </main>
       </DialogContent>
     </Dialog>
   );

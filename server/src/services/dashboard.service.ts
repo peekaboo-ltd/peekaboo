@@ -15,9 +15,13 @@ import {
   RecentActivity,
   BusinessMetrics,
   ChartDataPoint,
+  SummaryChartMetric,
+  SummaryChartPeriod,
 } from '../types/dashboard.types';
 import { UUID } from '../types';
 import { UserRole } from '../entities/userRole.entity';
+import { OrganizationMembership } from '../entities/organizationMembership.entity';
+import { MembershipStatus } from '../constants/organization.constants';
 
 export class DashboardService {
   private orderRepository = AppDataSource.getRepository(Order);
@@ -26,6 +30,7 @@ export class DashboardService {
   private userRepository = AppDataSource.getRepository(User);
   private userRoleRepository = AppDataSource.getRepository(UserRole);
   private orderActivityRepository = AppDataSource.getRepository(OrderActivity);
+  private organizationMembershipRepository = AppDataSource.getRepository(OrganizationMembership);
 
   /**
    * Determine the primary role for dashboard display
@@ -150,8 +155,26 @@ export class DashboardService {
       where: { assignedToId: userId, status: OrderAssignmentStatus.PENDING },
     });
 
-    // Earnings calculations
-    const { earningsThisMonth, totalEarnings } = await this.getRiderEarnings(userId);
+    // Deliveries this month
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const deliveriesThisMonth = await this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .where('assignment.assignedToId = :userId', { userId })
+      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
+      .andWhere('assignment.updatedAt >= :startOfMonth', { startOfMonth })
+      .getCount();
+
+    // Completion rate (completed / (completed + cancelled))
+    const cancelledAssignments = await this.orderAssignmentRepository.count({
+      where: { assignedToId: userId, status: OrderAssignmentStatus.CANCELLED },
+    });
+    const completionDenominator = completedDeliveries + cancelledAssignments;
+    const completionRate = completionDenominator > 0
+      ? Math.round((completedDeliveries / completionDenominator) * 100)
+      : 100;
 
     // Acceptance rate
     const acceptanceRate = await this.calculateAcceptanceRate(userId);
@@ -165,8 +188,8 @@ export class DashboardService {
     return {
       activeAssignments,
       completedDeliveries,
-      earningsThisMonth,
-      totalEarnings,
+      deliveriesThisMonth,
+      completionRate,
       acceptanceRate,
       pendingAssignments,
       assignmentsByStatus,
@@ -196,20 +219,25 @@ export class DashboardService {
     // Completed orders
     const completedOrders = ordersByStatus.find((s) => s.status === OrderStatus.COMPLETED)?.count || 0;
 
-    // Total spent
-    const totalSpentResult = await this.paymentRepository
-      .createQueryBuilder('payment')
-      .select('COALESCE(SUM(payment.amount), 0)', 'total')
-      .where('payment.createdById = :userId', { userId })
-      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
-      .getRawOne();
+    // Orders this month
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
-    const totalSpent = parseFloat(totalSpentResult?.total || '0');
+    const ordersThisMonth = await this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.senderId = :userId OR order.createdById = :userId', { userId })
+      .andWhere('order.createdAt >= :startOfMonth', { startOfMonth })
+      .getCount();
 
-    // Pending payments
-    const pendingPayments = await this.paymentRepository.count({
-      where: { createdById: userId, status: KpayPaymentStatus.PENDING },
-    });
+    // Cancelled orders
+    const cancelledOrders = ordersByStatus.find((s) => s.status === OrderStatus.CANCELLED)?.count || 0;
+
+    // Delivery success rate
+    const nonCancelledOrders = totalOrders - cancelledOrders;
+    const deliverySuccessRate = nonCancelledOrders > 0
+      ? Math.round((completedOrders / nonCancelledOrders) * 100)
+      : 0;
 
     // Recent activity
     const recentActivity = await this.getCustomerRecentActivity(userId);
@@ -218,8 +246,9 @@ export class DashboardService {
       totalOrders,
       activeOrders,
       completedOrders,
-      totalSpent,
-      pendingPayments,
+      ordersThisMonth,
+      cancelledOrders,
+      deliverySuccessRate,
       ordersByStatus,
       recentActivity,
     };
@@ -227,7 +256,7 @@ export class DashboardService {
 
   /**
    * Get business metrics (B2B user-specific)
-   * Currently based on orders created by / sent by the business user, plus payment spend.
+   * Based on orders created by / sent by the business user, plus organization data.
    */
   private async getBusinessMetrics(userId: UUID): Promise<BusinessMetrics> {
     // Total orders by this business (as sender or creator)
@@ -255,26 +284,46 @@ export class DashboardService {
     const completedCount = ordersByStatus.find((s) => s.status === OrderStatus.COMPLETED)?.count || 0;
     const completedOrders = deliveredCount + completedCount;
 
-    // Total spent
-    const totalSpentResult = await this.paymentRepository
-      .createQueryBuilder('payment')
-      .select('COALESCE(SUM(payment.amount), 0)', 'total')
-      .where('payment.createdById = :userId', { userId })
-      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
-      .getRawOne();
-
-    const totalSpent = parseFloat(totalSpentResult?.total || '0');
-
     // Pending payments
     const pendingPayments = await this.paymentRepository.count({
       where: { createdById: userId, status: KpayPaymentStatus.PENDING },
     });
 
+    // Average order value (from successful payments / completed orders)
+    const totalPaidResult = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .select('COALESCE(SUM(payment.amount), 0)', 'total')
+      .where('payment.createdById = :userId', { userId })
+      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .getRawOne();
+    const totalPaid = parseFloat(totalPaidResult?.total || '0');
     const averageOrderValue =
-      completedOrders > 0 ? Math.round((totalSpent / completedOrders) * 100) / 100 : 0;
+      completedOrders > 0 ? Math.round((totalPaid / completedOrders) * 100) / 100 : 0;
 
     const deliverySuccessRate =
       totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+
+    // Team members: count active organization memberships for user's organization
+    let teamMembers = 0;
+    const userMembership = await this.organizationMembershipRepository.findOne({
+      where: { userId, status: MembershipStatus.ACTIVE },
+    });
+    if (userMembership) {
+      teamMembers = await this.organizationMembershipRepository.count({
+        where: { organizationId: userMembership.organizationId, status: MembershipStatus.ACTIVE },
+      });
+    }
+
+    // Orders this week
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const ordersThisWeek = await this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.senderId = :userId OR order.createdById = :userId', { userId })
+      .andWhere('order.createdAt >= :startOfWeek', { startOfWeek })
+      .getCount();
 
     const monthlyOrderVolume = await this.getMonthlyOrderVolume(userId);
 
@@ -284,7 +333,8 @@ export class DashboardService {
       totalOrders,
       activeOrders,
       completedOrders,
-      totalSpent,
+      teamMembers,
+      ordersThisWeek,
       pendingPayments,
       ordersByStatus,
       recentActivity,
@@ -432,6 +482,238 @@ export class DashboardService {
       .getRawMany();
 
     return this.fillTimeSeries(rows, start, now, normalizedPeriod, true);
+  }
+
+  /**
+   * Chart data: deliveries (completed assignments) over time for a rider
+   */
+  async getDeliveryChartData(userId: UUID, period: string): Promise<ChartDataPoint[]> {
+    const normalizedPeriod = ['week', 'month', 'year'].includes(period) ? period : 'month';
+
+    const now = new Date();
+    let start: Date;
+    let truncUnit: 'day' | 'month';
+    let format: string;
+
+    if (normalizedPeriod === 'week') {
+      start = new Date(now);
+      start.setDate(start.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+      truncUnit = 'day';
+      format = 'YYYY-MM-DD';
+    } else if (normalizedPeriod === 'year') {
+      start = new Date(now);
+      start.setMonth(start.getMonth() - 11, 1);
+      start.setHours(0, 0, 0, 0);
+      truncUnit = 'month';
+      format = 'YYYY-MM';
+    } else {
+      start = new Date(now);
+      start.setDate(start.getDate() - 29);
+      start.setHours(0, 0, 0, 0);
+      truncUnit = 'day';
+      format = 'YYYY-MM-DD';
+    }
+
+    const rows = await this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', assignment.updatedAt), '${format}')`, 'label')
+      .addSelect('COUNT(*)', 'value')
+      .where('assignment.assignedToId = :userId', { userId })
+      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
+      .andWhere('assignment.updatedAt >= :start', { start })
+      .groupBy(`DATE_TRUNC('${truncUnit}', assignment.updatedAt)`)
+      .orderBy(`DATE_TRUNC('${truncUnit}', assignment.updatedAt)`, 'ASC')
+      .getRawMany();
+
+    return this.fillTimeSeries(rows, start, now, normalizedPeriod);
+  }
+
+  /**
+   * Summary chart data: unified endpoint for the dashboard summary chart.
+   * Dispatches to appropriate aggregation based on metric and period.
+   */
+  async getSummaryChartData(
+    userId: UUID,
+    userRoles: RoleTypes[],
+    metric: SummaryChartMetric,
+    period: SummaryChartPeriod
+  ): Promise<ChartDataPoint[]> {
+    const isAdmin = userRoles.includes(RoleTypes.ADMIN) || userRoles.includes(RoleTypes.STAFF);
+    const isRider = userRoles.includes(RoleTypes.RIDER);
+
+    const { start, truncUnit, format } = this.getSummaryPeriodConfig(period);
+    const now = new Date();
+
+    switch (metric) {
+      case 'ORDERS': {
+        const qb = this.orderRepository
+          .createQueryBuilder('order')
+          .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', order.createdAt), '${format}')`, 'label')
+          .addSelect('COUNT(*)', 'value')
+          .where('order.createdAt >= :start', { start });
+
+        if (!isAdmin) {
+          qb.andWhere('(order.senderId = :userId OR order.createdById = :userId)', { userId });
+        }
+
+        const rows = await qb
+          .groupBy(`DATE_TRUNC('${truncUnit}', order.createdAt)`)
+          .orderBy(`DATE_TRUNC('${truncUnit}', order.createdAt)`, 'ASC')
+          .getRawMany();
+
+        return period === '90d'
+          ? this.fillWeeklyTimeSeries(rows, start, now)
+          : this.fillTimeSeries(rows, start, now, period === '7d' ? 'week' : 'month');
+      }
+
+      case 'REVENUE': {
+        const qb = this.paymentRepository
+          .createQueryBuilder('payment')
+          .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', payment.createdAt), '${format}')`, 'label')
+          .addSelect('COALESCE(SUM(payment.amount), 0)', 'value')
+          .where('payment.createdAt >= :start', { start })
+          .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL });
+
+        if (!isAdmin) {
+          qb.andWhere('payment.createdById = :userId', { userId });
+        }
+
+        const rows = await qb
+          .groupBy(`DATE_TRUNC('${truncUnit}', payment.createdAt)`)
+          .orderBy(`DATE_TRUNC('${truncUnit}', payment.createdAt)`, 'ASC')
+          .getRawMany();
+
+        return period === '90d'
+          ? this.fillWeeklyTimeSeries(rows, start, now, true)
+          : this.fillTimeSeries(rows, start, now, period === '7d' ? 'week' : 'month', true);
+      }
+
+      case 'DELIVERIES': {
+        const qb = this.orderAssignmentRepository
+          .createQueryBuilder('assignment')
+          .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', assignment.updatedAt), '${format}')`, 'label')
+          .addSelect('COUNT(*)', 'value')
+          .where('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
+          .andWhere('assignment.updatedAt >= :start', { start });
+
+        if (!isAdmin) {
+          if (isRider) {
+            qb.andWhere('assignment.assignedToId = :userId', { userId });
+          } else {
+            qb.innerJoin('assignment.order', 'order')
+              .andWhere('(order.senderId = :userId OR order.createdById = :userId)', { userId });
+          }
+        }
+
+        const rows = await qb
+          .groupBy(`DATE_TRUNC('${truncUnit}', assignment.updatedAt)`)
+          .orderBy(`DATE_TRUNC('${truncUnit}', assignment.updatedAt)`, 'ASC')
+          .getRawMany();
+
+        return period === '90d'
+          ? this.fillWeeklyTimeSeries(rows, start, now)
+          : this.fillTimeSeries(rows, start, now, period === '7d' ? 'week' : 'month');
+      }
+
+      case 'ACTIVE_USERS': {
+        if (!isAdmin) return [];
+
+        const rows: Array<{ label: string; value: string }> = await AppDataSource.query(
+          `SELECT label, COUNT(DISTINCT user_id)::int as value FROM (
+            SELECT TO_CHAR(DATE_TRUNC($1, created_at), $2) as label, created_by_id as user_id
+            FROM orders WHERE created_at >= $3
+            UNION ALL
+            SELECT TO_CHAR(DATE_TRUNC($1, created_at), $2) as label, created_by_id as user_id
+            FROM payments WHERE created_at >= $3
+            UNION ALL
+            SELECT TO_CHAR(DATE_TRUNC($1, updated_at), $2) as label, assigned_to_id as user_id
+            FROM order_assignments WHERE updated_at >= $3
+          ) combined
+          GROUP BY label
+          ORDER BY label ASC`,
+          [truncUnit, format, start]
+        );
+
+        return period === '90d'
+          ? this.fillWeeklyTimeSeries(rows, start, now)
+          : this.fillTimeSeries(rows, start, now, period === '7d' ? 'week' : 'month');
+      }
+
+      default:
+        return [];
+    }
+  }
+
+  private getSummaryPeriodConfig(period: SummaryChartPeriod): {
+    start: Date;
+    truncUnit: string;
+    format: string;
+  } {
+    const now = new Date();
+
+    switch (period) {
+      case '7d': {
+        const start = new Date(now);
+        start.setDate(start.getDate() - 6);
+        start.setHours(0, 0, 0, 0);
+        return { start, truncUnit: 'day', format: 'YYYY-MM-DD' };
+      }
+      case '90d': {
+        const start = new Date(now);
+        start.setDate(start.getDate() - 89);
+        start.setHours(0, 0, 0, 0);
+        return { start, truncUnit: 'week', format: 'IYYY-"W"IW' };
+      }
+      case '30d':
+      default: {
+        const start = new Date(now);
+        start.setDate(start.getDate() - 29);
+        start.setHours(0, 0, 0, 0);
+        return { start, truncUnit: 'day', format: 'YYYY-MM-DD' };
+      }
+    }
+  }
+
+  private fillWeeklyTimeSeries(
+    rows: Array<{ label: string; value: string }>,
+    start: Date,
+    end: Date,
+    parseAsFloat: boolean = false
+  ): ChartDataPoint[] {
+    const byLabel = new Map<string, number>(
+      rows.map((r) => [r.label, parseAsFloat ? parseFloat(r.value) : parseInt(String(r.value), 10)])
+    );
+
+    const result: ChartDataPoint[] = [];
+    const cursor = new Date(start);
+    // Align cursor to Monday (ISO week start)
+    const dayOfWeek = cursor.getDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    cursor.setDate(cursor.getDate() + diff);
+    cursor.setHours(0, 0, 0, 0);
+
+    while (cursor <= end) {
+      const label = this.getISOWeekLabel(cursor);
+      result.push({ label, value: byLabel.get(label) || 0 });
+      cursor.setDate(cursor.getDate() + 7);
+    }
+
+    return result;
+  }
+
+  private getISOWeekLabel(date: Date): string {
+    // Calculate ISO week number and year
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+    const yearStart = new Date(d.getFullYear(), 0, 4);
+    const weekNumber = Math.ceil(
+      ((d.getTime() - yearStart.getTime()) / 86400000 + yearStart.getDay() + 1) / 7
+    );
+    // ISO year: if the week belongs to the next year's first week, use next year
+    const isoYear = d.getFullYear();
+    return `${isoYear}-W${String(weekNumber).padStart(2, '0')}`;
   }
 
   private fillTimeSeries(
@@ -586,40 +868,6 @@ export class DashboardService {
       .getCount();
 
     return result;
-  }
-
-  /**
-   * Get rider earnings
-   */
-  private async getRiderEarnings(userId: UUID) {
-    // Get completed orders for this rider
-    const completedAssignments = await this.orderAssignmentRepository
-      .createQueryBuilder('assignment')
-      .innerJoinAndSelect('assignment.order', 'order')
-      .where('assignment.assignedToId = :userId', { userId })
-      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
-      .getMany();
-
-    const totalEarnings = completedAssignments.reduce(
-      (sum, a) => sum + (parseFloat(String(a.order.finalFee)) || 0),
-      0
-    );
-
-    // This month's earnings
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const thisMonthAssignments = completedAssignments.filter(
-      (a) => new Date(a.updatedAt) >= startOfMonth
-    );
-
-    const earningsThisMonth = thisMonthAssignments.reduce(
-      (sum, a) => sum + (parseFloat(String(a.order.finalFee)) || 0),
-      0
-    );
-
-    return { earningsThisMonth, totalEarnings };
   }
 
   /**

@@ -19,6 +19,7 @@ export interface HeroCopy {
   tryQuickDeliveryLabel: string;
   quickStartLabel: string;
   formTitle: string;
+  formSubtitle: string;
   senderLabel: string;
   senderPlaceholder: string;
   recipientLabel: string;

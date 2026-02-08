@@ -54,7 +54,6 @@ export const UserController = {
         roles,
         name,
         email,
-        passwordHash,
         status = UserStatus.ACTIVE,
         nationality,
         dateOfBirth
@@ -66,7 +65,6 @@ export const UserController = {
           phoneNumber,
           name,
           email,
-          passwordHash,
           status,
           nationality,
           dateOfBirth,
