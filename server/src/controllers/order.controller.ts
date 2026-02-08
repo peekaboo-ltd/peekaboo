@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { OrderService } from '../services/order.service';
 import { UUID } from '../types';
 import { UserService } from '../services/user.service';
-import { AuthenticatedRequest } from '../types/auth.types';
+import { AuthRequest } from '../types/auth.types';
+import { ForbiddenError, UnauthorizedError } from '../helpers/errors.helper';
 
 const orderService = new OrderService();
 const userService = new UserService();
@@ -40,9 +41,17 @@ export const OrderController = {
   async createOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const { order } = req.body;
+      const { user } = req as AuthRequest;
+
+      if (!user?.id) {
+        throw new UnauthorizedError('User not authenticated');
+      }
 
       // CREATE ORDER
-      const createdOrder = await orderService.createOrder(order);
+      const createdOrder = await orderService.createOrder({
+        ...order,
+        createdById: user.id,
+      });
 
       // RETURN ORDER
       return res.status(201).json({
@@ -117,11 +126,21 @@ export const OrderController = {
       const { id } = req.params;
       const { order } = req.body;
 
-      const { user } = req as AuthenticatedRequest;
+      const { user } = req as AuthRequest;
+
+      if (!user?.id) {
+        throw new UnauthorizedError('User not authenticated');
+      }
+
+      const existingOrder = await orderService.getOrderById(id as UUID);
+
+      if (existingOrder.createdById && existingOrder.createdById !== user.id) {
+        throw new ForbiddenError('You do not have permission to update this order');
+      }
 
       // UPDATE ORDER
       const updatedOrder = await orderService.updateOrder(id as UUID, order, {
-        createdById: user?.id,
+        createdById: user.id,
       });
 
       // RETURN ORDER
