@@ -6,12 +6,11 @@ import HeroScene from '@/components/three/HeroScene';
 import { useCreatePublicOrder } from '@/hooks/orders/orders.hooks';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import type { LandingStats } from '@/types/landing.type';
-import type { HeroBusinessStat, HeroCopy, HomeFormValues } from '../home.types';
+import type { HeroCopy, HomeFormValues } from '../home.types';
 import { containerVariants, itemVariants } from '../home.animations';
 import HeroTabs from './HeroTabs';
 import HeroHeadline from './HeroHeadline';
 import HeroTrustIndicators from './HeroTrustIndicators';
-import HeroBusinessStats from './HeroBusinessStats';
 import HeroBusinessCta from './HeroBusinessCta';
 import HeroForm from './HeroForm';
 import HeroScrollIndicator from './HeroScrollIndicator';
@@ -21,7 +20,6 @@ interface HeroSectionProps {
   onScrollToForm: () => void;
   landingStats?: LandingStats;
   heroCopy: HeroCopy;
-  businessStats: HeroBusinessStat[];
   onContactClick?: () => void;
 }
 
@@ -30,7 +28,6 @@ const HeroSection = ({
   onScrollToForm,
   landingStats,
   heroCopy,
-  businessStats,
   onContactClick,
 }: HeroSectionProps) => {
   const [activeTab, setActiveTab] = useState<'personal' | 'business'>('personal');
@@ -109,8 +106,6 @@ const HeroSection = ({
               trustDailyLabel={heroCopy.trustDailyLabel}
               growingCommunityLabel={heroCopy.growingCommunityLabel}
             />
-
-            <HeroBusinessStats isActive={activeTab === 'business'} stats={businessStats} />
 
             <HeroBusinessCta
               isActive={activeTab === 'business'}

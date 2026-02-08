@@ -19,7 +19,7 @@ interface DataTablePaginationProps<TData> {
 
 export function DataTablePagination<TData>({
   table,
-  page = 1,
+  page = 0,
   size = 10,
   totalCount = 0,
   totalPages = 0,
@@ -73,7 +73,7 @@ export function DataTablePagination<TData>({
       <menu className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 
                      md:justify-end md:gap-x-6">
         <section className="flex items-center space-x-2">
-          <span className="hidden text-sm font-medium sm:block">Rows per page</span>
+          <span className="hidden text-sm font-normal sm:block">Rows per page</span>
           <Select
             value={`${size}`}
             onValueChange={(value) => {
@@ -101,7 +101,7 @@ export function DataTablePagination<TData>({
         </section>
 
         <section className="flex items-center gap-2">
-          <span className="text-sm font-medium whitespace-nowrap">
+          <span className="text-sm font-normal whitespace-nowrap">
             Page {page + 1} of {totalPages || 1}
           </span>
           <input
@@ -165,7 +165,7 @@ export function DataTablePagination<TData>({
               table.nextPage();
               if (setPage) setPage((page + 1) as unknown as number);
             }}
-            disabled={page === ((totalPages - 1) || 1)}
+            disabled={totalPages === 0 || page >= (totalPages - 1)}
           >
             <span className="sr-only">Go to next page</span>
             <ChevronRightIcon className="w-4 h-4" />
@@ -174,10 +174,10 @@ export function DataTablePagination<TData>({
             variant="outline"
             className="w-8 h-8 p-0 cursor-pointer"
             onClick={() => {
-              table.setPageIndex((totalPages - 1) || 1);
-              if (setPage) setPage((totalPages - 1) || 1 as unknown as number);
+              table.setPageIndex((totalPages - 1) || 0);
+              if (setPage) setPage((totalPages - 1) || 0 as unknown as number);
             }}
-            disabled={page === ((totalPages - 1) || 1)}
+            disabled={totalPages === 0 || page >= (totalPages - 1)}
           >
             <span className="sr-only">Go to last page</span>
             <DoubleArrowRightIcon className="w-4 h-4" />

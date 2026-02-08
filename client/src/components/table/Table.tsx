@@ -191,7 +191,7 @@ export default function Table<TData, TValue>({
                     return (
                       <TableCell
                         className={`${preventAction ? '!cursor-auto' : ''
-                          } text-[13px] p-4`}
+                          } text-[13px] text-black p-4`}
                         key={cell.id}
                         onClick={(e) => {
                           if (preventAction) {

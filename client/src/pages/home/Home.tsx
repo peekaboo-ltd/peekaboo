@@ -5,11 +5,11 @@ import {
   faChartLine,
   faHandshake,
   faRocket,
-  faBoxesStacked,
   faCheck,
   faShieldHalved,
   faClock,
   faMapLocationDot,
+  faBoxesStacked,
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
@@ -17,19 +17,14 @@ import { useI18n } from '@/i18n/i18n';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import type {
   BusinessFeatureItem,
-  BusinessHighlightStat,
   FeatureItem,
-  HeroBusinessStat,
   HeroCopy,
   HowItWorksStep,
-  Testimonial,
 } from './home.types';
 import HeroSection from './components/HeroSection';
-import TrustedBySection from './components/TrustedBySection';
 import FeaturesSection from './components/FeaturesSection';
 import BusinessSolutionsSection from './components/BusinessSolutionsSection';
 import HowItWorksSection from './components/HowItWorksSection';
-import TestimonialsSection from './components/TestimonialsSection';
 import FinalCtaSection from './components/FinalCtaSection';
 
 const Home = () => {
@@ -73,12 +68,6 @@ const Home = () => {
     growingCommunityLabel: 'Growing in Kigali',
     businessAccountCta: t('home.b2b.cta.contact'),
   };
-
-  const heroBusinessStats: HeroBusinessStat[] = [
-    { value: '98%', label: 'On-time' },
-    { value: '500+', label: 'Daily runs' },
-    { value: '24/7', label: 'Support' },
-  ];
 
   const features: FeatureItem[] = [
     {
@@ -147,42 +136,6 @@ const Home = () => {
     },
   ];
 
-  const testimonials: Testimonial[] = [
-    {
-      name: t('home.testimonials.t1.name'),
-      role: t('home.testimonials.t1.role'),
-      content: t('home.testimonials.t1.content'),
-      type: 'business',
-    },
-    {
-      name: t('home.testimonials.t2.name'),
-      role: t('home.testimonials.t2.role'),
-      content: t('home.testimonials.t2.content'),
-      type: 'business',
-    },
-    {
-      name: t('home.testimonials.t3.name'),
-      role: t('home.testimonials.t3.role'),
-      content: t('home.testimonials.t3.content'),
-      type: 'personal',
-    },
-  ];
-
-  const trustedByIndustries = [
-    'E-commerce',
-    'Restaurants',
-    'Pharmacies',
-    'Retail',
-    'Florists',
-  ];
-
-  const businessHighlights: BusinessHighlightStat[] = [
-    { value: '10K+', label: t('home.b2b.stats.packages'), icon: faBoxesStacked },
-    { value: '50+', label: t('home.b2b.stats.partners'), icon: faBuilding },
-    { value: '99.2%', label: t('home.b2b.stats.success'), icon: faCheck },
-    { value: '4.9/5', label: t('home.b2b.stats.rating'), icon: faHandshake },
-  ];
-
   return (
     <main className="relative min-h-screen w-full bg-slate-50 overflow-x-hidden max-lg:mt-16">
       <span
@@ -194,11 +147,8 @@ const Home = () => {
         onScrollToForm={scrollToForm}
         landingStats={landingStats}
         heroCopy={heroCopy}
-        businessStats={heroBusinessStats}
         onContactClick={handleContactNavigation}
       />
-
-      <TrustedBySection label={t('home.b2b.trustedBy')} industries={trustedByIndustries} />
 
       <FeaturesSection
         badgeLabel="Why it works"
@@ -214,7 +164,6 @@ const Home = () => {
         subtitle={t('home.b2b.subtitle')}
         features={businessFeatures}
         primaryCtaLabel={t('home.b2b.cta.contact')}
-        stats={businessHighlights}
         onContactClick={handleContactNavigation}
       />
 
@@ -223,13 +172,6 @@ const Home = () => {
         title={t('home.howItWorks.title')}
         subtitle={t('home.howItWorks.subtitle')}
         steps={howItWorks}
-      />
-
-      <TestimonialsSection
-        badgeLabel="Testimonials"
-        title={t('home.testimonials.title')}
-        subtitle={t('home.testimonials.subtitle')}
-        testimonials={testimonials}
       />
 
       <FinalCtaSection

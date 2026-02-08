@@ -183,10 +183,10 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
                   onClick={() => handleRiderSelect(rider.id)}
                 >
                   <strong className="block text-sm font-medium text-gray-900">
-                    {rider.name || 'Unnamed Rider'}
+                    {rider?.name || 'Unnamed Rider'}
                   </strong>
                   <span className="block text-xs text-gray-600">
-                    {rider.phoneNumber}
+                    {rider?.phoneNumber}
                   </span>
                 </button>
               </li>
@@ -199,11 +199,11 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
   // If user is a customer, show read-only assignment status
   if (isCustomer) {
     return (
-      <div
+      <p
         className={`text-sm text-black px-4 py-2 rounded-md ${getStatusBackgroundColor(activeAssignment?.status)}`}
       >
         {renderAssignmentStatus()}
-      </div>
+      </p>
     );
   }
 

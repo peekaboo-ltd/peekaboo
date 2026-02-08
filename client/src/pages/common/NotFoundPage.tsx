@@ -1,6 +1,8 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faArrowLeft,
   faHome,
   faBox,
   faInfoCircle,
@@ -9,104 +11,193 @@ import {
   faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import Button from '@/components/inputs/Button';
 
 const NotFoundPage = () => {
   useDocumentTitle('Page Not Found');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const canGoBack = typeof window !== 'undefined' && window.history.length > 1;
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 via-white to-gray-100 px-4 py-12">
-      <section className="max-w-2xl w-full text-center space-y-8">
-        {/* 404 Number Display */}
-        <header className="space-y-4">
-          <figure className="relative">
-            <h1 className="text-9xl sm:text-[12rem] font-bold text-black/10 select-none">
-              404
-            </h1>
+    <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-slate-50 px-4 py-12 sm:px-6 lg:px-10">
+      <span
+        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.2),_transparent_70%)]"
+        aria-hidden="true"
+      />
+      <span
+        className="pointer-events-none absolute -left-24 top-20 h-72 w-72 rounded-full bg-primary-200/20 blur-3xl"
+        aria-hidden="true"
+      />
+      <span
+        className="pointer-events-none absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-slate-200/60 blur-3xl"
+        aria-hidden="true"
+      />
+
+      <motion.section
+        className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-8"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <article className="grid grid-cols-1 gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <motion.article
+            className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/95 p-8 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.45)]"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
             <span
-              className="absolute inset-0 flex items-center justify-center"
+              className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl"
               aria-hidden="true"
-            >
-              <FontAwesomeIcon
-                icon={faExclamationTriangle}
-                className="text-6xl sm:text-8xl text-black/20"
-                aria-hidden="true"
-              />
-            </span>
-          </figure>
-          <hgroup className="space-y-2">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              Page Not Found
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-600">
-              Oops! The page you're looking for seems to have taken a different
-              delivery route.
-            </p>
-          </hgroup>
-        </header>
+            />
+            <span
+              className="pointer-events-none absolute -left-10 bottom-8 h-32 w-32 rounded-full bg-emerald-200/40 blur-3xl"
+              aria-hidden="true"
+            />
 
-        {/* Description */}
-        <article className="space-y-3">
-          <p className="text-gray-500 leading-relaxed">
-            Just like our carefully tracked packages, every page has its
-            destination. This one might be getting rerouted, or perhaps it
-            never existed at all.
-          </p>
+            <header className="space-y-6">
+              <article className="flex items-center gap-3">
+                <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-slate-500">
+                  Error 404
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-500">
+                  <FontAwesomeIcon
+                    icon={faExclamationTriangle}
+                    className="text-xs text-primary-700"
+                  />
+                  Page missing
+                </span>
+              </article>
+
+              <article className="space-y-4">
+                <h1 className="text-6xl sm:text-7xl font-semibold tracking-tight text-slate-900">
+                  Lost route.
+                  <br />
+                  Let’s get you back.
+                </h1>
+                <p className="text-base sm:text-lg text-slate-600">
+                  We couldn’t find the page you requested. The link might be
+                  broken, or the route has changed.
+                </p>
+              </article>
+
+              <article className="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm text-slate-600">
+                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                  Requested
+                </span>
+                <p className="mt-1 font-medium text-slate-700">
+                  {location.pathname}
+                </p>
+              </article>
+
+              <nav className="flex flex-wrap gap-3">
+                {canGoBack && (
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(-1);
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faArrowLeft}
+                      className="text-xs"
+                      aria-hidden="true"
+                    />
+                    Back to previous page
+                  </Button>
+                )}
+                <Button
+                  route="/"
+                  primary
+                  className="!px-5 !py-2.5 !rounded-lg !text-sm !font-medium"
+                >
+                  <FontAwesomeIcon
+                    icon={faHome}
+                    className="text-xs"
+                    aria-hidden="true"
+                  />
+                  Go to homepage
+                </Button>
+              </nav>
+            </header>
+          </motion.article>
+
+          <motion.aside
+            className="flex h-full flex-col gap-5 rounded-3xl border border-slate-200 bg-white/95 p-7 shadow-[0_20px_45px_-35px_rgba(15,23,42,0.4)]"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <header className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-[0.28em] text-slate-400">
+                Quick links
+              </p>
+              <h2 className="text-2xl font-semibold text-slate-900">
+                Keep exploring
+              </h2>
+              <p className="text-sm text-slate-500">
+                Here are a few useful places to continue from.
+              </p>
+            </header>
+
+            <article className="grid gap-3">
+              <Link
+                to="/track"
+                className="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300"
+              >
+                <span className="flex items-center gap-2">
+                  <FontAwesomeIcon
+                    icon={faBox}
+                    className="text-xs text-primary-700"
+                  />
+                  Track an order
+                </span>
+                <span className="text-xs text-slate-400">Order ID needed</span>
+              </Link>
+
+              <Link
+                to="/contact"
+                className="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300"
+              >
+                <span className="flex items-center gap-2">
+                  <FontAwesomeIcon
+                    icon={faInfoCircle}
+                    className="text-xs text-primary-700"
+                  />
+                  Contact support
+                </span>
+                <span className="text-xs text-slate-400">We can help</span>
+              </Link>
+
+              <article className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Link
+                  to="/auth/login"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
+                >
+                  <FontAwesomeIcon
+                    icon={faSignInAlt}
+                    className="text-xs"
+                    aria-hidden="true"
+                  />
+                  Sign in
+                </Link>
+                <Link
+                  to="/auth/register"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
+                >
+                  <FontAwesomeIcon
+                    icon={faUserPlus}
+                    className="text-xs"
+                    aria-hidden="true"
+                  />
+                  Create account
+                </Link>
+              </article>
+            </article>
+          </motion.aside>
         </article>
-
-        {/* Primary Actions */}
-        <nav className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link
-            to="/"
-            className="group inline-flex items-center gap-2 bg-primary-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-800 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[200px] justify-center"
-          >
-            <FontAwesomeIcon icon={faHome} className="text-sm" aria-hidden="true" />
-            <span>Go Home</span>
-          </Link>
-
-          <Link
-            to="/about"
-            className="group inline-flex items-center gap-2 border-2 border-primary-900 text-primary-900 px-6 py-3 rounded-lg font-medium hover:bg-primary-900 hover:text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 min-w-[200px] justify-center"
-          >
-            <FontAwesomeIcon icon={faInfoCircle} className="text-sm" aria-hidden="true" />
-            <span>About Us</span>
-          </Link>
-        </nav>
-
-        {/* Secondary Links */}
-        <aside className="pt-8 border-t border-gray-200">
-          <p className="text-sm text-gray-500 mb-6">
-            Or try one of these helpful links:
-          </p>
-          <nav className="flex flex-wrap justify-center gap-4 sm:gap-6">
-            <Link
-              to="/auth/login"
-              className="inline-flex items-center gap-2 text-primary-900 hover:text-primary-800 font-medium transition-colors text-sm"
-            >
-              <FontAwesomeIcon icon={faSignInAlt} className="text-xs" aria-hidden="true" />
-              <span>Login</span>
-            </Link>
-            <Link
-              to="/auth/register"
-              className="inline-flex items-center gap-2 text-primary-900 hover:text-primary-800 font-medium transition-colors text-sm"
-            >
-              <FontAwesomeIcon icon={faUserPlus} className="text-xs" aria-hidden="true" />
-              <span>Register</span>
-            </Link>
-            <Link
-              to="/about"
-              className="inline-flex items-center gap-2 text-primary-900 hover:text-primary-800 font-medium transition-colors text-sm"
-            >
-              <FontAwesomeIcon icon={faInfoCircle} className="text-xs" aria-hidden="true" />
-              <span>About</span>
-            </Link>
-            <p className="inline-flex items-center gap-2 text-gray-400 font-medium text-sm">
-              <FontAwesomeIcon icon={faBox} className="text-xs" aria-hidden="true" />
-              <span>Track Order</span>
-              <span className="text-xs text-gray-400">(Requires Order ID)</span>
-            </p>
-          </nav>
-        </aside>
-      </section>
+      </motion.section>
     </main>
   );
 };

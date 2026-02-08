@@ -12,7 +12,7 @@ interface BusinessSolutionsSectionProps {
   subtitle: string;
   features: BusinessFeatureItem[];
   primaryCtaLabel: string;
-  stats: BusinessHighlightStat[];
+  stats?: BusinessHighlightStat[];
   onContactClick?: () => void;
 }
 
@@ -34,7 +34,11 @@ const BusinessSolutionsSection = ({
       viewport={{ once: true, margin: '-100px' }}
       variants={containerVariants}
     >
-      <figure className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <figure
+        className={`grid grid-cols-1 gap-12 lg:gap-20 items-center ${
+          stats?.length ? 'lg:grid-cols-2' : ''
+        }`}
+      >
         <motion.figcaption variants={slideInLeft}>
           <motion.span
             className="inline-block text-black font-medium text-sm tracking-wider uppercase mb-4"
@@ -96,44 +100,46 @@ const BusinessSolutionsSection = ({
           </motion.nav>
         </motion.figcaption>
 
-        <motion.aside className="relative" variants={slideInRight}>
-          <motion.article
-            className="rounded-2xl p-8 border border-slate-200 bg-white/95 shadow-xl shadow-slate-900/5"
-            animate={{ y: [-8, 8, -8] }}
-            transition={{ duration: 4, repeat: Infinity, ease: [0.42, 0, 0.58, 1] }}
-          >
-            <ul className="grid grid-cols-2 gap-6">
-              {stats.map((stat, index) => (
-                <motion.li
-                  key={stat.label}
-                  className="group text-center p-4 rounded-xl hover:bg-primary-50 transition-colors cursor-default"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, type: 'spring', stiffness: 200 }}
-                  whileHover={{ scale: 1.08 }}
-                >
-                  <motion.figure
-                    className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary-200 transition-colors"
-                    whileHover={{ rotate: [0, -15, 15, 0] }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <FontAwesomeIcon icon={stat.icon} className="text-black" />
-                  </motion.figure>
-                  <motion.data
-                    className="block text-2xl font-bold text-slate-900 mb-1"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
+        {stats?.length ? (
+          <motion.aside className="relative" variants={slideInRight}>
+            <motion.article
+              className="rounded-2xl p-8 border border-slate-200 bg-white/95 shadow-xl shadow-slate-900/5"
+              animate={{ y: [-8, 8, -8] }}
+              transition={{ duration: 4, repeat: Infinity, ease: [0.42, 0, 0.58, 1] }}
+            >
+              <ul className="grid grid-cols-2 gap-6">
+                {stats.map((stat, index) => (
+                  <motion.li
+                    key={stat.label}
+                    className="group text-center p-4 rounded-xl hover:bg-primary-50 transition-colors cursor-default"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, type: 'spring', stiffness: 200 }}
+                    whileHover={{ scale: 1.08 }}
                   >
-                    {stat.value}
-                  </motion.data>
-                  <span className="text-xs text-slate-500 font-normal">{stat.label}</span>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.article>
-        </motion.aside>
+                    <motion.figure
+                      className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary-200 transition-colors"
+                      whileHover={{ rotate: [0, -15, 15, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <FontAwesomeIcon icon={stat.icon} className="text-black" />
+                    </motion.figure>
+                    <motion.data
+                      className="block text-2xl font-bold text-slate-900 mb-1"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                    >
+                      {stat.value}
+                    </motion.data>
+                    <span className="text-xs text-slate-500 font-normal">{stat.label}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.article>
+          </motion.aside>
+        ) : null}
       </figure>
     </motion.article>
   </section>
