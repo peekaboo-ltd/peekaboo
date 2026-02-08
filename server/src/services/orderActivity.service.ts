@@ -80,6 +80,10 @@ export class OrderActivityService {
       ['PAID'].includes(statusStr)
     ) {
       const statusMessage = ORDER_STATUS_MESSAGES[statusStr];
+      const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, '');
+      const trackingUrl = frontendUrl
+        ? `${frontendUrl}/p/orders/${order.id}/tracking`
+        : undefined;
 
       if (order.sender?.email) {
         this.emailService
@@ -89,6 +93,7 @@ export class OrderActivityService {
             orderReference: order?.referenceId || '',
             status: statusStr,
             statusMessage,
+            trackingUrl,
           })
           .catch(() => {});
       }

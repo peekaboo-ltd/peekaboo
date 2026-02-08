@@ -2,6 +2,7 @@ import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
 import { StatusBadge } from '../components/status-badge';
+import { EmailButton } from '../components/button';
 import { OrderStatusEmailData } from '../../types/email.types';
 
 export const OrderStatusEmail = ({
@@ -10,6 +11,7 @@ export const OrderStatusEmail = ({
   status,
   statusMessage,
   trackingInfo,
+  trackingUrl,
 }: OrderStatusEmailData) => {
   return (
     <EmailLayout preview={`Order ${orderReference} - ${status}`}>
@@ -22,6 +24,11 @@ export const OrderStatusEmail = ({
         <StatusBadge status={status} />
       </Section>
       <Text style={styles.text}>{statusMessage}</Text>
+      {trackingUrl && (
+        <Section style={styles.buttonContainer}>
+          <EmailButton href={trackingUrl}>Track your order</EmailButton>
+        </Section>
+      )}
       {trackingInfo && (trackingInfo.riderName || trackingInfo.riderPhone) && (
         <Section style={styles.detailsBox}>
           <Text style={styles.detailHeading}>Rider Information</Text>
@@ -57,6 +64,10 @@ const styles = {
   statusContainer: {
     textAlign: 'center' as const,
     margin: '16px 0',
+  },
+  buttonContainer: {
+    textAlign: 'center' as const,
+    margin: '24px 0',
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
