@@ -27,7 +27,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <Card style={styles.card} elevation="lg">
       <View style={styles.header}>
-        <View style={[styles.iconContainer, { backgroundColor: `${iconColor}15` }]}>
+        <View style={[styles.iconContainer, { backgroundColor: `${iconColor}12` }]}>
           <Ionicons name={icon} size={22} color={iconColor} />
         </View>
         {trend && (
@@ -56,6 +56,9 @@ const styles = StyleSheet.create({
     minWidth: '45%',
     marginBottom: spacing.md,
     marginHorizontal: spacing.xs, // Add horizontal spacing between cards
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.18)',
   },
   header: {
     flexDirection: 'row',
@@ -78,10 +81,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   trendPositive: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: 'rgba(16, 185, 129, 0.16)',
   },
   trendNegative: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: 'rgba(239, 68, 68, 0.16)',
   },
   trendText: {
     fontSize: 11,
@@ -89,7 +92,7 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
   value: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '700',
     color: colors.text.primary,
     marginBottom: 2,
@@ -98,6 +101,8 @@ const styles = StyleSheet.create({
     fontSize: typography.bodySmall.fontSize,
     color: colors.text.secondary,
     fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: 1.4,
   },
   subtitle: {
     fontSize: typography.caption.fontSize,
