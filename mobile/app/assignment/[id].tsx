@@ -3,11 +3,11 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { AssignmentDetails } from '../../components/assignments/AssignmentDetails';
+import { AssignmentDetailsSkeleton } from '../../components/assignments/AssignmentDetailsSkeleton';
 import { AssignmentActions } from '../../components/assignments/AssignmentActions';
 import { useAssignmentStore } from '../../store/assignmentStore';
 import { OrderAssignmentStatus } from '../../types';
@@ -91,7 +91,7 @@ export default function AssignmentDetailScreen() {
             headerBackTitle: 'Back',
           }} 
         />
-        <ActivityIndicator size="large" color={colors.primary} />
+        <AssignmentDetailsSkeleton />
       </View>
     );
   }
@@ -118,6 +118,10 @@ export default function AssignmentDetailScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.background}>
+        <View style={styles.glowTop} />
+        <View style={styles.glowBottom} />
+      </View>
       <Stack.Screen 
         options={{ 
           title: getHeaderTitle(),
@@ -152,19 +156,41 @@ export default function AssignmentDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
+  },
+  background: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  glowTop: {
+    position: 'absolute',
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: 'rgba(95, 149, 152, 0.16)',
+    top: -120,
+    right: -60,
+  },
+  glowBottom: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(29, 84, 109, 0.12)',
+    bottom: -110,
+    left: -80,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
+    padding: spacing.md,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,

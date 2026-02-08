@@ -5,12 +5,12 @@ import {
   StyleSheet,
   FlatList,
   RefreshControl,
-  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AssignmentCard } from '../../components/assignments/AssignmentCard';
+import { AssignmentSkeletonCard } from '../../components/assignments/AssignmentSkeletonCard';
 import { AssignmentFilters } from '../../components/assignments/AssignmentFilters';
 import { useAssignments } from '../../hooks/useAssignments';
 import { Assignment, OrderAssignmentStatus } from '../../types';
@@ -91,17 +91,50 @@ export default function AssignmentsScreen() {
 
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="small" color={colors.primary} />
+        <AssignmentSkeletonCard compact />
       </View>
     );
   };
 
+  const isInitialLoading = isLoading && assignments.length === 0;
+  const summary = {
+    pending: assignments.filter((assignment) => assignment.status === OrderAssignmentStatus.PENDING).length,
+    active: assignments.filter((assignment) => assignment.status === OrderAssignmentStatus.ACTIVE).length,
+    completed: assignments.filter((assignment) => assignment.status === OrderAssignmentStatus.COMPLETED).length,
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.background}>
+        <View style={styles.glowTop} />
+        <View style={styles.glowBottom} />
+      </View>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Assignments</Text>
-        <Text style={styles.subtitle}>{assignments.length} total</Text>
+        <View style={styles.headerSurface}>
+          <View>
+            <View style={styles.kickerRow}>
+              <View style={styles.kickerDot} />
+              <Text style={styles.kicker}>Assignments</Text>
+            </View>
+            <Text style={styles.title}>Your delivery queue</Text>
+            <Text style={styles.subtitle}>{assignments.length} total assignments</Text>
+          </View>
+          <View style={styles.summaryPill}>
+            <Text style={styles.summaryLabel}>Active</Text>
+            <Text style={styles.summaryValue}>{summary.active}</Text>
+          </View>
+        </View>
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryLabel}>Pending</Text>
+            <Text style={styles.summaryValue}>{summary.pending}</Text>
+          </View>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryLabel}>Completed</Text>
+            <Text style={styles.summaryValue}>{summary.completed}</Text>
+          </View>
+        </View>
       </View>
 
       {/* Filters */}
@@ -119,24 +152,32 @@ export default function AssignmentsScreen() {
       )}
 
       {/* Assignments List */}
-      <FlatList
-        data={assignments}
-        renderItem={renderAssignment}
-        keyExtractor={(item, index) => `${item.id}-${index}`}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary}
-          />
-        }
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.3}
-        ListEmptyComponent={renderEmpty}
-        ListFooterComponent={renderFooter}
-      />
+      {isInitialLoading ? (
+        <View style={styles.listContent}>
+          {[0, 1, 2, 3].map((index) => (
+            <AssignmentSkeletonCard key={index} />
+          ))}
+        </View>
+      ) : (
+        <FlatList
+          data={assignments}
+          renderItem={renderAssignment}
+          keyExtractor={(item, index) => `${item.id}-${index}`}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              tintColor={colors.primary}
+            />
+          }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          ListEmptyComponent={renderEmpty}
+          ListFooterComponent={renderFooter}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -144,22 +185,111 @@ export default function AssignmentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
+  },
+  background: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  glowTop: {
+    position: 'absolute',
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: 'rgba(95, 149, 152, 0.16)',
+    top: -120,
+    right: -80,
+  },
+  glowBottom: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(29, 84, 109, 0.12)',
+    bottom: -90,
+    left: -80,
   },
   header: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    backgroundColor: colors.background,
+    gap: spacing.md,
+  },
+  headerSurface: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.2)',
+    padding: spacing.lg,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 3,
+  },
+  kickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  kickerDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.primaryLight,
+    marginRight: spacing.sm,
+  },
+  kicker: {
+    fontSize: typography.caption.fontSize,
+    letterSpacing: 2.2,
+    textTransform: 'uppercase',
+    color: colors.text.secondary,
+    fontWeight: '600',
   },
   title: {
-    fontSize: typography.h2.fontSize,
-    fontWeight: typography.h2.fontWeight,
+    fontSize: typography.h3.fontSize,
+    fontWeight: '700',
     color: colors.text.primary,
   },
   subtitle: {
     fontSize: typography.bodySmall.fontSize,
     color: colors.text.secondary,
     marginTop: 2,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  summaryCard: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.16)',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  summaryPill: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderRadius: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
+  },
+  summaryLabel: {
+    fontSize: typography.caption.fontSize,
+    textTransform: 'uppercase',
+    letterSpacing: 1.6,
+    color: colors.text.secondary,
+  },
+  summaryValue: {
+    fontSize: typography.h3.fontSize,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginTop: spacing.xs,
   },
   errorBanner: {
     flexDirection: 'row',
@@ -168,6 +298,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     gap: spacing.sm,
+    marginHorizontal: spacing.md,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
   },
   errorText: {
     flex: 1,

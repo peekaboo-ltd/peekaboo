@@ -106,6 +106,9 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
 const styles = StyleSheet.create({
   activityCard: {
     marginBottom: 0,
+    backgroundColor: colors.surface,
+    borderColor: 'rgba(95, 149, 152, 0.18)',
+    borderRadius: 16,
   },
   activityContent: {
     flexDirection: 'row',

@@ -64,9 +64,12 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.orderId}>
-            {order?.referenceId ? formatOrderRef(order.referenceId) : `#${assignment.id.slice(0, 8)}`}
-          </Text>
+          <View>
+            <Text style={styles.orderLabel}>Order</Text>
+            <Text style={styles.orderId}>
+              {order?.referenceId ? formatOrderRef(order.referenceId) : `#${assignment.id.slice(0, 8)}`}
+            </Text>
+          </View>
           <Badge
             text={getStatusLabel(assignment.status)}
             variant={getStatusBadgeVariant(assignment.status)}
@@ -145,6 +148,9 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.18)',
   },
   header: {
     flexDirection: 'row',
@@ -156,6 +162,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  orderLabel: {
+    fontSize: typography.caption.fontSize,
+    textTransform: 'uppercase',
+    letterSpacing: 1.6,
+    color: colors.text.disabled,
+    marginBottom: 2,
   },
   orderId: {
     fontSize: typography.body.fontSize,
@@ -190,7 +203,7 @@ const styles = StyleSheet.create({
   locationLine: {
     width: 1,
     height: 12,
-    backgroundColor: colors.border,
+    backgroundColor: 'rgba(95, 149, 152, 0.35)',
     marginLeft: 3.5,
     marginVertical: 2,
   },
@@ -216,7 +229,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     paddingTop: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: 'rgba(95, 149, 152, 0.2)',
   },
   actionButton: {
     minWidth: 80,
