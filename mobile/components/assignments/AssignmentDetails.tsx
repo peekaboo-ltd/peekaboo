@@ -212,12 +212,18 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: spacing.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.16)',
+    borderRadius: 18,
   },
   sectionTitle: {
     fontSize: typography.body.fontSize,
     fontWeight: '600',
     color: colors.text.primary,
     marginBottom: spacing.md,
+    textTransform: 'uppercase',
+    letterSpacing: 1.6,
   },
   row: {
     flexDirection: 'row',
@@ -225,12 +231,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors.surface,
+    borderBottomColor: 'rgba(95, 149, 152, 0.12)',
   },
   label: {
     fontSize: typography.bodySmall.fontSize,
     color: colors.text.secondary,
     flex: 1,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
   },
   value: {
     fontSize: typography.bodySmall.fontSize,
@@ -253,9 +261,11 @@ const styles = StyleSheet.create({
     padding: spacing.xs,
   },
   locationCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 8,
+    backgroundColor: 'rgba(95, 149, 152, 0.08)',
+    borderRadius: 14,
     padding: spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.16)',
   },
   locationHeader: {
     flexDirection: 'row',
@@ -286,7 +296,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     marginTop: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: 'rgba(95, 149, 152, 0.18)',
   },
   totalLabel: {
     fontSize: typography.body.fontSize,
