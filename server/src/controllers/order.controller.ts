@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { OrderService } from '../services/order.service';
 import { UUID } from '../types';
+import { Order } from '../entities/order.entity';
 import { UserService } from '../services/user.service';
 import { AuthRequest } from '../types/auth.types';
 import { ForbiddenError, UnauthorizedError } from '../helpers/errors.helper';
@@ -40,18 +41,56 @@ export const OrderController = {
   // CREATE ORDER
   async createOrder(req: Request, res: Response, next: NextFunction) {
     try {
-      const { order } = req.body;
+      const {
+        order: rawOrder,
+        senderPhoneNumber: senderPhoneFromBody,
+        recipientPhoneNumber: recipientPhoneFromBody,
+      } = req.body;
       const { user } = req as AuthRequest;
 
       if (!user?.id) {
         throw new UnauthorizedError('User not authenticated');
       }
 
-      // CREATE ORDER
-      const createdOrder = await orderService.createOrder({
-        ...order,
+      const orderInput = (rawOrder ?? {}) as Partial<Order> & {
+        senderPhoneNumber?: string;
+        recipientPhoneNumber?: string;
+      };
+
+      const senderPhoneNumber = senderPhoneFromBody ?? orderInput.senderPhoneNumber;
+      const recipientPhoneNumber =
+        recipientPhoneFromBody ?? orderInput.recipientPhoneNumber;
+
+      let senderId = orderInput.senderId;
+      let recipientId = orderInput.recipientId;
+
+      if (senderPhoneNumber && !senderId) {
+        const sender =
+          (await userService.getUserByCondition({ phoneNumber: senderPhoneNumber })) ||
+          (await userService.createUser({ phoneNumber: senderPhoneNumber }));
+        senderId = sender?.id;
+      }
+
+      if (recipientPhoneNumber && !recipientId) {
+        const recipient =
+          (await userService.getUserByCondition({ phoneNumber: recipientPhoneNumber })) ||
+          (await userService.createUser({ phoneNumber: recipientPhoneNumber }));
+        recipientId = recipient?.id;
+      }
+
+      const order: Partial<Order> = {
+        ...orderInput,
+        senderId,
+        recipientId,
         createdById: user.id,
-      });
+        initialFee: orderInput.initialFee ?? 1500,
+      };
+
+      delete (order as Partial<Order> & { senderPhoneNumber?: string }).senderPhoneNumber;
+      delete (order as Partial<Order> & { recipientPhoneNumber?: string }).recipientPhoneNumber;
+
+      // CREATE ORDER
+      const createdOrder = await orderService.createOrder(order);
 
       // RETURN ORDER
       return res.status(201).json({
@@ -147,6 +186,33 @@ export const OrderController = {
       return res.status(200).json({
         message: 'Order updated successfully',
         data: updatedOrder,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // DELETE ORDER
+  async deleteOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { user } = req as AuthRequest;
+
+      if (!user?.id) {
+        throw new UnauthorizedError('User not authenticated');
+      }
+
+      const existingOrder = await orderService.getOrderById(id as UUID);
+
+      if (existingOrder.createdById && existingOrder.createdById !== user.id) {
+        throw new ForbiddenError('You do not have permission to delete this order');
+      }
+
+      const deletedOrder = await orderService.deleteOrder(id as UUID);
+
+      return res.status(200).json({
+        message: 'Order deleted successfully',
+        data: deletedOrder,
       });
     } catch (error) {
       next(error);

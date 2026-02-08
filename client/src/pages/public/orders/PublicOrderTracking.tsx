@@ -2,7 +2,7 @@ import { useFetchOrderActivities } from '@/hooks/orders/orderActivities.hooks';
 import { useAppSelector } from '@/states/hooks';
 import type { UUID } from '@/types';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { OrderStatus } from '@/types/order.type';
 import { useGetOrder } from '@/hooks/orders/orders.hooks';
 import { faCopy, faCheckCircle } from '@fortawesome/free-regular-svg-icons';
@@ -30,6 +30,9 @@ const PublicOrderTracking = () => {
 
   // NAVIGATION
   const { id } = useParams();
+
+  // NAVIGATION
+  const navigate = useNavigate();
 
   // ORDER ACTIVITY HOOKS
   const { fetchOrderActivities } = useFetchOrderActivities();
@@ -452,7 +455,11 @@ const PublicOrderTracking = () => {
           variants={itemVariants as unknown as Variants}
         >
           <Button
-            route={`/p/orders/${order?.id}`}
+            route={`#`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(-1);
+            }}
             className="!bg-white !text-gray-700 !border-gray-200 hover:!bg-gray-50 cursor-pointer"
           >
             Back

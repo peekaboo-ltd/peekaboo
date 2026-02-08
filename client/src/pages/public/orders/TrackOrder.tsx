@@ -30,7 +30,7 @@ const TrackOrder = () => {
 
   useEffect(() => {
     if (isSuccess && data?.data?.id) {
-      navigate(`/p/orders/${data.data.id}`);
+      navigate(`/p/orders/${data.data.id}/tracking`);
       reset();
     }
   }, [isSuccess, data, navigate, reset]);

@@ -1,23 +1,30 @@
 import Table from '@/components/table/Table';
 import { useOrdersColumns } from '@/hooks/orders/columns.orders';
 import { useFetchOrders } from '@/hooks/orders/orders.hooks';
-import { useAppSelector } from '@/states/hooks';
-import { useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import OrderSearchBar from '@/components/dashboard/OrderSearchBar';
+import { useAppDispatch, useAppSelector } from '@/states/hooks';
+import { useEffect } from 'react';
 import { OrderStatus } from '@/types/order.type';
 import { useStatusFilter } from '@/hooks/common/filters.hooks';
 import { useForm } from 'react-hook-form';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import Button from '@/components/inputs/Button';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { setCreateOrderModal } from '@/states/slices/order.slice';
+import CreateOrder from './CreateOrder';
+import DeleteOrder from './DeleteOrder';
 
 const OrdersPage = () => {
   // STATE VARIABLES
-  const { ordersList } = useAppSelector((state) => state.order);
+  const dispatch = useAppDispatch();
+  const { ordersList, deleteOrderModal } = useAppSelector(
+    (state) => state.order,
+  );
   useDocumentTitle('Orders');
 
   // REACT HOOK FORM
-  const { control, setValue } = useForm();
+  const { control: filterControl, setValue: setFilterValue } = useForm();
 
+  // CREATE ORDER MODAL
   const {
     fetchOrders,
     page,
@@ -29,28 +36,23 @@ const OrdersPage = () => {
     isFetching,
   } = useFetchOrders();
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const referenceId = searchParams.get('referenceId') || '';
-
   const { statusFilter, applicationStatus } = useStatusFilter({
-    control,
-    setValue,
+    control: filterControl,
+    setValue: setFilterValue,
     label: 'Order Status',
     applicationStatuses: Object.values(OrderStatus),
   });
 
   useEffect(() => {
-    fetchOrders({
-      page,
-      size,
-      referenceId: referenceId || undefined,
-      status: applicationStatus ? applicationStatus?.join(',') : undefined,
-    });
-  }, [page, size, referenceId, applicationStatus, fetchOrders]);
+    if (!deleteOrderModal)
+      fetchOrders({
+        page,
+        size,
+        status: applicationStatus ? applicationStatus?.join(',') : undefined,
+      });
+  }, [page, size, applicationStatus, fetchOrders, deleteOrderModal]);
 
   const { ordersColumns } = useOrdersColumns();
-
-  const searchInitial = useMemo(() => referenceId, [referenceId]);
 
   return (
     <main className="text-primary h-full w-full">
@@ -62,15 +64,20 @@ const OrdersPage = () => {
               Search and filter orders by status or Order ID.
             </p>
           </article>
-          <OrderSearchBar
-            initialValue={searchInitial}
-            onSearch={(query) => {
-              const next = new URLSearchParams(searchParams);
-              next.set('referenceId', query);
-              setSearchParams(next);
-              setPage(0);
-            }}
-          />
+          <nav className="w-full sm:w-auto flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+            <Button
+              type="button"
+              primary
+              icon={faPlus}
+              className="w-full sm:w-auto"
+              onClick={(e) => {
+                e.preventDefault();
+                dispatch(setCreateOrderModal(true));
+              }}
+            >
+              Create Order
+            </Button>
+          </nav>
         </section>
 
         <fieldset className="w-full grid grid-cols-4 gap-4 max-md:grid-cols-3 max-sm:grid-cols-2">
@@ -92,6 +99,8 @@ const OrdersPage = () => {
           isLoading={isFetching}
         />
       </section>
+      <CreateOrder />
+      <DeleteOrder />
     </main>
   );
 };

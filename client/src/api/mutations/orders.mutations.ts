@@ -7,6 +7,21 @@ export const ordersMutationApiSlice = createApi({
   reducerPath: 'ordersMutationApi',
   baseQuery: createBaseQuery(),
   endpoints: (builder) => ({
+    // CREATE AUTHENTICATED ORDER
+    createOrder: builder.mutation({
+      query: ({
+        senderPhoneNumber,
+        recipientPhoneNumber,
+      }: {
+        senderPhoneNumber: string;
+        recipientPhoneNumber: string;
+      }) => ({
+        url: '/orders',
+        method: 'POST',
+        body: { senderPhoneNumber, recipientPhoneNumber },
+      }),
+    }),
+
     // CREATE PUBLIC ORDER
     createPublicOrder: builder.mutation({
       query: ({
@@ -30,10 +45,20 @@ export const ordersMutationApiSlice = createApi({
         body: { order },
       }),
     }),
+
+    // DELETE ORDER
+    deleteOrder: builder.mutation({
+      query: (id: UUID) => ({
+        url: `/orders/${id}`,
+        method: 'DELETE',
+      }),
+    }),
   }),
 });
 
 export const {
+  useCreateOrderMutation,
   useCreatePublicOrderMutation,
   useUpdateOrderMutation,
+  useDeleteOrderMutation,
 } = ordersMutationApiSlice;

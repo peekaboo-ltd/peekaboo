@@ -144,37 +144,37 @@ export const Login = () => {
       <section className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white/90 shadow-[0_28px_70px_-50px_rgba(15,23,42,0.6)]">
         <article className="flex flex-col gap-6 px-6 py-10 sm:px-10">
           <header className="flex flex-col gap-2 text-center">
-              <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
-                {authMode === 'login' ? 'Secure sign in' : 'Create your account'}
-              </p>
-              <h1 className="mt-2 text-2xl font-semibold text-slate-900 sm:text-3xl">
-                {authMode === 'login' ? 'Sign in to Peekaboo' : 'Create Account'}
-              </h1>
-              <p className="text-sm text-slate-600">
-                {authMode === 'login' ? (
-                  <>
-                    Don't have an account?{' '}
-                    <Link
-                      to="#"
-                      onClick={toggleAuthMode}
-                      className="font-medium text-[13px] hover:underline text-primary hover:text-primary/80"
-                    >
-                      Create one
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    Already have an account?{' '}
-                    <Link
-                      to="#"
-                      onClick={toggleAuthMode}
-                      className="font-medium text-[13px] hover:underline text-primary hover:text-primary/80"
-                    >
-                      Sign in
-                    </Link>
-                  </>
-                )}
-              </p>
+            <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
+              {authMode === 'login' ? 'Secure sign in' : 'Create your account'}
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold text-slate-900 sm:text-3xl">
+              {authMode === 'login' ? 'Sign in to Peekaboo' : 'Create Account'}
+            </h1>
+            <p className="text-sm text-slate-600">
+              {authMode === 'login' ? (
+                <>
+                  Don't have an account?{' '}
+                  <Link
+                    to="#"
+                    onClick={toggleAuthMode}
+                    className="font-medium text-[13px] hover:underline text-primary hover:text-primary/80"
+                  >
+                    Create one
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Already have an account?{' '}
+                  <Link
+                    to="#"
+                    onClick={toggleAuthMode}
+                    className="font-medium text-[13px] hover:underline text-primary hover:text-primary/80"
+                  >
+                    Sign in
+                  </Link>
+                </>
+              )}
+            </p>
           </header>
 
           {/* Google Sign In Button */}

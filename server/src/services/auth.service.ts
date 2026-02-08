@@ -61,6 +61,7 @@ export class AuthService {
         email: true,
         phoneNumber: true,
         name: true,
+        dateOfBirth: true,
         status: true,
         passwordHash: true,
         userRoles: {
@@ -75,6 +76,7 @@ export class AuthService {
           organization: {
             id: true,
             name: true,
+            phoneNumber: true,
           },
         }
       },

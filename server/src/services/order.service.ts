@@ -3,7 +3,7 @@ import { Order } from '../entities/order.entity';
 import { AppDataSource } from '../data-source';
 import { generateReferenceNumber } from '../helpers/string.helper';
 import { UUID } from '../types';
-import { NotFoundError } from '../helpers/errors.helper';
+import { NotFoundError, ValidationError } from '../helpers/errors.helper';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import {
   OrderAssignmentStatus,
@@ -28,6 +28,7 @@ import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrganizationService } from './organization.service';
 import { OrganizationBillingService } from './organizationBilling.service';
 import { EmailService } from '../integrations/emails/email.service';
+import { OrderAssignment } from '../entities/orderAssignment.entity';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -38,6 +39,8 @@ export class OrderService {
   private readonly organizationService: OrganizationService;
   private readonly organizationBillingService: OrganizationBillingService;
   private readonly emailService: EmailService;
+  private readonly orderActivityRepository: Repository<OrderActivity>;
+  private readonly orderAssignmentRepository: Repository<OrderAssignment>;
 
   constructor() {
     this.orderRepository = AppDataSource.getRepository(Order);
@@ -48,6 +51,8 @@ export class OrderService {
     this.organizationService = new OrganizationService();
     this.organizationBillingService = new OrganizationBillingService();
     this.emailService = new EmailService();
+    this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
+    this.orderAssignmentRepository = AppDataSource.getRepository(OrderAssignment);
   }
 
   // CREATE ORDER
@@ -320,6 +325,31 @@ export class OrderService {
         })
         .catch(() => {});
     }
+
+    return order;
+  }
+
+  // DELETE ORDER
+  async deleteOrder(id: UUID): Promise<Order> {
+    const order = await this.getOrderById(id);
+
+    const latestActivity = order?.activities
+      ? [...order.activities].sort(
+          (a, b) =>
+            new Date(b?.updatedAt ?? '').getTime() -
+            new Date(a?.updatedAt ?? '').getTime()
+        )[0]
+      : undefined;
+
+    const statusToValidate = latestActivity?.status ?? order.status;
+
+    if (![OrderStatus.CREATED, OrderStatus.PENDING].includes(statusToValidate)) {
+      throw new ValidationError('Only orders in CREATED or PENDING can be deleted');
+    }
+
+    await this.orderAssignmentRepository.delete({ orderId: id });
+    await this.orderActivityRepository.delete({ orderId: id });
+    await this.orderRepository.delete({ id });
 
     return order;
   }
