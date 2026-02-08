@@ -11,10 +11,12 @@ import { formatCurrency } from '@/utils/strings.util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faCopy } from '@fortawesome/free-regular-svg-icons';
 import { toast } from 'sonner';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const PublicOrderPaymentSuccess = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  useDocumentTitle('Payment Successful');
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(

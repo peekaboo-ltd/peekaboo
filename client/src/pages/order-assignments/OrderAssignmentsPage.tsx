@@ -7,12 +7,14 @@ import AcceptOrderAssignment from './AcceptOrderAssignment';
 import RejectOrderAssignment from './RejectOrderAssignment';
 import ReassignOrderAssignment from './ReassignOrderAssignment';
 import { UUID } from '@/types';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const OrderAssignmentsPage = () => {
 
     // STATE VARIABLES
     const { orderAssignmentsList, acceptOrderAssignmentModal, rejectOrderAssignmentModal, reassignOrderAssignmentModal } = useAppSelector((state) => state.orderAssignment);
     const { user } = useAppSelector((state) => state.auth);
+    useDocumentTitle('Assignments');
 
     // ORDER ASSIGMENT HOOKS
     const { fetchOrderAssignments, page, setPage, size, setSize, totalPages, totalCount, isFetching } = useFetchOrderAssignments();

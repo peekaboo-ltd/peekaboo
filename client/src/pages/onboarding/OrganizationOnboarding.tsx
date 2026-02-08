@@ -16,6 +16,7 @@ import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrganizationData } from '@/states/slices/onboarding.slice';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import type { OrganizationFormData } from '@/types/organization.type';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 // Animation variants
 const containerVariants: Variants = {
@@ -84,6 +85,7 @@ const OrganizationOnboarding = () => {
   const { organization } = useAppSelector((state) => state.onboarding);
   const { t } = useI18n();
   const [phoneError, setPhoneError] = useState<string | undefined>();
+  useDocumentTitle(t('onboarding.organization.title'));
 
   const {
     control,

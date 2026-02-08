@@ -15,11 +15,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useI18n } from '@/i18n/i18n';
 import { RoleTypes } from '@/types/auth.type';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const UsersPage = () => {
   const dispatch = useAppDispatch();
   const { usersList, createUserModal } = useAppSelector((state) => state.user);
   const { user } = useAppSelector((state) => state.auth);
+  useDocumentTitle('Users');
 
   const {
     fetchUsers,

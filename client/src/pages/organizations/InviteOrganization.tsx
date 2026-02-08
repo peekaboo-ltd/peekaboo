@@ -5,10 +5,12 @@ import Input from '@/components/inputs/Input';
 import Button from '@/components/inputs/Button';
 import { useInviteOrganizationMutation } from '@/api/mutations/organization.mutations';
 import type { InviteOrganizationPayload } from '@/types/organization.type';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const InviteOrganization = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [inviteOrganization, { isLoading }] = useInviteOrganizationMutation();
+  useDocumentTitle('Invite Organization');
 
   const {
     control,
@@ -176,7 +178,7 @@ const InviteOrganization = () => {
             </div>
           )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button
               type="submit"
               primary

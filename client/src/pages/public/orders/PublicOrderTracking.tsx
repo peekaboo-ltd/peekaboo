@@ -13,8 +13,10 @@ import { toast } from 'sonner';
 import { workflowStatuses } from '@/constants/order.constants';
 import Button from '@/components/inputs/Button';
 import { motion, Variants } from 'framer-motion';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const PublicOrderTracking = () => {
+  useDocumentTitle('Order Tracking');
   // STATE VARIABLES
   const { orderActivitiesList } = useAppSelector(
     (state) => state.orderActivity,

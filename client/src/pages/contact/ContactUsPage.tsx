@@ -1,8 +1,10 @@
 import { useI18n } from '@/i18n/i18n';
 import ContactUsForm from '@/pages/home/components/ContactUsForm';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const ContactUsPage = () => {
   const { t } = useI18n();
+  useDocumentTitle('Contact Us');
 
   return (
     <main className="min-h-screen bg-slate-50">

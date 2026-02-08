@@ -6,12 +6,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faBoxOpen } from '@fortawesome/free-solid-svg-icons';
 import { useGetOrderByReferenceId } from '@/hooks/orders/orders.hooks';
 import { useI18n } from '@/i18n/i18n';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const TrackOrder = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialRef = searchParams.get('ref') || '';
+  useDocumentTitle('Track Order');
 
   const [referenceId, setReferenceId] = useState(initialRef);
   const [errorMessage, setErrorMessage] = useState('');

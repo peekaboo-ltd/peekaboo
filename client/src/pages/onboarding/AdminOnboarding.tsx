@@ -15,6 +15,7 @@ import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setAdminData } from '@/states/slices/onboarding.slice';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import type { AdminFormData } from '@/types/organization.type';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 // Animation variants
 const containerVariants: Variants = {
@@ -83,6 +84,7 @@ const AdminOnboarding = () => {
   const { organization, admin } = useAppSelector((state) => state.onboarding);
   const { t } = useI18n();
   const [phoneError, setPhoneError] = useState<string | undefined>();
+  useDocumentTitle(t('onboarding.admin.title'));
 
   // Redirect to step 1 if organization data is missing
   useEffect(() => {

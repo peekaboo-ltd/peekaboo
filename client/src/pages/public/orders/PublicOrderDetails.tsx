@@ -19,9 +19,11 @@ import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import OrderPayment from '@/components/modals/OrderPayment';
 import { useFetchPayments } from '@/hooks/payments/payment.hooks';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const PublicOrderDetails = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
+  useDocumentTitle('Order Details');
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
