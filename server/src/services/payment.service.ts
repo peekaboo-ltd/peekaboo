@@ -204,4 +204,241 @@ export class PaymentService {
 
     return payment;
   }
+
+  // ADMIN: FETCH PAYMENTS WITH COMPREHENSIVE FILTERS
+  async fetchAdminPayments(
+    query: Request['query'],
+  ): Promise<Pagination<Payment>> {
+    const {
+      page = 0,
+      size = 10,
+      status,
+      currency,
+      method,
+      startDate,
+      endDate,
+      minAmount,
+      maxAmount,
+      searchKey,
+    } = query;
+
+    const { take, skip } = getPagination({
+      page: Number(page),
+      size: Number(size),
+    });
+
+    const queryBuilder = this.paymentRepository
+      .createQueryBuilder('payment')
+      .leftJoinAndSelect('payment.createdBy', 'createdBy')
+      .orderBy('payment.createdAt', 'DESC');
+
+    if (status) {
+      queryBuilder.andWhere('payment.status = :status', { status });
+    }
+
+    if (currency) {
+      queryBuilder.andWhere('payment.currency = :currency', { currency });
+    }
+
+    if (method) {
+      queryBuilder.andWhere('payment.method = :method', { method });
+    }
+
+    if (startDate && endDate) {
+      queryBuilder.andWhere(
+        'payment.createdAt BETWEEN :startDate AND :endDate',
+        {
+          startDate: new Date(startDate as string),
+          endDate: new Date(endDate as string),
+        },
+      );
+    } else if (startDate) {
+      queryBuilder.andWhere('payment.createdAt >= :startDate', {
+        startDate: new Date(startDate as string),
+      });
+    } else if (endDate) {
+      queryBuilder.andWhere('payment.createdAt <= :endDate', {
+        endDate: new Date(endDate as string),
+      });
+    }
+
+    if (minAmount) {
+      queryBuilder.andWhere('payment.amount >= :minAmount', {
+        minAmount: Number(minAmount),
+      });
+    }
+
+    if (maxAmount) {
+      queryBuilder.andWhere('payment.amount <= :maxAmount', {
+        maxAmount: Number(maxAmount),
+      });
+    }
+
+    if (searchKey) {
+      queryBuilder.andWhere(
+        '(payment.externalReferenceId ILIKE :searchKey OR payment.internalReferenceId ILIKE :searchKey OR payment.customerEmail ILIKE :searchKey OR payment.customerName ILIKE :searchKey OR payment.customerPhone ILIKE :searchKey)',
+        { searchKey: `%${searchKey}%` },
+      );
+    }
+
+    const [rows, totalCount] = await queryBuilder
+      .skip(skip)
+      .take(take)
+      .getManyAndCount();
+
+    return {
+      rows,
+      totalCount,
+      totalPages: Math.ceil(totalCount / Number(size)),
+      currentPage: Number(page) + 1,
+    };
+  }
+
+  // ADMIN: GET PAYMENT STATS
+  async getPaymentStats(query: Request['query']): Promise<{
+    totalRevenue: number;
+    totalPayments: number;
+    pendingCount: number;
+    successfulCount: number;
+    failedCount: number;
+    pendingAmount: number;
+    successfulAmount: number;
+    failedAmount: number;
+  }> {
+    const { startDate, endDate, currency } = query;
+
+    const queryBuilder = this.paymentRepository
+      .createQueryBuilder('payment');
+
+    if (startDate && endDate) {
+      queryBuilder.andWhere(
+        'payment.createdAt BETWEEN :startDate AND :endDate',
+        {
+          startDate: new Date(startDate as string),
+          endDate: new Date(endDate as string),
+        },
+      );
+    } else if (startDate) {
+      queryBuilder.andWhere('payment.createdAt >= :startDate', {
+        startDate: new Date(startDate as string),
+      });
+    } else if (endDate) {
+      queryBuilder.andWhere('payment.createdAt <= :endDate', {
+        endDate: new Date(endDate as string),
+      });
+    }
+
+    if (currency) {
+      queryBuilder.andWhere('payment.currency = :currency', { currency });
+    }
+
+    const stats = await queryBuilder
+      .select([
+        'COUNT(*)::int AS "totalPayments"',
+        'COALESCE(SUM(payment.amount), 0)::numeric AS "totalRevenue"',
+        'COUNT(*) FILTER (WHERE payment.status = :pending)::int AS "pendingCount"',
+        'COUNT(*) FILTER (WHERE payment.status = :successful)::int AS "successfulCount"',
+        'COUNT(*) FILTER (WHERE payment.status = :failed)::int AS "failedCount"',
+        'COALESCE(SUM(payment.amount) FILTER (WHERE payment.status = :pending), 0)::numeric AS "pendingAmount"',
+        'COALESCE(SUM(payment.amount) FILTER (WHERE payment.status = :successful), 0)::numeric AS "successfulAmount"',
+        'COALESCE(SUM(payment.amount) FILTER (WHERE payment.status = :failed), 0)::numeric AS "failedAmount"',
+      ])
+      .setParameters({
+        pending: KpayPaymentStatus.PENDING,
+        successful: KpayPaymentStatus.SUCCESSFUL,
+        failed: KpayPaymentStatus.FAILED,
+      })
+      .getRawOne();
+
+    return {
+      totalRevenue: Number(stats?.totalRevenue || 0),
+      totalPayments: Number(stats?.totalPayments || 0),
+      pendingCount: Number(stats?.pendingCount || 0),
+      successfulCount: Number(stats?.successfulCount || 0),
+      failedCount: Number(stats?.failedCount || 0),
+      pendingAmount: Number(stats?.pendingAmount || 0),
+      successfulAmount: Number(stats?.successfulAmount || 0),
+      failedAmount: Number(stats?.failedAmount || 0),
+    };
+  }
+
+  // ADMIN: UPDATE PAYMENT STATUS (manual)
+  async adminUpdatePaymentStatus(
+    paymentId: UUID,
+    status: KpayPaymentStatus,
+  ): Promise<Payment> {
+    return this.updatePaymentStatus(paymentId, status);
+  }
+
+  // ADMIN: EXPORT PAYMENTS (returns all matching payments without pagination)
+  async exportPayments(
+    query: Request['query'],
+  ): Promise<Payment[]> {
+    const {
+      status,
+      currency,
+      method,
+      startDate,
+      endDate,
+      minAmount,
+      maxAmount,
+      searchKey,
+    } = query;
+
+    const queryBuilder = this.paymentRepository
+      .createQueryBuilder('payment')
+      .leftJoinAndSelect('payment.createdBy', 'createdBy')
+      .orderBy('payment.createdAt', 'DESC');
+
+    if (status) {
+      queryBuilder.andWhere('payment.status = :status', { status });
+    }
+
+    if (currency) {
+      queryBuilder.andWhere('payment.currency = :currency', { currency });
+    }
+
+    if (method) {
+      queryBuilder.andWhere('payment.method = :method', { method });
+    }
+
+    if (startDate && endDate) {
+      queryBuilder.andWhere(
+        'payment.createdAt BETWEEN :startDate AND :endDate',
+        {
+          startDate: new Date(startDate as string),
+          endDate: new Date(endDate as string),
+        },
+      );
+    } else if (startDate) {
+      queryBuilder.andWhere('payment.createdAt >= :startDate', {
+        startDate: new Date(startDate as string),
+      });
+    } else if (endDate) {
+      queryBuilder.andWhere('payment.createdAt <= :endDate', {
+        endDate: new Date(endDate as string),
+      });
+    }
+
+    if (minAmount) {
+      queryBuilder.andWhere('payment.amount >= :minAmount', {
+        minAmount: Number(minAmount),
+      });
+    }
+
+    if (maxAmount) {
+      queryBuilder.andWhere('payment.amount <= :maxAmount', {
+        maxAmount: Number(maxAmount),
+      });
+    }
+
+    if (searchKey) {
+      queryBuilder.andWhere(
+        '(payment.externalReferenceId ILIKE :searchKey OR payment.internalReferenceId ILIKE :searchKey OR payment.customerEmail ILIKE :searchKey OR payment.customerName ILIKE :searchKey OR payment.customerPhone ILIKE :searchKey)',
+        { searchKey: `%${searchKey}%` },
+      );
+    }
+
+    return queryBuilder.getMany();
+  }
 }

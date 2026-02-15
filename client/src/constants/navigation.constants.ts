@@ -6,6 +6,7 @@ import {
   faBuilding,
   faUserCheck,
   faUserGroup,
+  faCreditCard,
 } from '@fortawesome/free-solid-svg-icons';
 
 export const NAVIGATION_LINKS = {
@@ -40,6 +41,12 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     path: '/assignments',
     icon: faUserCheck,
     permissions: [RoleTypes.ADMIN, RoleTypes.RIDER],
+  },
+  {
+    label: 'Payments',
+    path: '/payments',
+    icon: faCreditCard,
+    permissions: [RoleTypes.ADMIN],
   },
   {
     label: 'Users',

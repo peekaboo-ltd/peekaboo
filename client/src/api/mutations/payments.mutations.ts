@@ -12,7 +12,17 @@ export const paymentsMutationsApiSlice = createApi({
         body: payment,
       }),
     }),
+    adminUpdatePaymentStatus: builder.mutation({
+      query: ({ id, status }: { id: string; status: string }) => ({
+        url: `/payments/admin/${id}/status`,
+        method: 'PATCH',
+        body: { status },
+      }),
+    }),
   }),
 });
 
-export const { useCreatePaymentMutation } = paymentsMutationsApiSlice;
+export const {
+  useCreatePaymentMutation,
+  useAdminUpdatePaymentStatusMutation,
+} = paymentsMutationsApiSlice;

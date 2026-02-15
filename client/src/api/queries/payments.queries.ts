@@ -1,6 +1,19 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
 
+export interface AdminPaymentsQueryParams {
+  page?: number;
+  size?: number;
+  status?: string;
+  currency?: string;
+  method?: string;
+  startDate?: string;
+  endDate?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  searchKey?: string;
+}
+
 export const paymentsQueriesApiSlice = createApi({
   reducerPath: 'paymentsQueriesApi',
   baseQuery: createBaseQuery(),
@@ -12,7 +25,33 @@ export const paymentsQueriesApiSlice = createApi({
         params: { entityId, paymentType },
       }),
     }),
+    fetchAdminPayments: builder.query({
+      query: (params: AdminPaymentsQueryParams) => ({
+        url: `/payments/admin`,
+        method: 'GET',
+        params,
+      }),
+    }),
+    fetchPaymentStats: builder.query({
+      query: (params?: { startDate?: string; endDate?: string; currency?: string }) => ({
+        url: `/payments/admin/stats`,
+        method: 'GET',
+        params,
+      }),
+    }),
+    exportPayments: builder.query({
+      query: (params: AdminPaymentsQueryParams) => ({
+        url: `/payments/admin/export`,
+        method: 'GET',
+        params,
+      }),
+    }),
   }),
 });
 
-export const { useLazyFetchPaymentsQuery } = paymentsQueriesApiSlice;
+export const {
+  useLazyFetchPaymentsQuery,
+  useLazyFetchAdminPaymentsQuery,
+  useLazyFetchPaymentStatsQuery,
+  useLazyExportPaymentsQuery,
+} = paymentsQueriesApiSlice;

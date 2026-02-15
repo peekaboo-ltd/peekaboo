@@ -17,6 +17,7 @@ import { UsersPage, UserProfilePage, UserDetailsPage } from '@/pages/users';
 import { About, OrderFees } from '@/pages/about';
 import { ContactUsPage } from '@/pages/contact';
 import { InviteOrganization } from '@/pages/organizations';
+import { PaymentsPage } from '@/pages/payments';
 import {
   OrganizationOnboarding,
   AdminOnboarding,
@@ -135,6 +136,14 @@ const Router = () => {
                 ]}
               >
                 <UserProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payments"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <PaymentsPage />
               </ProtectedRoute>
             }
           />

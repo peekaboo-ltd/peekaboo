@@ -30,6 +30,11 @@ export interface Payment {
   description: string;
   method: string;
 
+  // Customer fields
+  customerEmail?: string;
+  customerName?: string;
+  customerPhone?: string;
+
   // Payment timestamps
   paidAt?: string;
   failedAt?: string;
