@@ -96,6 +96,8 @@ export interface MetricCardData {
   };
   colorClass?: string;
   href?: string;
+  query?: Record<string, string>;
+  to?: string;
   icon?: IconProp;
   sparklineData?: number[];
   sparklineType?: 'line' | 'bar';
