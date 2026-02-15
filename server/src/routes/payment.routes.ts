@@ -22,4 +22,32 @@ router.get(
   PaymentController.fetchPayments
 );
 
+// Admin: Fetch payments with comprehensive filters
+router.get(
+  '/admin',
+  authorize([RoleTypes.ADMIN]),
+  PaymentController.fetchAdminPayments
+);
+
+// Admin: Get payment stats
+router.get(
+  '/admin/stats',
+  authorize([RoleTypes.ADMIN]),
+  PaymentController.getPaymentStats
+);
+
+// Admin: Export payments
+router.get(
+  '/admin/export',
+  authorize([RoleTypes.ADMIN]),
+  PaymentController.exportPayments
+);
+
+// Admin: Update payment status
+router.patch(
+  '/admin/:id/status',
+  authorize([RoleTypes.ADMIN]),
+  PaymentController.adminUpdatePaymentStatus
+);
+
 export default router;
