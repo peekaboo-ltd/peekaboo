@@ -20,11 +20,10 @@ const SessionExpiredModal = () => {
     const currentSearch = search;
     const fullPath = `${currentPath}${currentSearch}`;
 
-    dispatch(setLogout());
     localStorageUtil.setItem('from', fullPath);
-    navigate('/auth/login');
+    dispatch(setLogout());
     dispatch(setSessionExpiredModal(false));
-    window.location.reload();
+    navigate('/auth/login');
   }, [dispatch, navigate, pathname, search]);
 
   return (
