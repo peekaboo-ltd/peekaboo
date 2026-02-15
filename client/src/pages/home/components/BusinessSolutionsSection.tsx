@@ -114,7 +114,7 @@ const BusinessSolutionsSection = ({
               transition={{ duration: 4, repeat: Infinity, ease: [0.42, 0, 0.58, 1] }}
             >
               <ul className="grid grid-cols-2 gap-6">
-                {stats.map((stat, index) => (
+                {stats?.map((stat, index) => (
                   <motion.li
                     key={stat.label}
                     className="group text-center p-4 rounded-xl hover:bg-primary-50 transition-colors cursor-default"

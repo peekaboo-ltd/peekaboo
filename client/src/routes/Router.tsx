@@ -13,7 +13,7 @@ import { Dashboard } from '@/pages/dashboard';
 import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayout';
 import { OrdersPage } from '@/pages/orders';
 import { OrderAssignmentsPage } from '@/pages/order-assignments';
-import { UsersPage, UserProfilePage } from '@/pages/users';
+import { UsersPage, UserProfilePage, UserDetailsPage } from '@/pages/users';
 import { About, OrderFees } from '@/pages/about';
 import { ContactUsPage } from '@/pages/contact';
 import { InviteOrganization } from '@/pages/organizations';
@@ -111,6 +111,14 @@ const Router = () => {
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'BUSINESS']}>
                 <UsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/:id"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'BUSINESS']}>
+                <UserDetailsPage />
               </ProtectedRoute>
             }
           />

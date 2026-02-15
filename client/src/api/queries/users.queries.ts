@@ -34,7 +34,13 @@ export const usersQueriesApiSlice = createApi({
         };
       },
     }),
+    fetchUserById: builder.query({
+      query: (id: string) => ({
+        url: `/users/${id}`,
+      }),
+    }),
   }),
 });
 
-export const { useLazyFetchUsersQuery } = usersQueriesApiSlice;
+export const { useLazyFetchUsersQuery, useLazyFetchUserByIdQuery } =
+  usersQueriesApiSlice;

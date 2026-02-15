@@ -16,7 +16,7 @@ router.get("/", authorize([RoleTypes.ADMIN, RoleTypes.BUSINESS]), UserController
 router.get("/:id", UserController.getUserById);
 
 // CREATE new user (ADMIN only)
-router.post("/", authorize([RoleTypes.ADMIN]), UserController.createUser);
+router.post("/", authorize([RoleTypes.ADMIN, RoleTypes.BUSINESS]), UserController.createUser);
 
 // UPDATE user (ADMIN or own profile)
 router.patch("/:id", UserController.updateUser);

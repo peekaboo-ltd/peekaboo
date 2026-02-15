@@ -5,6 +5,14 @@ import { RoleTypes } from '@/types/auth.type';
 import { formatDate } from '@/utils/strings.util';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
+import CustomPopover from '@/components/inputs/CustomPopover';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEllipsisH, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import {
+  ellipsisHClassName,
+  tableActionClassName,
+} from '@/constants/inputs.constants';
+import { Link } from 'react-router-dom';
 
 export const useUsersColumns = () => {
   const usersColumns: ColumnDef<User>[] = useMemo(
@@ -54,6 +62,27 @@ export const useUsersColumns = () => {
         header: 'Last updated',
         accessorKey: 'updatedAt',
         cell: ({ row }) => formatDate(row?.original?.updatedAt, 'DD/MM/YYYY HH:mm'),
+      },
+      {
+        header: 'Actions',
+        id: 'actions',
+        cell: ({ row }) => (
+          <CustomPopover
+            trigger={
+              <FontAwesomeIcon
+                icon={faEllipsisH}
+                className={ellipsisHClassName}
+              />
+            }
+          >
+            <menu className="w-full flex flex-col gap-1">
+              <Link className={tableActionClassName} to={`/users/${row.original.id}`}>
+                <FontAwesomeIcon icon={faCircleInfo} />
+                View details
+              </Link>
+            </menu>
+          </CustomPopover>
+        ),
       },
     ],
     []

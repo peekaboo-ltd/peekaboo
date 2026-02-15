@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Modal from '@/components/Modal';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setCreateUserModal } from '@/states/slices/user.slice';
@@ -23,12 +23,32 @@ const CreateUserModal = () => {
   const { createUserModal } = useAppSelector((state) => state.user);
   const { user: authUser } = useAppSelector((state) => state.auth);
   const [selectedRoles, setSelectedRoles] = useState<RoleTypes[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<RoleTypes[]>(
+    Object.values(RoleTypes),
+  );
+
+  useEffect(() => {
+    if (
+      authUser?.userRoles?.some(
+        (userRole) => userRole?.role?.name === RoleTypes.ADMIN,
+      )
+    ) {
+      setAvailableRoles(Object.values(RoleTypes));
+    }
+    if (
+      authUser?.userRoles?.some(
+        (userRole) => userRole?.role?.name === RoleTypes.BUSINESS,
+      )
+    ) {
+      setAvailableRoles([RoleTypes.STAFF]);
+    }
+  }, [authUser?.userRoles]);
 
   const activeOrganizationId = useMemo(
     () =>
       authUser?.organizationMembership?.find(
         (membership) => membership.status === MembershipStatus.ACTIVE,
-      )?.organizationId,
+      )?.organization?.id,
     [authUser?.organizationMembership],
   );
 
@@ -80,8 +100,6 @@ const CreateUserModal = () => {
       organizationId: activeOrganizationId,
     });
   });
-
-  const availableRoles = Object.values(RoleTypes);
 
   return (
     <Modal
@@ -167,7 +185,7 @@ const CreateUserModal = () => {
             Assign Roles
           </legend>
           <menu className="flex flex-wrap gap-2">
-            {availableRoles.map((role) => (
+            {availableRoles?.map((role) => (
               <li key={role}>
                 <button
                   type="button"

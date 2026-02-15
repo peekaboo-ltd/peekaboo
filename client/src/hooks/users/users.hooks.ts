@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/states/hooks';
 import { setUsersList, setUser, setCreateUserModal } from '@/states/slices/user.slice';
-import { useLazyFetchUsersQuery } from '@/api/queries/users.queries';
+import { useLazyFetchUserByIdQuery, useLazyFetchUsersQuery } from '@/api/queries/users.queries';
 import {
   useCreateUserMutation,
   useUpdateUserMutation,
@@ -182,3 +182,19 @@ export const useDeleteUser = () => {
 
   return { deleteUser: handleDeleteUser, data, error, isLoading, isSuccess, reset };
 };
+
+// FETCH USER BY ID
+export const useFetchUserById = () => {
+  const dispatch = useAppDispatch();
+
+  const [fetchUserById, { data, error, isFetching, isSuccess, reset }] =
+    useLazyFetchUserByIdQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setUser(data?.data));
+    }
+  }, [data, isSuccess, dispatch]);
+
+  return { fetchUserById, data, error, isFetching, isSuccess, reset };
+}

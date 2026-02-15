@@ -73,6 +73,8 @@ export class AuthService {
         },
         organizationMembership: {
           id: true,
+          status: true,
+          organizationId: true,
           organization: {
             id: true,
             name: true,
