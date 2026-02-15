@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import Input from '@/components/inputs/Input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -29,6 +29,7 @@ interface RegisterFormData {
 
 export const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [phoneError, setPhoneError] = useState<string | undefined>();
@@ -38,14 +39,20 @@ export const Login = () => {
   useEffect(() => {
     if (isAuthenticated) {
       const redirectPath = localStorageUtil.getItem<string>('from');
-      if (redirectPath) {
-        localStorageUtil.removeItem('from');
-        navigate(redirectPath);
+      const locationStateFrom = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+      const fallbackFrom = locationStateFrom?.pathname
+        ? `${locationStateFrom.pathname}${locationStateFrom.search || ''}`
+        : undefined;
+
+      localStorageUtil.removeItem('from');
+
+      if (redirectPath || fallbackFrom) {
+        navigate(redirectPath || fallbackFrom || '/dashboard');
       } else {
         navigate('/dashboard');
       }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, location.state]);
 
   // Login form
   const {

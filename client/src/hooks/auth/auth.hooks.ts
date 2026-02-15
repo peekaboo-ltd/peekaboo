@@ -29,7 +29,6 @@ export const useLogin = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      reset();
       localStorageUtil.setItem('token', data?.data?.token);
       localStorageUtil.setItem('user', data?.data?.user);
       dispatch(setToken(data?.data?.token));

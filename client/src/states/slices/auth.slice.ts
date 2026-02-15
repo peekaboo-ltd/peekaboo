@@ -35,7 +35,6 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       localStorageUtil.removeItem('user');
       localStorageUtil.removeItem('token');
-      window.location.href = '/auth/login';
     },
     setSessionExpiredModal: (state, action) => {
       state.sessionExpiredModal = action.payload;

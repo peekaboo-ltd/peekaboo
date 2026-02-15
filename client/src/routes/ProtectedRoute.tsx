@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../states/hooks';
 import { UserRole } from '@/types/user.type';
+import { localStorageUtil } from '@/utils/localStorage.util';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -17,7 +18,8 @@ export const ProtectedRoute = ({
 
   // Redirect to login if not authenticated
   if (!token) {
-    return <Navigate to="/auth/login" state={{ from: location }} />;
+    localStorageUtil.setItem('from', `${location.pathname}${location.search}`);
+    return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
   // Check role-based access
