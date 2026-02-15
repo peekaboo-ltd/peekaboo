@@ -2,7 +2,7 @@ import Table from '@/components/table/Table';
 import { useOrdersColumns } from '@/hooks/orders/columns.orders';
 import { useFetchOrders } from '@/hooks/orders/orders.hooks';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { OrderStatus } from '@/types/order.type';
 import { useStatusFilter } from '@/hooks/common/filters.hooks';
 import { useForm } from 'react-hook-form';
@@ -10,6 +10,7 @@ import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import Button from '@/components/inputs/Button';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { setCreateOrderModal } from '@/states/slices/order.slice';
+import { useSearchParams } from 'react-router-dom';
 import CreateOrder from './CreateOrder';
 import DeleteOrder from './DeleteOrder';
 
@@ -23,6 +24,26 @@ const OrdersPage = () => {
 
   // REACT HOOK FORM
   const { control: filterControl, setValue: setFilterValue } = useForm();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const availableStatuses = useMemo(() => Object.values(OrderStatus), []);
+
+  const urlStatusGroup = searchParams.get('statusGroup') || undefined;
+  const urlStatuses = useMemo(() => {
+    const parsedStatuses = (searchParams.get('status') || '')
+      .split(',')
+      .map((status) => status.trim())
+      .filter(
+        (status): status is OrderStatus =>
+          Boolean(status) && availableStatuses.includes(status as OrderStatus),
+      );
+
+    return Array.from(new Set(parsedStatuses));
+  }, [searchParams, availableStatuses]);
+
+  const initialStatusesRef = useRef<string[]>(urlStatuses);
+  const initialStatusGroupRef = useRef(urlStatusGroup);
+  const hasFetchedInitiallyRef = useRef(false);
 
   // CREATE ORDER MODAL
   const {
@@ -40,17 +61,54 @@ const OrdersPage = () => {
     control: filterControl,
     setValue: setFilterValue,
     label: 'Order Status',
-    applicationStatuses: Object.values(OrderStatus),
+    applicationStatuses: availableStatuses,
+    defaultStatuses: initialStatusesRef.current,
   });
 
   useEffect(() => {
+    const nextSearchParams = new URLSearchParams(searchParams);
+    const currentStatusParam = searchParams.get('status') || '';
+    const nextStatusParam = applicationStatus.join(',');
+
+    if (currentStatusParam === nextStatusParam) {
+      return;
+    }
+
+    if (applicationStatus.length > 0) {
+      nextSearchParams.set('status', nextStatusParam);
+    } else {
+      nextSearchParams.delete('status');
+    }
+
+    setSearchParams(nextSearchParams, { replace: true });
+  }, [applicationStatus, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const activeStatuses = hasFetchedInitiallyRef.current
+      ? applicationStatus
+      : initialStatusesRef.current;
+
+    const activeStatusGroup = hasFetchedInitiallyRef.current
+      ? searchParams.get('statusGroup') || undefined
+      : initialStatusGroupRef.current;
+
     if (!deleteOrderModal)
       fetchOrders({
         page,
         size,
-        status: applicationStatus ? applicationStatus?.join(',') : undefined,
+        status: activeStatuses.length > 0 ? activeStatuses.join(',') : undefined,
+        statusGroup: activeStatusGroup as
+          | 'recent'
+          | 'pending'
+          | 'active'
+          | 'completed'
+          | undefined,
       });
-  }, [page, size, applicationStatus, fetchOrders, deleteOrderModal]);
+
+    if (!hasFetchedInitiallyRef.current) {
+      hasFetchedInitiallyRef.current = true;
+    }
+  }, [page, size, applicationStatus, fetchOrders, deleteOrderModal, searchParams]);
 
   const { ordersColumns } = useOrdersColumns();
 
