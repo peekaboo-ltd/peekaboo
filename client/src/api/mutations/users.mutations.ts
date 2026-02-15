@@ -13,6 +13,7 @@ export interface CreateUserRequest {
   nationality?: string;
   dateOfBirth?: string;
   roles?: RoleTypes[];
+  organizationId?: UUID;
 }
 
 export interface UpdateUserRequest {
