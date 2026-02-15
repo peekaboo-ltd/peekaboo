@@ -21,6 +21,11 @@ const UsersPage = () => {
   const dispatch = useAppDispatch();
   const { usersList, createUserModal } = useAppSelector((state) => state.user);
   const { user } = useAppSelector((state) => state.auth);
+  const hasOrganizationMembership =
+    (user?.organizationMembership?.length ?? 0) > 0;
+  const organizationId = hasOrganizationMembership
+    ? user?.organizationMembership?.[0]?.organization?.id
+    : undefined;
   useDocumentTitle('Users');
 
   const {
@@ -36,9 +41,20 @@ const UsersPage = () => {
 
   useEffect(() => {
     if (!createUserModal) {
-      fetchUsers({ page, size, organizationId: user?.organizationMembership?.[0]?.organization?.id });
+      if (hasOrganizationMembership && organizationId) {
+        fetchUsers({ page, size, organizationId });
+      } else {
+        fetchUsers({ page, size });
+      }
     }
-  }, [fetchUsers, page, size, createUserModal, user?.organizationMembership]);
+  }, [
+    fetchUsers,
+    page,
+    size,
+    createUserModal,
+    hasOrganizationMembership,
+    organizationId,
+  ]);
 
   const { usersColumns } = useUsersColumns();
   const { t } = useI18n();
@@ -66,10 +82,14 @@ const UsersPage = () => {
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
             <h1 className="text-2xl font-bold text-black">
-              {t('organization.users.title')}
+              {hasOrganizationMembership
+                ? t('organization.users.title')
+                : 'User management'}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage team access, roles, and status for your organization.
+              {hasOrganizationMembership
+                ? 'Manage team access, roles, and status for your organization.'
+                : 'Manage users, roles, and account status across all organizations.'}
             </p>
           </article>
           <menu className="flex items-center gap-2 flex-wrap">
@@ -87,17 +107,23 @@ const UsersPage = () => {
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             {
-              label: t('organization.users.active'),
+              label: hasOrganizationMembership
+                ? t('organization.users.active')
+                : 'Active users',
               value: activeUsers.toString(),
               icon: faUsersGear,
             },
             {
-              label: t('organization.users.admins'),
+              label: hasOrganizationMembership
+                ? t('organization.users.admins')
+                : 'Admin users',
               value: adminCount.toString(),
               icon: faUserTie,
             },
             {
-              label: t('organization.users.members'),
+              label: hasOrganizationMembership
+                ? t('organization.users.members')
+                : 'Staff & business users',
               value: teamMemberCount.toString(),
               icon: faBuilding,
             },
