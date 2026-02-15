@@ -33,6 +33,7 @@ export const getAdminMetricCards = (
     value: formatNumbers(metrics.totalOrders),
     colorClass: 'text-blue-600',
     href: '/orders',
+    query: { statusGroup: 'recent' },
     icon: faShoppingCart,
   },
   {
@@ -54,6 +55,7 @@ export const getAdminMetricCards = (
     value: formatNumbers(metrics.activeAssignments),
     colorClass: 'text-amber-600',
     href: '/assignments',
+    query: { status: 'ACTIVE' },
     icon: faClipboardList,
   },
   {
@@ -94,6 +96,7 @@ export const getRiderMetricCards = (
     value: formatNumbers(metrics.activeAssignments),
     colorClass: 'text-blue-600',
     href: '/assignments',
+    query: { status: 'ACTIVE' },
     icon: faClipboardList,
   },
   {
@@ -101,6 +104,7 @@ export const getRiderMetricCards = (
     value: formatNumbers(metrics.pendingAssignments),
     colorClass: 'text-amber-600',
     href: '/assignments',
+    query: { status: 'PENDING' },
     icon: faHourglassHalf,
   },
   {
@@ -108,6 +112,7 @@ export const getRiderMetricCards = (
     value: formatNumbers(metrics.completedDeliveries),
     colorClass: 'text-green-600',
     href: '/assignments',
+    query: { status: 'COMPLETED' },
     icon: faCheckCircle,
   },
   {
@@ -143,6 +148,7 @@ export const getCustomerMetricCards = (
     value: formatNumbers(metrics.totalOrders),
     colorClass: 'text-blue-600',
     href: '/orders',
+    query: { statusGroup: 'recent' },
     icon: faShoppingCart,
   },
   {
@@ -150,6 +156,7 @@ export const getCustomerMetricCards = (
     value: formatNumbers(metrics.activeOrders),
     colorClass: 'text-amber-600',
     href: '/orders',
+    query: { status: 'IN_TRANSIT,ACCEPTED,CONFIRMED' },
     icon: faTruck,
   },
   {
@@ -157,6 +164,7 @@ export const getCustomerMetricCards = (
     value: formatNumbers(metrics.completedOrders),
     colorClass: 'text-green-600',
     href: '/orders',
+    query: { status: 'COMPLETED,DELIVERED' },
     icon: faCheckCircle,
   },
   {
@@ -191,6 +199,7 @@ export const getBusinessMetricCards = (
     value: formatNumbers(metrics.totalOrders),
     colorClass: 'text-blue-600',
     href: '/orders',
+    query: { statusGroup: 'recent' },
     icon: faShoppingCart,
   },
   {
@@ -198,6 +207,7 @@ export const getBusinessMetricCards = (
     value: formatNumbers(metrics.activeOrders),
     colorClass: 'text-amber-600',
     href: '/orders',
+    query: { status: 'IN_TRANSIT,ACCEPTED,CONFIRMED' },
     icon: faTruck,
   },
   {
@@ -205,12 +215,15 @@ export const getBusinessMetricCards = (
     value: formatNumbers(metrics.completedOrders),
     colorClass: 'text-green-600',
     href: '/orders',
+    query: { status: 'COMPLETED,DELIVERED' },
     icon: faCheckCircle,
   },
   {
     label: 'Monthly Volume',
     value: formatNumbers(
-      Array.isArray(metrics.monthlyOrderVolume) ? metrics.monthlyOrderVolume.slice(-1)[0]?.value || 0 : 0
+      Array.isArray(metrics.monthlyOrderVolume)
+        ? metrics.monthlyOrderVolume.slice(-1)[0]?.value || 0
+        : 0
     ),
     colorClass: 'text-purple-600',
     href: '/orders',

@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { MetricCardData } from '@/types/dashboard.type';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
+import { createSearchParams, Link } from 'react-router-dom';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import {
   LineChart,
@@ -17,6 +17,8 @@ const MetricCard = ({
   trend,
   colorClass,
   href,
+  query,
+  to,
   icon,
   sparklineData,
   sparklineType,
@@ -61,6 +63,13 @@ const MetricCard = ({
 
   const bgColorClass = getBgColorClass(colorClass);
   const chartColor = getChartColor(colorClass);
+  const destination =
+    to ||
+    (href
+      ? query
+        ? `${href}?${createSearchParams(query).toString()}`
+        : href
+      : undefined);
 
   // Format sparkline data for recharts
   const chartData = sparklineData?.map((val, idx) => ({ value: val, index: idx })) || [];
@@ -94,7 +103,7 @@ const MetricCard = ({
   const cardContent = (
     <Card
       className={`group border border-slate-200 bg-white shadow-none transition-all duration-300 ${
-        href
+        destination
           ? 'hover:-translate-y-0.5 hover:shadow-sm cursor-pointer'
           : 'hover:shadow-sm'
       }`}
@@ -142,7 +151,7 @@ const MetricCard = ({
           </div>
           <div className="hidden sm:flex items-center gap-2">
             {renderSparkline()}
-            {href && (
+            {destination && (
               <span
                 className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 aria-hidden="true"
@@ -160,9 +169,9 @@ const MetricCard = ({
     </Card>
   );
 
-  if (href) {
+  if (destination) {
     return (
-      <Link to={href} className="block">
+      <Link to={destination} className="block">
         {cardContent}
       </Link>
     );
