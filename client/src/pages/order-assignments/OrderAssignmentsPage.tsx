@@ -1,13 +1,17 @@
 import Table from '@/components/table/Table';
+import { useStatusFilter } from '@/hooks/common/filters.hooks';
 import { useOrderAssignmentsColumns } from '@/hooks/orders/columns.orderAssignments';
 import { useFetchOrderAssignments } from '@/hooks/orders/orderAssignments.hooks';
 import { useAppSelector } from '@/states/hooks';
-import { useEffect } from 'react'
+import { OrderAssignmentStatus } from '@/types/orderAssignment.type';
+import { useEffect, useMemo } from 'react'
 import AcceptOrderAssignment from './AcceptOrderAssignment';
 import RejectOrderAssignment from './RejectOrderAssignment';
 import ReassignOrderAssignment from './ReassignOrderAssignment';
 import { UUID } from '@/types';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 
 const OrderAssignmentsPage = () => {
 
@@ -15,9 +19,49 @@ const OrderAssignmentsPage = () => {
     const { orderAssignmentsList, acceptOrderAssignmentModal, rejectOrderAssignmentModal, reassignOrderAssignmentModal } = useAppSelector((state) => state.orderAssignment);
     const { user } = useAppSelector((state) => state.auth);
     useDocumentTitle('Assignments');
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const { control: filterControl, setValue: setFilterValue } = useForm();
+
+    const statusOptions = useMemo(() => Object.values(OrderAssignmentStatus), []);
+
+    const defaultStatuses = useMemo(() => {
+        const statusParam = searchParams.get('status');
+
+        if (!statusParam) {
+            return [];
+        }
+
+        return statusParam
+            .split(',')
+            .map((status) => status.trim())
+            .filter((status) => statusOptions.includes(status as (typeof statusOptions)[number]));
+    }, [searchParams, statusOptions]);
+
+    const { statusFilter, applicationStatus } = useStatusFilter({
+        control: filterControl,
+        setValue: setFilterValue,
+        applicationStatuses: statusOptions,
+        defaultStatuses,
+        label: 'Assignment Status',
+    });
 
     // ORDER ASSIGMENT HOOKS
     const { fetchOrderAssignments, page, setPage, size, setSize, totalPages, totalCount, isFetching } = useFetchOrderAssignments();
+
+    useEffect(() => {
+        const nextSearchParams = new URLSearchParams(searchParams);
+
+        if (applicationStatus.length) {
+            nextSearchParams.set('status', applicationStatus.join(','));
+        } else {
+            nextSearchParams.delete('status');
+        }
+
+        if (nextSearchParams.toString() !== searchParams.toString()) {
+            setSearchParams(nextSearchParams, { replace: true });
+        }
+    }, [applicationStatus, searchParams, setSearchParams]);
 
     useEffect(() => {
         if (!acceptOrderAssignmentModal && !rejectOrderAssignmentModal && !reassignOrderAssignmentModal) {
@@ -27,14 +71,22 @@ const OrderAssignmentsPage = () => {
                 userId = user?.id;
             }
 
-            fetchOrderAssignments({ page, size, assignedToId: userId });
+            fetchOrderAssignments({
+                page,
+                size,
+                assignedToId: userId,
+                status: applicationStatus.length ? applicationStatus.join(',') : undefined,
+            });
         }
-    }, [fetchOrderAssignments, page, size, acceptOrderAssignmentModal, rejectOrderAssignmentModal, reassignOrderAssignmentModal, user?.userRoles, user?.id]);
+    }, [fetchOrderAssignments, page, size, acceptOrderAssignmentModal, rejectOrderAssignmentModal, reassignOrderAssignmentModal, user?.userRoles, user?.id, applicationStatus]);
 
     const { orderAssignmentsColumns } = useOrderAssignmentsColumns();
 
     return (
         <main className='w-full flex flex-col gap-4'>
+            <fieldset className='w-full grid grid-cols-4 gap-4 max-md:grid-cols-3 max-sm:grid-cols-2'>
+                {statusFilter}
+            </fieldset>
             <Table columns={orderAssignmentsColumns} data={orderAssignmentsList} showPagination={true} page={page} setPage={setPage} size={size} setSize={setSize} totalPages={totalPages} totalCount={totalCount} isLoading={isFetching} />
             <AcceptOrderAssignment />
             <RejectOrderAssignment />
