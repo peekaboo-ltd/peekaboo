@@ -31,3 +31,8 @@ skills.md
 .kiro/
 .agents/
 .gemini/
+
+# DS_Store
+.DS_Store
+.DS_Store?
+._*

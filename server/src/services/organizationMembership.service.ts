@@ -21,15 +21,21 @@ import { EmailService } from '../integrations/emails/email.service';
 
 export class OrganizationMembershipService {
   private readonly membershipRepository: Repository<OrganizationMembership>;
-  private readonly userService: UserService;
+  private _userService?: UserService;
   private readonly emailService: EmailService;
 
   constructor() {
     this.membershipRepository = AppDataSource.getRepository(
       OrganizationMembership
     );
-    this.userService = new UserService();
     this.emailService = new EmailService();
+  }
+
+  private get userService(): UserService {
+    if (!this._userService) {
+      this._userService = new UserService();
+    }
+    return this._userService;
   }
 
   // ADD MEMBER
