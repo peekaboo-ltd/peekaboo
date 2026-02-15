@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/states/store';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import { localStorageUtil } from '@/utils/localStorage.util';
-import { setIsAuthenticated, setSessionExpiredModal, setToken, setUser } from '@/states/slices/auth.slice';
+import { setSessionExpiredModal } from '@/states/slices/auth.slice';
 
 const INACTIVITY_TIMEOUT =
   parseInt(ENVIRONMENTS.inactivityTimeout || '30') * 60 * 1000; // 30 MINUTES
@@ -18,9 +18,6 @@ export const useInactivityTimeout = () => {
 
     window.inactivityTimeout = setTimeout(() => {
       localStorageUtil.clearAll();
-      dispatch(setUser(undefined));
-      dispatch(setToken(undefined));
-      dispatch(setIsAuthenticated(false));
       dispatch(setSessionExpiredModal(true));
     }, INACTIVITY_TIMEOUT);
   }, [dispatch]);

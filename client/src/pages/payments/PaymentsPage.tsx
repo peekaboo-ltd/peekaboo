@@ -125,7 +125,7 @@ const PaymentsPage = () => {
     if (!updateStatusModal) {
       fetchAdminPayments(buildFilterParams());
     }
-  }, [page, size, updateStatusModal]);
+  }, [buildFilterParams, fetchAdminPayments, page, size, updateStatusModal]);
 
   useEffect(() => {
     fetchPaymentStats({
@@ -133,7 +133,7 @@ const PaymentsPage = () => {
       endDate: endDate || undefined,
       currency: currencyFilter !== 'all' ? currencyFilter : undefined,
     });
-  }, [startDate, endDate, currencyFilter]);
+  }, [startDate, endDate, currencyFilter, fetchPaymentStats]);
 
   const handleApplyFilters = () => {
     setPage(0);
@@ -157,6 +157,7 @@ const PaymentsPage = () => {
   // CSV export
   const handleExportCSV = () => {
     const params = buildFilterParams();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { page: _p, size: _s, ...exportParams } = params;
     exportPayments(exportParams);
   };
