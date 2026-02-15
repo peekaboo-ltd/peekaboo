@@ -1,4 +1,4 @@
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { OrderAssignment } from '../entities/orderAssignment.entity';
 import { AppDataSource } from '../data-source';
 import { getPagination, getPagingData } from '../helpers/pagination.helper';
@@ -142,7 +142,18 @@ export class OrderAssignmentService {
     }
 
     if (status) {
-      condition.status = status as OrderAssignmentStatus;
+      const normalizedStatuses = String(status)
+        .split(',')
+        .map((assignmentStatus) => assignmentStatus.trim())
+        .filter(Boolean);
+
+      if (normalizedStatuses.length === 1) {
+        condition.status = normalizedStatuses[0] as OrderAssignmentStatus;
+      }
+
+      if (normalizedStatuses.length > 1) {
+        condition.status = In(normalizedStatuses as OrderAssignmentStatus[]);
+      }
     }
 
     const { take, skip } = getPagination({
