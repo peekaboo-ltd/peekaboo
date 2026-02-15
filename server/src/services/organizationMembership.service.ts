@@ -99,6 +99,34 @@ export class OrganizationMembershipService {
     return fullMembership;
   }
 
+
+
+  // CREATE MEMBERSHIP FOR AN EXISTING USER
+  async createMembershipForUser(data: {
+    userId: UUID;
+    organizationId: UUID;
+    role?: OrganizationRole;
+    status?: MembershipStatus;
+    addedById?: UUID;
+  }): Promise<OrganizationMembership> {
+    const existingUserMembership = await this.membershipRepository.findOne({
+      where: { userId: data.userId },
+    });
+
+    if (existingUserMembership) {
+      throw new ConflictError('User already belongs to an organization');
+    }
+
+    const membership = await this.membershipRepository.save({
+      userId: data.userId,
+      organizationId: data.organizationId,
+      role: data.role || OrganizationRole.MEMBER,
+      status: data.status || MembershipStatus.ACTIVE,
+      addedById: data.addedById,
+    });
+
+    return this.getMembershipById(membership.id);
+  }
   // GET MEMBERSHIP BY ID
   async getMembershipById(id: UUID): Promise<OrganizationMembership> {
     const membership = await this.membershipRepository.findOne({

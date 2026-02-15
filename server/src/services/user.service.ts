@@ -13,19 +13,32 @@ import { UserStatus } from '../constants/user.constants';
 import { hashPassword } from '../helpers/auth.helper';
 import { EmailService } from '../integrations/emails/email.service';
 import { Request } from 'express';
+import { OrganizationMembershipService } from './organizationMembership.service';
+import { MembershipStatus, OrganizationRole } from '../constants/organization.constants';
 
 export class UserService {
   private readonly userRepository: Repository<User>;
   private readonly userRoleService: UserRoleService;
+  private readonly organizationMembershipService: OrganizationMembershipService;
 
   constructor() {
     this.userRepository = AppDataSource.getRepository(User);
     this.userRoleService = new UserRoleService();
+    this.organizationMembershipService = new OrganizationMembershipService();
   }
 
   // GET USER BY ID
   async getUserById(id: UUID): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id }, relations: { userRoles: { role: true } } });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: {
+        userRoles: { role: true },
+        organizationMembership: {
+          organization: true,
+          addedBy: true,
+        },
+      },
+    });
 
     if (!user) {
       throw new NotFoundError('User not found', {
@@ -71,7 +84,11 @@ export class UserService {
   // CREATE USER
   async createUser(
     user: Partial<User>,
-    roles?: Partial<RoleTypes>[]
+    roles?: Partial<RoleTypes>[],
+    options?: {
+      organizationId?: UUID;
+      addedById?: UUID;
+    }
   ): Promise<User> {
     if (!user?.phoneNumber) {
       throw new ValidationError('Phone number is required');
@@ -104,6 +121,16 @@ export class UserService {
       rolesToAssign
     );
 
+    if (options?.organizationId) {
+      await this.organizationMembershipService.createMembershipForUser({
+        userId: createdUser.id,
+        organizationId: options.organizationId,
+        role: OrganizationRole.MEMBER,
+        status: MembershipStatus.ACTIVE,
+        addedById: options.addedById,
+      });
+    }
+
     // SEND ADMIN-CREATED ACCOUNT EMAIL WITH TEMP PASSWORD AND ROLES
     if (createdUser.email) {
       const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
@@ -117,7 +144,7 @@ export class UserService {
       });
     }
 
-    return createdUser;
+    return this.getUserById(createdUser.id);
   }
 
   // UPDATE USER

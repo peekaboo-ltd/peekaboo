@@ -4,6 +4,7 @@ import { RoleTypes } from "../constants/role.constants";
 import { UserStatus } from "../constants/user.constants";
 import { In } from "typeorm";
 import { UUID } from "../types";
+import { AuthRequest } from '../types/auth.types';
 
 const userService = new UserService();
 
@@ -56,8 +57,10 @@ export const UserController = {
         email,
         status = UserStatus.ACTIVE,
         nationality,
-        dateOfBirth
+        dateOfBirth,
+        organizationId,
       } = req.body;
+      const { user: requester } = req as AuthRequest;
 
       // CREATE USER
       const user = await userService.createUser(
@@ -69,7 +72,11 @@ export const UserController = {
           nationality,
           dateOfBirth,
         },
-        roles as RoleTypes[]
+        roles as RoleTypes[],
+        {
+          organizationId,
+          addedById: requester?.id,
+        }
       );
 
       // RETURN USER

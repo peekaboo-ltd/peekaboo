@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Modal from '@/components/Modal';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setCreateUserModal } from '@/states/slices/user.slice';
@@ -8,6 +8,7 @@ import { useCreateUser } from '@/hooks/users/users.hooks';
 import { RoleTypes } from '@/types/auth.type';
 import { Controller, useForm } from 'react-hook-form';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import { MembershipStatus } from '@/types/organization.type';
 
 interface CreateUserFormData {
   name: string;
@@ -20,7 +21,16 @@ interface CreateUserFormData {
 const CreateUserModal = () => {
   const dispatch = useAppDispatch();
   const { createUserModal } = useAppSelector((state) => state.user);
+  const { user: authUser } = useAppSelector((state) => state.auth);
   const [selectedRoles, setSelectedRoles] = useState<RoleTypes[]>([]);
+
+  const activeOrganizationId = useMemo(
+    () =>
+      authUser?.organizationMembership?.find(
+        (membership) => membership.status === MembershipStatus.ACTIVE,
+      )?.organizationId,
+    [authUser?.organizationMembership],
+  );
 
   const {
     control,
@@ -67,6 +77,7 @@ const CreateUserModal = () => {
       phoneNumber: data.phoneNumber,
       passwordHash: data?.password || undefined,
       roles: selectedRoles.length > 0 ? selectedRoles : [RoleTypes.CUSTOMER],
+      organizationId: activeOrganizationId,
     });
   });
 
