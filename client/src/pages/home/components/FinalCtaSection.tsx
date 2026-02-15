@@ -40,7 +40,7 @@ const FinalCtaSection = ({
 
         <motion.header className="relative max-w-3xl mx-auto text-center">
           <motion.h2
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-5"
+            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-900 mb-5"
             whileInView={{ opacity: [0, 1], y: [30, 0] }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}

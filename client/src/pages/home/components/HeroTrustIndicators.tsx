@@ -27,11 +27,11 @@ const HeroTrustIndicators = ({
       ))}
     </figcaption>
     <address className="not-italic flex flex-col">
-      <strong className="text-sm font-semibold text-slate-900">
+      <span className="text-sm font-medium text-slate-900">
         {typeof landingStats?.activeCustomers === 'number'
           ? `${landingStats.activeCustomers.toLocaleString()}+ ${customersLabel}`
           : growingCommunityLabel}
-      </strong>
+      </span>
       <span className="text-xs text-slate-500 font-normal">{trustDailyLabel}</span>
     </address>
   </motion.figure>

@@ -106,7 +106,7 @@ const HeroForm = ({
               />
             </mark>
             <hgroup>
-              <h2 className="text-2xl font-semibold text-slate-900">
+              <h2 className="text-2xl font-medium text-slate-900">
                 {copy.formTitle}
               </h2>
               <p className="text-slate-500 text-sm font-normal">
@@ -127,7 +127,7 @@ const HeroForm = ({
           rules={{ validate: validateRwandanPhone }}
           render={({ field }) => (
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <span className="text-sm font-medium text-slate-700 flex items-center gap-2">
                 <mark className="w-5 h-5 rounded-full bg-slate-200 text-slate-900 flex items-center justify-center text-xs font-normal">
                   1
                 </mark>
@@ -152,7 +152,7 @@ const HeroForm = ({
           rules={{ validate: validateRecipientPhone }}
           render={({ field }) => (
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <span className="text-sm font-medium text-slate-700 flex items-center gap-2">
                 <mark className="w-5 h-5 rounded-full bg-slate-200 text-slate-900 flex items-center justify-center text-xs font-normal">
                   2
                 </mark>

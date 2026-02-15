@@ -29,7 +29,7 @@ const HeroHeadline = ({
       transition={{ duration: 0.4 }}
       className="space-y-4"
     >
-      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-slate-900">
+      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-slate-900">
         {activeTab === 'personal' ? personalTitle1 : businessTitle1}
         <br />
         <span className="text-black">

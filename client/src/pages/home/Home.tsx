@@ -138,10 +138,6 @@ const Home = () => {
 
   return (
     <main className="relative min-h-screen w-full bg-slate-50 overflow-x-hidden max-lg:mt-16">
-      <span
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.2),_transparent_70%)]"
-        aria-hidden="true"
-      />
       <HeroSection
         formRef={formRef}
         onScrollToForm={scrollToForm}

@@ -27,7 +27,7 @@ const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSect
         >
           {badgeLabel}
         </motion.span>
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-900 mb-4">
           {title}
         </h2>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal">{subtitle}</p>
@@ -55,7 +55,7 @@ const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSect
               >
                 <FontAwesomeIcon icon={feature.icon} className="text-black text-xl" />
               </motion.figure>
-              <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-black transition-colors">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-black transition-colors">
                 {feature.title}
               </h3>
               <p className="text-slate-600 text-sm leading-relaxed font-normal">

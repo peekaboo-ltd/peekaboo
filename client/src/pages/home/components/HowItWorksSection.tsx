@@ -27,7 +27,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
         >
           {badgeLabel}
         </motion.span>
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4">{title}</h2>
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-900 mb-4">{title}</h2>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal">{subtitle}</p>
       </motion.header>
 
@@ -79,7 +79,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
             </motion.figure>
 
             <motion.h3
-              className="text-xl font-bold text-slate-900 mb-3"
+              className="text-xl font-semibold text-slate-900 mb-3"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}

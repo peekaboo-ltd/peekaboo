@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
+import { Suspense } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import type { BusinessFeatureItem, BusinessHighlightStat } from '../home.types';
 import { containerVariants, fadeInUp, slideInLeft, slideInRight } from '../home.animations';
 import Button from '@/components/inputs/Button';
+import BusinessScene from '@/components/three/BusinessScene';
 
 interface BusinessSolutionsSectionProps {
   badgeLabel: string;
@@ -25,20 +27,19 @@ const BusinessSolutionsSection = ({
   primaryCtaLabel,
   stats,
   onContactClick,
-}: BusinessSolutionsSectionProps) => (
-  <section className="w-full py-20 lg:py-28 border-y border-slate-100 bg-white">
-    <motion.article
-      className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-100px' }}
-      variants={containerVariants}
-    >
-      <figure
-        className={`grid grid-cols-1 gap-12 lg:gap-20 items-center ${
-          stats?.length ? 'lg:grid-cols-2' : ''
-        }`}
+}: BusinessSolutionsSectionProps) => {
+  const hasStats = Boolean(stats?.length);
+
+  return (
+    <section className="w-full py-20 lg:py-28 border-y border-slate-100 bg-white">
+      <motion.article
+        className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-100px' }}
+        variants={containerVariants}
       >
+        <figure className="grid grid-cols-1 gap-12 lg:gap-20 items-center lg:grid-cols-2">
         <motion.figcaption variants={slideInLeft}>
           <motion.span
             className="inline-block text-black font-medium text-sm tracking-wider uppercase mb-4"
@@ -47,7 +48,7 @@ const BusinessSolutionsSection = ({
           >
             {badgeLabel}
           </motion.span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-900 mb-6">
             {title1}
             <br />
             <span className="text-black">{title2}</span>
@@ -73,7 +74,7 @@ const BusinessSolutionsSection = ({
                   <FontAwesomeIcon icon={feature.icon} className="text-black" />
                 </motion.mark>
                 <section>
-                  <h4 className="text-slate-900 font-semibold mb-1 group-hover:text-black transition-colors">
+                  <h4 className="text-slate-900 font-medium mb-1 group-hover:text-black transition-colors">
                     {feature.title}
                   </h4>
                   <p className="text-slate-500 text-sm font-normal">{feature.description}</p>
@@ -105,7 +106,7 @@ const BusinessSolutionsSection = ({
           </motion.nav>
         </motion.figcaption>
 
-        {stats?.length ? (
+        {hasStats ? (
           <motion.aside className="relative" variants={slideInRight}>
             <motion.article
               className="rounded-2xl p-8 border border-slate-200 bg-white/95 shadow-xl shadow-slate-900/5"
@@ -131,7 +132,7 @@ const BusinessSolutionsSection = ({
                       <FontAwesomeIcon icon={stat.icon} className="text-black" />
                     </motion.figure>
                     <motion.data
-                      className="block text-2xl font-bold text-slate-900 mb-1"
+                      className="block text-2xl font-semibold text-slate-900 mb-1"
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
                       viewport={{ once: true }}
@@ -144,10 +145,23 @@ const BusinessSolutionsSection = ({
               </ul>
             </motion.article>
           </motion.aside>
-        ) : null}
+        ) : (
+          <motion.aside className="relative h-[340px] sm:h-[400px] lg:h-[460px]" variants={slideInRight}>
+            <span
+              className="pointer-events-none absolute inset-x-8 bottom-2 h-20 rounded-full bg-slate-200/40 blur-3xl"
+              aria-hidden="true"
+            />
+            <div className="relative h-full overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/60">
+              <Suspense fallback={null}>
+                <BusinessScene />
+              </Suspense>
+            </div>
+          </motion.aside>
+        )}
       </figure>
-    </motion.article>
-  </section>
-);
+      </motion.article>
+    </section>
+  );
+};
 
 export default BusinessSolutionsSection;

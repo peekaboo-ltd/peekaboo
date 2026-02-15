@@ -59,17 +59,17 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-white via-slate-50 to-slate-50">
+    <section className="relative min-h-screen w-full overflow-hidden bg-white">
       <Suspense fallback={null}>
         <HeroScene />
       </Suspense>
 
       <span
-        className="pointer-events-none absolute inset-x-0 -top-24 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.28),_transparent_70%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-slate-100/40"
         aria-hidden="true"
       />
       <span
-        className="pointer-events-none absolute -right-16 top-24 h-72 w-72 rounded-full bg-primary/10 blur-[120px]"
+        className="pointer-events-none absolute -right-24 top-20 h-64 w-64 rounded-full bg-slate-200/35 blur-[120px]"
         aria-hidden="true"
       />
 
