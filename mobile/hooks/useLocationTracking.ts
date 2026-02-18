@@ -39,7 +39,9 @@ export const useLocationTracking = () => {
           accuracy: Location.Accuracy.Balanced,
         });
 
-        const currentLocation = await usersAPI.updateCurrentLocation({
+        const currentLocation = await usersAPI.updateCurrentLocation(
+          user?.id,
+          {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
@@ -56,7 +58,7 @@ export const useLocationTracking = () => {
             currentLocation,
           });
         }
-      } catch {
+      } catch (error) {
         // No-op: location updates should never interrupt app usage.
       } finally {
         isUpdatingRef.current = false;

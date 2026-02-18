@@ -19,7 +19,7 @@ const locationUpdateIntervalMinutes =
   Number.isFinite(locationUpdateIntervalMinutesFromEnv) &&
   locationUpdateIntervalMinutesFromEnv > 0
     ? locationUpdateIntervalMinutesFromEnv
-    : 5;
+    : 1; // Default to 0.5 minutes (30 seconds) if env variable is invalid
 
 export const LOCATION_UPDATE_INTERVAL_MS =
   locationUpdateIntervalMinutes * 60 * 1000;

@@ -19,7 +19,7 @@ router.get("/:id", UserController.getUserById);
 router.post("/", authorize([RoleTypes.ADMIN, RoleTypes.BUSINESS]), UserController.createUser);
 
 // UPDATE current user location
-router.patch('/current-location', UserController.updateCurrentLocation);
+router.patch('/:id/current-location', UserController.updateCurrentLocation);
 
 // UPDATE user (ADMIN or own profile)
 router.patch("/:id", UserController.updateUser);
