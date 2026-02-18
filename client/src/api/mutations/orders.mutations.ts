@@ -55,20 +55,18 @@ export const ordersMutationApiSlice = createApi({
       }),
     }),
 
-    // IMPORT BULK ORDERS
+    // IMPORT BULK ORDERS — always creates a DRAFT batch
     importBulkOrders: builder.mutation({
       query: ({
         rows,
-        createBatch,
         batch,
       }: {
         rows: ImportTemplateRow[];
-        createBatch: boolean;
-        batch?: { name: string; description?: string };
+        batch?: { name?: string; description?: string };
       }) => ({
         url: '/orders/import/bulk',
         method: 'POST',
-        body: { rows, createBatch, batch },
+        body: { rows, batch },
       }),
     }),
   }),

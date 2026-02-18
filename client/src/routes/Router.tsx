@@ -25,6 +25,10 @@ import {
   CompleteOnboarding,
 } from '@/pages/onboarding';
 import SessionExpiredModal from '@/components/auth/SessionExpiredModal';
+import BatchesPage from '@/pages/batches/BatchesPage';
+import BatchPreviewPage from '@/pages/batches/BatchPreviewPage';
+
+const batchRoles = ['ADMIN', 'STAFF', 'BUSINESS', 'CUSTOMER'] as const;
 
 const Router = () => {
   return (
@@ -96,6 +100,22 @@ const Router = () => {
                 ]}
               >
                 <OrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/batches"
+            element={
+              <ProtectedRoute allowedRoles={[...batchRoles]}>
+                <BatchesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/batches/:id/preview"
+            element={
+              <ProtectedRoute allowedRoles={[...batchRoles]}>
+                <BatchPreviewPage />
               </ProtectedRoute>
             }
           />

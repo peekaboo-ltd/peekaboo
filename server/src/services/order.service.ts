@@ -279,10 +279,6 @@ export class OrderService {
       throw new ValidationError('At least one row is required for import');
     }
 
-    if (payload.createBatch && !payload.batch?.name?.trim()) {
-      throw new ValidationError('Batch name is required when createBatch is enabled');
-    }
-
     const rows = payload.rows;
     const rowErrors: BulkImportResponse['errors'] = [];
     const seenProductRefs = new Set<string>();
@@ -373,19 +369,16 @@ export class OrderService {
         );
       }
 
-      let batch: Batch | undefined;
-      if (payload.createBatch) {
-        const batchReferenceId = await this.generateUniqueBatchReferenceId();
-        batch = await batchRepository.save(
-          batchRepository.create({
-            name: payload.batch?.name?.trim(),
-            description: payload.batch?.description?.trim() || undefined,
-            referenceId: batchReferenceId,
-            createdById: currentUser.id,
-            status: BatchStatus.PENDING,
-          }),
-        );
-      }
+      const batchReferenceId = await this.generateUniqueBatchReferenceId();
+      const batch = await batchRepository.save(
+        batchRepository.create({
+          name: payload.batch?.name?.trim() || undefined,
+          description: payload.batch?.description?.trim() || undefined,
+          referenceId: batchReferenceId,
+          createdById: currentUser.id,
+          status: BatchStatus.DRAFT,
+        }),
+      );
 
       const rowResults: BulkImportRowResult[] = [];
       let createdCount = 0;
@@ -458,9 +451,10 @@ export class OrderService {
             recipientId: recipient.id,
             createdById: currentUser.id,
             initialFee: 1500,
+            status: OrderStatus.DRAFT,
             description: composedDescription || undefined,
             notes: row.deliveryLocation || undefined,
-            ...(batch ? { batchId: batch.id } : {}),
+            batchId: batch.id,
           };
 
           if (membership?.organizationId) {
@@ -481,16 +475,14 @@ export class OrderService {
           await orderActivityRepository.save(
             orderActivityRepository.create({
               orderId: orderToAttach.id,
-              status: OrderStatus.CREATED,
+              status: OrderStatus.DRAFT,
               createdById: currentUser.id,
             }),
           );
           createdCount += 1;
         } else {
-          if (batch) {
-            orderToAttach.batchId = batch.id;
-            orderToAttach = await orderRepository.save(orderToAttach);
-          }
+          orderToAttach.batchId = batch.id;
+          orderToAttach = await orderRepository.save(orderToAttach);
           linkedCount += 1;
         }
 
@@ -510,14 +502,12 @@ export class OrderService {
           failed: 0,
         },
         orders: rowResults,
-        batch: batch
-          ? {
-              id: batch.id,
-              name: batch.name,
-              referenceId: batch.referenceId,
-              status: batch.status,
-            }
-          : undefined,
+        batch: {
+          id: batch.id,
+          name: batch.name,
+          referenceId: batch.referenceId,
+          status: batch.status,
+        },
         errors: [],
       } as BulkImportResponse;
     });

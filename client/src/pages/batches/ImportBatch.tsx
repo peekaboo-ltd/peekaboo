@@ -2,16 +2,16 @@ import Modal from '@/components/Modal';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setImportBatchModal } from '@/states/slices/batch.slice';
 import { ChangeEvent, useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { cleanPhoneNumber, validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { useImportBulkOrders } from '@/hooks/orders/orders.hooks';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
 import type {
   ImportPreviewState,
   ImportRowValidationError,
@@ -47,21 +47,25 @@ const trimTrailingEmpty = (values: string[]) => {
 
 const MAX_TEXT_LENGTH = 255;
 
+interface ImportBatchFormData {
+  batchName: string;
+}
+
 const ImportBatch = () => {
-  // STATE VARIABLES
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { importBatchModal } = useAppSelector((state) => state.batch);
   const [fileName, setFileName] = useState<string>('');
   const [preview, setPreview] = useState<ImportPreviewState>({
     rows: [],
     errors: [],
   });
-  const [createBatch, setCreateBatch] = useState<boolean>(false);
-  const [batchName, setBatchName] = useState<string>('');
-  const [batchDescription, setBatchDescription] = useState<string>('');
 
-  const { importBulkOrders, isLoading, data, isSuccess, isError, error, reset } =
-    useImportBulkOrders();
+  const { register, getValues, reset: resetForm } = useForm<ImportBatchFormData>({
+    defaultValues: { batchName: '' },
+  });
+
+  const { importBulkOrders, isLoading, isError, error, reset } = useImportBulkOrders();
 
   const errorsByRow = useMemo(() => {
     return preview.errors.reduce<Record<number, ImportRowValidationError[]>>(
@@ -77,28 +81,18 @@ const ImportBatch = () => {
   }, [preview.errors]);
 
   const hasBlockingErrors = useMemo(() => {
-    if (preview.rows.length === 0) {
-      return true;
-    }
-    if (preview.errors.length > 0) {
-      return true;
-    }
-    if (createBatch && !batchName.trim()) {
-      return true;
-    }
+    if (preview.rows.length === 0) return true;
+    if (preview.errors.length > 0) return true;
     return false;
-  }, [batchName, createBatch, preview.errors.length, preview.rows.length]);
+  }, [preview.errors.length, preview.rows.length]);
 
-  // CLOSE MODAL
   const closeModal = useCallback(() => {
     dispatch(setImportBatchModal(false));
     setFileName('');
     setPreview({ rows: [], errors: [] });
-    setCreateBatch(false);
-    setBatchName('');
-    setBatchDescription('');
+    resetForm();
     reset();
-  }, [dispatch, reset]);
+  }, [dispatch, reset, resetForm]);
 
   const parseWorkbook = useCallback((file: File) => {
     const reader = new FileReader();
@@ -110,13 +104,7 @@ const ImportBatch = () => {
         if (!firstSheet) {
           setPreview({
             rows: [],
-            errors: [
-              {
-                rowNumber: 1,
-                field: 'file',
-                message: 'No worksheet found in file',
-              },
-            ],
+            errors: [{ rowNumber: 1, field: 'file', message: 'No worksheet found in file' }],
           });
           return;
         }
@@ -139,24 +127,19 @@ const ImportBatch = () => {
 
         const matchesCurrent =
           normalizedHeaderRow.length === normalizedCurrent.length &&
-          normalizedCurrent.every((header, index) => header === normalizedHeaderRow[index]);
+          normalizedCurrent.every((h, i) => h === normalizedHeaderRow[i]);
         const matchesLegacy =
           normalizedHeaderRow.length === normalizedLegacy.length &&
-          normalizedLegacy.every((header, index) => header === normalizedHeaderRow[index]);
+          normalizedLegacy.every((h, i) => h === normalizedHeaderRow[i]);
 
-        const headersAreValid = matchesCurrent || matchesLegacy;
-
-        if (!headersAreValid) {
+        if (!matchesCurrent && !matchesLegacy) {
           setPreview({
             rows: [],
-            errors: [
-              {
-                rowNumber: 1,
-                field: 'headers',
-                message:
-                  'Invalid template headers. Please use the official Bulk Import Template.',
-              },
-            ],
+            errors: [{
+              rowNumber: 1,
+              field: 'headers',
+              message: 'Invalid template headers. Please use the official Bulk Import Template.',
+            }],
           });
           return;
         }
@@ -184,17 +167,16 @@ const ImportBatch = () => {
             description,
           ].every((value) => !value);
 
-          if (isCompletelyEmpty) {
-            return;
-          }
+          if (isCompletelyEmpty) return;
 
-          const phoneValidation = validateAndFormatPhoneNumber(cleanPhoneNumber(recipientPhoneNumber)?.formattedNumber || '');
+          const phoneValidation = validateAndFormatPhoneNumber(
+            cleanPhoneNumber(recipientPhoneNumber)?.formattedNumber || '',
+          );
           if (!phoneValidation.isValid || !phoneValidation.formattedNumber) {
             validationErrors.push({
               rowNumber,
               field: 'recipientPhoneNumber',
-              message:
-                phoneValidation.error || 'Recipient phone number is required and must be valid',
+              message: phoneValidation.error || 'Recipient phone number is required and must be valid',
             });
           }
 
@@ -232,20 +214,11 @@ const ImportBatch = () => {
           });
         }
 
-        setPreview({
-          rows: parsedRows,
-          errors: validationErrors,
-        });
+        setPreview({ rows: parsedRows, errors: validationErrors });
       } catch {
         setPreview({
           rows: [],
-          errors: [
-            {
-              rowNumber: 1,
-              field: 'file',
-              message: 'Unable to parse file. Please upload a valid .xlsx template.',
-            },
-          ],
+          errors: [{ rowNumber: 1, field: 'file', message: 'Unable to parse file. Please upload a valid .xlsx template.' }],
         });
       }
     };
@@ -255,24 +228,16 @@ const ImportBatch = () => {
   const onFileChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const selectedFile = event.target.files?.[0];
-      if (!selectedFile) {
-        return;
-      }
+      if (!selectedFile) return;
 
       const isXlsx =
-        selectedFile.type ===
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        selectedFile.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
         selectedFile.name.toLowerCase().endsWith('.xlsx');
+
       if (!isXlsx) {
         setPreview({
           rows: [],
-          errors: [
-            {
-              rowNumber: 1,
-              field: 'file',
-              message: 'Only .xlsx files are supported',
-            },
-          ],
+          errors: [{ rowNumber: 1, field: 'file', message: 'Only .xlsx files are supported' }],
         });
         return;
       }
@@ -284,59 +249,47 @@ const ImportBatch = () => {
   );
 
   const onSubmit = useCallback(async () => {
-    if (hasBlockingErrors) {
-      return;
-    }
+    if (hasBlockingErrors) return;
+
+    const batchName = getValues('batchName').trim();
 
     try {
       const response = await importBulkOrders({
         rows: preview.rows,
-        createBatch,
-        batch: createBatch
-          ? {
-              name: batchName.trim(),
-              description: batchDescription.trim() || undefined,
-            }
-          : undefined,
+        batch: batchName ? { name: batchName } : undefined,
       }).unwrap();
 
-      toast.success(
-        `Imported ${response?.data?.summary?.total || preview.rows.length} orders successfully`,
-      );
+      const batchId = response?.data?.batch?.id;
+      toast.success(`Batch created with ${preview.rows.length} orders. Review before completing.`);
       closeModal();
+
+      if (batchId) {
+        navigate(`/batches/${batchId}/preview`);
+      } else {
+        navigate('/batches');
+      }
     } catch (submissionError) {
       const backendErrors = (submissionError as {
         data?: { data?: { errors?: ImportRowValidationError[] } };
-      })?.data?.data
-        ?.errors as ImportRowValidationError[] | undefined;
+      })?.data?.data?.errors as ImportRowValidationError[] | undefined;
+
       if (backendErrors?.length) {
-        setPreview((previous) => ({
-          ...previous,
-          errors: backendErrors,
-        }));
+        setPreview((previous) => ({ ...previous, errors: backendErrors }));
       }
       toast.error('Bulk import failed. Fix highlighted errors and retry.');
     }
-  }, [
-    batchDescription,
-    batchName,
-    closeModal,
-    createBatch,
-    hasBlockingErrors,
-    importBulkOrders,
-    preview.rows,
-    setPreview,
-  ]);
+  }, [closeModal, getValues, hasBlockingErrors, importBulkOrders, navigate, preview.rows]);
 
   return (
     <Modal
       isOpen={importBatchModal}
       onClose={closeModal}
-      heading={`Import Batch Orders`}
-      description="Upload the official template, review strict validations, then import."
+      heading="Import Batch Orders"
+      description="Upload the official template, review, then complete the batch after validating."
       className="!max-w-[96vw] !w-[86vw] lg:!w-[78vw]"
     >
       <section className="w-full flex flex-col gap-4 pb-2">
+        {/* File Upload */}
         <motion.article
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -348,25 +301,21 @@ const ImportBatch = () => {
                 Template Upload
               </h3>
               <p className="text-xs text-slate-600 mt-1">
-                Accepted format: `.xlsx` with exact 5-column template headers.
+                Accepted format: <code>.xlsx</code> with exact 5-column template headers.
               </p>
             </div>
             {fileName && <Badge variant="secondary">{fileName}</Badge>}
           </header>
           <label className="mt-4 block rounded-lg border border-dashed border-slate-300 bg-white p-4 cursor-pointer hover:border-primary-900 transition-colors">
-            <input
-              type="file"
-              accept=".xlsx"
-              onChange={onFileChange}
-              className="hidden"
-            />
+            <input type="file" accept=".xlsx" onChange={onFileChange} className="hidden" />
             <p className="text-sm text-slate-700">Click to select import file</p>
             <p className="text-xs text-slate-500 mt-1">
-              Recipient phone is required. Delivery location is optional.
+              Recipient phone is required. Delivery location, product ref, and description are optional.
             </p>
           </label>
         </motion.article>
 
+        {/* Validation Errors */}
         {preview.errors.length > 0 && (
           <motion.article
             initial={{ opacity: 0, y: 6 }}
@@ -386,6 +335,7 @@ const ImportBatch = () => {
           </motion.article>
         )}
 
+        {/* Preview Table */}
         {preview.rows.length > 0 && (
           <motion.article
             initial={{ opacity: 0, y: 8 }}
@@ -435,9 +385,7 @@ const ImportBatch = () => {
                             variant={rowErrors.length ? 'destructive' : 'secondary'}
                             className="text-[10px]"
                           >
-                            {rowErrors.length
-                              ? `${rowErrors.length} issue(s)`
-                              : 'Validated'}
+                            {rowErrors.length ? `${rowErrors.length} issue(s)` : 'Validated'}
                           </Badge>
                         </td>
                       </motion.tr>
@@ -449,55 +397,26 @@ const ImportBatch = () => {
           </motion.article>
         )}
 
-        <section className="rounded-xl border border-slate-200 bg-white p-4 flex flex-col gap-3">
-          <label className="flex items-center gap-2 text-sm">
-            <Checkbox
-              checked={createBatch}
-              onCheckedChange={(value) => setCreateBatch(Boolean(value))}
-            />
-            <span className="font-medium text-slate-800">Create batch now</span>
-          </label>
-
-          {createBatch && (
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-3"
-            >
-              <Input
-                label="Batch Name"
-                required
-                value={batchName}
-                onChange={(e) => setBatchName(e.target.value)}
-                placeholder="Morning Kigali Drop-offs"
-                errorMessage={
-                  !batchName.trim() ? 'Batch name is required when enabled' : undefined
-                }
-              />
-              <label className="w-full flex flex-col gap-1">
-                <span className="text-sm font-normal">Batch Description (Optional)</span>
-                <Textarea
-                  value={batchDescription}
-                  onChange={(e) => setBatchDescription(e.target.value)}
-                  placeholder="Extra context for this import..."
-                  className="min-h-10 h-10 py-2"
-                />
-              </label>
-            </motion.div>
-          )}
-        </section>
+        {/* Batch Name Field */}
+        <motion.article
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl border border-slate-200 bg-white p-4"
+        >
+          <h3 className="text-sm font-semibold text-slate-900 mb-3">Batch Details (Optional)</h3>
+          <Input
+            label="Batch Name"
+            placeholder="e.g. Morning Kigali Drop-offs"
+            {...register('batchName')}
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            Leave blank to create an unnamed batch. You can review and edit all orders on the next page.
+          </p>
+        </motion.article>
 
         {isError && (
           <p className="text-sm text-red-700">
-            {String((error as {
-              data?: { message?: string };
-            })?.data?.message || 'Import failed')}
-          </p>
-        )}
-        {isSuccess && data?.data?.summary && (
-          <p className="text-sm text-green-700">
-            Imported {data.data.summary.total} rows ({data.data.summary.created} created,{' '}
-            {data.data.summary.linked} linked).
+            {String((error as { data?: { message?: string } })?.data?.message || 'Import failed')}
           </p>
         )}
 
@@ -512,7 +431,7 @@ const ImportBatch = () => {
             disabled={hasBlockingErrors || isLoading}
             isLoading={isLoading}
           >
-            Import Orders
+            Create Batch &amp; Review
           </Button>
         </footer>
       </section>
