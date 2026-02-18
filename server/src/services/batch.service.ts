@@ -72,7 +72,7 @@ export class BatchService {
     });
   }
 
-  async getBatchOrders(batchId: UUID, userId: UUID): Promise<Batch> {
+  async getBatchOrders(batchId: UUID, userId: UUID, isAdmin?: boolean): Promise<Batch> {
     const batch = await this.batchRepository.findOne({
       where: { id: batchId },
       relations: {
@@ -91,7 +91,7 @@ export class BatchService {
       });
     }
 
-    if (!isAdmin && batch.createdById !== userId) {
+    if (!isAdmin && batch?.createdById !== userId) {
       // Allow admin to view any batch — caller should pass their id; admin check done in controller
       throw new NotFoundError('Batch not found', {
         referenceId: batchId,

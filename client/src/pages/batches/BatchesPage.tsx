@@ -1,30 +1,12 @@
 import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
 import Button from '@/components/inputs/Button';
 import { useFetchBatches } from '@/hooks/batches/batches.hooks';
 import { useAppDispatch } from '@/states/hooks';
 import { setImportBatchModal } from '@/states/slices/batch.slice';
 import { BatchStatus } from '@/types/batch.type';
 import type { Batch } from '@/types/batch.type';
-
-const getBatchStatusVariant = (status: BatchStatus): 'default' | 'secondary' | 'destructive' => {
-  switch (status) {
-    case BatchStatus.DRAFT:
-      return 'secondary';
-    case BatchStatus.PENDING:
-      return 'default';
-    case BatchStatus.PROCESSING:
-      return 'default';
-    case BatchStatus.COMPLETED:
-      return 'default';
-    case BatchStatus.FAILED:
-      return 'destructive';
-    default:
-      return 'secondary';
-  }
-};
 
 const getBatchStatusColor = (status: BatchStatus): string => {
   switch (status) {
@@ -43,7 +25,8 @@ const getBatchStatusColor = (status: BatchStatus): string => {
   }
 };
 
-const formatDate = (date: Date | string) => {
+const formatDate = (date: Date | string | undefined) => {
+  if (!date) return '';
   return new Date(date).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short',
@@ -57,7 +40,7 @@ const BatchesPage = () => {
   const { fetchBatches, batches, isFetching } = useFetchBatches();
 
   useEffect(() => {
-    fetchBatches();
+    fetchBatches({});
   }, [fetchBatches]);
 
   const handleImport = useCallback(() => {
@@ -150,7 +133,7 @@ const BatchesPage = () => {
                       {batch.createdBy?.name || batch.createdBy?.phoneNumber || '—'}
                     </td>
                     <td className="px-4 py-3 text-slate-500 text-xs">
-                      {formatDate(batch.createdAt)}
+                      {formatDate(batch?.createdAt)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">

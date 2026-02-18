@@ -118,7 +118,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                       disabled={option?.disabled || readOnly}
                       className="cursor-pointer text-[13px] py-1 hover:bg-background"
                     >
-                      <p className="text-[13px] py-[3px] truncate">{option.label}</p>
+                      <p className="text-[13px] py-[3px] truncate">{option?.label}</p>
                     </SelectItem>
                   );
                 })}

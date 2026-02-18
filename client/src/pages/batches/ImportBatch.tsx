@@ -251,7 +251,7 @@ const ImportBatch = () => {
   const onSubmit = useCallback(async () => {
     if (hasBlockingErrors) return;
 
-    const batchName = getValues('batchName').trim();
+    const batchName = getValues('batchName')?.trim();
 
     try {
       const response = await importBulkOrders({

@@ -85,7 +85,7 @@ export const BatchController = {
       // Admins/Staff can view any batch; others only their own
       const batch = isAdminOrStaff(user)
         ? await batchService.getBatchById(id as UUID)
-        : await batchService.getBatchOrders(id as UUID, user.id as UUID);
+        : await batchService.getBatchOrders(id as UUID, user.id as UUID, isAdminOrStaff(user));
 
       return res.status(200).json({
         message: 'Batch orders fetched successfully',
