@@ -1,4 +1,5 @@
 export enum BatchStatus {
+  DRAFT = 'DRAFT',
   PENDING = 'PENDING',
   PROCESSING = 'PROCESSING',
   COMPLETED = 'COMPLETED',

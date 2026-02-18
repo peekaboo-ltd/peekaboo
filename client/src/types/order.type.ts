@@ -10,6 +10,7 @@ export const OrderType = {
 };
 
 export enum OrderStatus {
+  DRAFT = 'DRAFT',
   CREATED = 'CREATED',
   PENDING = 'PENDING',
   PAID = 'PAID',
@@ -19,7 +20,7 @@ export enum OrderStatus {
   DELIVERED = 'DELIVERED',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
-};
+}
 
 export interface OrderLocation {
   latitude: number | null;
@@ -45,6 +46,9 @@ export interface Order extends BaseDomain {
   recipientName?: string;
   recipientPhoneNumber?: string;
   notes?: string;
+  description?: string;
+  batchId?: UUID | null;
+  externalReferenceId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 

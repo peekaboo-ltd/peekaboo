@@ -4,6 +4,7 @@ import { type Order } from './order.type';
 import type { User } from './user.type';
 
 export enum BatchStatus {
+  DRAFT = 'DRAFT',
   PENDING = 'PENDING',
   PROCESSING = 'PROCESSING',
   COMPLETED = 'COMPLETED',

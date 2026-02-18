@@ -13,9 +13,8 @@ export interface BulkImportRowInput {
 
 export interface BulkImportRequest {
   rows: BulkImportRowInput[];
-  createBatch: boolean;
   batch?: {
-    name: string;
+    name?: string;
     description?: string;
   };
 }
@@ -35,7 +34,7 @@ export interface BulkImportResponse {
     failed: number;
   };
   orders: BulkImportRowResult[];
-  batch?: Pick<Batch, 'id' | 'name' | 'referenceId' | 'status'>;
+  batch: Pick<Batch, 'id' | 'name' | 'referenceId' | 'status'>;
   createdOrders?: Pick<Order, 'id' | 'referenceId'>[];
   errors: Array<{
     rowNumber: number;
