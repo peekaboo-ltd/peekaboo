@@ -45,6 +45,14 @@ export class Order extends AbstractEntity {
   @Column({ name: 'initial_fee', type: 'numeric', nullable: false })
   initialFee: number;
 
+  // DESCRIPTION
+  @Column({ name: 'description', type: 'text', nullable: true })
+  description: string;
+
+  // NOTES
+  @Column({ name: 'notes', type: 'text', nullable: true })
+  notes: string;
+
   // STATUS
   @Column({
     name: 'status',

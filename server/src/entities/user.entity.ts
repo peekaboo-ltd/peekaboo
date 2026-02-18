@@ -85,9 +85,16 @@ export class User extends AbstractEntity {
   })
   passwordHash?: string;
 
-  // DEFAULT LOCATION (for drivers, can be used for optimized order assignment)
+  // DEFAULT LOCATION (for users)
   @Column({ name: 'default_location', type: 'jsonb', nullable: true })
   defaultLocation: {
+    latitude: number;
+    longitude: number;
+  };
+
+  // LAST LOCATION (for riders, can be used for order assignment and tracking)
+  @Column({ name: 'last_location', type: 'jsonb', nullable: true })
+  lastLocation: {
     latitude: number;
     longitude: number;
   };

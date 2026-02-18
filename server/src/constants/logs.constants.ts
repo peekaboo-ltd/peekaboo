@@ -19,4 +19,5 @@ export enum LogReferenceTypes {
   CONVERSATION = 'CONVERSATION',
   MESSAGE = 'MESSAGE',
   ORDER_ACTIVITY = 'ORDER_ACTIVITY',
+  BATCH = 'BATCH',
 }

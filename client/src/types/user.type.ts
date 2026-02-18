@@ -21,6 +21,7 @@ export interface User extends BaseDomain {
   status: UserStatus;
   nationality?: string;
   passwordHash?: string;
+  defaultLocation?: { latitude: number; longitude: number };
   createdAt: Date;
   updatedAt: Date;
   assignments: OrderAssignment[];

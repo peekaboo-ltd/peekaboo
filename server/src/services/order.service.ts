@@ -29,6 +29,15 @@ import { OrganizationService } from './organization.service';
 import { OrganizationBillingService } from './organizationBilling.service';
 import { EmailService } from '../integrations/emails/email.service';
 import { OrderAssignment } from '../entities/orderAssignment.entity';
+import { Batch } from '../entities/batch.entity';
+import { BatchStatus } from '../constants/batch.constants';
+import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
+import {
+  BulkImportRequest,
+  BulkImportResponse,
+  BulkImportRowInput,
+  BulkImportRowResult,
+} from '../types/orderImport.types';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -41,6 +50,7 @@ export class OrderService {
   private readonly emailService: EmailService;
   private readonly orderActivityRepository: Repository<OrderActivity>;
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
+  private readonly batchRepository: Repository<Batch>;
 
   constructor() {
     this.orderRepository = AppDataSource.getRepository(Order);
@@ -53,6 +63,7 @@ export class OrderService {
     this.emailService = new EmailService();
     this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
     this.orderAssignmentRepository = AppDataSource.getRepository(OrderAssignment);
+    this.batchRepository = AppDataSource.getRepository(Batch);
   }
 
   // CREATE ORDER
@@ -226,6 +237,292 @@ export class OrderService {
         user: userWithRoles,
       },
     };
+  }
+
+  private async generateUniqueOrderReferenceId(): Promise<string> {
+    let referenceId: string = generateReferenceNumber({
+      prefix: 'P',
+      length: 6,
+    });
+
+    while (await this.getOrderByReferenceId(referenceId)) {
+      referenceId = generateReferenceNumber({
+        prefix: 'P',
+        length: 6,
+      });
+    }
+
+    return referenceId;
+  }
+
+  private async generateUniqueBatchReferenceId(): Promise<string> {
+    let referenceId = generateReferenceNumber({
+      prefix: 'B',
+      length: 6,
+    });
+
+    while (await this.batchRepository.findOne({ where: { referenceId } })) {
+      referenceId = generateReferenceNumber({
+        prefix: 'B',
+        length: 6,
+      });
+    }
+
+    return referenceId;
+  }
+
+  async importBulkOrders(
+    payload: BulkImportRequest,
+    currentUser: User,
+  ): Promise<BulkImportResponse> {
+    if (!payload?.rows?.length) {
+      throw new ValidationError('At least one row is required for import');
+    }
+
+    if (payload.createBatch && !payload.batch?.name?.trim()) {
+      throw new ValidationError('Batch name is required when createBatch is enabled');
+    }
+
+    const rows = payload.rows;
+    const rowErrors: BulkImportResponse['errors'] = [];
+    const seenProductRefs = new Set<string>();
+
+    for (const row of rows) {
+      if (!row?.rowNumber || row.rowNumber < 2) {
+        rowErrors.push({
+          rowNumber: row?.rowNumber || 0,
+          field: 'rowNumber',
+          message: 'Invalid row number',
+        });
+      }
+
+      const normalizedRecipient = validateAndFormatPhoneNumber(
+        row?.recipientPhoneNumber,
+      );
+      if (!normalizedRecipient.isValid || !normalizedRecipient.formattedNumber) {
+        rowErrors.push({
+          rowNumber: row.rowNumber,
+          field: 'recipientPhoneNumber',
+          message: normalizedRecipient.error || 'Invalid recipient phone number',
+        });
+      }
+
+      if ((row.productReferenceNo || '').trim().length > 255) {
+        rowErrors.push({
+          rowNumber: row.rowNumber,
+          field: 'productReferenceNo',
+          message: 'Product reference cannot exceed 255 characters',
+        });
+      }
+
+      if ((row.productName || '').trim().length > 255) {
+        rowErrors.push({
+          rowNumber: row.rowNumber,
+          field: 'productName',
+          message: 'Product name cannot exceed 255 characters',
+        });
+      }
+
+      const normalizedProductRef = (row.productReferenceNo || '').trim();
+      if (normalizedProductRef) {
+        if (seenProductRefs.has(normalizedProductRef)) {
+          rowErrors.push({
+            rowNumber: row.rowNumber,
+            field: 'productReferenceNo',
+            message: 'Duplicate product reference in this upload',
+          });
+        }
+        seenProductRefs.add(normalizedProductRef);
+      }
+    }
+
+    if (rowErrors.length > 0) {
+      throw new ValidationError('Bulk import validation failed', {
+        referenceType: LogReferenceTypes.ORDER,
+        referenceId: currentUser.id,
+        errors: rowErrors,
+      } as any);
+    }
+
+    const membership = await this.organizationService.getUserMembership(currentUser.id);
+    const organizationPhone = membership?.organization?.phoneNumber?.trim();
+    const senderCandidate = organizationPhone || currentUser.phoneNumber || '';
+    const senderValidation = validateAndFormatPhoneNumber(senderCandidate);
+
+    if (!senderValidation.isValid || !senderValidation.formattedNumber) {
+      throw new ValidationError(
+        'Unable to determine a valid sender phone number for import. Update your user or organization phone number first.',
+      );
+    }
+
+    const senderPhoneNumber = senderValidation.formattedNumber;
+
+    const result = await AppDataSource.transaction(async (manager) => {
+      const orderRepository = manager.getRepository(Order);
+      const userRepository = manager.getRepository(User);
+      const orderActivityRepository = manager.getRepository(OrderActivity);
+      const batchRepository = manager.getRepository(Batch);
+
+      let sender = await userRepository.findOne({
+        where: { phoneNumber: senderPhoneNumber },
+      });
+
+      if (!sender) {
+        sender = await userRepository.save(
+          userRepository.create({ phoneNumber: senderPhoneNumber }),
+        );
+      }
+
+      let batch: Batch | undefined;
+      if (payload.createBatch) {
+        const batchReferenceId = await this.generateUniqueBatchReferenceId();
+        batch = await batchRepository.save(
+          batchRepository.create({
+            name: payload.batch?.name?.trim(),
+            description: payload.batch?.description?.trim() || undefined,
+            referenceId: batchReferenceId,
+            createdById: currentUser.id,
+            status: BatchStatus.PENDING,
+          }),
+        );
+      }
+
+      const rowResults: BulkImportRowResult[] = [];
+      let createdCount = 0;
+      let linkedCount = 0;
+
+      for (const rawRow of rows) {
+        const row: BulkImportRowInput = {
+          rowNumber: rawRow.rowNumber,
+          recipientPhoneNumber:
+            validateAndFormatPhoneNumber(rawRow.recipientPhoneNumber)
+              .formattedNumber || '',
+          deliveryLocation: rawRow.deliveryLocation?.trim() || undefined,
+          productReferenceNo: rawRow.productReferenceNo?.trim() || undefined,
+          productName: rawRow.productName?.trim() || undefined,
+          description: rawRow.description?.trim() || undefined,
+        };
+
+        let orderToAttach: Order | null = null;
+        let rowAction: BulkImportRowResult['action'] = 'created';
+
+        if (row.productReferenceNo) {
+          const existingOrder = await orderRepository.findOne({
+            where: { externalReferenceId: row.productReferenceNo },
+          });
+          if (existingOrder) {
+            const isVisible = membership?.organizationId
+              ? existingOrder.organizationId === membership.organizationId
+              : existingOrder.createdById === currentUser.id;
+
+            if (!isVisible) {
+              throw new ValidationError('Bulk import validation failed', {
+                referenceType: LogReferenceTypes.ORDER,
+                referenceId: currentUser.id,
+                errors: [
+                  {
+                    rowNumber: row.rowNumber,
+                    field: 'productReferenceNo',
+                    message:
+                      'An order with this product reference exists but is outside your scope',
+                  },
+                ],
+              } as any);
+            }
+            orderToAttach = existingOrder;
+            rowAction = 'linked';
+          }
+        }
+
+        if (!orderToAttach) {
+          let recipient = await userRepository.findOne({
+            where: { phoneNumber: row.recipientPhoneNumber },
+          });
+
+          if (!recipient) {
+            recipient = await userRepository.save(
+              userRepository.create({ phoneNumber: row.recipientPhoneNumber }),
+            );
+          }
+
+          const orderReferenceId = await this.generateUniqueOrderReferenceId();
+
+          const composedDescription = [row.productName, row.description]
+            .filter(Boolean)
+            .join(' - ');
+
+          const orderPayload: Partial<Order> = {
+            referenceId: orderReferenceId,
+            externalReferenceId: row.productReferenceNo,
+            senderId: sender.id,
+            recipientId: recipient.id,
+            createdById: currentUser.id,
+            initialFee: 1500,
+            description: composedDescription || undefined,
+            notes: row.deliveryLocation || undefined,
+            ...(batch ? { batchId: batch.id } : {}),
+          };
+
+          if (membership?.organizationId) {
+            orderPayload.organizationId = membership.organizationId;
+            orderPayload.isBusinessOrder = true;
+          }
+
+          if (membership?.organization?.businessPlan) {
+            const businessPlanPrice = Number(
+              membership.organization.businessPlan.pricePerOrder,
+            );
+            orderPayload.businessPlanPrice = businessPlanPrice;
+            orderPayload.initialFee = businessPlanPrice;
+            orderPayload.finalFee = businessPlanPrice;
+          }
+
+          orderToAttach = await orderRepository.save(orderRepository.create(orderPayload));
+          await orderActivityRepository.save(
+            orderActivityRepository.create({
+              orderId: orderToAttach.id,
+              status: OrderStatus.CREATED,
+              createdById: currentUser.id,
+            }),
+          );
+          createdCount += 1;
+        } else {
+          if (batch) {
+            orderToAttach.batchId = batch.id;
+            orderToAttach = await orderRepository.save(orderToAttach);
+          }
+          linkedCount += 1;
+        }
+
+        rowResults.push({
+          rowNumber: row.rowNumber,
+          orderId: orderToAttach.id,
+          referenceId: orderToAttach.referenceId,
+          action: rowAction,
+        });
+      }
+
+      return {
+        summary: {
+          total: rows.length,
+          created: createdCount,
+          linked: linkedCount,
+          failed: 0,
+        },
+        orders: rowResults,
+        batch: batch
+          ? {
+              id: batch.id,
+              name: batch.name,
+              referenceId: batch.referenceId,
+              status: batch.status,
+            }
+          : undefined,
+        errors: [],
+      } as BulkImportResponse;
+    });
+
+    return result;
   }
 
   // GET ORDER BY REFERENCE ID
@@ -450,6 +747,7 @@ export class OrderService {
       status,
       statusGroup,
       referenceId,
+      batchId,
     } = query as Request['query'] & {
       status?: string | string[];
       statusGroup?: 'recent' | 'pending' | 'active' | 'completed';
@@ -479,6 +777,7 @@ export class OrderService {
     if (createdById) condition.createdById = createdById as UUID;
     if (referenceId) condition.referenceId = ILike(`%${referenceId}%`);
     if (normalizedStatuses.length > 0) condition.status = In(normalizedStatuses as OrderStatus[]);
+    if (batchId) condition.batchId = batchId as UUID;
 
     const orders = await this.orderRepository.findAndCount({
       where: condition,

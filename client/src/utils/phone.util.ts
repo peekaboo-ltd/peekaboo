@@ -13,6 +13,32 @@ export interface PhoneValidationResult {
 }
 
 /**
+ * Clean phone number input and validate against Rwandan phone number rules
+ */
+export function cleanPhoneNumber(input: string | null | undefined): PhoneValidationResult {
+  if (!input) {
+    return { isValid: false, error: 'Phone number is required' };
+  }
+
+  // Remove all whitespace
+  const normalizedNumber = input.replace(/\s/g, '');
+
+  // Check for non-numeric characters (except leading +)
+  const hasLeadingPlus = normalizedNumber.startsWith('+');
+  let numberWithoutPlus = hasLeadingPlus
+    ? normalizedNumber.slice(1)
+    : normalizedNumber;
+
+  if (!/^\d+$/.test(numberWithoutPlus)) {
+    return { isValid: false, error: 'Phone number must contain only digits' };
+  }
+
+  numberWithoutPlus = `0${numberWithoutPlus.slice(numberWithoutPlus.length - 9)}`; // Get last 9 digits to handle country code variations
+
+  return { isValid: true, formattedNumber: numberWithoutPlus };
+}
+
+/**
  * Validates and formats a phone number to local format (0XXXXXXXXX)
  *
  * Accepts formats:

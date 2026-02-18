@@ -3,6 +3,7 @@ import {
   useCreateOrderMutation,
   useCreatePublicOrderMutation,
   useDeleteOrderMutation,
+  useImportBulkOrdersMutation,
   useUpdateOrderMutation,
 } from '../../api/mutations/orders.mutations';
 import { useNavigate } from 'react-router-dom';
@@ -90,6 +91,23 @@ export const useCreateOrder = () => {
   }, [data, isSuccess, navigate, reset]);
 
   return { createOrder, data, error, isLoading, reset, isSuccess, isError };
+};
+
+export const useImportBulkOrders = () => {
+  const [
+    importBulkOrders,
+    { data, error, isLoading, isSuccess, isError, reset },
+  ] = useImportBulkOrdersMutation();
+
+  return {
+    importBulkOrders,
+    data,
+    error,
+    isLoading,
+    isSuccess,
+    isError,
+    reset,
+  };
 };
 
 /**

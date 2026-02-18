@@ -10,6 +10,7 @@ import type {
   CompleteOnboardingResponse,
   InviteOrganizationPayload,
   InviteOrganizationResponse,
+  Organization,
 } from '@/types/organization.type';
 
 export const organizationMutationApiSlice = createApi({
@@ -74,6 +75,18 @@ export const organizationMutationApiSlice = createApi({
         body: data,
       }),
     }),
+
+    // UPDATE MY ORGANIZATION (BUSINESS USER)
+    updateMyOrganization: builder.mutation<
+      { message: string; data: Organization },
+      Partial<Organization>
+    >({
+      query: (data) => ({
+        url: '/organizations/me',
+        method: 'PATCH',
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -83,4 +96,5 @@ export const {
   useValidateOnboardingTokenQuery,
   useCompleteOnboardingMutation,
   useInviteOrganizationMutation,
+  useUpdateMyOrganizationMutation,
 } = organizationMutationApiSlice;

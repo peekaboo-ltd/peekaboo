@@ -13,6 +13,7 @@ import dashboardRoutes from './dashboard.routes';
 import landingRoutes from './landing.routes';
 import businessPlanRoutes from './businessPlan.routes';
 import organizationRoutes from './organization.routes';
+import batchRoutes from './batch.routes';
 
 // CREATE ROUTER
 const routes = Router();
@@ -57,5 +58,8 @@ routes.use('/business-plans', businessPlanRoutes);
 
 // ORGANIZATION ROUTES
 routes.use('/organizations', organizationRoutes);
+
+// BATCH ROUTES
+routes.use('/batches', batchRoutes);
 
 export default routes;

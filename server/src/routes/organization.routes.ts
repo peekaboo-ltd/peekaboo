@@ -30,6 +30,11 @@ router.get(
   authorize([RoleTypes.BUSINESS]),
   OrganizationController.getMyMembership
 );
+router.patch(
+  '/me',
+  authorize([RoleTypes.BUSINESS]),
+  OrganizationController.updateMyOrganization
+);
 router.get(
   '/me/dashboard',
   authorize([RoleTypes.BUSINESS]),

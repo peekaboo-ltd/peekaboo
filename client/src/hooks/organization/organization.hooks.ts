@@ -1,12 +1,15 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useCreateOrganizationMutation } from '@/api/mutations/organization.mutations';
+import {
+  useCreateOrganizationMutation,
+  useUpdateMyOrganizationMutation,
+} from '@/api/mutations/organization.mutations';
 import { useAppDispatch } from '@/states/hooks';
 import { setToken, setUser, setIsAuthenticated } from '@/states/slices/auth.slice';
 import { resetOnboarding } from '@/states/slices/onboarding.slice';
 import { localStorageUtil } from '@/utils/localStorage.util';
-import type { CreateOrganizationPayload } from '@/types/organization.type';
+import type { CreateOrganizationPayload, Organization } from '@/types/organization.type';
 
 /**
  * Hook for creating an organization (B2B registration)
@@ -77,4 +80,31 @@ export const useCreateOrganization = () => {
     isSuccess,
     reset,
   };
+};
+
+export const useUpdateMyOrganization = () => {
+  const [updateMyOrganizationMutation, { data, error, isLoading, isSuccess, reset }] =
+    useUpdateMyOrganizationMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success('Organization updated successfully');
+      reset();
+    }
+  }, [isSuccess, reset]);
+
+  useEffect(() => {
+    if (error) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        'Failed to update organization';
+      toast.error(errorMessage);
+    }
+  }, [error]);
+
+  const updateMyOrganization = (data: Partial<Organization>) => {
+    updateMyOrganizationMutation(data);
+  };
+
+  return { updateMyOrganization, data, error, isLoading, isSuccess, reset };
 };

@@ -8,6 +8,7 @@ export interface UserState {
   createUserModal: boolean;
   updateUserModal: boolean;
   deleteUserModal: boolean;
+  userDefaultLocationModal: boolean;
 }
 
 const initialState: UserState = {
@@ -17,6 +18,7 @@ const initialState: UserState = {
   createUserModal: false,
   updateUserModal: false,
   deleteUserModal: false,
+  userDefaultLocationModal: false,
 };
 
 const userSlice = createSlice({
@@ -41,6 +43,9 @@ const userSlice = createSlice({
     setDeleteUserModal: (state, action) => {
       state.deleteUserModal = action.payload;
     },
+    setUserDefaultLocationModal: (state, action) => {
+      state.userDefaultLocationModal = action.payload;
+    },
   },
 });
 
@@ -51,6 +56,7 @@ export const {
   setCreateUserModal,
   setUpdateUserModal,
   setDeleteUserModal,
+  setUserDefaultLocationModal,
 } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -102,6 +102,26 @@ export const OrderController = {
     }
   },
 
+  // IMPORT BULK ORDERS
+  async importBulkOrders(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user } = req as AuthRequest;
+
+      if (!user?.id) {
+        throw new UnauthorizedError('User not authenticated');
+      }
+
+      const imported = await orderService.importBulkOrders(req.body, user);
+
+      return res.status(201).json({
+        message: 'Bulk orders imported successfully',
+        data: imported,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // CREATE PUBLIC ORDER
   async createPublicOrder(req: Request, res: Response, next: NextFunction) {
     try {

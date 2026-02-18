@@ -179,6 +179,38 @@ export const OrganizationController = {
     }
   },
 
+  // UPDATE MY ORGANIZATION (BUSINESS USER)
+  async updateMyOrganization(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const organization = await organizationService.getOrganizationByUserId(userId);
+
+      if (!organization) {
+        return res.status(404).json({
+          message: 'You are not a member of any organization',
+        });
+      }
+
+      const updated = await organizationService.updateOrganization(
+        organization.id,
+        req.body
+      );
+
+      return res.status(200).json({
+        message: 'Organization updated successfully',
+        data: updated,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // ADD MEMBER TO MY ORGANIZATION (BUSINESS ADMIN)
   async addMemberToMyOrg(req: Request, res: Response, next: NextFunction) {
     try {

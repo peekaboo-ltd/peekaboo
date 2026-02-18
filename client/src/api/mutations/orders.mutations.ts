@@ -2,6 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
 import type { UUID } from '@/types';
 import type { Order } from '@/types/order.type';
+import type { ImportTemplateRow } from '@/types/orderImport.type';
 
 export const ordersMutationApiSlice = createApi({
   reducerPath: 'ordersMutationApi',
@@ -53,6 +54,23 @@ export const ordersMutationApiSlice = createApi({
         method: 'DELETE',
       }),
     }),
+
+    // IMPORT BULK ORDERS
+    importBulkOrders: builder.mutation({
+      query: ({
+        rows,
+        createBatch,
+        batch,
+      }: {
+        rows: ImportTemplateRow[];
+        createBatch: boolean;
+        batch?: { name: string; description?: string };
+      }) => ({
+        url: '/orders/import/bulk',
+        method: 'POST',
+        body: { rows, createBatch, batch },
+      }),
+    }),
   }),
 });
 
@@ -61,4 +79,5 @@ export const {
   useCreatePublicOrderMutation,
   useUpdateOrderMutation,
   useDeleteOrderMutation,
+  useImportBulkOrdersMutation,
 } = ordersMutationApiSlice;

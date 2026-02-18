@@ -10,16 +10,20 @@ import {
   faFlag,
   faBriefcase,
   faChartLine,
+  faLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/components/inputs/Button';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import {
   setSelectedUser,
   setUpdateUserModal,
+  setUserDefaultLocationModal,
 } from '@/states/slices/user.slice';
 import UpdateUserProfileModal from './UpdateUserProfileModal';
+import SetUserDefaultLocationModal from './SetUserDefaultLocationModal';
 import { faPenToSquare, faUser } from '@fortawesome/free-regular-svg-icons';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { Link } from 'react-router-dom';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -247,6 +251,36 @@ const UserProfilePage = () => {
                 </header>
               </li>
             ))}
+
+            <li className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 sm:col-span-2">
+              <header className="flex items-center justify-between gap-3">
+                <section className="flex items-center gap-3">
+                  <span className="h-9 w-9 rounded-lg bg-white text-primary-900 shadow-sm flex items-center justify-center">
+                    <FontAwesomeIcon icon={faLocationDot} />
+                  </span>
+                  <section>
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                      Default Pickup Location
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-slate-900">
+                      {selectedUser?.defaultLocation
+                        ? `${selectedUser.defaultLocation.latitude.toFixed(5)}, ${selectedUser.defaultLocation.longitude.toFixed(5)}`
+                        : '—'}
+                    </p>
+                  </section>
+                </section>
+                <Link
+                  to={`#`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(setUserDefaultLocationModal(true));
+                  }}
+                  className="text-xs font-medium text-primary-900 hover:underline underline-offset-2 shrink-0"
+                >
+                  {selectedUser?.defaultLocation ? 'Update' : 'Set Location'}
+                </Link>
+              </header>
+            </li>
           </ul>
         </article>
 
@@ -316,6 +350,7 @@ const UserProfilePage = () => {
       </motion.section>
 
       <UpdateUserProfileModal />
+      <SetUserDefaultLocationModal />
     </motion.main>
   );
 };

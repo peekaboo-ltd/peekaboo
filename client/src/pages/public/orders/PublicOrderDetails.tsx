@@ -57,9 +57,12 @@ const PublicOrderDetails = () => {
   const dispatch = useAppDispatch();
   const { order } = useAppSelector((state) => state.order);
   const { paymentsList } = useAppSelector((state) => state.payment);
+  const { user: authUser } = useAppSelector((state) => state.auth);
   const [distance, setDistance] = useState<number | null>(null);
   const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
   const [gettingCurrentLocation, setGettingCurrentLocation] = useState(false);
+  const [defaultLocationPrompt, setDefaultLocationPrompt] = useState<'user' | 'org' | 'both' | null>(null);
+  const hasAppliedDefault = useRef(false);
 
   // NAVIGATION
   const { id } = useParams();
@@ -130,6 +133,8 @@ const PublicOrderDetails = () => {
       dispatch(setOrder(undefined));
       setDistance(null);
       setEstimatedTime(null);
+      hasAppliedDefault.current = false;
+      setDefaultLocationPrompt(null);
     }
   }, [dispatch, order?.id, orderId]);
 
@@ -138,6 +143,42 @@ const PublicOrderDetails = () => {
       getOrder({ id: orderId });
     }
   }, [orderId, getOrder]);
+
+  // DEFAULT LOCATION PRE-FILL
+  const userDefaultLat = authUser?.defaultLocation?.latitude ?? null;
+  const userDefaultLng = authUser?.defaultLocation?.longitude ?? null;
+  const orgDefaultLat = authUser?.organizationMembership?.[0]?.organization?.defaultLocation?.latitude ?? null;
+  const orgDefaultLng = authUser?.organizationMembership?.[0]?.organization?.defaultLocation?.longitude ?? null;
+  const userDefault = userDefaultLat !== null && userDefaultLng !== null
+    ? { latitude: userDefaultLat, longitude: userDefaultLng }
+    : null;
+  const orgDefault = orgDefaultLat !== null && orgDefaultLng !== null
+    ? { latitude: orgDefaultLat, longitude: orgDefaultLng }
+    : null;
+
+  useEffect(() => {
+    if (!currentOrder?.id || currentOrder.locationFrom || hasAppliedDefault.current) return;
+
+    if (userDefaultLat !== null && orgDefaultLat !== null) {
+      setDefaultLocationPrompt('both');
+    } else if (userDefaultLat !== null && userDefaultLng !== null) {
+      hasAppliedDefault.current = true;
+      updateOrder({ id: currentOrder.id, order: { locationFrom: { latitude: userDefaultLat, longitude: userDefaultLng } } });
+    } else if (orgDefaultLat !== null && orgDefaultLng !== null) {
+      hasAppliedDefault.current = true;
+      updateOrder({ id: currentOrder.id, order: { locationFrom: { latitude: orgDefaultLat, longitude: orgDefaultLng } } });
+    }
+  }, [currentOrder?.id, currentOrder?.locationFrom, userDefaultLat, userDefaultLng, orgDefaultLat, orgDefaultLng, updateOrder]);
+
+  const handleApplyDefault = (choice: 'user' | 'org' | 'skip') => {
+    setDefaultLocationPrompt(null);
+    hasAppliedDefault.current = true;
+    if (choice === 'skip' || !currentOrder?.id) return;
+    const loc = choice === 'user' ? userDefault : orgDefault;
+    if (loc) {
+      updateOrder({ id: currentOrder.id, order: { locationFrom: { latitude: loc.latitude, longitude: loc.longitude } } });
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -228,6 +269,34 @@ const PublicOrderDetails = () => {
               locations.
             </p>
           </header>
+          {defaultLocationPrompt === 'both' && (
+            <section className="bg-blue-50 border border-blue-200 rounded-lg p-4 animate-on-scroll">
+              <p className="text-sm font-medium text-blue-900 mb-3">
+                You have a default pickup location saved. Which would you like to use?
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={() => handleApplyDefault('user')}
+                  className="py-1.5! px-4! text-xs"
+                  primary
+                >
+                  My Default Location
+                </Button>
+                <Button
+                  onClick={() => handleApplyDefault('org')}
+                  className="py-1.5! px-4! text-xs"
+                >
+                  Organization Location
+                </Button>
+                <Button
+                  onClick={() => handleApplyDefault('skip')}
+                  className="py-1.5! px-4! text-xs text-gray-500!"
+                >
+                  Set Manually
+                </Button>
+              </div>
+            </section>
+          )}
           <section className="w-full flex flex-col gap-6">
             <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <article className="bg-white rounded-sm shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 animate-on-scroll">

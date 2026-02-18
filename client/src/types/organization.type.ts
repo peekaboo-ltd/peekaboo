@@ -64,6 +64,7 @@ export interface Organization extends BaseDomain {
   status: OrganizationStatus;
   businessPlanId?: UUID;
   createdById: UUID;
+  defaultLocation?: { latitude: number; longitude: number };
   createdAt: Date;
   updatedAt: Date;
 }

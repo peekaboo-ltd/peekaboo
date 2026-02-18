@@ -22,6 +22,7 @@ const OrdersPage = () => {
   const { ordersList, deleteOrderModal } = useAppSelector(
     (state) => state.order,
   );
+  const { importBatchModal } = useAppSelector((state) => state.batch);
   useDocumentTitle('Orders');
 
   // REACT HOOK FORM
@@ -94,7 +95,7 @@ const OrdersPage = () => {
       ? searchParams.get('statusGroup') || undefined
       : initialStatusGroupRef.current;
 
-    if (!deleteOrderModal)
+    if (!deleteOrderModal && !importBatchModal)
       fetchOrders({
         page,
         size,
@@ -110,7 +111,7 @@ const OrdersPage = () => {
     if (!hasFetchedInitiallyRef.current) {
       hasFetchedInitiallyRef.current = true;
     }
-  }, [page, size, applicationStatus, fetchOrders, deleteOrderModal, searchParams]);
+  }, [page, size, applicationStatus, fetchOrders, deleteOrderModal, importBatchModal, searchParams]);
 
   const { ordersColumns } = useOrdersColumns();
 

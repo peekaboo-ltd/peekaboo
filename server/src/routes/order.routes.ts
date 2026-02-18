@@ -58,6 +58,18 @@ router.patch(
   OrderController.acceptOrder,
 );
 
+router.post(
+  '/import/bulk',
+  authorize([
+    RoleTypes.CUSTOMER,
+    RoleTypes.BUSINESS,
+    RoleTypes.ADMIN,
+    RoleTypes.STAFF,
+    RoleTypes.RIDER,
+  ]),
+  OrderController.importBulkOrders,
+);
+
 router.get(
   '/:id',
   authorize([

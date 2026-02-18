@@ -6,6 +6,7 @@ import {
     faChevronDown,
     faBars,
     faTimes,
+    faBuilding,
 } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/states/store';
@@ -33,8 +34,21 @@ const AuthenticatedNavbar = ({ className }: Props) => {
         return null;
     }
 
+    const isBusinessUser = user?.userRoles?.some(
+        (role: UserRole) => role?.role?.name === 'BUSINESS'
+    );
+
     // NAV DROPDOWN
     const navDropdown = [
+        ...(isBusinessUser
+            ? [
+                  {
+                      title: 'Organization Settings',
+                      link: '/organizations/settings',
+                      icon: faBuilding,
+                  },
+              ]
+            : []),
         {
             title: 'Profile',
             link: '/user-profile',

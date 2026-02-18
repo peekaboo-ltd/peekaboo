@@ -59,8 +59,7 @@ export class Organization extends AbstractEntity {
   // DEFAULT LOCATION
   @Column({
     name: 'default_location',
-    type: 'varchar',
-    length: 255,
+    type: 'jsonb',
     nullable: true,
   })
   defaultLocation?: {
