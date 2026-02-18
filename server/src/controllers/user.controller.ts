@@ -106,6 +106,48 @@ export const UserController = {
     }
   },
 
+
+  // UPDATE CURRENT USER LOCATION
+  async updateCurrentLocation(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user } = req as AuthRequest;
+      const { latitude, longitude } = req.body;
+
+      if (!user?.id) {
+        return res.status(401).json({
+          message: 'User not authenticated',
+        });
+      }
+
+      if (
+        typeof latitude !== 'number' ||
+        typeof longitude !== 'number' ||
+        Number.isNaN(latitude) ||
+        Number.isNaN(longitude) ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180
+      ) {
+        return res.status(400).json({
+          message: 'Invalid location coordinates provided',
+        });
+      }
+
+      const updatedUser = await userService.updateCurrentLocation(user.id as UUID, {
+        latitude,
+        longitude,
+      });
+
+      return res.status(200).json({
+        message: 'Current location updated successfully',
+        data: updatedUser.currentLocation,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // UPDATE USER STATUS
   async updateUserStatus(req: Request, res: Response, next: NextFunction) {
     try {

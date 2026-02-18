@@ -1,6 +1,11 @@
 import apiClient from './client';
 import { LoginCredentials, AuthResponse, LoginApiResponse, User } from '../../types';
 
+interface ApiResponse<T> {
+  message: string;
+  data: T;
+}
+
 /**
  * Auth API endpoints
  */
@@ -29,8 +34,8 @@ export const authAPI = {
    * Get current user profile
    */
   getProfile: async (): Promise<User> => {
-    const response = await apiClient.get<User>('/auth/me');
-    return response.data;
+    const response = await apiClient.get<ApiResponse<User>>('/auth/me');
+    return response.data.data;
   },
 
   /**

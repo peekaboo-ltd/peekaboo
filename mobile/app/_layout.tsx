@@ -4,10 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import { colors } from '../utils/constants';
+import { useLocationTracking } from '../hooks';
 
 export default function RootLayout() {
   const { isLoading, checkAuth } = useAuthStore();
   const [isInitializing, setIsInitializing] = useState(true);
+  useLocationTracking();
 
   useEffect(() => {
     const initialize = async () => {

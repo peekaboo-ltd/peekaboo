@@ -157,6 +157,21 @@ export class UserService {
     });
   }
 
+  async updateCurrentLocation(
+    id: UUID,
+    location: { latitude: number; longitude: number }
+  ): Promise<User> {
+    const user = await this.getUserById(id);
+
+    user.currentLocation = {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      collectedAt: new Date().toISOString(),
+    };
+
+    return this.userRepository.save(user);
+  }
+
   // FETCH USERS
   async fetchUsers({
     page,
