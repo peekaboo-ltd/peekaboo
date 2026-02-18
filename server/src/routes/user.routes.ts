@@ -18,6 +18,9 @@ router.get("/:id", UserController.getUserById);
 // CREATE new user (ADMIN only)
 router.post("/", authorize([RoleTypes.ADMIN, RoleTypes.BUSINESS]), UserController.createUser);
 
+// UPDATE current user location
+router.patch('/current-location', UserController.updateCurrentLocation);
+
 // UPDATE user (ADMIN or own profile)
 router.patch("/:id", UserController.updateUser);
 

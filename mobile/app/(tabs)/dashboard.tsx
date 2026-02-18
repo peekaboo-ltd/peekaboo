@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   Animated,
   View,
@@ -35,6 +35,21 @@ export default function DashboardScreen() {
   const heroAnim = useRef(new Animated.Value(0)).current;
   const statsAnim = useRef(new Animated.Value(0)).current;
   const activityAnim = useRef(new Animated.Value(0)).current;
+  const locationCollectedText = useMemo(() => {
+    const collectedAt = user?.currentLocation?.collectedAt;
+
+    if (!collectedAt) {
+      return 'Location updates are active. Waiting for your first location sync.';
+    }
+
+    const parsedDate = new Date(collectedAt);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return 'Location was collected recently.';
+    }
+
+    return `Last location collected: ${parsedDate.toLocaleString()}`;
+  }, [user?.currentLocation?.collectedAt]);
+
 
   const handleRefresh = useCallback(() => {
     refresh();
@@ -208,6 +223,13 @@ export default function DashboardScreen() {
         </Animated.View>
 
         {/* Stats Section */}
+        <Card style={styles.locationDisclaimerCard}>
+          <View style={styles.locationDisclaimerContent}>
+            <Ionicons name="location-outline" size={16} color={colors.text.secondary} />
+            <Text style={styles.locationDisclaimerText}>{locationCollectedText}</Text>
+          </View>
+        </Card>
+
         <Animated.View
           style={[
             styles.section,
@@ -668,6 +690,22 @@ const styles = StyleSheet.create({
   },
   actionSubtext: {
     marginTop: 2,
+    fontSize: typography.caption.fontSize,
+    color: colors.text.secondary,
+  },
+  locationDisclaimerCard: {
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.2)',
+    backgroundColor: 'rgba(243, 244, 244, 0.85)',
+  },
+  locationDisclaimerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  locationDisclaimerText: {
+    flex: 1,
     fontSize: typography.caption.fontSize,
     color: colors.text.secondary,
   },

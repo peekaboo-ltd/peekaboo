@@ -92,11 +92,12 @@ export class User extends AbstractEntity {
     longitude: number;
   };
 
-  // LAST LOCATION (for riders, can be used for order assignment and tracking)
-  @Column({ name: 'last_location', type: 'jsonb', nullable: true })
-  lastLocation: {
+  // CURRENT LOCATION (for riders, can be used for order assignment and tracking)
+  @Column({ name: 'current_location', type: 'jsonb', nullable: true })
+  currentLocation: {
     latitude: number;
     longitude: number;
+    collectedAt?: string;
   };
 
   /**

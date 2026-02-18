@@ -11,6 +11,19 @@ if (!apiBaseUrlFromEnv) {
 export const API_BASE_URL = apiBaseUrlFromEnv || (__DEV__ ? 'http://localhost:3000/api' : '');
 export const API_TIMEOUT = 30000;
 
+
+const locationUpdateIntervalMinutesFromEnv = Number(
+  process.env.EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES || '5'
+);
+const locationUpdateIntervalMinutes =
+  Number.isFinite(locationUpdateIntervalMinutesFromEnv) &&
+  locationUpdateIntervalMinutesFromEnv > 0
+    ? locationUpdateIntervalMinutesFromEnv
+    : 5;
+
+export const LOCATION_UPDATE_INTERVAL_MS =
+  locationUpdateIntervalMinutes * 60 * 1000;
+
 // Storage Keys
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',

@@ -8,6 +8,12 @@ export interface UserRole {
   role: Role;
 }
 
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+  collectedAt?: string;
+}
+
 export interface User {
   id: string;
   name?: string;
@@ -17,6 +23,7 @@ export interface User {
   status: UserStatus;
   nationality?: string;
   userRoles?: UserRole[];
+  currentLocation?: UserLocation;
   createdAt: string;
   updatedAt: string;
 }

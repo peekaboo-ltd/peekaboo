@@ -60,9 +60,12 @@ Update the environment variables:
 ```env
 EXPO_PUBLIC_API_BASE_URL=https://your-backend-url/api/v1
 EXPO_PUBLIC_PROJECT_ID=your-expo-project-id
+EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES=5
 ```
 
 For EAS builds, make sure `EXPO_PUBLIC_*` values are provided via `eas.json` `env` or EAS secrets. Local `.env` files are not used in cloud builds.
+
+`EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES` controls how often rider location is sent to the backend (defaults to 5 minutes). Set it to `1` for faster testing.
 
 ### 3. Start Development Server
 
