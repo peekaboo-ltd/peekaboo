@@ -1,40 +1,54 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
-import { AbstractEntity } from "./index";
-import { User } from "./user.entity";
-import { UUID } from "../types";
-import { OrderStatus, OrderType } from "../constants/order.constants";
-import { Conversation } from "./conversation.entity";
-import { OrderAssignment } from "./orderAssignment.entity";
-import { OrderActivity } from "./orderActivity.entity";
-import { Organization } from "./organization.entity";
-import { OrganizationBilling } from "./organizationBilling.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { AbstractEntity } from './index';
+import { User } from './user.entity';
+import { UUID } from '../types';
+import { OrderStatus, OrderType } from '../constants/order.constants';
+import { Conversation } from './conversation.entity';
+import { OrderAssignment } from './orderAssignment.entity';
+import { OrderActivity } from './orderActivity.entity';
+import { Organization } from './organization.entity';
+import { OrganizationBilling } from './organizationBilling.entity';
+import { Batch } from './batch.entity';
 
-@Entity("orders")
-export class  Order extends AbstractEntity {
+@Entity('orders')
+export class Order extends AbstractEntity {
   // REFERENCE ID
-  @Column({ name: "reference_id", type: "varchar", length: 255 })
+  @Column({ name: 'reference_id', type: 'varchar', length: 255 })
   referenceId: string;
 
+  // EXTERNAL REFERENCE ID (for integration with external systems)
+  @Column({
+    name: 'external_reference_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  externalReferenceId: string;
+
+  // TRACKING ID (for delivery tracking)
+  @Column({ name: 'tracking_id', type: 'varchar', length: 255, nullable: true })
+  trackingId: string;
+
   // RECIPIENT ID
-  @Column({ name: "recipient_id", type: "uuid", nullable: true })
+  @Column({ name: 'recipient_id', type: 'uuid', nullable: true })
   recipientId: UUID;
 
   // SENDER ID
-  @Column({ name: "sender_id", type: "uuid", nullable: true })
+  @Column({ name: 'sender_id', type: 'uuid', nullable: true })
   senderId: UUID;
 
   // CREATED BY ID
-  @Column({ name: "created_by_id", type: "uuid", nullable: false })
+  @Column({ name: 'created_by_id', type: 'uuid', nullable: false })
   createdById: UUID;
 
   // INITIAL FEE
-  @Column({ name: "initial_fee", type: "numeric", nullable: false })
+  @Column({ name: 'initial_fee', type: 'numeric', nullable: false })
   initialFee: number;
 
   // STATUS
   @Column({
-    name: "status",
-    type: "enum",
+    name: 'status',
+    type: 'enum',
     nullable: false,
     enum: OrderStatus,
     default: OrderStatus.PENDING,
@@ -43,8 +57,8 @@ export class  Order extends AbstractEntity {
 
   // TYPE
   @Column({
-    name: "type",
-    type: "enum",
+    name: 'type',
+    type: 'enum',
     nullable: false,
     enum: OrderType,
     default: OrderType.SEND,
@@ -52,26 +66,26 @@ export class  Order extends AbstractEntity {
   type: OrderType;
 
   // DISCOUNT
-  @Column({ name: "discount", type: "numeric", nullable: true, default: 0 })
+  @Column({ name: 'discount', type: 'numeric', nullable: true, default: 0 })
   discount: number;
 
   // FINAL FEE
-  @Column({ name: "final_fee", type: "numeric", nullable: true })
+  @Column({ name: 'final_fee', type: 'numeric', nullable: true })
   finalFee: number;
 
   // CONVERSATION ID
-  @Column({ name: "conversation_id", type: "uuid", nullable: true })
+  @Column({ name: 'conversation_id', type: 'uuid', nullable: true })
   conversationId: UUID;
 
   // LOCATION FROM
-  @Column({ name: "location_from", type: "jsonb", nullable: true })
+  @Column({ name: 'location_from', type: 'jsonb', nullable: true })
   locationFrom: {
     latitude: number;
     longitude: number;
   };
 
   // LOCATION TO
-  @Column({ name: "location_to", type: "jsonb", nullable: true })
+  @Column({ name: 'location_to', type: 'jsonb', nullable: true })
   locationTo: {
     latitude: number;
     longitude: number;
@@ -93,23 +107,27 @@ export class  Order extends AbstractEntity {
   @Column({ name: 'business_plan_price', type: 'numeric', nullable: true })
   businessPlanPrice?: number;
 
+  // BATCH ID (for batch deliveries)
+  @Column({ name: 'batch_id', type: 'uuid', nullable: true })
+  batchId?: UUID;
+
   /**
    * RELATIONS
    */
 
   // RECIPIENT
   @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: "recipient_id" })
+  @JoinColumn({ name: 'recipient_id' })
   recipient: User;
 
   // CREATED BY
   @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: "created_by_id" })
+  @JoinColumn({ name: 'created_by_id' })
   createdBy: User;
 
   // SENDER
   @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: "sender_id" })
+  @JoinColumn({ name: 'sender_id' })
   sender: User;
 
   // ORDER ACTIVITIES
@@ -122,7 +140,7 @@ export class  Order extends AbstractEntity {
 
   // CONVERSATION
   @ManyToOne(() => Conversation, (conversation) => conversation.id)
-  @JoinColumn({ name: "conversation_id" })
+  @JoinColumn({ name: 'conversation_id' })
   conversation: Conversation;
 
   // ORGANIZATION
@@ -134,4 +152,9 @@ export class  Order extends AbstractEntity {
   @ManyToOne(() => OrganizationBilling, (billing) => billing.orders)
   @JoinColumn({ name: 'organization_billing_id' })
   organizationBilling?: OrganizationBilling;
+
+  // BATCH
+  @ManyToOne(() => Batch, (batch) => batch.orders, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'batch_id' })
+  batch?: Batch;
 }

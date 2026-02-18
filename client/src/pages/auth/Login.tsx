@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import Input from '@/components/inputs/Input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -6,7 +6,7 @@ import Button from '@/components/inputs/Button';
 import { useLogin, useRegister } from '@/hooks/auth/auth.hooks';
 import { useAppSelector } from '@/states/hooks';
 import { localStorageUtil } from '@/utils/localStorage.util';
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
@@ -28,31 +28,12 @@ interface RegisterFormData {
 }
 
 export const Login = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [phoneError, setPhoneError] = useState<string | undefined>();
   useDocumentTitle(authMode === 'login' ? 'Sign In' : 'Create Account');
 
-  // Redirect authenticated users to dashboard
-  useEffect(() => {
-    if (isAuthenticated) {
-      const redirectPath = localStorageUtil.getItem<string>('from');
-      const locationStateFrom = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
-      const fallbackFrom = locationStateFrom?.pathname
-        ? `${locationStateFrom.pathname}${locationStateFrom.search || ''}`
-        : undefined;
-
-      localStorageUtil.removeItem('from');
-
-      if (redirectPath || fallbackFrom) {
-        navigate(redirectPath || fallbackFrom || '/dashboard');
-      } else {
-        navigate('/dashboard');
-      }
-    }
-  }, [isAuthenticated, navigate, location.state]);
 
   // Login form
   const {
@@ -142,6 +123,17 @@ export const Login = () => {
     setPhoneError(undefined);
   };
 
+  // Redirect authenticated users — placed after all hooks to satisfy Rules of Hooks
+  if (isAuthenticated) {
+    const redirectPath = localStorageUtil.getItem<string>('from');
+    const locationStateFrom = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+    const fallbackFrom = locationStateFrom?.pathname
+      ? `${locationStateFrom.pathname}${locationStateFrom.search || ''}`
+      : undefined;
+    localStorageUtil.removeItem('from');
+    return <Navigate to={redirectPath || fallbackFrom || '/dashboard'} replace />;
+  }
+
   return (
     <main className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-10 overflow-x-hidden">
       <span className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.18),_transparent_65%)]" />
@@ -164,7 +156,7 @@ export const Login = () => {
                   <Link
                     to="#"
                     onClick={toggleAuthMode}
-                    className="font-medium text-[13px] hover:underline text-primary hover:text-primary/80"
+                    className="font-normal text-[13px] hover:underline underline-offset-2 text-primary hover:text-primary/80"
                   >
                     Create one
                   </Link>
@@ -189,7 +181,7 @@ export const Login = () => {
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="w-full cursor-pointer flex items-center justify-center gap-3 py-3 px-4 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+              className="w-full cursor-pointer flex items-center justify-center gap-3 py-2 px-4 border border-slate-200 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path

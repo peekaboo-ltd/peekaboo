@@ -137,7 +137,7 @@ const Home = () => {
   ];
 
   return (
-    <main className="relative min-h-screen w-full bg-slate-50 overflow-x-hidden max-lg:mt-16">
+    <main className="relative min-h-screen w-full bg-[#f7f7f4] overflow-x-hidden mt-0 max-lg:mt-16">
       <HeroSection
         formRef={formRef}
         onScrollToForm={scrollToForm}
@@ -147,7 +147,7 @@ const Home = () => {
       />
 
       <FeaturesSection
-        badgeLabel="Why it works"
+        badgeLabel="Client friendly"
         title={t('home.features.title')}
         subtitle={t('home.features.subtitle')}
         features={features}

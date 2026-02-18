@@ -1,8 +1,7 @@
 import type { RefObject } from 'react';
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
-import HeroScene from '@/components/three/HeroScene';
 import { useCreateOrder, useCreatePublicOrder } from '@/hooks/orders/orders.hooks';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import { useAppSelector } from '@/states/hooks';
@@ -59,38 +58,25 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-white">
-      <Suspense fallback={null}>
-        <HeroScene />
-      </Suspense>
-
-      <span
-        className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-slate-100/40"
-        aria-hidden="true"
-      />
-      <span
-        className="pointer-events-none absolute -right-24 top-20 h-64 w-64 rounded-full bg-slate-200/35 blur-[120px]"
-        aria-hidden="true"
-      />
-
+    <section className="relative h-screen w-full overflow-hidden bg-[#f8f8f6]">
       <figure
-        className="absolute inset-0 opacity-[0.02] pointer-events-none"
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-          backgroundSize: '40px 40px',
+          backgroundSize: '44px 44px',
         }}
         aria-hidden="true"
       />
 
-      <article className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16 pt-10 pb-16 lg:pt-14 lg:pb-20">
+      <article className="relative z-10 w-full max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-14 pt-10 pb-16 lg:pt-14 lg:pb-20">
         <motion.section
-          className="w-full flex flex-col lg:flex-row gap-12 lg:gap-16 items-center max-lg:justify-center min-h-[calc(100vh-6rem)]"
+          className="w-full flex flex-col lg:flex-row gap-10 lg:gap-16 items-center max-lg:justify-center min-h-[calc(100vh-6rem)]"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           <motion.header
-            className="w-full lg:w-[45%] lg:self-center flex flex-col max-lg:items-center max-lg:justify-center gap-6 order-2 lg:order-1 text-center lg:text-left"
+            className="w-full lg:w-[44%] lg:self-center flex flex-col max-lg:items-center max-lg:justify-center gap-6 order-2 lg:order-1 text-center lg:text-left"
             variants={itemVariants}
           >
             <HeroTabs
@@ -127,37 +113,39 @@ const HeroSection = ({
           </motion.header>
 
           <motion.aside
-            className="w-full lg:w-[55%] flex justify-center lg:justify-end order-1 lg:order-2"
+            className="w-full lg:w-[56%] flex justify-end order-1 lg:order-2"
             variants={itemVariants}
           >
-            <motion.article
-              className="relative w-full max-w-lg"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-            >
-              <HeroForm
-                formRef={formRef}
-                onSubmit={onSubmit}
-                control={control}
-                isLoading={isCreatingOrder || isCreatingPublicOrder}
-                errors={errors}
-                copy={{
-                  formTitle: heroCopy.formTitle,
-                  formSubtitle: heroCopy.formSubtitle,
-                  quickStartLabel: heroCopy.quickStartLabel,
-                  senderLabel: heroCopy.senderLabel,
-                  senderPlaceholder: heroCopy.senderPlaceholder,
-                  recipientLabel: heroCopy.recipientLabel,
-                  recipientPlaceholder: heroCopy.recipientPlaceholder,
-                  continueLabel: heroCopy.continueLabel,
-                  haveOrderLabel: heroCopy.haveOrderLabel,
-                  trackHereLabel: heroCopy.trackHereLabel,
-                  verifiedRidersLabel: heroCopy.verifiedRidersLabel,
-                  realtimeTrackingLabel: heroCopy.realtimeTrackingLabel,
-                }}
-              />
-            </motion.article>
+            <menu className="w-full lg:max-w-[30vw] flex items-center justify-end max-lg:justify-center">
+              <motion.article
+                className="relative"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+              >
+                <HeroForm
+                  formRef={formRef}
+                  onSubmit={onSubmit}
+                  control={control}
+                  isLoading={isCreatingOrder || isCreatingPublicOrder}
+                  errors={errors}
+                  copy={{
+                    formTitle: heroCopy.formTitle,
+                    formSubtitle: heroCopy.formSubtitle,
+                    quickStartLabel: heroCopy.quickStartLabel,
+                    senderLabel: heroCopy.senderLabel,
+                    senderPlaceholder: heroCopy.senderPlaceholder,
+                    recipientLabel: heroCopy.recipientLabel,
+                    recipientPlaceholder: heroCopy.recipientPlaceholder,
+                    continueLabel: heroCopy.continueLabel,
+                    haveOrderLabel: heroCopy.haveOrderLabel,
+                    trackHereLabel: heroCopy.trackHereLabel,
+                    verifiedRidersLabel: heroCopy.verifiedRidersLabel,
+                    realtimeTrackingLabel: heroCopy.realtimeTrackingLabel,
+                  }}
+                />
+              </motion.article>
+            </menu>
           </motion.aside>
         </motion.section>
       </article>

@@ -21,6 +21,7 @@ import { dashboardQueriesApiSlice } from '../api/queries/dashboard.queries';
 import { landingQueriesApiSlice } from '../api/queries/landing.queries';
 import onboardingSlice from './slices/onboarding.slice';
 import { organizationMutationApiSlice } from '../api/mutations/organization.mutations';
+import batchSlice from './slices/batch.slice';
 
 export const store = configureStore({
   reducer: {
@@ -36,6 +37,7 @@ export const store = configureStore({
     order: orderSlice,
     orderAssignment: orderAssignmentSlice,
     orderActivity: orderActivitySlice,
+    batch: batchSlice,
     [ordersQueriesApiSlice.reducerPath]: ordersQueriesApiSlice.reducer,
     [orderActivityQueriesApiSlice.reducerPath]:
       orderActivityQueriesApiSlice.reducer,

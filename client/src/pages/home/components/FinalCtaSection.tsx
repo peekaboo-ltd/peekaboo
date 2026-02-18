@@ -17,30 +17,21 @@ const FinalCtaSection = ({
   buttonLabel,
   onScrollToForm,
 }: FinalCtaSectionProps) => (
-  <section className="w-full py-20 lg:py-28 border-t border-slate-100">
+  <section className="w-full py-20 lg:py-28 border-t border-slate-200 bg-[#f4f4f1]">
     <motion.article
-      className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12"
+      className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-100px' }}
       variants={containerVariants}
     >
       <motion.section
-        className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/95 px-6 py-12 sm:px-10 lg:px-16 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.45)]"
+        className="relative overflow-hidden rounded-3xl border border-slate-300 bg-white px-6 py-12 sm:px-10 lg:px-16 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.5)]"
         variants={fadeInUp}
       >
-        <span
-          className="pointer-events-none absolute -right-20 -top-24 h-48 w-48 rounded-full bg-primary/10 blur-3xl"
-          aria-hidden="true"
-        />
-        <span
-          className="pointer-events-none absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-emerald-200/40 blur-3xl"
-          aria-hidden="true"
-        />
-
         <motion.header className="relative max-w-3xl mx-auto text-center">
           <motion.h2
-            className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-900 mb-5"
+            className="text-3xl sm:text-4xl lg:text-[3rem] font-medium text-slate-900 leading-[1.08] mb-5"
             whileInView={{ opacity: [0, 1], y: [30, 0] }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
@@ -48,7 +39,7 @@ const FinalCtaSection = ({
             {title}
           </motion.h2>
           <motion.p
-            className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-8 font-normal"
+            className="text-base text-slate-600 max-w-2xl mx-auto mb-8"
             whileInView={{ opacity: [0, 1] }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}

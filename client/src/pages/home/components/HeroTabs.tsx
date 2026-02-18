@@ -16,7 +16,7 @@ const HeroTabs = ({
   businessLabel,
 }: HeroTabsProps) => (
   <nav
-    className="flex items-center gap-1 p-1 rounded-xl border border-slate-200 bg-white/80 shadow-sm w-fit"
+    className="flex items-center gap-1 p-1 rounded-xl border border-slate-300 bg-white shadow-sm w-fit"
     role="tablist"
   >
     <button
@@ -25,7 +25,7 @@ const HeroTabs = ({
       aria-selected={activeTab === 'personal'}
       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
         activeTab === 'personal'
-          ? 'bg-white text-slate-900 shadow-sm'
+          ? 'bg-[#eef2e8] text-slate-900 shadow-sm'
           : 'text-slate-600 hover:text-slate-900'
       }`}
     >
@@ -38,7 +38,7 @@ const HeroTabs = ({
       aria-selected={activeTab === 'business'}
       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
         activeTab === 'business'
-          ? 'bg-white text-slate-900 shadow-sm'
+          ? 'bg-[#eef2e8] text-slate-900 shadow-sm'
           : 'text-slate-600 hover:text-slate-900'
       }`}
     >

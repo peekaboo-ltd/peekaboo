@@ -11,9 +11,9 @@ interface HowItWorksSectionProps {
 }
 
 const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSectionProps) => (
-  <section className="w-full py-20 lg:py-28">
+  <section className="w-full py-20 lg:py-28 bg-white">
     <motion.article
-      className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
+      className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-14"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-100px' }}
@@ -21,14 +21,12 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
     >
       <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp}>
         <motion.span
-          className="inline-block text-black font-medium text-sm tracking-wider uppercase mb-3"
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: [0.42, 0, 0.58, 1] }}
+          className="inline-block rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-[11px] font-medium tracking-[0.12em] uppercase text-slate-600 mb-4"
         >
           {badgeLabel}
         </motion.span>
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-slate-900 mb-4">{title}</h2>
-        <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal">{subtitle}</p>
+        <h2 className="text-3xl sm:text-4xl lg:text-[3rem] font-medium text-slate-900 leading-[1.08] mb-4">{title}</h2>
+        <p className="text-lg text-slate-600 max-w-2xl mx-auto">{subtitle}</p>
       </motion.header>
 
       <motion.ol
@@ -36,7 +34,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
         variants={containerVariants}
       >
         <motion.hr
-          className="hidden md:block absolute top-16 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-primary-200 via-primary-400 to-primary-200 border-0 origin-left"
+          className="hidden md:block absolute top-18 left-[20%] right-[20%] h-px bg-slate-300 border-0 origin-left"
           aria-hidden="true"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
@@ -55,20 +53,14 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
           >
             <motion.figure
               className="relative inline-flex items-center justify-center mb-6"
-              whileHover={{ scale: 1.1 }}
-              transition={{ type: 'spring', stiffness: 300 }}
             >
               <motion.mark
-                className="relative w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-primary-500/15 border border-primary-100"
-                whileHover={{
-                  boxShadow: '0 20px 40px -10px rgba(95, 149, 152, 0.3)',
-                  borderColor: '#5f9598',
-                }}
+                className="relative w-16 h-16 rounded-2xl bg-[#f3f5ef] flex items-center justify-center shadow-[0_16px_40px_-28px_rgba(15,23,42,0.45)] border border-slate-300"
               >
                 <FontAwesomeIcon icon={step.icon} className="text-2xl text-black" />
               </motion.mark>
               <motion.data
-                className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary-600 text-white text-xs font-medium flex items-center justify-center shadow-lg"
+                className="absolute -top-2 -right-2 min-w-7 h-7 rounded-full border border-slate-300 bg-white px-1 text-[11px] font-medium flex items-center justify-center shadow-sm text-slate-700"
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
                 viewport={{ once: true }}
@@ -79,7 +71,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
             </motion.figure>
 
             <motion.h3
-              className="text-xl font-semibold text-slate-900 mb-3"
+              className="text-[16px] font-medium text-slate-900 mb-3"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -88,7 +80,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
               {step.title}
             </motion.h3>
             <motion.p
-              className="text-slate-600 max-w-xs mx-auto font-normal"
+              className="text-slate-600 max-w-xs mx-auto text-[13px] font-normal"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}

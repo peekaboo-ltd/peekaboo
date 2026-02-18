@@ -30,7 +30,13 @@ export class Organization extends AbstractEntity {
   address?: string;
 
   // TIN (Tax Identification Number)
-  @Column({ name: 'tin', type: 'varchar', length: 50, nullable: true, unique: true })
+  @Column({
+    name: 'tin',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+    unique: true,
+  })
   tin?: string;
 
   // STATUS
@@ -50,6 +56,18 @@ export class Organization extends AbstractEntity {
   @Column({ name: 'created_by_id', type: 'uuid', nullable: false })
   createdById: UUID;
 
+  // DEFAULT LOCATION
+  @Column({
+    name: 'default_location',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  defaultLocation?: {
+    latitude: number;
+    longitude: number;
+  };
+
   /**
    * RELATIONS
    */
@@ -60,7 +78,10 @@ export class Organization extends AbstractEntity {
   businessPlan?: BusinessPlan;
 
   // MEMBERSHIPS
-  @OneToMany(() => OrganizationMembership, (membership) => membership.organization)
+  @OneToMany(
+    () => OrganizationMembership,
+    (membership) => membership.organization,
+  )
   memberships: OrganizationMembership[];
 
   // ORDERS

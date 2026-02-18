@@ -42,7 +42,7 @@ const PublicNavbar = () => {
               if (label === 'MY_ACCOUNT') {
                 return (
                   <li key={index}>
-                    <Button route={link} primary className="py-2! px-6!">
+                    <Button route={link} primary className="py-1.5! px-6! !text-[12px]">
                       {capitalizeString(label)}
                     </Button>
                   </li>
@@ -52,7 +52,7 @@ const PublicNavbar = () => {
                 <li key={index}>
                   <Link
                     to={link}
-                    className="text-slate-700 hover:underline underline-offset-4 transition-colors duration-200"
+                    className="text-slate-700 !text-[13px] hover:underline underline-offset-4 transition-colors duration-200"
                   >
                     {capitalizeString(label)}
                   </Link>
@@ -107,7 +107,7 @@ const PublicNavbar = () => {
                     <Button
                       route={link}
                       primary
-                      className="w-full !py-2 !px-4"
+                      className="w-full !py-2 !px-4 !text-[12px]"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {capitalizeString(label)}
@@ -120,7 +120,7 @@ const PublicNavbar = () => {
                   key={index}
                   to={link}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-3 py-2 text-gray-700 hover:text-slate-700 hover:bg-gray-50 transition-colors duration-200 font-medium"
+                  className="block px-3 py-2 text-gray-700 text-[13px] hover:text-slate-700 hover:bg-gray-50 transition-colors duration-200 !font-normal"
                 >
                   {capitalizeString(label)}
                 </Link>

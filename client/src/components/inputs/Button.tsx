@@ -41,7 +41,7 @@ const Button: FC<ButtonProps> = ({
       <ButtonUI
         type={type || 'submit'}
         onClick={onClick as MouseEventHandler<HTMLButtonElement> | undefined}
-        className={`py-[6px] flex items-center gap-2 justify-center text-center border-[1px] border-primary-900 px-4 rounded-sm text-[13px] text-primary-900 bg-white hover:bg-primary-900 hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] max-[800px]:!text-[13px] max-md:!py-2 ${
+        className={`py-[6px] flex font-normal items-center gap-2 justify-center text-center border-[1px] border-primary-900 px-4 rounded-sm text-[13px] text-primary-900 bg-white hover:bg-primary-900 hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] max-[800px]:!text-[13px] max-md:!py-2 ${
           !styled &&
           '!bg-transparent !shadow-none !text-primary-900 hover:!scale-[1.005] !py-0 !px-0 !border-none hover:!bg-transparent hover:!text-primary-900'
         } ${className} ${

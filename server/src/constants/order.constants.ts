@@ -4,6 +4,7 @@ export enum OrderType {
 }
 
 export enum OrderStatus {
+  DRAFT = "DRAFT",
   CREATED = "CREATED",
   PENDING = "PENDING",
   CONFIRMED = "CONFIRMED",

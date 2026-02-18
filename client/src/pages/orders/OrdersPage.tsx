@@ -8,11 +8,13 @@ import { useStatusFilter } from '@/hooks/common/filters.hooks';
 import { useForm } from 'react-hook-form';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import Button from '@/components/inputs/Button';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { setCreateOrderModal } from '@/states/slices/order.slice';
 import { useSearchParams } from 'react-router-dom';
 import CreateOrder from './CreateOrder';
 import DeleteOrder from './DeleteOrder';
+import ImportBatch from '../batches/ImportBatch';
+import { setImportBatchModal } from '@/states/slices/batch.slice';
 
 const OrdersPage = () => {
   // STATE VARIABLES
@@ -125,6 +127,17 @@ const OrdersPage = () => {
           <nav className="w-full sm:w-auto flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
             <Button
               type="button"
+              icon={faUpload}
+              className="w-full sm:w-auto"
+              onClick={(e) => {
+                e.preventDefault();
+                dispatch(setImportBatchModal(true));
+              }}
+            >
+              Import batch orders
+            </Button>
+            <Button
+              type="button"
               primary
               icon={faPlus}
               className="w-full sm:w-auto"
@@ -159,6 +172,7 @@ const OrdersPage = () => {
       </section>
       <CreateOrder />
       <DeleteOrder />
+      <ImportBatch />
     </main>
   );
 };

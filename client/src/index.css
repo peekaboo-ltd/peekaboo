@@ -24,7 +24,7 @@
   box-sizing: border-box;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2 {
   font-family: 'Work Sans', sans-serif;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -144,12 +144,19 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 14px;
   }
   body {
-    @apply bg-background;
+    @apply bg-background text-foreground;
     font-size: 14px;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Work Sans', sans-serif;
     letter-spacing: -0.01em;
+  }
+  /* Prevent primary color from leaking onto links and buttons by default */
+  a {
+    color: inherit;
+  }
+  button {
+    color: inherit;
   }
 }
 
@@ -183,8 +190,9 @@ html {
   color: #061e29;
 }
 
-/* Focus visible styles */
+/* Focus visible styles — uses the ring token (neutral) so only explicitly
+   styled elements (text-primary, bg-primary, etc.) carry the brand colour */
 :focus-visible {
-  outline: 2px solid #5f9598;
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }

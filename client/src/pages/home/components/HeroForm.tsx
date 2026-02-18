@@ -86,38 +86,23 @@ const HeroForm = ({
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="relative isolate">
-    <span
-      className="pointer-events-none absolute -inset-6 rounded-[32px] bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.35),_transparent_70%)] blur-2xl"
-      aria-hidden="true"
-    />
-    <span
-      className="pointer-events-none absolute -inset-px rounded-[28px] bg-gradient-to-br from-primary-100/80 via-white to-sky-100/70"
-      aria-hidden="true"
-    />
-    <div className="relative rounded-[26px] bg-white/95 backdrop-blur border border-slate-200 p-8 sm:p-10 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.55)]">
+    <div className="relative rounded-[26px] bg-white border border-slate-300 p-8 sm:p-10 shadow-[0_28px_56px_-44px_rgba(15,23,42,0.65)]">
       <header className="space-y-4 mb-7">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <nav className="flex flex-wrap items-center justify-between gap-4">
           <figure className="flex items-center gap-3">
-            <mark className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center">
-              <img
-                src="/peekaboo.png"
-                alt="Peekaboo"
-                className="w-14 h-14 object-contain"
-              />
-            </mark>
             <hgroup>
-              <h2 className="text-2xl font-medium text-slate-900">
-                {copy.formTitle}
+              <h2 className="text-xl !font-medium text-slate-900">
+                {copy?.formTitle}
               </h2>
-              <p className="text-slate-500 text-sm font-normal">
-                {copy.formSubtitle}
+              <p className="text-slate-500 text-[11px] font-normal">
+                {copy?.formSubtitle}
               </p>
             </hgroup>
           </figure>
-          <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
-            {copy.quickStartLabel}
+          <span className="invisible h-[0px] items-center rounded-full border border-slate-300 bg-white px-3 py-1 !text-[10px] font-medium uppercase tracking-wide text-slate-500">
+            {copy?.quickStartLabel}
           </span>
-        </div>
+        </nav>
       </header>
 
       <fieldset className="space-y-4 mb-7">
@@ -127,11 +112,8 @@ const HeroForm = ({
           rules={{ validate: validateRwandanPhone }}
           render={({ field }) => (
             <label className="block space-y-2">
-              <span className="text-sm font-medium text-slate-700 flex items-center gap-2">
-                <mark className="w-5 h-5 rounded-full bg-slate-200 text-slate-900 flex items-center justify-center text-xs font-normal">
-                  1
-                </mark>
-                {copy.senderLabel}
+              <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                {copy.senderLabel} <span className='text-red-700 text-[13px]'>*</span>
               </span>
               <Input
                 {...field}
@@ -139,7 +121,7 @@ const HeroForm = ({
                 className={`!rounded-lg focus:!ring-1 transition-all !py-3 !text-sm ${
                   errors.senderPhoneNumber
                     ? '!border-red-400 focus:!border-red-500 focus:!ring-red-500/10 !bg-red-50/30'
-                    : '!border-slate-200 focus:!border-slate-900 focus:!ring-slate-900/10 !bg-slate-50 hover:!bg-white'
+                    : '!border-slate-300 focus:!border-slate-900 focus:!ring-slate-900/10 !bg-slate-50 hover:!bg-white'
                 }`}
                 errorMessage={errors.senderPhoneNumber?.message}
               />
@@ -152,11 +134,8 @@ const HeroForm = ({
           rules={{ validate: validateRecipientPhone }}
           render={({ field }) => (
             <label className="block space-y-2">
-              <span className="text-sm font-medium text-slate-700 flex items-center gap-2">
-                <mark className="w-5 h-5 rounded-full bg-slate-200 text-slate-900 flex items-center justify-center text-xs font-normal">
-                  2
-                </mark>
-                {copy.recipientLabel}
+              <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                {copy.recipientLabel} <span className='text-red-700 text-[13px]'>*</span>
               </span>
               <Input
                 {...field}
@@ -164,7 +143,7 @@ const HeroForm = ({
                 className={`!rounded-lg focus:!ring-1 transition-all !py-3 !text-sm ${
                   errors.recipientPhoneNumber
                     ? '!border-red-400 focus:!border-red-500 focus:!ring-red-500/10 !bg-red-50/30'
-                    : '!border-slate-200 focus:!border-slate-900 focus:!ring-slate-900/10 !bg-slate-50 hover:!bg-white'
+                    : '!border-slate-300 focus:!border-slate-900 focus:!ring-slate-900/10 !bg-slate-50 hover:!bg-white'
                 }`}
                 errorMessage={errors.recipientPhoneNumber?.message}
               />
@@ -198,22 +177,22 @@ const HeroForm = ({
       </footer>
 
       <aside className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-center gap-4 text-[11px] text-slate-500 font-normal">
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1.5 text-[12px]">
           <FontAwesomeIcon
             size="xs"
             icon={faShieldHalved}
             className="text-slate-400"
           />
-          {copy.verifiedRidersLabel}
+          {copy?.verifiedRidersLabel}
         </span>
         <span className="w-1 h-1 rounded-full bg-slate-300" aria-hidden="true" />
-        <span className="flex items-center gap-1.5">
+        <span className="flex items-center gap-1.5 text-[12px]">
           <FontAwesomeIcon
             size="xs"
             icon={faClock}
             className="text-slate-400"
           />
-          {copy.realtimeTrackingLabel}
+          {copy?.realtimeTrackingLabel}
         </span>
       </aside>
     </div>

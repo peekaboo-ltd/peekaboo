@@ -22,7 +22,7 @@ const LanguageSelector = () => {
     <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
       <SelectTrigger className="cursor-pointer w-fit min-w-[80px]">
         <SelectValue>
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2 !text-[12px]">
             {currentOption.flag} {currentOption.label}
           </span>
         </SelectValue>
@@ -30,7 +30,7 @@ const LanguageSelector = () => {
       <SelectContent className="z-[10001]">
         {Object.entries(languageOptions).map(([code, option]) => (
           <SelectItem key={code} value={code} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 !text-[12px]">
               {option.flag} {option.label}
             </span>
           </SelectItem>

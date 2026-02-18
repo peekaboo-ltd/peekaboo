@@ -205,7 +205,7 @@ const Footer = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger className="group flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-300 transition-colors cursor-pointer">
                   <FontAwesomeIcon icon={faGlobe} className="w-4 h-4 text-slate-400" />
-                  <span className="text-[13px] font-medium tracking-wide">{t(currentLanguageLabel)}</span>
+                  <span className="text-[12px] font-medium tracking-wide">{t(currentLanguageLabel)}</span>
                   <FontAwesomeIcon icon={faChevronDown} className="w-2.5 h-2.5 text-slate-400/80 group-hover:rotate-180 transition-transform duration-300" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
@@ -216,7 +216,7 @@ const Footer = () => {
                     <DropdownMenuItem
                       key={lang.code}
                       onClick={() => setLanguage(lang.code)}
-                      className={`cursor-pointer text-[13px] tracking-wide px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 ${
+                      className={`cursor-pointer !text-[12px] ring-0 hover:ring-0 tracking-wide px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 ${
                         language === lang.code ? 'bg-slate-100 text-slate-900' : ''
                       }`}
                     >

@@ -20,13 +20,13 @@ const HeroTrustIndicators = ({
       {['JM', 'AK', 'MP', 'CN'].map((initials) => (
         <span
           key={initials}
-          className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-normal text-slate-600"
+          className="w-10 h-10 rounded-full bg-[#ecf0e7] border-2 border-white flex items-center justify-center text-xs font-normal text-slate-600"
         >
           {initials}
         </span>
       ))}
     </figcaption>
-    <address className="not-italic flex flex-col">
+    <address className="not-italic flex flex-col gap-0.5">
       <span className="text-sm font-medium text-slate-900">
         {typeof landingStats?.activeCustomers === 'number'
           ? `${landingStats.activeCustomers.toLocaleString()}+ ${customersLabel}`

@@ -7,6 +7,7 @@ import { Order } from './order.entity';
 import { UserStatus } from '../constants/user.constants';
 import { OrderAssignment } from './orderAssignment.entity';
 import { OrganizationMembership } from './organizationMembership.entity';
+import { Batch } from './batch.entity';
 
 @Entity('users')
 export class User extends AbstractEntity {
@@ -84,6 +85,13 @@ export class User extends AbstractEntity {
   })
   passwordHash?: string;
 
+  // DEFAULT LOCATION (for drivers, can be used for optimized order assignment)
+  @Column({ name: 'default_location', type: 'jsonb', nullable: true })
+  defaultLocation: {
+    latitude: number;
+    longitude: number;
+  };
+
   /**
    * RELATIONS
    */
@@ -95,7 +103,7 @@ export class User extends AbstractEntity {
   // ASSIGNMENTS
   @OneToMany(
     () => OrderAssignment,
-    (orderAssignment) => orderAssignment.assignedTo
+    (orderAssignment) => orderAssignment.assignedTo,
   )
   assignments: OrderAssignment[];
 
@@ -106,4 +114,8 @@ export class User extends AbstractEntity {
   // ORGANIZATION MEMBERSHIP (user can belong to at most one organization)
   @OneToMany(() => OrganizationMembership, (membership) => membership.user)
   organizationMembership?: OrganizationMembership[];
+
+  // BATCHES
+  @OneToMany(() => Batch, (batch) => batch.createdBy)
+  createdBatches: Batch[];
 }
