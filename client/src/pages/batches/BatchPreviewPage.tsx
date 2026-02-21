@@ -13,6 +13,7 @@ import type { Order } from '@/types/order.type';
 import type { UUID } from '@/types';
 import { BatchStatus } from '@/types/batch.type';
 import { OrderStatus } from '@/types/order.type';
+import { User } from '@/types/user.type';
 
 // ─── Inline Phone Editor ────────────────────────────────────────────────────
 
@@ -43,7 +44,9 @@ const InlinePhoneEditor = ({ order, onSave, isSaving }: InlinePhoneEditorProps) 
       toast.error(result.error || 'Invalid phone number');
       return;
     }
-    await onSave(order.id, result.formattedNumber!);
+    if (order?.id) {
+      await onSave(order?.id, result.formattedNumber!);
+    }
     setIsEditing(false);
   };
 
@@ -77,11 +80,10 @@ const InlinePhoneEditor = ({ order, onSave, isSaving }: InlinePhoneEditorProps) 
     <button
       type="button"
       onClick={() => setIsEditing(true)}
-      className={`text-xs px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors ${
-        isValid
+      className={`text-xs px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors ${isValid
           ? 'border-transparent hover:border-slate-200 hover:bg-slate-50 text-slate-900'
           : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
-      }`}
+        }`}
       title="Click to edit phone number"
     >
       {currentPhone || <span className="text-slate-400 italic">Not set</span>}
@@ -156,7 +158,8 @@ const InlineLocationEditor = ({ order, onSave, isSaving }: InlineLocationEditorP
 
   const handleSave = async () => {
     if (!selectedLocation) return;
-    await onSave(order.id, selectedLocation);
+    if (!order?.id) return;
+    await onSave(order?.id, selectedLocation);
     setIsOpen(false);
     setSelectedLocation(null);
   };
@@ -164,52 +167,52 @@ const InlineLocationEditor = ({ order, onSave, isSaving }: InlineLocationEditorP
   const dropdownContent =
     isOpen && dropdownPos
       ? createPortal(
-          <div
-            ref={dropdownRef}
-            className="fixed z-[10000] bg-white border border-slate-200 rounded-xl shadow-xl p-4 space-y-3"
-            style={{
-              top: `${dropdownPos.top}px`,
-              left: `${dropdownPos.left}px`,
-              width: `${dropdownPos.width}px`,
-            }}
-          >
-            <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-              Search delivery location
-            </p>
-            <PlaceSearch
-              onLocationSelect={(loc) => setSelectedLocation(loc)}
-              placeholder="Search for delivery location..."
-              country="rw"
-            />
-            {selectedLocation && (
-              <div className="p-2 bg-slate-50 rounded-lg border text-xs">
-                <p className="font-medium text-slate-800">{selectedLocation.name}</p>
-                <p className="text-slate-500">{selectedLocation.formattedAddress}</p>
-              </div>
-            )}
-            <div className="flex gap-2 pt-1">
-              <Button
-                type="button"
-                primary
-                onClick={handleSave}
-                disabled={!selectedLocation || isSaving}
-                isLoading={isSaving}
-              >
-                Save Location
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false);
-                  setSelectedLocation(null);
-                }}
-              >
-                Cancel
-              </Button>
+        <div
+          ref={dropdownRef}
+          className="fixed z-[10000] bg-white border border-slate-200 rounded-xl shadow-xl p-4 space-y-3"
+          style={{
+            top: `${dropdownPos.top}px`,
+            left: `${dropdownPos.left}px`,
+            width: `${dropdownPos.width}px`,
+          }}
+        >
+          <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+            Search delivery location
+          </p>
+          <PlaceSearch
+            onLocationSelect={(loc) => setSelectedLocation(loc)}
+            placeholder="Search for delivery location..."
+            country="rw"
+          />
+          {selectedLocation && (
+            <div className="p-2 bg-slate-50 rounded-lg border text-xs">
+              <p className="font-medium text-slate-800">{selectedLocation.name}</p>
+              <p className="text-slate-500">{selectedLocation.formattedAddress}</p>
             </div>
-          </div>,
-          document.body,
-        )
+          )}
+          <div className="flex gap-2 pt-1">
+            <Button
+              type="button"
+              primary
+              onClick={handleSave}
+              disabled={!selectedLocation || isSaving}
+              isLoading={isSaving}
+            >
+              Save Location
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                setSelectedLocation(null);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>,
+        document.body,
+      )
       : null;
 
   return (
@@ -237,7 +240,7 @@ const InlineLocationEditor = ({ order, onSave, isSaving }: InlineLocationEditorP
 
 interface InlineTextEditorProps {
   value?: string | null;
-  onSave: (value: string) => Promise<void>;
+  onSave: (value?: string | null | undefined | UUID) => Promise<void>;
   isSaving: boolean;
   placeholder?: string;
 }
@@ -305,7 +308,7 @@ const InlineTextEditor = ({
 const BatchPreviewPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { fetchBatchOrders, batch, setBatch, isFetching } = useGetBatchOrders();
+  const { fetchBatchOrders, batch, isFetching } = useGetBatchOrders();
   const { completeBatch, isLoading: isCompleting } = useCompleteBatch();
   const [updateOrder, { isLoading: isUpdating }] = useUpdateOrderMutation();
 
@@ -333,7 +336,7 @@ const BatchPreviewPage = () => {
       try {
         await updateOrder({
           id: orderId,
-          order: { recipient: { phoneNumber: phone } as any },
+          order: { recipient: { phoneNumber: phone } as unknown as User },
         }).unwrap();
         // Refetch batch to get updated data
         if (id) fetchBatchOrders(id as UUID);
@@ -368,7 +371,8 @@ const BatchPreviewPage = () => {
   );
 
   const handleUpdateField = useCallback(
-    async (orderId: UUID, field: 'externalReferenceId' | 'description', value: string) => {
+    async (orderId: UUID | undefined, field: 'externalReferenceId' | 'description', value: string | null | undefined) => {
+      if (!orderId) return;
       try {
         await updateOrder({
           id: orderId,
@@ -557,7 +561,7 @@ const BatchPreviewPage = () => {
                       {isDraftOrder ? (
                         <InlineTextEditor
                           value={order.externalReferenceId}
-                          onSave={(val) => handleUpdateField(order.id, 'externalReferenceId', val)}
+                          onSave={(val) => handleUpdateField(order?.id, 'externalReferenceId', val)}
                           isSaving={isUpdating}
                           placeholder="Add ref..."
                         />

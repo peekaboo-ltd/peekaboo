@@ -7,8 +7,8 @@ import { useAppDispatch } from '@/states/hooks';
 import CustomPopover from '@/components/inputs/CustomPopover';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faCircleInfo,
   faEllipsisH,
-  faPenToSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   ellipsisHClassName,
@@ -18,6 +18,8 @@ import {
   setSelectedPayment,
   setUpdateStatusModal,
 } from '@/states/slices/payment.slice';
+import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
+import { Link } from 'react-router-dom';
 
 const PAYMENT_STATUS_LABELS: Record<string, string> = {
   [KpayPaymentStatus.PENDING]: 'PENDING',
@@ -108,7 +110,15 @@ export const useAdminPaymentsColumns = () => {
               }
             >
               <menu className="w-full flex flex-col gap-1">
-                <button
+                <Link
+                  to={`/payments/${row?.original?.id}`}
+                  className={tableActionClassName}
+                >
+                  <FontAwesomeIcon icon={faCircleInfo} />
+                  View details
+                </Link>
+                <Link
+                  to={`#`}
                   className={tableActionClassName}
                   onClick={() => {
                     dispatch(setSelectedPayment(row.original));
@@ -117,7 +127,7 @@ export const useAdminPaymentsColumns = () => {
                 >
                   <FontAwesomeIcon icon={faPenToSquare} />
                   Update Status
-                </button>
+                </Link>
               </menu>
             </CustomPopover>
           );

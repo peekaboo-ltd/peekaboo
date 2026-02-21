@@ -13,7 +13,6 @@ export interface UserRole {
 }
 
 export interface User extends BaseDomain {
-  id: UUID;
   name?: string;
   email?: string;
   phoneNumber: string;

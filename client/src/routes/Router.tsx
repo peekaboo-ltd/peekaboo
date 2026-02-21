@@ -4,7 +4,7 @@ import { PublicOrderDetails, TrackOrder } from '../pages/public/orders';
 import PublicOrderTracking from '@/pages/public/orders/PublicOrderTracking';
 import PublicOrderPaymentSuccess from '@/pages/public/orders/PublicOrderPaymentSuccess';
 import PublicLayout from '@/containers/navigation/PublicLayout';
-import { NotFoundPage } from '../pages/common';
+import { NotFoundPage, UnauthorizedPage } from '../pages/common';
 import { Login } from '@/pages/auth';
 import AuthCallback from '@/pages/auth/AuthCallback';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
@@ -184,6 +184,8 @@ const Router = () => {
             }
           />
         </Route>
+        {/* Unauthorized — logs user out and shows single CTA */}
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
