@@ -303,6 +303,28 @@ export class PaymentService {
     };
   }
 
+  // GET PAYMENT BY ID
+  async getPaymentById(id: UUID): Promise<Payment> {
+    const payment = await this.paymentRepository.findOne({
+      where: { id },
+      select: {
+        createdBy: true,
+      },
+      relations: {
+        createdBy: true,
+      },
+    });
+
+    if (!payment) {
+      throw new NotFoundError('Payment not found', {
+        referenceId: id,
+        referenceType: LogReferenceTypes.PAYMENT,
+      });
+    }
+
+    return payment;
+  }
+
   // ADMIN: GET PAYMENT STATS
   async getPaymentStats(query: Request['query']): Promise<{
     totalRevenue: number;

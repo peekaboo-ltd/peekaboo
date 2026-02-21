@@ -113,7 +113,7 @@ export const useOrdersColumns = () => {
               <menu className="w-full flex flex-col gap-1">
                 <Link
                   className={tableActionClassName}
-                  to={`/p/orders/${row.original.id}/tracking`}
+                  to={`/orders/${row.original.id}`}
                 >
                   <FontAwesomeIcon icon={faCircleInfo} />
                   View details

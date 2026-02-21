@@ -166,7 +166,7 @@ export const useStatusFilter = ({
         trigger={
           <Button
             variant="outline"
-            className="text-primary cursor-pointer font-medium !justify-start bg-white flex !w-full items-center gap-2 !h-[38px] text-[12px]"
+            className="cursor-pointer font-normal text-slate-700 !justify-start bg-white flex !w-full items-center gap-2 !h-[38px] text-[12px]"
           >
             <FontAwesomeIcon icon={labelIcon} />
             <p className="text-[12px]">{label}</p>

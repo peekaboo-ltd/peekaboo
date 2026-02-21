@@ -31,6 +31,7 @@ export interface OrderLocation {
 export interface Order extends BaseDomain {
   referenceId: string;
   status: OrderStatus;
+  trackingId?: string | null;
   recipientId?: UUID | null;
   senderId?: UUID | null;
   createdById: UUID;

@@ -10,10 +10,18 @@ export const batchQueriesApiSlice = createApi({
       query: () => '/batches',
     }),
 
+    getBatchById: builder.query({
+      query: ({ id }: { id: UUID }) => `/batches/${id}`,
+    }),
+
     getBatchOrders: builder.query({
       query: ({ id }: { id: UUID }) => `/batches/${id}/orders`,
     }),
   }),
 });
 
-export const { useLazyFetchBatchesQuery, useLazyGetBatchOrdersQuery } = batchQueriesApiSlice;
+export const {
+  useLazyFetchBatchesQuery,
+  useLazyGetBatchByIdQuery,
+  useLazyGetBatchOrdersQuery,
+} = batchQueriesApiSlice;

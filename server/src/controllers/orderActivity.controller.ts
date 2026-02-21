@@ -52,10 +52,12 @@ export const OrderActivityController = {
   async completeOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const { orderId } = req.params;
+      const { trackingId } = req.body;
       const { user } = req as AuthenticatedRequest;
 
       const completedActivity = await orderActivityService.markOrderCompleted({
         orderId: orderId as UUID,
+        trackingId,
         actorId: user.id as UUID,
         isAdmin: user.role === RoleTypes.ADMIN,
       });

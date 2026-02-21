@@ -248,17 +248,17 @@ export class OrderService {
   }
 
 
-  private async generateUniqueTrackingId(): Promise<string> {
+  private async generateUniqueTrackingId(prefix: string = 'TRK'): Promise<string> {
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-    let trackingId = `TRK-${Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('')}`;
+    let trackingId = `${prefix}-${Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('')}`;
 
     while (
       await this.orderRepository.findOne({
         where: { trackingId: ILike(trackingId) },
       })
     ) {
-      trackingId = `TRK-${Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('')}`;
+      trackingId = `${prefix}-${Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('')}`;
     }
 
     return trackingId;

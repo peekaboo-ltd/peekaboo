@@ -22,7 +22,7 @@ router.get(
   PaymentController.fetchPayments
 );
 
-// Admin: Fetch payments with comprehensive filters
+// Admin: Fetch payments with comprehensive filters (must be before /:id)
 router.get(
   '/admin',
   authorize([RoleTypes.ADMIN]),
@@ -48,6 +48,13 @@ router.patch(
   '/admin/:id/status',
   authorize([RoleTypes.ADMIN]),
   PaymentController.adminUpdatePaymentStatus
+);
+
+// Get payment by id (after /admin routes so "admin" is not matched as id)
+router.get(
+  '/:id',
+  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.STAFF]),
+  PaymentController.getPaymentById
 );
 
 export default router;

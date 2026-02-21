@@ -23,6 +23,7 @@ import { localStorageUtil } from '@/utils/localStorage.util';
 import { ORDER_FEE_RANGES } from '@/constants/order.constants';
 import { usePagination } from '../common/pagination.hooks';
 import { RoleTypes } from '@/types/auth.type';
+import type { UUID } from '@/types';
 
 /**
  *
@@ -273,6 +274,7 @@ export const useFetchOrders = () => {
       createdById?: string;
       senderId?: string;
       recipientId?: string;
+      batchId?: UUID;
       status?: string;
       statusGroup?: 'recent' | 'pending' | 'active' | 'completed';
       referenceId?: string;

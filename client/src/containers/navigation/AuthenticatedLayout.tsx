@@ -27,8 +27,10 @@ export const AuthenticatedLayout = () => {
           ${sidebarOpen ? 'md:ml-[280px] lg:ml-[300px]' : 'ml-16'}
         `}
       >
-        <section className="min-h-[91vh] mt-[9vh] w-full mx-auto px-3 py-4 sm:px-6 sm:py-6 lg:px-8 mb-4!">
-          <Outlet />
+        <section className="min-h-[91vh] mt-[9vh] w-full px-3 py-4 sm:px-6 sm:py-6 lg:px-8 mb-4!">
+          <article className="w-full max-w-8xl mx-auto">
+            <Outlet />
+          </article>
         </section>
       </main>
     </section>

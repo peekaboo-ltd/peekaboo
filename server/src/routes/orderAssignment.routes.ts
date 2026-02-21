@@ -10,19 +10,19 @@ router.use(authenticate);
 
 router.post(
   '/',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS]),
+  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.STAFF]),
   OrderAssignmentController.createOrderAssignment
 );
 
 router.get(
   '/',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER]),
+  authorize([RoleTypes.STAFF, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER]),
   OrderAssignmentController.fetchOrderAssignments
 );
 
 router.get(
   '/:id',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER]),
+  authorize([RoleTypes.STAFF, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER]),
   OrderAssignmentController.getOrderAssignmentById
 );
 

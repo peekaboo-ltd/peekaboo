@@ -100,13 +100,8 @@ export default function AssignmentDetailScreen() {
   const handleConfirmDispatch = async () => {
     if (!selectedAssignment?.orderId) return;
 
-    if (!trackingIdInput.trim()) {
-      Alert.alert('Tracking ID Required', 'Please enter the order tracking ID to confirm dispatch.');
-      return;
-    }
-
     setIsActionLoading(true);
-    const success = await confirmOrderDispatch(selectedAssignment.orderId, trackingIdInput.trim());
+    const success = await confirmOrderDispatch(selectedAssignment.orderId);
     setIsActionLoading(false);
 
     if (success) {
@@ -120,7 +115,10 @@ export default function AssignmentDetailScreen() {
     if (!selectedAssignment?.orderId) return;
 
     setIsActionLoading(true);
-    const success = await completeOrder(selectedAssignment.orderId);
+    const success = await completeOrder(
+      selectedAssignment.orderId,
+      trackingIdInput.trim() || undefined,
+    );
     setIsActionLoading(false);
 
     if (success) {
@@ -184,13 +182,13 @@ export default function AssignmentDetailScreen() {
       >
         <AssignmentDetails assignment={selectedAssignment} />
 
-        {canConfirmDispatch && (
+        {canComplete && (
           <View style={styles.trackingCard}>
-            <Text style={styles.trackingLabel}>Confirm Dispatch</Text>
+            <Text style={styles.trackingLabel}>Complete Order Verification</Text>
             <Input
               value={trackingIdInput}
               onChangeText={setTrackingIdInput}
-              placeholder="Enter tracking ID"
+              placeholder="Enter tracking ID (if required)"
               autoCapitalize="characters"
             />
           </View>

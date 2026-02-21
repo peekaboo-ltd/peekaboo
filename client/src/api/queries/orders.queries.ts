@@ -13,6 +13,7 @@ export const ordersQueriesApiSlice = createApi({
         createdById,
         senderId,
         recipientId,
+        batchId,
         status,
         statusGroup,
         referenceId,
@@ -22,6 +23,7 @@ export const ordersQueriesApiSlice = createApi({
         createdById?: UUID;
         senderId?: UUID;
         recipientId?: UUID;
+        batchId?: UUID;
         status?: string;
         statusGroup?: 'recent' | 'pending' | 'active' | 'completed';
         referenceId?: string;
@@ -34,6 +36,7 @@ export const ordersQueriesApiSlice = createApi({
             createdById,
             senderId,
             recipientId,
+            batchId,
             status,
             statusGroup,
             referenceId,

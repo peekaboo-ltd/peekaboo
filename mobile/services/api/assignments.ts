@@ -114,15 +114,17 @@ export const assignmentsAPI = {
   /**
    * Confirm order dispatch: creates CONFIRMED + IN_TRANSIT activities
    */
-  confirmOrderDispatch: async (orderId: string, trackingId: string): Promise<void> => {
-    await apiClient.post(`/order-activities/${orderId}/confirm-dispatch`, { trackingId });
+  confirmOrderDispatch: async (orderId: string, trackingId?: string): Promise<void> => {
+    const payload = trackingId ? { trackingId } : {};
+    await apiClient.post(`/order-activities/${orderId}/confirm-dispatch`, payload);
   },
 
   /**
    * Mark order as completed
    */
-  completeOrder: async (orderId: string): Promise<void> => {
-    await apiClient.post(`/order-activities/${orderId}/complete`);
+  completeOrder: async (orderId: string, trackingId?: string): Promise<void> => {
+    const payload = trackingId ? { trackingId } : {};
+    await apiClient.post(`/order-activities/${orderId}/complete`, payload);
   },
 
   /**

@@ -308,7 +308,7 @@ const InlineTextEditor = ({
 const BatchPreviewPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { fetchBatchOrders, batch, isFetching } = useGetBatchOrders();
+  const { fetchBatchOrders, batch, setBatch, isFetching } = useGetBatchOrders();
   const { completeBatch, isLoading: isCompleting } = useCompleteBatch();
   const [updateOrder, { isLoading: isUpdating }] = useUpdateOrderMutation();
 
@@ -331,27 +331,46 @@ const BatchPreviewPage = () => {
   const canComplete = invalidCount === 0 && draftOrders.length > 0;
   const isDraft = batch?.status === BatchStatus.DRAFT;
 
+  const updateOrderInBatchState = useCallback(
+    (updatedOrder: Order | undefined) => {
+      if (!updatedOrder?.id) return;
+
+      setBatch((prev) =>
+        prev
+          ? {
+            ...prev,
+            orders: prev.orders?.map((order) =>
+              order.id === updatedOrder.id
+                ? { ...order, ...updatedOrder }
+                : order,
+            ),
+          }
+          : prev,
+      );
+    },
+    [setBatch],
+  );
+
   const handleUpdatePhone = useCallback(
     async (orderId: UUID, phone: string) => {
       try {
-        await updateOrder({
+        const response = await updateOrder({
           id: orderId,
           order: { recipient: { phoneNumber: phone } as unknown as User },
         }).unwrap();
-        // Refetch batch to get updated data
-        if (id) fetchBatchOrders(id as UUID);
+        updateOrderInBatchState(response?.data);
         toast.success('Phone number updated');
       } catch {
         toast.error('Failed to update phone number');
       }
     },
-    [updateOrder, id, fetchBatchOrders],
+    [updateOrder, updateOrderInBatchState],
   );
 
   const handleUpdateLocation = useCallback(
     async (orderId: UUID, location: PlaceSearchResult) => {
       try {
-        await updateOrder({
+        const response = await updateOrder({
           id: orderId,
           order: {
             locationTo: {
@@ -361,30 +380,30 @@ const BatchPreviewPage = () => {
             notes: location.formattedAddress || location.name,
           },
         }).unwrap();
-        if (id) fetchBatchOrders(id as UUID);
+        updateOrderInBatchState(response?.data);
         toast.success('Delivery location updated');
       } catch {
         toast.error('Failed to update location');
       }
     },
-    [updateOrder, id, fetchBatchOrders],
+    [updateOrder, updateOrderInBatchState],
   );
 
   const handleUpdateField = useCallback(
     async (orderId: UUID | undefined, field: 'externalReferenceId' | 'description', value: string | null | undefined) => {
       if (!orderId) return;
       try {
-        await updateOrder({
+        const response = await updateOrder({
           id: orderId,
           order: { [field]: value || null },
         }).unwrap();
-        if (id) fetchBatchOrders(id as UUID);
+        updateOrderInBatchState(response?.data);
         toast.success('Updated');
       } catch {
         toast.error('Failed to update');
       }
     },
-    [updateOrder, id, fetchBatchOrders],
+    [updateOrder, updateOrderInBatchState],
   );
 
   const handleCompleteBatch = useCallback(async () => {

@@ -6,7 +6,7 @@ import { messages } from './i18n/messages';
 const App = () => {
   return (
     <I18nProvider messages={messages}>
-      <Toaster duration={2000} />
+      <Toaster style={{ fontSize: 11 }} duration={2000} />
       <Router />
     </I18nProvider>
   );

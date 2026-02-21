@@ -5,6 +5,7 @@ import {
   StyleSheet,
   FlatList,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -12,8 +13,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { AssignmentCard } from '../../components/assignments/AssignmentCard';
 import { AssignmentSkeletonCard } from '../../components/assignments/AssignmentSkeletonCard';
 import { AssignmentFilters } from '../../components/assignments/AssignmentFilters';
+import { Button } from '../../components/ui/Button';
 import { useAssignments } from '../../hooks/useAssignments';
-import { Assignment, OrderAssignmentStatus } from '../../types';
+import { Assignment, OrderAssignmentStatus, OrderStatus } from '../../types';
+import { useAssignmentStore } from '../../store/assignmentStore';
 import { colors, typography, spacing } from '../../utils/constants';
 
 export default function AssignmentsScreen() {
@@ -30,6 +33,7 @@ export default function AssignmentsScreen() {
     refreshAssignments,
     loadMore,
   } = useAssignments();
+  const { confirmOrderDispatch } = useAssignmentStore();
 
   const handleRefresh = useCallback(() => {
     refreshAssignments();
@@ -53,22 +57,80 @@ export default function AssignmentsScreen() {
     await rejectAssignment(id);
   };
 
-  const renderAssignment = ({ item }: { item: Assignment }) => (
-    <AssignmentCard
-      assignment={item}
-      onPress={() => handleAssignmentPress(item)}
-      onAccept={
-        item.status === OrderAssignmentStatus.PENDING
-          ? () => handleAccept(item.id)
-          : undefined
-      }
-      onReject={
-        item.status === OrderAssignmentStatus.PENDING
-          ? () => handleReject(item.id)
-          : undefined
-      }
-    />
-  );
+  const getLatestOrderStatus = (assignment: Assignment) => {
+    const activities = assignment.order?.activities || [];
+    if (activities.length === 0) {
+      return assignment.order?.status;
+    }
+
+    const sorted = [...activities].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+    return sorted[0]?.status || assignment.order?.status;
+  };
+
+  const handleConfirmAndTransit = async (assignment: Assignment) => {
+    if (!assignment.orderId) return;
+
+    Alert.alert(
+      'Confirm Dispatch',
+      'This will set the order to in transit.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Confirm',
+          onPress: async () => {
+            const success = await confirmOrderDispatch(assignment.orderId);
+            if (success) {
+              await refreshAssignments();
+              Alert.alert('Success', 'Order is now in transit.');
+            } else {
+              Alert.alert('Unable to start transit', 'Please try again.');
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const renderAssignment = ({ item }: { item: Assignment }) => {
+    const latestOrderStatus = getLatestOrderStatus(item);
+    const canConfirmAndTransit =
+      item.status === OrderAssignmentStatus.ACTIVE &&
+      latestOrderStatus !== OrderStatus.IN_TRANSIT &&
+      latestOrderStatus !== OrderStatus.COMPLETED;
+
+    return (
+      <View>
+        <AssignmentCard
+          assignment={item}
+          onPress={() => handleAssignmentPress(item)}
+          onAccept={
+            item.status === OrderAssignmentStatus.PENDING
+              ? () => handleAccept(item.id)
+              : undefined
+          }
+          onReject={
+            item.status === OrderAssignmentStatus.PENDING
+              ? () => handleReject(item.id)
+              : undefined
+          }
+        />
+        {canConfirmAndTransit && (
+          <View style={styles.quickActionWrap}>
+            <Button
+              title="Confirm & Start Transit"
+              onPress={() => handleConfirmAndTransit(item)}
+              variant="primary"
+              fullWidth
+            />
+          </View>
+        )}
+      </View>
+    );
+  };
 
   const renderEmpty = () => {
     if (isLoading) return null;
@@ -335,5 +397,9 @@ const styles = StyleSheet.create({
   footer: {
     paddingVertical: spacing.lg,
     alignItems: 'center',
+  },
+  quickActionWrap: {
+    marginTop: -spacing.sm,
+    marginBottom: spacing.md,
   },
 });

@@ -2,7 +2,7 @@ import { useFetchOrderActivities } from '@/hooks/orders/orderActivities.hooks';
 import { useAppSelector } from '@/states/hooks';
 import type { UUID } from '@/types';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { OrderStatus } from '@/types/order.type';
 import { useGetOrder } from '@/hooks/orders/orders.hooks';
 import { faCopy, faCheckCircle } from '@fortawesome/free-regular-svg-icons';
@@ -30,9 +30,8 @@ const PublicOrderTracking = () => {
 
   // NAVIGATION
   const { id } = useParams();
-
-  // NAVIGATION
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   // ORDER ACTIVITY HOOKS
   const { fetchOrderActivities } = useFetchOrderActivities();
@@ -125,7 +124,7 @@ const PublicOrderTracking = () => {
 
   return (
     <motion.main
-      className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-12"
+      className="min-h-screen bg-gray-50"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -147,7 +146,7 @@ const PublicOrderTracking = () => {
             Track Your Order
           </h1>
           {order && (
-            <div className="flex items-center justify-center gap-2 text-gray-600">
+            <section className="flex items-center justify-center gap-2 text-gray-600">
               <span className="text-sm">Order Reference:</span>
               <code className="bg-gray-100 px-3 py-1 rounded-lg text-sm font-mono font-semibold text-black">
                 {order?.referenceId}
@@ -167,7 +166,7 @@ const PublicOrderTracking = () => {
                   className={`w-4 h-4 ${isCopied ? 'text-black' : 'text-gray-400'}`}
                 />
               </button>
-            </div>
+            </section>
           )}
         </motion.header>
 
@@ -238,15 +237,14 @@ const PublicOrderTracking = () => {
                   >
                     {/* Status Circle */}
                     <button
-                      className={`relative flex items-center justify-center w-12 h-12 rounded-xl border-2 transition-all duration-300 z-10 cursor-pointer ${
-                        isCompleted
-                          ? 'bg-primary-600 border-primary-600 text-white'
-                          : isCurrent
-                            ? 'bg-primary-600 border-primary-600 text-white ring-4 ring-primary-100'
-                            : hasActivity
-                              ? 'bg-primary-100 border-primary-200 text-black'
-                              : 'bg-gray-100 border-gray-200 text-gray-400 hover:bg-gray-200'
-                      }`}
+                      className={`relative flex items-center justify-center w-12 h-12 rounded-xl border-2 transition-all duration-300 z-10 cursor-pointer ${isCompleted
+                        ? 'bg-primary-600 border-primary-600 text-white'
+                        : isCurrent
+                          ? 'bg-primary-600 border-primary-600 text-white ring-4 ring-primary-100'
+                          : hasActivity
+                            ? 'bg-primary-100 border-primary-200 text-black'
+                            : 'bg-gray-100 border-gray-200 text-gray-400 hover:bg-gray-200'
+                        }`}
                       aria-label={`${status.label}: ${status.description}`}
                     >
                       {isCompleted ? (
@@ -267,11 +265,10 @@ const PublicOrderTracking = () => {
                       <header className="flex items-start justify-between gap-2">
                         <hgroup className="min-w-0">
                           <p
-                            className={`text-sm font-normal truncate ${
-                              isCurrent || isCompleted || hasActivity
-                                ? 'text-gray-900'
-                                : 'text-gray-500'
-                            }`}
+                            className={`text-sm font-normal truncate ${isCurrent || isCompleted || hasActivity
+                              ? 'text-gray-900'
+                              : 'text-gray-500'
+                              }`}
                           >
                             {status.label}
                           </p>
@@ -288,11 +285,10 @@ const PublicOrderTracking = () => {
                           )}
                           {activity?.createdAt && (
                             <time
-                              className={`block text-xs mt-1 ${
-                                isCurrent || isCompleted || hasActivity
-                                  ? 'text-black font-normal'
-                                  : 'text-gray-400'
-                              }`}
+                              className={`block text-xs mt-1 ${isCurrent || isCompleted || hasActivity
+                                ? 'text-black font-normal'
+                                : 'text-gray-400'
+                                }`}
                             >
                               {formatTimestamp(activity.createdAt)}
                             </time>
@@ -370,15 +366,14 @@ const PublicOrderTracking = () => {
                     >
                       {/* Status Circle */}
                       <button
-                        className={`relative flex items-center justify-center w-12 h-12 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
-                          isCompleted
-                            ? 'bg-primary-600 border-primary-600 text-white'
-                            : isCurrent
-                              ? 'bg-primary-600 border-primary-600 text-white ring-4 ring-primary-100'
-                              : hasActivity
-                                ? 'bg-primary-100 border-primary-200 text-black'
-                                : 'bg-gray-100 border-gray-200 text-gray-400 hover:bg-gray-200'
-                        }`}
+                        className={`relative flex items-center justify-center w-12 h-12 rounded-xl border-2 transition-all duration-300 cursor-pointer ${isCompleted
+                          ? 'bg-primary-600 border-primary-600 text-white'
+                          : isCurrent
+                            ? 'bg-primary-600 border-primary-600 text-white ring-4 ring-primary-100'
+                            : hasActivity
+                              ? 'bg-primary-100 border-primary-200 text-black'
+                              : 'bg-gray-100 border-gray-200 text-gray-400 hover:bg-gray-200'
+                          }`}
                         aria-label={`${status.label}: ${status.description}`}
                       >
                         {isCompleted ? (
@@ -397,22 +392,20 @@ const PublicOrderTracking = () => {
                       {/* Status Label */}
                       <footer className="mt-4 text-center max-w-[120px]">
                         <p
-                          className={`text-xs font-normal truncate ${
-                            isCurrent || isCompleted || hasActivity
-                              ? 'text-gray-900'
-                              : 'text-gray-500'
-                          }`}
+                          className={`text-xs font-normal truncate ${isCurrent || isCompleted || hasActivity
+                            ? 'text-gray-900'
+                            : 'text-gray-500'
+                            }`}
                           title={status.label}
                         >
                           {status.label}
                         </p>
 
                         <p
-                          className={`mt-1 text-[10px] leading-snug text-gray-500 transition-opacity duration-200 ${
-                            hoveredStatus === (status.key as string)
-                              ? 'opacity-100'
-                              : 'opacity-0'
-                          }`}
+                          className={`mt-1 text-[10px] leading-snug text-gray-500 transition-opacity duration-200 ${hoveredStatus === (status.key as string)
+                            ? 'opacity-100'
+                            : 'opacity-0'
+                            }`}
                         >
                           {(
                             activity as OrderActivity & {
@@ -430,11 +423,10 @@ const PublicOrderTracking = () => {
 
                         {activity?.createdAt && (
                           <time
-                            className={`block text-[10px] mt-1 ${
-                              isCurrent || isCompleted || hasActivity
-                                ? 'text-black font-normal'
-                                : 'text-gray-400'
-                            }`}
+                            className={`block text-[10px] mt-1 ${isCurrent || isCompleted || hasActivity
+                              ? 'text-black font-normal'
+                              : 'text-gray-400'
+                              }`}
                             title={formatTimestamp(activity.createdAt)}
                           >
                             {formatTimestamp(activity.createdAt)}
@@ -460,13 +452,12 @@ const PublicOrderTracking = () => {
               e.preventDefault();
               navigate(-1);
             }}
-            className="!bg-white !text-gray-700 !border-gray-200 hover:!bg-gray-50 cursor-pointer"
           >
             Back
           </Button>
-          <Button route="/dashboard" primary className="cursor-pointer">
+          {pathname.includes(`/p/orders/${id}/tracking`) && <Button route="/dashboard" primary className="cursor-pointer">
             Continue to Dashboard
-          </Button>
+          </Button>}
         </motion.footer>
       </section>
     </motion.main>

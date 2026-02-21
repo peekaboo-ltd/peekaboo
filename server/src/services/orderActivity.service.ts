@@ -182,7 +182,7 @@ export class OrderActivityService {
     isAdmin,
   }: {
     orderId: UUID;
-    trackingId: string;
+    trackingId?: string;
     actorId: UUID;
     isAdmin?: boolean;
   }): Promise<{ confirmed: OrderActivity; inTransit: OrderActivity }> {
@@ -201,14 +201,6 @@ export class OrderActivityService {
     }
 
     await this.assertRiderCanUpdateOrder(order, actorId, isAdmin);
-
-    if (!trackingId?.trim()) {
-      throw new ValidationError('Tracking ID is required');
-    }
-
-    if ((order.trackingId || '').toLowerCase() !== trackingId.trim().toLowerCase()) {
-      throw new ValidationError('Invalid tracking ID provided');
-    }
 
     const existingConfirmed = await this.orderActivityRepository.findOne({
       where: { orderId, status: OrderStatus.CONFIRMED },
@@ -245,10 +237,12 @@ export class OrderActivityService {
 
   async markOrderCompleted({
     orderId,
+    trackingId,
     actorId,
     isAdmin,
   }: {
     orderId: UUID;
+    trackingId?: string;
     actorId: UUID;
     isAdmin?: boolean;
   }): Promise<OrderActivity> {
@@ -267,6 +261,19 @@ export class OrderActivityService {
 
     if (!latestActivity || latestActivity.status !== OrderStatus.IN_TRANSIT) {
       throw new ValidationError('Only orders in transit can be marked as completed');
+    }
+
+    const storedTrackingId = order.trackingId?.trim();
+    const providedTrackingId = trackingId?.trim();
+
+    if (storedTrackingId) {
+      if (!providedTrackingId) {
+        throw new ValidationError('Tracking ID is required to complete this order');
+      }
+
+      if (storedTrackingId.toLowerCase() !== providedTrackingId.toLowerCase()) {
+        throw new ValidationError('Invalid tracking ID provided');
+      }
     }
 
     const existing = await this.orderActivityRepository.findOne({

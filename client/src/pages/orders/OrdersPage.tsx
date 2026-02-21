@@ -120,7 +120,7 @@ const OrdersPage = () => {
       <header className="w-full flex flex-col gap-4 mb-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-bold">Orders</h1>
+            <h1 className="text-2xl font-bold text-slate-700">Orders</h1>
             <p className="text-sm text-muted-foreground">
               Search and filter orders by status or Order ID.
             </p>
@@ -157,7 +157,6 @@ const OrdersPage = () => {
         </fieldset>
       </header>
 
-      <section aria-label="Orders list" className="w-full flex flex-col gap-4">
         <Table
           columns={ordersColumns}
           data={ordersList}
@@ -170,7 +169,6 @@ const OrdersPage = () => {
           totalCount={totalCount}
           isLoading={isFetching}
         />
-      </section>
       <CreateOrder />
       <DeleteOrder />
       <ImportBatch />

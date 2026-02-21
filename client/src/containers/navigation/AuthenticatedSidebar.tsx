@@ -137,7 +137,7 @@ const AuthenticatedSidebar = () => {
                         <li key={index} className="w-full flex flex-col items-start">
                             <Link
                                 to={nav.path}
-                                className={`flex w-full items-center gap-4 font-medium text-[14px] ease-in-out duration-200 rounded-lg 
+                                className={`flex w-full items-center gap-4 font-normal text-[14px] ease-in-out duration-200 rounded-lg 
                           ${sidebarOpen ? 'px-4 py-3' : 'p-3 justify-center'}
                           hover:bg-white hover:text-slate-900
                           ${isLinkActive
@@ -170,7 +170,7 @@ const AuthenticatedSidebar = () => {
                                 <motion.span
                                     initial={{ opacity: 0 }}
                                     animate={controlText}
-                                    className="font-medium whitespace-nowrap"
+                                    className="font-normal whitespace-nowrap"
                                     style={{ display: sidebarOpen ? 'block' : 'none' }}
                                 >
                                     {nav.label}
@@ -196,7 +196,7 @@ const AuthenticatedSidebar = () => {
                                             <li key={subIndex}>
                                                 <Link
                                                     to={sub.path}
-                                                    className={`flex items-center w-full gap-3 px-4 py-3 font-medium text-[14px] ease-in-out duration-200 rounded-md 
+                                                    className={`flex items-center w-full gap-3 px-4 py-3 font-normal text-[14px] ease-in-out duration-200 rounded-md 
                                     hover:bg-white hover:text-slate-900
                                     ${isSubLinkActive
                                                             ? 'bg-white text-slate-900 font-semibold'
@@ -213,7 +213,7 @@ const AuthenticatedSidebar = () => {
                                                     />
                                                     <motion.span
                                                         animate={controlText}
-                                                        className="font-medium whitespace-nowrap"
+                                                        className="font-normal whitespace-nowrap"
                                                         style={{ display: sidebarOpen ? 'block' : 'none' }}
                                                     >
                                                         {sub.label}

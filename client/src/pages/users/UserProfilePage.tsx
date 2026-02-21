@@ -23,7 +23,7 @@ import UpdateUserProfileModal from './UpdateUserProfileModal';
 import SetUserDefaultLocationModal from './SetUserDefaultLocationModal';
 import { faPenToSquare, faUser } from '@fortawesome/free-regular-svg-icons';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -58,6 +58,9 @@ const UserProfilePage = () => {
   const { user: authUser } = useAppSelector((state) => state.auth);
   const { selectedUser } = useAppSelector((state) => state.user);
   useDocumentTitle('Profile');
+
+  // NAVIGATION
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (authUser && (!selectedUser || selectedUser.id !== authUser.id)) {
@@ -101,7 +104,7 @@ const UserProfilePage = () => {
 
   return (
     <motion.main
-      className="relative w-full flex flex-col gap-6 max-w-6xl mx-auto px-4 sm:px-6"
+      className="relative w-full flex flex-col gap-6 mx-auto px-4 sm:px-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -158,22 +161,22 @@ const UserProfilePage = () => {
         className="grid grid-cols-1 gap-4 md:grid-cols-3"
         variants={itemVariants}
       >
-        {stats.map((stat) => (
+        {stats?.map((stat) => (
           <article
-            key={stat.label}
+            key={stat?.label}
             className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]"
           >
             <header className="flex items-center justify-between">
               <section>
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                  {stat.label}
+                  {stat?.label}
                 </p>
-                <p className="mt-3 text-2xl font-medium text-slate-900">
-                  {stat.value}
+                <p className="mt-3 text-xl font-medium text-slate-900">
+                  {stat?.value}
                 </p>
               </section>
               <span className="h-11 w-11 rounded-xl bg-primary-50 text-primary-900 flex items-center justify-center">
-                <FontAwesomeIcon icon={stat.icon} />
+                <FontAwesomeIcon icon={stat?.icon} />
               </span>
             </header>
           </article>
@@ -347,8 +350,15 @@ const UserProfilePage = () => {
             </section>
           </section>
         </article>
+        <menu className='w-full flex items-center gap-3 justify-between'>
+          <Button type='button' onClick={(e) => {
+            e.preventDefault();
+            navigate(-1);
+          }}>
+            Back
+          </Button>
+        </menu>
       </motion.section>
-
       <UpdateUserProfileModal />
       <SetUserDefaultLocationModal />
     </motion.main>

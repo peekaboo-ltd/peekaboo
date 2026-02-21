@@ -46,7 +46,7 @@ export class AuditLog extends AbstractEntity {
     type: 'varchar',
     name: 'source',
     nullable: true,
-    default: "'SERVICE'",
+    default: 'SERVICE',
   })
   source?: 'SERVICE' | 'SUBSCRIBER';
 

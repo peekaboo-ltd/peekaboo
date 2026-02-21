@@ -48,6 +48,20 @@ export const PaymentController = {
     }
   },
 
+  // GET PAYMENT BY ID
+  async getPaymentById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const payment = await paymentService.getPaymentById(id as UUID);
+      return res.status(200).json({
+        message: 'Payment fetched successfully',
+        data: payment,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // ADMIN: FETCH PAYMENTS WITH COMPREHENSIVE FILTERS
   async fetchAdminPayments(req: Request, res: Response, next: NextFunction) {
     try {

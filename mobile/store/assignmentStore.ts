@@ -22,8 +22,8 @@ interface AssignmentState {
   fetchAssignmentById: (id: string) => Promise<Assignment | null>;
   acceptAssignment: (id: string) => Promise<boolean>;
   rejectAssignment: (id: string, reason?: string) => Promise<boolean>;
-  confirmOrderDispatch: (orderId: string, trackingId: string) => Promise<boolean>;
-  completeOrder: (orderId: string) => Promise<boolean>;
+  confirmOrderDispatch: (orderId: string, trackingId?: string) => Promise<boolean>;
+  completeOrder: (orderId: string, trackingId?: string) => Promise<boolean>;
   refreshAssignments: () => Promise<void>;
   setFilter: (filter: OrderAssignmentStatus | 'ALL') => void;
   setSelectedAssignment: (assignment: Assignment | null) => void;
@@ -176,7 +176,7 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
 
 
 
-  confirmOrderDispatch: async (orderId: string, trackingId: string): Promise<boolean> => {
+  confirmOrderDispatch: async (orderId: string, trackingId?: string): Promise<boolean> => {
     set({ isLoading: true, error: null });
 
     try {
@@ -205,11 +205,11 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     }
   },
 
-  completeOrder: async (orderId: string): Promise<boolean> => {
+  completeOrder: async (orderId: string, trackingId?: string): Promise<boolean> => {
     set({ isLoading: true, error: null });
 
     try {
-      await assignmentsAPI.completeOrder(orderId);
+      await assignmentsAPI.completeOrder(orderId, trackingId);
 
       set(state => ({
         selectedAssignment: state.selectedAssignment

@@ -14,7 +14,6 @@ import Modal from '@/components/Modal';
 import PlaceSearch, { type PlaceSearchResult } from '@/components/inputs/PlaceSearch';
 import Button from '@/components/inputs/Button';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import { toast } from 'sonner';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -95,7 +94,7 @@ const OrganizationSettingsPage = () => {
 
   return (
     <motion.main
-      className="relative w-full flex flex-col gap-6 max-w-6xl mx-auto px-4 sm:px-6"
+      className="relative w-full flex flex-col gap-6 mx-auto px-4 sm:px-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

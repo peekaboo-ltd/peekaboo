@@ -19,7 +19,7 @@ import {
   faPenToSquare,
   faUser,
 } from '@fortawesome/free-regular-svg-icons';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/inputs/Button';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import {
@@ -70,6 +70,9 @@ const UserDetailsPage = () => {
   const [isCopied, setIsCopied] = useState(false);
   useDocumentTitle('User Details');
 
+  // NAVIGATION
+  const navigate = useNavigate();
+
   const { fetchUserById, isFetching } = useFetchUserById();
 
   useEffect(() => {
@@ -114,7 +117,7 @@ const UserDetailsPage = () => {
 
   if (isFetching && !currentUser) {
     return (
-      <main className="relative w-full flex flex-col gap-6 max-w-6xl mx-auto px-4 sm:px-6">
+      <main className="relative w-full flex flex-col gap-6 mx-auto px-4 sm:px-6">
         <span className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.18),_transparent_65%)]" />
 
         <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)]">
@@ -220,7 +223,7 @@ const UserDetailsPage = () => {
 
   return (
     <motion.main
-      className="relative w-full flex flex-col gap-6 max-w-6xl mx-auto px-4 sm:px-6"
+      className="relative w-full flex flex-col gap-6 mx-auto px-4 sm:px-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -253,12 +256,6 @@ const UserDetailsPage = () => {
             </section>
           </section>
           <aside className="flex flex-wrap items-center gap-3">
-            <Link
-              to="/users"
-              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600 hover:bg-slate-50"
-            >
-              Back to list
-            </Link>
             <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600">
               {currentUser?.status ?? 'Status Unavailable'}
             </span>
@@ -288,22 +285,22 @@ const UserDetailsPage = () => {
         className="grid grid-cols-1 gap-4 md:grid-cols-3"
         variants={itemVariants}
       >
-        {stats.map((stat) => (
+        {stats?.map((stat) => (
           <article
-            key={stat.label}
+            key={stat?.label}
             className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]"
           >
             <header className="flex items-center justify-between">
               <section>
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                  {stat.label}
+                  {stat?.label}
                 </p>
-                <p className="mt-3 text-2xl font-medium text-slate-900">
-                  {stat.value}
+                <p className="mt-3 text-xl font-medium text-slate-900">
+                  {stat?.value}
                 </p>
               </section>
               <span className="h-11 w-11 rounded-xl bg-primary-50 text-primary-900 flex items-center justify-center">
-                <FontAwesomeIcon icon={stat.icon} />
+                <FontAwesomeIcon icon={stat?.icon} />
               </span>
             </header>
           </article>
@@ -474,6 +471,14 @@ const UserDetailsPage = () => {
             </section>
           </section>
         </article>
+        <menu className='w-full flex items-center gap-3 justify-between'>
+          <Button type='button' onClick={(e) => {
+            e.preventDefault();
+            navigate(-1);
+          }}>
+            Back
+          </Button>
+        </menu>
       </motion.section>
 
       <UpdateUserProfileModal />

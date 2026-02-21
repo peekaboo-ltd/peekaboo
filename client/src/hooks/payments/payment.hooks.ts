@@ -7,12 +7,13 @@ import {
   useLazyFetchAdminPaymentsQuery,
   useLazyFetchPaymentStatsQuery,
   useLazyExportPaymentsQuery,
-  AdminPaymentsQueryParams,
+  useLazyGetPaymentQuery,
 } from '@/api/queries/payments.queries';
 import { useAppDispatch } from '@/states/hooks';
 import {
   setAddToPaymentsList,
   setAdminPaymentsList,
+  setPayment,
   setPaymentsList,
   setUpdateStatusModal,
 } from '@/states/slices/payment.slice';
@@ -39,6 +40,23 @@ export const useFetchPayments = () => {
   }, [data, dispatch, isSuccess, reset]);
 
   return { fetchPayments, data, error, isFetching, reset, isSuccess };
+};
+
+export const useGetPayment = () => {
+
+  const dispatch = useAppDispatch();
+
+  const [getPayment, { data, error, isFetching, isSuccess, reset }] =
+    useLazyGetPaymentQuery();
+
+    useEffect(() => {
+      if (isSuccess) {
+        dispatch(setPayment(data?.data));
+        reset();
+      }
+    }, [data, isSuccess, dispatch, reset]);  
+
+  return { getPayment, data, error, isFetching, isSuccess };
 };
 
 /**
