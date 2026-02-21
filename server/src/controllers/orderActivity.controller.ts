@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { OrderActivityService } from '../services/orderActivity.service';
 import { AuthenticatedRequest } from '../types/auth.types';
+import { RoleTypes } from '../constants/role.constants';
+import { UUID } from '../types';
 
 const orderActivityService = new OrderActivityService();
 
@@ -17,6 +19,50 @@ export const OrderActivityController = {
       return res.status(200).json({
         message: 'Order activity fetched successfully',
         data: orderActivity,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+
+
+  async confirmOrderDispatch(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { orderId } = req.params;
+      const { trackingId } = req.body;
+      const { user } = req as AuthenticatedRequest;
+
+      const updatedActivities = await orderActivityService.confirmOrderDispatch({
+        orderId: orderId as UUID,
+        trackingId,
+        actorId: user.id as UUID,
+        isAdmin: user.role === RoleTypes.ADMIN,
+      });
+
+      return res.status(200).json({
+        message: 'Order confirmed and marked in transit successfully',
+        data: updatedActivities,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async completeOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { orderId } = req.params;
+      const { user } = req as AuthenticatedRequest;
+
+      const completedActivity = await orderActivityService.markOrderCompleted({
+        orderId: orderId as UUID,
+        actorId: user.id as UUID,
+        isAdmin: user.role === RoleTypes.ADMIN,
+      });
+
+      return res.status(200).json({
+        message: 'Order marked as completed successfully',
+        data: completedActivity,
       });
     } catch (error) {
       next(error);

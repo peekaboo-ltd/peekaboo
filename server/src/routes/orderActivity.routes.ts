@@ -13,6 +13,19 @@ router.get(
   authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER]),
   OrderActivityController.fetchOrderActivities
 );
+
+router.post(
+  '/:orderId/confirm-dispatch',
+  authorize([RoleTypes.RIDER, RoleTypes.ADMIN]),
+  OrderActivityController.confirmOrderDispatch
+);
+
+router.post(
+  '/:orderId/complete',
+  authorize([RoleTypes.RIDER, RoleTypes.ADMIN]),
+  OrderActivityController.completeOrder
+);
+
 router.post(
   '/',
   authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.RIDER]),

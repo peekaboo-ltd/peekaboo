@@ -6,16 +6,20 @@ import { colors, spacing } from '../../utils/constants';
 
 interface AssignmentActionsProps {
   status: OrderAssignmentStatus;
+  showConfirmDispatch?: boolean;
   onAccept: () => void;
   onReject: () => void;
+  onConfirmDispatch?: () => void;
   onComplete?: () => void;
   isLoading?: boolean;
 }
 
 export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
   status,
+  showConfirmDispatch = false,
   onAccept,
   onReject,
+  onConfirmDispatch,
   onComplete,
   isLoading = false,
 }) => {
@@ -32,6 +36,23 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
           text: 'Reject',
           onPress: onReject,
           style: 'destructive',
+        },
+      ]
+    );
+  };
+
+  const handleConfirmDispatch = () => {
+    Alert.alert(
+      'Confirm Dispatch',
+      'Confirming dispatch will log both CONFIRMED and IN_TRANSIT activities.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Confirm',
+          onPress: onConfirmDispatch,
         },
       ]
     );
@@ -54,7 +75,6 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
     );
   };
 
-  // Pending status - Show Accept/Reject
   if (status === OrderAssignmentStatus.PENDING) {
     return (
       <View style={styles.container}>
@@ -76,29 +96,47 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
     );
   }
 
-  // Active status - Show Complete
-  if (status === OrderAssignmentStatus.ACTIVE && onComplete) {
+  if (status === OrderAssignmentStatus.ACTIVE && (showConfirmDispatch || onComplete)) {
     return (
-      <View style={styles.container}>
-        <Button
-          title="Mark as Completed"
-          onPress={handleComplete}
-          variant="primary"
-          loading={isLoading}
-          fullWidth
-          style={styles.completeButton}
-        />
+      <View style={styles.containerColumn}>
+        {showConfirmDispatch && onConfirmDispatch && (
+          <Button
+            title="Confirm & Start Transit"
+            onPress={handleConfirmDispatch}
+            variant="primary"
+            loading={isLoading}
+            fullWidth
+          />
+        )}
+        {onComplete && (
+          <Button
+            title="Mark as Completed"
+            onPress={handleComplete}
+            variant="primary"
+            loading={isLoading}
+            fullWidth
+            style={styles.completeButton}
+          />
+        )}
       </View>
     );
   }
 
-  // Completed or other statuses - No actions
   return null;
 };
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    padding: spacing.md,
+    paddingBottom: spacing.lg,
+    backgroundColor: colors.background,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    gap: spacing.md,
+  },
+  containerColumn: {
+    flexDirection: 'column',
     padding: spacing.md,
     paddingBottom: spacing.lg,
     backgroundColor: colors.background,

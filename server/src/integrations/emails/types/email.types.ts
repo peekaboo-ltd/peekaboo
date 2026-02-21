@@ -169,6 +169,7 @@ export interface OrderCreatedSenderEmailData {
   senderEmail: string;
   recipientPhone: string;
   orderReference: string;
+  trackingId: string;
   fee: number;
   currency: string;
 }
@@ -178,6 +179,14 @@ export interface OrderCreatedRecipientEmailData {
   recipientEmail: string;
   senderPhone: string;
   orderReference: string;
+  trackingId: string;
+}
+
+export interface OrderDispatchedEmailData {
+  userName: string;
+  userEmail: string;
+  orderReference: string;
+  trackingId: string;
 }
 
 export interface OrderStatusEmailData {

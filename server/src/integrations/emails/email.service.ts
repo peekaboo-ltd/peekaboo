@@ -25,6 +25,7 @@ import { PaymentFailedEmail } from './templates/payment/payment-failed';
 import { OrderCreatedSenderEmail } from './templates/order/order-created-sender';
 import { OrderCreatedRecipientEmail } from './templates/order/order-created-recipient';
 import { OrderStatusEmail } from './templates/order/order-status';
+import { OrderDispatchedEmail } from './templates/order/order-dispatched';
 import { RiderAssignedEmail } from './templates/assignment/rider-assigned';
 import { AssignmentNotificationEmail } from './templates/assignment/assignment-notification';
 import { AssignmentStatusEmail } from './templates/assignment/assignment-status';
@@ -57,6 +58,7 @@ import {
   OrderCreatedSenderEmailData,
   OrderCreatedRecipientEmailData,
   OrderStatusEmailData,
+  OrderDispatchedEmailData,
   RiderAssignedEmailData,
   AssignmentNotificationEmailData,
   AssignmentStatusEmailData,
@@ -335,6 +337,16 @@ export class EmailService {
     await this.sendEmail({
       to: data.recipientEmail,
       subject: `You have a delivery coming! Order ${data?.orderReference} - Peekaboo`,
+      html,
+    });
+  }
+
+
+  async sendOrderDispatchedEmail(data: OrderDispatchedEmailData): Promise<void> {
+    const html = await render(OrderDispatchedEmail(data));
+    await this.sendEmail({
+      to: data.userEmail,
+      subject: `Order ${data.orderReference} sent successfully - Peekaboo`,
       html,
     });
   }
