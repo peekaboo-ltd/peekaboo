@@ -34,7 +34,7 @@ export const AssignmentSkeletonCard: React.FC<AssignmentSkeletonCardProps> = ({ 
 
   return (
     <Animated.View style={{ opacity: pulse }}>
-      <Card style={[styles.card, compact && styles.compactCard]} elevation="md">
+      <Card style={StyleSheet.flatten([styles.card, compact ? styles.compactCard : undefined])} elevation="md">
         <View style={styles.header}>
           <View style={styles.titleLine} />
           <View style={styles.badgeLine} />

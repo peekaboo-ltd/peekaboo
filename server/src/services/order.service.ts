@@ -68,22 +68,9 @@ export class OrderService {
 
   // CREATE ORDER
   async createOrder(order: Partial<Order>): Promise<Order> {
-    // GENERATE REFERENCE ID
-    let referenceId: string = generateReferenceNumber({
-      prefix: 'P',
-      length: 6,
-    });
-
-    // CHECK IF REFERENCE ID IS UNIQUE
-    while (await this.getOrderByReferenceId(referenceId)) {
-      referenceId = generateReferenceNumber({
-        prefix: 'P',
-        length: 6,
-      });
-    }
-
     // SET REFERENCE ID
-    order.referenceId = referenceId;
+    order.referenceId = await this.generateUniqueOrderReferenceId();
+    order.trackingId = await this.generateUniqueTrackingId();
 
     // CHECK IF USER BELONGS TO ORGANIZATION
     if (order.createdById) {
@@ -136,6 +123,7 @@ export class OrderService {
             senderEmail: sender.email,
             recipientPhone: '',
             orderReference: createdOrder.referenceId || '',
+            trackingId: createdOrder.trackingId || '',
             fee: Number(createdOrder.initialFee || 0),
             currency: 'RWF',
           })
@@ -153,6 +141,7 @@ export class OrderService {
             recipientEmail: recipient.email,
             senderPhone: '',
             orderReference: createdOrder.referenceId || '',
+            trackingId: createdOrder.trackingId || '',
           })
           .catch(() => {});
       }
@@ -169,19 +158,8 @@ export class OrderService {
     senderPhoneNumber: string;
     recipientPhoneNumber: string;
   }): Promise<{ order: Order; auth: { token: string; user: User } }> {
-    // GENERATE REFERENCE ID
-    let referenceId: string = generateReferenceNumber({
-      prefix: 'P',
-      length: 6,
-    });
-
-    // CHECK IF REFERENCE ID IS UNIQUE
-    while (await this.getOrderByReferenceId(referenceId)) {
-      referenceId = generateReferenceNumber({
-        prefix: 'P',
-        length: 6,
-      });
-    }
+    const referenceId = await this.generateUniqueOrderReferenceId();
+    const trackingId = await this.generateUniqueTrackingId();
 
     let sender = await this.userRepository.findOne({
       where: { phoneNumber: senderPhoneNumber },
@@ -210,6 +188,7 @@ export class OrderService {
       recipientId: recipient?.id,
       createdById: sender?.id,
       initialFee: 1500,
+      trackingId,
     });
 
     // CREATE ORDER STATUS
@@ -253,6 +232,23 @@ export class OrderService {
     }
 
     return referenceId;
+  }
+
+
+  private async generateUniqueTrackingId(): Promise<string> {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+    let trackingId = `TRK-${Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('')}`;
+
+    while (
+      await this.orderRepository.findOne({
+        where: { trackingId: ILike(trackingId) },
+      })
+    ) {
+      trackingId = `TRK-${Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('')}`;
+    }
+
+    return trackingId;
   }
 
   private async generateUniqueBatchReferenceId(): Promise<string> {
@@ -439,6 +435,7 @@ export class OrderService {
           }
 
           const orderReferenceId = await this.generateUniqueOrderReferenceId();
+          const trackingId = await this.generateUniqueTrackingId();
 
           const composedDescription = [row.productName, row.description]
             .filter(Boolean)
@@ -446,6 +443,7 @@ export class OrderService {
 
           const orderPayload: Partial<Order> = {
             referenceId: orderReferenceId,
+            trackingId,
             externalReferenceId: row.productReferenceNo,
             senderId: sender.id,
             recipientId: recipient.id,

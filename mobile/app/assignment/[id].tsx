@@ -1,29 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
   Alert,
+  Text,
 } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { AssignmentDetails } from '../../components/assignments/AssignmentDetails';
 import { AssignmentDetailsSkeleton } from '../../components/assignments/AssignmentDetailsSkeleton';
 import { AssignmentActions } from '../../components/assignments/AssignmentActions';
+import { Input } from '../../components/ui/Input';
 import { useAssignmentStore } from '../../store/assignmentStore';
-import { OrderAssignmentStatus } from '../../types';
-import { colors, spacing } from '../../utils/constants';
+import { OrderAssignmentStatus, OrderStatus } from '../../types';
+import { colors, spacing, typography } from '../../utils/constants';
 
 export default function AssignmentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isActionLoading, setIsActionLoading] = useState(false);
-  
-  const { 
-    selectedAssignment, 
-    isLoading, 
+  const [trackingIdInput, setTrackingIdInput] = useState('');
+
+  const {
+    selectedAssignment,
+    isLoading,
     error,
     fetchAssignmentById,
     acceptAssignment,
     rejectAssignment,
+    confirmOrderDispatch,
+    completeOrder,
     clearError,
   } = useAssignmentStore();
 
@@ -31,19 +36,38 @@ export default function AssignmentDetailScreen() {
     if (id) {
       fetchAssignmentById(id);
     }
-    
+
     return () => {
       clearError();
     };
   }, [id]);
 
+  const latestOrderStatus = useMemo(() => {
+    const activities = selectedAssignment?.order?.activities || [];
+    if (activities.length === 0) {
+      return selectedAssignment?.order?.status;
+    }
+
+    const sorted = [...activities].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+    return sorted[0]?.status || selectedAssignment?.order?.status;
+  }, [selectedAssignment]);
+
+  const isActiveAssignment = selectedAssignment?.status === OrderAssignmentStatus.ACTIVE;
+  const canConfirmDispatch =
+    isActiveAssignment && latestOrderStatus !== OrderStatus.IN_TRANSIT && latestOrderStatus !== OrderStatus.COMPLETED;
+  const canComplete =
+    isActiveAssignment && latestOrderStatus === OrderStatus.IN_TRANSIT;
+
   const handleAccept = async () => {
     if (!id) return;
-    
+
     setIsActionLoading(true);
     const success = await acceptAssignment(id);
     setIsActionLoading(false);
-    
+
     if (success) {
       Alert.alert(
         'Assignment Accepted',
@@ -57,11 +81,11 @@ export default function AssignmentDetailScreen() {
 
   const handleReject = async () => {
     if (!id) return;
-    
+
     setIsActionLoading(true);
     const success = await rejectAssignment(id);
     setIsActionLoading(false);
-    
+
     if (success) {
       Alert.alert(
         'Assignment Rejected',
@@ -73,23 +97,47 @@ export default function AssignmentDetailScreen() {
     }
   };
 
+  const handleConfirmDispatch = async () => {
+    if (!selectedAssignment?.orderId) return;
+
+    if (!trackingIdInput.trim()) {
+      Alert.alert('Tracking ID Required', 'Please enter the order tracking ID to confirm dispatch.');
+      return;
+    }
+
+    setIsActionLoading(true);
+    const success = await confirmOrderDispatch(selectedAssignment.orderId, trackingIdInput.trim());
+    setIsActionLoading(false);
+
+    if (success) {
+      Alert.alert('Order in Transit', 'Order has been confirmed and marked as in transit.');
+    } else if (error) {
+      Alert.alert('Error', error);
+    }
+  };
+
   const handleComplete = async () => {
-    // For now, just show a message as complete endpoint isn't fully implemented
-    Alert.alert(
-      'Complete Assignment',
-      'This feature will be available soon.',
-      [{ text: 'OK' }]
-    );
+    if (!selectedAssignment?.orderId) return;
+
+    setIsActionLoading(true);
+    const success = await completeOrder(selectedAssignment.orderId);
+    setIsActionLoading(false);
+
+    if (success) {
+      Alert.alert('Order Completed', 'Order has been marked as completed.');
+    } else if (error) {
+      Alert.alert('Error', error);
+    }
   };
 
   if (isLoading && !selectedAssignment) {
     return (
       <View style={styles.loadingContainer}>
-        <Stack.Screen 
-          options={{ 
+        <Stack.Screen
+          options={{
             title: 'Loading...',
             headerBackTitle: 'Back',
-          }} 
+          }}
         />
         <AssignmentDetailsSkeleton />
       </View>
@@ -99,11 +147,11 @@ export default function AssignmentDetailScreen() {
   if (!selectedAssignment) {
     return (
       <View style={styles.errorContainer}>
-        <Stack.Screen 
-          options={{ 
+        <Stack.Screen
+          options={{
             title: 'Not Found',
             headerBackTitle: 'Back',
-          }} 
+          }}
         />
       </View>
     );
@@ -122,31 +170,40 @@ export default function AssignmentDetailScreen() {
         <View style={styles.glowTop} />
         <View style={styles.glowBottom} />
       </View>
-      <Stack.Screen 
-        options={{ 
+      <Stack.Screen
+        options={{
           title: getHeaderTitle(),
           headerBackTitle: 'Back',
-        }} 
+        }}
       />
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <AssignmentDetails assignment={selectedAssignment} />
+
+        {canConfirmDispatch && (
+          <View style={styles.trackingCard}>
+            <Text style={styles.trackingLabel}>Confirm Dispatch</Text>
+            <Input
+              value={trackingIdInput}
+              onChangeText={setTrackingIdInput}
+              placeholder="Enter tracking ID"
+              autoCapitalize="characters"
+            />
+          </View>
+        )}
       </ScrollView>
 
-      {/* Action buttons at the bottom */}
       <AssignmentActions
         status={selectedAssignment.status}
+        showConfirmDispatch={canConfirmDispatch}
         onAccept={handleAccept}
         onReject={handleReject}
-        onComplete={
-          selectedAssignment.status === OrderAssignmentStatus.ACTIVE 
-            ? handleComplete 
-            : undefined
-        }
+        onConfirmDispatch={canConfirmDispatch ? handleConfirmDispatch : undefined}
+        onComplete={canComplete ? handleComplete : undefined}
         isLoading={isActionLoading}
       />
     </View>
@@ -197,5 +254,21 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: spacing.md,
+  },
+  trackingCard: {
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.16)',
+    borderRadius: 16,
+    backgroundColor: colors.surface,
+  },
+  trackingLabel: {
+    fontSize: typography.body.fontSize,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
   },
 });

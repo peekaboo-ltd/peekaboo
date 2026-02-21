@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Assignment, OrderAssignmentStatus } from '../types';
+import { Assignment, OrderAssignmentStatus, OrderStatus } from '../types';
 import { assignmentsAPI } from '../services/api/assignments';
 import { handleAPIError, getErrorMessage } from '../utils/errorHandler';
 
@@ -22,6 +22,8 @@ interface AssignmentState {
   fetchAssignmentById: (id: string) => Promise<Assignment | null>;
   acceptAssignment: (id: string) => Promise<boolean>;
   rejectAssignment: (id: string, reason?: string) => Promise<boolean>;
+  confirmOrderDispatch: (orderId: string, trackingId: string) => Promise<boolean>;
+  completeOrder: (orderId: string) => Promise<boolean>;
   refreshAssignments: () => Promise<void>;
   setFilter: (filter: OrderAssignmentStatus | 'ALL') => void;
   setSelectedAssignment: (assignment: Assignment | null) => void;
@@ -148,8 +150,7 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      // Server returns the newly created assignment after rejection (auto-reassigned)
-      const newAssignment = await assignmentsAPI.reject(id, reason);
+      await assignmentsAPI.reject(id, reason);
 
       // Update rejected assignment in list and remove from pending view
       set(state => ({
@@ -158,6 +159,67 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
         ),
         selectedAssignment: state.selectedAssignment?.id === id
           ? { ...state.selectedAssignment, status: OrderAssignmentStatus.REJECTED }
+          : state.selectedAssignment,
+        isLoading: false,
+      }));
+
+      return true;
+    } catch (error) {
+      const appError = handleAPIError(error);
+      set({
+        isLoading: false,
+        error: getErrorMessage(appError),
+      });
+      return false;
+    }
+  },
+
+
+
+  confirmOrderDispatch: async (orderId: string, trackingId: string): Promise<boolean> => {
+    set({ isLoading: true, error: null });
+
+    try {
+      await assignmentsAPI.confirmOrderDispatch(orderId, trackingId);
+
+      set(state => ({
+        selectedAssignment: state.selectedAssignment
+          ? {
+              ...state.selectedAssignment,
+              order: state.selectedAssignment.order
+                ? { ...state.selectedAssignment.order, status: OrderStatus.IN_TRANSIT }
+                : state.selectedAssignment.order,
+            }
+          : state.selectedAssignment,
+        isLoading: false,
+      }));
+
+      return true;
+    } catch (error) {
+      const appError = handleAPIError(error);
+      set({
+        isLoading: false,
+        error: getErrorMessage(appError),
+      });
+      return false;
+    }
+  },
+
+  completeOrder: async (orderId: string): Promise<boolean> => {
+    set({ isLoading: true, error: null });
+
+    try {
+      await assignmentsAPI.completeOrder(orderId);
+
+      set(state => ({
+        selectedAssignment: state.selectedAssignment
+          ? {
+              ...state.selectedAssignment,
+              status: OrderAssignmentStatus.COMPLETED,
+              order: state.selectedAssignment.order
+                ? { ...state.selectedAssignment.order, status: OrderStatus.COMPLETED }
+                : state.selectedAssignment.order,
+            }
           : state.selectedAssignment,
         isLoading: false,
       }));

@@ -18,6 +18,13 @@ export enum OrderStatus {
   CANCELLED = 'CANCELLED',
 }
 
+export interface OrderActivity {
+  id: string;
+  status: OrderStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Location {
   latitude: number;
   longitude: number;
@@ -26,9 +33,11 @@ export interface Location {
 export interface Order {
   id: string;
   referenceId: string;
+  trackingId?: string;
   recipientId?: string;
   senderId?: string;
   createdById: string;
+  status?: OrderStatus;
   initialFee: number;
   type: OrderType;
   discount: number;
@@ -39,6 +48,7 @@ export interface Order {
   recipient?: User;
   sender?: User;
   createdBy?: User;
+  activities?: OrderActivity[];
   createdAt: string;
   updatedAt: string;
 }

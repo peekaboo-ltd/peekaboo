@@ -7,6 +7,7 @@ export const OrderCreatedSenderEmail = ({
   senderName,
   recipientPhone,
   orderReference,
+  trackingId,
   fee,
   currency,
 }: OrderCreatedSenderEmailData) => {
@@ -23,6 +24,9 @@ export const OrderCreatedSenderEmail = ({
         </Text>
         <Text style={styles.detailRow}>
           <strong>Recipient Phone:</strong> {recipientPhone}
+        </Text>
+        <Text style={styles.detailRow}>
+          <strong>Tracking ID:</strong> {trackingId}
         </Text>
         <Text style={styles.detailRow}>
           <strong>Delivery Fee:</strong> {currency} {fee?.toLocaleString()}

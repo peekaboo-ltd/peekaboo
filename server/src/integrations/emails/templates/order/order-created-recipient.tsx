@@ -7,6 +7,7 @@ export const OrderCreatedRecipientEmail = ({
   recipientName,
   senderPhone,
   orderReference,
+  trackingId,
 }: OrderCreatedRecipientEmailData) => {
   return (
     <EmailLayout preview={`You have a delivery coming! Order ${orderReference}`}>
@@ -21,6 +22,9 @@ export const OrderCreatedRecipientEmail = ({
         </Text>
         <Text style={styles.detailRow}>
           <strong>Sender Phone:</strong> {senderPhone}
+        </Text>
+        <Text style={styles.detailRow}>
+          <strong>Tracking ID:</strong> {trackingId}
         </Text>
       </Section>
       <Text style={styles.text}>

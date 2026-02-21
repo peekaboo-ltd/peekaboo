@@ -4,7 +4,8 @@ import {
   AssignmentListParams,
   AcceptAssignmentResponse,
   RejectAssignmentResponse,
-  AssignmentApiResponse
+  AssignmentApiResponse,
+  OrderAssignmentStatus
 } from '../../types';
 
 interface PaginatedResponse<T> {
@@ -108,11 +109,27 @@ export const assignmentsAPI = {
     return response.data.data;
   },
 
+
+
+  /**
+   * Confirm order dispatch: creates CONFIRMED + IN_TRANSIT activities
+   */
+  confirmOrderDispatch: async (orderId: string, trackingId: string): Promise<void> => {
+    await apiClient.post(`/order-activities/${orderId}/confirm-dispatch`, { trackingId });
+  },
+
+  /**
+   * Mark order as completed
+   */
+  completeOrder: async (orderId: string): Promise<void> => {
+    await apiClient.post(`/order-activities/${orderId}/complete`);
+  },
+
   /**
    * Get pending assignments for current rider
    */
   getPending: async (params?: Omit<AssignmentListParams, 'status'>): Promise<Assignment[]> => {
-    const serverParams = convertPaginationParams({ ...params, status: 'PENDING' as const });
+    const serverParams = convertPaginationParams({ ...params, status: OrderAssignmentStatus.PENDING });
     const response = await apiClient.get<ApiPaginatedResponse<Assignment>>('/order-assignments', {
       params: serverParams
     });
@@ -123,7 +140,7 @@ export const assignmentsAPI = {
    * Get active assignments for current rider
    */
   getActive: async (params?: Omit<AssignmentListParams, 'status'>): Promise<Assignment[]> => {
-    const serverParams = convertPaginationParams({ ...params, status: 'ACTIVE' as const });
+    const serverParams = convertPaginationParams({ ...params, status: OrderAssignmentStatus.ACTIVE });
     const response = await apiClient.get<ApiPaginatedResponse<Assignment>>('/order-assignments', {
       params: serverParams
     });
