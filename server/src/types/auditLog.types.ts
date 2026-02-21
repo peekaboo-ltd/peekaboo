@@ -15,4 +15,5 @@ export interface AuditLog extends AbstractEntity {
   newValues?: Record<string, any>;
   createdById?: UUID;
   createdBy?: User;
+  source?: 'SERVICE' | 'SUBSCRIBER';
 }

@@ -171,10 +171,8 @@ export class UserService {
     });
   }
 
-  @AuditUpdate({
-    entityType: AuditLogEntityTypes.USER,
-    getEntityId: (args) => args[0],
-  })
+  // Intentionally not audited: high-frequency GPS updates would create
+  // excessive log volume with minimal audit value.
   async updateCurrentLocation(
     id: UUID,
     location: { latitude: number; longitude: number }

@@ -43,6 +43,14 @@ export class AuditLog extends AbstractEntity {
   newValues: Record<string, any>;
 
   @Column({
+    type: 'varchar',
+    name: 'source',
+    nullable: true,
+    default: "'SERVICE'",
+  })
+  source?: 'SERVICE' | 'SUBSCRIBER';
+
+  @Column({
     type: 'uuid',
     name: 'created_by_id',
     nullable: true,

@@ -30,7 +30,8 @@ export class AuditLogService {
     entityId: UUID,
     oldValues: any,
     newValues: any,
-    createdById?: UUID
+    createdById?: UUID,
+    source: 'SERVICE' | 'SUBSCRIBER' = 'SERVICE'
   ): Promise<AuditLog> {
     const auditLog = new AuditLog();
     auditLog.action = action;
@@ -39,6 +40,7 @@ export class AuditLogService {
     auditLog.oldValues = sanitizeAuditValues(oldValues);
     auditLog.newValues = sanitizeAuditValues(newValues);
     auditLog.createdById = createdById;
+    auditLog.source = source;
 
     return this.auditLogRepository.save(auditLog);
   }

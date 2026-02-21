@@ -111,6 +111,7 @@ export class AuditSubscriber implements EntitySubscriberInterface {
       auditLog.oldValues = sanitizeAuditValues(oldValues ? { ...oldValues } : {});
       auditLog.newValues = sanitizeAuditValues(newValues ? { ...newValues } : {});
       auditLog.createdById = userId;
+      auditLog.source = 'SUBSCRIBER';
 
       // Use the event's manager so the audit log participates in the same
       // transaction (if any). This guarantees the audit row is rolled back
