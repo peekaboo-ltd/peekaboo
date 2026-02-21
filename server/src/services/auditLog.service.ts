@@ -9,6 +9,7 @@ import {
   Pagination,
 } from '../helpers/pagination.helper';
 import { AuditAction } from '../constants/auditLog.constants';
+import { sanitizeAuditValues } from '../helpers/audit.helper';
 
 /**
  * AUDIT LOG SERVICE
@@ -29,17 +30,38 @@ export class AuditLogService {
     entityId: UUID,
     oldValues: any,
     newValues: any,
-    createdById?: UUID
+    createdById?: UUID,
+    source: 'SERVICE' | 'SUBSCRIBER' = 'SERVICE'
   ): Promise<AuditLog> {
     const auditLog = new AuditLog();
     auditLog.action = action;
     auditLog.entityType = entityType;
     auditLog.entityId = entityId;
-    auditLog.oldValues = oldValues;
-    auditLog.newValues = newValues;
+    auditLog.oldValues = sanitizeAuditValues(oldValues);
+    auditLog.newValues = sanitizeAuditValues(newValues);
     auditLog.createdById = createdById;
+    auditLog.source = source;
 
     return this.auditLogRepository.save(auditLog);
+  }
+
+  /**
+   * LOG CREATE
+   */
+  async logCreate(
+    entityType: string,
+    entityId: UUID,
+    newValues: any,
+    createdById?: UUID
+  ): Promise<AuditLog> {
+    return this.createAuditLog(
+      AuditAction.CREATE,
+      entityType,
+      entityId,
+      {},
+      newValues,
+      createdById
+    );
   }
 
   /**

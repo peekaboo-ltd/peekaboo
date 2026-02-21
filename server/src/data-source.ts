@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
+import { AuditSubscriber } from './subscribers/audit.subscriber';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -13,6 +14,7 @@ export const AppDataSource = new DataSource({
   logging: false,
   entities: [`${__dirname}/**/**/*.entity.{ts,js}`],
   migrations: [`${__dirname}/**/migrations/*.{ts,js}`],
+  subscribers: [AuditSubscriber],
   ssl: ['localhost', 'host.docker.internal'].includes(
     String(process.env.DB_HOST)
   )

@@ -4,6 +4,8 @@ import { AppDataSource } from "../data-source";
 import { UUID } from "../types";
 import { NotFoundError } from "../helpers/errors.helper";
 import { RoleTypes } from "../constants/role.constants";
+import { AuditCreate } from "../decorators/auditLog.decorator";
+import { AuditLogEntityTypes } from "../constants/auditLog.constants";
 
 export class RoleService {
   private readonly roleRepository: Repository<Role>;
@@ -13,6 +15,9 @@ export class RoleService {
   }
 
   // CREATE ROLE
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.ROLE,
+  })
   async createRole(role: Partial<Role>): Promise<Role> {
     // CHECK IF ROLE EXISTS
     const existingRole = await this.roleRepository.findOne({

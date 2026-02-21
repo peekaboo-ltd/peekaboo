@@ -18,6 +18,8 @@ import { OrganizationQuery, OrganizationStatistics } from '../types/b2b.types';
 import { OrganizationMembership } from '../entities/organizationMembership.entity';
 import jwt from 'jsonwebtoken';
 import { EmailService } from '../integrations/emails/email.service';
+import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
+import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
 export class OrganizationService {
   private readonly organizationRepository: Repository<Organization>;
@@ -32,7 +34,16 @@ export class OrganizationService {
     this.emailService = new EmailService();
   }
 
+  // Alias for audit decorators
+  async getEntityById(id: UUID): Promise<Organization> {
+    return this.getOrganizationById(id);
+  }
+
   // CREATE ORGANIZATION
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.ORGANIZATION,
+    getEntityId: (result) => result?.organization?.id,
+  })
   async createOrganization(data: {
     organization: Partial<Organization>;
     adminUser: {
@@ -149,6 +160,10 @@ export class OrganizationService {
   }
 
   // UPDATE ORGANIZATION
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORGANIZATION,
+    getEntityId: (args) => args[0],
+  })
   async updateOrganization(
     id: UUID,
     data: Partial<Organization>
@@ -173,6 +188,10 @@ export class OrganizationService {
   }
 
   // UPDATE ORGANIZATION STATUS
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORGANIZATION,
+    getEntityId: (args) => args[0],
+  })
   async updateOrganizationStatus(
     id: UUID,
     status: OrganizationStatus
@@ -201,6 +220,10 @@ export class OrganizationService {
   }
 
   // ASSIGN BUSINESS PLAN
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORGANIZATION,
+    getEntityId: (args) => args[0],
+  })
   async assignBusinessPlan(
     organizationId: UUID,
     businessPlanId: UUID | null
@@ -368,6 +391,10 @@ export class OrganizationService {
   }
 
   // ADMIN: INVITE ORGANIZATION (manual onboarding)
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.ORGANIZATION,
+    getEntityId: (result) => result?.organization?.id,
+  })
   async inviteOrganization(data: {
     name: string;
     email: string;
@@ -494,6 +521,7 @@ export class OrganizationService {
   }
 
   // COMPLETE ONBOARDING (org admin sets password and activates account)
+  // Note: org ID is resolved from token, not args — audited by TypeORM subscriber
   async completeOnboarding(data: {
     token: string;
     password: string;

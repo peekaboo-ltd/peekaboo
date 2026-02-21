@@ -25,6 +25,8 @@ import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrderAssignmentService } from './orderAssignment.service';
 import { EmailService } from '../integrations/emails/email.service';
 import { Order } from '../entities/order.entity';
+import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
+import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
@@ -42,6 +44,9 @@ export class PaymentService {
   }
 
   // CREATE PAYMENT
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.PAYMENT,
+  })
   async createPayment(payment: CreatePaymentDto): Promise<Payment> {
     const newPayment: Payment = await this.paymentRepository.save({
       entityId: payment.entityId,
@@ -151,6 +156,10 @@ export class PaymentService {
   }
 
   // UPDATE PAYMENT STATUS
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.PAYMENT,
+    getEntityId: (args) => args[0],
+  })
   async updatePaymentStatus(
     paymentId: UUID,
     status: KpayPaymentStatus,

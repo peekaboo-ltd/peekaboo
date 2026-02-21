@@ -1,7 +1,8 @@
 import { AuditLogService } from '../services/auditLog.service';
 import { UUID } from '../types';
 import { AuditContext } from '../middlewares/auditContext.middleware';
-import { AuditLogEntityTypes } from '../constants/auditLog.constants';
+import { AuditLogEntityTypes, AuditAction } from '../constants/auditLog.constants';
+import { sanitizeAuditValues } from '../helpers/audit.helper';
 
 interface AuditOptions {
   entityType: AuditLogEntityTypes;
@@ -10,9 +11,60 @@ interface AuditOptions {
   getEntity?: (args: any[]) => any;
 }
 
-// Define an interface for services that have a getEntityById method
-interface ServiceWithGetById {
-  getEntityById: (id: UUID) => Promise<any>;
+interface AuditCreateOptions {
+  entityType: AuditLogEntityTypes;
+  getUserId?: (args: any[]) => UUID | undefined;
+  /** Extract the entity ID from the method result (defaults to result.id). */
+  getEntityId?: (result: any) => UUID;
+}
+
+/**
+ * Creates an audit trail when a method creates an entity.
+ * The original method runs first, then the result is logged.
+ */
+export function AuditCreate(options: AuditCreateOptions) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (...args: any[]) {
+      // Execute original method first to get the created entity
+      const result = await originalMethod.apply(this, args);
+
+      try {
+        const auditLogService = new AuditLogService();
+        const entityId = options.getEntityId
+          ? options.getEntityId(result)
+          : result?.id;
+
+        let userId = options.getUserId ? options.getUserId(args) : undefined;
+        if (!userId) {
+          userId = AuditContext.getCurrentUserId();
+        }
+
+        if (entityId) {
+          // Mark as audited so the TypeORM subscriber skips it
+          AuditContext.markEntityAudited(options.entityType, entityId, AuditAction.CREATE);
+
+          await auditLogService.logCreate(
+            options.entityType,
+            entityId,
+            sanitizeAuditValues({ ...(result || {}) }),
+            userId
+          );
+        }
+      } catch (error) {
+        console.error('Error creating audit log (non-blocking):', error);
+      }
+
+      return result;
+    };
+
+    return descriptor;
+  };
 }
 
 /**
@@ -55,13 +107,16 @@ export function AuditUpdate(options: AuditOptions) {
         // Execute original method
         const result = await originalMethod.apply(this, args);
 
+        // Mark as audited so the TypeORM subscriber skips it
+        AuditContext.markEntityAudited(options.entityType, entityId, AuditAction.UPDATE);
+
         // Create audit log after operation completes
         try {
           await auditLogService.logUpdate(
             options.entityType,
             entityId,
-            oldValues,
-            { ...(result || {}) },
+            sanitizeAuditValues(oldValues),
+            sanitizeAuditValues({ ...(result || {}) }),
             userId
           );
         } catch (error) {
@@ -120,12 +175,15 @@ export function AuditDelete(options: AuditOptions) {
           }
         }
 
+        // Mark as audited so the TypeORM subscriber skips it
+        AuditContext.markEntityAudited(options.entityType, entityId, AuditAction.DELETE);
+
         // Create audit log before deletion
         try {
           await auditLogService.logDelete(
             options.entityType,
             entityId,
-            oldValues,
+            sanitizeAuditValues(oldValues),
             userId
           );
         } catch (error) {

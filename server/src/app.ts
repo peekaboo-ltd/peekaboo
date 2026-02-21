@@ -7,6 +7,7 @@ import errorHandler from './middlewares/errors.middleware';
 import routes from './routes';
 import logger from './helpers/logger.helper';
 import { configureGoogleAuth } from './config/passport.config';
+import { auditContextMiddleware } from './middlewares/auditContext.middleware';
 
 // CREATE EXPRESS APP
 const app: Application = express();
@@ -21,6 +22,9 @@ app.use(passport.initialize());
 
 // Configure Google OAuth
 configureGoogleAuth();
+
+// Audit context — wraps every request in AsyncLocalStorage
+app.use(auditContextMiddleware);
 
 app.use('/api/v1', routes);
 app.use(errorHandler);

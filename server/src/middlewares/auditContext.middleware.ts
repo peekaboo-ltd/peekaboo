@@ -1,100 +1,87 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { NextFunction, Request, Response } from 'express';
 import { UUID } from '../types';
 import { AuthenticatedRequest } from '../types/auth.types';
-import logger from '../helpers/logger.helper';
+
+interface AuditStore {
+  userId?: UUID;
+  auditedEntities: Set<string>;
+}
+
+const asyncLocalStorage = new AsyncLocalStorage<AuditStore>();
 
 /**
- * A namespace for storing request-specific data that can be accessed
- * throughout the application during a request lifecycle.
+ * Provides request-scoped audit context using AsyncLocalStorage.
+ * Each concurrent request gets its own isolated store.
  */
 export namespace AuditContext {
-  // Use AsyncLocalStorage to handle concurrent requests
-  const asyncLocalStorage = new Map<string, UUID>();
-  const REQUEST_ID_KEY = 'X-Request-ID';
-
-  /**
-   * Generate a simple request ID if one is not provided
-   */
-  function getRequestId(req: Request): string {
-    if (!req.headers[REQUEST_ID_KEY]) {
-      req.headers[REQUEST_ID_KEY] = `req-${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2, 15)}`;
-    }
-    return req.headers[REQUEST_ID_KEY] as string;
+  export function getStore(): AuditStore | undefined {
+    return asyncLocalStorage.getStore();
   }
 
-  export function setCurrentUserId(
-    req: Request,
-    userId: UUID | undefined
-  ): void {
-    const requestId = getRequestId(req);
-    if (userId) {
-      asyncLocalStorage.set(requestId, userId);
-    } else {
-      asyncLocalStorage.delete(requestId);
+  export function setCurrentUserId(userId: UUID | undefined): void {
+    const store = asyncLocalStorage.getStore();
+    if (store && userId) {
+      store.userId = userId;
     }
   }
 
   export function getCurrentUserId(): UUID | undefined {
-    // Since we can't access the request context directly in the decorator,
-    // we'll just return the first user ID we find
-    // This is a simplified approach and should be improved in production
-    if (asyncLocalStorage.size === 0) {
-      return undefined;
+    return asyncLocalStorage.getStore()?.userId;
+  }
+
+  /**
+   * Build a unique key for deduplication between decorators and subscriber.
+   */
+  function buildKey(entityType: string, entityId: string, action: string): string {
+    return `${entityType}:${entityId}:${action}`;
+  }
+
+  /**
+   * Mark an entity change as already audited (called by decorators).
+   * The TypeORM subscriber checks this to avoid double-logging.
+   */
+  export function markEntityAudited(entityType: string, entityId: string, action: string): void {
+    const store = asyncLocalStorage.getStore();
+    if (store) {
+      store.auditedEntities.add(buildKey(entityType, entityId, action));
     }
-
-    return Array.from(asyncLocalStorage.values())[0];
   }
 
   /**
-   * Resets the context for a specific request
+   * Check whether a decorator already logged this specific change.
    */
-  export function reset(req: Request): void {
-    const requestId = getRequestId(req);
-    asyncLocalStorage.delete(requestId);
+  export function isEntityAudited(entityType: string, entityId: string, action: string): boolean {
+    const store = asyncLocalStorage.getStore();
+    if (!store) return false;
+    return store.auditedEntities.has(buildKey(entityType, entityId, action));
   }
 
   /**
-   * Debug method to log the current state of the context storage
+   * Run a callback within a new audit context store.
+   * Used by the middleware to wrap the entire request lifecycle.
    */
-  export function printContextState(): void {
-    logger.debug(`AuditContext state: ${asyncLocalStorage.size} entries`);
-    asyncLocalStorage.forEach((value, key) => {
-      logger.debug(`Request ${key}: User ${value}`);
-    });
+  export function run<T>(callback: () => T): T {
+    return asyncLocalStorage.run({ auditedEntities: new Set() }, callback);
   }
 }
 
 /**
- * Middleware to set the current user's ID in the AuditContext
- * when a user is authenticated, making it available for audit logging.
- *
- * This middleware should be placed AFTER the auth middleware in the stack
- * to ensure the user information is available.
+ * Middleware to initialise the AuditContext for every request.
+ * Must be placed AFTER the auth middleware so `req.user` is available.
  */
 export const auditContextMiddleware = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  // Reset the context first to ensure clean state
-  AuditContext.reset(req);
-  // Try to access the user from the request object as set by auth middleware
-  const authReq = req as AuthenticatedRequest;
+  AuditContext.run(() => {
+    const authReq = req as AuthenticatedRequest;
 
-  if (authReq.user && authReq.user.id) {
-    // Set the user ID in the audit context
-    AuditContext.setCurrentUserId(req, authReq.user.id as UUID);
+    if (authReq.user && authReq.user.id) {
+      AuditContext.setCurrentUserId(authReq.user.id as UUID);
+    }
 
-    // Debug log
-    console.debug(`AuditContext: Set user ID ${authReq.user.id} for request`);
-  }
-
-  // Clear context when response is finished
-  res.on('finish', () => {
-    AuditContext.reset(req);
+    next();
   });
-
-  next();
 };

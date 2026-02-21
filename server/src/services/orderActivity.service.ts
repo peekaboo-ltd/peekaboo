@@ -14,7 +14,7 @@ import {
 } from '../helpers/pagination.helper';
 import { Request } from 'express';
 import { UUID } from '../types';
-import { AuditUpdate } from '../decorators/auditLog.decorator';
+import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { OrderStatus } from '../constants/order.constants';
 import { EmailService } from '../integrations/emails/email.service';
@@ -42,6 +42,10 @@ export class OrderActivityService {
   }
 
   // CREATE ORDER STATUS
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.ORDER_STATUS,
+    getUserId: (args) => args[0]?.createdById,
+  })
   async createOrderActivity(
     orderStatus: Partial<OrderActivity>,
   ): Promise<OrderActivity> {

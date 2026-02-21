@@ -17,7 +17,7 @@ import {
   Pagination,
 } from '../helpers/pagination.helper';
 import { OrderAssignmentService } from './orderAssignment.service';
-import { AuditUpdate } from '../decorators/auditLog.decorator';
+import { AuditCreate, AuditUpdate, AuditDelete } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { User } from '../entities/user.entity';
 import { UserService } from './user.service';
@@ -66,7 +66,16 @@ export class OrderService {
     this.batchRepository = AppDataSource.getRepository(Batch);
   }
 
+  // GET ORDER BY ID (needed by audit decorators)
+  async getEntityById(id: UUID): Promise<Order> {
+    return this.getOrderById(id);
+  }
+
   // CREATE ORDER
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.ORDER,
+    getUserId: (args) => args[0]?.createdById,
+  })
   async createOrder(order: Partial<Order>): Promise<Order> {
     // SET REFERENCE ID
     order.referenceId = await this.generateUniqueOrderReferenceId();
@@ -151,6 +160,10 @@ export class OrderService {
   }
 
   // CREATE PUBLIC ORDER
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.ORDER,
+    getEntityId: (result) => result?.order?.id,
+  })
   async createPublicOrder({
     senderPhoneNumber,
     recipientPhoneNumber,
@@ -576,6 +589,11 @@ export class OrderService {
   }
 
   // CANCEL ORDER
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORDER,
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[1],
+  })
   async cancelOrder(id: UUID, createdById?: UUID): Promise<Order> {
     const order = await this.getOrderById(id);
 
@@ -615,6 +633,10 @@ export class OrderService {
   }
 
   // DELETE ORDER
+  @AuditDelete({
+    entityType: AuditLogEntityTypes.ORDER,
+    getEntityId: (args) => args[0],
+  })
   async deleteOrder(id: UUID): Promise<Order> {
     const order = await this.getOrderById(id);
 
@@ -691,6 +713,11 @@ export class OrderService {
   }
 
   // ACCEPT ORDER
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORDER,
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[1],
+  })
   async acceptOrder(id: UUID, createdById?: UUID): Promise<Order> {
     const orderExists = await this.getOrderById(id);
 
