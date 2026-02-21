@@ -15,6 +15,8 @@ import { EmailService } from '../integrations/emails/email.service';
 import { Request } from 'express';
 import { OrganizationMembershipService } from './organizationMembership.service';
 import { MembershipStatus, OrganizationRole } from '../constants/organization.constants';
+import { AuditCreate, AuditUpdate, AuditDelete } from '../decorators/auditLog.decorator';
+import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
 export class UserService {
   private readonly userRepository: Repository<User>;
@@ -81,7 +83,15 @@ export class UserService {
     return user;
   }
 
+  // Alias for audit decorators
+  async getEntityById(id: UUID): Promise<User> {
+    return this.getUserById(id);
+  }
+
   // CREATE USER
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.USER,
+  })
   async createUser(
     user: Partial<User>,
     roles?: Partial<RoleTypes>[],
@@ -148,6 +158,10 @@ export class UserService {
   }
 
   // UPDATE USER
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.USER,
+    getEntityId: (args) => args[0],
+  })
   async updateUser(id: UUID, user: Partial<User>): Promise<User> {
     const userExists = await this.getUserById(id);
 
@@ -157,6 +171,10 @@ export class UserService {
     });
   }
 
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.USER,
+    getEntityId: (args) => args[0],
+  })
   async updateCurrentLocation(
     id: UUID,
     location: { latitude: number; longitude: number }
@@ -340,6 +358,10 @@ export class UserService {
   }
 
   // UPDATE USER STATUS
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.USER,
+    getEntityId: (args) => args[0],
+  })
   async updateUserStatus(id: UUID, status: UserStatus): Promise<User> {
     const user = await this.getUserById(id);
 
@@ -367,6 +389,10 @@ export class UserService {
   }
 
   // DELETE USER (SOFT DELETE)
+  @AuditDelete({
+    entityType: AuditLogEntityTypes.USER,
+    getEntityId: (args) => args[0],
+  })
   async deleteUser(id: UUID): Promise<void> {
     const user = await this.getUserById(id);
 
@@ -390,6 +416,10 @@ export class UserService {
   }
 
   // RESET USER PASSWORD
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.USER,
+    getEntityId: (args) => args[0],
+  })
   async resetPassword(id: UUID): Promise<void> {
     const user = await this.getUserById(id);
 

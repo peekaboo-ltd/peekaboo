@@ -18,6 +18,8 @@ import { RoleTypes } from '../constants/role.constants';
 import { hashPassword } from '../helpers/auth.helper';
 import { MembershipQuery, MemberUpdateData } from '../types/b2b.types';
 import { EmailService } from '../integrations/emails/email.service';
+import { AuditCreate, AuditUpdate, AuditDelete } from '../decorators/auditLog.decorator';
+import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
 export class OrganizationMembershipService {
   private readonly membershipRepository: Repository<OrganizationMembership>;
@@ -38,7 +40,16 @@ export class OrganizationMembershipService {
     return this._userService;
   }
 
+  // Alias for audit decorators
+  async getEntityById(id: UUID): Promise<OrganizationMembership> {
+    return this.getMembershipById(id);
+  }
+
   // ADD MEMBER
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.ORGANIZATION_MEMBERSHIP,
+    getUserId: (args) => args[0]?.addedById,
+  })
   async addMember(data: {
     organizationId: UUID;
     user: {
@@ -108,6 +119,10 @@ export class OrganizationMembershipService {
 
 
   // CREATE MEMBERSHIP FOR AN EXISTING USER
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.ORGANIZATION_MEMBERSHIP,
+    getUserId: (args) => args[0]?.addedById,
+  })
   async createMembershipForUser(data: {
     userId: UUID;
     organizationId: UUID;
@@ -156,6 +171,11 @@ export class OrganizationMembershipService {
   }
 
   // UPDATE MEMBER ROLE
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORGANIZATION_MEMBERSHIP,
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[2],
+  })
   async updateMemberRole(
     membershipId: UUID,
     role: OrganizationRole,
@@ -205,6 +225,11 @@ export class OrganizationMembershipService {
   }
 
   // REMOVE MEMBER
+  @AuditDelete({
+    entityType: AuditLogEntityTypes.ORGANIZATION_MEMBERSHIP,
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[1],
+  })
   async removeMember(
     membershipId: UUID,
     removedById: UUID
@@ -250,6 +275,11 @@ export class OrganizationMembershipService {
   }
 
   // UPDATE MEMBER DETAILS
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORGANIZATION_MEMBERSHIP,
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[2],
+  })
   async updateMemberDetails(
     membershipId: UUID,
     data: MemberUpdateData,
@@ -278,6 +308,11 @@ export class OrganizationMembershipService {
   }
 
   // REACTIVATE MEMBER
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORGANIZATION_MEMBERSHIP,
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[1],
+  })
   async reactivateMember(
     membershipId: UUID,
     reactivatedById: UUID

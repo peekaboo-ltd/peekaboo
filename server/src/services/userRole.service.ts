@@ -8,6 +8,8 @@ import { RoleService } from "./role.service";
 import { UUID } from "../types";
 import { RoleTypes } from "../constants/role.constants";
 import { User } from "../entities/user.entity";
+import { AuditCreate } from "../decorators/auditLog.decorator";
+import { AuditLogEntityTypes } from "../constants/auditLog.constants";
 
 export class UserRoleService {
   private readonly userRoleRepository: Repository<UserRole>;
@@ -21,6 +23,9 @@ export class UserRoleService {
   }
 
   // CREATE USER ROLE
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.USER_ROLE,
+  })
   async createUserRole(userRole: Partial<UserRole>): Promise<UserRole> {
     if (!userRole?.userId || !userRole?.roleId) {
       throw new ValidationError("User ID and Role ID are required");

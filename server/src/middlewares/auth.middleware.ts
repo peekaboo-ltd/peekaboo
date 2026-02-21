@@ -2,6 +2,7 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { AuthRequest } from "../types/auth.types";
 import { UserService } from "../services/user.service";
+import { AuditContext } from "./auditContext.middleware";
 
 const userService = new UserService();
 
@@ -40,6 +41,9 @@ export const authenticate: RequestHandler = async (
       // Attach user to request
       authReq.user = user;
       authReq.user.id = user.id;
+
+      // Set user ID in audit context for audit logging
+      AuditContext.setCurrentUserId(user.id);
 
       next();
     } catch (error) {

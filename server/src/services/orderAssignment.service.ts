@@ -17,6 +17,8 @@ import { LogReferenceTypes } from '../constants/logs.constants';
 import { Request } from 'express';
 import { OrderActivityService } from './orderActivity.service';
 import { EmailService } from '../integrations/emails/email.service';
+import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
+import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
 export class OrderAssignmentService {
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
@@ -34,6 +36,9 @@ export class OrderAssignmentService {
   }
 
   // CREATE ORDER ASSIGNMENT
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.ORDER_ASSIGNMENT,
+  })
   async createOrderAssignment(
     orderAssignment: Partial<OrderAssignment>
   ): Promise<OrderAssignment> {
@@ -206,6 +211,10 @@ export class OrderAssignmentService {
   }
 
   // UPDATE ORDER ASSIGNMENT
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORDER_ASSIGNMENT,
+    getEntityId: (args) => args[0],
+  })
   async updateOrderAssignment(
     id: UUID,
     orderAssignment: Partial<OrderAssignment>
@@ -234,6 +243,10 @@ export class OrderAssignmentService {
   }
 
   // ACCEPT ORDER ASSIGNMENT
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORDER_ASSIGNMENT,
+    getEntityId: (args) => args[0],
+  })
   async acceptOrderAssignment(id: UUID): Promise<OrderAssignment> {
     const orderAssignment = await this.getOrderAssignmentById(id);
     const updatedOrderAssignment = await this.orderAssignmentRepository.save({
@@ -255,6 +268,10 @@ export class OrderAssignmentService {
   }
 
   // REJECT ORDER ASSIGNMENT
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORDER_ASSIGNMENT,
+    getEntityId: (args) => args[0],
+  })
   async rejectOrderAssignment(id: UUID): Promise<OrderAssignment> {
     const orderAssignment = await this.getOrderAssignmentById(id);
     const updatedOrderAssignment = await this.orderAssignmentRepository.save({

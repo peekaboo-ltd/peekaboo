@@ -10,6 +10,8 @@ import { LogReferenceTypes } from '../constants/logs.constants';
 import { BatchStatus } from '../constants/batch.constants';
 import { OrderStatus } from '../constants/order.constants';
 import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
+import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
+import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
 export class BatchService {
   private readonly batchRepository: Repository<Batch>;
@@ -18,6 +20,15 @@ export class BatchService {
     this.batchRepository = AppDataSource.getRepository(Batch);
   }
 
+  // Alias for audit decorators
+  async getEntityById(id: UUID): Promise<Batch> {
+    return this.getBatchById(id);
+  }
+
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.BATCH,
+    getUserId: (args) => args[0]?.createdById,
+  })
   async createBatch(data: {
     name?: string;
     description?: string;
@@ -102,6 +113,11 @@ export class BatchService {
     return batch;
   }
 
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.BATCH,
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[1],
+  })
   async completeBatch(batchId: UUID, userId: UUID, isAdmin: boolean = false): Promise<Batch> {
     const batch = await this.batchRepository.findOne({
       where: { id: batchId },

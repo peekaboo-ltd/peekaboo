@@ -11,6 +11,8 @@ import {
 import { getPagination, getPagingData, Pagination } from '../helpers/pagination.helper';
 import { BusinessPlanQuery } from '../types/b2b.types';
 import { OrganizationStatus } from '../constants/organization.constants';
+import { AuditCreate, AuditUpdate, AuditDelete } from '../decorators/auditLog.decorator';
+import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
 export class BusinessPlanService {
   private readonly businessPlanRepository: Repository<BusinessPlan>;
@@ -19,7 +21,15 @@ export class BusinessPlanService {
     this.businessPlanRepository = AppDataSource.getRepository(BusinessPlan);
   }
 
+  // Alias for audit decorators
+  async getEntityById(id: UUID): Promise<BusinessPlan> {
+    return this.getBusinessPlanById(id);
+  }
+
   // CREATE BUSINESS PLAN
+  @AuditCreate({
+    entityType: AuditLogEntityTypes.BUSINESS_PLAN,
+  })
   async createBusinessPlan(data: Partial<BusinessPlan>): Promise<BusinessPlan> {
     // Check name uniqueness
     if (data.name) {
@@ -61,6 +71,10 @@ export class BusinessPlanService {
   }
 
   // UPDATE BUSINESS PLAN
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.BUSINESS_PLAN,
+    getEntityId: (args) => args[0],
+  })
   async updateBusinessPlan(
     id: UUID,
     data: Partial<BusinessPlan>
@@ -93,6 +107,10 @@ export class BusinessPlanService {
   }
 
   // DELETE BUSINESS PLAN (soft delete by archiving)
+  @AuditDelete({
+    entityType: AuditLogEntityTypes.BUSINESS_PLAN,
+    getEntityId: (args) => args[0],
+  })
   async deleteBusinessPlan(id: UUID): Promise<void> {
     const businessPlan = await this.getBusinessPlanById(id);
 

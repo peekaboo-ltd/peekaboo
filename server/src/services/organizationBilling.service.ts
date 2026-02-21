@@ -10,6 +10,8 @@ import { generateReferenceNumber } from '../helpers/string.helper';
 import { BillingQuery, GlobalBillingSummary } from '../types/b2b.types';
 import { Organization } from '../entities/organization.entity';
 import { EmailService } from '../integrations/emails/email.service';
+import { AuditUpdate } from '../decorators/auditLog.decorator';
+import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
 export class OrganizationBillingService {
   private readonly billingRepository: Repository<OrganizationBilling>;
@@ -123,7 +125,17 @@ export class OrganizationBillingService {
     return billing;
   }
 
+  // Alias for audit decorators
+  async getEntityById(id: UUID): Promise<OrganizationBilling> {
+    return this.getBillingById(id);
+  }
+
   // GENERATE INVOICE
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORGANIZATION_BILLING,
+    getEntityId: (args) => args[0],
+    getUserId: (args) => args[1],
+  })
   async generateInvoice(
     billingId: UUID,
     createdById: UUID
@@ -177,6 +189,10 @@ export class OrganizationBillingService {
   }
 
   // MARK AS PAID
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORGANIZATION_BILLING,
+    getEntityId: (args) => args[0],
+  })
   async markAsPaid(billingId: UUID, notes?: string): Promise<OrganizationBilling> {
     const billing = await this.getBillingById(billingId);
 
