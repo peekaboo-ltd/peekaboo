@@ -263,7 +263,7 @@ export const Login = () => {
                     )}
                   />
                   <Link
-                    to="/forgot-password"
+                    to="/auth/forgot-password"
                     className="font-medium text-sm sm:text-[13px] hover:underline text-primary hover:text-primary/80"
                   >
                     Forgot password?
