@@ -38,6 +38,7 @@ import { AccountStatusEmail } from './templates/user/account-status';
 import {
   WelcomeEmailData,
   PasswordResetEmailData,
+  PasswordResetLinkEmailData,
   PasswordChangedEmailData,
   OAuthWelcomeEmailData,
   AdminCreatedAccountEmailData,
@@ -132,6 +133,22 @@ export class EmailService {
     await this.sendEmail({
       to,
       subject: 'Password Reset - Peekaboo',
+      html,
+    });
+  }
+
+
+  async sendPasswordResetLinkEmail(
+    data: PasswordResetLinkEmailData
+  ): Promise<void> {
+    const html = await render(PasswordResetEmail({
+      name: data.name,
+      email: data.email,
+      resetUrl: data.resetUrl,
+    }));
+    await this.sendEmail({
+      to: data.email,
+      subject: 'Reset Your Peekaboo Password',
       html,
     });
   }

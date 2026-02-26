@@ -8,6 +8,8 @@ const router = Router();
 // PUBLIC ROUTES
 router.post('/login', AuthController.login);
 router.post('/register', AuthController.register);
+router.post('/forgot-password', AuthController.forgotPassword);
+router.post('/reset-password', AuthController.resetPassword);
 
 // GOOGLE OAUTH ROUTES
 // Initiate Google OAuth - redirect to Google login page

@@ -8,6 +8,7 @@ import { NotFoundPage, UnauthorizedPage } from '../pages/common';
 import { Login } from '@/pages/auth';
 import AuthCallback from '@/pages/auth/AuthCallback';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
+import ResetPassword from '@/pages/auth/ResetPassword';
 import { ProtectedRoute } from './ProtectedRoute';
 import { Dashboard } from '@/pages/dashboard';
 import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayout';
@@ -48,6 +49,7 @@ const Router = () => {
             <Route path="register" element={<Navigate to="/auth/login" replace />} />
             <Route path="callback" element={<AuthCallback />} />
             <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
           </Route>
 
           <Route path="onboarding">

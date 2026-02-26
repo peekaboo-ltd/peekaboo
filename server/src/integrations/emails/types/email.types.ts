@@ -9,7 +9,14 @@ export interface WelcomeEmailData {
 export interface PasswordResetEmailData {
   name: string;
   email: string;
-  temporaryPassword: string;
+  temporaryPassword?: string;
+  resetUrl?: string;
+}
+
+export interface PasswordResetLinkEmailData {
+  name: string;
+  email: string;
+  resetUrl: string;
 }
 
 export interface PasswordChangedEmailData {
