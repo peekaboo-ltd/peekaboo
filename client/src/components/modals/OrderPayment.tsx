@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrderPaymentModal, setSelectedOrder } from '@/states/slices/order.slice';
 import { PaymentType } from '@/types/payment.types';
 import { formatCurrency, formatPhone } from '@/utils/strings.util';
+import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import Button from '../inputs/Button';
 import { useCreatePayment } from '@/hooks/payments/payment.hooks';
 
@@ -19,6 +20,8 @@ const OrderPayment = () => {
   const [payerType, setPayerType] = useState<PayerType>('sender');
   const [customPhone, setCustomPhone] = useState<string>('');
   const [phoneError, setPhoneError] = useState<string>('');
+  const [fallbackPhone, setFallbackPhone] = useState<string>('');
+  const [fallbackPhoneError, setFallbackPhoneError] = useState<string>('');
 
   // CLOSE MODAL
   const closeModal = useCallback(() => {
@@ -27,44 +30,31 @@ const OrderPayment = () => {
     setPayerType('sender');
     setCustomPhone('');
     setPhoneError('');
+    setFallbackPhone('');
+    setFallbackPhoneError('');
   }, [dispatch]);
 
   const { createPayment: createPaymentMutation, isSuccess, isLoading } = useCreatePayment();
 
-  // VALIDATE AND FORMAT PHONE NUMBER
-  const validateAndFormatPhone = (phone: string): string | null => {
-    // Remove all non-numeric characters
-    const cleanedPhone = phone.replace(/\D/g, '');
+  // Validate phone using shared util; returns 250XXXXXXXXX for API or null
+  const validatePhone = (
+    phone: string,
+    options?: { setError: (s: string) => void; optional?: boolean },
+  ): string | null => {
+    const setError = options?.setError ?? setPhoneError;
+    const optional = options?.optional ?? false;
 
-    // Check if phone is empty
-    if (!cleanedPhone) {
-      setPhoneError('Phone number is required');
+    if (!phone?.trim()) {
+      setError(optional ? '' : 'Phone number is required');
       return null;
     }
 
-    // Handle different formats
-    let formattedPhone = cleanedPhone;
+    const result = validateAndFormatPhoneNumber(phone);
+    setError(result.error ?? '');
 
-    // Remove country code if it starts with 250
-    if (formattedPhone.startsWith('250')) {
-      formattedPhone = formattedPhone.substring(3);
-    }
-
-    // Remove leading zero if present
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = formattedPhone.substring(1);
-    }
-
-    // Check if the remaining number is 9 digits
-    if (formattedPhone.length !== 9) {
-      setPhoneError('Phone number must be 9 digits (e.g., 788123456)');
-      return null;
-    }
-
-    // Format as 250XXXXXXXXX (without plus sign)
-    const finalPhone = `250${formattedPhone}`;
-    setPhoneError('');
-    return finalPhone;
+    if (!result.isValid || !result.formattedNumber) return null;
+    // Convert 0XXXXXXXXX to 250XXXXXXXXX for API
+    return '250' + result.formattedNumber.slice(1);
   };
 
   // GET PAYER INFORMATION
@@ -95,7 +85,7 @@ const OrderPayment = () => {
       };
     } else {
       // For 'other', validate and format the custom phone
-      const formattedPhone = validateAndFormatPhone(customPhone);
+      const formattedPhone = validatePhone(customPhone);
       return {
         phone: formattedPhone,
         email: 'info@peekaboo.co.rw',
@@ -113,6 +103,12 @@ const OrderPayment = () => {
       return;
     }
 
+    const fallbackContactPhone = validatePhone(fallbackPhone, {
+      setError: setFallbackPhoneError,
+      optional: true,
+    });
+    if (fallbackPhone.trim() && !fallbackContactPhone) return;
+
     createPaymentMutation({
       entityId: selectedOrder?.id,
       amount: selectedOrder?.finalFee || selectedOrder?.initialFee || 0,
@@ -121,9 +117,10 @@ const OrderPayment = () => {
       description: selectedOrder?.notes,
       customerEmail: payerInfo.email,
       customerName: payerInfo.name,
-      customerPhone: payerInfo.phone || '250794892784'
+      customerPhone: payerInfo.phone || '250794892784',
+      ...(fallbackContactPhone && { metadata: { fallbackContactPhone } }),
     })
-  }, [createPaymentMutation, selectedOrder, getPayerInfo, payerType]);
+  }, [createPaymentMutation, selectedOrder, getPayerInfo, payerType, fallbackPhone]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -139,6 +136,9 @@ const OrderPayment = () => {
     setPhoneError('');
     setCustomPhone('');
   }, [payerType]);
+  useEffect(() => {
+    setFallbackPhoneError('');
+  }, [fallbackPhone]);
 
   return (
     <Modal isOpen={orderPaymentModal} onClose={closeModal} className='min-w-[50vw]' heading="Order Payment" description="Payment for the order">
@@ -217,6 +217,24 @@ const OrderPayment = () => {
             </p>
           </fieldset>
         )}
+
+        {/* FALLBACK CONTACT — who to call if sender and recipient aren't answering */}
+        <fieldset className='flex flex-col gap-2'>
+          <label htmlFor='fallbackPhone' className='text-sm font-medium'>
+            Number to call if sender and recipient aren't answering <span className='text-gray-500 font-normal'>(optional)</span>
+          </label>
+          <input
+            id='fallbackPhone'
+            type='tel'
+            value={fallbackPhone}
+            onChange={(e) => setFallbackPhone(e.target.value)}
+            placeholder='788123456 or 250788123456'
+            className='px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
+          />
+          {fallbackPhoneError && (
+            <p className='text-sm text-black'>{fallbackPhoneError}</p>
+          )}
+        </fieldset>
 
         <Button primary onClick={(e) => {
           e.preventDefault();
