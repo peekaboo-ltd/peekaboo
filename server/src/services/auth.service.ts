@@ -16,6 +16,8 @@ import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
 import { UUID } from '../types';
 import { EmailService } from '../integrations/emails/email.service';
 
+const PASSWORD_RESET_TOKEN_EXPIRY = '30m';
+
 export class AuthService {
   private readonly userRepository: Repository<User>;
   private readonly userRoleService: UserRoleService;
@@ -385,5 +387,107 @@ export class AuthService {
     const updatedUser = await this.userRepository.save(user);
 
     return { ...updatedUser, passwordHash: undefined };
+  }
+
+  async requestPasswordReset(identifier: string): Promise<void> {
+    const trimmedIdentifier = identifier.trim();
+    if (!trimmedIdentifier) {
+      throw new ValidationError('Email or phone number is required');
+    }
+
+    let normalizedPhone: string | undefined;
+    const phoneValidation = validateAndFormatPhoneNumber(trimmedIdentifier);
+    if (phoneValidation.isValid) {
+      normalizedPhone = phoneValidation.formattedNumber;
+    }
+
+    const whereConditions: Array<{ email?: string; phoneNumber?: string }> = [
+      { email: trimmedIdentifier },
+      { phoneNumber: trimmedIdentifier },
+    ];
+
+    if (normalizedPhone && normalizedPhone !== trimmedIdentifier) {
+      whereConditions.push({ phoneNumber: normalizedPhone });
+    }
+
+    const user = await this.userRepository.findOne({
+      where: whereConditions,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        status: true,
+      },
+    });
+
+    if (!user || !user.email || user.status !== UserStatus.ACTIVE) {
+      return;
+    }
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        purpose: 'password-reset',
+      },
+      process.env.JWT_SECRET || 'default_secret',
+      { expiresIn: PASSWORD_RESET_TOKEN_EXPIRY }
+    );
+
+    const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const resetUrl = `${baseUrl}/auth/reset-password?token=${encodeURIComponent(token)}`;
+
+    await this.emailService.sendPasswordResetLinkEmail({
+      name: user.name || 'there',
+      email: user.email,
+      resetUrl,
+    });
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    if (!token) {
+      throw new ValidationError('Password reset token is required');
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      throw new ValidationError('Password must be at least 8 characters');
+    }
+
+    let payload: { id: UUID; purpose?: string };
+    try {
+      payload = jwt.verify(
+        token,
+        process.env.JWT_SECRET || 'default_secret'
+      ) as { id: UUID; purpose?: string };
+    } catch {
+      throw new ValidationError('Invalid or expired password reset token');
+    }
+
+    if (payload.purpose !== 'password-reset') {
+      throw new ValidationError('Invalid or expired password reset token');
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        status: true,
+      },
+    });
+
+    if (!user || user.status !== UserStatus.ACTIVE) {
+      throw new NotFoundError('User not found');
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    await this.userRepository.update(user.id, { passwordHash: hashedPassword });
+
+    if (user.email) {
+      await this.emailService.sendPasswordChangedEmail({
+        name: user.name || 'there',
+        email: user.email,
+      });
+    }
   }
 }

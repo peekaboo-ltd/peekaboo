@@ -168,4 +168,31 @@ export const AuthController = {
       next(error);
     }
   },
+
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { identifier } = req.body;
+      await authService.requestPasswordReset(identifier);
+
+      return res.status(200).json({
+        message:
+          'If an account exists for that identifier, password reset instructions have been sent.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token, newPassword } = req.body;
+      await authService.resetPassword(token, newPassword);
+
+      return res.status(200).json({
+        message: 'Password reset successful. You can now sign in.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
