@@ -13,6 +13,10 @@ import { faCheckCircle, faCopy } from '@fortawesome/free-regular-svg-icons';
 import { toast } from 'sonner';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
+const SkeletonLine = ({ className = '' }: { className?: string }) => (
+  <span className={`inline-block animate-pulse rounded bg-slate-100 ${className}`} />
+);
+
 const PublicOrderPaymentSuccess = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [isCopied, setIsCopied] = useState(false);
@@ -23,292 +27,264 @@ const PublicOrderPaymentSuccess = () => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in-up');
-            entry.target.classList.remove('opacity-0', 'translate-y-8');
+            entry.target.classList.add('ps-visible');
           }
         });
       },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px',
-      }
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
     );
 
-    const animatedElements = document.querySelectorAll('.animate-on-scroll');
-    animatedElements.forEach((el) => {
+    document.querySelectorAll('.ps-reveal').forEach((el) => {
       observerRef.current?.observe(el);
     });
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
+    return () => { observerRef.current?.disconnect(); };
   }, []);
 
-  // STATE VARIABLES
   const { id } = useParams();
   const { order } = useAppSelector((state) => state.order);
   const { paymentsList } = useAppSelector((state) => state.payment);
 
-  // HOOKS
-  const { getOrder } = useGetOrder();
-  const { fetchPayments } = useFetchPayments();
+  const { getOrder, isFetching: orderLoading } = useGetOrder();
+  const { fetchPayments, isFetching: paymentsLoading } = useFetchPayments();
 
-  // Fetch order details
   useEffect(() => {
     if (id) {
       getOrder({ id: id as UUID });
     }
   }, [id, getOrder]);
 
-  // Fetch payments
   useEffect(() => {
     if (order?.id) {
-      fetchPayments({ entityId: order?.id, paymentType: PaymentType.ORDER });
+      fetchPayments({ entityId: order.id, paymentType: PaymentType.ORDER });
     }
   }, [fetchPayments, order?.id]);
 
-  // Get successful payment
   const successfulPayment = paymentsList?.find(
     (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL
   );
 
-  // Handle copy reference ID
   const handleCopyReferenceId = () => {
     if (order?.referenceId) {
       navigator.clipboard.writeText(order.referenceId);
       toast.success('Reference ID copied to clipboard');
       setIsCopied(true);
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
+      setTimeout(() => setIsCopied(false), 2000);
     }
   };
 
   return (
     <>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-          .animate-fade-in-up {
-            animation: fadeInUp 1.2s ease-out forwards;
-          }
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ps-reveal {
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .ps-reveal.ps-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .ps-reveal:nth-child(2) { transition-delay: 0.08s; }
+        .ps-reveal:nth-child(3) { transition-delay: 0.16s; }
+        .ps-reveal:nth-child(4) { transition-delay: 0.24s; }
+      ` }} />
 
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(50px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
+      <main className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-5xl">
 
-          .animate-on-scroll {
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-          }
-
-          html {
-            scroll-behavior: smooth;
-          }
-        `,
-        }}
-      />
-
-      <main className="py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-12">
-        <section className="max-w-7xl mx-auto">
-          {/* Success Header */}
-          <header className="text-center mb-6 sm:mb-8 animate-on-scroll">
-            <figure className="flex justify-center mb-4">
-              <span
-                className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center"
-                aria-hidden="true"
-              >
-                <FontAwesomeIcon
-                  icon={faCheckCircle}
-                  size='lg'
-                  className="text-black"
-                  aria-hidden="true"
-                />
-              </span>
+          {/* Header */}
+          <header className="ps-reveal mb-8 border border-slate-200 rounded-xl p-6 sm:p-8 text-center">
+            <figure className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-slate-200">
+              <FontAwesomeIcon icon={faCheckCircle} className="h-5 w-5 text-primary" aria-hidden="true" />
             </figure>
-            <h1 className="text-xl uppercase sm:text-xl lg:text-2xl font-bold text-black mb-2 px-2">
-              Payment Successful
+            <p className="mb-2 text-xs uppercase tracking-widest text-slate-600">Payment confirmed</p>
+            <h1 className="mb-2 text-xl text-slate-900 sm:text-2xl">
+              Your order is ready for the next step
             </h1>
-            <p className="text-sm sm:text-base text-gray-600">
-              Your order is being prepared for delivery
+            <p className="text-sm text-slate-500">
+              We&apos;ve received your payment and your delivery request is now moving into rider assignment.
             </p>
           </header>
 
-          {/* Payment Details Card */}
-          {successfulPayment && (
-            <article className="bg-white rounded-sm shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 border border-gray-100 animate-on-scroll">
-              <header className="mb-4">
-                <h2 className="text-sm sm:text-md uppercase font-semibold text-gray-800 mb-1">
-                  Payment Details
-                </h2>
-                <p className="text-xs text-gray-500">
-                  Transaction confirmation information
-                </p>
-              </header>
-              <dl className="space-y-3">
-                <section className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-100">
-                  <dt className="text-sm font-medium text-gray-700 mb-1 sm:mb-0">
-                    Payment Reference
-                  </dt>
-                  <dd className="text-sm text-gray-900">
-                    <Link
-                      to={`https://kpay.co.rw/transactions/${successfulPayment.externalReferenceId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline underline-offset-2 hover:text-primary-600"
-                    >
-                      {successfulPayment.externalReferenceId}
-                    </Link>
-                  </dd>
-                </section>
-                <section className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-100">
-                  <dt className="text-sm font-medium text-gray-700 mb-1 sm:mb-0">
-                    Order Reference
-                  </dt>
-                  <dd className="text-sm text-gray-900 flex items-center gap-2">
-                    <span className="break-all">{order?.referenceId}</span>
-                    <button
-                      type="button"
-                      onClick={handleCopyReferenceId}
-                      className="p-1 hover:text-primary cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-                      aria-label="Copy reference ID to clipboard"
-                    >
-                      <FontAwesomeIcon
-                        icon={isCopied ? faCheckCircle : faCopy}
-                        className="w-4 h-4"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </dd>
-                </section>
-                <section className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2">
-                  <dt className="text-sm font-medium text-gray-700 mb-1 sm:mb-0">
-                    Amount Paid
-                  </dt>
-                  <dd className="text-lg font-bold text-black">
-                    {formatCurrency(order?.finalFee ?? order?.initialFee ?? 0)}
-                  </dd>
-                </section>
-              </dl>
-            </article>
-          )}
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-start">
 
-          {/* Order Summary Card */}
-          {order && (
-            <article className="bg-white rounded-sm shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 border border-gray-100 animate-on-scroll">
-              <header className="mb-6">
-                <h2 className="text-sm sm:text-md uppercase font-semibold text-gray-800 mb-1">
-                  Order Summary
-                </h2>
-                <p className="text-xs text-gray-500">
-                  Delivery route and details
-                </p>
-              </header>
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
-                {/* Pickup Location */}
-                <article className="bg-gray-50 rounded-sm p-4 sm:p-5">
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
-                    Pickup Location
-                  </h3>
-                  {order.locationFrom ? (
-                    <ul className='w-full grid grid-cols-1 sm:grid-cols-2 gap-2'>
-                      <AdministrativeLocation location={order?.locationFrom} />
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-gray-500">Not set</p>
-                  )}
-                </article>
+            {/* Left column */}
+            <div className="space-y-5">
 
-                {/* Delivery Location */}
-                <article className="bg-gray-50 rounded-sm p-4 sm:p-5">
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
-                    Delivery Destination
-                  </h3>
-                  {order.locationTo ? (
-                    <ul className='w-full grid grid-cols-1 sm:grid-cols-2 gap-2'>
-                      <AdministrativeLocation location={order?.locationTo} />
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-gray-500">Not set</p>
-                  )}
-                </article>
-              </section>
+              {/* Payment details */}
+              <article className="ps-reveal border border-slate-200 rounded-xl p-5 sm:p-6">
+                <header className="mb-4 border-b border-slate-100 pb-4">
+                  <p className="text-xs uppercase tracking-widest text-slate-600 mb-1">Payment details</p>
+                  <p className="text-sm text-slate-700">Transaction confirmation</p>
+                </header>
 
-              {/* Delivery Info */}
-              <section className="bg-gray-50 rounded-sm p-4 sm:p-5">
-                  <section className="text-center flex items-center gap-2 justify-between">
-                    <dt className="text-xs text-gray-500">Delivery Fee</dt>
-                    <dd className="text-lg font-bold text-black">
-                      {formatCurrency(order?.finalFee ?? order?.initialFee ?? 0)}
-                    </dd>
+                {paymentsLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex justify-between items-center border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                        <SkeletonLine className="h-3 w-28" />
+                        <SkeletonLine className="h-3 w-36" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <dl className="space-y-4">
+                    {successfulPayment && (
+                      <div className="flex flex-col gap-1 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                        <dt className="text-xs text-slate-600 uppercase tracking-wide">Payment Reference</dt>
+                        <dd className="text-sm text-slate-700">
+                          <Link
+                            to={`https://kpay.co.rw/transactions/${successfulPayment.externalReferenceId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary underline underline-offset-4 transition-opacity hover:opacity-70"
+                          >
+                            {successfulPayment.externalReferenceId}
+                          </Link>
+                        </dd>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-1 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                      <dt className="text-xs text-slate-600 uppercase tracking-wide">Order Reference</dt>
+                      <dd className="flex flex-wrap items-center gap-2">
+                        {orderLoading ? (
+                          <SkeletonLine className="h-6 w-40" />
+                        ) : (
+                          <>
+                            <code className="break-all rounded-md bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs text-slate-600">
+                              {order?.referenceId ?? '—'}
+                            </code>
+                            {order?.referenceId && (
+                              <button
+                                type="button"
+                                onClick={handleCopyReferenceId}
+                                className="cursor-pointer rounded border border-slate-200 p-1.5 text-slate-600 transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                                aria-label="Copy reference ID to clipboard"
+                              >
+                                <FontAwesomeIcon
+                                  icon={isCopied ? faCheckCircle : faCopy}
+                                  className="h-3.5 w-3.5"
+                                  aria-hidden="true"
+                                />
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </dd>
+                    </div>
+
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                      <dt className="text-xs text-slate-600 uppercase tracking-wide">Amount Paid</dt>
+                      <dd className="text-lg text-slate-900">
+                        {orderLoading ? (
+                          <SkeletonLine className="h-6 w-24" />
+                        ) : (
+                          formatCurrency(order?.finalFee ?? order?.initialFee ?? 0)
+                        )}
+                      </dd>
+                    </div>
+                  </dl>
+                )}
+              </article>
+
+              {/* Order summary */}
+              <article className="ps-reveal border border-slate-200 rounded-xl p-5 sm:p-6">
+                <header className="mb-5 border-b border-slate-100 pb-4">
+                  <p className="text-xs uppercase tracking-widest text-slate-600 mb-1">Order summary</p>
+                  <p className="text-sm text-slate-700">Pickup and delivery overview</p>
+                </header>
+
+                {orderLoading ? (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="rounded-lg border border-slate-100 bg-slate-50 p-4 space-y-3">
+                        <SkeletonLine className="h-3 w-24" />
+                        <SkeletonLine className="h-3 w-36" />
+                        <SkeletonLine className="h-3 w-28" />
+                        <SkeletonLine className="h-3 w-32" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <section className="grid gap-4 sm:grid-cols-2">
+                    <article className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+                      <p className="mb-3 text-xs uppercase tracking-widest text-slate-600">Pickup</p>
+                      {order?.locationFrom ? (
+                        <ul className='space-y-2'>
+                          <AdministrativeLocation location={order.locationFrom} />
+                          </ul>
+                      ) : (
+                        <p className="text-sm text-slate-600">Not set</p>
+                      )}
+                    </article>
+
+                    <article className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+                      <p className="mb-3 text-xs uppercase tracking-widest text-slate-600">Destination</p>
+                      {order?.locationTo ? (
+                        <ul className='space-y-2'>
+                          <AdministrativeLocation location={order.locationTo} />
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-slate-600">Not set</p>
+                      )}
+                    </article>
                   </section>
-              </section>
-            </article>
-          )}
+                )}
 
-          {/* Next Steps Card */}
-          <article className="bg-blue-50 rounded-sm shadow-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 border border-blue-100 animate-on-scroll">
-            <header className="mb-3">
-              <h2 className="text-sm sm:text-md uppercase font-semibold text-gray-800 mb-1">
-                What Happens Next?
-              </h2>
-            </header>
-            <ol className="space-y-2 text-sm text-gray-700">
-              <li className="flex items-start gap-2">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary-900 text-white flex items-center justify-center text-xs font-bold">
-                  1
-                </span>
-                <span>
-                  Your order is being assigned to a nearby rider
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary-900 text-white flex items-center justify-center text-xs font-bold">
-                  2
-                </span>
-                <span>
-                  Once assigned, you can track your order in real-time
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary-900 text-white flex items-center justify-center text-xs font-bold">
-                  3
-                </span>
-                <span>
-                  The rider will pick up your package and deliver it to the destination
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="shrink-0 w-5 h-5 rounded-full bg-primary-900 text-white flex items-center justify-center text-xs font-bold">
-                  4
-                </span>
-                <span>
-                  You'll receive updates at each stage of the delivery
-                </span>
-              </li>
-            </ol>
-          </article>
+                {!orderLoading && (
+                  <div className="mt-4 flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-slate-600">Delivery fee</p>
+                    </div>
+                    <p className="text-base text-slate-900">
+                      {formatCurrency(order?.finalFee ?? order?.initialFee ?? 0)}
+                    </p>
+                  </div>
+                )}
+              </article>
+            </div>
 
-          {/* Footer Actions */}
-          <footer className="flex flex-col sm:flex-row items-center justify-between gap-4 animate-on-scroll">
-            <Button route={`/p/orders/${order?.id}`} className="cursor-pointer">
-              View Order Details
-            </Button>
-            <Button primary route={`/p/orders/${order?.id}/tracking`} className="cursor-pointer">
-              Track Order
-            </Button>
-          </footer>
-        </section>
+            {/* Right column */}
+            <aside className="space-y-5">
+              <article className="ps-reveal border border-slate-200 rounded-xl p-5 sm:p-6">
+                <header className="mb-4 border-b border-slate-100 pb-4">
+                  <p className="text-xs uppercase tracking-widest text-slate-600 mb-1">What happens next</p>
+                  <p className="text-sm text-slate-700">Delivery progress after payment</p>
+                </header>
+
+                <ol className="space-y-4">
+                  {[
+                    'Your order is being assigned to a nearby rider.',
+                    'Once assigned, you can track your order in real time.',
+                    'The rider will collect your package and head to the destination.',
+                    'You\'ll receive updates as the delivery moves through each stage.',
+                  ].map((step, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 text-xs text-slate-500">
+                        {i + 1}
+                      </span>
+                      <p className="text-sm text-slate-600 leading-relaxed">{step}</p>
+                    </li>
+                  ))}
+                </ol>
+              </article>
+
+              <div className="ps-reveal border border-slate-200 rounded-xl p-5 sm:p-6">
+                <p className="mb-4 text-xs text-slate-600 uppercase tracking-widest">Continue</p>
+                <nav aria-label="Order actions" className="flex flex-col gap-2.5">
+                  <Button route={`/p/orders/${order?.id}`} className="cursor-pointer">
+                    View Order Details
+                  </Button>
+                  <Button primary route={`/p/orders/${order?.id}/tracking`} className="cursor-pointer">
+                    Track Order
+                  </Button>
+                </nav>
+              </div>
+            </aside>
+          </div>
+        </div>
       </main>
     </>
   );

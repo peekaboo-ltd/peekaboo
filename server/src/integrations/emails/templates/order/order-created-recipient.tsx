@@ -24,7 +24,7 @@ export const OrderCreatedRecipientEmail = ({
           <strong>Sender Phone:</strong> {senderPhone}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Tracking ID:</strong> {trackingId}
+          <strong>OTP:</strong> {trackingId}
         </Text>
       </Section>
       <Text style={styles.text}>

@@ -21,11 +21,11 @@ export const OrderDispatchedEmail = ({
           <strong>Order Reference:</strong> {orderReference}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Tracking ID:</strong> {trackingId}
+          <strong>OTP:</strong> {trackingId}
         </Text>
       </Section>
       <Text style={styles.text}>
-        Please keep your tracking ID safe and share it only with trusted parties.
+        Please keep your OTP safe and share it only with trusted parties.
       </Text>
       <Section style={styles.buttonContainer}>
         <EmailButton href="https://peekaboo.co.rw">Visit Peekaboo</EmailButton>

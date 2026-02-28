@@ -37,15 +37,26 @@ const AdministrativeLocation = ({
     );
   }
 
+  if (!administrativeDivisions && !administrativeDivisionsIsLoading) {
+    return (
+      <p className="text-sm text-slate-600">
+       {location?.latitude?.toFixed(4)}, {location?.longitude?.toFixed(4)}
+      </p>
+    );
+  }
+
   return (
     <>
       {Object.entries(administrativeDivisions ?? {}).map(([key, value]) => (
-        <ul key={key} className="flex items-center gap-2">
-          <p className="font-semibold text-sm text-gray-700">
+        <p
+          key={key}
+          className="grid grid-cols-1 gap-1 text-sm text-slate-600 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-2"
+        >
+          <span className="text-sm text-slate-800">
             {capitalizeString(key)}:
-          </p>{' '}
-          <p className="text-sm text-gray-500">{value}</p>
-        </ul>
+          </span>
+          <span className="break-words text-sm text-slate-500">{value}</span>
+        </p>
       ))}
     </>
   );

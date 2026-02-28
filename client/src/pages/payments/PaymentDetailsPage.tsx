@@ -361,7 +361,7 @@ const PaymentDetailsPage = () => {
                 icon: faCircleCheck,
               },
               {
-                label: 'Linked Order Tracking ID',
+                label: 'Linked Order OTP',
                 value:
                   payment.type === PaymentType.ORDER
                     ? isFetchingOrder

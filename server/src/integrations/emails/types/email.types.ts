@@ -174,6 +174,7 @@ export interface PaymentFailedEmailData {
 export interface OrderCreatedSenderEmailData {
   senderName: string;
   senderEmail: string;
+  senderPhone: string;
   recipientPhone: string;
   orderReference: string;
   trackingId: string;
@@ -185,6 +186,7 @@ export interface OrderCreatedRecipientEmailData {
   recipientName: string;
   recipientEmail: string;
   senderPhone: string;
+  recipientPhone: string;
   orderReference: string;
   trackingId: string;
 }

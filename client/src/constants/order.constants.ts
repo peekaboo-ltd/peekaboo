@@ -42,6 +42,12 @@ export const workflowStatuses: {
       icon: faClock,
     },
     {
+      key: OrderStatus.PENDING,
+      label: 'Pending payment',
+      description: 'Your order is pending payment',
+      icon: faClock,
+    },
+    {
       key: OrderStatus.PAID,
       label: 'Paid',
       description: 'Payment has been processed successfully',

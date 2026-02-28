@@ -116,7 +116,7 @@ export default function AssignmentDetailScreen() {
 
     const enteredTrackingId = trackingIdInput.trim();
     if (!enteredTrackingId) {
-      Alert.alert('Tracking ID required', 'Enter the order tracking ID to complete this delivery.');
+      Alert.alert('OTP required', 'Enter the order OTP to complete this delivery.');
       return;
     }
 
@@ -125,7 +125,7 @@ export default function AssignmentDetailScreen() {
       expectedTrackingId &&
       enteredTrackingId.toLowerCase() !== expectedTrackingId.toLowerCase()
     ) {
-      Alert.alert('Invalid Tracking ID', 'The tracking ID does not match this order.');
+      Alert.alert('Invalid OTP', 'The OTP does not match this order.');
       return;
     }
 
@@ -200,8 +200,8 @@ export default function AssignmentDetailScreen() {
             <Input
               value={trackingIdInput}
               onChangeText={setTrackingIdInput}
-              placeholder="Enter tracking ID"
-              autoCapitalize="characters"
+              placeholder="Enter OTP"
+              keyboardType="number-pad"
             />
           </View>
         )}

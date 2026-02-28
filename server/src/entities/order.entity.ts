@@ -25,7 +25,7 @@ export class Order extends AbstractEntity {
   })
   externalReferenceId: string;
 
-  // TRACKING ID (for delivery tracking)
+  // OTP (for delivery tracking)
   @Column({ name: 'tracking_id', type: 'varchar', length: 255, nullable: true })
   trackingId: string;
 

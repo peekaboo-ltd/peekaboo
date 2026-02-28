@@ -101,7 +101,7 @@ export class OrderActivityService {
             statusMessage,
             trackingUrl,
           })
-          .catch(() => {});
+          .catch(() => { });
       }
     }
 
@@ -278,7 +278,7 @@ export class OrderActivityService {
     await this.orderRepository.update(orderId, { status: OrderStatus.IN_TRANSIT });
 
     if (!existingInTransit) {
-      this.sendDispatchEmails(order).catch(() => {});
+      this.sendDispatchEmails(order).catch(() => { });
     }
 
     return { confirmed, inTransit };
@@ -315,23 +315,37 @@ export class OrderActivityService {
     const storedTrackingId = order.trackingId?.trim();
     const providedTrackingId = trackingId?.trim();
 
+    // First mark as delivered, then completed (only when trackingId is matched or not required)
+    const existingDelivered = await this.orderActivityRepository.findOne({
+      where: { orderId, status: OrderStatus.DELIVERED },
+    });
+
+    if (!existingDelivered) {
+      await this.orderActivityRepository.save({
+        orderId,
+        status: OrderStatus.DELIVERED,
+        createdById: actorId,
+      });
+      await this.orderRepository.update(orderId, { status: OrderStatus.DELIVERED });
+    }
+
     if (storedTrackingId) {
       if (!providedTrackingId) {
-        throw new ValidationError('Tracking ID is required to complete this order');
+        throw new ValidationError('OTP is required to complete this order');
       }
 
-      if (storedTrackingId.toLowerCase() !== providedTrackingId.toLowerCase()) {
-        throw new ValidationError('Invalid tracking ID provided');
+      if (storedTrackingId !== providedTrackingId) {
+        throw new ValidationError('Invalid OTP provided');
       }
     }
 
-    const existing = await this.orderActivityRepository.findOne({
+    const existingCompleted = await this.orderActivityRepository.findOne({
       where: { orderId, status: OrderStatus.COMPLETED },
     });
 
-    if (existing) {
+    if (existingCompleted) {
       await this.orderRepository.update(orderId, { status: OrderStatus.COMPLETED });
-      return existing;
+      return existingCompleted;
     }
 
     const completedActivity = await this.orderActivityRepository.save({
@@ -342,7 +356,7 @@ export class OrderActivityService {
 
     await this.orderRepository.update(orderId, { status: OrderStatus.COMPLETED });
 
-    this.sendCompletionEmails(order).catch(() => {});
+    this.sendCompletionEmails(order).catch(() => { });
 
     return completedActivity;
   }

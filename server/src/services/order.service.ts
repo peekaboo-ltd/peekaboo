@@ -121,19 +121,28 @@ export class OrderService {
       );
     }
 
+    const sender = await this.userRepository.findOne({
+      where: { id: createdOrder.senderId },
+    });
+
+    const recipient = await this.userRepository.findOne({
+      where: { id: createdOrder.recipientId },
+    });
+
+    console.log(recipient);
+    console.log(sender);
+
     // Send order created emails (non-blocking)
     if (createdOrder.senderId) {
-      const sender = await this.userRepository.findOne({
-        where: { id: createdOrder.senderId },
-      });
       if (sender?.email) {
         this.emailService
           .sendOrderCreatedSenderEmail({
             senderName: sender.name || '',
             senderEmail: sender.email,
-            recipientPhone: '',
+            recipientPhone: recipient?.phoneNumber || '',
             orderReference: createdOrder.referenceId || '',
             trackingId: createdOrder.trackingId || '',
+            senderPhone: sender?.phoneNumber || '',
             fee: Number(createdOrder.initialFee || 0),
             currency: 'RWF',
           })
@@ -141,15 +150,13 @@ export class OrderService {
       }
     }
     if (createdOrder.recipientId) {
-      const recipient = await this.userRepository.findOne({
-        where: { id: createdOrder.recipientId },
-      });
       if (recipient?.email) {
         this.emailService
           .sendOrderCreatedRecipientEmail({
             recipientName: recipient.name || '',
             recipientEmail: recipient.email,
-            senderPhone: '',
+            senderPhone: sender?.phoneNumber || '',
+            recipientPhone: recipient?.phoneNumber || '',
             orderReference: createdOrder.referenceId || '',
             trackingId: createdOrder.trackingId || '',
           })
@@ -223,6 +230,34 @@ export class OrderService {
     // FETCH COMPLETE USER DETAILS WITH ROLES
     const userWithRoles = await this.userService.getUserById(sender.id);
 
+    if (sender?.email) {
+      this.emailService
+        .sendOrderCreatedSenderEmail({
+          senderName: sender.name || '',
+          senderEmail: sender.email,
+          senderPhone: sender?.phoneNumber || '',
+          recipientPhone: recipient?.phoneNumber || '',
+          orderReference: createdOrder.referenceId || '',
+          trackingId: createdOrder.trackingId || '',
+          fee: Number(createdOrder.initialFee || 0),
+          currency: 'RWF',
+        })
+        .catch(() => { });
+    }
+
+    if (recipient?.email) {
+      this.emailService
+        .sendOrderCreatedRecipientEmail({
+          recipientName: recipient.name || '',
+          recipientEmail: recipient.email,
+          senderPhone: sender?.phoneNumber || '',
+          recipientPhone: recipient?.phoneNumber || '',
+          orderReference: createdOrder.referenceId || '',
+          trackingId: createdOrder.trackingId || '',
+        })
+        .catch(() => { });
+    }
+
     // RETURN ORDER AND AUTH DATA
     return {
       order: createdOrder,
@@ -251,16 +286,17 @@ export class OrderService {
 
 
   private async generateUniqueTrackingId(prefix: string = 'TRK'): Promise<string> {
-    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const digits = '0123456789';
+    const length = 5;
 
-    let trackingId = `${prefix}-${Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('')}`;
+    let trackingId = Array.from({ length }, () => digits[Math.floor(Math.random() * digits.length)]).join('');
 
     while (
       await this.orderRepository.findOne({
         where: { trackingId: ILike(trackingId) },
       })
     ) {
-      trackingId = `${prefix}-${Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('')}`;
+      trackingId = Array.from({ length }, () => digits[Math.floor(Math.random() * digits.length)]).join('');
     }
 
     return trackingId;

@@ -26,7 +26,7 @@ export const OrderCreatedSenderEmail = ({
           <strong>Recipient Phone:</strong> {recipientPhone}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Tracking ID:</strong> {trackingId}
+          <strong>OTP:</strong> {trackingId}
         </Text>
         <Text style={styles.detailRow}>
           <strong>Delivery Fee:</strong> {currency} {fee?.toLocaleString()}

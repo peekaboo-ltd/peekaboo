@@ -44,7 +44,7 @@ export const sparklineMockData = {
   delivered: [40, 48, 45, 56, 52, 64, 58, 72, 68, 82],
 };
 
-// Recent activities mock data with tracking IDs
+// Recent activities mock data with OTPs
 export const recentActivitiesMock = [
   {
     id: 'act-1',
