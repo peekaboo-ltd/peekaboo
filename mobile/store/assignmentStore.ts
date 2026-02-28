@@ -2,6 +2,19 @@ import { create } from 'zustand';
 import { Assignment, OrderAssignmentStatus, OrderStatus } from '../types';
 import { assignmentsAPI } from '../services/api/assignments';
 import { handleAPIError, getErrorMessage } from '../utils/errorHandler';
+import { useAuthStore } from './authStore';
+
+const withCurrentRider = <T extends Record<string, unknown>>(params: T): T => {
+  const currentUserId = useAuthStore.getState().user?.id;
+  if (!currentUserId) {
+    return params;
+  }
+
+  return {
+    ...params,
+    assignedToId: currentUserId,
+  };
+};
 
 interface AssignmentState {
   assignments: Assignment[];
@@ -23,7 +36,7 @@ interface AssignmentState {
   acceptAssignment: (id: string) => Promise<boolean>;
   rejectAssignment: (id: string, reason?: string) => Promise<boolean>;
   confirmOrderDispatch: (orderId: string, trackingId?: string) => Promise<boolean>;
-  completeOrder: (orderId: string, trackingId?: string) => Promise<boolean>;
+  completeOrder: (orderId: string, trackingId: string) => Promise<boolean>;
   refreshAssignments: () => Promise<void>;
   setFilter: (filter: OrderAssignmentStatus | 'ALL') => void;
   setSelectedAssignment: (assignment: Assignment | null) => void;
@@ -46,9 +59,11 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     set({ isLoading: true, error: null, filter: currentFilter, page: 1 });
     
     try {
-      const params = currentFilter !== 'ALL' 
-        ? { status: currentFilter, page: 1, size: 20 } 
-        : { page: 1, size: 20 };
+      const params = withCurrentRider(
+        currentFilter !== 'ALL'
+          ? { status: currentFilter, page: 1, size: 20 }
+          : { page: 1, size: 20 },
+      );
       
       const response = await assignmentsAPI.getAll(params);
       
@@ -76,9 +91,11 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     
     try {
       const nextPage = page + 1;
-      const params = filter !== 'ALL' 
-        ? { status: filter, page: nextPage, size: 20 } 
-        : { page: nextPage, size: 20 };
+      const params = withCurrentRider(
+        filter !== 'ALL'
+          ? { status: filter, page: nextPage, size: 20 }
+          : { page: nextPage, size: 20 },
+      );
       
       const response = await assignmentsAPI.getAll(params);
       
@@ -205,7 +222,7 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     }
   },
 
-  completeOrder: async (orderId: string, trackingId?: string): Promise<boolean> => {
+  completeOrder: async (orderId: string, trackingId: string): Promise<boolean> => {
     set({ isLoading: true, error: null });
 
     try {
@@ -240,9 +257,11 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     
     try {
       const { filter } = get();
-      const params = filter !== 'ALL' 
-        ? { status: filter, page: 1, size: 20 }
-        : { page: 1, size: 20 };
+      const params = withCurrentRider(
+        filter !== 'ALL'
+          ? { status: filter, page: 1, size: 20 }
+          : { page: 1, size: 20 },
+      );
       
       const response = await assignmentsAPI.getAll(params);
       
