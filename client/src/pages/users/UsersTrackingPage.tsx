@@ -1,12 +1,14 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
-import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
+import { APIProvider, AdvancedMarker, Map, Pin } from '@vis.gl/react-google-maps';
 import Table from '@/components/table/Table';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import { useFetchUsersTracking } from '@/hooks/users/users.hooks';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useAppSelector } from '@/states/hooks';
+import { RoleTypes } from '@/types/auth.type';
+import LocationDisplay from '@/containers/locations/LocationDisplay';
 
 type Coordinate = {
   latitude?: number | null;
@@ -22,6 +24,19 @@ type TrackingUser = {
   phoneNumber?: string;
   currentLocation?: Coordinate | null;
 };
+
+const RIDER_COLORS = [
+  '#ef4444', // red
+  '#3b82f6', // blue
+  '#22c55e', // green
+  '#f97316', // orange
+  '#a855f7', // purple
+  '#06b6d4', // cyan
+  '#eab308', // yellow
+  '#ec4899', // pink
+  '#14b8a6', // teal
+  '#f43f5e', // rose
+];
 
 const getCoordinates = (location?: Coordinate | null) => {
   if (!location) return null;
@@ -64,8 +79,18 @@ const UsersTrackingPage = () => {
       page,
       size,
       organizationId,
+      roles: [RoleTypes.RIDER],
     });
   }, [fetchUsersTracking, page, size, organizationId]);
+
+  // Assign a stable color to each rider by their index in the current page
+  const riderColorMap = useMemo<Record<string, string>>(
+    () =>
+      Object.fromEntries(
+        rows.map((rider, index) => [rider.id, RIDER_COLORS[index % RIDER_COLORS.length]]),
+      ),
+    [rows],
+  );
 
   const mapMarkers = useMemo(
     () =>
@@ -73,12 +98,13 @@ const UsersTrackingPage = () => {
         .map((trackedUser) => ({
           user: trackedUser,
           coordinates: getCoordinates(trackedUser.currentLocation),
+          color: riderColorMap[trackedUser.id],
         }))
         .filter(
-          (item): item is { user: TrackingUser; coordinates: { lat: number; lng: number } } =>
+          (item): item is { user: TrackingUser; coordinates: { lat: number; lng: number }; color: string } =>
             Boolean(item.coordinates),
         ),
-    [rows],
+    [rows, riderColorMap],
   );
 
   const mapCenter = mapMarkers[0]?.coordinates ?? { lat: -1.9441, lng: 30.0619 };
@@ -88,7 +114,18 @@ const UsersTrackingPage = () => {
       {
         accessorKey: 'name',
         header: 'Name',
-        cell: ({ row }) => row.original.name || '—',
+        cell: ({ row }) => {
+          const color = riderColorMap[row.original.id];
+          return (
+            <span className="flex items-center gap-2">
+              <span
+                className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+                style={{ backgroundColor: color }}
+              />
+              {row.original.name || '—'}
+            </span>
+          );
+        },
       },
       {
         accessorKey: 'email',
@@ -104,10 +141,9 @@ const UsersTrackingPage = () => {
         id: 'currentLocation',
         header: 'Current location',
         cell: ({ row }) => {
-          const coordinates = getCoordinates(row.original.currentLocation);
-          if (!coordinates) return 'No location';
-          return `${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`;
-        },
+          return (
+          <LocationDisplay location={row.original.currentLocation} />
+        )},
       },
       {
         id: 'locationHistory',
@@ -119,7 +155,7 @@ const UsersTrackingPage = () => {
         ),
       },
     ],
-    [],
+    [riderColorMap],
   );
 
   return (
@@ -134,12 +170,18 @@ const UsersTrackingPage = () => {
       <section className="border rounded-md overflow-hidden h-[420px]">
         <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY || ''}>
           <Map defaultCenter={mapCenter} defaultZoom={11} mapId="users-tracking-map">
-            {mapMarkers.map(({ user: trackedUser, coordinates }) => (
-              <Marker
+            {mapMarkers.map(({ user: trackedUser, coordinates, color }) => (
+              <AdvancedMarker
                 key={trackedUser.id}
                 position={coordinates}
                 title={trackedUser.name || trackedUser.email || trackedUser.id}
-              />
+              >
+                <Pin
+                  background={color}
+                  borderColor={color}
+                  glyphColor="#ffffff"
+                />
+              </AdvancedMarker>
             ))}
           </Map>
         </APIProvider>

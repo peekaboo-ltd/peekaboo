@@ -25,6 +25,7 @@ export enum BillingStatus {
 }
 
 export enum BillingPeriod {
+  DAILY = 'DAILY',
   WEEKLY = 'WEEKLY',
   MONTHLY = 'MONTHLY',
 }

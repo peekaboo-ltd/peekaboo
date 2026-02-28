@@ -44,16 +44,19 @@ export const usersQueriesApiSlice = createApi({
         page,
         size,
         organizationId,
+        roles,
       }: {
         page: number;
         size: number;
         organizationId?: string;
+        roles?: string[];
       }) => ({
         url: '/users/tracking',
         params: {
           page,
           size,
           organizationId,
+          roles: roles ? roles.join(',') : undefined,
         },
       }),
     }),

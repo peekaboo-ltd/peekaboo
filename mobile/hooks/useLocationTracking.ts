@@ -40,7 +40,6 @@ export const useLocationTracking = () => {
         });
 
         const currentLocation = await usersAPI.updateCurrentLocation(
-          user?.id,
           {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,

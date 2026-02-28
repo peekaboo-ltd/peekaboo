@@ -8,11 +8,10 @@ interface UpdateCurrentLocationResponse {
 
 export const usersAPI = {
   updateCurrentLocation: async (
-    id: string,
     location: Pick<UserLocation, 'latitude' | 'longitude'>
   ): Promise<UserLocation> => {
     const response = await apiClient.patch<UpdateCurrentLocationResponse>(
-      `/users/${id}/current-location`,
+      `/users/me/current-location`,
       location
     );
 
