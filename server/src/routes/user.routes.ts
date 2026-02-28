@@ -12,6 +12,13 @@ router.use(authenticate);
 // GET all users with filters (ADMIN only)
 router.get("/", authorize([RoleTypes.ADMIN, RoleTypes.BUSINESS]), UserController.getUsers);
 
+// GET lightweight users tracking list
+router.get(
+  "/tracking",
+  authorize([RoleTypes.ADMIN, RoleTypes.BUSINESS, RoleTypes.STAFF]),
+  UserController.getUsersTracking
+);
+
 // GET user by ID (ADMIN or own profile)
 router.get("/:id", UserController.getUserById);
 

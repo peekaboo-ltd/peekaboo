@@ -25,6 +25,20 @@ export const UserController = {
     }
   },
 
+  // GET USERS TRACKING LIST
+  async getUsersTracking(req: Request, res: Response, next: NextFunction) {
+    try {
+      const trackingUsers = await userService.getUsersTracking(req.query);
+
+      return res.status(200).json({
+        message: 'Users tracking fetched successfully',
+        data: trackingUsers,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // GET USER BY ID
   async getUserById(req: Request, res: Response, next: NextFunction) {
     try {

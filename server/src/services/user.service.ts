@@ -18,6 +18,21 @@ import { MembershipStatus, OrganizationRole } from '../constants/organization.co
 import { AuditCreate, AuditUpdate, AuditDelete } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
+
+interface UserTrackingListItem {
+  id: UUID;
+  name?: string;
+  status: UserStatus;
+  currentLocation: User['currentLocation'] | null;
+  updatedAt: Date;
+  roles: Array<{
+    id: UUID;
+    name: RoleTypes;
+    label: string | null;
+  }>;
+}
+
+
 export class UserService {
   private readonly userRepository: Repository<User>;
   private readonly userRoleService: UserRoleService;
@@ -353,6 +368,118 @@ export class UserService {
         size: Number(size),
       });
     }
+  }
+
+
+  // GET USERS TRACKING WITH LIGHTWEIGHT PAYLOAD
+  async getUsersTracking(query: Request['query']): Promise<Pagination<UserTrackingListItem>> {
+    const { page = 0, size = 10, status, role, hasCurrentLocation } = query;
+
+    const pageNumber = Number(page) >= 0 ? Number(page) : 0;
+    const sizeNumber = Number(size) > 0 ? Number(size) : 10;
+    const roleFilter = Array.isArray(role) ? role[0] : role;
+    const statusFilter = Array.isArray(status) ? status[0] : status;
+
+    const hasCurrentLocationFilter =
+      typeof hasCurrentLocation === 'string'
+        ? hasCurrentLocation.toLowerCase() === 'true'
+          ? true
+          : hasCurrentLocation.toLowerCase() === 'false'
+            ? false
+            : undefined
+        : undefined;
+
+    const applyFilters = (queryBuilder: any) => {
+      if (statusFilter) {
+        queryBuilder.andWhere('user.status = :status', { status: statusFilter });
+      }
+
+      if (roleFilter) {
+        queryBuilder.andWhere('role.name = :role', { role: roleFilter });
+      }
+
+      if (hasCurrentLocationFilter === true) {
+        queryBuilder.andWhere('user.currentLocation IS NOT NULL');
+      }
+
+      if (hasCurrentLocationFilter === false) {
+        queryBuilder.andWhere('user.currentLocation IS NULL');
+      }
+
+      return queryBuilder;
+    };
+
+    const countQueryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoin('user.userRoles', 'userRole')
+      .leftJoin('userRole.role', 'role')
+      .select('COUNT(DISTINCT user.id)', 'totalCount');
+
+    applyFilters(countQueryBuilder);
+
+    const totalCountResult = await countQueryBuilder.getRawOne<{ totalCount: string }>();
+    const totalCount = Number(totalCountResult?.totalCount || 0);
+
+    const { take, skip } = getPagination({
+      page: pageNumber,
+      size: sizeNumber,
+    });
+
+    const dataQueryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoin('user.userRoles', 'userRole')
+      .leftJoin('userRole.role', 'role')
+      .select('user.id', 'id')
+      .addSelect('user.name', 'name')
+      .addSelect('user.status', 'status')
+      .addSelect('user.currentLocation', 'currentLocation')
+      .addSelect('user.updatedAt', 'updatedAt')
+      .addSelect(
+        `COALESCE(
+          JSONB_AGG(
+            DISTINCT JSONB_BUILD_OBJECT('id', role.id, 'name', role.name, 'label', role.label)
+          ) FILTER (WHERE role.id IS NOT NULL),
+          '[]'::jsonb
+        )`,
+        'roles'
+      )
+      .groupBy('user.id')
+      .addGroupBy('user.name')
+      .addGroupBy('user.status')
+      .addGroupBy('user.currentLocation')
+      .addGroupBy('user.updatedAt')
+      .orderBy('user.updatedAt', 'DESC')
+      .skip(skip)
+      .take(take);
+
+    applyFilters(dataQueryBuilder);
+
+    const trackingRows = await dataQueryBuilder.getRawMany<{
+      id: UUID;
+      name: string | null;
+      status: UserStatus;
+      currentLocation: User['currentLocation'] | null;
+      updatedAt: Date;
+      roles: Array<{ id: UUID; name: RoleTypes; label: string | null }> | string;
+    }>();
+
+    const rows: UserTrackingListItem[] = trackingRows.map((row) => ({
+      id: row.id,
+      name: row.name || undefined,
+      status: row.status,
+      currentLocation: row.currentLocation,
+      updatedAt: new Date(row.updatedAt),
+      roles: Array.isArray(row.roles) ? row.roles : JSON.parse(row.roles || '[]'),
+    }));
+
+    return {
+      rows,
+      totalCount,
+      totalPages: Math.ceil(totalCount / sizeNumber),
+      currentPage: pageNumber + 1,
+      size: sizeNumber,
+      page: pageNumber,
+    };
   }
 
   // UPDATE USER STATUS
