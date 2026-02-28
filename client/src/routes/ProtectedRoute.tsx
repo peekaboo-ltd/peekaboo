@@ -22,6 +22,12 @@ export const ProtectedRoute = ({
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
+  // Redirect GUEST users to complete their account before accessing protected routes
+  const isGuest = user?.userRoles?.some((role: UserRole) => role.role.name === 'GUEST');
+  if (isGuest) {
+    return <Navigate to={`/auth/complete?next=${encodeURIComponent(location.pathname)}`} replace />;
+  }
+
   // Check role-based access
   if (allowedRoles.length > 0 && !user?.userRoles?.some((role: UserRole) => allowedRoles.includes(role.role.name))) {
     return <Navigate to="/unauthorized" />;

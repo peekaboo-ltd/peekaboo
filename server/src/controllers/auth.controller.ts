@@ -195,4 +195,45 @@ export const AuthController = {
       next(error);
     }
   },
+
+  // CHECK ACCOUNT — returns whether current user has email and password set
+  async checkAccount(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new UnauthorizedError('User not authenticated');
+      }
+
+      const result = await authService.checkAccount(req.user.id);
+
+      return res.status(200).json({
+        message: 'Account status fetched',
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // COMPLETE ACCOUNT — upgrades GUEST user with name/email/password → CUSTOMER
+  async completeAccount(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new UnauthorizedError('User not authenticated');
+      }
+
+      const { name, email, password } = req.body;
+      const { token, user } = await authService.completeAccount(req.user.id, {
+        name,
+        email,
+        password,
+      });
+
+      return res.status(200).json({
+        message: 'Account completed successfully',
+        data: { token, user },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };

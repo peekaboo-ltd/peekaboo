@@ -47,6 +47,15 @@ export const authMutationApiSlice = createApi({
         body: { phoneNumber },
       }),
     }),
+
+    // COMPLETE ACCOUNT (GUEST → CUSTOMER: sets name/email/password)
+    completeAccount: builder.mutation({
+      query: ({ name, email, password }: { name: string; email: string; password: string }) => ({
+        url: '/auth/complete-account',
+        method: 'POST',
+        body: { name, email, password },
+      }),
+    }),
   }),
 });
 
@@ -56,4 +65,5 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useAddPhoneMutation,
+  useCompleteAccountMutation,
 } = authMutationApiSlice;

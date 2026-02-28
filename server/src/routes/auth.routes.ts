@@ -37,5 +37,7 @@ router.get('/me', AuthController.getCurrentUser as RequestHandler);
 router.post('/logout', AuthController.logout as RequestHandler);
 router.post('/refresh', AuthController.refreshToken as RequestHandler);
 router.patch('/add-phone', AuthController.addPhoneNumber as RequestHandler);
+router.get('/check-account', AuthController.checkAccount as RequestHandler);
+router.post('/complete-account', AuthController.completeAccount as RequestHandler);
 
 export default router;

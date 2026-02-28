@@ -32,6 +32,7 @@ import { OrderAssignment } from '../entities/orderAssignment.entity';
 import { Batch } from '../entities/batch.entity';
 import { BatchStatus } from '../constants/batch.constants';
 import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
+import { RoleTypes } from '../constants/role.constants';
 import {
   BulkImportRequest,
   BulkImportResponse,
@@ -179,9 +180,10 @@ export class OrderService {
     });
 
     if (!sender) {
-      sender = await this.userService.createUser({
-        phoneNumber: senderPhoneNumber,
-      });
+      sender = await this.userService.createUser(
+        { phoneNumber: senderPhoneNumber },
+        [RoleTypes.GUEST]
+      );
     }
 
     let recipient = await this.userRepository.findOne({

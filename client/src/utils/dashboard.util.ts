@@ -76,14 +76,14 @@ export const getAdminMetricCards = (
     label: 'Pending Payments',
     value: formatNumbers(metrics.pendingPayments),
     colorClass: 'text-amber-600',
-    href: '/orders',
+    href: '/orders?status=PENDING',
     icon: faClock,
   },
   {
     label: 'Completed Payments',
     value: formatNumbers(metrics.completedPayments),
     colorClass: 'text-green-600',
-    href: '/orders',
+    href: '/orders?status=COMPLETED',
     icon: faCheckCircle,
   },
 ];

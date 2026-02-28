@@ -20,6 +20,7 @@ import OrderPayment from '@/components/modals/OrderPayment';
 import { useFetchPayments } from '@/hooks/payments/payment.hooks';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { ORDER_FEE_RANGES } from '@/constants/order.constants';
 
 const PublicOrderDetails = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -489,7 +490,7 @@ const PublicOrderDetails = () => {
                     </section>
                   </article>
                 </dl>
-                <footer className="mt-6 pt-4 border-t border-gray-300">
+                <footer className="mt-6 pt-4 border-t border-gray-300 space-y-4">
                   <p className="text-xs text-gray-600 mb-2">
                     * Route calculated using Google Maps. Delivery time includes a +15 minute buffer for unexpected circumstances. Minimum delivery time is 20–30 minutes.
                   </p>
@@ -504,6 +505,25 @@ const PublicOrderDetails = () => {
                       </Link>
                     </p>
                   )}
+                  <details className="text-xs">
+                    <summary className="cursor-pointer font-medium text-gray-700 hover:text-gray-900">
+                      Fee ranges (RWF)
+                    </summary>
+                    <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-1.5 text-gray-600">
+                      {ORDER_FEE_RANGES.map((range) => {
+                        const label =
+                          range.max === Infinity
+                            ? `${Math.floor(range.min)} km+ (outside Kigali)`
+                            : `${range.min}–${range.max} km`;
+                        return (
+                          <li key={`${range.min}-${range.max}`} className="flex justify-between gap-2">
+                            <span>{label}</span>
+                            <span className="font-medium text-gray-800">{formatCurrency(range.fee)}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </details>
                 </footer>
               </section>
             )}

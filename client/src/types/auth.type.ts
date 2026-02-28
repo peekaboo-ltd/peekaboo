@@ -36,6 +36,7 @@ export interface Role {
 }
 
 export enum RoleTypes {
+  GUEST = 'GUEST',
   RIDER = 'RIDER',
   CUSTOMER = 'CUSTOMER',
   STAFF = 'STAFF',

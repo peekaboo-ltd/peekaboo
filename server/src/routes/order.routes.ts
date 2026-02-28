@@ -36,6 +36,7 @@ router.patch(
     RoleTypes.ADMIN,
     RoleTypes.STAFF,
     RoleTypes.RIDER,
+    RoleTypes.GUEST,
   ]),
   OrderController.updateOrder,
 );
@@ -78,6 +79,7 @@ router.get(
     RoleTypes.ADMIN,
     RoleTypes.RIDER,
     RoleTypes.STAFF,
+    RoleTypes.GUEST,
   ]),
   OrderController.getOrderById,
 );

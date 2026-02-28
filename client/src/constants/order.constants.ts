@@ -17,11 +17,16 @@ export enum OrderFee {
 
 export const ORDER_FEE_RANGES = [
   { min: 0, max: 3, fee: 600 },
-  { min: 3.01, max: 6, fee: 1000 },
-  { min: 6.01, max: 10, fee: 1000 },
-  { min: 10.01, max: 15, fee: 1500 },
+  { min: 3.01, max: 6, fee: 800 },
+  { min: 6.01, max: 9, fee: 1000 },
+  { min: 9.01, max: 12, fee: 1200 },
+  { min: 12.01, max: 15, fee: 1500 },
   { min: 15.01, max: 20, fee: 2000 },
-  { min: 20.01, max: Infinity, fee: 2500 },
+  { min: 20.01, max: 25, fee: 2500 },
+  { min: 25.01, max: 30, fee: 3000 },
+  { min: 30.01, max: 35, fee: 3500 },
+  { min: 35.01, max: 40, fee: 5000 },
+  { min: 40.01, max: Infinity, fee: 6000 },
 ];
 
 export const workflowStatuses: {

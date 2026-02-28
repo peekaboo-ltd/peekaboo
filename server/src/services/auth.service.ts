@@ -15,15 +15,18 @@ import { UserService } from './user.service';
 import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
 import { UUID } from '../types';
 import { EmailService } from '../integrations/emails/email.service';
+import { UserRole } from '../entities/userRole.entity';
 
 const PASSWORD_RESET_TOKEN_EXPIRY = '30m';
 
 export class AuthService {
   private readonly userRepository: Repository<User>;
+  private readonly userRoleRepository: Repository<UserRole>;
   private readonly userRoleService: UserRoleService;
   private readonly emailService: EmailService;
   constructor() {
     this.userRepository = AppDataSource.getRepository(User);
+    this.userRoleRepository = AppDataSource.getRepository(UserRole);
     this.userRoleService = new UserRoleService();
     this.emailService = new EmailService();
   }
@@ -489,5 +492,79 @@ export class AuthService {
         email: user.email,
       });
     }
+  }
+
+  // CHECK ACCOUNT — returns whether the current user has email and password set
+  async checkAccount(userId: UUID): Promise<{ hasEmail: boolean; hasPassword: boolean }> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: { id: true, email: true, passwordHash: true },
+    });
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    return {
+      hasEmail: !!user.email,
+      hasPassword: !!user.passwordHash,
+    };
+  }
+
+  // COMPLETE ACCOUNT — sets name/email/password and upgrades GUEST → CUSTOMER
+  async completeAccount(
+    userId: UUID,
+    {
+      name,
+      email,
+      password,
+    }: { name: string; email: string; password: string }
+  ): Promise<{ token: string; user: User }> {
+    if (!name || !email || !password) {
+      throw new ValidationError('Name, email, and password are required');
+    }
+
+    if (password.length < 8) {
+      throw new ValidationError('Password must be at least 8 characters');
+    }
+
+    // Check email not already taken by another user
+    const existingWithEmail = await this.userRepository.findOne({
+      where: { email },
+    });
+    if (existingWithEmail && existingWithEmail.id !== userId) {
+      throw new ConflictError('Email is already in use');
+    }
+
+    const hashedPassword = await hashPassword(password);
+    await this.userRepository.update(userId, {
+      name,
+      email,
+      passwordHash: hashedPassword,
+    });
+
+    // Remove GUEST role and assign CUSTOMER role
+    const guestUserRoles = await this.userRoleRepository.find({
+      where: { userId },
+      relations: { role: true },
+    });
+    const guestUserRole = guestUserRoles.find(
+      (ur) => (ur.role as { name: string }).name === RoleTypes.GUEST
+    );
+    if (guestUserRole) {
+      await this.userRoleRepository.delete({ id: guestUserRole.id });
+    }
+    await this.userRoleService.assignRolesToUser(userId, [RoleTypes.CUSTOMER]);
+
+    const userService = new UserService();
+    const updatedUser = await userService.getUserById(userId);
+
+    const token = jwt.sign(
+      { id: userId },
+      process.env.JWT_SECRET || 'default_secret',
+      { expiresIn: '24h' }
+    );
+
+    return { token, user: updatedUser };
   }
 }

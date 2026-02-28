@@ -10,7 +10,7 @@ router.use(authenticate);
 
 router.get(
   '/',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER]),
+  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.GUEST]),
   OrderActivityController.fetchOrderActivities
 );
 

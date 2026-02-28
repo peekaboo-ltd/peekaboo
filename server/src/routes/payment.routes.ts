@@ -11,14 +11,14 @@ router.use(authenticate);
 // Create payment
 router.post(
   '/',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.STAFF]),
+  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.STAFF, RoleTypes.GUEST]),
   PaymentController.createPayment
 );
 
 // Fetch payments
 router.get(
   '/',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.STAFF]),
+  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.STAFF, RoleTypes.GUEST]),
   PaymentController.fetchPayments
 );
 
@@ -53,7 +53,7 @@ router.patch(
 // Get payment by id (after /admin routes so "admin" is not matched as id)
 router.get(
   '/:id',
-  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.STAFF]),
+  authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.RIDER, RoleTypes.STAFF, RoleTypes.GUEST]),
   PaymentController.getPaymentById
 );
 
