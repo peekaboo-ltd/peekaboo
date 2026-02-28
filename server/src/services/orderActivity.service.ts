@@ -40,6 +40,7 @@ export class OrderActivityService {
   constructor() {
     this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
     this.orderRepository = AppDataSource.getRepository(Order);
+    this.orderAssignmentRepository = AppDataSource.getRepository(OrderAssignment);
     this.emailService = new EmailService();
   }
 
