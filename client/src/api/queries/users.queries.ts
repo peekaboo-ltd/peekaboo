@@ -39,8 +39,47 @@ export const usersQueriesApiSlice = createApi({
         url: `/users/${id}`,
       }),
     }),
+    fetchUsersTracking: builder.query({
+      query: ({
+        page,
+        size,
+        organizationId,
+      }: {
+        page: number;
+        size: number;
+        organizationId?: string;
+      }) => ({
+        url: '/users/tracking',
+        params: {
+          page,
+          size,
+          organizationId,
+        },
+      }),
+    }),
+    fetchUserCurrentLocationHistory: builder.query({
+      query: ({
+        userId,
+        page,
+        size,
+      }: {
+        userId: string;
+        page: number;
+        size: number;
+      }) => ({
+        url: `/users/${userId}/current-location-history`,
+        params: {
+          page,
+          size,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useLazyFetchUsersQuery, useLazyFetchUserByIdQuery } =
-  usersQueriesApiSlice;
+export const {
+  useLazyFetchUsersQuery,
+  useLazyFetchUserByIdQuery,
+  useLazyFetchUsersTrackingQuery,
+  useLazyFetchUserCurrentLocationHistoryQuery,
+} = usersQueriesApiSlice;

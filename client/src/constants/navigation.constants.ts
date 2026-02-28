@@ -1,6 +1,6 @@
 import { RoleTypes } from '@/types/auth.type';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faFileLines, faLayerGroup } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faLayerGroup, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import {
   faChartLine,
   faBuilding,
@@ -58,6 +58,12 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     label: 'Users',
     path: '/users',
     icon: faUserGroup,
+    permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
+  },
+  {
+    label: 'Users Tracking',
+    path: '/users/tracking',
+    icon: faLocationDot,
     permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
   },
   {

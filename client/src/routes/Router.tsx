@@ -14,7 +14,13 @@ import { Dashboard } from '@/pages/dashboard';
 import { AuthenticatedLayout } from '../containers/navigation/AuthenticatedLayout';
 import { OrdersPage } from '@/pages/orders';
 import { OrderAssignmentsPage } from '@/pages/order-assignments';
-import { UsersPage, UserProfilePage, UserDetailsPage } from '@/pages/users';
+import {
+  UsersPage,
+  UserProfilePage,
+  UserDetailsPage,
+  UsersTrackingPage,
+  UserLocationHistoryPage,
+} from '@/pages/users';
 import { About, OrderFees } from '@/pages/about';
 import { ContactUsPage } from '@/pages/contact';
 import { InviteOrganization, OrganizationSettingsPage } from '@/pages/organizations';
@@ -159,6 +165,22 @@ const Router = () => {
               element={
                 <ProtectedRoute allowedRoles={[...userManagementRoles]}>
                   <UsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="tracking"
+              element={
+                <ProtectedRoute allowedRoles={[...userManagementRoles]}>
+                  <UsersTrackingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path=":id/location-history"
+              element={
+                <ProtectedRoute allowedRoles={[...userManagementRoles]}>
+                  <UserLocationHistoryPage />
                 </ProtectedRoute>
               }
             />

@@ -1,7 +1,12 @@
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/states/hooks';
 import { setUsersList, setUser, setCreateUserModal } from '@/states/slices/user.slice';
-import { useLazyFetchUserByIdQuery, useLazyFetchUsersQuery } from '@/api/queries/users.queries';
+import {
+  useLazyFetchUserByIdQuery,
+  useLazyFetchUserCurrentLocationHistoryQuery,
+  useLazyFetchUsersQuery,
+  useLazyFetchUsersTrackingQuery,
+} from '@/api/queries/users.queries';
 import {
   useCreateUserMutation,
   useUpdateUserMutation,
@@ -198,3 +203,79 @@ export const useFetchUserById = () => {
 
   return { fetchUserById, data, error, isFetching, isSuccess, reset };
 }
+
+export const useFetchUsersTracking = () => {
+  const {
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    setTotalPages,
+    totalCount,
+    setTotalCount,
+  } = usePagination();
+
+  const [fetchUsersTracking, { data, error, isFetching, isSuccess, reset }] =
+    useLazyFetchUsersTrackingQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      setTotalPages(data?.data?.totalPages ?? 0);
+      setTotalCount(data?.data?.totalCount ?? 0);
+    }
+  }, [data, isSuccess, setTotalPages, setTotalCount]);
+
+  return {
+    fetchUsersTracking,
+    data,
+    error,
+    isFetching,
+    isSuccess,
+    reset,
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    totalCount,
+  };
+};
+
+export const useFetchUserCurrentLocationHistory = () => {
+  const {
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    setTotalPages,
+    totalCount,
+    setTotalCount,
+  } = usePagination();
+
+  const [fetchUserCurrentLocationHistory, { data, error, isFetching, isSuccess, reset }] =
+    useLazyFetchUserCurrentLocationHistoryQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      setTotalPages(data?.data?.totalPages ?? 0);
+      setTotalCount(data?.data?.totalCount ?? 0);
+    }
+  }, [data, isSuccess, setTotalPages, setTotalCount]);
+
+  return {
+    fetchUserCurrentLocationHistory,
+    data,
+    error,
+    isFetching,
+    isSuccess,
+    reset,
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    totalCount,
+  };
+};
