@@ -57,7 +57,7 @@ const LocationAdministrativeLabel: React.FC<{ latitude: number; longitude: numbe
         }
 
         const data = (await response.json()) as AdministrativeDivisions;
-        const administrativeLabel = [data.cell, data.sector, data.district]
+        const administrativeLabel = [data?.village, data?.cell, data?.sector, data?.district]
           .filter(Boolean)
           .join(', ');
 
