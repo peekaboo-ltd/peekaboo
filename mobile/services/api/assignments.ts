@@ -122,9 +122,8 @@ export const assignmentsAPI = {
   /**
    * Mark order as completed
    */
-  completeOrder: async (orderId: string, trackingId?: string): Promise<void> => {
-    const payload = trackingId ? { trackingId } : {};
-    await apiClient.post(`/order-activities/${orderId}/complete`, payload);
+  completeOrder: async (orderId: string, trackingId: string): Promise<void> => {
+    await apiClient.post(`/order-activities/${orderId}/complete`, { trackingId: trackingId.trim() });
   },
 
   /**

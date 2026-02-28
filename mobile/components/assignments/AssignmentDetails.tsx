@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Linking, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../ui/Card';
@@ -16,6 +16,76 @@ import {
 interface AssignmentDetailsProps {
   assignment: Assignment;
 }
+
+interface AdministrativeDivisions {
+  village?: string;
+  cell?: string;
+  sector?: string;
+  district?: string;
+  province?: string;
+}
+
+const formatCoordinateFallback = (latitude: number, longitude: number) =>
+  `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+
+const LocationAdministrativeLabel: React.FC<{ latitude: number; longitude: number }> = ({
+  latitude,
+  longitude,
+}) => {
+  const [locationLabel, setLocationLabel] = useState(
+    formatCoordinateFallback(latitude, longitude),
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchAdministrativeDivisions = async () => {
+      try {
+        const response = await fetch('https://menya.fly.dev/api/boundaries', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            lat: latitude,
+            lng: longitude,
+          }),
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = (await response.json()) as AdministrativeDivisions;
+        const administrativeLabel = [data.cell, data.sector, data.district]
+          .filter(Boolean)
+          .join(', ');
+
+        if (isMounted && administrativeLabel) {
+          setLocationLabel(administrativeLabel);
+        }
+      } catch {
+        // Keep coordinate fallback if lookup fails
+      }
+    };
+
+    fetchAdministrativeDivisions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [latitude, longitude]);
+
+  return (
+    <Text
+      style={styles.locationAddress}
+      numberOfLines={2}
+      ellipsizeMode="tail"
+    >
+      {locationLabel}
+    </Text>
+  );
+};
 
 const getStatusBadgeVariant = (status: OrderAssignmentStatus): 'success' | 'warning' | 'danger' | 'info' | 'neutral' => {
   switch (status) {
@@ -141,9 +211,10 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
                 <View style={[styles.locationDot, { backgroundColor: colors.success }]} />
                 <Text style={styles.locationLabel}>Pickup Location</Text>
               </View>
-              <Text style={styles.locationAddress}>
-                Lat: {order.locationFrom.latitude.toFixed(6)}, Lng: {order.locationFrom.longitude.toFixed(6)}
-              </Text>
+              <LocationAdministrativeLabel
+                latitude={order.locationFrom.latitude}
+                longitude={order.locationFrom.longitude}
+              />
               <Button
                 title="Get Directions"
                 onPress={() => openMaps(order.locationFrom!.latitude, order.locationFrom!.longitude)}
@@ -162,9 +233,10 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
                 <View style={[styles.locationDot, { backgroundColor: colors.danger }]} />
                 <Text style={styles.locationLabel}>Delivery Location</Text>
               </View>
-              <Text style={styles.locationAddress}>
-                Lat: {order.locationTo.latitude.toFixed(6)}, Lng: {order.locationTo.longitude.toFixed(6)}
-              </Text>
+              <LocationAdministrativeLabel
+                latitude={order.locationTo.latitude}
+                longitude={order.locationTo.longitude}
+              />
               <Button
                 title="Get Directions"
                 onPress={() => openMaps(order.locationTo!.latitude, order.locationTo!.longitude)}

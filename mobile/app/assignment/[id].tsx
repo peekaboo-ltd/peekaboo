@@ -114,11 +114,23 @@ export default function AssignmentDetailScreen() {
   const handleComplete = async () => {
     if (!selectedAssignment?.orderId) return;
 
+    const enteredTrackingId = trackingIdInput.trim();
+    if (!enteredTrackingId) {
+      Alert.alert('Tracking ID required', 'Enter the order tracking ID to complete this delivery.');
+      return;
+    }
+
+    const expectedTrackingId = selectedAssignment.order?.trackingId?.trim();
+    if (
+      expectedTrackingId &&
+      enteredTrackingId.toLowerCase() !== expectedTrackingId.toLowerCase()
+    ) {
+      Alert.alert('Invalid Tracking ID', 'The tracking ID does not match this order.');
+      return;
+    }
+
     setIsActionLoading(true);
-    const success = await completeOrder(
-      selectedAssignment.orderId,
-      trackingIdInput.trim() || undefined,
-    );
+    const success = await completeOrder(selectedAssignment.orderId, enteredTrackingId);
     setIsActionLoading(false);
 
     if (success) {
@@ -188,7 +200,7 @@ export default function AssignmentDetailScreen() {
             <Input
               value={trackingIdInput}
               onChangeText={setTrackingIdInput}
-              placeholder="Enter tracking ID (if required)"
+              placeholder="Enter tracking ID"
               autoCapitalize="characters"
             />
           </View>
