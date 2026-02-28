@@ -6,11 +6,12 @@ export enum OrderType {
 }
 
 export enum OrderStatus {
+  DRAFT = 'DRAFT',
   CREATED = 'CREATED',
   PENDING = 'PENDING',
+  PAID = 'PAID',
   CONFIRMED = 'CONFIRMED',
   ACCEPTED = 'ACCEPTED',
-  PAID = 'PAID',
   ACTIVE = 'ACTIVE',
   IN_TRANSIT = 'IN_TRANSIT',
   DELIVERED = 'DELIVERED',

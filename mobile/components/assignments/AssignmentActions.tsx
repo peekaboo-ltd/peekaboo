@@ -44,7 +44,7 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
   const handleConfirmDispatch = () => {
     Alert.alert(
       'Confirm Dispatch',
-      'Confirming dispatch will log both CONFIRMED and IN_TRANSIT activities.',
+      'Confirming dispatch will log both CONFIRMED and In Transit activities.',
       [
         {
           text: 'Cancel',

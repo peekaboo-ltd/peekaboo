@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -50,11 +50,19 @@ export default function AssignmentsScreen() {
   };
 
   const handleAccept = async (id: string) => {
-    await acceptAssignment(id);
+    const success = await acceptAssignment(id);
+    if (!success) {
+      const message = useAssignmentStore.getState().error || 'Failed to accept assignment.';
+      Alert.alert('Error', message);
+    }
   };
 
   const handleReject = async (id: string) => {
-    await rejectAssignment(id);
+    const success = await rejectAssignment(id);
+    if (!success) {
+      const message = useAssignmentStore.getState().error || 'Failed to reject assignment.';
+      Alert.alert('Error', message);
+    }
   };
 
   const getLatestOrderStatus = (assignment: Assignment) => {
@@ -70,6 +78,32 @@ export default function AssignmentsScreen() {
 
     return sorted[0]?.status || assignment.order?.status;
   };
+
+  const orderStatusSortRank = (status: OrderStatus | undefined): number => {
+    if (!status) return 99;
+    switch (status) {
+      case OrderStatus.IN_TRANSIT:
+      case OrderStatus.DELIVERED:
+        return 0;
+      case OrderStatus.PAID:
+      case OrderStatus.CONFIRMED:
+      case OrderStatus.ACCEPTED:
+      case OrderStatus.ACTIVE:
+        return 1;
+      case OrderStatus.COMPLETED:
+        return 2;
+      default:
+        return 3;
+    }
+  };
+
+  const sortedAssignments = useMemo(() => {
+    return [...assignments].sort((a, b) => {
+      const rankA = orderStatusSortRank(getLatestOrderStatus(a));
+      const rankB = orderStatusSortRank(getLatestOrderStatus(b));
+      return rankA - rankB;
+    });
+  }, [assignments]);
 
   const handleConfirmAndTransit = async (assignment: Assignment) => {
     if (!assignment.orderId) return;
@@ -87,7 +121,8 @@ export default function AssignmentsScreen() {
               await refreshAssignments();
               Alert.alert('Success', 'Order is now in transit.');
             } else {
-              Alert.alert('Unable to start transit', 'Please try again.');
+              const message = useAssignmentStore.getState().error || 'Unable to start transit. Please try again.';
+              Alert.alert('Error', message);
             }
           },
         },
@@ -100,6 +135,7 @@ export default function AssignmentsScreen() {
     const canConfirmAndTransit =
       item.status === OrderAssignmentStatus.ACTIVE &&
       latestOrderStatus !== OrderStatus.IN_TRANSIT &&
+      latestOrderStatus !== OrderStatus.DELIVERED &&
       latestOrderStatus !== OrderStatus.COMPLETED;
 
     return (
@@ -222,7 +258,7 @@ export default function AssignmentsScreen() {
         </View>
       ) : (
         <FlatList
-          data={assignments}
+          data={sortedAssignments}
           renderItem={renderAssignment}
           keyExtractor={(item, index) => `${item.id}-${index}`}
           contentContainerStyle={styles.listContent}

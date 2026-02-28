@@ -1,10 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
   Alert,
   Text,
+  Keyboard,
 } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { AssignmentDetails } from '../../components/assignments/AssignmentDetails';
@@ -19,6 +22,23 @@ export default function AssignmentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [trackingIdInput, setTrackingIdInput] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => setKeyboardHeight(e.endCoordinates.height)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardHeight(0)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const {
     selectedAssignment,
@@ -57,9 +77,18 @@ export default function AssignmentDetailScreen() {
 
   const isActiveAssignment = selectedAssignment?.status === OrderAssignmentStatus.ACTIVE;
   const canConfirmDispatch =
-    isActiveAssignment && latestOrderStatus !== OrderStatus.IN_TRANSIT && latestOrderStatus !== OrderStatus.COMPLETED;
+    isActiveAssignment &&
+    latestOrderStatus !== OrderStatus.IN_TRANSIT &&
+    latestOrderStatus !== OrderStatus.DELIVERED &&
+    latestOrderStatus !== OrderStatus.COMPLETED;
   const canComplete =
-    isActiveAssignment && latestOrderStatus === OrderStatus.IN_TRANSIT;
+    isActiveAssignment &&
+    (latestOrderStatus === OrderStatus.IN_TRANSIT ||
+      latestOrderStatus === OrderStatus.DELIVERED);
+
+  const refresh = () => {
+    if (id) fetchAssignmentById(id);
+  };
 
   const handleAccept = async () => {
     if (!id) return;
@@ -69,13 +98,15 @@ export default function AssignmentDetailScreen() {
     setIsActionLoading(false);
 
     if (success) {
+      refresh();
       Alert.alert(
         'Assignment Accepted',
         'You have successfully accepted this assignment.',
         [{ text: 'OK' }]
       );
-    } else if (error) {
-      Alert.alert('Error', error);
+    } else {
+      const message = useAssignmentStore.getState().error || 'Failed to accept assignment.';
+      Alert.alert('Error', message);
     }
   };
 
@@ -92,8 +123,9 @@ export default function AssignmentDetailScreen() {
         'You have rejected this assignment.',
         [{ text: 'OK', onPress: () => router.back() }]
       );
-    } else if (error) {
-      Alert.alert('Error', error);
+    } else {
+      const message = useAssignmentStore.getState().error || 'Failed to reject assignment.';
+      Alert.alert('Error', message);
     }
   };
 
@@ -105,9 +137,11 @@ export default function AssignmentDetailScreen() {
     setIsActionLoading(false);
 
     if (success) {
+      refresh();
       Alert.alert('Order in Transit', 'Order has been confirmed and marked as in transit.');
-    } else if (error) {
-      Alert.alert('Error', error);
+    } else {
+      const message = useAssignmentStore.getState().error || 'Failed to confirm dispatch.';
+      Alert.alert('Error', message);
     }
   };
 
@@ -120,23 +154,17 @@ export default function AssignmentDetailScreen() {
       return;
     }
 
-    const expectedTrackingId = selectedAssignment.order?.trackingId?.trim();
-    if (
-      expectedTrackingId &&
-      enteredTrackingId.toLowerCase() !== expectedTrackingId.toLowerCase()
-    ) {
-      Alert.alert('Invalid OTP', 'The OTP does not match this order.');
-      return;
-    }
-
     setIsActionLoading(true);
     const success = await completeOrder(selectedAssignment.orderId, enteredTrackingId);
     setIsActionLoading(false);
 
     if (success) {
+      refresh();
       Alert.alert('Order Completed', 'Order has been marked as completed.');
-    } else if (error) {
-      Alert.alert('Error', error);
+    } else {
+      const message = useAssignmentStore.getState().error || 'Failed to complete order.';
+      Alert.alert('Error', message);
+      refresh();
     }
   };
 
@@ -174,8 +202,18 @@ export default function AssignmentDetailScreen() {
     return 'Assignment Details';
   };
 
+  const handleOtpFocus = () => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={0}
+    >
       <View style={styles.background}>
         <View style={styles.glowTop} />
         <View style={styles.glowBottom} />
@@ -188,9 +226,14 @@ export default function AssignmentDetailScreen() {
       />
 
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          keyboardHeight > 0 && { paddingBottom: keyboardHeight },
+        ]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <AssignmentDetails assignment={selectedAssignment} />
 
@@ -202,21 +245,22 @@ export default function AssignmentDetailScreen() {
               onChangeText={setTrackingIdInput}
               placeholder="Enter OTP"
               keyboardType="number-pad"
+              onFocus={handleOtpFocus}
             />
           </View>
         )}
-      </ScrollView>
 
-      <AssignmentActions
-        status={selectedAssignment.status}
-        showConfirmDispatch={canConfirmDispatch}
-        onAccept={handleAccept}
-        onReject={handleReject}
-        onConfirmDispatch={canConfirmDispatch ? handleConfirmDispatch : undefined}
-        onComplete={canComplete ? handleComplete : undefined}
-        isLoading={isActionLoading}
-      />
-    </View>
+        <AssignmentActions
+          status={selectedAssignment.status}
+          showConfirmDispatch={canConfirmDispatch}
+          onAccept={handleAccept}
+          onReject={handleReject}
+          onConfirmDispatch={canConfirmDispatch ? handleConfirmDispatch : undefined}
+          onComplete={canComplete ? handleComplete : undefined}
+          isLoading={isActionLoading}
+        />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

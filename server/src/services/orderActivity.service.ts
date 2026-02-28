@@ -308,8 +308,8 @@ export class OrderActivityService {
 
     const latestActivity = await this.getLatestActivityByOrderId(orderId);
 
-    if (!latestActivity || latestActivity.status !== OrderStatus.IN_TRANSIT) {
-      throw new ValidationError('Only orders in transit can be marked as completed');
+    if (!latestActivity || !['IN_TRANSIT', 'DELIVERED'].includes(latestActivity.status)) {
+      throw new ValidationError('Only orders in transit or delivered can be marked as completed');
     }
 
     const storedTrackingId = order.trackingId?.trim();

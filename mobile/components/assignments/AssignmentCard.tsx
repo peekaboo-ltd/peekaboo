@@ -4,9 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
-import { Assignment, OrderAssignmentStatus } from '../../types';
+import { Assignment, OrderAssignmentStatus, OrderStatus } from '../../types';
 import { colors, typography, spacing } from '../../utils/constants';
 import { formatSmartDate, formatCurrency, formatOrderRef } from '../../utils/formatters';
+import { getOrderStatusLabel } from '../../constants/order.constants';
 
 interface AssignmentCardProps {
   assignment: Assignment;
@@ -49,6 +50,15 @@ const getStatusLabel = (status: OrderAssignmentStatus): string => {
   }
 };
 
+const getLatestOrderStatus = (assignment: Assignment): OrderStatus | undefined => {
+  const activities = assignment.order?.activities || [];
+  if (activities.length === 0) return assignment.order?.status;
+  const sorted = [...activities].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+  return sorted[0]?.status ?? assignment.order?.status;
+};
+
 export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   assignment,
   onPress,
@@ -58,6 +68,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
 }) => {
   const isPending = assignment.status === OrderAssignmentStatus.PENDING;
   const order = assignment.order;
+  const latestOrderStatus = getLatestOrderStatus(assignment);
 
   return (
     <Card style={styles.card} onPress={onPress} elevation="md">
@@ -70,11 +81,18 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
               {order?.referenceId ? formatOrderRef(order.referenceId) : `#${assignment.id.slice(0, 8)}`}
             </Text>
           </View>
-          <Badge
-            text={getStatusLabel(assignment.status)}
-            variant={getStatusBadgeVariant(assignment.status)}
-            size="small"
-          />
+          <View style={styles.badgeRow}>
+            <Badge
+              text={getStatusLabel(assignment.status)}
+              variant={getStatusBadgeVariant(assignment.status)}
+              size="small"
+            />
+            {latestOrderStatus != null && (
+              <Text style={styles.orderStatusSubtitle}>
+                {getOrderStatusLabel(latestOrderStatus)}
+              </Text>
+            )}
+          </View>
         </View>
         <Text style={styles.time}>{formatSmartDate(assignment.createdAt)}</Text>
       </View>
@@ -162,6 +180,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  badgeRow: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+  },
+  orderStatusSubtitle: {
+    fontSize: typography.caption.fontSize,
+    color: colors.text.secondary,
   },
   orderLabel: {
     fontSize: typography.caption.fontSize,

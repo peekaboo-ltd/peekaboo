@@ -4,8 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
-import { Assignment, OrderAssignmentStatus } from '../../types';
+import { Assignment, OrderAssignmentStatus, OrderStatus } from '../../types';
 import { colors, typography, spacing } from '../../utils/constants';
+import { getOrderStatusLabel } from '../../constants/order.constants';
 import { 
   formatDateTime, 
   formatCurrency, 
@@ -120,6 +121,15 @@ const getStatusLabel = (status: OrderAssignmentStatus): string => {
   }
 };
 
+const getLatestOrderStatus = (assignment: Assignment): OrderStatus | undefined => {
+  const activities = assignment.order?.activities || [];
+  if (activities.length === 0) return assignment.order?.status;
+  const sorted = [...activities].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+  return sorted[0]?.status ?? assignment.order?.status;
+};
+
 export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
   assignment,
 }) => {
@@ -152,12 +162,20 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
           </Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>Status</Text>
+          <Text style={styles.label}>Assignment</Text>
           <Badge
             text={getStatusLabel(assignment.status)}
             variant={getStatusBadgeVariant(assignment.status)}
           />
         </View>
+        {order && (
+          <View style={styles.row}>
+            <Text style={styles.label}>Order status</Text>
+            <Text style={styles.value}>
+              {getOrderStatusLabel(getLatestOrderStatus(assignment))}
+            </Text>
+          </View>
+        )}
         <View style={styles.row}>
           <Text style={styles.label}>Created</Text>
           <Text style={styles.value}>{formatDateTime(assignment.createdAt)}</Text>
