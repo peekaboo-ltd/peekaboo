@@ -22,11 +22,14 @@ router.get(
 // GET user by ID (ADMIN or own profile)
 router.get("/:id", UserController.getUserById);
 
+// GET user current-location history timeline
+router.get('/:id/current-location-history', UserController.getCurrentLocationHistory);
+
 // CREATE new user (ADMIN only)
 router.post("/", authorize([RoleTypes.ADMIN, RoleTypes.BUSINESS]), UserController.createUser);
 
 // UPDATE current user location
-router.patch('/:id/current-location', UserController.updateCurrentLocation);
+router.patch('/me/current-location', UserController.updateCurrentLocation);
 
 // UPDATE user (ADMIN or own profile)
 router.patch("/:id", UserController.updateUser);

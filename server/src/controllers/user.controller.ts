@@ -2,11 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import { UserService } from "../services/user.service";
 import { RoleTypes } from "../constants/role.constants";
 import { UserStatus } from "../constants/user.constants";
-import { In } from "typeorm";
 import { UUID } from "../types";
 import { AuthRequest } from '../types/auth.types';
+import { AuditLogService } from '../services/auditLog.service';
 
 const userService = new UserService();
+const auditLogService = new AuditLogService();
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const UserController = {
   // GET ALL USERS WITH FILTERS
@@ -55,6 +58,47 @@ export const UserController = {
       return res.status(200).json({
         message: "User fetched successfully",
         data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET USER CURRENT-LOCATION HISTORY
+  async getCurrentLocationHistory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { page = '0', size = '10' } = req.query;
+
+      if (!UUID_REGEX.test(id)) {
+        return res.status(400).json({
+          message: 'Invalid user id provided',
+        });
+      }
+
+      const pageNumber = Number(page);
+      const sizeNumber = Number(size);
+
+      if (
+        !Number.isInteger(pageNumber) ||
+        pageNumber < 0 ||
+        !Number.isInteger(sizeNumber) ||
+        sizeNumber <= 0
+      ) {
+        return res.status(400).json({
+          message: 'Invalid pagination params provided',
+        });
+      }
+
+      const timeline = await auditLogService.fetchUserCurrentLocationHistory({
+        userId: id as UUID,
+        page: pageNumber,
+        size: sizeNumber,
+      });
+
+      return res.status(200).json({
+        message: 'Current location history fetched successfully',
+        data: timeline,
       });
     } catch (error) {
       next(error);

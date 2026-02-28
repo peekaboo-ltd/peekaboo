@@ -8,8 +8,26 @@ import {
   getPagingData,
   Pagination,
 } from '../helpers/pagination.helper';
-import { AuditAction } from '../constants/auditLog.constants';
+import { AuditAction, AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { sanitizeAuditValues } from '../helpers/audit.helper';
+
+interface CurrentLocationData {
+  latitude?: number | string;
+  longitude?: number | string;
+}
+
+interface CurrentLocationTimelineItem {
+  timestamp: string;
+  latitude: number;
+  longitude: number;
+  source: 'SERVICE' | 'SUBSCRIBER';
+  action: AuditAction;
+  actor?: {
+    id: UUID;
+    name: string | undefined;
+    email: string | undefined;
+  };
+}
 
 /**
  * AUDIT LOG SERVICE
@@ -166,6 +184,76 @@ export class AuditLogService {
 
     return getPagingData({
       data: auditLogs,
+      page,
+      size,
+    });
+  }
+
+  async fetchUserCurrentLocationHistory({
+    userId,
+    page = 0,
+    size = 10,
+  }: {
+    userId: UUID;
+    page?: number;
+    size?: number;
+  }): Promise<Pagination<CurrentLocationTimelineItem>> {
+    const { skip, take } = getPagination({ page, size });
+
+    const [auditLogs, total] = await this.auditLogRepository
+      .createQueryBuilder('auditLog')
+      .leftJoinAndSelect('auditLog.createdBy', 'createdBy')
+      .where('auditLog.entityType = :entityType', {
+        entityType: AuditLogEntityTypes.USER,
+      })
+      .andWhere('auditLog.entityId = :userId', { userId })
+      .andWhere(
+        `(
+          (auditLog.oldValues ? 'currentLocation')
+          OR
+          (auditLog.newValues ? 'currentLocation')
+        )`
+      )
+      .andWhere(
+        `(COALESCE(auditLog.oldValues -> 'currentLocation', '{}'::jsonb) IS DISTINCT FROM COALESCE(auditLog.newValues -> 'currentLocation', '{}'::jsonb))`
+      )
+      .orderBy('auditLog.createdAt', 'DESC')
+      .skip(skip)
+      .take(take)
+      .getManyAndCount();
+
+    const timeline: CurrentLocationTimelineItem[] = [];
+
+    for (const auditLog of auditLogs) {
+      const locationData =
+        (auditLog.newValues?.currentLocation as CurrentLocationData | undefined) ||
+        (auditLog.oldValues?.currentLocation as CurrentLocationData | undefined);
+
+      const latitude = Number(locationData?.latitude);
+      const longitude = Number(locationData?.longitude);
+
+      if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+        continue;
+      }
+
+      timeline.push({
+        timestamp: auditLog.createdAt.toISOString(),
+        latitude,
+        longitude,
+        source: auditLog.source || 'SERVICE',
+        action: auditLog.action,
+        actor: auditLog.createdBy
+          ? {
+              id: auditLog.createdBy.id,
+              name: auditLog.createdBy.name,
+              email: auditLog.createdBy.email,
+            }
+          : undefined,
+      });
+    }
+
+    return getPagingData({
+      data: [timeline, total],
       page,
       size,
     });
