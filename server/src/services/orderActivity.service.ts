@@ -16,8 +16,9 @@ import { Request } from 'express';
 import { UUID } from '../types';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
-import { OrderStatus } from '../constants/order.constants';
+import { OrderAssignmentStatus, OrderStatus } from '../constants/order.constants';
 import { EmailService } from '../integrations/emails/email.service';
+import { OrderAssignment } from '../entities/orderAssignment.entity';
 
 const ORDER_STATUS_MESSAGES: Record<string, string> = {
   [OrderStatus.PAID]:
@@ -33,6 +34,7 @@ const ORDER_STATUS_MESSAGES: Record<string, string> = {
 export class OrderActivityService {
   private readonly orderActivityRepository: Repository<OrderActivity>;
   private readonly orderRepository: Repository<Order>;
+  private readonly orderAssignmentRepository: Repository<OrderAssignment>;
   private readonly emailService: EmailService;
 
   constructor() {
@@ -355,6 +357,7 @@ export class OrderActivityService {
     });
 
     await this.orderRepository.update(orderId, { status: OrderStatus.COMPLETED });
+    await this.orderAssignmentRepository.update(order.assignments.map((assignment) => assignment.id), { status: OrderAssignmentStatus.COMPLETED });
 
     this.sendCompletionEmails(order).catch(() => { });
 
