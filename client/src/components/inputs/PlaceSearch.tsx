@@ -44,6 +44,11 @@ const PlaceSearch = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
   const places = useMapsLibrary('places');
+  const normalizedCountry =
+    typeof country === 'string'
+      ? country.toLowerCase()
+      : country?.map((countryCode) => countryCode.toLowerCase());
+  const isMapsUnavailable = inputValue.length > 2 && !places;
 
   const handlePlaceSelect = useCallback(
     (place: google.maps.places.PlaceResult) => {
@@ -76,7 +81,7 @@ const PlaceSearch = ({
     }
   }, [value]);
 
-  const getViewportMetrics = () => {
+  const getViewportMetrics = useCallback(() => {
     const visualViewport = window.visualViewport;
     if (visualViewport) {
       return {
@@ -90,9 +95,9 @@ const PlaceSearch = ({
       offsetTop: 0,
       offsetLeft: 0,
     };
-  };
+  }, []);
 
-  const updateDropdownPosition = () => {
+  const updateDropdownPosition = useCallback(() => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect();
       const viewport = getViewportMetrics();
@@ -114,7 +119,7 @@ const PlaceSearch = ({
         maxHeight: height,
       });
     }
-  };
+  }, [getViewportMetrics]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -127,10 +132,12 @@ const PlaceSearch = ({
     if (newValue.length > 2 && places) {
       updateDropdownPosition();
       const service = new places.AutocompleteService();
-      service.getQueryPredictions(
+      service.getPlacePredictions(
         {
           input: newValue,
-          componentRestrictions: country ? { country } : undefined,
+          componentRestrictions: normalizedCountry
+            ? { country: normalizedCountry }
+            : undefined,
         },
         (predictions, status) => {
           if (
@@ -172,7 +179,7 @@ const PlaceSearch = ({
         }
       };
     }
-  }, [predictions.length]);
+  }, [predictions.length, updateDropdownPosition]);
 
   const handleSuggestionClick = (
     prediction: google.maps.places.AutocompletePrediction,
@@ -260,6 +267,9 @@ const PlaceSearch = ({
           autoComplete="off"
           className="w-full px-3 py-2 placeholder:text-[13px] text-[14px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent"
         />
+        {isMapsUnavailable && (
+          <p className="mt-1 text-xs text-red-500">Maps failed to load.</p>
+        )}
       </section>
       {dropdownContent && createPortal(dropdownContent, document.body)}
     </>
