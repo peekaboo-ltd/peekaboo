@@ -37,25 +37,29 @@ const PublicOrderDetails = () => {
   useDocumentTitle('Order Details');
 
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('pods-visible');
-          }
-        });
-      },
-      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
-    );
+    if (!observerRef.current) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('pods-visible');
+              observerRef.current?.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+      );
+    }
 
-    document.querySelectorAll('.pods-reveal').forEach((el) => {
+    document.querySelectorAll('.pods-reveal:not(.pods-visible)').forEach((el) => {
       observerRef.current?.observe(el);
     });
 
     return () => {
       observerRef.current?.disconnect();
+      observerRef.current = null;
     };
-  }, []);
+  });
 
   const dispatch = useAppDispatch();
   const { order } = useAppSelector((state) => state.order);
