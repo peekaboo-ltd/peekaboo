@@ -175,6 +175,55 @@ export class OrderActivityService {
     await Promise.allSettled(emailPromises);
   }
 
+
+  private async sendCompletionEmails(order: Order): Promise<void> {
+    const recipients = new Map<string, { name?: string; email?: string }>();
+
+    if (order.sender?.email) {
+      recipients.set(order.sender.id, {
+        name: order.sender.name,
+        email: order.sender.email,
+      });
+    }
+
+    if (order.recipient?.email) {
+      recipients.set(order.recipient.id, {
+        name: order.recipient.name,
+        email: order.recipient.email,
+      });
+    }
+
+    if (order.createdBy?.email && order.createdBy.id !== order.sender?.id) {
+      recipients.set(order.createdBy.id, {
+        name: order.createdBy.name,
+        email: order.createdBy.email,
+      });
+    }
+
+    const statusMessage = ORDER_STATUS_MESSAGES[OrderStatus.COMPLETED];
+    const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, '');
+    const trackingUrl = frontendUrl
+      ? `${frontendUrl}/p/orders/${order.id}/tracking`
+      : undefined;
+
+    const emailPromises = Array.from(recipients.values()).map((recipient) => {
+      if (!recipient.email) {
+        return Promise.resolve();
+      }
+
+      return this.emailService.sendOrderStatusEmail({
+        userName: recipient.name || '',
+        userEmail: recipient.email,
+        orderReference: order.referenceId || '',
+        status: OrderStatus.COMPLETED,
+        statusMessage,
+        trackingUrl,
+      });
+    });
+
+    await Promise.allSettled(emailPromises);
+  }
+
   async confirmOrderDispatch({
     orderId,
     trackingId,
@@ -248,7 +297,7 @@ export class OrderActivityService {
   }): Promise<OrderActivity> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: { assignments: true },
+      relations: { assignments: true, sender: true, recipient: true, createdBy: true },
     });
 
     if (!order) {
@@ -292,6 +341,8 @@ export class OrderActivityService {
     });
 
     await this.orderRepository.update(orderId, { status: OrderStatus.COMPLETED });
+
+    this.sendCompletionEmails(order).catch(() => {});
 
     return completedActivity;
   }
