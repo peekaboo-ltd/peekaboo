@@ -85,7 +85,7 @@ const Footer = () => {
   const contactInfo = useMemo<ContactInfo[]>(
     () => [
       { icon: faLocationDot, text: 'Niboye, Kicukiro, Kigali, Rwanda' },
-      { icon: faPhone, text: '(+250) 788 478 652', href: 'tel:+250788478652' },
+      { icon: faPhone, text: '(+250) 794 892 784', href: 'tel:+250794892784' },
       { icon: faEnvelope, text: 'info@peekaboo.co.rw', href: 'mailto:info@peekaboo.co.rw' },
     ],
     []

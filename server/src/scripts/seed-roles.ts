@@ -25,6 +25,10 @@ const roleMetadata: Record<RoleTypes, { description: string; label: string }> = 
     description: 'Delivery rider who fulfills orders',
     label: 'Rider',
   },
+  [RoleTypes.GUEST]: {
+    description: 'Guest user who can view the website and the app',
+    label: 'Guest User',
+  },
 };
 
 async function main() {
