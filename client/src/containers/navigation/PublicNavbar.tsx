@@ -27,7 +27,7 @@ const PublicNavbar = () => {
             className="flex items-center transition-colors duration-200"
           >
             <img
-              src="/peekaboo.png"
+              src="/peekaboo new.png"
               className="h-12 w-auto sm:h-16 md:h-20 max-w-[200px] sm:max-w-[230px] md:max-w-[280px]"
               alt="Peekaboo Logo"
             />

@@ -70,8 +70,8 @@ const AuthenticatedNavbar = ({ className }: Props) => {
             >
                 <Link to="/" className="w-fit shrink-0">
                     <img
-                        src="/peekaboo.png"
-                        className="h-12 w-auto sm:h-16 md:h-20 max-w-[200px] sm:max-w-[230px] md:max-w-[280px]"
+                        src="/peekaboo new.png"
+                        className="h-14 w-auto sm:h-20 md:h-24 max-w-[240px] sm:max-w-[300px] md:max-w-[340px] object-contain"
                         alt="Peekaboo Logo"
                     />
                 </Link>
@@ -209,7 +209,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         </header>
 
                         <section className="py-2">
-                            <header className="px-3 py-3 border-b border-gray-100 bg-linear-to-r from-primary-900/5 to-transparent">
+                            <header className="px-3 py-3 border-b border-gray-100 bg-gradient-to-r from-primary-900/5 to-transparent">
                                 <div className="flex items-center gap-2.5">
                                     <span className="w-10 h-10 rounded-full bg-primary-900/10 flex items-center justify-center text-black font-medium text-base">
                                         {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
