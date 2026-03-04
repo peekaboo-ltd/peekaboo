@@ -494,6 +494,70 @@ export class AuthService {
     }
   }
 
+  async changePassword(
+    userId: UUID,
+    oldPassword: string,
+    newPassword: string
+  ): Promise<void> {
+    if (!oldPassword || !newPassword) {
+      throw new ValidationError('Old password and new password are required');
+    }
+
+    if (newPassword.length < 8) {
+      throw new ValidationError('Password must be at least 8 characters');
+    }
+
+    const hasLower = /[a-z]/.test(newPassword);
+    const hasUpper = /[A-Z]/.test(newPassword);
+    const hasNumber = /[0-9]/.test(newPassword);
+    const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+    if (!hasLower || !hasUpper || !hasNumber || !hasSpecial) {
+      throw new ValidationError(
+        'Password must include uppercase, lowercase, a number, and a symbol'
+      );
+    }
+
+    if (oldPassword === newPassword) {
+      throw new ValidationError('New password must be different from old password');
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        status: true,
+        passwordHash: true,
+      },
+    });
+
+    if (!user || user.status !== UserStatus.ACTIVE) {
+      throw new NotFoundError('User not found');
+    }
+
+    if (!user.passwordHash) {
+      throw new ValidationError(
+        'This account does not have a password set. Please complete your account first.'
+      );
+    }
+
+    const isValidOldPassword = await comparePassword(oldPassword, user.passwordHash);
+    if (!isValidOldPassword) {
+      throw new ValidationError('Old password is incorrect');
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    await this.userRepository.update(user.id, { passwordHash: hashedPassword });
+
+    if (user.email) {
+      await this.emailService.sendPasswordChangedEmail({
+        name: user.name || 'there',
+        email: user.email,
+      });
+    }
+  }
+
   // CHECK ACCOUNT — returns whether the current user has email and password set
   async checkAccount(userId: UUID): Promise<{ hasEmail: boolean; hasPassword: boolean }> {
     const user = await this.userRepository.findOne({

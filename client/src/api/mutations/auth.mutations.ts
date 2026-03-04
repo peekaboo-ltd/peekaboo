@@ -56,6 +56,15 @@ export const authMutationApiSlice = createApi({
         body: { name, email, password },
       }),
     }),
+
+    // CHANGE PASSWORD (authenticated)
+    changePassword: builder.mutation({
+      query: ({ oldPassword, newPassword }: { oldPassword: string; newPassword: string }) => ({
+        url: '/auth/change-password',
+        method: 'PATCH',
+        body: { oldPassword, newPassword },
+      }),
+    }),
   }),
 });
 
@@ -66,4 +75,5 @@ export const {
   useResetPasswordMutation,
   useAddPhoneMutation,
   useCompleteAccountMutation,
+  useChangePasswordMutation,
 } = authMutationApiSlice;
