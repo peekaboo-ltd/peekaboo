@@ -236,4 +236,26 @@ export const AuthController = {
       next(error);
     }
   },
+
+  // CHANGE PASSWORD (authenticated user)
+  async changePassword(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new UnauthorizedError('User not authenticated');
+      }
+
+      const { oldPassword, newPassword } = req.body;
+      if (!oldPassword || !newPassword) {
+        throw new ValidationError('Old password and new password are required');
+      }
+
+      await authService.changePassword(req.user.id, oldPassword, newPassword);
+
+      return res.status(200).json({
+        message: 'Password updated successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
