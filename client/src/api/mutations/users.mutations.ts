@@ -24,6 +24,7 @@ export interface UpdateUserRequest {
   status?: UserStatus;
   nationality?: string;
   dateOfBirth?: string;
+  profilePhotoUrl?: string | null;
 }
 
 export interface UpdateUserStatusRequest {
@@ -72,6 +73,25 @@ export const usersMutationsApiSlice = createApi({
         method: 'POST',
       }),
     }),
+
+    uploadUserAvatar: builder.mutation({
+      query: ({ userId, file }: { userId: UUID; file: File }) => {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        return {
+          url: `/users/${userId}/avatar`,
+          method: 'POST',
+          body: formData,
+        };
+      },
+    }),
+
+    removeUserAvatar: builder.mutation({
+      query: (userId: UUID) => ({
+        url: `/users/${userId}/avatar`,
+        method: 'DELETE',
+      }),
+    }),
   }),
 });
 
@@ -81,4 +101,6 @@ export const {
   useUpdateUserStatusMutation,
   useDeleteUserMutation,
   useResetUserPasswordMutation,
+  useUploadUserAvatarMutation,
+  useRemoveUserAvatarMutation,
 } = usersMutationsApiSlice;

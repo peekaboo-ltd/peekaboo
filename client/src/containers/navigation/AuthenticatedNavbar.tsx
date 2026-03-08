@@ -16,6 +16,8 @@ import { setLogout } from '@/states/slices/auth.slice';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
 import { capitalizeString } from '@/utils/strings.util';
 import { UserRole } from '@/types/user.type';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getProfilePhotoUrl } from '@/utils/profilePhoto.util';
 
 interface Props {
     className?: string;
@@ -116,9 +118,12 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                             aria-expanded={isOpen}
                             aria-haspopup="true"
                         >
-                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-900/10 flex items-center justify-center text-black font-medium">
-                                {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
-                            </div>
+                            <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200">
+                                <AvatarImage src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined} alt="" />
+                                <AvatarFallback className="rounded-full bg-primary-900/10 text-black text-xs font-medium">
+                                    {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
+                                </AvatarFallback>
+                            </Avatar>
 
                             <div className="hidden sm:flex flex-col items-start">
                                 <span className="text-sm font-medium text-gray-800 truncate max-w-[150px] sm:max-w-[170px]">
@@ -211,9 +216,12 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         <section className="py-2">
                             <header className="px-3 py-3 border-b border-gray-100 bg-gradient-to-r from-primary-900/5 to-transparent">
                                 <div className="flex items-center gap-2.5">
-                                    <span className="w-10 h-10 rounded-full bg-primary-900/10 flex items-center justify-center text-black font-medium text-base">
-                                        {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
-                                    </span>
+                                    <Avatar className="w-10 h-10 rounded-full border border-slate-200">
+                                        <AvatarImage src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined} alt="" />
+                                        <AvatarFallback className="rounded-full bg-primary-900/10 text-black text-sm font-medium">
+                                            {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
                                     <div>
                                         <p className="font-medium text-gray-800 text-sm">
                                             {user?.name || user?.phoneNumber}
