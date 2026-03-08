@@ -1,4 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+import path from "path";
+import fs from "fs";
+import { User } from "../entities/user.entity";
 import { UserService } from "../services/user.service";
 import { RoleTypes } from "../constants/role.constants";
 import { UserStatus } from "../constants/user.constants";
@@ -151,7 +154,14 @@ export const UserController = {
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const updateData = req.body;
+      const { name, email, phoneNumber, nationality, dateOfBirth, profilePhotoUrl } = req.body;
+      const updateData: Record<string, unknown> = {};
+      if (name !== undefined) updateData.name = name;
+      if (email !== undefined) updateData.email = email;
+      if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+      if (nationality !== undefined) updateData.nationality = nationality;
+      if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
+      if (profilePhotoUrl !== undefined) updateData.profilePhotoUrl = profilePhotoUrl;
 
       const user = await userService.updateUser(id as UUID, updateData);
 
@@ -253,6 +263,62 @@ export const UserController = {
 
       return res.status(200).json({
         message: "Password reset email sent successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // UPLOAD USER AVATAR
+  async uploadAvatar(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({
+          message: "No image file provided",
+        });
+      }
+
+      const relativePath = `avatars/${file.filename}`;
+      const user = await userService.updateUser(id as UUID, {
+        profilePhotoUrl: relativePath,
+      });
+
+      return res.status(200).json({
+        message: "Profile photo updated successfully",
+        data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // REMOVE USER AVATAR
+  async removeAvatar(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const user = await userService.getUserById(id as UUID);
+
+      if (user.profilePhotoUrl) {
+        const fullPath = path.join(process.cwd(), "uploads", user.profilePhotoUrl);
+        try {
+          if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath);
+          }
+        } catch {
+          // ignore file delete errors
+        }
+      }
+
+      const updatedUser = await userService.updateUser(id as UUID, {
+        profilePhotoUrl: null as User['profilePhotoUrl'],
+      });
+
+      return res.status(200).json({
+        message: "Profile photo removed successfully",
+        data: updatedUser,
       });
     } catch (error) {
       next(error);
