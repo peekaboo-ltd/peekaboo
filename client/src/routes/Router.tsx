@@ -23,6 +23,7 @@ import {
   UserLocationHistoryPage,
 } from '@/pages/users';
 import { About, OrderFees } from '@/pages/about';
+import { Services } from '@/pages/services';
 import { ContactUsPage } from '@/pages/contact';
 import { InviteOrganization, OrganizationSettingsPage } from '@/pages/organizations';
 import { PaymentsPage } from '@/pages/payments';
@@ -71,6 +72,8 @@ const Router = () => {
             <Route index element={<About />} />
             <Route path="orders/fees" element={<OrderFees />} />
           </Route>
+
+          <Route path="services" element={<Services />} />
 
           <Route path="contact" element={<ContactUsPage />} />
           <Route path="track" element={<TrackOrder />} />
