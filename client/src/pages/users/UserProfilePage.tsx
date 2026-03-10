@@ -24,6 +24,8 @@ import SetUserDefaultLocationModal from './SetUserDefaultLocationModal';
 import { faPenToSquare, faUser } from '@fortawesome/free-regular-svg-icons';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { Link, useNavigate } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getProfilePhotoUrl } from '@/utils/profilePhoto.util';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -120,9 +122,16 @@ const UserProfilePage = () => {
 
         <header className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <section className="flex items-center gap-5">
-            <figure className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white flex items-center justify-center text-2xl font-medium shadow-lg">
-              <FontAwesomeIcon icon={faUser} />
-            </figure>
+            <Avatar className="h-16 w-16 rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden">
+              <AvatarImage
+                src={selectedUser?.profilePhotoUrl ? getProfilePhotoUrl(selectedUser.profilePhotoUrl) ?? undefined : undefined}
+                alt="Profile"
+                className="object-cover"
+              />
+              <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white text-2xl font-medium">
+                <FontAwesomeIcon icon={faUser} />
+              </AvatarFallback>
+            </Avatar>
             <section>
               <p className="text-xs uppercase tracking-[0.28em] text-slate-500">
                 Profile Overview

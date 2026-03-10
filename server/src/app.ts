@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import path from 'path';
 import cors from 'cors';
 import 'dotenv/config';
 import passport from 'passport';
@@ -27,6 +28,7 @@ configureGoogleAuth();
 app.use(auditContextMiddleware);
 
 app.use('/api/v1', routes);
+app.use('/api/v1/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use(errorHandler);
 
 // DATABASE CONNECTION

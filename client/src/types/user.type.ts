@@ -19,6 +19,7 @@ export interface User extends BaseDomain {
   dateOfBirth?: Date;
   status: UserStatus;
   nationality?: string;
+  profilePhotoUrl?: string | null;
   passwordHash?: string;
   defaultLocation?: { latitude: number; longitude: number };
   createdAt: Date;

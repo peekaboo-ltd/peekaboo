@@ -14,6 +14,7 @@ interface ModalProps {
   onClose: (e?: MouseEvent) => void;
   className?: string;
   mainClassName?: string;
+  overlayClassName?: string;
   heading?: string | ReactNode;
   headingClassName?: string;
   description?: string;
@@ -27,6 +28,7 @@ const JSX_MODAL: FC<ModalProps> = ({
   heading = null,
   headingClassName = null,
   className = null,
+  overlayClassName = null,
   description = null,
   descriptionClassName = null,
 }) => {
@@ -35,7 +37,8 @@ const JSX_MODAL: FC<ModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className={`z-9000 w-[92vw] max-w-[92vw] min-w-0 sm:w-auto sm:max-w-[80vw] sm:min-w-[420px] lg:max-w-[720px] lg:min-w-[520px] max-h-[85vh] sm:max-h-[80vh] ${className} flex flex-col overflow-hidden`}
+        overlayClassName={overlayClassName}
+        className={`z-[9999] w-[92vw] max-w-[92vw] min-w-0 sm:w-auto sm:max-w-[80vw] sm:min-w-[420px] lg:max-w-[720px] lg:min-w-[520px] max-h-[85vh] sm:max-h-[80vh] ${className} flex flex-col overflow-hidden`}
         onClick={(e) => {
           e.stopPropagation();
         }}

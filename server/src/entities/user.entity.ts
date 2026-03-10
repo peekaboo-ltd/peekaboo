@@ -75,6 +75,15 @@ export class User extends AbstractEntity {
   })
   nationality?: string;
 
+  // PROFILE PHOTO (relative path, e.g. avatars/<userId>.jpg)
+  @Column({
+    name: 'profile_photo_url',
+    type: 'varchar',
+    length: 512,
+    nullable: true,
+  })
+  profilePhotoUrl?: string | null;
+
   // PASSWORD HASH
   @Column({
     name: 'password_hash',

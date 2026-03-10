@@ -140,3 +140,6 @@ dist
 
 # Claude
 .claude/
+
+# Server uploads (profile photos)
+server/uploads/

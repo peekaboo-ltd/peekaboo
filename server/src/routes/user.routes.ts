@@ -2,6 +2,7 @@ import { Router } from "express";
 import { UserController } from "../controllers/user.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
+import { uploadAvatar } from "../middlewares/upload.middleware";
 import { RoleTypes } from "../constants/role.constants";
 
 const router = Router();
@@ -33,6 +34,12 @@ router.patch('/me/current-location', UserController.updateCurrentLocation);
 
 // UPDATE user (ADMIN or own profile)
 router.patch("/:id", UserController.updateUser);
+
+// Upload profile photo (own profile)
+router.post("/:id/avatar", uploadAvatar, UserController.uploadAvatar);
+
+// Remove profile photo (own profile)
+router.delete("/:id/avatar", UserController.removeAvatar);
 
 // UPDATE user status (ADMIN only)
 router.patch("/:id/status", authorize([RoleTypes.ADMIN]), UserController.updateUserStatus);
