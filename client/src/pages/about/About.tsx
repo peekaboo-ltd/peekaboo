@@ -444,7 +444,7 @@ const About = () => {
                 className="text-black text-3xl mb-4"
               />
               <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
-              <p className="text-gray-600">+250 788 XXX XXX</p>
+              <p className="text-gray-600">+250 794 892 784</p>
             </article>
 
             <article className="bg-gray-50 rounded-lg p-6 text-center">
