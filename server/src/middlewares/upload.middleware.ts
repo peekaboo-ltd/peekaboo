@@ -14,10 +14,18 @@ try {
 }
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
+  destination: (
+    _req: Request,
+    _file: unknown,
+    cb: (error: Error | null, destination: string) => void
+  ) => {
     cb(null, UPLOADS_DIR);
   },
-  filename: (req, file, cb) => {
+  filename: (
+    req: Request,
+    file: { mimetype: string },
+    cb: (error: Error | null, filename: string) => void
+  ) => {
     const userId = req.params.id as UUID;
     const ext = (file.mimetype === 'image/png') ? '.png' : '.jpg';
     cb(null, `${userId}${ext}`);
@@ -26,7 +34,7 @@ const storage = multer.diskStorage({
 
 const fileFilter = (
   _req: Request,
-  file: Express.Multer.File,
+  file: { mimetype: string },
   cb: multer.FileFilterCallback
 ) => {
   const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
