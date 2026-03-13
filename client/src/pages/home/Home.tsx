@@ -137,7 +137,7 @@ const Home = () => {
   ];
 
   return (
-    <main className="relative min-h-screen w-full bg-[#f7f7f4] overflow-x-hidden mt-0 max-lg:mt-16">
+    <main className="relative min-h-screen w-full bg-white overflow-x-hidden mt-0 max-lg:mt-14">
       <HeroSection
         formRef={formRef}
         onScrollToForm={scrollToForm}

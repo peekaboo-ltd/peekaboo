@@ -23,20 +23,20 @@ const HeroHeadline = ({
   <AnimatePresence mode="wait">
     <motion.hgroup
       key={activeTab}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.4 }}
+      exit={{ opacity: 0, y: -16 }}
+      transition={{ duration: 0.35 }}
       className="space-y-4"
     >
-      <h1 className="text-4xl sm:text-5xl lg:text-[4rem] font-medium tracking-[-0.02em] leading-[1.03] text-slate-900">
+      <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-[-0.02em] leading-[1.06] text-gray-900">
         {activeTab === 'personal' ? personalTitle1 : businessTitle1}
         <br />
-        <span className="text-slate-700">
+        <span className="text-gray-500">
           {activeTab === 'personal' ? personalTitle2 : businessTitle2}
         </span>
       </h1>
-      <p className="text-lg text-slate-600 leading-relaxed max-w-lg">
+      <p className="text-base text-gray-500 leading-relaxed max-w-lg">
         {activeTab === 'personal' ? personalSubtitle : businessSubtitle}
       </p>
     </motion.hgroup>

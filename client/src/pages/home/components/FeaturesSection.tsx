@@ -11,26 +11,22 @@ interface FeaturesSectionProps {
 }
 
 const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSectionProps) => (
-  <section className="w-full py-20 lg:py-28 bg-white">
+  <section className="w-full py-20 lg:py-28 bg-gray-50">
     <motion.article
-      className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-14"
+      className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-100px' }}
       variants={containerVariants}
     >
-      <motion.header className="text-center mb-14 lg:mb-16" variants={fadeInUp}>
-        <motion.span
-          className="inline-block rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-[11px] font-medium tracking-[0.12em] uppercase text-slate-600 mb-4"
-          whileInView={{ opacity: [0, 1], y: [20, 0] }}
-          viewport={{ once: true }}
-        >
+      <motion.header className="text-center mb-14" variants={fadeInUp}>
+        <span className="inline-block text-[11px] uppercase tracking-[0.14em] font-medium text-primary-600 mb-4">
           {badgeLabel}
-        </motion.span>
-        <h2 className="text-3xl sm:text-4xl lg:text-[3rem] font-medium text-slate-900 leading-[1.08] mb-4">
+        </span>
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">
           {title}
         </h2>
-        <p className="text-lg text-slate-600 max-w-2xl mx-auto">{subtitle}</p>
+        <p className="text-base text-gray-500 max-w-2xl mx-auto">{subtitle}</p>
       </motion.header>
 
       <motion.ul
@@ -38,22 +34,15 @@ const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSect
         variants={containerVariants}
       >
         {features.map((feature) => (
-          <motion.li
-            key={feature.title}
-            variants={scaleIn}
-            whileHover={{
-              y: -3,
-              transition: { type: 'spring', stiffness: 280, damping: 26 },
-            }}
-          >
-            <article className="group h-full rounded-2xl p-7 border border-slate-200 bg-[#f9f9f7] shadow-[0_16px_34px_-28px_rgba(15,23,42,0.45)] transition-all duration-300 hover:border-slate-300">
-              <motion.figure className="w-12 h-12 rounded-xl border border-slate-300 bg-white flex items-center justify-center mb-5 text-slate-700">
-                <FontAwesomeIcon icon={feature.icon} className="text-black text-xl" />
-              </motion.figure>
-              <h3 className="text-lg !font-medium text-slate-900 mb-2">
+          <motion.li key={feature.title} variants={scaleIn}>
+            <article className="h-full rounded-lg p-6 border border-gray-100 bg-white transition-colors duration-200 hover:border-gray-200">
+              <figure className="w-10 h-10 rounded-md bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
+                <FontAwesomeIcon icon={feature.icon} className="text-gray-700 text-sm" />
+              </figure>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">
                 {feature.title}
               </h3>
-              <p className="text-slate-600 text-sm leading-relaxed">
+              <p className="text-gray-500 text-[13px] leading-relaxed">
                 {feature.description}
               </p>
             </article>
