@@ -11,6 +11,7 @@ import DatePicker, { DatePickerSelectionType } from './DatePicker';
 import { ChangeEvent, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
+import { cn } from '@/lib/utils';
 
 export interface InputProps {
   label?: string;
@@ -64,22 +65,20 @@ const Input = ({
 
   if (['date'].includes(type)) {
     return (
-      <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
-        <p
-          className={`${
-            label ? 'flex items-center gap-[5px] text-[14px]' : 'hidden'
-          }`}
-        >
-          {label}{' '}
-          {required && (
-            <CustomTooltip
-              label={required ? `${label} is required` : ''}
-              labelClassName="text-[12px] bg-red-600"
-            >
-              <span className="text-red-600 cursor-pointer">*</span>
-            </CustomTooltip>
-          )}
-        </p>
+      <label className={cn('flex flex-col gap-1 w-full', labelClassName)}>
+        {label && (
+          <span className="flex items-center gap-1 text-[13px] font-normal text-gray-700">
+            {label}
+            {required && (
+              <CustomTooltip
+                label={`${label} is required`}
+                labelClassName="text-[11px] bg-red-600"
+              >
+                <span className="text-red-500 cursor-pointer">*</span>
+              </CustomTooltip>
+            )}
+          </span>
+        )}
         {isLoading ? (
           <SkeletonLoader type="input" />
         ) : (
@@ -104,14 +103,18 @@ const Input = ({
   return (
     <label className="w-full flex flex-col gap-1">
       {label && (
-        <span className="text-sm font-normal">
-          {label}{' '}
-          {required && <span className="text-red-700 text-[12px]">*</span>}
+        <span className="text-[13px] font-normal text-gray-700">
+          {label}
+          {required && <span className="text-red-500 ml-0.5 text-[11px]">*</span>}
         </span>
       )}
       <span className="relative w-full">
         <InputUI
-          className={`!py-[8px] focus:!outline-1 h-10 !px-4 ${isPassword ? '!pr-12' : ''} font-normal placeholder:!font-light placeholder:text-[13px] text-[14px] flex items-center w-full rounded-lg border-[1.5px] border-secondary border-opacity-50 outline-none focus:outline-none focus:border-[1.1px] focus:border-primary ease-in-out duration-50 ${className}`}
+          className={cn(
+            'h-9 w-full rounded-md border border-gray-200 px-3 py-2 text-[13px] placeholder:text-[12px] placeholder:font-light placeholder:text-gray-400 focus:border-primary-600 focus:ring-1 focus:ring-primary-600/20 focus:outline-none transition-colors duration-150',
+            isPassword && 'pr-10',
+            className
+          )}
           type={inputType}
           name={name}
           placeholder={placeholder}
@@ -121,20 +124,18 @@ const Input = ({
           onBlur={onBlur}
         />
         {isPassword && (
-          <>
-            <FontAwesomeIcon
-              className="absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-              icon={showPassword ? faEyeSlash : faEye}
-              onClick={(e) => {
-                e.preventDefault();
-                setShowPassword((prev) => !prev);
-              }}
-            />
-          </>
+          <FontAwesomeIcon
+            className="absolute cursor-pointer right-2.5 top-1/2 -translate-y-1/2 text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
+            icon={showPassword ? faEyeSlash : faEye}
+            onClick={(e) => {
+              e.preventDefault();
+              setShowPassword((prev) => !prev);
+            }}
+          />
         )}
       </span>
       {errorMessage && (
-        <p className="text-sm text-red-700">{String(errorMessage)}</p>
+        <p className="text-[12px] text-red-600">{String(errorMessage)}</p>
       )}
     </label>
   );

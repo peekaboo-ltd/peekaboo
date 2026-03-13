@@ -48,116 +48,97 @@ const BusinessSolutionsSection = ({
   const hasStats = Boolean(stats?.length);
 
   return (
-    <section className="w-full py-20 lg:py-28 border-y border-slate-200/80 bg-[#f2f3ef]">
+    <section className="w-full py-20 lg:py-28 bg-gray-900">
       <motion.article
-        className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-14"
+        className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-100px' }}
         variants={containerVariants}
       >
-        <figure className="grid grid-cols-1 gap-12 lg:gap-20 items-center lg:grid-cols-2">
+        <figure className="grid grid-cols-1 gap-12 lg:gap-16 items-center lg:grid-cols-2">
           <motion.figcaption variants={slideInLeft}>
-            <motion.span
-              className="inline-block rounded-full border border-slate-300 bg-white px-3 py-1 !text-[10px] font-medium tracking-[0.12em] uppercase text-slate-600 mb-4"
-              whileInView={{ opacity: [0, 1], x: [-20, 0] }}
-              viewport={{ once: true }}
-            >
+            <span className="inline-block text-[11px] uppercase tracking-[0.14em] font-medium text-gray-400 mb-4">
               {badgeLabel}
-            </motion.span>
-            <h2 className="text-3xl sm:text-4xl lg:text-[3rem] font-medium text-slate-900 leading-[1.08] mb-6">
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-5">
               {title1}
               <br />
-              <span className="text-slate-700">{title2}</span>
+              <span className="text-gray-400">{title2}</span>
             </h2>
-            <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-xl">{subtitle}</p>
+            <p className="text-base text-gray-400 mb-8 leading-relaxed max-w-xl">{subtitle}</p>
 
-            <ul className="space-y-4 mb-10">
+            <ul className="space-y-3 mb-8">
               {features.map((feature) => (
                 <motion.li
                   key={feature.title}
-                  className="group flex items-start gap-4 rounded-xl border border-slate-300/70 bg-white/90 p-4"
-                  initial={{ opacity: 0, x: -30 }}
+                  className="flex items-start gap-3 rounded-lg border border-gray-700/50 bg-gray-800/40 p-4"
+                  initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.45 }}
-                  whileHover={{ y: -2 }}
+                  transition={{ duration: 0.4 }}
                 >
-                  <span className="w-10 h-10 rounded-lg border border-slate-300 bg-[#edf1e7] flex items-center justify-center flex-shrink-0 text-slate-700">
-                    <FontAwesomeIcon icon={feature.icon} className="text-black" />
+                  <span className="w-9 h-9 rounded-md bg-gray-700/50 flex items-center justify-center flex-shrink-0">
+                    <FontAwesomeIcon icon={feature.icon} className="text-gray-300 text-sm" />
                   </span>
                   <section>
-                    <h4 className="text-slate-900 font-medium mb-1">{feature.title}</h4>
-                    <p className="text-slate-500 text-sm font-normal">{feature.description}</p>
+                    <h4 className="text-white text-sm font-medium mb-0.5">{feature.title}</h4>
+                    <p className="text-gray-400 text-[13px]">{feature.description}</p>
                   </section>
                 </motion.li>
               ))}
             </ul>
 
-            <motion.nav className="flex flex-wrap gap-4" variants={fadeInUp}>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (onContactClick) {
-                      onContactClick();
-                    }
-                  }}
-                  primary
-                >
-                  {primaryCtaLabel}
-                  <motion.span
-                    animate={{ x: [0, 4, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    <FontAwesomeIcon icon={faArrowRight} />
-                  </motion.span>
-                </Button>
-              </motion.div>
+            <motion.nav variants={fadeInUp}>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onContactClick) {
+                    onContactClick();
+                  }
+                }}
+                className="bg-white text-gray-900 border-white hover:bg-gray-100 hover:text-gray-900"
+              >
+                {primaryCtaLabel}
+                <FontAwesomeIcon icon={faArrowRight} className="text-[11px]" />
+              </Button>
             </motion.nav>
           </motion.figcaption>
 
-          {/* Analytics card — always visible */}
           <motion.aside className="relative" variants={slideInRight}>
-            <div className="rounded-2xl border border-slate-300 bg-white/95 shadow-[0_24px_48px_-40px_rgba(15,23,42,0.5)] overflow-hidden">
-
-              {/* Card header */}
-              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
+            <div className="rounded-xl border border-gray-700/50 bg-gray-800/60 overflow-hidden">
+              <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-700/30">
                 <div>
-                  <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-slate-400 mb-0.5">
+                  <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-gray-500 mb-0.5">
                     Business Dashboard
                   </p>
-                  <h3 className="text-sm font-semibold text-slate-900">Delivery Analytics</h3>
+                  <h3 className="text-sm font-semibold text-white">Delivery Analytics</h3>
                 </div>
-                <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">
+                <span className="flex items-center gap-1.5 text-[10px] font-medium text-emerald-400 bg-emerald-900/30 border border-emerald-800/40 rounded-full px-2 py-0.5">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
                   </span>
                   Live
                 </span>
               </div>
 
-              {/* Bar chart */}
               <div className="px-6 pt-5 pb-2">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-[11px] text-slate-400 font-medium">Packages · this week</p>
-                  <span className="text-[11px] text-slate-500 tabular-nums font-medium">
+                  <p className="text-[11px] text-gray-500 font-medium">Packages · this week</p>
+                  <span className="text-[11px] text-gray-400 tabular-nums font-medium">
                     {WEEK_TOTAL} total
                   </span>
                 </div>
 
-                {/* Bars area */}
                 <div className="relative h-28">
-                  {/* Subtle grid lines */}
                   {[25, 50, 75].map((pct) => (
                     <div
                       key={pct}
-                      className="absolute left-0 right-0 border-t border-slate-100 pointer-events-none"
+                      className="absolute left-0 right-0 border-t border-gray-700/30 pointer-events-none"
                       style={{ bottom: `${pct}%` }}
                     />
                   ))}
-                  {/* Bars */}
                   <div className="absolute inset-0 flex items-end gap-1.5">
                     {WEEK_DATA.map((item, index) => {
                       const heightPct = (item.deliveries / MAX_DELIVERIES) * 100;
@@ -165,15 +146,15 @@ const BusinessSolutionsSection = ({
                       return (
                         <motion.div
                           key={index}
-                          className={`flex-1 rounded-t-[3px] ${
-                            isPeak ? 'bg-slate-800' : 'bg-[#d4dbc8]'
+                          className={`flex-1 rounded-t-sm ${
+                            isPeak ? 'bg-white' : 'bg-gray-600'
                           }`}
                           initial={{ scaleY: 0 }}
                           whileInView={{ scaleY: 1 }}
                           viewport={{ once: true }}
                           transition={{
-                            duration: 0.55,
-                            delay: 0.1 + index * 0.065,
+                            duration: 0.5,
+                            delay: 0.1 + index * 0.06,
                             ease: [0.25, 0.46, 0.45, 0.94],
                           }}
                           style={{ height: `${heightPct}%`, originY: 1 }}
@@ -183,7 +164,6 @@ const BusinessSolutionsSection = ({
                   </div>
                 </div>
 
-                {/* Day labels */}
                 <div className="flex gap-1.5 mt-2">
                   {WEEK_DATA.map((item, index) => {
                     const isPeak = item.deliveries === MAX_DELIVERIES;
@@ -191,7 +171,7 @@ const BusinessSolutionsSection = ({
                       <span
                         key={index}
                         className={`flex-1 text-center text-[9px] leading-none ${
-                          isPeak ? 'text-slate-700 font-semibold' : 'text-slate-400'
+                          isPeak ? 'text-white font-medium' : 'text-gray-500'
                         }`}
                       >
                         {item.day}
@@ -201,51 +181,47 @@ const BusinessSolutionsSection = ({
                 </div>
               </div>
 
-              {/* Divider */}
-              <div className="h-px bg-slate-100 mx-6 mt-4" />
+              <div className="h-px bg-gray-700/30 mx-6 mt-4" />
 
-              {/* Metrics */}
-              <div className="grid grid-cols-3 gap-2.5 px-6 py-5">
+              <div className="grid grid-cols-3 gap-2 px-6 py-5">
                 {METRICS.map((metric, i) => (
                   <motion.div
                     key={metric.label}
-                    className="text-center py-3 px-2 rounded-xl bg-slate-50 border border-slate-100"
-                    initial={{ opacity: 0, y: 8 }}
+                    className="text-center py-3 px-2 rounded-lg bg-gray-700/30 border border-gray-700/20"
+                    initial={{ opacity: 0, y: 6 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.5 + i * 0.08, duration: 0.35 }}
+                    transition={{ delay: 0.5 + i * 0.08, duration: 0.3 }}
                   >
-                    <p className="text-base font-semibold text-slate-900 tabular-nums leading-tight">
+                    <p className="text-base font-semibold text-white tabular-nums leading-tight">
                       {metric.value}
                     </p>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">{metric.label}</p>
-                    <p className="text-[10px] font-medium text-emerald-600 mt-1">{metric.trend}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{metric.label}</p>
+                    <p className="text-[10px] font-medium text-emerald-400 mt-1">{metric.trend}</p>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Backward-compat: render stats if provided */}
               {hasStats && (
                 <>
-                  <div className="h-px bg-slate-100 mx-6" />
+                  <div className="h-px bg-gray-700/30 mx-6" />
                   <ul className="grid grid-cols-2 gap-4 px-6 py-5">
                     {stats?.map((stat, index) => (
                       <motion.li
                         key={stat.label}
-                        className="group text-center p-3 rounded-xl hover:bg-primary-50 transition-colors cursor-default"
-                        initial={{ opacity: 0, scale: 0.8 }}
+                        className="text-center p-3 rounded-lg"
+                        initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
                         transition={{ delay: index * 0.1, type: 'spring', stiffness: 200 }}
-                        whileHover={{ scale: 1.08 }}
                       >
-                        <figure className="w-10 h-10 rounded-xl border border-slate-300 bg-slate-100 flex items-center justify-center mx-auto mb-2">
-                          <FontAwesomeIcon icon={stat.icon} className="text-black text-sm" />
+                        <figure className="w-9 h-9 rounded-md bg-gray-700/40 flex items-center justify-center mx-auto mb-2">
+                          <FontAwesomeIcon icon={stat.icon} className="text-gray-300 text-sm" />
                         </figure>
-                        <span className="block text-xl font-semibold text-slate-900 mb-0.5">
+                        <span className="block text-lg font-semibold text-white mb-0.5">
                           {stat.value}
                         </span>
-                        <span className="text-xs text-slate-500 font-normal">{stat.label}</span>
+                        <span className="text-[11px] text-gray-400">{stat.label}</span>
                       </motion.li>
                     ))}
                   </ul>

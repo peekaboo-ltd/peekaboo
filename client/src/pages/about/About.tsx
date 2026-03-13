@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBuilding,
   faMapLocationDot,
   faPhone,
   faEnvelope,
-  faTruck,
-  faUser,
-  faBriefcase,
+  faHandshake,
+  faShieldHalved,
+  faRocket,
+  faBolt,
 } from '@fortawesome/free-solid-svg-icons';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
@@ -44,7 +44,37 @@ const useInView = (options?: IntersectionObserverInit) => {
   return { ref, inView };
 };
 
-const LiveStatistics = () => {
+const milestones = [
+  { year: '2022', label: 'Founded in Kigali with a small team of riders' },
+  { year: '2023', label: 'Launched B2B logistics for local businesses' },
+  { year: '2024', label: 'Expanded to full city-wide coverage' },
+  { year: '2025', label: 'Serving hundreds of businesses and individuals daily' },
+];
+
+const coreValues = [
+  {
+    icon: faRocket,
+    title: 'Speed',
+    description: 'Every delivery is optimised for the fastest possible route and pickup.',
+  },
+  {
+    icon: faShieldHalved,
+    title: 'Trust',
+    description: 'Verified riders, proof of delivery, and transparent tracking at every step.',
+  },
+  {
+    icon: faHandshake,
+    title: 'Partnership',
+    description: 'We grow with the businesses and people we serve across Kigali.',
+  },
+  {
+    icon: faBolt,
+    title: 'Simplicity',
+    description: 'A clean, straightforward experience from order to drop-off.',
+  },
+];
+
+const Statistics = () => {
   const [stats, setStats] = useState<Stats>({
     deliveriesToday: 0,
     activeRiders: 0,
@@ -108,7 +138,6 @@ const LiveStatistics = () => {
 
         animateTo(next);
       } catch {
-        // Fallback demo values if API is not yet wired
         animateTo({
           deliveriesToday: 128,
           activeRiders: 42,
@@ -124,146 +153,42 @@ const LiveStatistics = () => {
       isMounted = false;
       clearInterval(id);
     };
-    // Intentionally ignore stats in dependencies to avoid restarting animation loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <section
       ref={ref as React.RefObject<HTMLElement>}
-      className={`border-y border-gray-100 bg-white/60 backdrop-blur-sm`}
+      className="bg-gray-900 py-20 md:py-24"
     >
       <article
-        className={`max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12 py-10 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center transition-all duration-700 ${
+        className={`max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 sm:grid-cols-3 gap-10 text-center transition-all duration-700 ${
           inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
         }`}
       >
-        <div className="space-y-1">
-          <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+        <div className="space-y-2">
+          <p className="text-[11px] font-medium tracking-[0.16em] uppercase text-gray-400">
             Deliveries today
           </p>
-          <p className="text-3xl font-semibold text-gray-900 tabular-nums">
+          <p className="text-4xl font-semibold text-white tabular-nums">
             {stats.deliveriesToday.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-500">
-            Updated every few seconds from live operations.
-          </p>
         </div>
-        <div className="space-y-1">
-          <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+        <div className="space-y-2">
+          <p className="text-[11px] font-medium tracking-[0.16em] uppercase text-gray-400">
             Active riders
           </p>
-          <p className="text-3xl font-semibold text-gray-900 tabular-nums">
+          <p className="text-4xl font-semibold text-white tabular-nums">
             {stats.activeRiders.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-500">
-            Verified partners on the road right now.
-          </p>
         </div>
-        <div className="space-y-1">
-          <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+        <div className="space-y-2">
+          <p className="text-[11px] font-medium tracking-[0.16em] uppercase text-gray-400">
             Businesses served
           </p>
-          <p className="text-3xl font-semibold text-gray-900 tabular-nums">
+          <p className="text-4xl font-semibold text-white tabular-nums">
             {stats.businessPartners.toLocaleString()}
           </p>
-          <p className="text-xs text-gray-500">
-            Growing brands that trust Peekaboo daily.
-          </p>
-        </div>
-      </article>
-    </section>
-  );
-};
-
-const features = [
-  {
-    title: 'Smart dispatch',
-    description:
-      'Orders are automatically assigned to the closest available rider for faster pickups and fewer delays.',
-  },
-  {
-    title: 'Real-time tracking',
-    description:
-      'Follow every delivery on the map with live status updates for you and your customers.',
-  },
-  {
-    title: 'Business deliveries',
-    description:
-      'Batch orders, recurring pickups, and priority support designed for merchants and growing brands.',
-  },
-  {
-    title: 'Secure package handling',
-    description:
-      'Verified riders, clear proof-of-delivery, and careful handling for sensitive or high‑value parcels.',
-  },
-];
-
-const RotatingFeatureCard = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const { ref, inView } = useInView();
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % features.length);
-    }, 4000);
-
-    return () => clearInterval(id);
-  }, []);
-
-  const feature = features[activeIndex];
-
-  return (
-    <section
-      ref={ref as React.RefObject<HTMLElement>}
-      className="bg-gray-50"
-    >
-      <article
-        className={`max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12 py-12 flex flex-col lg:flex-row items-center gap-8 transition-all duration-700 ${
-          inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-        }`}
-      >
-        <div className="flex-1 text-left">
-          <p className="text-xs font-semibold tracking-[0.22em] uppercase text-primary-700 mb-2">
-            How Peekaboo works
-          </p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-            Built for live, urban logistics.
-          </h2>
-          <p className="text-gray-600 max-w-xl">
-            Under the hood, Peekaboo combines routing logic, rider location data, and
-            smart notifications so each delivery moves smoothly from order to drop‑off.
-          </p>
-        </div>
-
-        <div className="flex-1">
-          <div className="relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 px-6 py-6 sm:px-8 sm:py-8 transition-transform duration-500">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 capitalize">
-                {feature.title}
-              </h3>
-              <span className="inline-flex items-center rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-800">
-                {activeIndex + 1} / {features.length}
-              </span>
-            </div>
-            <p className="text-gray-700 mb-6">{feature.description}</p>
-
-            <div className="flex justify-end gap-2">
-              {features.map((item, index) => (
-                <button
-                  key={item.title}
-                  type="button"
-                  onClick={() => setActiveIndex(index)}
-                  className={`h-2 w-6 rounded-full transition-colors ${
-                    index === activeIndex
-                      ? 'bg-primary-600'
-                      : 'bg-gray-200 hover:bg-gray-300'
-                  }`}
-                  aria-label={item.title}
-                />
-              ))}
-            </div>
-          </div>
         </div>
       </article>
     </section>
@@ -274,254 +199,206 @@ const About = () => {
   useDocumentTitle('About');
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 text-white py-20">
-        {/* Decorative background orbs */}
-        <div className="pointer-events-none absolute -top-24 -left-16 h-64 w-64 rounded-full bg-primary-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
-
-        <article className="relative max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12 text-center">
-          <p className="inline-flex items-center gap-2 rounded-full bg-black/10 px-4 py-1 text-xs font-medium uppercase tracking-[0.18em] text-primary-100 mb-4">
-            Fast. Reliable. Human.
+    <main className="min-h-screen bg-white">
+      {/* Hero */}
+      <section className="bg-white py-24 md:py-32">
+        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12 text-center">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-primary-600 font-medium mb-4">
+            About Peekaboo
           </p>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">
-            We move what
-            <span className="relative inline-block pl-2">
-              matters
-              <span className="absolute inset-x-0 -bottom-1 h-2 bg-primary-400/60 blur-[2px]" />
-            </span>
+          <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-gray-900 leading-tight mb-6">
+            We move what matters
+            <br className="hidden sm:block" />
             across Kigali.
           </h1>
-          <p className="text-lg sm:text-xl text-primary-100 max-w-3xl mx-auto mb-8">
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
             Peekaboo connects individuals, small businesses, and growing brands with a
-            trusted network of professional riders—so every parcel arrives quickly,
+            trusted network of professional riders — so every parcel arrives quickly,
             safely, and with a smile.
           </p>
-
-          <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-sm text-primary-100">
-            <article className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-              <p className="font-semibold text-white">Same‑day deliveries</p>
-              <p>Optimised routes and live coordination to keep your orders on time.</p>
-            </article>
-            <article className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-              <p className="font-semibold text-white">For people & businesses</p>
-              <p>From personal errands to e‑commerce logistics, we scale with you.</p>
-            </article>
-            <article className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-              <p className="font-semibold text-white">Built in Rwanda</p>
-              <p>Locally registered, locally operated, and committed to Kigali.</p>
-            </article>
-          </section>
         </article>
       </section>
 
-      <LiveStatistics />
-      <RotatingFeatureCard />
-
-      {/* Company Overview */}
-      <section className="py-10 lg:py-12">
-        <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12">
-          <header className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-              Company Overview
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              Peekaboo Ltd is a private limited company providing modern courier
-              and last‑mile delivery services across Rwanda. We combine
-              technology, trusted riders, and local expertise to make sending
-              and receiving parcels simple, transparent, and stress‑free.
-            </p>
-          </header>
-
-          <section className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-            {/* Company facts */}
-            <div className="flex-1 flex flex-col gap-4">
-              <div className="flex flex-col gap-4 md:flex-row md:gap-4">
-                <article className="group flex-1 rounded-xl p-5 shadow-sm border border-primary-800 bg-primary-900 transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] hover:bg-white hover:shadow-xl">
-                  <figure className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-white/10 transition-colors duration-300 group-hover:bg-primary-100">
-                    <FontAwesomeIcon
-                      icon={faBuilding}
-                      className="text-white text-xl transition-colors duration-300 group-hover:text-black"
-                    />
-                  </figure>
-                  <h3 className="font-semibold text-white mb-1 transition-colors duration-300 group-hover:text-gray-900">
-                    Company Name
-                  </h3>
-                  <p className="text-sm text-primary-100 transition-colors duration-300 group-hover:text-gray-600">
-                    PEEKABOO Ltd
-                  </p>
-                </article>
-
-                <article className="group flex-1 rounded-xl p-5 shadow-sm border border-primary-800 bg-primary-900 transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] hover:bg-white hover:shadow-xl">
-                  <figure className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-white/10 transition-colors duration-300 group-hover:bg-primary-100">
-                    <FontAwesomeIcon
-                      icon={faTruck}
-                      className="text-white text-xl transition-colors duration-300 group-hover:text-black"
-                    />
-                  </figure>
-                  <h3 className="font-semibold text-white mb-1 transition-colors duration-300 group-hover:text-gray-900">
-                    Business Activity
-                  </h3>
-                  <p className="text-sm text-primary-100 transition-colors duration-300 group-hover:text-gray-600">
-                    Courier and last‑mile delivery services (H5320), specialising in
-                    fast, on‑demand drops around Kigali.
-                  </p>
-                </article>
-              </div>
-
-              <div className="flex flex-col gap-4 md:flex-row md:gap-4">
-                <article className="group flex-1 rounded-xl p-5 shadow-sm border border-primary-800 bg-primary-900 transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] hover:bg-white hover:shadow-xl">
-                  <figure className="w-11 h-11 rounded-lg flex items-center justify-center mb-4 bg-white/10 transition-colors duration-300 group-hover:bg-primary-100">
-                    <FontAwesomeIcon
-                      icon={faUser}
-                      className="text-white text-lg transition-colors duration-300 group-hover:text-black"
-                    />
-                  </figure>
-                  <h3 className="font-semibold text-white mb-1 transition-colors duration-300 group-hover:text-gray-900">
-                    B2C Services
-                  </h3>
-                  <p className="text-sm text-primary-100 transition-colors duration-300 group-hover:text-gray-600">
-                    On‑demand deliveries for individuals: personal parcels, errands,
-                    gifting, and same‑day drops anywhere in Kigali.
-                  </p>
-                </article>
-
-                <article className="group flex-1 rounded-xl p-5 shadow-sm border border-primary-800 bg-primary-900 transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] hover:bg-white hover:shadow-xl">
-                  <figure className="w-11 h-11 rounded-lg flex items-center justify-center mb-4 bg-white/10 transition-colors duration-300 group-hover:bg-primary-100">
-                    <FontAwesomeIcon
-                      icon={faBriefcase}
-                      className="text-white text-lg transition-colors duration-300 group-hover:text-black"
-                    />
-                  </figure>
-                  <h3 className="font-semibold text-white mb-1 transition-colors duration-300 group-hover:text-gray-900">
-                    B2B Services
-                  </h3>
-                  <p className="text-sm text-primary-100 transition-colors duration-300 group-hover:text-gray-600">
-                    Scheduled pickups, bulk order dispatch, and tailored SLAs for
-                    e‑commerce, restaurants, pharmacies, and other businesses.
-                  </p>
-                </article>
+      {/* Our Story */}
+      <section className="bg-gray-50 py-24 md:py-32">
+        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.16em] text-primary-600 font-medium mb-4">
+                Our Story
+              </p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                Built from the streets of Kigali.
+              </h2>
+              <div className="space-y-4 text-gray-600 leading-relaxed">
+                <p>
+                  Peekaboo started with a simple observation: sending a package across
+                  Kigali shouldn't be complicated. What began as a small team of riders
+                  and a shared phone has grown into a technology-driven delivery platform
+                  trusted by thousands.
+                </p>
+                <blockquote className="border-l-2 border-primary-500 pl-5 italic text-gray-700 my-6">
+                  "We believe every delivery is a promise — and we take promises seriously."
+                </blockquote>
+                <p>
+                  Today, Peekaboo combines routing logic, rider location data, and smart
+                  notifications so each delivery moves smoothly from order to drop-off.
+                  We serve both individuals running personal errands and businesses
+                  managing daily logistics.
+                </p>
               </div>
             </div>
-          </section>
+
+            <div className="flex items-start justify-center lg:justify-end">
+              <div className="relative pl-8">
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-200" />
+                <div className="space-y-10">
+                  {milestones.map((m) => (
+                    <div key={m.year} className="relative">
+                      <div className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-primary-500 ring-4 ring-gray-50" />
+                      <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-primary-600 mb-1">
+                        {m.year}
+                      </p>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        {m.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </article>
       </section>
 
-      {/* Registered Office */}
-      <section className="py-16 lg:py-24 bg-white">
-        <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12">
-          <header className="text-center mb-12">
+      {/* Mission & Vision */}
+      <section className="bg-gray-900 py-24 md:py-32">
+        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-gray-400 font-medium mb-10 text-center">
+            What drives us
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="border-t-2 border-primary-500 bg-gray-800/50 rounded-lg p-8">
+              <h3 className="text-[11px] uppercase tracking-[0.14em] text-gray-400 font-medium mb-4">
+                Mission
+              </h3>
+              <p className="text-xl text-white italic leading-relaxed">
+                To make sending and receiving parcels across Kigali simple,
+                transparent, and stress-free — for every person and every business.
+              </p>
+            </div>
+            <div className="border-t-2 border-primary-500 bg-gray-800/50 rounded-lg p-8">
+              <h3 className="text-[11px] uppercase tracking-[0.14em] text-gray-400 font-medium mb-4">
+                Vision
+              </h3>
+              <p className="text-xl text-white italic leading-relaxed">
+                To be Rwanda's most trusted last-mile delivery partner,
+                connecting communities and businesses through reliable logistics.
+              </p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      {/* Core Values */}
+      <section className="bg-white py-24 md:py-32">
+        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="text-center mb-14">
+            <p className="text-[11px] uppercase tracking-[0.16em] text-primary-600 font-medium mb-4">
+              Core Values
+            </p>
+            <h2 className="text-3xl font-bold text-gray-900">
+              What we stand for.
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {coreValues.map((v) => (
+              <div
+                key={v.title}
+                className="group p-6 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors duration-200"
+              >
+                <FontAwesomeIcon
+                  icon={v.icon}
+                  className="text-primary-600 text-lg mb-4"
+                />
+                <h3 className="font-semibold text-gray-900 mb-2 text-sm">
+                  {v.title}
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  {v.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </article>
+      </section>
+
+      <Statistics />
+
+      {/* Contact / Office */}
+      <section className="bg-white py-24 md:py-32">
+        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="text-center mb-14">
+            <p className="text-[11px] uppercase tracking-[0.16em] text-primary-600 font-medium mb-4">
+              Get in touch
+            </p>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Registered Office
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Peekaboo Ltd is fully registered and based in Kigali, Rwanda. We
-              operate with transparency and compliance so that customers and
-              partners can trust every delivery we complete.
+            <p className="text-gray-500 max-w-xl mx-auto">
+              Peekaboo Ltd is fully registered and based in Kigali, Rwanda.
             </p>
-          </header>
+          </div>
 
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <article className="bg-gray-50 rounded-lg p-6 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div className="text-center p-6">
               <FontAwesomeIcon
                 icon={faMapLocationDot}
-                className="text-black text-3xl mb-4"
+                className="text-gray-900 text-xl mb-4"
               />
-              <h3 className="font-semibold text-gray-900 mb-2">Address</h3>
-              <address className="text-gray-600 not-italic">
+              <h3 className="font-semibold text-gray-900 text-sm mb-2">Address</h3>
+              <address className="text-gray-500 text-sm not-italic leading-relaxed">
                 Niboye, Kicukiro
                 <br />
                 Umujyi wa Kigali
                 <br />
                 RWANDA
               </address>
-            </article>
+            </div>
 
-            <article className="bg-gray-50 rounded-lg p-6 text-center">
+            <div className="text-center p-6">
               <FontAwesomeIcon
                 icon={faPhone}
-                className="text-black text-3xl mb-4"
+                className="text-gray-900 text-xl mb-4"
               />
-              <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
-              <p className="text-gray-600">+250 794 892 784</p>
-            </article>
+              <h3 className="font-semibold text-gray-900 text-sm mb-2">Phone</h3>
+              <p className="text-gray-500 text-sm">+250 794 892 784</p>
+            </div>
 
-            <article className="bg-gray-50 rounded-lg p-6 text-center">
+            <div className="text-center p-6">
               <FontAwesomeIcon
                 icon={faEnvelope}
-                className="text-black text-3xl mb-4"
+                className="text-gray-900 text-xl mb-4"
               />
-              <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
-              <p className="text-gray-600">info@peekaboo.co.rw</p>
-            </article>
-          </section>
-        </article>
-      </section>
-
-      {/* Company Type Info */}
-      <section className="py-16 lg:py-24">
-        <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12">
-          <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Legal Information
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Below is a quick summary of how Peekaboo Ltd is structured and
-              registered. For detailed documentation or partnership enquiries,
-              please reach out to our team.
-            </p>
-          </header>
-
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <article className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">
-                Company Type
-              </h3>
-              <dl className="space-y-3">
-                <div className="flex justify-between">
-                  <dt className="text-gray-600">Category:</dt>
-                  <dd className="font-medium text-gray-900">Private</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-gray-600">Type:</dt>
-                  <dd className="font-medium text-gray-900">Limited by Shares</dd>
-                </div>
-              </dl>
-            </article>
-
-            <article className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-900 mb-4 text-lg">
-                Business Information
-              </h3>
-              <dl className="space-y-3">
-                <div className="flex justify-between">
-                  <dt className="text-gray-600">Activity:</dt>
-                  <dd className="font-medium text-gray-900">Courier Services</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-gray-600">Location:</dt>
-                  <dd className="font-medium text-gray-900">Kigali, Rwanda</dd>
-                </div>
-              </dl>
-            </article>
-          </section>
+              <h3 className="font-semibold text-gray-900 text-sm mb-2">Email</h3>
+              <p className="text-gray-500 text-sm">info@peekaboo.co.rw</p>
+            </div>
+          </div>
         </article>
       </section>
 
       {/* CTA */}
       <section className="bg-primary-900 py-16">
-        <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Experience Fast Delivery?
+        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12 text-center">
+          <h2 className="text-2xl font-bold text-white mb-3">
+            Ready to get started?
           </h2>
-          <p className="text-lg text-primary-200 max-w-2xl mx-auto mb-8">
-            Join thousands of satisfied customers using Peekaboo for their
-            delivery needs.
+          <p className="text-primary-200 mb-8 max-w-lg mx-auto">
+            Join thousands of satisfied customers using Peekaboo for their delivery needs.
           </p>
           <Link
             to="/"
-            className="inline-block bg-white text-primary-900 px-8 py-3 rounded font-semibold hover:bg-gray-100 transition-colors"
+            className="inline-block bg-white text-primary-900 px-8 py-2.5 rounded-md text-[13px] font-medium hover:bg-gray-100 transition-colors duration-200"
           >
             Get Started
           </Link>

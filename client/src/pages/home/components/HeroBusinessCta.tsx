@@ -20,24 +20,24 @@ const HeroBusinessCta = ({
   <AnimatePresence mode="wait">
     {isActive && (
       <motion.nav
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
+        exit={{ opacity: 0, y: -16 }}
         className="flex flex-wrap gap-3 pt-2 max-lg:items-center max-lg:justify-center"
       >
         <button
           onClick={onContactClick}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 px-5 py-2 bg-gray-900 text-white rounded-md text-[13px] font-medium hover:bg-gray-800 transition-colors cursor-pointer"
         >
-          <FontAwesomeIcon icon={faBuilding} />
+          <FontAwesomeIcon icon={faBuilding} className="text-[11px]" />
           {accountLabel}
         </button>
         <button
           onClick={onScrollToForm}
-          className="inline-flex items-center gap-2 px-2 py-2 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors cursor-pointer hover:underline underline-offset-4"
+          className="inline-flex items-center gap-2 px-2 py-2 text-gray-500 hover:text-gray-900 text-[13px] font-normal transition-colors cursor-pointer"
         >
           {tryQuickDeliveryLabel}
-          <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
+          <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" />
         </button>
       </motion.nav>
     )}

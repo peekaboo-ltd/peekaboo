@@ -58,16 +58,7 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-[#f8f8f6]">
-      <figure
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-          backgroundSize: '44px 44px',
-        }}
-        aria-hidden="true"
-      />
-
+    <section className="relative h-screen w-full overflow-hidden bg-white">
       <article className="relative z-10 w-full max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-14 pt-10 pb-16 lg:pt-14 lg:pb-20">
         <motion.section
           className="w-full flex flex-col lg:flex-row gap-10 lg:gap-16 items-center max-lg:justify-center min-h-[calc(100vh-6rem)]"
@@ -119,9 +110,9 @@ const HeroSection = ({
             <menu className="w-full lg:max-w-[30vw] flex items-center justify-end max-lg:justify-center">
               <motion.article
                 className="relative"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <HeroForm
                   formRef={formRef}

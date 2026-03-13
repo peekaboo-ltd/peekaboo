@@ -4,6 +4,7 @@ import { type FC, type MouseEventHandler, type ReactNode, type HTMLAttributes } 
 import { Link } from 'react-router-dom';
 import { Loader } from './Loader.tsx';
 import { Button as ButtonUI } from '../ui/button';
+import { cn } from '@/lib/utils';
 
 interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchorElement>, 'onClick'> {
   route?: string;
@@ -19,6 +20,17 @@ interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchor
   isLoading?: boolean;
   children?: ReactNode;
 }
+
+const baseStyles =
+  'inline-flex items-center gap-2 justify-center text-center text-[13px] font-normal py-2 px-5 rounded-md border transition-colors duration-200 cursor-pointer';
+
+const variantStyles = {
+  default: 'border-primary-900 text-primary-900 bg-transparent hover:bg-primary-900 hover:text-white',
+  primary: 'bg-primary-900 text-white border-primary-900 hover:bg-primary-800',
+  danger: 'bg-red-600 text-white border-red-600 hover:bg-red-700',
+  unstyled: 'bg-transparent border-transparent text-primary-900 p-0 hover:opacity-70',
+  disabled: 'opacity-50 cursor-not-allowed pointer-events-none',
+};
 
 const Button: FC<ButtonProps> = ({
   route = '#',
@@ -36,25 +48,24 @@ const Button: FC<ButtonProps> = ({
   children,
   ...rest
 }) => {
+  const variant = disabled
+    ? 'disabled'
+    : danger
+      ? 'danger'
+      : !styled
+        ? 'unstyled'
+        : primary
+          ? 'primary'
+          : 'default';
+
+  const classes = cn(baseStyles, variantStyles[variant], className);
+
   if (submit || type === 'submit' || type === 'button' || type === 'reset') {
     return (
       <ButtonUI
         type={type || 'submit'}
         onClick={onClick as MouseEventHandler<HTMLButtonElement> | undefined}
-        className={`py-[6px] flex font-normal items-center gap-2 justify-center text-center border-[1px] border-primary-900 px-4 rounded-sm text-[13px] text-primary-900 bg-white hover:bg-primary-900 hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] max-[800px]:!text-[13px] max-md:!py-2 ${
-          !styled &&
-          '!bg-transparent !shadow-none !text-primary-900 hover:!scale-[1.005] !py-0 !px-0 !border-none hover:!bg-transparent hover:!text-primary-900'
-        } ${className} ${
-          primary &&
-          '!bg-primary-900 !text-white hover:!bg-primary-800 hover:!text-white !shadow-sm !border-primary-900'
-        }
-        ${
-          danger &&
-          '!bg-red-700 !border-none !text-white hover:!bg-red-700 hover:!text-white !shadow-sm'
-        } ${
-          disabled &&
-          '!bg-secondary !shadow-none hover:!scale-[1] !cursor-not-allowed hover:!bg-secondary hover:text-opacity-80 !duration-0 text-white text-opacity-80 !border-none text-center transition-all'
-        }`}
+        className={classes}
         disabled={disabled}
         {...rest}
       >
@@ -66,7 +77,7 @@ const Button: FC<ButtonProps> = ({
             {children || value}
           </>
         )}
-        </ButtonUI>
+      </ButtonUI>
     );
   }
 
@@ -82,20 +93,7 @@ const Button: FC<ButtonProps> = ({
           onClick(e);
         }
       }}
-      className={`py-[6px] text-center flex items-center gap-2 justify-center border-[1px] border-primary-900 px-4 rounded-sm text-[13px] text-primary-900 bg-white hover:bg-primary-900 hover:text-white cursor-pointer ease-in-out duration-400 hover:scale-[1.005] max-[800px]:!text-[13px] max-md:!py-2 ${
-        !styled &&
-        '!bg-transparent !shadow-none !text-primary-900 hover:!scale-[1.005] !py-0 !px-0 !border-none hover:!bg-transparent hover:!text-primary-900'
-      } ${className} ${
-        primary &&
-        '!bg-primary-900 !text-white hover:!bg-primary-800 hover:!text-white !shadow-sm !border-primary-900'
-      }
-      ${
-        danger &&
-        '!bg-red-700 !border-none !text-white hover:!bg-red-700 hover:!text-white !shadow-sm'
-      } ${
-        disabled &&
-        '!bg-secondary !shadow-none hover:!scale-[1] !cursor-default hover:!bg-secondary hover:text-opacity-80 !duration-0 text-white text-opacity-80 !border-none text-center transition-all'
-      }`}
+      className={classes}
       {...rest}
     >
       {isLoading ? (
