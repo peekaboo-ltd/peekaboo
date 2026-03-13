@@ -6,15 +6,14 @@ interface ApiResponse<T> {
   data: T;
 }
 
-interface UpdateCurrentLocationResponse {
-  message: string;
-  data: UserLocation;
-}
+interface UpdateCurrentLocationResponse extends ApiResponse<UserLocation> {}
 
-export interface UpdateProfilePayload {
+export interface UpdateUserPayload {
   name?: string;
   email?: string;
   phoneNumber?: string;
+  dateOfBirth?: string;
+  nationality?: string;
 }
 
 export const usersAPI = {
@@ -28,8 +27,12 @@ export const usersAPI = {
 
     return response.data.data;
   },
-  updateProfile: async (payload: UpdateProfilePayload): Promise<User> => {
-    const response = await apiClient.patch<ApiResponse<User>>('/users/me', payload);
+
+  updateUser: async (id: string, payload: UpdateUserPayload): Promise<User> => {
+    const response = await apiClient.patch<ApiResponse<User>>(
+      `/users/${id}`,
+      payload
+    );
     return response.data.data;
   },
 };

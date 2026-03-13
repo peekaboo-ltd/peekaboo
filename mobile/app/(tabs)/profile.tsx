@@ -6,177 +6,226 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../hooks/useAuth';
+import { useDashboard } from '../../hooks/useDashboard';
 import { useAuthStore } from '../../store/authStore';
+import { usersAPI, UpdateUserPayload } from '../../services/api/users';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { colors, spacing, typography } from '../../utils/constants';
-import { usersAPI } from '../../services/api/users';
-import { handleAPIError, getErrorMessage } from '../../utils/errorHandler';
+import { colors, spacing, typography, borderRadius, shadows } from '../../utils/constants';
 
 export default function ProfileScreen() {
-  const { user, setUser, logout } = useAuthStore();
+  const { user, isLoading } = useAuth();
+  const setUser = useAuthStore((state) => state.setUser);
+  const { stats } = useDashboard();
+
   const [name, setName] = useState(user?.name ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber ?? '');
+  const [dateOfBirth, setDateOfBirth] = useState(user?.dateOfBirth ?? '');
+  const [nationality, setNationality] = useState(user?.nationality ?? '');
+
+  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const initials = useMemo(() => {
+    if (user?.name) {
+      return user.name
+        .split(' ')
+        .map((part) => part.charAt(0).toUpperCase())
+        .slice(0, 2)
+        .join('');
+    }
+    if (user?.phoneNumber) {
+      return user.phoneNumber.slice(-2);
+    }
+    return '--';
+  }, [user]);
 
   const statusLabel = useMemo(() => {
-    if (!user?.status) return 'Unknown';
-    const value = user.status.toString().toLowerCase();
-    return value.charAt(0).toUpperCase() + value.slice(1);
-  }, [user?.status]);
+    if (!user?.status) return '';
+    return user.status.charAt(0) + user.status.slice(1).toLowerCase();
+  }, [user]);
+
+  const handleStartEdit = () => {
+    if (!user) return;
+    setName(user.name ?? '');
+    setEmail(user.email ?? '');
+    setPhoneNumber(user.phoneNumber ?? '');
+    setDateOfBirth(user.dateOfBirth ?? '');
+    setNationality(user.nationality ?? '');
+    setError(null);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    if (!user) return;
+    setName(user.name ?? '');
+    setEmail(user.email ?? '');
+    setPhoneNumber(user.phoneNumber ?? '');
+    setDateOfBirth(user.dateOfBirth ?? '');
+    setNationality(user.nationality ?? '');
+    setError(null);
+    setIsEditing(false);
+  };
 
   const handleSave = async () => {
     if (!user) return;
 
+    const payload: UpdateUserPayload = {
+      name: name.trim() || undefined,
+      email: email.trim() || undefined,
+      phoneNumber: phoneNumber.trim() || undefined,
+      dateOfBirth: dateOfBirth.trim() || undefined,
+      nationality: nationality.trim() || undefined,
+    };
+
     setIsSaving(true);
+    setError(null);
+
     try {
-      const updated = await usersAPI.updateProfile({
-        name: name.trim() || undefined,
-        email: email.trim() || undefined,
-        phoneNumber: phoneNumber.trim() || undefined,
-      });
-
-      setUser({
-        ...user,
-        ...updated,
-      });
-
-      Alert.alert('Profile Updated', 'Your profile details have been saved.');
-    } catch (error) {
-      const appError = handleAPIError(error);
-      Alert.alert('Update Failed', getErrorMessage(appError));
+      const updatedUser = await usersAPI.updateUser(user.id, payload);
+      setUser(updatedUser);
+      setIsEditing(false);
+      Alert.alert('Profile updated', 'Your profile has been updated successfully.');
+    } catch (e) {
+      setError('Failed to update profile. Please try again.');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
   if (!user) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContent}>
-          <Ionicons name="person-circle-outline" size={64} color={colors.text.disabled} />
-          <Text style={styles.emptyTitle}>No profile loaded</Text>
-          <Text style={styles.emptyText}>
-            Please log in again to load your rider profile.
-          </Text>
-          <Button
-            title="Log out"
-            onPress={handleLogout}
-            variant="outline"
-            style={styles.logoutButton}
-          />
-        </View>
-      </SafeAreaView>
+      <View style={styles.centered}>
+        <Text style={styles.centeredText}>
+          {isLoading ? 'Loading your profile...' : 'No user data available.'}
+        </Text>
+      </View>
     );
   }
 
-  const initial = (user.name || user.phoneNumber || 'R')[0]?.toUpperCase();
-
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.background}>
-        <View style={styles.glowTop} />
-        <View style={styles.glowBottom} />
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.headerCard}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{initials}</Text>
+        </View>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.name}>{user.name || 'Unnamed rider'}</Text>
+          <Text style={styles.subtitle}>{user.phoneNumber}</Text>
+          {user.email ? <Text style={styles.subtitle}>{user.email}</Text> : null}
+        </View>
+        <View style={styles.statusPill}>
+          <Ionicons
+            name={user.status === 'ACTIVE' ? 'checkmark-circle' : 'alert-circle'}
+            size={16}
+            color={colors.text.inverse}
+          />
+          <Text style={styles.statusText}>{statusLabel}</Text>
+        </View>
       </View>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.headerCard}>
-          <View style={styles.headerLeft}>
-            <View style={styles.kickerRow}>
-              <View style={styles.kickerDot} />
-              <Text style={styles.kicker}>Profile</Text>
-            </View>
-            <Text style={styles.title}>Rider account</Text>
-            <Text style={styles.subtitle}>
-              Manage your details and account status.
-            </Text>
-            <View style={styles.statusPill}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusLabel}>{statusLabel}</Text>
-            </View>
-          </View>
-          <View style={styles.headerRight}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initial}</Text>
-            </View>
-          </View>
-        </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Profile information</Text>
 
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Personal details</Text>
-          <Input
-            label="Full name"
-            placeholder="Enter your name"
-            value={name}
-            onChangeText={setName}
-            icon={<Ionicons name="person-outline" size={20} color={colors.text.secondary} />}
-          />
-          <Input
-            label="Email"
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            icon={<Ionicons name="mail-outline" size={20} color={colors.text.secondary} />}
-          />
-          <Input
-            label="Phone number"
-            placeholder="Enter your phone number"
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            keyboardType="phone-pad"
-            icon={<Ionicons name="call-outline" size={20} color={colors.text.secondary} />}
-          />
+        <Input
+          label="Full name"
+          value={name}
+          onChangeText={setName}
+          placeholder="Enter your full name"
+          editable={isEditing}
+        />
 
-          <Button
-            title="Save changes"
-            onPress={handleSave}
-            loading={isSaving}
-            fullWidth
-            style={styles.saveButton}
-          />
-        </View>
+        <Input
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Enter your email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          editable={isEditing}
+        />
 
+        <Input
+          label="Phone number"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          placeholder="Enter your phone number"
+          keyboardType="phone-pad"
+          editable={isEditing}
+        />
+
+        <Input
+          label="Date of birth"
+          value={dateOfBirth}
+          onChangeText={setDateOfBirth}
+          placeholder="YYYY-MM-DD"
+          editable={isEditing}
+        />
+
+        <Input
+          label="Nationality"
+          value={nationality}
+          onChangeText={setNationality}
+          placeholder="Enter your nationality"
+          editable={isEditing}
+        />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Today’s performance</Text>
         <View style={styles.metaRow}>
-          <View style={styles.metaColumn}>
-            <Text style={styles.metaLabel}>Joined</Text>
-            <Text style={styles.metaValue}>
-              {new Date(user.createdAt).toLocaleDateString()}
-            </Text>
-          </View>
-          <View style={styles.metaColumn}>
-            <Text style={styles.metaLabel}>Last updated</Text>
-            <Text style={styles.metaValue}>
-              {new Date(user.updatedAt).toLocaleDateString()}
-            </Text>
-          </View>
+          <Text style={styles.metaLabel}>Deliveries completed today</Text>
+          <Text style={styles.metaValue}>{stats?.completedToday ?? 0}</Text>
         </View>
+        <View style={styles.metaRow}>
+          <Text style={styles.metaLabel}>Total deliveries today</Text>
+          <Text style={styles.metaValue}>{stats?.todayDeliveries ?? 0}</Text>
+        </View>
+        <View style={styles.metaRow}>
+          <Text style={styles.metaLabel}>Total assignments</Text>
+          <Text style={styles.metaValue}>{stats?.totalAssignments ?? 0}</Text>
+        </View>
+      </View>
 
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Account</Text>
+      {error && (
+        <Text style={styles.errorText}>{error}</Text>
+      )}
+
+      <View style={styles.actionsRow}>
+        {isEditing ? (
+          <>
+            <Button
+              title="Cancel"
+              variant="outline"
+              onPress={handleCancelEdit}
+              style={styles.actionButton}
+            />
+            <Button
+              title="Save changes"
+              onPress={handleSave}
+              loading={isSaving}
+              disabled={isSaving}
+              style={styles.actionButton}
+            />
+          </>
+        ) : (
           <Button
-            title="Log out"
-            onPress={handleLogout}
-            variant="outline"
-            fullWidth
-            icon={<Ionicons name="log-out-outline" size={20} color={colors.danger} />}
+            title="Edit profile"
+            onPress={handleStartEdit}
+            style={styles.singleActionButton}
+            icon={<Ionicons name="create-outline" size={18} color={colors.text.inverse} />}
           />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -185,180 +234,113 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  background: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  glowTop: {
-    position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'rgba(95, 149, 152, 0.16)',
-    top: -120,
-    right: -80,
-  },
-  glowBottom: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: 'rgba(29, 84, 109, 0.12)',
-    bottom: -90,
-    left: -80,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.md,
+  contentContainer: {
+    padding: spacing.lg,
     paddingBottom: spacing.xxl,
-    gap: spacing.lg,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+  },
+  centeredText: {
+    color: colors.text.secondary,
+    fontSize: typography.body.fontSize,
   },
   headerCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(95, 149, 152, 0.2)',
+    borderRadius: borderRadius.lg,
     padding: spacing.lg,
-  },
-  headerLeft: {
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  headerRight: {
-    alignItems: 'flex-end',
-  },
-  kickerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  kickerDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primaryLight,
-    marginRight: spacing.sm,
-  },
-  kicker: {
-    fontSize: typography.caption.fontSize,
-    letterSpacing: 2.2,
-    textTransform: 'uppercase',
-    color: colors.text.secondary,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: typography.h3.fontSize,
-    fontWeight: '700',
-    color: colors.text.primary,
-  },
-  subtitle: {
-    fontSize: typography.bodySmall.fontSize,
-    color: colors.text.secondary,
-    marginTop: spacing.xs,
-  },
-  statusPill: {
-    marginTop: spacing.md,
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 999,
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.25)',
-    gap: spacing.xs,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.success,
-  },
-  statusLabel: {
-    fontSize: typography.caption.fontSize,
-    color: colors.text.secondary,
-    fontWeight: '600',
-    letterSpacing: 1,
+    marginBottom: spacing.lg,
+    ...shadows.md,
   },
   avatar: {
     width: 64,
     height: 64,
-    borderRadius: 24,
-    backgroundColor: colors.primaryDark,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
     color: colors.text.inverse,
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
   },
-  sectionCard: {
+  headerTextContainer: {
+    flex: 1,
+    marginLeft: spacing.md,
+  },
+  name: {
+    fontSize: typography.h2.fontSize,
+    fontWeight: typography.h2.fontWeight,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  subtitle: {
+    fontSize: typography.bodySmall.fontSize,
+    color: colors.text.secondary,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primaryLight,
+  },
+  statusText: {
+    marginLeft: spacing.xs,
+    color: colors.text.inverse,
+    fontSize: typography.caption.fontSize,
+    fontWeight: '500',
+  },
+  section: {
     backgroundColor: colors.surface,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(95, 149, 152, 0.2)',
+    borderRadius: borderRadius.lg,
     padding: spacing.lg,
+    marginBottom: spacing.lg,
+    ...shadows.sm,
   },
   sectionTitle: {
-    fontSize: typography.body.fontSize,
-    fontWeight: '600',
+    fontSize: typography.h3.fontSize,
+    fontWeight: typography.h3.fontWeight,
     color: colors.text.primary,
     marginBottom: spacing.md,
-  },
-  saveButton: {
-    marginTop: spacing.md,
   },
   metaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  metaColumn: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(95, 149, 152, 0.16)',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
   },
   metaLabel: {
-    fontSize: typography.caption.fontSize,
+    fontSize: typography.bodySmall.fontSize,
     color: colors.text.secondary,
-    textTransform: 'uppercase',
-    letterSpacing: 1.4,
   },
   metaValue: {
-    marginTop: spacing.xs,
-    fontSize: typography.body.fontSize,
-    color: colors.text.primary,
-    fontWeight: '600',
-  },
-  centerContent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  emptyTitle: {
-    fontSize: typography.h3.fontSize,
-    fontWeight: '700',
+    fontSize: typography.bodySmall.fontSize,
     color: colors.text.primary,
   },
-  emptyText: {
-    fontSize: typography.body.fontSize,
-    color: colors.text.secondary,
+  errorText: {
+    color: colors.danger,
+    fontSize: typography.bodySmall.fontSize,
+    marginBottom: spacing.md,
     textAlign: 'center',
   },
-  logoutButton: {
-    marginTop: spacing.md,
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  actionButton: {
+    flex: 1,
+  },
+  singleActionButton: {
+    flex: 1,
   },
 });
 

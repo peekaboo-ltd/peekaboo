@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AssignmentCard } from '../../components/assignments/AssignmentCard';
 import { AssignmentSkeletonCard } from '../../components/assignments/AssignmentSkeletonCard';
@@ -20,6 +20,7 @@ import { useAssignmentStore } from '../../store/assignmentStore';
 import { colors, typography, spacing } from '../../utils/constants';
 
 export default function AssignmentsScreen() {
+  const params = useLocalSearchParams<{ filter?: string }>();
   const {
     assignments,
     isLoading,
@@ -34,6 +35,12 @@ export default function AssignmentsScreen() {
     loadMore,
   } = useAssignments();
   const { confirmOrderDispatch } = useAssignmentStore();
+
+  useEffect(() => {
+    if (params.filter) {
+      setFilter(params.filter as any);
+    }
+  }, [params.filter, setFilter]);
 
   const handleRefresh = useCallback(() => {
     refreshAssignments();

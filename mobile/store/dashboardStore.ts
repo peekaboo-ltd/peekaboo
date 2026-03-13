@@ -3,6 +3,7 @@ import { DashboardStats, RecentActivity } from '../types';
 import { dashboardAPI } from '../services/api/dashboard';
 import { assignmentsAPI } from '../services/api/assignments';
 import { handleAPIError, getErrorMessage } from '../utils/errorHandler';
+import { OrderAssignmentStatus } from '../types';
 
 interface DashboardState {
   stats: DashboardStats | null;
@@ -31,14 +32,33 @@ export const useDashboardStore = create<DashboardState>((set) => ({
     set({ isLoading: true, error: null });
     
     try {
-      // Fetch dashboard data and pending assignments in parallel
-      const [dashboardData, pendingAssignments] = await Promise.all([
-        dashboardAPI.getDashboardData(),
-        assignmentsAPI.getPending(),
-      ]);
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      // Fetch dashboard data and assignments in parallel
+      const [dashboardData, pendingAssignments, activeAssignments, completedPage] =
+        await Promise.all([
+          dashboardAPI.getDashboardData(),
+          assignmentsAPI.getPending(),
+          assignmentsAPI.getActive(),
+          assignmentsAPI.getAll({ status: OrderAssignmentStatus.COMPLETED, page: 1, size: 200 }),
+        ]);
+
+      const completedToday = completedPage.data.filter((a) => {
+        const updated = new Date(a.updatedAt);
+        return !Number.isNaN(updated.getTime()) && updated >= startOfDay;
+      }).length;
+
+      const todayDeliveries = pendingAssignments.length + activeAssignments.length + completedToday;
+      const mergedStats: DashboardStats = {
+        ...dashboardData.stats,
+        pendingAssignments: pendingAssignments.length,
+        completedToday,
+        todayDeliveries,
+      };
       
       set({
-        stats: dashboardData.stats,
+        stats: mergedStats,
         recentActivity: dashboardData.recentActivity || [],
         pendingCount: pendingAssignments.length,
         isLoading: false,
@@ -75,13 +95,32 @@ export const useDashboardStore = create<DashboardState>((set) => ({
     set({ isRefreshing: true });
     
     try {
-      const [dashboardData, pendingAssignments] = await Promise.all([
-        dashboardAPI.getDashboardData(),
-        assignmentsAPI.getPending(),
-      ]);
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const [dashboardData, pendingAssignments, activeAssignments, completedPage] =
+        await Promise.all([
+          dashboardAPI.getDashboardData(),
+          assignmentsAPI.getPending(),
+          assignmentsAPI.getActive(),
+          assignmentsAPI.getAll({ status: OrderAssignmentStatus.COMPLETED, page: 1, size: 200 }),
+        ]);
+
+      const completedToday = completedPage.data.filter((a) => {
+        const updated = new Date(a.updatedAt);
+        return !Number.isNaN(updated.getTime()) && updated >= startOfDay;
+      }).length;
+
+      const todayDeliveries = pendingAssignments.length + activeAssignments.length + completedToday;
+      const mergedStats: DashboardStats = {
+        ...dashboardData.stats,
+        pendingAssignments: pendingAssignments.length,
+        completedToday,
+        todayDeliveries,
+      };
       
       set({
-        stats: dashboardData.stats,
+        stats: mergedStats,
         recentActivity: dashboardData.recentActivity || [],
         pendingCount: pendingAssignments.length,
         isRefreshing: false,

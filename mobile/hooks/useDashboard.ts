@@ -18,11 +18,22 @@ export const useDashboard = () => {
   } = useDashboardStore();
 
   /**
-   * Load dashboard data on mount
+   * Load dashboard data on mount and keep it fresh while dashboard is in use.
+   * This provides near real-time updates without needing manual refresh.
    */
   useEffect(() => {
+    // Initial load
     fetchDashboardData();
-  }, []);
+
+    // Poll for updates at a regular interval
+    const intervalId = setInterval(() => {
+      refreshDashboard();
+    }, 30000); // 30 seconds
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [fetchDashboardData, refreshDashboard]);
 
   /**
    * Handle refresh
