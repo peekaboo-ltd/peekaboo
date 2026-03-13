@@ -8,6 +8,7 @@ import { UserStatus } from "../constants/user.constants";
 import { UUID } from "../types";
 import { AuthRequest } from '../types/auth.types';
 import { AuditLogService } from '../services/auditLog.service';
+import { uploadUserAvatarToCloudinary } from '../integrations/cloudinary/cloudinary.service';
 
 const userService = new UserService();
 const auditLogService = new AuditLogService();
@@ -280,10 +281,28 @@ export const UserController = {
           message: "No image file provided",
         });
       }
+      
+      const localFilePath = (file as Express.Multer.File & { path?: string }).path;
+      if (!localFilePath) {
+        return res.status(500).json({
+          message: "Failed to process uploaded image",
+        });
+      }
 
-      const relativePath = `avatars/${file.filename}`;
+      const cloudinaryUrl = await uploadUserAvatarToCloudinary(localFilePath, {
+        userId: id,
+      });
+
+      try {
+        if (fs.existsSync(localFilePath)) {
+          fs.unlinkSync(localFilePath);
+        }
+      } catch {
+        // ignore local file delete errors
+      }
+
       const user = await userService.updateUser(id as UUID, {
-        profilePhotoUrl: relativePath,
+        profilePhotoUrl: cloudinaryUrl,
       });
 
       return res.status(200).json({
