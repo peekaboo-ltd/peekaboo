@@ -32,7 +32,7 @@ export const AuthenticatedLayout = () => {
             <SidebarTrigger className="-ml-1" />
           </div>
           <section className="w-full px-3 py-4 sm:px-6 sm:py-6 lg:px-8 mb-4">
-            <article className="w-full max-w-8xl mx-auto">
+            <article className="w-full max-w-6xl mx-auto">
               <Outlet />
             </article>
           </section>

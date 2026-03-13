@@ -55,11 +55,12 @@ const Services = () => {
   useDocumentTitle('Services');
 
   return (
-    <main className="min-h-screen bg-[#f7f7f4]">
-      <section className="pt-24 pb-10 bg-primary-900 text-white">
-        <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12 text-center">
+    <main className="min-h-screen bg-slate-50">
+      <section className="relative overflow-hidden pt-24 pb-14 bg-slate-950 text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(59,130,246,0.28),transparent_40%),radial-gradient(circle_at_80%_15%,rgba(14,165,233,0.22),transparent_34%)]" />
+        <article className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Business Delivery Plans</h1>
-          <p className="text-lg text-primary-200 max-w-3xl mx-auto">
+          <p className="text-lg text-slate-300 max-w-3xl mx-auto">
             Choose the package that matches your growth: monthly, weekly, daily, or a dedicated rider
             fully committed to your operations.
           </p>

@@ -23,7 +23,7 @@ const BusinessPlansSection = ({
 }: BusinessPlansSectionProps) => (
   <section className="w-full py-20 lg:py-28">
     <motion.article
-      className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16"
+      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-100px' }}

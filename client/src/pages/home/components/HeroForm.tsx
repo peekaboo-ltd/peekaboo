@@ -86,12 +86,12 @@ const HeroForm = ({
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="relative isolate">
-      <div className="relative rounded-xl bg-white border border-gray-200 p-7 sm:p-8 shadow-sm">
+      <div className="relative rounded-2xl bg-white/95 backdrop-blur-md border border-white/70 p-7 sm:p-8 shadow-[0_26px_60px_rgba(2,6,23,0.45)]">
         <header className="mb-6">
           <h2 className="text-lg font-semibold text-gray-900">
             {copy?.formTitle}
           </h2>
-          <p className="text-gray-400 text-[11px] mt-0.5">
+          <p className="text-gray-500 text-[11px] mt-0.5">
             {copy?.formSubtitle}
           </p>
         </header>
@@ -139,7 +139,7 @@ const HeroForm = ({
 
         <footer className="space-y-3">
           <Button
-            className="w-full bg-gray-900 hover:bg-gray-800 border-gray-900 text-white py-2.5 rounded-md text-[13px] font-medium"
+            className="w-full bg-primary-600 hover:bg-primary-700 border-primary-600 text-white py-2.5 rounded-md text-[13px] font-medium shadow-sm"
             isLoading={isLoading}
             type="submit"
             primary

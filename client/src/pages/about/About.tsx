@@ -162,7 +162,7 @@ const Statistics = () => {
       className="bg-gray-900 py-20 md:py-24"
     >
       <article
-        className={`max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 sm:grid-cols-3 gap-10 text-center transition-all duration-700 ${
+        className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 grid grid-cols-1 sm:grid-cols-3 gap-10 text-center transition-all duration-700 ${
           inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
         }`}
       >
@@ -199,19 +199,20 @@ const About = () => {
   useDocumentTitle('About');
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-slate-50">
       {/* Hero */}
-      <section className="bg-white py-24 md:py-32">
-        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12 text-center">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-primary-600 font-medium mb-4">
+      <section className="relative overflow-hidden bg-slate-950 py-24 md:py-32">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.3),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(14,165,233,0.22),transparent_35%)]" />
+        <article className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 text-center">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-primary-200 font-medium mb-4">
             About Peekaboo
           </p>
-          <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-gray-900 leading-tight mb-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-white leading-tight mb-6">
             We move what matters
             <br className="hidden sm:block" />
             across Kigali.
           </h1>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
             Peekaboo connects individuals, small businesses, and growing brands with a
             trusted network of professional riders — so every parcel arrives quickly,
             safely, and with a smile.
@@ -221,7 +222,7 @@ const About = () => {
 
       {/* Our Story */}
       <section className="bg-gray-50 py-24 md:py-32">
-        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12">
+        <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             <div>
               <p className="text-[11px] uppercase tracking-[0.16em] text-primary-600 font-medium mb-4">
@@ -273,7 +274,7 @@ const About = () => {
 
       {/* Mission & Vision */}
       <section className="bg-gray-900 py-24 md:py-32">
-        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12">
+        <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10">
           <p className="text-[11px] uppercase tracking-[0.16em] text-gray-400 font-medium mb-10 text-center">
             What drives us
           </p>
@@ -302,7 +303,7 @@ const About = () => {
 
       {/* Core Values */}
       <section className="bg-white py-24 md:py-32">
-        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12">
+        <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10">
           <div className="text-center mb-14">
             <p className="text-[11px] uppercase tracking-[0.16em] text-primary-600 font-medium mb-4">
               Core Values
@@ -337,7 +338,7 @@ const About = () => {
 
       {/* Contact / Office */}
       <section className="bg-white py-24 md:py-32">
-        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12">
+        <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10">
           <div className="text-center mb-14">
             <p className="text-[11px] uppercase tracking-[0.16em] text-primary-600 font-medium mb-4">
               Get in touch
@@ -389,7 +390,7 @@ const About = () => {
 
       {/* CTA */}
       <section className="bg-primary-900 py-16">
-        <article className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12 text-center">
+        <article className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 text-center">
           <h2 className="text-2xl font-bold text-white mb-3">
             Ready to get started?
           </h2>
