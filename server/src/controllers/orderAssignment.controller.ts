@@ -1,8 +1,20 @@
 import { NextFunction, Request, Response } from 'express';
 import { OrderAssignmentService } from '../services/orderAssignment.service';
 import { UUID } from '../types';
+import { AuthRequest } from '../types/auth.types';
+import { RoleTypes } from '../constants/role.constants';
 
 const orderAssignmentService = new OrderAssignmentService();
+
+const getRiderId = (req: Request): UUID | undefined => {
+  const authReq = req as AuthRequest;
+  const hasRiderRole =
+    authReq.user?.userRoles?.some(
+      (userRole) => userRole.role.name === RoleTypes.RIDER
+    ) ?? false;
+
+  return hasRiderRole ? (authReq.user?.id as UUID | undefined) : undefined;
+};
 
 export const OrderAssignmentController = {
   // CREATE ORDER ASSIGNMENT
@@ -32,7 +44,9 @@ export const OrderAssignmentController = {
     try {
       // FETCH ORDER ASSIGNMENTS
       const fetchedOrderAssignments =
-        await orderAssignmentService.fetchOrderAssignments(req.query);
+        await orderAssignmentService.fetchOrderAssignments(req.query, {
+          riderId: getRiderId(req),
+        });
 
       // RETURN ORDER ASSIGNMENTS
       return res.status(200).json({
@@ -55,7 +69,9 @@ export const OrderAssignmentController = {
 
       // GET ORDER ASSIGNMENT BY ID
       const orderAssignment =
-        await orderAssignmentService.getOrderAssignmentById(id as UUID);
+        await orderAssignmentService.getOrderAssignmentById(id as UUID, {
+          riderId: getRiderId(req),
+        });
 
       // RETURN ORDER ASSIGNMENT
       return res.status(200).json({

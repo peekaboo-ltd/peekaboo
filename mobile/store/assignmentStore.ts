@@ -2,19 +2,6 @@ import { create } from 'zustand';
 import { Assignment, OrderAssignmentStatus, OrderStatus } from '../types';
 import { assignmentsAPI } from '../services/api/assignments';
 import { handleAPIError, getErrorMessage } from '../utils/errorHandler';
-import { useAuthStore } from './authStore';
-
-const withCurrentRider = <T extends Record<string, unknown>>(params: T): T => {
-  const currentUserId = useAuthStore.getState().user?.id;
-  if (!currentUserId) {
-    return params;
-  }
-
-  return {
-    ...params,
-    assignedToId: currentUserId,
-  };
-};
 
 interface AssignmentState {
   assignments: Assignment[];
@@ -59,11 +46,10 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     set({ isLoading: true, error: null, filter: currentFilter, page: 1 });
     
     try {
-      const params = withCurrentRider(
+      const params =
         currentFilter !== 'ALL'
           ? { status: currentFilter, page: 1, size: 20 }
-          : { page: 1, size: 20 },
-      );
+          : { page: 1, size: 20 };
       
       const response = await assignmentsAPI.getAll(params);
       
@@ -91,11 +77,10 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     
     try {
       const nextPage = page + 1;
-      const params = withCurrentRider(
+      const params =
         filter !== 'ALL'
           ? { status: filter, page: nextPage, size: 20 }
-          : { page: nextPage, size: 20 },
-      );
+          : { page: nextPage, size: 20 };
       
       const response = await assignmentsAPI.getAll(params);
       
@@ -257,11 +242,10 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     
     try {
       const { filter } = get();
-      const params = withCurrentRider(
+      const params =
         filter !== 'ALL'
           ? { status: filter, page: 1, size: 20 }
-          : { page: 1, size: 20 },
-      );
+          : { page: 1, size: 20 };
       
       const response = await assignmentsAPI.getAll(params);
       

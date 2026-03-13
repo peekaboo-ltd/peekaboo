@@ -20,6 +20,10 @@ import { EmailService } from '../integrations/emails/email.service';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
+interface RiderAssignmentScope {
+  riderId?: UUID;
+}
+
 export class OrderAssignmentService {
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
   private readonly orderRepository: Repository<Order>;
@@ -131,7 +135,10 @@ export class OrderAssignmentService {
   }
 
   // FETCH ORDER ASSIGNMENTS
-  async fetchOrderAssignments(query: Request['query']): Promise<Pagination> {
+  async fetchOrderAssignments(
+    query: Request['query'],
+    scope?: RiderAssignmentScope
+  ): Promise<Pagination> {
     const { page = 0, size = 10, orderId, assignedToId, status } = query;
 
     let condition:
@@ -166,8 +173,13 @@ export class OrderAssignmentService {
       size: Number(size),
     });
 
+    const scopedCondition = condition as FindOptionsWhere<OrderAssignment>;
+    if (scope?.riderId) {
+      scopedCondition.assignedToId = scope.riderId;
+    }
+
     const orderAssignments = await this.orderAssignmentRepository.findAndCount({
-      where: condition,
+      where: scopedCondition,
       skip,
       take,
       relations: {
@@ -188,9 +200,17 @@ export class OrderAssignmentService {
   }
 
   // GET ORDER ASSIGNMENT BY ID
-  async getOrderAssignmentById(id: UUID): Promise<OrderAssignment> {
+  async getOrderAssignmentById(
+    id: UUID,
+    scope?: RiderAssignmentScope
+  ): Promise<OrderAssignment> {
+    const whereCondition: FindOptionsWhere<OrderAssignment> = { id };
+    if (scope?.riderId) {
+      whereCondition.assignedToId = scope.riderId;
+    }
+
     const orderAssignment = await this.orderAssignmentRepository.findOne({
-      where: { id },
+      where: whereCondition,
       relations: {
         order: {
           activities: true,
