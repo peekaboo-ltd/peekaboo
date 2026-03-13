@@ -58,16 +58,20 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-white">
-      <article className="relative z-10 w-full max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-14 pt-10 pb-16 lg:pt-14 lg:pb-20">
+    <section className="relative min-h-screen w-full overflow-hidden bg-slate-950">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(59,130,246,0.28),transparent_40%),radial-gradient(circle_at_82%_22%,rgba(14,165,233,0.22),transparent_34%),linear-gradient(160deg,#020617,#0f172a_42%,#111827)]" />
+      <div className="pointer-events-none absolute -left-24 top-28 h-72 w-72 rounded-full bg-primary-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute right-0 top-16 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+
+      <article className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 pt-14 pb-16 lg:pt-20 lg:pb-24">
         <motion.section
-          className="w-full flex flex-col lg:flex-row gap-10 lg:gap-16 items-center max-lg:justify-center min-h-[calc(100vh-6rem)]"
+          className="w-full flex flex-col lg:flex-row gap-10 lg:gap-14 items-center max-lg:justify-center min-h-[calc(100vh-6rem)]"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           <motion.header
-            className="w-full lg:w-[44%] lg:self-center flex flex-col max-lg:items-center max-lg:justify-center gap-6 order-2 lg:order-1 text-center lg:text-left"
+            className="w-full lg:w-[48%] lg:self-center flex flex-col max-lg:items-center max-lg:justify-center gap-6 order-2 lg:order-1 text-center lg:text-left"
             variants={itemVariants}
           >
             <HeroTabs
@@ -104,10 +108,10 @@ const HeroSection = ({
           </motion.header>
 
           <motion.aside
-            className="w-full lg:w-[56%] flex justify-end order-1 lg:order-2"
+            className="w-full lg:w-[52%] flex justify-end order-1 lg:order-2"
             variants={itemVariants}
           >
-            <menu className="w-full lg:max-w-[30vw] flex items-center justify-end max-lg:justify-center">
+            <menu className="w-full max-w-xl flex items-center justify-end max-lg:justify-center">
               <motion.article
                 className="relative"
                 initial={{ opacity: 0, y: 16 }}
