@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
-import type { BusinessPlan, PaginatedBusinessPlansResponse } from '@/types/businessPlan.type';
+import type { BusinessPlan, BusinessPlanOrganizationCountResponse, PaginatedBusinessPlansResponse } from '@/types/businessPlan.type';
 
 export const businessPlanQueriesApiSlice = createApi({
   reducerPath: 'businessPlanQueriesApi',
@@ -21,6 +21,12 @@ export const businessPlanQueriesApiSlice = createApi({
         url: `/business-plans/${id}`,
       }),
     }),
+
+    fetchBusinessPlanOrganizationCount: builder.query<BusinessPlanOrganizationCountResponse, string>({
+      query: (id) => ({
+        url: `/business-plans/${id}/organization-count`,
+      }),
+    }),
   }),
 });
 
@@ -28,4 +34,5 @@ export const {
   useFetchBusinessPlansQuery,
   useLazyFetchBusinessPlansQuery,
   useFetchBusinessPlanByIdQuery,
+  useFetchBusinessPlanOrganizationCountQuery,
 } = businessPlanQueriesApiSlice;

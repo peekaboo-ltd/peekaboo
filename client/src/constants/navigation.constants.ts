@@ -7,6 +7,7 @@ import {
   faUserCheck,
   faUserGroup,
   faCreditCard,
+  faTag,
 } from '@fortawesome/free-solid-svg-icons';
 
 export const NAVIGATION_LINKS = {
@@ -44,10 +45,24 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS, RoleTypes.CUSTOMER],
   },
   {
-    label: 'Assignments',
-    path: '/assignments',
+    label: 'Riders',
+    path: '/riders',
     icon: faUserCheck,
     permissions: [RoleTypes.ADMIN, RoleTypes.RIDER],
+    subCategories: [
+      {
+        label: 'Assignments',
+        path: '/assignments',
+        icon: faUserCheck,
+        permissions: [RoleTypes.ADMIN, RoleTypes.RIDER],
+      },
+      {
+        label: 'Users Tracking',
+        path: '/users/tracking',
+        icon: faLocationDot,
+        permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
+      },
+    ]
   },
   {
     label: 'Payments',
@@ -62,15 +77,15 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
   },
   {
-    label: 'Users Tracking',
-    path: '/users/tracking',
-    icon: faLocationDot,
-    permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
-  },
-  {
     label: 'Organizations',
     path: '/organizations',
     icon: faBuilding,
+    permissions: [RoleTypes.ADMIN],
+  },
+  {
+    label: 'Business Plans',
+    path: '/business-plans',
+    icon: faTag,
     permissions: [RoleTypes.ADMIN],
   },
 ];

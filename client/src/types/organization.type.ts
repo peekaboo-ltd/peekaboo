@@ -25,6 +25,12 @@ export interface TeamMemberFormData {
   email: string;
 }
 
+export enum BillingPeriod {
+  DAILY = 'DAILY',
+  WEEKLY = 'WEEKLY',
+  MONTHLY = 'MONTHLY',
+}
+
 // Redux onboarding state
 export interface OnboardingState {
   organization: OrganizationFormData;
@@ -42,7 +48,11 @@ export interface CreateOrganizationPayload {
     phoneNumber?: string;
     address?: string;
     tin?: string;
+    status?: OrganizationStatus;
     businessPlanId?: string;
+    billingPeriod?: BillingPeriod;
+    paymentTermsDays?: number;
+    defaultLocation?: { latitude: number; longitude: number };
   };
   adminUser: {
     name?: string;
@@ -52,7 +62,7 @@ export interface CreateOrganizationPayload {
   };
 }
 
-// Organization entity
+// Organization entity (aligned with server organization.entity.ts)
 export interface Organization extends BaseDomain {
   id: UUID;
   name: string;
@@ -63,6 +73,8 @@ export interface Organization extends BaseDomain {
   tin?: string;
   status: OrganizationStatus;
   businessPlanId?: UUID;
+  billingPeriod: BillingPeriod;
+  paymentTermsDays: number;
   createdById: UUID;
   defaultLocation?: { latitude: number; longitude: number };
   createdAt: Date;
@@ -156,21 +168,4 @@ export interface InviteOrganizationPayload {
 
 export interface InviteOrganizationResponse {
   message: string;
-}
-
-export enum BillingPeriod {
-  DAILY = 'DAILY',
-  WEEKLY = 'WEEKLY',
-  MONTHLY = 'MONTHLY',
-}
-
-export interface OrganizationMembership {
-  id: UUID;
-  userId: UUID;
-  organizationId: UUID;
-  role: OrganizationRole;
-  status: MembershipStatus;
-  user?: User;
-  createdAt: Date;
-  updatedAt: Date;
 }

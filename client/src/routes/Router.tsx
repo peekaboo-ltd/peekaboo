@@ -31,6 +31,11 @@ import {
   OrganizationsPage,
   ManageOrganizationPage,
 } from '@/pages/organizations';
+import {
+  BusinessPlansPage,
+  CreateBusinessPlanPage,
+  ManageBusinessPlanPage,
+} from '@/pages/business-plans';
 import { PaymentsPage } from '@/pages/payments';
 import {
   OrganizationOnboarding,
@@ -252,6 +257,33 @@ const Router = () => {
               element={
                 <ProtectedRoute allowedRoles={['BUSINESS']}>
                   <OrganizationSettingsPage />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+
+          <Route path="business-plans">
+            <Route
+              index
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <BusinessPlansPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="create"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <CreateBusinessPlanPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path=":id/manage"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <ManageBusinessPlanPage />
                 </ProtectedRoute>
               }
             />

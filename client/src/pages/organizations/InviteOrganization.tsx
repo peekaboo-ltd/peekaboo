@@ -6,11 +6,14 @@ import Button from '@/components/inputs/Button';
 import { useInviteOrganizationMutation } from '@/api/mutations/organization.mutations';
 import type { InviteOrganizationPayload } from '@/types/organization.type';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { useNavigate } from 'react-router-dom';
 
 const InviteOrganization = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [inviteOrganization, { isLoading }] = useInviteOrganizationMutation();
   useDocumentTitle('Invite Organization');
+
+  const navigate = useNavigate();
 
   const {
     control,
@@ -173,25 +176,27 @@ const InviteOrganization = () => {
           </div>
 
           {statusMessage && (
-            <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
               {statusMessage}
-            </div>
+            </p>
           )}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <footer className="flex items-center justify-between gap-3">
+            <Button onClick={(e) => {
+              e.preventDefault();
+              navigate(-1);
+            }}>
+              Back
+            </Button>
             <Button
               type="submit"
               primary
-              className="px-6"
               isLoading={isLoading}
               disabled={isLoading}
             >
               Send invite
             </Button>
-            <Button route="/users" className="px-6">
-              Back to users
-            </Button>
-          </div>
+          </footer>
         </form>
       </section>
     </main>

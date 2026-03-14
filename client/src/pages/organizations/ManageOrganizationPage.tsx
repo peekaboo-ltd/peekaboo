@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
+import Select from '@/components/inputs/Select';
 import { Badge } from '@/components/ui/badge';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
@@ -31,6 +32,8 @@ import {
   InternalPageHeader,
   InternalStatCard,
 } from '@/components/layout/InternalPage';
+import { UUID } from '@/types';
+import { OrganizationMembership } from '@/types/organizationMembership.types';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -54,7 +57,7 @@ type OrgFormValues = {
 };
 
 const ManageOrganizationPage = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: UUID }>();
   const navigate = useNavigate();
   useDocumentTitle('Manage Organization');
 
@@ -280,38 +283,32 @@ const ManageOrganizationPage = () => {
                 name="status"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-slate-700 uppercase tracking-wide">
-                      Status
-                    </label>
-                    <select
-                      {...field}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    >
-                      {Object.values(OrganizationStatus).map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <Select
+                    label="Status"
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={Object.values(OrganizationStatus).map((s) => ({
+                      label: s.charAt(0) + s.slice(1).toLowerCase(),
+                      value: s,
+                    }))}
+                    placeholder="Select status"
+                  />
                 )}
               />
               <Controller
                 name="billingPeriod"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-slate-700 uppercase tracking-wide">
-                      Billing Period
-                    </label>
-                    <select
-                      {...field}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    >
-                      {Object.values(BillingPeriod).map((p) => (
-                        <option key={p} value={p}>{p}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <Select
+                    label="Billing Period"
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={Object.values(BillingPeriod).map((p) => ({
+                      label: p.charAt(0) + p.slice(1).toLowerCase(),
+                      value: p,
+                    }))}
+                    placeholder="Select billing period"
+                  />
                 )}
               />
               <Controller
@@ -391,23 +388,16 @@ const ManageOrganizationPage = () => {
             )}
 
             <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-slate-700 uppercase tracking-wide">
-                  Assign Plan
-                </label>
-                <select
-                  value={selectedPlanId}
-                  onChange={(e) => setSelectedPlanId(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                  <option value="">— Select a plan —</option>
-                  {businessPlans.map((plan) => (
-                    <option key={plan.id} value={plan.id}>
-                      {plan.name} ({plan.currency} {Number(plan.pricePerOrder).toLocaleString()}/order)
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Select
+                label="Assign Plan"
+                value={selectedPlanId}
+                onChange={(value) => setSelectedPlanId(value)}
+                options={businessPlans.map((plan) => ({
+                  label: `${plan.name} (${plan.currency} ${Number(plan.pricePerOrder).toLocaleString()}/order)`,
+                  value: plan.id,
+                }))}
+                placeholder="Select a plan"
+              />
               <Button
                 primary
                 type="button"
@@ -438,7 +428,7 @@ const ManageOrganizationPage = () => {
               <p className="text-sm text-slate-400">No members found.</p>
             ) : (
               <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
-                {members.map((member) => (
+                {members.map((member: OrganizationMembership) => (
                   <li
                     key={member.id}
                     className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"

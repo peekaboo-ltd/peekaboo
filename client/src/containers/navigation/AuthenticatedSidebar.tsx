@@ -36,7 +36,7 @@ const Sidebar = () => {
       className={`fixed left-0 top-16 z-40 h-[calc(100vh-50px)] flex flex-col bg-primary text-white transition-all duration-300 ease-in-out
         ${sidebarOpen
           ? 'w-[18vw] min-w-[220px] max-w-[260px] shadow-[4px_0_24px_-4px_rgba(0,40,80,0.18)]'
-          : 'w-[12vw] min-w-[60px] max-w-[80px] shadow-[2px_0_12px_-2px_rgba(0,40,80,0.1)]'
+          : 'w-[10vw] min-w-[50px] max-w-[80px] shadow-[2px_0_12px_-2px_rgba(0,40,80,0.1)]'
         }
         border-r border-white/10
       `}
