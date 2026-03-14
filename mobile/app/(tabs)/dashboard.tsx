@@ -18,6 +18,7 @@ import { useDashboard } from '../../hooks/useDashboard';
 import { useAuthStore } from '../../store/authStore';
 import { colors, typography, spacing } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatters';
+import { OrderAssignmentStatus } from '../../types';
 
 export default function DashboardScreen() {
   const { user, logout } = useAuthStore();
@@ -60,8 +61,19 @@ export default function DashboardScreen() {
     router.replace('/(auth)/login');
   };
 
+  const navigateToAssignments = (filter?: OrderAssignmentStatus | 'ALL') => {
+    if (filter) {
+      router.push({
+        pathname: '/(tabs)/assignments',
+        params: { filter },
+      });
+    } else {
+      router.push('/(tabs)/assignments');
+    }
+  };
+
   const handleViewAssignments = () => {
-    router.push('/(tabs)/assignments');
+    navigateToAssignments('ALL');
   };
 
   useEffect(() => {
@@ -259,25 +271,44 @@ export default function DashboardScreen() {
               value={stats?.todayDeliveries ?? 0}
               icon="bicycle"
               iconColor={colors.primary}
+              onPress={() => navigateToAssignments('ALL')}
             />
             <StatCard
               title="Pending"
               value={stats?.pendingAssignments ?? pendingCount}
               icon="time"
               iconColor={colors.warning}
+              onPress={() => navigateToAssignments(OrderAssignmentStatus.PENDING)}
             />
             <StatCard
               title="Completed"
               value={stats?.completedToday ?? 0}
               icon="checkmark-circle"
               iconColor={colors.success}
+              onPress={() => navigateToAssignments(OrderAssignmentStatus.COMPLETED)}
             />
             <StatCard
               title="Earnings"
               value={formatCurrency(stats?.totalEarnings ?? 0)}
               icon="cash"
               iconColor={colors.success}
+              onPress={() => navigateToAssignments('ALL')}
             />
+          </View>
+
+          <View style={styles.earningsSummary}>
+            <View style={styles.earningsRow}>
+              <Text style={styles.earningsLabel}>Deliveries Today</Text>
+              <Text style={styles.earningsValue}>{stats?.completedToday ?? 0}</Text>
+            </View>
+            <View style={styles.earningsRow}>
+              <Text style={styles.earningsLabel}>Bonus Activated</Text>
+              <Text style={styles.earningsValue}>{stats?.bonusActive ? 'YES' : 'NO'}</Text>
+            </View>
+            <View style={styles.earningsRow}>
+              <Text style={styles.earningsLabel}>Earnings</Text>
+              <Text style={styles.earningsValue}>{formatCurrency(stats?.totalEarnings ?? 0)}</Text>
+            </View>
           </View>
 
           {/* Quick Actions */}
@@ -655,6 +686,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.lg,
     marginHorizontal: -spacing.xs, // Negative margin to offset card margins
+  },
+  earningsSummary: {
+    marginBottom: spacing.lg,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: 'rgba(95, 149, 152, 0.08)',
+    borderRadius: 12,
+  },
+  earningsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
+  earningsLabel: {
+    fontSize: typography.bodySmall.fontSize,
+    color: colors.text.secondary,
+  },
+  earningsValue: {
+    fontSize: typography.bodySmall.fontSize,
+    fontWeight: '600',
+    color: colors.text.primary,
   },
   quickActions: {
     flexDirection: 'row',

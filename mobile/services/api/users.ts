@@ -1,9 +1,19 @@
 import apiClient from './client';
-import { UserLocation } from '../../types';
+import { User, UserLocation } from '../../types';
 
-interface UpdateCurrentLocationResponse {
+interface ApiResponse<T> {
   message: string;
-  data: UserLocation;
+  data: T;
+}
+
+interface UpdateCurrentLocationResponse extends ApiResponse<UserLocation> {}
+
+export interface UpdateUserPayload {
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  nationality?: string;
 }
 
 export const usersAPI = {
@@ -15,6 +25,14 @@ export const usersAPI = {
       location
     );
 
+    return response.data.data;
+  },
+
+  updateUser: async (id: string, payload: UpdateUserPayload): Promise<User> => {
+    const response = await apiClient.patch<ApiResponse<User>>(
+      `/users/${id}`,
+      payload
+    );
     return response.data.data;
   },
 };

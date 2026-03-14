@@ -14,6 +14,7 @@ interface StatCardProps {
     value: number;
     isPositive: boolean;
   };
+  onPress?: () => void;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -23,9 +24,10 @@ export const StatCard: React.FC<StatCardProps> = ({
   iconColor = colors.primary,
   subtitle,
   trend,
+  onPress,
 }) => {
   return (
-    <Card style={styles.card} elevation="lg">
+    <Card style={styles.card} elevation="lg" onPress={onPress}>
       <View style={styles.header}>
         <View style={[styles.iconContainer, { backgroundColor: `${iconColor}12` }]}>
           <Ionicons name={icon} size={22} color={iconColor} />

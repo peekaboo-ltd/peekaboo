@@ -43,15 +43,15 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
 
   const handleConfirmDispatch = () => {
     Alert.alert(
-      'Confirm Dispatch',
-      'Confirming dispatch will log both CONFIRMED and In Transit activities.',
+      'Confirm & Start Transit',
+      'This will mark the order as confirmed and in transit.',
       [
         {
           text: 'Cancel',
           style: 'cancel',
         },
         {
-          text: 'Confirm',
+          text: 'Confirm & Start Transit',
           onPress: onConfirmDispatch,
         },
       ]

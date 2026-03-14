@@ -179,30 +179,35 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
 
 
   confirmOrderDispatch: async (orderId: string, trackingId?: string): Promise<boolean> => {
-    set({ isLoading: true, error: null });
+    set({ error: null });
 
     try {
       await assignmentsAPI.confirmOrderDispatch(orderId, trackingId);
 
-      set(state => ({
-        selectedAssignment: state.selectedAssignment
-          ? {
-              ...state.selectedAssignment,
-              order: state.selectedAssignment.order
-                ? { ...state.selectedAssignment.order, status: OrderStatus.IN_TRANSIT }
-                : state.selectedAssignment.order,
-            }
-          : state.selectedAssignment,
-        isLoading: false,
-      }));
+      set(state => {
+        const updateOrderInTransit = (order: { status?: OrderStatus } | undefined) =>
+          order ? { ...order, status: OrderStatus.IN_TRANSIT } : undefined;
+        return {
+          assignments: state.assignments.map(a =>
+            a.orderId === orderId
+              ? { ...a, order: updateOrderInTransit(a.order) }
+              : a,
+          ),
+          selectedAssignment: state.selectedAssignment
+            ? {
+                ...state.selectedAssignment,
+                order: state.selectedAssignment.order
+                  ? { ...state.selectedAssignment.order, status: OrderStatus.IN_TRANSIT }
+                  : state.selectedAssignment.order,
+              }
+            : state.selectedAssignment,
+        };
+      });
 
       return true;
     } catch (error) {
       const appError = handleAPIError(error);
-      set({
-        isLoading: false,
-        error: getErrorMessage(appError),
-      });
+      set({ error: getErrorMessage(appError) });
       return false;
     }
   },

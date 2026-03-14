@@ -5,6 +5,7 @@ export interface DashboardStats {
   totalEarnings: number;
   completionRate: number;
   totalAssignments: number;
+  bonusActive?: boolean;
 }
 
 export interface RecentActivity {

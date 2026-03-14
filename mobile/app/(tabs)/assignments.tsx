@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AssignmentCard } from '../../components/assignments/AssignmentCard';
 import { AssignmentSkeletonCard } from '../../components/assignments/AssignmentSkeletonCard';
@@ -20,6 +20,7 @@ import { useAssignmentStore } from '../../store/assignmentStore';
 import { colors, typography, spacing } from '../../utils/constants';
 
 export default function AssignmentsScreen() {
+  const params = useLocalSearchParams<{ filter?: string }>();
   const {
     assignments,
     isLoading,
@@ -34,6 +35,13 @@ export default function AssignmentsScreen() {
     loadMore,
   } = useAssignments();
   const { confirmOrderDispatch } = useAssignmentStore();
+  const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (params.filter) {
+      setFilter(params.filter as any);
+    }
+  }, [params.filter, setFilter]);
 
   const handleRefresh = useCallback(() => {
     refreshAssignments();
@@ -105,24 +113,30 @@ export default function AssignmentsScreen() {
     });
   }, [assignments]);
 
-  const handleConfirmAndTransit = async (assignment: Assignment) => {
-    if (!assignment.orderId) return;
+  const handleConfirmAndTransit = (assignment: Assignment) => {
+    if (!assignment?.orderId) return;
 
     Alert.alert(
-      'Confirm Dispatch',
-      'This will set the order to in transit.',
+      'Confirm & Start Transit',
+      'This will mark the order as confirmed and in transit.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Confirm',
+          text: 'Confirm & Start Transit',
           onPress: async () => {
-            const success = await confirmOrderDispatch(assignment.orderId);
-            if (success) {
-              await refreshAssignments();
-              Alert.alert('Success', 'Order is now in transit.');
-            } else {
-              const message = useAssignmentStore.getState().error || 'Unable to start transit. Please try again.';
-              Alert.alert('Error', message);
+            const orderId = assignment.orderId;
+            setConfirmingOrderId(orderId);
+            try {
+              const success = await confirmOrderDispatch(orderId);
+              if (success) {
+                await refreshAssignments();
+                Alert.alert('Success', 'Order is now in transit.');
+              } else {
+                const message = useAssignmentStore.getState().error || 'Unable to start transit. Please try again.';
+                Alert.alert('Error', message);
+              }
+            } finally {
+              setConfirmingOrderId(null);
             }
           },
         },
@@ -133,6 +147,7 @@ export default function AssignmentsScreen() {
   const renderAssignment = ({ item }: { item: Assignment }) => {
     const latestOrderStatus = getLatestOrderStatus(item);
     const canConfirmAndTransit =
+      !!item.orderId &&
       item.status === OrderAssignmentStatus.ACTIVE &&
       latestOrderStatus !== OrderStatus.IN_TRANSIT &&
       latestOrderStatus !== OrderStatus.DELIVERED &&
@@ -161,6 +176,8 @@ export default function AssignmentsScreen() {
               onPress={() => handleConfirmAndTransit(item)}
               variant="primary"
               fullWidth
+              loading={confirmingOrderId === item.orderId}
+              disabled={!!confirmingOrderId}
             />
           </View>
         )}
