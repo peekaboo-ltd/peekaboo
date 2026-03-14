@@ -643,6 +643,14 @@ export class OrderService {
 
     await this.orderRepository.save(order);
 
+    // Adjust billing totals if this is a business order
+    if (order.isBusinessOrder && order.organizationBillingId) {
+      await this.organizationBillingService.removeOrderFromBilling(
+        order.id,
+        Number(order.finalFee || order.initialFee)
+      );
+    }
+
     // Send cancellation emails (non-blocking)
     if (order.sender?.email) {
       this.emailService

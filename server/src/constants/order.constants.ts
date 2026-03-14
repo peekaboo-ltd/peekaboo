@@ -15,6 +15,7 @@ export enum OrderStatus {
   DELIVERED = "DELIVERED",
   COMPLETED = "COMPLETED",
   CANCELLED = "CANCELLED",
+  BILLING_PAID = "BILLING_PAID",
 }
 
 export enum OrderAssignmentStatus {

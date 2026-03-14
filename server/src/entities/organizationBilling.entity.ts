@@ -58,6 +58,14 @@ export class OrganizationBilling extends AbstractEntity {
   @Column({ name: 'invoiced_at', type: 'timestamp', nullable: true })
   invoicedAt?: Date;
 
+  // DUE DATE (set when invoice is generated based on payment terms)
+  @Column({ name: 'due_date', type: 'timestamp', nullable: true })
+  dueDate?: Date;
+
+  // PAYMENT TERMS IN DAYS
+  @Column({ name: 'payment_terms_days', type: 'integer', default: 30 })
+  paymentTermsDays: number;
+
   // PAID AT
   @Column({ name: 'paid_at', type: 'timestamp', nullable: true })
   paidAt?: Date;

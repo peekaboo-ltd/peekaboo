@@ -6,6 +6,8 @@ import { UUID } from '../types';
 import { NotFoundError, ValidationError } from '../helpers/errors.helper';
 import { getPagination, getPagingData, Pagination } from '../helpers/pagination.helper';
 import { Order } from '../entities/order.entity';
+import { OrderActivity } from '../entities/orderActivity.entity';
+import { OrderStatus } from '../constants/order.constants';
 import { generateReferenceNumber } from '../helpers/string.helper';
 import { BillingQuery, GlobalBillingSummary } from '../types/b2b.types';
 import { Organization } from '../entities/organization.entity';
@@ -16,12 +18,14 @@ import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 export class OrganizationBillingService {
   private readonly billingRepository: Repository<OrganizationBilling>;
   private readonly orderRepository: Repository<Order>;
+  private readonly orderActivityRepository: Repository<OrderActivity>;
   private readonly organizationRepository: Repository<Organization>;
   private readonly emailService: EmailService;
 
   constructor() {
     this.billingRepository = AppDataSource.getRepository(OrganizationBilling);
     this.orderRepository = AppDataSource.getRepository(Order);
+    this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
     this.organizationRepository = AppDataSource.getRepository(Organization);
     this.emailService = new EmailService();
   }
@@ -91,19 +95,66 @@ export class OrganizationBillingService {
       return; // Not a business order
     }
 
+    // Read the organization's configured billing period
+    const organization = await this.organizationRepository.findOne({
+      where: { id: order.organizationId },
+    });
+
+    const billingPeriod = organization?.billingPeriod || BillingPeriod.MONTHLY;
+
     // Get or create current billing period
     const billing = await this.getOrCreateCurrentBillingPeriod(
-      order.organizationId
+      order.organizationId,
+      billingPeriod
     );
 
-    // Update billing totals
-    billing.totalOrders += 1;
-    billing.totalAmount = Number(billing.totalAmount) + Number(orderAmount);
-
-    await this.billingRepository.save(billing);
+    // Atomic increment to prevent race conditions
+    await this.billingRepository
+      .createQueryBuilder()
+      .update(OrganizationBilling)
+      .set({
+        totalOrders: () => 'total_orders + 1',
+        totalAmount: () => `total_amount + ${Number(orderAmount)}`,
+      })
+      .where('id = :id', { id: billing.id })
+      .execute();
 
     // Link order to billing
     order.organizationBillingId = billing.id;
+    await this.orderRepository.save(order);
+  }
+
+  // REMOVE ORDER FROM BILLING (on cancellation)
+  async removeOrderFromBilling(orderId: UUID, orderAmount: number): Promise<void> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
+
+    if (!order || !order.organizationBillingId) {
+      return; // Not linked to any billing period
+    }
+
+    const billing = await this.billingRepository.findOne({
+      where: { id: order.organizationBillingId },
+    });
+
+    if (!billing || billing.status !== BillingStatus.PENDING) {
+      return; // Only adjust billing that hasn't been invoiced yet
+    }
+
+    // Atomic decrement to prevent race conditions
+    await this.billingRepository
+      .createQueryBuilder()
+      .update(OrganizationBilling)
+      .set({
+        totalOrders: () => 'GREATEST(total_orders - 1, 0)',
+        totalAmount: () => `GREATEST(total_amount - ${Number(orderAmount)}, 0)`,
+      })
+      .where('id = :id', { id: billing.id })
+      .execute();
+
+    // Unlink order from billing
+    order.organizationBillingId = undefined;
     await this.orderRepository.save(order);
   }
 
@@ -167,6 +218,13 @@ export class OrganizationBillingService {
     billing.invoicedAt = new Date();
     billing.createdById = createdById;
 
+    // Set due date based on organization's payment terms
+    const paymentTermsDays = billing.organization?.paymentTermsDays || billing.paymentTermsDays || 30;
+    billing.paymentTermsDays = paymentTermsDays;
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + paymentTermsDays);
+    billing.dueDate = dueDate;
+
     const savedBilling = await this.billingRepository.save(billing);
 
     // Send invoice generated email (non-blocking)
@@ -207,6 +265,16 @@ export class OrganizationBillingService {
     }
 
     const savedBilling = await this.billingRepository.save(billing);
+
+    // Create BILLING_PAID activity for all linked orders
+    if (billing.orders && billing.orders.length > 0) {
+      const activities = billing.orders.map((order) => ({
+        orderId: order.id,
+        status: OrderStatus.BILLING_PAID,
+        notes: `Billing invoice ${billing.invoiceNumber} paid`,
+      }));
+      await this.orderActivityRepository.save(activities);
+    }
 
     // Send payment received email (non-blocking)
     if (billing.organization?.email && billing.invoiceNumber) {
@@ -332,86 +400,63 @@ export class OrganizationBillingService {
 
   // GET GLOBAL BILLING SUMMARY (for admin dashboard)
   async getGlobalBillingSummary(): Promise<GlobalBillingSummary> {
-    // Get all active organizations
-    const organizations = await this.organizationRepository.find({
+    // Get total active organizations count
+    const totalOrganizations = await this.organizationRepository.count({
       where: { status: OrganizationStatus.ACTIVE },
-      select: { id: true, name: true },
     });
 
-    // Get all billings
-    const allBillings = await this.billingRepository.find({
-      relations: { organization: true },
-    });
+    // Get global totals using SQL aggregation
+    const globalTotals = await this.billingRepository
+      .createQueryBuilder('billing')
+      .select([
+        `COALESCE(SUM(billing.total_amount) FILTER (WHERE billing.status = :paid), 0)::numeric AS "totalPaid"`,
+        `COALESCE(SUM(billing.total_amount) FILTER (WHERE billing.status = :pending), 0)::numeric AS "totalPending"`,
+        `COALESCE(SUM(billing.total_amount) FILTER (WHERE billing.status = :overdue), 0)::numeric AS "totalOverdue"`,
+        `COALESCE(SUM(billing.total_amount) FILTER (WHERE billing.status = :invoiced), 0)::numeric AS "totalInvoiced"`,
+      ])
+      .setParameters({
+        paid: BillingStatus.PAID,
+        pending: BillingStatus.PENDING,
+        overdue: BillingStatus.OVERDUE,
+        invoiced: BillingStatus.INVOICED,
+      })
+      .getRawOne();
 
-    const summary: GlobalBillingSummary = {
-      totalOrganizations: organizations.length,
-      totalPaid: 0,
-      totalPending: 0,
-      totalOverdue: 0,
-      totalInvoiced: 0,
-      organizationBreakdown: [],
+    // Get per-organization breakdown using SQL aggregation
+    const orgBreakdown = await this.billingRepository
+      .createQueryBuilder('billing')
+      .leftJoin('billing.organization', 'organization')
+      .select([
+        'billing.organization_id AS "organizationId"',
+        'organization.name AS "organizationName"',
+        `COALESCE(SUM(billing.total_amount) FILTER (WHERE billing.status = :paid), 0)::numeric AS "totalPaid"`,
+        `COALESCE(SUM(billing.total_amount) FILTER (WHERE billing.status IN (:...pendingStatuses)), 0)::numeric AS "totalPending"`,
+        `COALESCE(SUM(billing.total_amount) FILTER (WHERE billing.status = :overdue), 0)::numeric AS "totalOverdue"`,
+      ])
+      .setParameters({
+        paid: BillingStatus.PAID,
+        pendingStatuses: [BillingStatus.PENDING, BillingStatus.INVOICED],
+        overdue: BillingStatus.OVERDUE,
+      })
+      .groupBy('billing.organization_id')
+      .addGroupBy('organization.name')
+      .orderBy(`COALESCE(SUM(billing.total_amount) FILTER (WHERE billing.status IN ('PENDING', 'INVOICED', 'OVERDUE')), 0)`, 'DESC')
+      .getRawMany();
+
+    return {
+      totalOrganizations,
+      totalPaid: Number(globalTotals?.totalPaid || 0),
+      totalPending: Number(globalTotals?.totalPending || 0),
+      totalOverdue: Number(globalTotals?.totalOverdue || 0),
+      totalInvoiced: Number(globalTotals?.totalInvoiced || 0),
+      organizationBreakdown: orgBreakdown.map((row) => ({
+        organizationId: row.organizationId,
+        organizationName: row.organizationName || 'Unknown',
+        totalPaid: Number(row.totalPaid || 0),
+        totalPending: Number(row.totalPending || 0),
+        totalOverdue: Number(row.totalOverdue || 0),
+      })),
     };
-
-    // Group billings by organization
-    const orgBillingMap = new Map<UUID, {
-      organizationId: UUID;
-      organizationName: string;
-      totalPaid: number;
-      totalPending: number;
-      totalOverdue: number;
-    }>();
-
-    for (const billing of allBillings) {
-      const amount = Number(billing.totalAmount);
-      const orgId = billing.organizationId;
-      const orgName = billing.organization?.name || 'Unknown';
-
-      // Update global totals
-      switch (billing.status) {
-        case BillingStatus.PAID:
-          summary.totalPaid += amount;
-          break;
-        case BillingStatus.PENDING:
-          summary.totalPending += amount;
-          break;
-        case BillingStatus.OVERDUE:
-          summary.totalOverdue += amount;
-          break;
-        case BillingStatus.INVOICED:
-          summary.totalInvoiced += amount;
-          break;
-      }
-
-      // Update organization breakdown
-      if (!orgBillingMap.has(orgId)) {
-        orgBillingMap.set(orgId, {
-          organizationId: orgId,
-          organizationName: orgName,
-          totalPaid: 0,
-          totalPending: 0,
-          totalOverdue: 0,
-        });
-      }
-
-      const orgData = orgBillingMap.get(orgId)!;
-      switch (billing.status) {
-        case BillingStatus.PAID:
-          orgData.totalPaid += amount;
-          break;
-        case BillingStatus.PENDING:
-        case BillingStatus.INVOICED:
-          orgData.totalPending += amount;
-          break;
-        case BillingStatus.OVERDUE:
-          orgData.totalOverdue += amount;
-          break;
-      }
-    }
-
-    summary.organizationBreakdown = Array.from(orgBillingMap.values())
-      .sort((a, b) => (b.totalPending + b.totalOverdue) - (a.totalPending + a.totalOverdue));
-
-    return summary;
   }
 
   // GET ALL BILLINGS WITH PAGINATION (for admin)
