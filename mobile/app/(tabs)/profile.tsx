@@ -14,6 +14,7 @@ import { usersAPI, UpdateUserPayload } from '../../services/api/users';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/constants';
+import { formatCurrency } from '../../utils/formatters';
 
 export default function ProfileScreen() {
   const { user, isLoading } = useAuth();
@@ -76,7 +77,6 @@ export default function ProfileScreen() {
 
     const payload: UpdateUserPayload = {
       name: name.trim() || undefined,
-      email: email.trim() || undefined,
       phoneNumber: phoneNumber.trim() || undefined,
       dateOfBirth: dateOfBirth.trim() || undefined,
       nationality: nationality.trim() || undefined,
@@ -112,6 +112,7 @@ export default function ProfileScreen() {
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       <View style={styles.headerCard}>
         <View style={styles.avatar}>
@@ -150,7 +151,7 @@ export default function ProfileScreen() {
           placeholder="Enter your email"
           keyboardType="email-address"
           autoCapitalize="none"
-          editable={isEditing}
+          editable={false}
         />
 
         <Input
@@ -180,18 +181,18 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today’s performance</Text>
+        <Text style={styles.sectionTitle}>Today's performance</Text>
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>Deliveries completed today</Text>
+          <Text style={styles.metaLabel}>Deliveries Today</Text>
           <Text style={styles.metaValue}>{stats?.completedToday ?? 0}</Text>
         </View>
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>Total deliveries today</Text>
-          <Text style={styles.metaValue}>{stats?.todayDeliveries ?? 0}</Text>
+          <Text style={styles.metaLabel}>Bonus Activated</Text>
+          <Text style={styles.metaValue}>{stats?.bonusActive ? 'YES' : 'NO'}</Text>
         </View>
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>Total assignments</Text>
-          <Text style={styles.metaValue}>{stats?.totalAssignments ?? 0}</Text>
+          <Text style={styles.metaLabel}>Earnings</Text>
+          <Text style={styles.metaValue}>{stats?.totalEarnings != null ? formatCurrency(stats.totalEarnings) : 'RWF 0'}</Text>
         </View>
       </View>
 
@@ -207,6 +208,7 @@ export default function ProfileScreen() {
               variant="outline"
               onPress={handleCancelEdit}
               style={styles.actionButton}
+              disabled={isSaving}
             />
             <Button
               title="Save changes"

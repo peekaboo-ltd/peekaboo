@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -35,6 +35,7 @@ export default function AssignmentsScreen() {
     loadMore,
   } = useAssignments();
   const { confirmOrderDispatch } = useAssignmentStore();
+  const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (params.filter) {
@@ -112,24 +113,30 @@ export default function AssignmentsScreen() {
     });
   }, [assignments]);
 
-  const handleConfirmAndTransit = async (assignment: Assignment) => {
-    if (!assignment.orderId) return;
+  const handleConfirmAndTransit = (assignment: Assignment) => {
+    if (!assignment?.orderId) return;
 
     Alert.alert(
-      'Confirm Dispatch',
-      'This will set the order to in transit.',
+      'Confirm & Start Transit',
+      'This will mark the order as confirmed and in transit.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Confirm',
+          text: 'Confirm & Start Transit',
           onPress: async () => {
-            const success = await confirmOrderDispatch(assignment.orderId);
-            if (success) {
-              await refreshAssignments();
-              Alert.alert('Success', 'Order is now in transit.');
-            } else {
-              const message = useAssignmentStore.getState().error || 'Unable to start transit. Please try again.';
-              Alert.alert('Error', message);
+            const orderId = assignment.orderId;
+            setConfirmingOrderId(orderId);
+            try {
+              const success = await confirmOrderDispatch(orderId);
+              if (success) {
+                await refreshAssignments();
+                Alert.alert('Success', 'Order is now in transit.');
+              } else {
+                const message = useAssignmentStore.getState().error || 'Unable to start transit. Please try again.';
+                Alert.alert('Error', message);
+              }
+            } finally {
+              setConfirmingOrderId(null);
             }
           },
         },
@@ -140,6 +147,7 @@ export default function AssignmentsScreen() {
   const renderAssignment = ({ item }: { item: Assignment }) => {
     const latestOrderStatus = getLatestOrderStatus(item);
     const canConfirmAndTransit =
+      !!item.orderId &&
       item.status === OrderAssignmentStatus.ACTIVE &&
       latestOrderStatus !== OrderStatus.IN_TRANSIT &&
       latestOrderStatus !== OrderStatus.DELIVERED &&
@@ -168,6 +176,8 @@ export default function AssignmentsScreen() {
               onPress={() => handleConfirmAndTransit(item)}
               variant="primary"
               fullWidth
+              loading={confirmingOrderId === item.orderId}
+              disabled={!!confirmingOrderId}
             />
           </View>
         )}

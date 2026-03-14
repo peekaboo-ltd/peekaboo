@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Linking, Platform } from 'react-native';
+import { View, Text, StyleSheet, Linking, Platform, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
@@ -13,6 +13,7 @@ import {
   formatOrderRef,
   formatPhoneNumber,
 } from '../../utils/formatters';
+import { AssignmentDirectionsMap } from './AssignmentDirectionsMap';
 
 interface AssignmentDetailsProps {
   assignment: Assignment;
@@ -134,6 +135,7 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
   assignment,
 }) => {
   const order = assignment.order;
+  const [directionsVisible, setDirectionsVisible] = useState(false);
 
   const openPhoneDialer = (phoneNumber: string) => {
     const url = Platform.OS === 'ios' ? `tel:${phoneNumber}` : `tel:${phoneNumber}`;
@@ -221,7 +223,16 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
       {order && (order.locationFrom || order.locationTo) && (
         <Card style={styles.section} elevation="sm">
           <Text style={styles.sectionTitle}>Locations</Text>
-          
+          {order.locationFrom && order.locationTo && (
+            <Button
+              title="Show route"
+              onPress={() => setDirectionsVisible(true)}
+              variant="outline"
+              size="small"
+              icon={<Ionicons name="map" size={16} color={colors.primary} />}
+              style={[styles.directionsButton, { marginBottom: spacing.md }]}
+            />
+          )}
           {/* Pickup Location */}
           {order.locationFrom && (
             <View style={styles.locationCard}>
@@ -267,6 +278,26 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
           )}
         </Card>
       )}
+
+      <Modal
+        visible={directionsVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setDirectionsVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Route: Pickup to Delivery</Text>
+            {order?.locationFrom && order?.locationTo && (
+              <AssignmentDirectionsMap
+                origin={order.locationFrom}
+                destination={order.locationTo}
+                onClose={() => setDirectionsVisible(false)}
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
 
       {/* Payment Info */}
       {order && (
@@ -380,6 +411,28 @@ const styles = StyleSheet.create({
   },
   directionsButton: {
     alignSelf: 'flex-start',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    borderRadius: 18,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: typography.h3.fontSize,
+    fontWeight: '600',
+    color: colors.text.primary,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
   },
   totalRow: {
     borderBottomWidth: 0,

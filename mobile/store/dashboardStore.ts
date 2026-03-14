@@ -44,10 +44,20 @@ export const useDashboardStore = create<DashboardState>((set) => ({
           assignmentsAPI.getAll({ status: OrderAssignmentStatus.COMPLETED, page: 1, size: 200 }),
         ]);
 
-      const completedToday = completedPage.data.filter((a) => {
+      const completedTodayList = completedPage.data.filter((a) => {
         const updated = new Date(a.updatedAt);
         return !Number.isNaN(updated.getTime()) && updated >= startOfDay;
-      }).length;
+      });
+      const completedToday = completedTodayList.length;
+
+      const baseEarnings = completedTodayList.reduce((sum, a) => {
+        const order = a.order;
+        if (!order) return sum;
+        const fee = order.finalFee ?? (order.initialFee - (order.discount || 0));
+        return sum + (Number.isFinite(fee) ? fee : 0);
+      }, 0);
+      const bonusActive = completedToday > 15;
+      const totalEarnings = bonusActive ? baseEarnings * 1.25 : baseEarnings;
 
       const todayDeliveries = pendingAssignments.length + activeAssignments.length + completedToday;
       const mergedStats: DashboardStats = {
@@ -55,6 +65,8 @@ export const useDashboardStore = create<DashboardState>((set) => ({
         pendingAssignments: pendingAssignments.length,
         completedToday,
         todayDeliveries,
+        totalEarnings,
+        bonusActive,
       };
       
       set({
@@ -106,10 +118,20 @@ export const useDashboardStore = create<DashboardState>((set) => ({
           assignmentsAPI.getAll({ status: OrderAssignmentStatus.COMPLETED, page: 1, size: 200 }),
         ]);
 
-      const completedToday = completedPage.data.filter((a) => {
+      const completedTodayList = completedPage.data.filter((a) => {
         const updated = new Date(a.updatedAt);
         return !Number.isNaN(updated.getTime()) && updated >= startOfDay;
-      }).length;
+      });
+      const completedToday = completedTodayList.length;
+
+      const baseEarnings = completedTodayList.reduce((sum, a) => {
+        const order = a.order;
+        if (!order) return sum;
+        const fee = order.finalFee ?? (order.initialFee - (order.discount || 0));
+        return sum + (Number.isFinite(fee) ? fee : 0);
+      }, 0);
+      const bonusActive = completedToday > 15;
+      const totalEarnings = bonusActive ? baseEarnings * 1.25 : baseEarnings;
 
       const todayDeliveries = pendingAssignments.length + activeAssignments.length + completedToday;
       const mergedStats: DashboardStats = {
@@ -117,6 +139,8 @@ export const useDashboardStore = create<DashboardState>((set) => ({
         pendingAssignments: pendingAssignments.length,
         completedToday,
         todayDeliveries,
+        totalEarnings,
+        bonusActive,
       };
       
       set({
