@@ -245,6 +245,12 @@ export interface InputProps {
    * @property {(e: React.FocusEvent<HTMLInputElement>) => void} [onBlur]
    */
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+
+  /**
+   * Error message to display below the input
+   * @property {string} [errorMessage]
+   */
+  errorMessage?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -281,6 +287,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       pattern,
       step,
       onBlur,
+      errorMessage,
     },
     ref,
   ) => {
@@ -550,6 +557,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             </button>
           )}
         </section>
+        {errorMessage && (
+          <p className="text-red-700 text-[12px]">{errorMessage}</p>
+        )}
       </label>
     );
   },
