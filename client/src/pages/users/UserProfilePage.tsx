@@ -61,7 +61,6 @@ const UserProfilePage = () => {
   const { selectedUser } = useAppSelector((state) => state.user);
   useDocumentTitle('Profile');
 
-  // NAVIGATION
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -91,57 +90,68 @@ const UserProfilePage = () => {
       label: 'Account Status',
       value: selectedUser?.status ?? '—',
       icon: faShieldHalved,
+      iconBg: 'bg-primary-50 text-primary-900',
     },
     {
       label: 'Active Roles',
       value: roles.length ? roles.length.toString() : '—',
       icon: faIdBadge,
+      iconBg: 'bg-secondary-50 text-secondary-800',
     },
     {
       label: 'Orders',
       value: selectedUser?.orders?.length?.toString() ?? '—',
       icon: faChartLine,
+      iconBg: 'bg-primary-50 text-primary-900',
     },
   ];
 
   return (
     <motion.main
-      className="relative w-full flex flex-col gap-6 mx-auto px-4 sm:px-6"
+      className="relative w-full flex flex-col gap-6 min-h-screen bg-[#FAFAF7]"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <span className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.18),_transparent_65%)]" />
+      {/* Decorative blur blobs */}
+      <figure
+        className="pointer-events-none absolute -right-40 -top-40 h-[420px] w-[420px] rounded-full bg-secondary-200/30 blur-3xl"
+        aria-hidden="true"
+      />
+      <figure
+        className="pointer-events-none absolute -left-32 bottom-20 h-[360px] w-[360px] rounded-full bg-primary-200/20 blur-3xl"
+        aria-hidden="true"
+      />
 
+      {/* Header card */}
       <motion.section
-        className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)]"
+        className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm"
         variants={itemVariants}
       >
-        <span className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/15 blur-3xl" />
-        <span className="pointer-events-none absolute -bottom-12 left-10 h-32 w-32 rounded-full bg-emerald-200/40 blur-3xl" />
+        <span className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-secondary-200/40 blur-3xl" />
+        <span className="pointer-events-none absolute -bottom-12 left-10 h-32 w-32 rounded-full bg-primary-200/30 blur-3xl" />
 
         <header className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <section className="flex items-center gap-5">
-            <Avatar className="h-16 w-16 rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden">
+            <Avatar className="h-16 w-16 rounded-2xl border-2 border-slate-100 shadow-md overflow-hidden">
               <AvatarImage
                 src={selectedUser?.profilePhotoUrl ? getProfilePhotoUrl(selectedUser.profilePhotoUrl) ?? undefined : undefined}
                 alt="Profile"
                 className="object-cover"
               />
-              <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white text-2xl font-medium">
+              <AvatarFallback className="rounded-2xl bg-gradient-to-br from-secondary-600 via-secondary-700 to-secondary-900 text-white text-2xl font-medium">
                 <FontAwesomeIcon icon={faUser} />
               </AvatarFallback>
             </Avatar>
             <section>
-              <p className="text-xs uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-xs uppercase tracking-[0.28em] text-secondary-700 font-medium">
                 Profile Overview
               </p>
-              <h1 className="mt-2 text-2xl font-medium text-slate-900 sm:text-3xl">
+              <h1 className="mt-2 text-2xl font-bold text-[#25343F] sm:text-3xl">
                 {selectedUser?.name ?? 'Your Profile'}
               </h1>
-              <p className="mt-2 text-sm text-slate-600 sm:text-base">
-                Keep your personal details, roles, and contact information
-                current.
+              <p className="mt-1 text-sm text-slate-500">
+                Keep your personal details, roles, and contact information current.
               </p>
             </section>
           </section>
@@ -166,43 +176,45 @@ const UserProfilePage = () => {
         </header>
       </motion.section>
 
+      {/* Stats */}
       <motion.section
         className="grid grid-cols-1 gap-4 md:grid-cols-3"
         variants={itemVariants}
       >
-        {stats?.map((stat) => (
+        {stats.map((stat) => (
           <article
-            key={stat?.label}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]"
+            key={stat.label}
+            className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
           >
             <header className="flex items-center justify-between">
               <section>
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                  {stat?.label}
+                  {stat.label}
                 </p>
-                <p className="mt-3 text-xl font-medium text-slate-900">
-                  {stat?.value}
+                <p className="mt-3 text-xl font-semibold text-[#25343F]">
+                  {stat.value}
                 </p>
               </section>
-              <span className="h-11 w-11 rounded-xl bg-primary-50 text-primary-900 flex items-center justify-center">
-                <FontAwesomeIcon icon={stat?.icon} />
+              <span className={`h-11 w-11 rounded-xl flex items-center justify-center ${stat.iconBg}`}>
+                <FontAwesomeIcon icon={stat.icon} />
               </span>
             </header>
           </article>
         ))}
       </motion.section>
 
+      {/* Details + Roles */}
       <motion.section
         className="grid grid-cols-1 gap-6 lg:grid-cols-3"
         variants={itemVariants}
       >
-        <article className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_16px_32px_-24px_rgba(15,23,42,0.35)]">
+        <article className="lg:col-span-2 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
           <header className="flex items-center justify-between gap-4">
             <section>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-xs uppercase tracking-[0.2em] text-secondary-700 font-medium">
                 Personal Details
               </p>
-              <h2 className="mt-2 text-lg font-medium text-slate-900">
+              <h2 className="mt-2 text-lg font-semibold text-[#25343F]">
                 Profile Information
               </h2>
             </section>
@@ -213,50 +225,26 @@ const UserProfilePage = () => {
 
           <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {[
-              {
-                label: 'Full Name',
-                value: selectedUser?.name ?? '—',
-                icon: faIdBadge,
-              },
-              {
-                label: 'Email Address',
-                value: selectedUser?.email ?? '—',
-                icon: faEnvelope,
-              },
-              {
-                label: 'Phone Number',
-                value: selectedUser?.phoneNumber ?? '—',
-                icon: faPhone,
-              },
-              {
-                label: 'Date of Birth',
-                value: formatDateLabel(selectedUser?.dateOfBirth),
-                icon: faCalendarDay,
-              },
-              {
-                label: 'Nationality',
-                value: selectedUser?.nationality ?? '—',
-                icon: faFlag,
-              },
-              {
-                label: 'Member Since',
-                value: formatDateLabel(selectedUser?.createdAt),
-                icon: faBriefcase,
-              },
+              { label: 'Full Name', value: selectedUser?.name ?? '—', icon: faIdBadge },
+              { label: 'Email Address', value: selectedUser?.email ?? '—', icon: faEnvelope },
+              { label: 'Phone Number', value: selectedUser?.phoneNumber ?? '—', icon: faPhone },
+              { label: 'Date of Birth', value: formatDateLabel(selectedUser?.dateOfBirth), icon: faCalendarDay },
+              { label: 'Nationality', value: selectedUser?.nationality ?? '—', icon: faFlag },
+              { label: 'Member Since', value: formatDateLabel(selectedUser?.createdAt), icon: faBriefcase },
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-xl border border-slate-100 bg-slate-50/60 p-4"
+                className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm"
               >
                 <header className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-lg bg-white text-primary-900 shadow-sm flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-lg bg-secondary-50 text-secondary-800 shadow-sm flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-slate-900">
+                    <p className="mt-1 text-sm font-medium text-[#25343F]">
                       {item.value}
                     </p>
                   </section>
@@ -264,17 +252,17 @@ const UserProfilePage = () => {
               </li>
             ))}
 
-            <li className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 sm:col-span-2">
+            <li className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:col-span-2">
               <header className="flex items-center justify-between gap-3">
                 <section className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-lg bg-white text-primary-900 shadow-sm flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-lg bg-secondary-50 text-secondary-800 shadow-sm flex items-center justify-center">
                     <FontAwesomeIcon icon={faLocationDot} />
                   </span>
                   <section>
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                       Default Pickup Location
                     </p>
-                    <p className="mt-1 text-sm font-medium text-slate-900">
+                    <p className="mt-1 text-sm font-medium text-[#25343F]">
                       {selectedUser?.defaultLocation
                         ? `${selectedUser.defaultLocation.latitude.toFixed(5)}, ${selectedUser.defaultLocation.longitude.toFixed(5)}`
                         : '—'}
@@ -287,7 +275,7 @@ const UserProfilePage = () => {
                     e.preventDefault();
                     dispatch(setUserDefaultLocationModal(true));
                   }}
-                  className="text-xs font-medium text-primary-900 hover:underline underline-offset-2 shrink-0"
+                  className="text-xs font-medium text-secondary-700 hover:underline underline-offset-2 shrink-0"
                 >
                   {selectedUser?.defaultLocation ? 'Update' : 'Set Location'}
                 </Link>
@@ -296,12 +284,12 @@ const UserProfilePage = () => {
           </ul>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_16px_32px_-24px_rgba(15,23,42,0.35)]">
+        <article className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
           <header>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+            <p className="text-xs uppercase tracking-[0.2em] text-secondary-700 font-medium">
               Access & Membership
             </p>
-            <h2 className="mt-2 text-lg font-medium text-slate-900">
+            <h2 className="mt-2 text-lg font-semibold text-[#25343F]">
               Roles & Organizations
             </h2>
           </header>
@@ -315,7 +303,7 @@ const UserProfilePage = () => {
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
-                      <span className="rounded-full border border-primary-100 bg-primary-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary-900">
+                      <span className="rounded-full border border-secondary-100 bg-secondary-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-secondary-800">
                         {role}
                       </span>
                     </li>
@@ -335,39 +323,38 @@ const UserProfilePage = () => {
                   organizations.map((org) => (
                     <li
                       key={org}
-                      className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3"
+                      className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
                     >
                       <section>
-                        <p className="text-sm font-medium text-slate-900">
-                          {org}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          Active membership
-                        </p>
+                        <p className="text-sm font-medium text-[#25343F]">{org}</p>
+                        <p className="text-xs text-slate-500">Active membership</p>
                       </section>
-                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-emerald-700">
+                      <span className="rounded-full bg-secondary-100 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-secondary-800">
                         Active
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-slate-500">
-                    No organization memberships.
-                  </li>
+                  <li className="text-sm text-slate-500">No organization memberships.</li>
                 )}
               </ul>
             </section>
           </section>
         </article>
-        <menu className='w-full flex items-center gap-3 justify-between'>
-          <Button type='button' onClick={(e) => {
-            e.preventDefault();
-            navigate(-1);
-          }}>
+
+        <menu className="w-full flex items-center gap-3 justify-between">
+          <Button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(-1);
+            }}
+          >
             Back
           </Button>
         </menu>
       </motion.section>
+
       <UpdateUserProfileModal />
       <SetUserDefaultLocationModal />
     </motion.main>

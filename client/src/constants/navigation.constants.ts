@@ -68,8 +68,8 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
   },
   {
-    label: 'Invite Organization',
-    path: '/organizations/invite',
+    label: 'Organizations',
+    path: '/organizations',
     icon: faBuilding,
     permissions: [RoleTypes.ADMIN],
   },

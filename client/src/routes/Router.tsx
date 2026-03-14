@@ -25,7 +25,12 @@ import {
 import { About, OrderFees } from '@/pages/about';
 import { Services } from '@/pages/services';
 import { ContactUsPage } from '@/pages/contact';
-import { InviteOrganization, OrganizationSettingsPage } from '@/pages/organizations';
+import {
+  InviteOrganization,
+  OrganizationSettingsPage,
+  OrganizationsPage,
+  ManageOrganizationPage,
+} from '@/pages/organizations';
 import { PaymentsPage } from '@/pages/payments';
 import {
   OrganizationOnboarding,
@@ -218,6 +223,22 @@ const Router = () => {
           </Route>
 
           <Route path="organizations">
+            <Route
+              index
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <OrganizationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path=":id/manage"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <ManageOrganizationPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="invite"
               element={
