@@ -2,9 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faMapLocationDot,
-  faPhone,
-  faEnvelope,
   faHandshake,
   faShieldHalved,
   faRocket,
@@ -333,57 +330,6 @@ const About = () => {
       </section>
 
       <Statistics />
-
-      <section className="bg-white py-24 md:py-32">
-        <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-14">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-secondary-600 font-semibold mb-4">
-              Get in touch
-            </p>
-            <h2 className="text-3xl font-bold text-primary-900 mb-4">
-              Registered Office
-            </h2>
-            <p className="text-primary-500 max-w-xl mx-auto text-[13px]">
-              Peekaboo Ltd is fully registered and based in Kigali, Rwanda.
-            </p>
-          </header>
-
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <article className="text-center p-6">
-              <FontAwesomeIcon
-                icon={faMapLocationDot}
-                className="text-primary-900 text-xl mb-4"
-              />
-              <h3 className="font-semibold text-primary-900 text-[13px] mb-2">Address</h3>
-              <address className="text-primary-500 text-[13px] not-italic leading-relaxed">
-                Niboye, Kicukiro
-                <br />
-                Umujyi wa Kigali
-                <br />
-                RWANDA
-              </address>
-            </article>
-
-            <article className="text-center p-6">
-              <FontAwesomeIcon
-                icon={faPhone}
-                className="text-primary-900 text-xl mb-4"
-              />
-              <h3 className="font-semibold text-primary-900 text-[13px] mb-2">Phone</h3>
-              <p className="text-primary-500 text-[13px]">+250 794 892 784</p>
-            </article>
-
-            <article className="text-center p-6">
-              <FontAwesomeIcon
-                icon={faEnvelope}
-                className="text-primary-900 text-xl mb-4"
-              />
-              <h3 className="font-semibold text-primary-900 text-[13px] mb-2">Email</h3>
-              <p className="text-primary-500 text-[13px]">info@peekaboo.co.rw</p>
-            </article>
-          </section>
-        </article>
-      </section>
 
       <section className="bg-primary-900 py-16">
         <article className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

@@ -50,7 +50,7 @@ const BusinessSolutionsSection = ({
   return (
     <section className="w-full py-20 lg:py-28 bg-primary-900">
       <motion.article
-        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
+        className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-100px' }}

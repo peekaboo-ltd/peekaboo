@@ -3,7 +3,7 @@ import {
   faBars,
   faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
-import { AnimatePresence, motion, useAnimation } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useLocation } from 'react-router-dom';
@@ -16,33 +16,12 @@ const Sidebar = () => {
   const dispatch = useAppDispatch();
   const { isOpen: sidebarOpen } = useAppSelector((state) => state.sidebar);
   const [openCategories, setOpenCategories] = useState<string[]>([]);
-  const textControls = useAnimation();
-
-  const showMore = useCallback(() => {
-    textControls.start({
-      opacity: 1,
-      display: 'block',
-      transition: { delay: 0.1, duration: 0.2 },
-    });
-  }, [textControls]);
-
-  const showLess = useCallback(() => {
-    textControls.start({
-      opacity: 0,
-      display: 'none',
-      transition: { duration: 0.1 },
-    });
-  }, [textControls]);
 
   useEffect(() => {
-    if (sidebarOpen) {
-      showMore();
-      return;
+    if (!sidebarOpen) {
+      setOpenCategories([]);
     }
-
-    showLess();
-    setOpenCategories([]);
-  }, [sidebarOpen, showLess, showMore]);
+  }, [sidebarOpen]);
 
   const toggleCategory = useCallback((title: string) => {
     setOpenCategories((prev) =>
@@ -138,8 +117,8 @@ const Sidebar = () => {
 
                   {sidebarOpen && (
                     <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={textControls}
+                      initial={{ opacity: 0, display: 'none' }}
+                      animate={{ opacity: 1, display: 'block', transition: { delay: 0.1, duration: 0.2 } }}
                       className="whitespace-nowrap text-[13px] font-normal"
                     >
                       {nav.label}
@@ -185,7 +164,8 @@ const Sidebar = () => {
                                     }`}
                                 />
                                 <motion.span
-                                  animate={textControls}
+                                  initial={{ opacity: 0, display: 'none' }}
+                                  animate={{ opacity: 1, display: 'block', transition: { delay: 0.1, duration: 0.2 } }}
                                   className="whitespace-nowrap text-[13px] font-normal"
                                 >
                                   {subCategory.label}
@@ -208,7 +188,8 @@ const Sidebar = () => {
         <div className="mb-3 h-px bg-white/10" />
         {sidebarOpen ? (
           <motion.p
-            animate={textControls}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.1, duration: 0.2 } }}
             className="text-center text-[10px] font-light uppercase tracking-wide text-white/25"
           >
             Peekaboo

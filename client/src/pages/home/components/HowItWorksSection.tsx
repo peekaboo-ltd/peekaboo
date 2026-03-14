@@ -13,7 +13,7 @@ interface HowItWorksSectionProps {
 const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSectionProps) => (
   <section className="w-full py-20 lg:py-28 bg-[#FAFAF7]">
     <motion.article
-      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
+      className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-100px' }}
@@ -34,7 +34,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
         variants={containerVariants}
       >
         <motion.hr
-          className="hidden md:block absolute top-10 left-[20%] right-[20%] h-px bg-primary-200 border-0 origin-left"
+          className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-primary-200 border-0 origin-left"
           aria-hidden="true"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}

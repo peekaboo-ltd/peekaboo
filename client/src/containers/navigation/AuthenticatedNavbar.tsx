@@ -69,21 +69,21 @@ const AuthenticatedNavbar = ({ className }: Props) => {
         <nav className="w-full fixed top-0 z-1000 bg-white shadow-md">
             <header
                 className={`relative w-[95%] sm:w-[92%] md:w-[90%] mx-auto transition-all duration-300
-        py-2 sm:py-3 h-[8vh] min-h-[56px] max-h-[64px] flex items-center justify-between ${className}`}
+        py-2 sm:py-3 h-[64px] min-h-[64px] max-h-[64px] flex items-center justify-between ${className}`}
             >
                 <Link to="/" className="w-fit shrink-0">
                     <img
                         src={peekabooLogo}
-                        className="h-14 w-auto sm:h-20 object-contain"
+                        className="h-14 w-auto sm:h-16 object-contain"
                         alt="Peekaboo Logo"
                     />
                 </Link>
 
-                <section className="flex items-center gap-2 sm:gap-3 ml-auto">
+                <section className="flex items-center gap-2 ml-auto">
                     {pathname === '/' && (
                         <Link
                             to="/dashboard"
-                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-900 hover:bg-primary-900/10 rounded-lg transition-colors duration-200"
+                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-normal text-primary-900 hover:bg-primary-900/10 rounded-lg transition-colors duration-200"
                         >
                             Dashboard
                         </Link>
@@ -91,12 +91,12 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                     {pathname === '/' && (
                         <Link
                             to="/track"
-                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-primary-900/10 rounded-lg transition-colors duration-200"
+                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-normal text-gray-700 hover:bg-primary-900/10 rounded-lg transition-colors duration-200"
                         >
                             Track order
                         </Link>
                     )}
-                    <LanguageSelector className="hidden min-w-[92px] sm:block" />
+                    <LanguageSelector className="hidden sm:block" />
 
                     <button
                         className="md:hidden p-2 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors duration-200"
@@ -121,13 +121,13 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         >
                             <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200">
                                 <AvatarImage src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined} alt="" />
-                                <AvatarFallback className="rounded-full bg-primary-900/10 text-black text-xs font-medium">
+                                <AvatarFallback className="rounded-full bg-primary-900/10 text-black text-xs font-normal">
                                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
 
                             <div className="hidden sm:flex flex-col items-start">
-                                <span className="text-sm font-medium text-gray-800 truncate max-w-[150px] sm:max-w-[170px]">
+                                <span className="text-sm font-normal text-gray-800 truncate max-w-[150px] sm:max-w-[170px]">
                                     {user?.name || user?.phoneNumber}
                                 </span>
                                 <span className="text-xs text-gray-500 truncate max-w-[150px] sm:max-w-[170px]">
@@ -148,7 +148,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                 <NavDropdown isOpen={isOpen}>
                     <section className="py-2 w-full rounded-lg shadow-lg bg-white border border-gray-100">
                         <div className="sm:hidden p-4 border-b border-gray-100">
-                            <h3 className="font-medium text-gray-800">
+                            <h3 className="font-normal text-gray-800">
                                 {user?.name || user?.phoneNumber}
                             </h3>
                             <p className="text-sm text-gray-500 truncate">
@@ -219,12 +219,12 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                 <div className="flex items-center gap-2.5">
                                     <Avatar className="w-10 h-10 rounded-full border border-slate-200">
                                         <AvatarImage src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined} alt="" />
-                                        <AvatarFallback className="rounded-full bg-primary-900/10 text-black text-sm font-medium">
+                                        <AvatarFallback className="rounded-full bg-primary-900/10 text-black text-sm font-normal">
                                             {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <p className="font-medium text-gray-800 text-sm">
+                                        <p className="font-normal text-gray-800 text-sm">
                                             {user?.name || user?.phoneNumber}
                                         </p>
                                         <p className="text-xs text-gray-500 truncate max-w-[160px]">
@@ -243,7 +243,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                         <Link
                                             to="/dashboard"
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
+                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
                                         >
                                             <FontAwesomeIcon
                                                 icon={faUser}
@@ -256,7 +256,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                         <Link
                                             to="/track"
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
+                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
                                         >
                                             <FontAwesomeIcon
                                                 icon={faBoxOpen}
@@ -279,7 +279,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                                     }
                                                     navigate(`${nav?.link}`);
                                                 }}
-                                                className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
+                                                className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
                                             >
                                                 <FontAwesomeIcon
                                                     icon={nav.icon}

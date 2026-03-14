@@ -10,7 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export const NAVIGATION_LINKS = {
-  TRACK_ORDER: '/track',
+  HOME: '/',
   SERVICES: '/services',
   ABOUT: '/about',
   MY_ACCOUNT: '/auth/login',
