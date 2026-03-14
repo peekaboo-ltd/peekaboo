@@ -149,7 +149,7 @@ const UserManagementOnboarding = () => {
 
   return (
     <motion.main
-      className="min-h-screen bg-gradient-to-br from-slate-50 to-primary-50/30 py-12 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -175,11 +175,11 @@ const UserManagementOnboarding = () => {
           <motion.form
             variants={cardVariants}
             onSubmit={handleFinish}
-            className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-lg transition-shadow duration-300 space-y-6"
+            className="bg-white border border-slate-200 p-6 sm:p-8 space-y-6"
           >
             <section className="flex items-center gap-3 text-slate-800">
               <motion.span
-                className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center border border-primary-100"
+                className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
               >
@@ -199,7 +199,7 @@ const UserManagementOnboarding = () => {
               {[0, 1].map((index) => (
                 <motion.div
                   key={`member-${index}`}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 border border-slate-200"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * index }}
@@ -270,18 +270,18 @@ const UserManagementOnboarding = () => {
 
           <motion.aside
             variants={sidebarVariants}
-            className="bg-gradient-to-br from-primary-900 to-primary-800 text-white rounded-2xl p-6 sm:p-8 flex flex-col gap-6 shadow-xl"
+            className="border border-slate-200 bg-white p-6 sm:p-8 flex flex-col gap-6"
           >
             <header>
-              <h3 className="text-xl font-semibold">
+              <h3 className="text-xl font-semibold text-slate-900">
                 {t('onboarding.users.nextTitle')}
               </h3>
-              <p className="text-sm text-primary-100 mt-2">
+              <p className="text-sm text-slate-600 mt-2">
                 {t('onboarding.users.nextSubtitle')}
               </p>
             </header>
 
-            <ul className="space-y-4 text-sm text-primary-100">
+            <ul className="space-y-4 text-sm text-slate-600">
               {[
                 t('onboarding.users.nextItem1'),
                 t('onboarding.users.nextItem2'),
@@ -294,10 +294,10 @@ const UserManagementOnboarding = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 + index * 0.1 }}
                 >
-                  <span className="mt-0.5 w-5 h-5 rounded-full bg-primary-700 flex items-center justify-center flex-shrink-0">
+                  <span className="mt-0.5 w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0">
                     <FontAwesomeIcon
                       icon={faCheck}
-                      className="text-xs text-primary-200"
+                      className="text-xs text-slate-700"
                     />
                   </span>
                   <span>{item}</span>
@@ -306,17 +306,17 @@ const UserManagementOnboarding = () => {
             </ul>
 
             <motion.div
-              className="mt-auto pt-4 border-t border-primary-700"
+              className="mt-auto pt-4 border-t border-slate-200"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
             >
-              <p className="text-xs text-primary-200 mb-3">
+              <p className="text-xs text-slate-500 mb-3">
                 {t('onboarding.users.alreadyHaveAccount')}
               </p>
               <Link
                 to="/auth/login"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/10 text-white rounded-lg font-medium hover:bg-white/20 transition-colors w-full border border-white/20"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white text-slate-900 rounded-lg font-medium hover:bg-slate-50 transition-colors w-full border border-slate-200"
               >
                 {t('onboarding.users.signIn')}
               </Link>

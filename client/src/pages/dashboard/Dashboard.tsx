@@ -167,13 +167,11 @@ const Dashboard = () => {
 
   return (
     <motion.main
-      className="w-full flex flex-col gap-6 mx-auto px-3 sm:px-6 py-6 sm:py-8"
+      className="w-full flex flex-col gap-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <span className="absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.22),_transparent_65%)]" />
-
       <DashboardHeader
         userName={user?.name}
         role={dashboardData?.role}

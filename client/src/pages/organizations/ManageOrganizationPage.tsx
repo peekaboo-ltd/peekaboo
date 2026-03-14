@@ -4,7 +4,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { motion, Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBuilding,
   faCircleCheck,
   faUsers,
   faCreditCard,
@@ -27,14 +26,11 @@ import {
 } from '@/api/mutations/organization.mutations';
 import type { Organization } from '@/types/organization.type';
 import { OrganizationStatus, BillingPeriod } from '@/types/organization.type';
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-};
+import {
+  InternalPage,
+  InternalPageHeader,
+  InternalStatCard,
+} from '@/components/layout/InternalPage';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -110,8 +106,8 @@ const ManageOrganizationPage = () => {
         address: org.address ?? '',
         tin: org.tin ?? '',
         status: org.status ?? OrganizationStatus.ACTIVE,
-        billingPeriod: (org as Record<string, unknown>).billingPeriod as BillingPeriod ?? BillingPeriod.MONTHLY,
-        paymentTermsDays: (org as Record<string, unknown>).paymentTermsDays as number ?? 30,
+        billingPeriod: org?.billingPeriod ?? BillingPeriod.MONTHLY,
+        paymentTermsDays: org?.paymentTermsDays ?? 30,
       });
       if (org.businessPlanId) {
         setSelectedPlanId(org.businessPlanId);
@@ -170,7 +166,7 @@ const ManageOrganizationPage = () => {
 
   if (isFetchingOrg && !org) {
     return (
-      <main className="w-full flex items-center justify-center py-16 bg-[#FAFAF7] min-h-screen">
+      <main className="w-full flex items-center justify-center py-16 min-h-screen">
         <p className="text-sm text-slate-500">Loading organization…</p>
       </main>
     );
@@ -178,7 +174,7 @@ const ManageOrganizationPage = () => {
 
   if (!org && !isFetchingOrg) {
     return (
-      <main className="w-full flex flex-col gap-4 py-8 bg-[#FAFAF7] min-h-screen px-4">
+      <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
         <p className="text-sm text-slate-500">Organization not found.</p>
         <Button type="button" onClick={() => navigate(-1)}>Back</Button>
       </main>
@@ -186,53 +182,18 @@ const ManageOrganizationPage = () => {
   }
 
   return (
-    <motion.main
-      className="relative w-full flex flex-col gap-6 min-h-screen bg-[#FAFAF7]"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Decorative blur blobs */}
-      <figure
-        className="pointer-events-none absolute -right-40 -top-40 h-[420px] w-[420px] rounded-full bg-secondary-200/30 blur-3xl"
-        aria-hidden="true"
-      />
-      <figure
-        className="pointer-events-none absolute -left-32 bottom-20 h-[360px] w-[360px] rounded-full bg-primary-200/20 blur-3xl"
-        aria-hidden="true"
-      />
-
-      {/* Header */}
-      <motion.section
-        className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm"
-        variants={itemVariants}
-      >
-        <span className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-secondary-200/40 blur-3xl" />
-        <span className="pointer-events-none absolute -bottom-12 left-10 h-32 w-32 rounded-full bg-primary-200/30 blur-3xl" />
-
-        <header className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <section className="flex items-center gap-5">
-            <figure className="h-16 w-16 rounded-2xl bg-gradient-to-br from-secondary-600 via-secondary-700 to-secondary-900 text-white flex items-center justify-center text-2xl shadow-lg">
-              <FontAwesomeIcon icon={faBuilding} />
-            </figure>
-            <section>
-              <p className="text-xs uppercase tracking-[0.28em] text-secondary-700 font-medium">
-                Organization Management
-              </p>
-              <h1 className="mt-2 text-2xl font-bold text-[#25343F] sm:text-3xl">
-                {org?.name ?? 'Organization'}
-              </h1>
-              <p className="mt-1 text-sm text-slate-500">
-                Update organization details, assign a billing plan, and view members.
-              </p>
-            </section>
-          </section>
-          <aside className="flex flex-wrap items-center gap-3">
+    <InternalPage>
+      <motion.section variants={itemVariants}>
+        <InternalPageHeader
+          eyebrow="Organization Management"
+          title={org?.name ?? 'Organization'}
+          description="Update organization details, assign a billing plan, and view members."
+          actions={
             <Badge variant="outline" className="text-xs rounded-full px-3">
               {org?.status ?? 'Unknown'}
             </Badge>
-          </aside>
-        </header>
+          }
+        />
       </motion.section>
 
       {/* Stats row */}
@@ -241,20 +202,12 @@ const ManageOrganizationPage = () => {
         variants={itemVariants}
       >
         {stats.map((stat) => (
-          <article
+          <InternalStatCard
             key={stat.label}
-            className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
-          >
-            <header className="flex items-center justify-between">
-              <section>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{stat.label}</p>
-                <p className="mt-3 text-md font-semibold text-[#25343F]">{stat.value}</p>
-              </section>
-              <span className={`h-11 w-11 rounded-xl flex items-center justify-center ${stat.iconBg}`}>
-                <FontAwesomeIcon icon={stat.icon} />
-              </span>
-            </header>
-          </article>
+            label={stat.label}
+            value={stat.value}
+            icon={<FontAwesomeIcon icon={stat.icon} />}
+          />
         ))}
       </motion.section>
 
@@ -264,7 +217,7 @@ const ManageOrganizationPage = () => {
         variants={itemVariants}
       >
         {/* Left: Edit form */}
-        <article className="lg:col-span-2 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <article className="lg:col-span-2 border border-slate-200 bg-white p-6">
           <header className="mb-6">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Organization Details</p>
             <h2 className="mt-2 text-lg font-semibold text-[#25343F]">Edit Information</h2>
@@ -418,15 +371,15 @@ const ManageOrganizationPage = () => {
         {/* Right: Plan + Members */}
         <aside className="flex flex-col gap-6">
           {/* Business Plan */}
-          <article className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+          <article className="border border-slate-200 bg-white p-6">
             <header className="mb-4">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Billing</p>
               <h2 className="mt-2 text-lg font-semibold text-[#25343F]">Business Plan</h2>
             </header>
 
             {currentPlan && (
-              <div className="mb-4 flex items-center gap-2 rounded-xl border border-secondary-100 bg-secondary-50 px-4 py-3">
-                <FontAwesomeIcon icon={faTag} className="text-secondary-700" />
+              <div className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                <FontAwesomeIcon icon={faTag} className="text-slate-700" />
                 <section>
                   <p className="text-xs text-slate-500 uppercase tracking-wide">Current Plan</p>
                   <p className="text-sm font-semibold text-[#25343F]">{currentPlan.name}</p>
@@ -468,7 +421,7 @@ const ManageOrganizationPage = () => {
           </article>
 
           {/* Members */}
-          <article className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+          <article className="border border-slate-200 bg-white p-6">
             <header className="mb-4">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Membership</p>
               <h2 className="mt-2 text-lg font-semibold text-[#25343F]">
@@ -488,7 +441,7 @@ const ManageOrganizationPage = () => {
                 {members.map((member) => (
                   <li
                     key={member.id}
-                    className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2"
+                    className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
                   >
                     <section>
                       <p className="text-sm font-medium text-[#25343F]">
@@ -497,7 +450,7 @@ const ManageOrganizationPage = () => {
                       <p className="text-xs text-slate-500">{member.user?.email || '—'}</p>
                     </section>
                     <span className="flex items-center gap-1">
-                      <span className="rounded-full bg-primary-50 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-primary-900">
+                      <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-700">
                         {member.role}
                       </span>
                       {member.status === 'ACTIVE' ? (
@@ -518,7 +471,7 @@ const ManageOrganizationPage = () => {
           Back
         </Button>
       </motion.menu>
-    </motion.main>
+    </InternalPage>
   );
 };
 

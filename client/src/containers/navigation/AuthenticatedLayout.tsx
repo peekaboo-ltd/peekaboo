@@ -10,7 +10,7 @@ export const AuthenticatedLayout = () => {
   useInactivityTimeout();
 
   return (
-    <section className="h-screen w-full overflow-x-hidden">
+    <section className="h-screen w-full overflow-x-hidden bg-slate-50">
       <AuthenticatedNavbar />
       <AuthenticatedSidebar />
       <main
@@ -20,7 +20,7 @@ export const AuthenticatedLayout = () => {
             : 'ml-[60px] lg:ml-[80px]'
         }`}
       >
-        <article className="w-full max-w-[1280px] mx-auto px-4 sm:px-8 lg:px-10 py-6">
+        <article className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
           <Outlet />
         </article>
       </main>

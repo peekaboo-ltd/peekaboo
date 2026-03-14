@@ -128,7 +128,7 @@ const OrganizationOnboarding = () => {
 
   return (
     <motion.main
-      className="min-h-screen bg-gradient-to-br from-slate-50 to-primary-50/30 py-12 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -159,11 +159,11 @@ const OrganizationOnboarding = () => {
         <motion.form
           variants={cardVariants}
           onSubmit={onSubmit}
-          className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-lg transition-shadow duration-300 space-y-6"
+          className="bg-white border border-slate-200 p-6 sm:p-8 space-y-6"
         >
           <section className="flex items-center gap-3 text-slate-800">
             <motion.span
-              className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center border border-primary-100"
+              className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >

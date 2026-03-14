@@ -26,6 +26,12 @@ import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getProfilePhotoUrl } from '@/utils/profilePhoto.util';
+import {
+  InternalPage,
+  InternalPageHeader,
+  InternalSectionCard,
+  InternalStatCard,
+} from '@/components/layout/InternalPage';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -107,73 +113,33 @@ const UserProfilePage = () => {
   ];
 
   return (
-    <motion.main
-      className="relative w-full flex flex-col gap-6 min-h-screen bg-[#FAFAF7]"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Decorative blur blobs */}
-      <figure
-        className="pointer-events-none absolute -right-40 -top-40 h-[420px] w-[420px] rounded-full bg-secondary-200/30 blur-3xl"
-        aria-hidden="true"
-      />
-      <figure
-        className="pointer-events-none absolute -left-32 bottom-20 h-[360px] w-[360px] rounded-full bg-primary-200/20 blur-3xl"
-        aria-hidden="true"
-      />
-
-      {/* Header card */}
-      <motion.section
-        className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm"
-        variants={itemVariants}
-      >
-        <span className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-secondary-200/40 blur-3xl" />
-        <span className="pointer-events-none absolute -bottom-12 left-10 h-32 w-32 rounded-full bg-primary-200/30 blur-3xl" />
-
-        <header className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <section className="flex items-center gap-5">
-            <Avatar className="h-16 w-16 rounded-2xl border-2 border-slate-100 shadow-md overflow-hidden">
-              <AvatarImage
-                src={selectedUser?.profilePhotoUrl ? getProfilePhotoUrl(selectedUser.profilePhotoUrl) ?? undefined : undefined}
-                alt="Profile"
-                className="object-cover"
-              />
-              <AvatarFallback className="rounded-2xl bg-gradient-to-br from-secondary-600 via-secondary-700 to-secondary-900 text-white text-2xl font-medium">
-                <FontAwesomeIcon icon={faUser} />
-              </AvatarFallback>
-            </Avatar>
-            <section>
-              <p className="text-xs uppercase tracking-[0.28em] text-secondary-700 font-medium">
-                Profile Overview
-              </p>
-              <h1 className="mt-2 text-2xl font-bold text-[#25343F] sm:text-3xl">
-                {selectedUser?.name ?? 'Your Profile'}
-              </h1>
-              <p className="mt-1 text-sm text-slate-500">
-                Keep your personal details, roles, and contact information current.
-              </p>
-            </section>
-          </section>
-          <aside className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600">
-              {selectedUser?.status ?? 'Status Unavailable'}
-            </span>
-            <Button
-              primary
-              className="flex items-center gap-2"
-              onClick={() => {
-                if (selectedUser) {
-                  dispatch(setSelectedUser(selectedUser));
-                }
-                dispatch(setUpdateUserModal(true));
-              }}
-            >
-              <FontAwesomeIcon icon={faPenToSquare} />
-              Edit Profile
-            </Button>
-          </aside>
-        </header>
+    <InternalPage>
+      <motion.section variants={itemVariants}>
+        <InternalPageHeader
+          eyebrow="Profile Overview"
+          title={selectedUser?.name ?? 'Your Profile'}
+          description="Keep your personal details, roles, and contact information current."
+          actions={
+            <>
+              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600">
+                {selectedUser?.status ?? 'Status Unavailable'}
+              </span>
+              <Button
+                primary
+                className="flex items-center gap-2"
+                onClick={() => {
+                  if (selectedUser) {
+                    dispatch(setSelectedUser(selectedUser));
+                  }
+                  dispatch(setUpdateUserModal(true));
+                }}
+              >
+                <FontAwesomeIcon icon={faPenToSquare} />
+                Edit Profile
+              </Button>
+            </>
+          }
+        />
       </motion.section>
 
       {/* Stats */}
@@ -182,24 +148,12 @@ const UserProfilePage = () => {
         variants={itemVariants}
       >
         {stats.map((stat) => (
-          <article
+          <InternalStatCard
             key={stat.label}
-            className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
-          >
-            <header className="flex items-center justify-between">
-              <section>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                  {stat.label}
-                </p>
-                <p className="mt-3 text-xl font-semibold text-[#25343F]">
-                  {stat.value}
-                </p>
-              </section>
-              <span className={`h-11 w-11 rounded-xl flex items-center justify-center ${stat.iconBg}`}>
-                <FontAwesomeIcon icon={stat.icon} />
-              </span>
-            </header>
-          </article>
+            label={stat.label}
+            value={stat.value}
+            icon={<FontAwesomeIcon icon={stat.icon} />}
+          />
         ))}
       </motion.section>
 
@@ -208,21 +162,16 @@ const UserProfilePage = () => {
         className="grid grid-cols-1 gap-6 lg:grid-cols-3"
         variants={itemVariants}
       >
-        <article className="lg:col-span-2 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <header className="flex items-center justify-between gap-4">
-            <section>
-              <p className="text-xs uppercase tracking-[0.2em] text-secondary-700 font-medium">
-                Personal Details
-              </p>
-              <h2 className="mt-2 text-lg font-semibold text-[#25343F]">
-                Profile Information
-              </h2>
-            </section>
+        <InternalSectionCard
+          className="lg:col-span-2"
+          eyebrow="Personal Details"
+          title="Profile Information"
+          actions={
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
               Updated {formatDateLabel(selectedUser?.updatedAt)}
             </span>
-          </header>
-
+          }
+        >
           <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {[
               { label: 'Full Name', value: selectedUser?.name ?? '—', icon: faIdBadge },
@@ -234,10 +183,10 @@ const UserProfilePage = () => {
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm"
+                className="rounded-lg border border-slate-200 bg-slate-50 p-4"
               >
                 <header className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-lg bg-secondary-50 text-secondary-800 shadow-sm flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
@@ -252,10 +201,10 @@ const UserProfilePage = () => {
               </li>
             ))}
 
-            <li className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:col-span-2">
+            <li className="rounded-lg border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
               <header className="flex items-center justify-between gap-3">
                 <section className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-lg bg-secondary-50 text-secondary-800 shadow-sm flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
                     <FontAwesomeIcon icon={faLocationDot} />
                   </span>
                   <section>
@@ -282,18 +231,12 @@ const UserProfilePage = () => {
               </header>
             </li>
           </ul>
-        </article>
+        </InternalSectionCard>
 
-        <article className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <header>
-            <p className="text-xs uppercase tracking-[0.2em] text-secondary-700 font-medium">
-              Access & Membership
-            </p>
-            <h2 className="mt-2 text-lg font-semibold text-[#25343F]">
-              Roles & Organizations
-            </h2>
-          </header>
-
+        <InternalSectionCard
+          eyebrow="Access & Membership"
+          title="Roles & Organizations"
+        >
           <section className="mt-6 flex flex-col gap-5">
             <section>
               <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
@@ -323,7 +266,7 @@ const UserProfilePage = () => {
                   organizations.map((org) => (
                     <li
                       key={org}
-                      className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
+                      className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3"
                     >
                       <section>
                         <p className="text-sm font-medium text-[#25343F]">{org}</p>
@@ -340,7 +283,7 @@ const UserProfilePage = () => {
               </ul>
             </section>
           </section>
-        </article>
+        </InternalSectionCard>
 
         <menu className="w-full flex items-center gap-3 justify-between">
           <Button
@@ -357,7 +300,7 @@ const UserProfilePage = () => {
 
       <UpdateUserProfileModal />
       <SetUserDefaultLocationModal />
-    </motion.main>
+    </InternalPage>
   );
 };
 

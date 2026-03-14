@@ -117,10 +117,8 @@ const UserDetailsPage = () => {
 
   if (isFetching && !currentUser) {
     return (
-      <main className="relative w-full flex flex-col gap-6 mx-auto px-4 sm:px-6">
-        <span className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.18),_transparent_65%)]" />
-
-        <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)]">
+      <main className="w-full flex flex-col gap-6 mx-auto">
+        <section className="border border-slate-200 bg-white p-6">
           <header className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <section className="flex items-center gap-5">
               <SkeletonLoader width="4rem" height="4rem" />
@@ -223,23 +221,18 @@ const UserDetailsPage = () => {
 
   return (
     <motion.main
-      className="relative w-full flex flex-col gap-6 mx-auto px-4 sm:px-6"
+      className="w-full flex flex-col gap-6 mx-auto"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <span className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.18),_transparent_65%)]" />
-
       <motion.section
-        className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)]"
+        className="border border-slate-200 bg-white p-6"
         variants={itemVariants}
       >
-        <span className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/15 blur-3xl" />
-        <span className="pointer-events-none absolute -bottom-12 left-10 h-32 w-32 rounded-full bg-emerald-200/40 blur-3xl" />
-
-        <header className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <header className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <section className="flex items-center gap-5">
-            <figure className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white flex items-center justify-center text-2xl font-medium shadow-lg">
+            <figure className="h-16 w-16 rounded-full border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-center text-2xl font-medium">
               <FontAwesomeIcon icon={faUser} />
             </figure>
             <section>
@@ -288,7 +281,7 @@ const UserDetailsPage = () => {
         {stats?.map((stat) => (
           <article
             key={stat?.label}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]"
+            className="border border-slate-200 bg-white p-5"
           >
             <header className="flex items-center justify-between">
               <section>
@@ -299,7 +292,7 @@ const UserDetailsPage = () => {
                   {stat?.value}
                 </p>
               </section>
-              <span className="h-11 w-11 rounded-xl bg-primary-50 text-primary-900 flex items-center justify-center">
+              <span className="h-11 w-11 rounded-full border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-center">
                 <FontAwesomeIcon icon={stat?.icon} />
               </span>
             </header>
@@ -311,7 +304,7 @@ const UserDetailsPage = () => {
         className="grid grid-cols-1 gap-6 lg:grid-cols-3"
         variants={itemVariants}
       >
-        <article className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_16px_32px_-24px_rgba(15,23,42,0.35)]">
+        <article className="lg:col-span-2 border border-slate-200 bg-white p-6">
           <header className="flex items-center justify-between gap-4">
             <section>
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -361,10 +354,10 @@ const UserDetailsPage = () => {
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-xl border border-slate-100 bg-slate-50/60 p-4"
+                className="rounded-lg border border-slate-200 bg-slate-50 p-4"
               >
                 <header className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-lg bg-white text-primary-900 shadow-sm flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
@@ -381,7 +374,7 @@ const UserDetailsPage = () => {
           </ul>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_16px_32px_-24px_rgba(15,23,42,0.35)]">
+        <article className="border border-slate-200 bg-white p-6">
           <header>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
               Access & Membership
@@ -400,7 +393,7 @@ const UserDetailsPage = () => {
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
-                      <span className="rounded-full border border-primary-100 bg-primary-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary-900">
+                      <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-700">
                         {role}
                       </span>
                     </li>
@@ -420,7 +413,7 @@ const UserDetailsPage = () => {
                   organizations.map((org) => (
                     <li
                       key={org}
-                      className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3"
+                      className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3"
                     >
                       <section>
                         <p className="text-sm font-medium text-slate-900">
@@ -430,7 +423,7 @@ const UserDetailsPage = () => {
                           Active membership
                         </p>
                       </section>
-                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-emerald-700">
+                      <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-slate-700">
                         Active
                       </span>
                     </li>
@@ -443,8 +436,8 @@ const UserDetailsPage = () => {
               </ul>
             </section>
 
-            <section className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 flex items-center gap-3">
-              <span className="h-9 w-9 rounded-lg bg-white text-primary-900 shadow-sm flex items-center justify-center">
+            <section className="rounded-lg border border-slate-200 bg-slate-50 p-4 flex items-center gap-3">
+              <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
                 <FontAwesomeIcon icon={faBuilding} />
               </span>
               <section>

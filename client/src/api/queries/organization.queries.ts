@@ -1,6 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
-import type { Organization, PaginatedOrganizationsResponse, PaginatedMembersResponse } from '@/types/organization.type';
+import type { Organization } from '@/types/organization.type';
+import { UUID } from '@/types';
 
 export const organizationQueriesApiSlice = createApi({
   reducerPath: 'organizationQueriesApi',
@@ -12,27 +13,21 @@ export const organizationQueriesApiSlice = createApi({
       }),
     }),
 
-    fetchOrganizations: builder.query<
-      PaginatedOrganizationsResponse,
-      { page?: number; size?: number }
-    >({
-      query: ({ page = 1, size = 20 } = {}) => ({
+    fetchOrganizations: builder.query({
+      query: ({ page = 0, size = 20 }: { page?: number; size?: number }) => ({
         url: '/organizations',
         params: { page, size },
       }),
     }),
 
-    fetchOrganizationById: builder.query<{ message: string; data: Organization }, string>({
-      query: (id) => ({
+    fetchOrganizationById: builder.query({
+      query: (id: UUID) => ({
         url: `/organizations/${id}`,
       }),
     }),
 
-    fetchOrganizationMembers: builder.query<
-      PaginatedMembersResponse,
-      { id: string; page?: number; size?: number }
-    >({
-      query: ({ id, page = 1, size = 50 }) => ({
+    fetchOrganizationMembers: builder.query({
+      query: ({ id, page = 0, size = 50 }: { id: UUID; page?: number; size?: number }) => ({
         url: `/organizations/${id}/members`,
         params: { page, size },
       }),
