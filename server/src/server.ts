@@ -1,11 +1,23 @@
 import cluster from "cluster";
 import os from "os";
 import logger from "./helpers/logger.helper";
+import { AppDataSource } from "./data-source";
+import { startBillingCronJobs } from "./cron/billingCron";
 
 const numCPUs = os.cpus().length;
 
 if (cluster.isPrimary) {
   logger.info(`Master ${process.pid} is running`);
+
+  // Start cron jobs on the primary process to avoid duplicate execution
+  AppDataSource.initialize()
+    .then(() => {
+      logger.info('Primary process database connected — starting cron jobs');
+      startBillingCronJobs();
+    })
+    .catch((error) => {
+      logger.error('Primary process database connection failed, cron jobs will not start', error);
+    });
 
   // Fork workers.
   for (let i = 0; i < numCPUs; i++) {

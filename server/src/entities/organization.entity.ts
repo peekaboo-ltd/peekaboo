@@ -5,7 +5,7 @@ import { BusinessPlan } from './businessPlan.entity';
 import { OrganizationMembership } from './organizationMembership.entity';
 import { Order } from './order.entity';
 import { OrganizationBilling } from './organizationBilling.entity';
-import { OrganizationStatus } from '../constants/organization.constants';
+import { OrganizationStatus, BillingPeriod } from '../constants/organization.constants';
 
 @Entity('organizations')
 export class Organization extends AbstractEntity {
@@ -51,6 +51,19 @@ export class Organization extends AbstractEntity {
   // BUSINESS PLAN ID
   @Column({ name: 'business_plan_id', type: 'uuid', nullable: true })
   businessPlanId?: UUID;
+
+  // BILLING PERIOD
+  @Column({
+    name: 'billing_period',
+    type: 'enum',
+    enum: BillingPeriod,
+    default: BillingPeriod.MONTHLY,
+  })
+  billingPeriod: BillingPeriod;
+
+  // PAYMENT TERMS IN DAYS
+  @Column({ name: 'payment_terms_days', type: 'integer', default: 30 })
+  paymentTermsDays: number;
 
   // CREATED BY ID (the user who created this organization)
   @Column({ name: 'created_by_id', type: 'uuid', nullable: false })
