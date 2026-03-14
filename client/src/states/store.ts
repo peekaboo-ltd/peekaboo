@@ -26,6 +26,7 @@ import batchSlice from './slices/batch.slice';
 import { batchQueriesApiSlice } from '../api/queries/batch.queries';
 import { batchMutationsApiSlice } from '../api/mutations/batch.mutations';
 import { authQueriesApiSlice } from '../api/queries/auth.queries';
+import { businessPlanQueriesApiSlice } from '../api/queries/businessPlan.queries';
 
 export const store = configureStore({
   reducer: {
@@ -59,6 +60,7 @@ export const store = configureStore({
     [batchQueriesApiSlice.reducerPath]: batchQueriesApiSlice.reducer,
     [batchMutationsApiSlice.reducerPath]: batchMutationsApiSlice.reducer,
     [authQueriesApiSlice.reducerPath]: authQueriesApiSlice.reducer,
+    [businessPlanQueriesApiSlice.reducerPath]: businessPlanQueriesApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -80,6 +82,7 @@ export const store = configureStore({
       batchQueriesApiSlice.middleware,
       batchMutationsApiSlice.middleware,
       authQueriesApiSlice.middleware,
+      businessPlanQueriesApiSlice.middleware,
     ),
   devTools: true,
 });

@@ -157,3 +157,42 @@ export interface InviteOrganizationPayload {
 export interface InviteOrganizationResponse {
   message: string;
 }
+
+export enum BillingPeriod {
+  DAILY = 'DAILY',
+  WEEKLY = 'WEEKLY',
+  MONTHLY = 'MONTHLY',
+}
+
+export interface OrganizationMembership {
+  id: UUID;
+  userId: UUID;
+  organizationId: UUID;
+  role: OrganizationRole;
+  status: MembershipStatus;
+  user?: User;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PaginatedOrganizationsResponse {
+  message: string;
+  data: {
+    list: Organization[];
+    page: number;
+    size: number;
+    totalCount: number;
+    totalPages: number;
+  };
+}
+
+export interface PaginatedMembersResponse {
+  message: string;
+  data: {
+    list: OrganizationMembership[];
+    page: number;
+    size: number;
+    totalCount: number;
+    totalPages: number;
+  };
+}

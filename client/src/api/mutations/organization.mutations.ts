@@ -87,6 +87,30 @@ export const organizationMutationApiSlice = createApi({
         body: data,
       }),
     }),
+
+    // UPDATE ORGANIZATION BY ID (ADMIN)
+    updateOrganization: builder.mutation<
+      { message: string; data: Organization },
+      { id: string; data: Partial<Organization> }
+    >({
+      query: ({ id, data }) => ({
+        url: `/organizations/${id}`,
+        method: 'PATCH',
+        body: data,
+      }),
+    }),
+
+    // ASSIGN BUSINESS PLAN TO ORGANIZATION (ADMIN)
+    assignBusinessPlan: builder.mutation<
+      { message: string; data: Organization },
+      { id: string; businessPlanId: string }
+    >({
+      query: ({ id, businessPlanId }) => ({
+        url: `/organizations/${id}/business-plan`,
+        method: 'PATCH',
+        body: { businessPlanId },
+      }),
+    }),
   }),
 });
 
@@ -97,4 +121,6 @@ export const {
   useCompleteOnboardingMutation,
   useInviteOrganizationMutation,
   useUpdateMyOrganizationMutation,
+  useUpdateOrganizationMutation,
+  useAssignBusinessPlanMutation,
 } = organizationMutationApiSlice;
