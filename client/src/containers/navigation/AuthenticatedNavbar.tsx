@@ -18,6 +18,7 @@ import { capitalizeString } from '@/utils/strings.util';
 import { UserRole } from '@/types/user.type';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getProfilePhotoUrl } from '@/utils/profilePhoto.util';
+import peekabooLogo from '/peekaboo.png';
 
 interface Props {
     className?: string;
@@ -67,13 +68,13 @@ const AuthenticatedNavbar = ({ className }: Props) => {
     return (
         <nav className="w-full fixed top-0 z-1000 bg-white shadow-md">
             <header
-                className={`w-[95%] sm:w-[92%] md:w-[90%] mx-auto transition-all duration-300
-        py-2 sm:py-3 h-[9vh] min-h-[56px] flex items-center justify-between ${className}`}
+                className={`relative w-[95%] sm:w-[92%] md:w-[90%] mx-auto transition-all duration-300
+        py-2 sm:py-3 h-[8vh] min-h-[56px] max-h-[64px] flex items-center justify-between ${className}`}
             >
                 <Link to="/" className="w-fit shrink-0">
                     <img
-                        src="/peekaboo new.png"
-                        className="h-14 w-auto sm:h-20 md:h-24 max-w-[240px] sm:max-w-[300px] md:max-w-[340px] object-contain"
+                        src={peekabooLogo}
+                        className="h-14 w-auto sm:h-20 object-contain"
                         alt="Peekaboo Logo"
                     />
                 </Link>
@@ -95,7 +96,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                             Track order
                         </Link>
                     )}
-                    <LanguageSelector />
+                    <LanguageSelector className="hidden min-w-[92px] sm:block" />
 
                     <button
                         className="md:hidden p-2 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors duration-200"
@@ -236,7 +237,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                             <nav className="py-2">
                                 <ul className="space-y-0.5">
                                     <li className="px-3 py-2">
-                                        <LanguageSelector />
+                                        <LanguageSelector className="w-full" menuClassName="left-0 right-auto min-w-full" />
                                     </li>
                                     <li>
                                         <Link
@@ -304,13 +305,10 @@ interface NavDropdownProps {
 }
 
 export const NavDropdown: FC<NavDropdownProps> = ({ isOpen, children }) => {
-    const { pathname } = useLocation();
-
     return (
         <aside
             className={`${isOpen ? 'translate-y-0' : 'translate-y-[-400px]'
-                } ease-in-out duration-500 z-[10000] absolute top-[9vh] ${pathname.includes('services') ? 'right-[7%]' : 'right-[2%]'
-                } w-[250px] bg-transparent shadow-md rounded-md max-[450px]:w-[100vw]`}
+                } ease-in-out duration-300 z-[10000] absolute top-[calc(100%+0.35rem)] right-0 w-[250px] bg-transparent rounded-md max-[450px]:fixed max-[450px]:top-[64px] max-[450px]:left-0 max-[450px]:right-0 max-[450px]:w-screen`}
             role="dialog"
             aria-modal="true"
             aria-label="User menu"

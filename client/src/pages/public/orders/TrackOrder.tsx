@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Input } from '@/components/ui/input';
 import Button from '@/components/inputs/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faBoxOpen } from '@fortawesome/free-solid-svg-icons';
 import { useGetOrderByReferenceId } from '@/hooks/orders/orders.hooks';
 import { useI18n } from '@/i18n/i18n';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import Input from '@/components/inputs/Input';
 
 const TrackOrder = () => {
   const { t } = useI18n();
@@ -82,7 +82,6 @@ const TrackOrder = () => {
                 <FontAwesomeIcon icon={faSearch} />
               </span>
               <Input
-                id="reference-id"
                 value={referenceId}
                 onChange={(e) => {
                   setReferenceId(e.target.value.toUpperCase());
@@ -90,8 +89,6 @@ const TrackOrder = () => {
                 }}
                 placeholder={t('trackOrder.orderIdPlaceholder')}
                 className="pl-10 uppercase"
-                autoComplete="off"
-                autoFocus
               />
             </div>
             {errorMessage && (

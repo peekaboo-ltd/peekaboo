@@ -58,14 +58,19 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-slate-950">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(59,130,246,0.28),transparent_40%),radial-gradient(circle_at_82%_22%,rgba(14,165,233,0.22),transparent_34%),linear-gradient(160deg,#020617,#0f172a_42%,#111827)]" />
-      <div className="pointer-events-none absolute -left-24 top-28 h-72 w-72 rounded-full bg-primary-500/20 blur-3xl" />
-      <div className="pointer-events-none absolute right-0 top-16 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
+    <section className="relative min-h-screen w-full overflow-hidden bg-[#FAFAF7]">
+      <figure
+        className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-secondary-200/30 blur-3xl"
+        aria-hidden="true"
+      />
+      <figure
+        className="pointer-events-none absolute -left-32 bottom-20 h-[400px] w-[400px] rounded-full bg-primary-200/20 blur-3xl"
+        aria-hidden="true"
+      />
 
-      <article className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 pt-14 pb-16 lg:pt-20 lg:pb-24">
+      <article className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 lg:pt-28 lg:pb-24">
         <motion.section
-          className="w-full flex flex-col lg:flex-row gap-10 lg:gap-14 items-center max-lg:justify-center min-h-[calc(100vh-6rem)]"
+          className="w-full flex flex-col lg:flex-row gap-10 lg:gap-14 items-center max-lg:justify-center min-h-[calc(100vh-7rem)]"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -111,9 +116,9 @@ const HeroSection = ({
             className="w-full lg:w-[52%] flex justify-end order-1 lg:order-2"
             variants={itemVariants}
           >
-            <menu className="w-full max-w-xl flex items-center justify-end max-lg:justify-center">
+            <section className="w-full max-w-xl flex items-center justify-end max-lg:justify-center">
               <motion.article
-                className="relative"
+                className="relative w-full"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
@@ -140,7 +145,7 @@ const HeroSection = ({
                   }}
                 />
               </motion.article>
-            </menu>
+            </section>
           </motion.aside>
         </motion.section>
       </article>

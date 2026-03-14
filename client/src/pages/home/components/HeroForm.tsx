@@ -86,12 +86,12 @@ const HeroForm = ({
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="relative isolate">
-      <div className="relative rounded-2xl bg-white/95 backdrop-blur-md border border-white/70 p-7 sm:p-8 shadow-[0_26px_60px_rgba(2,6,23,0.45)]">
+      <article className="relative rounded-2xl bg-white border border-primary-100 p-7 sm:p-8 shadow-[0_20px_50px_rgba(37,52,63,0.08)]">
         <header className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-primary-900">
             {copy?.formTitle}
           </h2>
-          <p className="text-gray-500 text-[11px] mt-0.5">
+          <p className="text-primary-500 text-[11px] mt-0.5">
             {copy?.formSubtitle}
           </p>
         </header>
@@ -139,7 +139,7 @@ const HeroForm = ({
 
         <footer className="space-y-3">
           <Button
-            className="w-full bg-primary-600 hover:bg-primary-700 border-primary-600 text-white py-2.5 rounded-md text-[13px] font-medium shadow-sm"
+            className="w-full bg-secondary-600 hover:bg-secondary-700 border-secondary-600 hover:border-secondary-700 text-white py-2.5 rounded-md text-[13px] font-medium shadow-sm"
             isLoading={isLoading}
             type="submit"
             primary
@@ -149,30 +149,30 @@ const HeroForm = ({
           </Button>
 
           <nav className="flex items-center justify-center gap-2 pt-1">
-            <span className="text-gray-400 text-[11px]">
+            <span className="text-primary-400 text-[11px]">
               {copy.haveOrderLabel}
             </span>
             <Link
               to="/track"
-              className="text-gray-900 hover:text-gray-600 text-[11px] font-medium transition-colors"
+              className="text-primary-900 hover:text-secondary-700 text-[11px] font-medium transition-colors"
             >
               {copy.trackHereLabel} &rarr;
             </Link>
           </nav>
         </footer>
 
-        <aside className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-center gap-4 text-[11px] text-gray-400">
+        <aside className="mt-5 pt-4 border-t border-primary-50 flex items-center justify-center gap-4 text-[11px] text-primary-400">
           <span className="flex items-center gap-1.5">
-            <FontAwesomeIcon icon={faShieldHalved} className="text-gray-300" />
+            <FontAwesomeIcon icon={faShieldHalved} className="text-primary-300" />
             {copy?.verifiedRidersLabel}
           </span>
-          <span className="w-0.5 h-0.5 rounded-full bg-gray-300" aria-hidden="true" />
+          <span className="w-0.5 h-0.5 rounded-full bg-primary-300" aria-hidden="true" />
           <span className="flex items-center gap-1.5">
-            <FontAwesomeIcon icon={faClock} className="text-gray-300" />
+            <FontAwesomeIcon icon={faClock} className="text-primary-300" />
             {copy?.realtimeTrackingLabel}
           </span>
         </aside>
-      </div>
+      </article>
     </form>
   );
 };

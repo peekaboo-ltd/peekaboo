@@ -167,7 +167,7 @@ const Dashboard = () => {
 
   return (
     <motion.main
-      className="w-full flex flex-col gap-6 max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8"
+      className="w-full flex flex-col gap-6 mx-auto px-3 sm:px-6 py-6 sm:py-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

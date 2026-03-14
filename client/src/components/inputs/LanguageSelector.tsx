@@ -1,42 +1,86 @@
+import { useEffect, useRef, useState } from 'react';
 import { useI18n, type Language } from '@/i18n/i18n';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
+import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
-const languageOptions: Record<Language, { flag: string; label: string }> = {
-  en: { flag: '🇬🇧', label: 'En' },
-  fr: { flag: '🇫🇷', label: 'Fr' },
-  rw: { flag: '🇷🇼', label: 'Kiny' },
+const languageOptions: Record<Language, { label: string; shortLabel: string }> = {
+  en: { label: 'English', shortLabel: 'EN' },
+  fr: { label: 'Francais', shortLabel: 'FR' },
+  rw: { label: 'Kinyarwanda', shortLabel: 'RW' },
 };
 
-const LanguageSelector = () => {
+interface LanguageSelectorProps {
+  className?: string;
+  menuClassName?: string;
+}
+
+const LanguageSelector = ({ className, menuClassName }: LanguageSelectorProps) => {
   const { language, setLanguage } = useI18n();
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, []);
 
   const currentOption = languageOptions[language];
 
   return (
-    <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
-      <SelectTrigger className="cursor-pointer w-fit min-w-[80px]">
-        <SelectValue>
-          <span className="flex items-center gap-2 !text-[12px]">
-            {currentOption.flag} {currentOption.label}
-          </span>
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent className="z-[10001]">
-        {Object.entries(languageOptions).map(([code, option]) => (
-          <SelectItem key={code} value={code} className="cursor-pointer">
-            <span className="flex items-center gap-2 !text-[12px]">
-              {option.flag} {option.label}
-            </span>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div ref={containerRef} className={cn('relative inline-flex', className)}>
+      <Link
+        to="#"
+        onClick={(e) => {
+          e.preventDefault();
+          setIsOpen((prev) => !prev);
+        }}
+        className="inline-flex w-[52px] items-center cursor-pointer justify-between gap-1 bg-white/80 px-2 py-1 text-[12px] font-light tracking-[0.14em] text-slate-500 uppercase backdrop-blur-sm transition-all duration-200 hover:border-primary-900/20 hover:text-primary-900"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-label="Select language"
+      >
+        <span className='flex items-center gap-1'>{currentOption?.shortLabel}</span>
+      </Link>
+
+      {isOpen && (
+        <div
+          className={cn(
+            'absolute right-2 top-full z-[10001] mt-2 w-[52px] overflow-hidden bg-white/95 p-0.5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.2)] backdrop-blur-sm',
+            menuClassName
+          )}
+          role="listbox"
+          aria-label="Language options"
+        >
+          {Object.entries(languageOptions).map(([code, option]) => {
+            const isActive = code === language;
+
+            return (
+              <Link
+                key={code}
+                to="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setLanguage(code as Language);
+                  setIsOpen(false);
+                }}
+                className={`cursor-pointer ${isActive ? 'text-primary-900' : 'text-slate-500 hover:bg-slate-50 hover:text-primary-900'} flex w-full items-center justify-center rounded-md px-2 py-1 text-[12px] font-light uppercase tracking-[0.14em] transition-colors duration-150`}
+                role="option"
+                aria-selected={isActive}
+                title={option.label}
+              >
+                {option?.shortLabel}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 };
 

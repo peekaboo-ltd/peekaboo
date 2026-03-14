@@ -1,6 +1,6 @@
 import { RoleTypes } from '@/types/auth.type';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faFileLines, faLayerGroup, faLocationCrosshairs, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { faFileLines, faLayerGroup, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import {
   faChartLine,
   faBuilding,
@@ -21,7 +21,7 @@ export interface SidebarNav {
   path: string;
   icon: IconProp;
   permissions: RoleTypes[];
-  subcategories?: SidebarNav[];
+  subCategories?: SidebarNav[];
 }
 
 export const SIDEBAR_NAV: SidebarNav[] = [
@@ -30,12 +30,6 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     path: '/dashboard',
     icon: faChartLine,
     permissions: Object.values(RoleTypes),
-  },
-  {
-    label:'Track order',
-    path:'/track',
-    icon:faLocationCrosshairs,
-    permissions:[RoleTypes.ADMIN,RoleTypes.BUSINESS,RoleTypes.CUSTOMER,RoleTypes.GUEST,RoleTypes.RIDER,RoleTypes.STAFF]
   },
   {
     label: 'Orders',

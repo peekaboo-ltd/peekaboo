@@ -11,22 +11,22 @@ interface HowItWorksSectionProps {
 }
 
 const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSectionProps) => (
-  <section className="w-full py-20 lg:py-28 bg-white">
+  <section className="w-full py-20 lg:py-28 bg-[#FAFAF7]">
     <motion.article
-      className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-12"
+      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-100px' }}
       variants={containerVariants}
     >
-      <motion.header className="text-center mb-14" variants={fadeInUp}>
-        <span className="inline-block text-[11px] uppercase tracking-[0.14em] font-medium text-primary-600 mb-4">
+      <motion.header className="text-center mb-16" variants={fadeInUp}>
+        <span className="inline-block text-[11px] uppercase tracking-[0.14em] font-semibold text-secondary-600 mb-4">
           {badgeLabel}
         </span>
-        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">
+        <h2 className="text-3xl sm:text-4xl font-bold text-primary-900 leading-tight mb-4">
           {title}
         </h2>
-        <p className="text-base text-gray-500 max-w-2xl mx-auto">{subtitle}</p>
+        <p className="text-[13px] text-primary-500 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
       </motion.header>
 
       <motion.ol
@@ -34,7 +34,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
         variants={containerVariants}
       >
         <motion.hr
-          className="hidden md:block absolute top-14 left-[20%] right-[20%] h-px bg-gray-200 border-0 origin-left"
+          className="hidden md:block absolute top-10 left-[20%] right-[20%] h-px bg-primary-200 border-0 origin-left"
           aria-hidden="true"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
@@ -51,19 +51,19 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
             viewport={{ once: true }}
             transition={{ delay: index * 0.15, duration: 0.5 }}
           >
-            <figure className="relative inline-flex items-center justify-center mb-5">
-              <div className="relative w-14 h-14 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center">
-                <FontAwesomeIcon icon={step.icon} className="text-xl text-gray-700" />
-              </div>
-              <span className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full border border-gray-200 bg-white text-[10px] font-medium flex items-center justify-center text-gray-500">
+            <figure className="relative inline-flex flex-col items-center mb-5">
+              <span className="text-4xl sm:text-5xl font-bold text-secondary-200 tracking-tight mb-3">
                 {step.step}
               </span>
+              <figcaption className="w-12 h-12 rounded-xl bg-white border border-primary-100 flex items-center justify-center shadow-sm">
+                <FontAwesomeIcon icon={step.icon} className="text-lg text-primary-700" />
+              </figcaption>
             </figure>
 
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">
+            <h3 className="text-[13px] font-semibold text-primary-900 mb-2">
               {step.title}
             </h3>
-            <p className="text-gray-500 max-w-xs mx-auto text-[13px] leading-relaxed">
+            <p className="text-primary-500 max-w-xs mx-auto text-[13px] leading-relaxed">
               {step.description}
             </p>
           </motion.li>

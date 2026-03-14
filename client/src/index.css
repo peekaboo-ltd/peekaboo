@@ -5,18 +5,29 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Cool Blue/Teal Color Palette - Color Hunt Palette #061e29 #1d546d #5f9598 #f3f4f4 */
-  --color-primary-50: #f3f4f4;
-  --color-primary-100: #e8ebeb;
-  --color-primary-200: #d1d7d7;
-  --color-primary-300: #a8b8b9;
-  --color-primary-400: #7fa0a2;
-  --color-primary-500: #5f9598;
-  --color-primary-600: #4d7a7d;
-  --color-primary-700: #3d6165;
-  --color-primary-800: #1d546d;
-  --color-primary-900: #0f3a4a;
-  --color-primary-950: #061e29;
+  --color-primary-50: #F2F5F6;
+  --color-primary-100: #E0E6E9;
+  --color-primary-200: #C1CDD3;
+  --color-primary-300: #96AAB4;
+  --color-primary-400: #6B8694;
+  --color-primary-500: #4E6A78;
+  --color-primary-600: #3D5564;
+  --color-primary-700: #334753;
+  --color-primary-800: #2C3C46;
+  --color-primary-900: #25343F;
+  --color-primary-950: #172129;
+
+  --color-secondary-50: #F5F7F0;
+  --color-secondary-100: #E8EDDC;
+  --color-secondary-200: #D2DCBC;
+  --color-secondary-300: #B3C594;
+  --color-secondary-400: #96AD6F;
+  --color-secondary-500: #7B8F56;
+  --color-secondary-600: #5F7042;
+  --color-secondary-700: #4B5735;
+  --color-secondary-800: #3E472D;
+  --color-secondary-900: #353D28;
+  --color-secondary-950: #1B2013;
 }
 
 * {
@@ -76,10 +87,10 @@ h1, h2 {
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #5f9598;
+  --primary: #25343F;
   --primary-foreground: #ffffff;
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --secondary: #7B8F56;
+  --secondary-foreground: #ffffff;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -110,10 +121,10 @@ h1, h2 {
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #5f9598;
+  --primary: #25343F;
   --primary-foreground: #ffffff;
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
+  --secondary: #7B8F56;
+  --secondary-foreground: #ffffff;
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
@@ -141,11 +152,11 @@ h1, h2 {
   * {
     @apply border-border outline-ring/50;
     font-family: 'Work Sans', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
   }
   body {
     @apply bg-background text-foreground;
-    font-size: 14px;
+    font-size: 13px;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Work Sans', sans-serif;
@@ -160,25 +171,6 @@ h1, h2 {
   }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c4c4c4;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a0a0a0;
-}
-
 /* Smooth scroll */
 html {
   scroll-behavior: smooth;
@@ -186,13 +178,7 @@ html {
 
 /* Selection color */
 ::selection {
-  background: rgba(95, 149, 152, 0.3);
-  color: #061e29;
+  background: rgba(123, 143, 86, 0.3);
+  color: #25343F;
 }
 
-/* Focus visible styles — uses the ring token (neutral) so only explicitly
-   styled elements (text-primary, bg-primary, etc.) carry the brand colour */
-:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}

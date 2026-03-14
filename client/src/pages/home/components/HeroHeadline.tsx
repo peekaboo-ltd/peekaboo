@@ -29,15 +29,17 @@ const HeroHeadline = ({
       transition={{ duration: 0.35 }}
       className="space-y-4"
     >
-      <p className="inline-flex w-fit rounded-full border border-white/20 bg-white/10 px-4 py-1 text-[11px] uppercase tracking-[0.18em] text-primary-200">Fast. Reliable. Local.</p>
-      <h1 className="text-4xl sm:text-5xl lg:text-[3.6rem] font-bold tracking-[-0.02em] leading-[1.05] text-white">
+      <p className="inline-flex w-fit rounded-full border border-secondary-300 bg-secondary-50 px-4 py-1 text-[11px] uppercase tracking-[0.18em] text-secondary-700 font-medium">
+        Fast. Reliable. Local.
+      </p>
+      <h1 className="text-4xl sm:text-5xl lg:text-[3.6rem] font-bold tracking-[-0.02em] leading-[1.05] text-primary-900">
         {activeTab === 'personal' ? personalTitle1 : businessTitle1}
         <br />
-        <span className="text-primary-200">
+        <span className="text-secondary-600">
           {activeTab === 'personal' ? personalTitle2 : businessTitle2}
         </span>
       </h1>
-      <p className="text-base text-slate-300 leading-relaxed max-w-lg">
+      <p className="text-[13px] text-primary-600 leading-relaxed max-w-lg">
         {activeTab === 'personal' ? personalSubtitle : businessSubtitle}
       </p>
     </motion.hgroup>

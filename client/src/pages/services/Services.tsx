@@ -55,12 +55,18 @@ const Services = () => {
   useDocumentTitle('Services');
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <section className="relative overflow-hidden pt-24 pb-14 bg-slate-950 text-white">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(59,130,246,0.28),transparent_40%),radial-gradient(circle_at_80%_15%,rgba(14,165,233,0.22),transparent_34%)]" />
-        <article className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 text-center">
+    <main className="min-h-screen bg-[#FAFAF7]">
+      <section className="relative overflow-hidden pt-28 pb-16 bg-primary-950 text-white">
+        <figure
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(123,143,86,0.15),transparent_40%),radial-gradient(circle_at_80%_15%,rgba(37,52,63,0.3),transparent_34%)]"
+          aria-hidden="true"
+        />
+        <article className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-secondary-400 font-semibold mb-4">
+            Pricing
+          </p>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Business Delivery Plans</h1>
-          <p className="text-lg text-slate-300 max-w-3xl mx-auto">
+          <p className="text-[13px] text-primary-300 max-w-3xl mx-auto leading-relaxed">
             Choose the package that matches your growth: monthly, weekly, daily, or a dedicated rider
             fully committed to your operations.
           </p>
@@ -81,4 +87,3 @@ const Services = () => {
 };
 
 export default Services;
-

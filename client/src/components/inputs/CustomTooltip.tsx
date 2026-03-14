@@ -3,30 +3,31 @@ import {
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { ReactNode } from 'react';
-
-type CustomTooltipProps = {
+  } from '@/components/ui/tooltip';
+  import { ReactNode } from 'react';
+  
+  type CustomTooltipProps = {
     children: ReactNode;
     label?: string;
     labelClassName?: string;
-};
-
-const CustomTooltip = ({
+  };
+  
+  const CustomTooltip = ({
     children,
     label,
     labelClassName,
-}: CustomTooltipProps) => {
+  }: CustomTooltipProps) => {
     return (
-        <TooltipProvider delayDuration={100}>
-            <Tooltip>
-                <TooltipTrigger asChild>{children}</TooltipTrigger>
-                <TooltipContent className={`bg-primary text-white shadow-md text-[13px] font-normal ${labelClassName}`}>
-                    {label}
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger asChild>{children}</TooltipTrigger>
+          <TooltipContent className={`bg-primary text-white shadow-md text-[12px] ${labelClassName}`}>
+            <>{label}</>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
-};
-
-export default CustomTooltip;
+  };
+  
+  export default CustomTooltip;
+  

@@ -16,17 +16,17 @@ const HeroTabs = ({
   businessLabel,
 }: HeroTabsProps) => (
   <nav
-    className="flex items-center gap-0 border-b border-gray-200 w-fit"
+    className="flex items-center gap-0 border-b border-primary-200 w-fit"
     role="tablist"
   >
     <button
       onClick={() => onTabChange('personal')}
       role="tab"
       aria-selected={activeTab === 'personal'}
-      className={`flex items-center gap-2 px-4 py-2.5 text-[12px] uppercase tracking-[0.06em] font-normal transition-colors duration-200 cursor-pointer border-b-2 -mb-px ${
+      className={`flex items-center gap-2 px-4 py-2.5 text-[12px] uppercase tracking-[0.06em] font-medium transition-colors duration-200 cursor-pointer border-b-2 -mb-px ${
         activeTab === 'personal'
-          ? 'border-gray-900 text-gray-900'
-          : 'border-transparent text-gray-400 hover:text-gray-600'
+          ? 'border-primary-900 text-primary-900'
+          : 'border-transparent text-primary-400 hover:text-primary-700'
       }`}
     >
       <FontAwesomeIcon icon={faStore} className="text-[10px]" />
@@ -36,10 +36,10 @@ const HeroTabs = ({
       onClick={() => onTabChange('business')}
       role="tab"
       aria-selected={activeTab === 'business'}
-      className={`flex items-center gap-2 px-4 py-2.5 text-[12px] uppercase tracking-[0.06em] font-normal transition-colors duration-200 cursor-pointer border-b-2 -mb-px ${
+      className={`flex items-center gap-2 px-4 py-2.5 text-[12px] uppercase tracking-[0.06em] font-medium transition-colors duration-200 cursor-pointer border-b-2 -mb-px ${
         activeTab === 'business'
-          ? 'border-gray-900 text-gray-900'
-          : 'border-transparent text-gray-400 hover:text-gray-600'
+          ? 'border-primary-900 text-primary-900'
+          : 'border-transparent text-primary-400 hover:text-primary-700'
       }`}
     >
       <FontAwesomeIcon icon={faUserTie} className="text-[10px]" />

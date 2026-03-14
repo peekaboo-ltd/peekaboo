@@ -22,7 +22,7 @@ interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchor
 }
 
 const baseStyles =
-  'inline-flex items-center gap-2 justify-center text-center text-[13px] font-normal py-2 px-5 rounded-md border transition-colors duration-200 cursor-pointer';
+  'inline-flex items-center gap-2 justify-center text-center text-[13px] font-normal! py-2 px-5 rounded-sm border transition-colors duration-200 cursor-pointer';
 
 const variantStyles = {
   default: 'border-primary-900 text-primary-900 bg-transparent hover:bg-primary-900 hover:text-white',

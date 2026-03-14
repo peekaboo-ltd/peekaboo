@@ -23,7 +23,7 @@ const BusinessPlansSection = ({
 }: BusinessPlansSectionProps) => (
   <section className="w-full py-20 lg:py-28">
     <motion.article
-      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10"
+      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-100px' }}
@@ -31,7 +31,7 @@ const BusinessPlansSection = ({
     >
       <motion.header className="text-center mb-4 lg:mb-6" variants={fadeInUp}>
         <motion.span
-          className="inline-block text-black font-medium text-sm tracking-wider uppercase"
+          className="inline-block text-primary-900 font-medium text-[13px] tracking-wider uppercase"
           whileInView={{ opacity: [0, 1], y: [20, 0] }}
           viewport={{ once: true }}
         >
@@ -54,44 +54,44 @@ const BusinessPlansSection = ({
             } hover:z-10`}
           >
             <article
-              className={`group h-full rounded-2xl border p-6 flex flex-col gap-6 transition-all duration-300 hover:shadow-2xl hover:shadow-primary-500/20 hover:-translate-y-1 hover:bg-primary-900 hover:border-primary-700 ${
+              className={`group h-full rounded-2xl border p-6 flex flex-col gap-6 transition-all duration-300 hover:shadow-2xl hover:shadow-primary-900/10 hover:-translate-y-1 hover:bg-primary-900 hover:border-primary-700 ${
                 plan.isPopular
-                  ? 'border-primary-300 shadow-xl shadow-primary-500/10 bg-primary-50/40'
-                  : 'border-slate-200 bg-white'
+                  ? 'border-secondary-300 shadow-xl shadow-secondary-500/10 bg-secondary-50/40'
+                  : 'border-primary-100 bg-white'
               }`}
             >
               <header className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-900 transition-colors duration-300 group-hover:text-white">
+                <hgroup>
+                  <h3 className="text-xl font-semibold text-primary-900 transition-colors duration-300 group-hover:text-white">
                     {plan.name}
                   </h3>
-                  <p className="text-sm text-slate-500 mt-2 transition-colors duration-300 group-hover:text-primary-100">
+                  <p className="text-[13px] text-primary-500 mt-2 transition-colors duration-300 group-hover:text-primary-200">
                     {plan.description}
                   </p>
-                </div>
+                </hgroup>
                 {plan.isPopular && (
-                  <span className="text-xs font-semibold uppercase tracking-wide text-white bg-primary-900 px-2.5 py-1 rounded-full shadow-sm transition-colors duration-300 group-hover:bg-white group-hover:text-primary-900">
+                  <mark className="text-xs font-semibold uppercase tracking-wide text-white bg-secondary-600 px-2.5 py-1 rounded-full shadow-sm transition-colors duration-300 group-hover:bg-white group-hover:text-primary-900">
                     {popularLabel}
-                  </span>
+                  </mark>
                 )}
               </header>
 
-              <div>
-                <p className="text-3xl font-bold text-slate-900 transition-colors duration-300 group-hover:text-white">
+              <section>
+                <p className="text-3xl font-bold text-primary-900 transition-colors duration-300 group-hover:text-white">
                   {plan.price}
                 </p>
-                <p className="text-xs text-slate-500 mt-1 transition-colors duration-300 group-hover:text-primary-100">
+                <p className="text-xs text-primary-500 mt-1 transition-colors duration-300 group-hover:text-primary-300">
                   {perMonthLabel}
                 </p>
-              </div>
+              </section>
 
-              <ul className="space-y-3 text-sm text-slate-600 flex-1">
+              <ul className="space-y-3 text-[13px] text-primary-600 flex-1">
                 {plan.features.map((feature: string) => (
                   <li key={feature} className="flex items-start gap-2">
-                    <span className="mt-0.5 text-black transition-colors duration-300 group-hover:text-primary-100">
+                    <span className="mt-0.5 text-secondary-600 transition-colors duration-300 group-hover:text-secondary-300">
                       <FontAwesomeIcon icon={faCheck} />
                     </span>
-                    <span className="transition-colors duration-300 group-hover:text-primary-50">
+                    <span className="transition-colors duration-300 group-hover:text-primary-100">
                       {feature}
                     </span>
                   </li>
@@ -100,10 +100,10 @@ const BusinessPlansSection = ({
 
               <Link
                 to="/onboarding/organization"
-                className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium transition-colors duration-300 ${
+                className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-[13px] font-medium transition-colors duration-300 ${
                   plan.isPopular
-                    ? 'bg-primary-600 text-white hover:bg-primary-700 group-hover:bg-primary-600 group-hover:text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 group-hover:bg-white group-hover:text-primary-900'
+                    ? 'bg-secondary-600 text-white hover:bg-secondary-700 group-hover:bg-secondary-500 group-hover:text-white'
+                    : 'bg-primary-50 text-primary-700 hover:bg-primary-100 group-hover:bg-white group-hover:text-primary-900'
                 }`}
               >
                 {ctaLabel}
