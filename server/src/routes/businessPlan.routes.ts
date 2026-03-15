@@ -6,10 +6,13 @@ import { RoleTypes } from '../constants/role.constants';
 
 const router = Router();
 
-// All routes require authentication
-router.use(authenticate);
+// Public routes
+router.get('/public', BusinessPlanController.getPublicBusinessPlans);
 
 // Admin only routes
+// All routes below require authentication
+router.use(authenticate);
+
 router.post(
   '/',
   authorize([RoleTypes.ADMIN]),

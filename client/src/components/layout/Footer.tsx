@@ -5,8 +5,6 @@ import {
   faLocationDot,
   faPhone,
   faEnvelope,
-  faGlobe,
-  faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faInstagram,
@@ -14,13 +12,8 @@ import {
   faWhatsapp,
 } from '@fortawesome/free-brands-svg-icons';
 import type { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core';
-import { useI18n, type Language } from '@/i18n/i18n';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { useI18n } from '@/i18n/i18n';
+import LanguageSelector from '@/components/inputs/LanguageSelector';
 import { motion, Variants } from 'framer-motion';
 
 interface QuickLink {
@@ -39,12 +32,6 @@ interface SocialMedia {
   url: string;
   label: string;
 }
-
-const LANGUAGES: { code: Language; labelKey: string }[] = [
-  { code: 'en', labelKey: 'home.language.en' },
-  { code: 'fr', labelKey: 'home.language.fr' },
-  { code: 'rw', labelKey: 'home.language.rw' },
-];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -70,14 +57,14 @@ const itemVariants = {
 };
 
 const Footer = () => {
-  const { t, language, setLanguage } = useI18n();
+  const { t } = useI18n();
 
   const quickLinks = useMemo<QuickLink[]>(
     () => [
       { to: '/about', labelKey: 'footer.aboutUs' },
-      { to: '/auth/login', labelKey: 'footer.signIn' },
       { to: '/track', labelKey: 'footer.trackOrder' },
       { to: '/contact', labelKey: 'footer.contactUs' },
+      { to: '/services', labelKey: 'footer.services' },
     ],
     []
   );
@@ -99,8 +86,6 @@ const Footer = () => {
     ],
     []
   );
-
-  const currentLanguageLabel = LANGUAGES.find((l) => l.code === language)?.labelKey || 'home.language.en';
 
   return (
     <footer className="relative w-full border-t border-primary-100 bg-white">
@@ -168,7 +153,7 @@ const Footer = () => {
               {contactInfo.map((contact, index) => (
                 <li key={index}>
                   {contact.href ? (
-                    <a 
+                    <a
                       href={contact.href}
                       className="group flex items-start gap-3 text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
                     >
@@ -200,29 +185,7 @@ const Footer = () => {
               &copy; {new Date().getFullYear()} Peekaboo. {t('footer.copyright')}
             </p>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger className="group flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-primary-200 text-primary-500 hover:text-primary-900 hover:border-primary-300 transition-colors cursor-pointer">
-                <FontAwesomeIcon icon={faGlobe} className="w-4 h-4 text-primary-400" />
-                <span className="text-[13px] font-medium tracking-wide">{t(currentLanguageLabel)}</span>
-                <FontAwesomeIcon icon={faChevronDown} className="w-2.5 h-2.5 text-primary-400/80 group-hover:rotate-180 transition-transform duration-300" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="end" 
-                className="bg-white border border-primary-200 rounded-xl shadow-lg overflow-hidden"
-              >
-                {LANGUAGES.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => setLanguage(lang.code)}
-                    className={`cursor-pointer !text-[13px] ring-0 hover:ring-0 tracking-wide px-4 py-2 text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-all duration-200 ${
-                      language === lang.code ? 'bg-primary-50 text-primary-900' : ''
-                    }`}
-                  >
-                    {t(lang.labelKey)}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <LanguageSelector dropdownDirection="up" />
           </motion.section>
         </section>
       </motion.article>

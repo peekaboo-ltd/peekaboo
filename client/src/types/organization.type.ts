@@ -117,6 +117,7 @@ export interface ContactInquiryPayload {
   contactEmail: string;
   companyName: string;
   phoneNumber?: string;
+  subject?: string;
   message?: string;
 }
 

@@ -130,6 +130,20 @@ export const BusinessPlanController = {
     }
   },
 
+  // GET PUBLIC BUSINESS PLANS
+  async getPublicBusinessPlans(req: Request, res: Response, next: NextFunction) {
+    try {
+      const plans = await businessPlanService.getPublicBusinessPlans();
+
+      return res.status(200).json({
+        message: 'Public business plans fetched successfully',
+        data: plans,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // GET ORGANIZATION COUNT FOR PLAN
   async getOrganizationCountForPlan(req: Request, res: Response, next: NextFunction) {
     try {

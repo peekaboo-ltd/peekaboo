@@ -23,6 +23,12 @@ export const businessPlanQueriesApiSlice = createApi({
         url: `/business-plans/${id}/organization-count`,
       }),
     }),
+
+    fetchPublicBusinessPlans: builder.query({
+      query: () => ({
+        url: '/business-plans/public',
+      }),
+    }),
   }),
 });
 
@@ -31,4 +37,5 @@ export const {
   useLazyFetchBusinessPlansQuery,
   useFetchBusinessPlanByIdQuery,
   useFetchBusinessPlanOrganizationCountQuery,
+  useFetchPublicBusinessPlansQuery,
 } = businessPlanQueriesApiSlice;

@@ -550,7 +550,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 text-[13px] text-slate-900
                 flex items-center w-full
                 rounded-lg border-[1.5px]
-                border-secondary border-opacity-10
+                border-slate-300 border-opacity-10
                 outline-none focus:outline-none
                 focus:border-[1.6px] focus:border-primary
                 ease-in-out duration-50

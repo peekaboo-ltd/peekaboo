@@ -273,6 +273,31 @@ export class BusinessPlanService {
     });
   }
 
+  // GET PUBLIC BUSINESS PLANS (public info only)
+  async getPublicBusinessPlans(): Promise<BusinessPlan[]> {
+    return this.businessPlanRepository.find({
+      where: {
+        status: BusinessPlanStatus.ACTIVE,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        pricePerOrder: true,
+        currency: true,
+        features: true,
+        pricingTiers: true,
+        billingPeriod: true,
+        badge: true,
+        isCustomPricing: true,
+        isDefault: true,
+      },
+      order: {
+        name: 'ASC',
+      },
+    });
+  }
+
   // GET ORGANIZATION COUNT FOR A PLAN
   async getOrganizationCountForPlan(planId: UUID): Promise<number> {
     const plan = await this.businessPlanRepository.findOne({

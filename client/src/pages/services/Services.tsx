@@ -7,58 +7,88 @@ import type { BusinessPlan } from '@/pages/home/home.types';
 import { containerVariants, fadeInUp } from '@/pages/home/home.animations';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import Button from '@/components/inputs/Button';
+import { useFetchPublicBusinessPlansQuery } from '@/api/queries/businessPlan.queries';
+import type { BusinessPlan as ApiBusinessPlan, PricingTier } from '@/types/businessPlan.type';
+import { BillingPeriod } from '@/types/businessPlan.type';
 
-const businessPlans: BusinessPlan[] = [
-  {
-    name: 'Business Growth Plan',
-    description: 'Scale your monthly deliveries with volume-based pricing that rewards growth.',
-    price: 'From 1,200–1,500 RWF / delivery',
-    features: [
-      '0 – 150 deliveries per month → 1,500 RWF per delivery',
-      '151 – 300 deliveries per month → 1,350 RWF per delivery',
-      '301 – 500 deliveries per month → 1,200 RWF per delivery',
-      '500+ deliveries → Custom volume agreement or dedicated rider solution',
-    ],
-  },
-  {
-    name: 'Weekly Boost Plan',
-    description: 'Perfect for campaigns, launches, and short-term spikes in demand.',
-    price: 'From 48,000 RWF / week',
-    features: [
-      '30 deliveries per week → 48,000 RWF',
-      '50 deliveries per week → 75,000 RWF',
-      '80 deliveries per week → 120,000 RWF',
-      'Extra deliveries → 1,500 RWF each',
-    ],
-    isPopular: true,
-  },
-  {
-    name: 'Daily Power Pack',
-    description: 'Ideal for flash sales, peak days, and busy periods.',
-    price: 'From 8,500 RWF / day',
-    features: [
-      '5 deliveries per day → 8,500 RWF',
-      '10 deliveries per day → 16,000 RWF',
-      '20 deliveries per day → 30,000 RWF',
-      'Extra deliveries → 1,600 RWF each',
-    ],
-  },
-  {
-    name: 'Dedicated Rider Solution',
-    description: 'Your own full-time rider dedicated to your business operations.',
-    price: 'Custom monthly pricing',
-    features: [
-      'Full-time rider (8 hours / day)',
-      'Priority dispatching for your orders',
-      'Tailored operational structure for your workflows',
-      'Deliveries within an agreed service zone',
-      'Minimum commitment applies based on your requirements',
-    ],
-  },
-];
+const formatCurrency = (value: number, currency = 'RWF') =>
+  `${Number(value).toLocaleString()} ${currency}`;
+
+const getBillingPeriodSuffix = (billingPeriod: BillingPeriod) => {
+  switch (billingPeriod) {
+    case BillingPeriod.DAILY:
+      return 'day';
+    case BillingPeriod.WEEKLY:
+      return 'week';
+    case BillingPeriod.MONTHLY:
+    default:
+      return 'delivery';
+  }
+};
+
+const getFirstDisplayTier = (tiers?: PricingTier[]) => {
+  if (!tiers?.length) return undefined;
+
+  return [...tiers]
+    .filter((tier) => !tier.isCustom && (tier.totalPrice || tier.pricePerUnit))
+    .sort((a, b) => {
+      const aValue = a.totalPrice ?? a.pricePerUnit ?? Number.MAX_SAFE_INTEGER;
+      const bValue = b.totalPrice ?? b.pricePerUnit ?? Number.MAX_SAFE_INTEGER;
+      return aValue - bValue;
+    })[0];
+};
+
+const getHeadlinePrice = (plan: ApiBusinessPlan) => {
+  if (plan.isCustomPricing) {
+    return 'Custom monthly pricing';
+  }
+
+  const firstTier = getFirstDisplayTier(plan.pricingTiers?.tiers);
+  if (firstTier?.totalPrice) {
+    return `From ${formatCurrency(firstTier.totalPrice, plan.currency)} / ${getBillingPeriodSuffix(plan.billingPeriod)}`;
+  }
+
+  if (firstTier?.pricePerUnit) {
+    return `From ${formatCurrency(firstTier.pricePerUnit, plan.currency)} / delivery`;
+  }
+
+  if (plan.pricePerOrder) {
+    return `From ${formatCurrency(Number(plan.pricePerOrder), plan.currency)} / delivery`;
+  }
+
+  return 'Contact us for pricing';
+};
+
+const mapPlanToCard = (plan: ApiBusinessPlan): BusinessPlan => ({
+  name: plan.name,
+  description: plan.description || 'Flexible pricing for growing teams.',
+  price: getHeadlinePrice(plan),
+  features:
+    plan.features?.length
+      ? plan.features
+      : (plan.pricingTiers?.tiers || [])
+          .filter((tier) => tier.label)
+          .map((tier) => {
+            if (tier.isCustom) {
+              return tier.label || 'Custom pricing available';
+            }
+            if (tier.totalPrice) {
+              return `${tier.label} → ${formatCurrency(tier.totalPrice, plan.currency)}`;
+            }
+            if (tier.pricePerUnit) {
+              return `${tier.label} → ${formatCurrency(tier.pricePerUnit, plan.currency)} per delivery`;
+            }
+            return tier.label || '';
+          })
+          .filter(Boolean),
+  isPopular: Boolean(plan.badge) || plan.isDefault,
+});
 
 const Services = () => {
   useDocumentTitle('Services');
+  const { data, isFetching } = useFetchPublicBusinessPlansQuery(undefined);
+
+  const businessPlans = (data?.data || []).map(mapPlanToCard);
 
   return (
     <main className="relative min-h-screen w-full bg-[#FAFAF7] overflow-x-hidden mt-0 max-lg:mt-16">
@@ -104,6 +134,7 @@ const Services = () => {
         perMonthLabel="Transparent, predictable pricing for growing teams"
         ctaLabel="Talk to our team"
         plans={businessPlans}
+        isLoading={isFetching}
       />
 
       {/* CTA Section */}

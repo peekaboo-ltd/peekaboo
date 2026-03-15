@@ -13,12 +13,14 @@ interface ContactUsFormProps {
   className?: string;
   onSuccessAction?: () => void;
   successActionLabel?: string;
+  hideIntro?: boolean;
 }
 
 const ContactUsForm = ({
   className,
   onSuccessAction,
   successActionLabel,
+  hideIntro = false,
 }: ContactUsFormProps) => {
   const { t } = useI18n();
   const [submitted, setSubmitted] = useState(false);
@@ -81,19 +83,21 @@ const ContactUsForm = ({
         </motion.div>
       ) : (
         <>
-          <div className="flex items-center gap-3 mb-1">
-            <span className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center border border-primary-100">
-              <FontAwesomeIcon icon={faBuilding} className="text-primary-600" />
-            </span>
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900">
-                {t('contact.title')}
-              </h2>
-              <p className="text-sm text-slate-600">
-                {t('contact.subtitle')}
-              </p>
+          {!hideIntro ? (
+            <div className="flex items-center gap-3 mb-1">
+              <span className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center border border-primary-100">
+                <FontAwesomeIcon icon={faBuilding} className="text-primary-600" />
+              </span>
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  {t('contact.title')}
+                </h2>
+                <p className="text-sm text-slate-600">
+                  {t('contact.subtitle')}
+                </p>
+              </div>
             </div>
-          </div>
+          ) : null}
 
           <form onSubmit={onSubmit} className="flex flex-col gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
