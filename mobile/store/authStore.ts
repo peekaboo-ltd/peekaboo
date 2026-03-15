@@ -9,6 +9,12 @@ import {
   getUserData 
 } from '../services/storage/secureStorage';
 import { handleAPIError, getErrorMessage } from '../utils/errorHandler';
+import { pushAPI } from '../services/api';
+import {
+  getCurrentPushToken,
+  getPushDeviceMetadata,
+  registerForPushNotifications,
+} from '../services/notifications/pushNotifications';
 
 interface AuthState {
   user: User | null;
@@ -49,7 +55,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
         error: null,
       });
-      
+
+      const expoPushToken = await registerForPushNotifications();
+      if (expoPushToken) {
+        await pushAPI.registerPushSubscription({
+          expoPushToken,
+          ...getPushDeviceMetadata(),
+        });
+      }
+
       return true;
     } catch (error) {
       const appError = handleAPIError(error);
@@ -66,6 +80,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     
     try {
+      const currentToken = getCurrentPushToken();
+      if (currentToken) {
+        await pushAPI.disablePushSubscription(currentToken).catch(() => {});
+      }
+
       // Try to logout from server (optional - might fail if token expired)
       await authAPI.logout().catch(() => {});
     } finally {
@@ -118,6 +137,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isAuthenticated: true,
           isLoading: false,
         });
+
+        const expoPushToken = await registerForPushNotifications();
+        if (expoPushToken) {
+          await pushAPI.registerPushSubscription({
+            expoPushToken,
+            ...getPushDeviceMetadata(),
+          });
+        }
+
         return true;
       } catch (error) {
         // Token might be invalid
