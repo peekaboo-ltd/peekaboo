@@ -26,7 +26,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
         <h2 className="text-3xl sm:text-4xl font-bold text-primary-900 leading-tight mb-4">
           {title}
         </h2>
-        <p className="text-[14px] text-primary-500 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
+        <p className="text-[13px] text-primary-500 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
       </motion.header>
 
       <motion.ol
@@ -60,10 +60,10 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
               </figcaption>
             </figure>
 
-            <h3 className="text-[14px] font-semibold text-primary-900 mb-2">
+            <h3 className="text-[13px] font-semibold text-primary-900 mb-2">
               {step.title}
             </h3>
-            <p className="text-primary-500 max-w-xs mx-auto text-[14px] leading-relaxed">
+            <p className="text-primary-500 max-w-xs mx-auto text-[13px] leading-relaxed">
               {step.description}
             </p>
           </motion.li>

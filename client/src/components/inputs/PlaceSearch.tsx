@@ -241,10 +241,10 @@ const PlaceSearch = ({
           onMouseDown={(e) => handleSuggestionClick(prediction, e)}
           role="option"
         >
-          <strong className="font-medium text-gray-900 text-[14px]">
+          <strong className="font-medium text-gray-900 text-[13px]">
             {prediction.structured_formatting?.main_text}
           </strong>
-          <address className="text-sm text-gray-600 not-italic text-[14px]">
+          <address className="text-sm text-gray-600 not-italic text-[13px]">
             {prediction.structured_formatting?.secondary_text}
           </address>
         </li>
@@ -265,7 +265,7 @@ const PlaceSearch = ({
           placeholder={placeholder}
           disabled={disabled}
           autoComplete="off"
-          className="w-full px-3 py-2 placeholder:text-[14px] text-[14px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent"
+          className="w-full px-3 py-2 placeholder:text-[13px] text-[13px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent"
         />
         {isMapsUnavailable && (
           <p className="mt-1 text-xs text-red-500">Maps failed to load.</p>

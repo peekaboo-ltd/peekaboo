@@ -87,7 +87,7 @@ const Services = () => {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
               Business Delivery Plans
             </h1>
-            <p className="text-[14px] text-primary-300 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-[13px] text-primary-300 max-w-3xl mx-auto leading-relaxed">
               Choose the package that matches your growth: monthly, weekly, daily, or a dedicated
               rider fully committed to your operations.
             </p>
@@ -122,7 +122,7 @@ const Services = () => {
             <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
               Ready to streamline your deliveries?
             </h2>
-            <p className="text-[14px] text-primary-300 max-w-xl mx-auto mb-8 leading-relaxed">
+            <p className="text-[13px] text-primary-300 max-w-xl mx-auto mb-8 leading-relaxed">
               Get in touch with our team to find the perfect plan for your business needs.
             </p>
 

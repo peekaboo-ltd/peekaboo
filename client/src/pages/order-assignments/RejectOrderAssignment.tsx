@@ -34,7 +34,7 @@ const RejectOrderAssignment = () => {
     return (
         <Modal heading={`Reject Assignment for ${selectedOrderAssignment?.order?.referenceId}`} headingClassName='text-black' isOpen={rejectOrderAssignmentModal} onClose={closeModal}>
             <article className='w-full flex flex-col gap-4'>
-                <p className='text-[14px]'>
+                <p className='text-[13px]'>
                     Are you sure you want to reject this assignment?
                 </p>
                 <Button className='self-end' danger onClick={(e) => {

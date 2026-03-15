@@ -337,7 +337,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     if (['checkbox', 'radio'].includes(type)) {
       if (['checkbox'].includes(type)) {
         return (
-          <label className="flex w-fit items-center gap-2 text-[14px]">
+          <label className="flex w-fit items-center gap-2 text-[13px]">
             <Checkbox
               onCheckedChange={
                 onChange as ((checked: CheckedState) => void) | undefined
@@ -355,7 +355,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <p
               className={`${
                 label ? 'flex' : 'hidden'
-              } text-secondary text-[14px]`}
+              } text-secondary text-[13px]`}
             >
               {label}
             </p>
@@ -363,7 +363,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         );
       }
       return (
-        <label className="flex items-center gap-2 text-[14px]">
+        <label className="flex items-center gap-2 text-[13px]">
           <input
             type={type}
             name={name}
@@ -373,7 +373,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             onChange={onChange}
             className={`w-4 h-4 border-[1.5px] rounded-xl cursor-pointer border-secondary outline-none focus:outline-none accent-primary focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className}`}
           />
-          <p className={`${label ? 'flex' : 'hidden'} text-[14px]`}>{label}</p>
+          <p className={`${label ? 'flex' : 'hidden'} text-[13px]`}>{label}</p>
         </label>
       );
     }
@@ -392,7 +392,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 type="button"
                 onClick={handleClick}
                 disabled={readOnly}
-                className={`!bg-primary !text-white hover:!bg-primary hover:!text-white !shadow-sm py-[5px] w-full text-[13px] text-center max-[800px]:!text-[14px] px-8 rounded-md cursor-pointer ease-in-out duration-400 hover:scale-[1.005] ${
+                className={`!bg-primary !text-white hover:!bg-primary hover:!text-white !shadow-sm py-[5px] w-full text-[13px] text-center max-[800px]:!text-[13px] px-8 rounded-md cursor-pointer ease-in-out duration-400 hover:scale-[1.005] ${
                   readOnly &&
                   '!bg-secondary hover:!bg-secondary !cursor-not-allowed'
                 } ${className}`}
@@ -505,7 +505,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 {prefixIcon && (
                   <FontAwesomeIcon className="text-current" icon={prefixIcon} />
                 )}
-                {prefixText && <p className="text-[14px]">{prefixText}</p>}
+                {prefixText && <p className="text-[13px]">{prefixText}</p>}
               </Link>
             </label>
           ) : null}

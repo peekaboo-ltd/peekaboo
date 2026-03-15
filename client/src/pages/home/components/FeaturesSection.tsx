@@ -26,7 +26,7 @@ const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSect
         <h2 className="text-3xl sm:text-4xl font-bold text-primary-900 leading-tight mb-4">
           {title}
         </h2>
-        <p className="text-[14px] text-primary-500 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
+        <p className="text-[13px] text-primary-500 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
       </motion.header>
 
       <motion.ul
@@ -37,12 +37,12 @@ const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSect
           <motion.li key={feature.title} variants={scaleIn}>
             <article className="h-full rounded-xl p-6 border border-primary-100 bg-[#FAFAF7] transition-all duration-300 hover:border-secondary-300 hover:shadow-sm">
               <figure className="w-10 h-10 rounded-lg bg-secondary-50 border border-secondary-200 flex items-center justify-center mb-4">
-                <FontAwesomeIcon icon={feature.icon} className="text-secondary-700 text-[14px]" />
+                <FontAwesomeIcon icon={feature.icon} className="text-secondary-700 text-[13px]" />
               </figure>
-              <h3 className="text-[14px] font-semibold text-primary-900 mb-2">
+              <h3 className="text-[13px] font-semibold text-primary-900 mb-2">
                 {feature.title}
               </h3>
-              <p className="text-primary-500 text-[14px] leading-relaxed">
+              <p className="text-primary-500 text-[13px] leading-relaxed">
                 {feature.description}
               </p>
             </article>

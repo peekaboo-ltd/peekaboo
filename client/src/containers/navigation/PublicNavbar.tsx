@@ -115,7 +115,7 @@ const PublicNavbar = () => {
                 <Link
                   to={link}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center rounded-md px-3 py-2.5 text-[14px] font-normal transition-colors duration-150 ${
+                  className={`flex items-center rounded-md px-3 py-2.5 text-[13px] font-normal transition-colors duration-150 ${
                     isActive
                       ? 'bg-primary-900 text-white'
                       : 'text-primary-800/80 hover:bg-primary-50 hover:text-primary-900'

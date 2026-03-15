@@ -50,9 +50,9 @@ const DeleteOrder = () => {
       headingClassName="text-red-700"
     >
       <article className="w-full flex flex-col gap-4">
-        <p className="text-[14px]">
+        <p className="text-[13px]">
           Are you sure you want to delete{' '}
-          <span className="text-[14px] text-red-700">
+          <span className="text-[13px] text-red-700">
             {selectedOrder?.referenceId}
           </span>
           ? This action cannot be undone.

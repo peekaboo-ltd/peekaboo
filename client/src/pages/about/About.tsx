@@ -211,7 +211,7 @@ const About = () => {
             <br className="hidden sm:block" />
             <span className="text-secondary-300"> across Kigali.</span>
           </h1>
-          <p className="text-[14px] text-primary-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-[13px] text-primary-300 max-w-2xl mx-auto leading-relaxed">
             Peekaboo connects individuals, small businesses, and growing brands with a
             trusted network of professional riders — so every parcel arrives quickly,
             safely, and with a smile.
@@ -229,14 +229,14 @@ const About = () => {
               <h2 className="text-3xl font-bold text-primary-900 mb-6">
                 Built from the streets of Kigali.
               </h2>
-              <section className="space-y-4 text-primary-600 text-[14px] leading-relaxed">
+              <section className="space-y-4 text-primary-600 text-[13px] leading-relaxed">
                 <p>
                   Peekaboo started with a simple observation: sending a package across
                   Kigali shouldn't be complicated. What began as a small team of riders
                   and a shared phone has grown into a technology-driven delivery platform
                   trusted by thousands.
                 </p>
-                <blockquote className="border-l-2 border-secondary-500 pl-5 italic text-primary-700 my-6 text-[14px]">
+                <blockquote className="border-l-2 border-secondary-500 pl-5 italic text-primary-700 my-6 text-[13px]">
                   "We believe every delivery is a promise — and we take promises seriously."
                 </blockquote>
                 <p>
@@ -258,7 +258,7 @@ const About = () => {
                       <time className="text-[11px] uppercase tracking-[0.14em] font-semibold text-secondary-600 mb-1 block">
                         {m.year}
                       </time>
-                      <p className="text-primary-600 text-[14px] leading-relaxed">
+                      <p className="text-primary-600 text-[13px] leading-relaxed">
                         {m.label}
                       </p>
                     </li>
@@ -316,10 +316,10 @@ const About = () => {
                     icon={v.icon}
                     className="text-secondary-600 text-lg mb-4"
                   />
-                  <h3 className="font-semibold text-primary-900 mb-2 text-[14px]">
+                  <h3 className="font-semibold text-primary-900 mb-2 text-[13px]">
                     {v.title}
                   </h3>
-                  <p className="text-primary-500 text-[14px] leading-relaxed">
+                  <p className="text-primary-500 text-[13px] leading-relaxed">
                     {v.description}
                   </p>
                 </article>
@@ -336,12 +336,12 @@ const About = () => {
           <h2 className="text-2xl font-bold text-white mb-3">
             Ready to get started?
           </h2>
-          <p className="text-primary-300 mb-8 max-w-lg mx-auto text-[14px]">
+          <p className="text-primary-300 mb-8 max-w-lg mx-auto text-[13px]">
             Join thousands of satisfied customers using Peekaboo for their delivery needs.
           </p>
           <Link
             to="/"
-            className="inline-block bg-secondary-500 text-white px-8 py-2.5 rounded-md text-[14px] font-medium hover:bg-secondary-600 transition-colors duration-200"
+            className="inline-block bg-secondary-500 text-white px-8 py-2.5 rounded-md text-[13px] font-medium hover:bg-secondary-600 transition-colors duration-200"
           >
             Get Started
           </Link>

@@ -34,7 +34,7 @@ const AcceptOrderAssignment = () => {
     return (
         <Modal heading={`Accept Assignment for ${selectedOrderAssignment?.order?.referenceId}`} headingClassName='text-black' isOpen={acceptOrderAssignmentModal} onClose={closeModal}>
             <article className='w-full flex flex-col gap-4'>
-                <p className='text-[14px]'>
+                <p className='text-[13px]'>
                     Are you sure you want to accept this assignment?
                 </p>
                 <Button className='self-end bg-green-700! !hover:bg-green-700/80 border-green-700! text-white!' onClick={(e) => {

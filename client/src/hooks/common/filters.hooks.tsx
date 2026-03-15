@@ -220,7 +220,7 @@ export const useStatusFilter = ({
                                   : 'w-4.5 h-4.5'
                               }
                             />
-                            <p className="text-[14px] text-black">
+                            <p className="text-[13px] text-black">
                               {capitalizeString(status)}
                             </p>
                           </Link>
@@ -230,7 +230,7 @@ export const useStatusFilter = ({
                   );
                 })
               ) : (
-                <p className="text-[14px] text-secondary text-center py-2">
+                <p className="text-[13px] text-secondary text-center py-2">
                   No statuses found
                 </p>
               )}

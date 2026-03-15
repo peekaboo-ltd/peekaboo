@@ -1,5 +1,5 @@
 import { useLazyFetchBusinessPlansQuery } from "@/api/queries/businessPlan.queries";
-import { useAppDispatch, useAppSelector } from "@/states/hooks";
+import { useAppDispatch } from "@/states/hooks";
 import { usePagination } from "../common/pagination.hooks";
 import { useEffect } from "react";
 import { setBusinessPlansList } from "@/states/slices/businessPlan.slice";
@@ -8,7 +8,6 @@ export const useFetchBusinessPlans = () => {
 
     // STATE VARIABLES
     const dispatch = useAppDispatch();
-    const { businessPlansList, selectedBusinessPlan, businessPlan } = useAppSelector((state) => state.businessPlan);
 
     const {
         page,
@@ -31,5 +30,5 @@ export const useFetchBusinessPlans = () => {
         }
     }, [isSuccess, data, dispatch, setTotalPages, setTotalCount]);
 
-    return { fetchBusinessPlans, businessPlansList, selectedBusinessPlan, businessPlan, isFetching, page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount };
+    return { fetchBusinessPlans, isFetching, page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount };
 };

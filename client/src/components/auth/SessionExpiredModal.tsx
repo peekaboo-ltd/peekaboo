@@ -33,7 +33,7 @@ const SessionExpiredModal = () => {
       heading={`Session Expired`}
     >
       <article className="flex flex-col gap-6">
-        <p className="text-black text-[14px]">{`Your session has expired due to inactivity. Please log in again.`}</p>
+        <p className="text-black text-[13px]">{`Your session has expired due to inactivity. Please log in again.`}</p>
         <menu className="flex items-center justify-end gap-3">
           <Button
             primary
