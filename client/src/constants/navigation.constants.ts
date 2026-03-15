@@ -22,7 +22,7 @@ export interface SidebarNav {
   label: string;
   path: string;
   icon: IconProp;
-  permissions: RoleTypes[];
+  roles: RoleTypes[];
   subCategories?: SidebarNav[];
 }
 
@@ -31,37 +31,37 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     label: 'Dashboard',
     path: '/dashboard',
     icon: faChartLine,
-    permissions: Object.values(RoleTypes),
+    roles: Object.values(RoleTypes),
   },
   {
     label: 'Orders',
     path: '/orders',
     icon: faFileLines,
-    permissions: Object.values(RoleTypes),
+    roles: Object.values(RoleTypes),
   },
   {
     label: 'Batches',
     path: '/batches',
     icon: faLayerGroup,
-    permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS, RoleTypes.CUSTOMER],
+    roles: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS, RoleTypes.CUSTOMER],
   },
   {
     label: 'Riders',
     path: '/riders',
     icon: faUserCheck,
-    permissions: [RoleTypes.ADMIN, RoleTypes.RIDER],
+    roles: [RoleTypes.ADMIN, RoleTypes.RIDER],
     subCategories: [
       {
         label: 'Assignments',
         path: '/assignments',
         icon: faUserCheck,
-        permissions: [RoleTypes.ADMIN, RoleTypes.RIDER],
+        roles: [RoleTypes.ADMIN, RoleTypes.RIDER],
       },
       {
         label: 'Users Tracking',
         path: '/users/tracking',
         icon: faLocationDot,
-        permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
+        roles: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
       },
     ]
   },
@@ -69,31 +69,31 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     label: 'Payments',
     path: '/payments',
     icon: faCreditCard,
-    permissions: [RoleTypes.ADMIN],
+    roles: [RoleTypes.ADMIN],
   },
   {
     label: 'Users',
     path: '/users',
     icon: faUserGroup,
-    permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
+    roles: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
   },
   {
     label: 'Business',
     path: '',
     icon: faBuilding,
-    permissions: [RoleTypes.ADMIN],
+    roles: [RoleTypes.ADMIN],
     subCategories: [
       {
         label: 'Organizations',
         path: '/organizations',
         icon: faBuilding,
-        permissions: [RoleTypes.ADMIN],
+        roles: [RoleTypes.ADMIN],
       },
       {
         label: 'Business Plans',
         path: '/business-plans',
         icon: faTag,
-        permissions: [RoleTypes.ADMIN],
+        roles: [RoleTypes.ADMIN],
       },
     ]
   },

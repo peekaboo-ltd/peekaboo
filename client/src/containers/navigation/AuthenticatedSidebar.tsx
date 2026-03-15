@@ -4,18 +4,66 @@ import {
   faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
-import { SIDEBAR_NAV } from '@/constants/navigation.constants';
+import { SIDEBAR_NAV, type SidebarNav } from '@/constants/navigation.constants';
 import { setIsOpen } from '@/states/slices/sidebar.slice';
+import { RoleTypes } from '@/types/auth.type';
+
+function canSeeItem(userRoles: Set<RoleTypes>, itemRoles: RoleTypes[]): boolean {
+  return itemRoles.some((r) => userRoles.has(r));
+}
+
+interface NavItemWithAllowedSubs extends SidebarNav {
+  allowedSubCategories: SidebarNav[];
+}
+
+function getFilteredNavWithAllowedSubs(
+  userRoles: Set<RoleTypes>,
+): NavItemWithAllowedSubs[] {
+  return SIDEBAR_NAV.filter((nav) => {
+    if (!nav.subCategories?.length) {
+      return canSeeItem(userRoles, nav.roles);
+    }
+    const allowedSubs = nav.subCategories.filter((sub) =>
+      canSeeItem(userRoles, sub.roles),
+    );
+    return (
+      canSeeItem(userRoles, nav.roles) || allowedSubs.length > 0
+    );
+  }).map((nav) => {
+    if (!nav.subCategories?.length) {
+      return { ...nav, allowedSubCategories: [] };
+    }
+    const allowedSubCategories = nav.subCategories.filter((sub) =>
+      canSeeItem(userRoles, sub.roles),
+    );
+    return { ...nav, allowedSubCategories };
+  });
+}
 
 const Sidebar = () => {
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
   const { isOpen: sidebarOpen } = useAppSelector((state) => state.sidebar);
+  const { user } = useAppSelector((state) => state.auth);
   const [openCategories, setOpenCategories] = useState<string[]>([]);
+
+  const userRoleNames = useMemo(
+    () =>
+      new Set<RoleTypes>(
+        (user?.userRoles?.map((ur) => ur.role.name).filter(Boolean) ??
+          []) as RoleTypes[],
+      ),
+    [user?.userRoles],
+  );
+
+  const filteredNav = useMemo(
+    () => getFilteredNavWithAllowedSubs(userRoleNames),
+    [userRoleNames],
+  );
 
   useEffect(() => {
     if (!sidebarOpen) {
@@ -69,13 +117,12 @@ const Sidebar = () => {
 
       <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3">
         <ul className="flex flex-col gap-2">
-          {SIDEBAR_NAV.map((nav) => {
+          {filteredNav.map((nav) => {
             const selected = pathname === nav.path;
-            const hasSubcategories =
-              !!nav.subCategories && nav.subCategories.length > 0;
+            const hasSubcategories = nav.allowedSubCategories.length > 0;
             const isSubcategoriesOpen = openCategories.includes(nav.label);
-            const isSubcategoryActive = nav.subCategories?.some((subCategory) =>
-              pathname.startsWith(subCategory.path),
+            const isSubcategoryActive = nav.allowedSubCategories.some(
+              (subCategory) => pathname.startsWith(subCategory.path),
             );
             const isActive = selected || isSubcategoryActive;
 
@@ -144,7 +191,7 @@ const Sidebar = () => {
                       className="my-1 overflow-hidden"
                     >
                       <ul className="ml-[14px] flex flex-col gap-1.5 border-l border-white/10 py-1.5 pl-2 pr-1">
-                        {nav.subCategories?.map((subCategory) => {
+                        {nav.allowedSubCategories.map((subCategory) => {
                           const isSubActive = pathname.startsWith(
                             subCategory.path,
                           );
