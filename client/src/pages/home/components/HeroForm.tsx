@@ -139,7 +139,7 @@ const HeroForm = ({
 
         <footer className="space-y-3">
           <Button
-            className="w-full bg-secondary-600 hover:bg-secondary-700 border-secondary-600 hover:border-secondary-700 text-white py-2.5 rounded-md text-[13px] font-medium shadow-sm"
+            className="w-full bg-secondary-600 hover:bg-secondary-700 border-secondary-600 hover:border-secondary-700 text-white py-2.5 rounded-md text-[14px] font-medium shadow-sm"
             isLoading={isLoading}
             type="submit"
             primary

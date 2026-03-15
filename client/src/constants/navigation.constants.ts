@@ -14,6 +14,7 @@ export const NAVIGATION_LINKS = {
   HOME: '/',
   SERVICES: '/services',
   ABOUT: '/about',
+  TRACK_ORDER: '/track',
   MY_ACCOUNT: '/auth/login',
 };
 

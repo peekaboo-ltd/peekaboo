@@ -39,7 +39,7 @@ const HeroHeadline = ({
           {activeTab === 'personal' ? personalTitle2 : businessTitle2}
         </span>
       </h1>
-      <p className="text-[13px] text-primary-600 leading-relaxed max-w-lg">
+      <p className="text-[14px] text-primary-600 leading-relaxed max-w-lg">
         {activeTab === 'personal' ? personalSubtitle : businessSubtitle}
       </p>
     </motion.hgroup>

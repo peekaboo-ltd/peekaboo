@@ -13,6 +13,7 @@ import { BusinessPlanQuery } from '../types/b2b.types';
 import { OrganizationStatus } from '../constants/organization.constants';
 import { AuditCreate, AuditUpdate, AuditDelete } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
+import { validatePricingTiers } from '../helpers/pricing.helper';
 
 export class BusinessPlanService {
   private readonly businessPlanRepository: Repository<BusinessPlan>;
@@ -39,6 +40,14 @@ export class BusinessPlanService {
 
       if (existingPlan) {
         throw new ConflictError('Business plan with this name already exists');
+      }
+    }
+
+    // Validate pricing tiers if provided
+    if (data.pricingTiers) {
+      const tierErrors = validatePricingTiers(data.pricingTiers);
+      if (tierErrors.length > 0) {
+        throw new ValidationError(tierErrors.join(' '));
       }
     }
 
@@ -89,6 +98,14 @@ export class BusinessPlanService {
 
       if (existingPlan) {
         throw new ConflictError('Business plan with this name already exists');
+      }
+    }
+
+    // Validate pricing tiers if provided
+    if (data.pricingTiers) {
+      const tierErrors = validatePricingTiers(data.pricingTiers);
+      if (tierErrors.length > 0) {
+        throw new ValidationError(tierErrors.join(' '));
       }
     }
 
@@ -178,7 +195,7 @@ export class BusinessPlanService {
     }
 
     // Validate and apply sorting
-    const allowedSortFields = ['createdAt', 'name', 'pricePerOrder', 'status', 'isDefault'];
+    const allowedSortFields = ['createdAt', 'name', 'pricePerOrder', 'status', 'isDefault', 'billingPeriod'];
     const sortField = allowedSortFields.includes(sortBy as string) ? sortBy : 'createdAt';
     const order = sortOrder === 'ASC' ? 'ASC' : 'DESC';
 
@@ -232,15 +249,8 @@ export class BusinessPlanService {
   }
 
   // GET AVAILABLE PLANS FOR BUSINESS USERS (public info only)
-  async getAvailablePlansForBusiness(): Promise<Array<{
-    id: UUID;
-    name: string;
-    description: string | null;
-    pricePerOrder: number;
-    currency: string;
-    isDefault: boolean;
-  }>> {
-    const plans = await this.businessPlanRepository.find({
+  async getAvailablePlansForBusiness(): Promise<BusinessPlan[]> {
+    return this.businessPlanRepository.find({
       where: {
         status: BusinessPlanStatus.ACTIVE,
       },
@@ -251,20 +261,16 @@ export class BusinessPlanService {
         pricePerOrder: true,
         currency: true,
         isDefault: true,
+        features: true,
+        pricingTiers: true,
+        billingPeriod: true,
+        badge: true,
+        isCustomPricing: true,
       },
       order: {
-        pricePerOrder: 'ASC',
+        name: 'ASC',
       },
     });
-
-    return plans.map(plan => ({
-      id: plan.id,
-      name: plan.name,
-      description: plan.description ?? null,
-      pricePerOrder: Number(plan.pricePerOrder),
-      currency: plan.currency,
-      isDefault: plan.isDefault,
-    }));
   }
 
   // GET ORGANIZATION COUNT FOR A PLAN

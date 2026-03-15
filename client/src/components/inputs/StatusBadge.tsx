@@ -28,7 +28,7 @@ export const StatusBadge = ({ status }: { status?: string }) => {
     }
 
     return (
-        <p className={`${className} p-1 px-3 rounded-md text-white text-center text-[12px]`}>
+        <p className={`${className} p-1 px-3 rounded-md text-white text-center text-[13px]`}>
             {capitalizeString(status)}
         </p>
     )

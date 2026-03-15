@@ -32,7 +32,7 @@ const FinalCtaSection = ({
         <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
           {title}
         </h2>
-        <p className="text-[13px] text-primary-300 max-w-xl mx-auto mb-8 leading-relaxed">
+        <p className="text-[14px] text-primary-300 max-w-xl mx-auto mb-8 leading-relaxed">
           {subtitle}
         </p>
 

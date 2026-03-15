@@ -9,6 +9,7 @@ import {
   MouseEventHandler,
   ReactNode,
   useRef,
+  useState,
 } from 'react';
 import { FieldValues, SetFieldValue } from 'react-hook-form';
 import { Link } from 'react-router-dom';
@@ -17,6 +18,7 @@ import CustomTooltip from './CustomTooltip';
 import DatePicker from './DatePicker';
 import { SkeletonLoader } from './Loader';
 import { toast } from 'sonner';
+import { faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 
 /**
  * Props for the Input component
@@ -157,6 +159,12 @@ export interface InputProps {
   multiple?: boolean;
 
   /**
+   * ID of the input
+   * @property {string} [id]
+   */
+  id?: string;
+
+  /**
    * Additional CSS classes for the label
    * @property {string} [labelClassName]
    */
@@ -251,6 +259,12 @@ export interface InputProps {
    * @property {string} [errorMessage]
    */
   errorMessage?: string;
+
+  /**
+   * When true and type is "password", shows a toggle to reveal/hide the password
+   * @property {boolean} [showPasswordToggle]
+   */
+  showPasswordToggle?: boolean;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -288,10 +302,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       step,
       onBlur,
       errorMessage,
+      showPasswordToggle = false,
     },
     ref,
   ) => {
     const hiddenFileInput = useRef<HTMLButtonElement>(null);
+    const [passwordVisible, setPasswordVisible] = useState(false);
+
+    const isPasswordWithToggle =
+      type === 'password' && showPasswordToggle;
 
     const validateFile = (file: File): boolean => {
       // If accept prop is provided, validate against it
@@ -318,7 +337,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     if (['checkbox', 'radio'].includes(type)) {
       if (['checkbox'].includes(type)) {
         return (
-          <label className="flex w-fit items-center gap-2 text-[13px]">
+          <label className="flex w-fit items-center gap-2 text-[14px]">
             <Checkbox
               onCheckedChange={
                 onChange as ((checked: CheckedState) => void) | undefined
@@ -336,7 +355,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <p
               className={`${
                 label ? 'flex' : 'hidden'
-              } text-secondary text-[13px]`}
+              } text-secondary text-[14px]`}
             >
               {label}
             </p>
@@ -344,7 +363,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         );
       }
       return (
-        <label className="flex items-center gap-2 text-[13px]">
+        <label className="flex items-center gap-2 text-[14px]">
           <input
             type={type}
             name={name}
@@ -354,7 +373,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             onChange={onChange}
             className={`w-4 h-4 border-[1.5px] rounded-xl cursor-pointer border-secondary outline-none focus:outline-none accent-primary focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className}`}
           />
-          <p className={`${label ? 'flex' : 'hidden'} text-[13px]`}>{label}</p>
+          <p className={`${label ? 'flex' : 'hidden'} text-[14px]`}>{label}</p>
         </label>
       );
     }
@@ -368,12 +387,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {isLoading ? (
             <SkeletonLoader type="button" />
           ) : (
-            <menu className="text-[12px] w-fit">
+            <menu className="text-[13px] w-fit">
               <button
                 type="button"
                 onClick={handleClick}
                 disabled={readOnly}
-                className={`!bg-primary !text-white hover:!bg-primary hover:!text-white !shadow-sm py-[5px] w-full text-[12px] text-center max-[800px]:!text-[14px] px-8 rounded-md cursor-pointer ease-in-out duration-400 hover:scale-[1.005] ${
+                className={`!bg-primary !text-white hover:!bg-primary hover:!text-white !shadow-sm py-[5px] w-full text-[13px] text-center max-[800px]:!text-[14px] px-8 rounded-md cursor-pointer ease-in-out duration-400 hover:scale-[1.005] ${
                   readOnly &&
                   '!bg-secondary hover:!bg-secondary !cursor-not-allowed'
                 } ${className}`}
@@ -420,14 +439,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
           <p
             className={`${
-              label ? 'flex items-center gap-[5px] text-[12px] text-slate-800' : 'hidden'
+              label ? 'flex items-center gap-[5px] text-[13px] text-slate-800' : 'hidden'
             }`}
           >
             {label}{' '}
             {required && (
               <CustomTooltip
                 label={required ? `${label} is required` : ''}
-                labelClassName="text-[12px] bg-red-600"
+                labelClassName="text-[13px] bg-red-600"
               >
                 <span className="text-red-600 cursor-pointer">*</span>
               </CustomTooltip>
@@ -461,14 +480,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
         <p
           className={`${
-            label ? 'pl-1 flex items-center gap-[5px] text-[12px] text-slate-800' : 'hidden'
+            label ? 'pl-1 flex items-center gap-[5px] text-[13px] text-slate-800' : 'hidden'
           }`}
         >
           {label}{' '}
           {required && (
             <CustomTooltip
               label={required ? `${label} is required` : ''}
-              labelClassName="text-[12px] bg-red-600"
+              labelClassName="text-[13px] bg-red-600"
             >
               <span className="text-red-600 cursor-pointer">*</span>
             </CustomTooltip>
@@ -511,7 +530,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <input
               defaultValue={defaultValue as string}
               value={resolvedValue}
-              type={type || 'text'}
+              type={isPasswordWithToggle ? (passwordVisible ? 'text' : 'password') : type || 'text'}
               min={type === 'number' ? 0 : min}
               readOnly={readOnly}
               name={name}
@@ -526,9 +545,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 py-[7px] px-4 
                 font-normal
                 placeholder:!font-light
-                placeholder:text-[12px] 
+                placeholder:text-[13px] 
                 placeholder:text-slate-600
-                text-[12px] text-slate-900
+                text-[13px] text-slate-900
                 flex items-center w-full
                 rounded-lg border-[1.5px]
                 border-secondary border-opacity-10
@@ -538,12 +557,28 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 ${className}
                 ${prefixIcon && 'ps-10'}
                 ${prefixText ? 'ps-[3.6rem]' : ''}
+                ${isPasswordWithToggle ? 'pe-10' : ''}
                 ${
                   readOnly &&
                   '!border-[.1px] !border-background hover:cursor-default focus:!border-background'
                 }
               `}
             />
+          )}
+
+          {isPasswordWithToggle && (
+            <button
+              type="button"
+              onClick={() => setPasswordVisible((v) => !v)}
+              className="absolute right-0 top-0 flex h-full items-center justify-center px-3 text-slate-500 hover:text-slate-700 focus:outline-none"
+              aria-label={passwordVisible ? 'Hide password' : 'Show password'}
+              tabIndex={-1}
+            >
+              <FontAwesomeIcon
+                icon={passwordVisible ? faEyeSlash : faEye}
+                className="h-4 w-4 cursor-pointer"
+              />
+            </button>
           )}
 
           {showSearchSuffix && (
@@ -558,7 +593,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </section>
         {errorMessage && (
-          <p className="text-red-700 text-[12px]">{errorMessage}</p>
+          <p className="text-red-700 text-[13px]">{errorMessage}</p>
         )}
       </label>
     );

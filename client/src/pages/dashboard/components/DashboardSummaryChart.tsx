@@ -120,13 +120,13 @@ const DashboardSummaryChart = ({
               value={metric}
               onValueChange={(value) => onMetricChange(value)}
             >
-              <SelectTrigger className="h-8 w-[140px] !text-[12px] cursor-pointer">
-                <SelectValue className="!text-[12px]" placeholder="Metric" />
+              <SelectTrigger className="h-8 w-[140px] !text-[13px] cursor-pointer">
+                <SelectValue className="!text-[13px]" placeholder="Metric" />
               </SelectTrigger>
-              <SelectContent className="!text-[12px]">
+              <SelectContent className="!text-[13px]">
                 {metricOptions.map((option) => (
                   <SelectItem
-                    className="cursor-pointer !text-[12px]"
+                    className="cursor-pointer !text-[13px]"
                     key={option}
                     value={option}
                   >

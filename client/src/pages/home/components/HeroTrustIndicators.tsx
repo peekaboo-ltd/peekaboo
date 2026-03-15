@@ -27,7 +27,7 @@ const HeroTrustIndicators = ({
       ))}
     </figcaption>
     <address className="not-italic flex flex-col gap-0.5">
-      <span className="text-[13px] font-semibold text-primary-900">
+      <span className="text-[14px] font-semibold text-primary-900">
         {typeof landingStats?.activeCustomers === 'number'
           ? `${landingStats.activeCustomers.toLocaleString()}+ ${customersLabel}`
           : growingCommunityLabel}

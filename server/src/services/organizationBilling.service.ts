@@ -11,15 +11,18 @@ import { OrderStatus } from '../constants/order.constants';
 import { generateReferenceNumber } from '../helpers/string.helper';
 import { BillingQuery, GlobalBillingSummary } from '../types/b2b.types';
 import { Organization } from '../entities/organization.entity';
+import { BusinessPlan } from '../entities/businessPlan.entity';
 import { EmailService } from '../integrations/emails/email.service';
 import { AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
+import { calculateBillingTotal } from '../helpers/pricing.helper';
 
 export class OrganizationBillingService {
   private readonly billingRepository: Repository<OrganizationBilling>;
   private readonly orderRepository: Repository<Order>;
   private readonly orderActivityRepository: Repository<OrderActivity>;
   private readonly organizationRepository: Repository<Organization>;
+  private readonly businessPlanRepository: Repository<BusinessPlan>;
   private readonly emailService: EmailService;
 
   constructor() {
@@ -27,6 +30,7 @@ export class OrganizationBillingService {
     this.orderRepository = AppDataSource.getRepository(Order);
     this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
     this.organizationRepository = AppDataSource.getRepository(Organization);
+    this.businessPlanRepository = AppDataSource.getRepository(BusinessPlan);
     this.emailService = new EmailService();
   }
 
@@ -44,6 +48,13 @@ export class OrganizationBillingService {
       periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
       // End of current month
       periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    } else if (billingPeriod === BillingPeriod.DAILY) {
+      // Start of today
+      periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      periodStart.setHours(0, 0, 0, 0);
+      // End of today
+      periodEnd = new Date(periodStart);
+      periodEnd.setHours(23, 59, 59);
     } else {
       // Weekly billing - start of week (Monday)
       const day = now.getDay();
@@ -69,7 +80,15 @@ export class OrganizationBillingService {
       return billing;
     }
 
-    // Create new billing period
+    // Snapshot the organization's current business plan pricing
+    const organization = await this.organizationRepository.findOne({
+      where: { id: organizationId },
+      relations: { businessPlan: true },
+    });
+
+    const businessPlan = organization?.businessPlan;
+
+    // Create new billing period with pricing snapshot
     const newBilling = await this.billingRepository.save({
       organizationId,
       billingPeriod,
@@ -77,8 +96,10 @@ export class OrganizationBillingService {
       periodEnd,
       totalOrders: 0,
       totalAmount: 0,
-      currency: 'RWF',
+      currency: businessPlan?.currency || 'RWF',
       status: BillingStatus.PENDING,
+      businessPlanId: businessPlan?.id,
+      pricingSnapshot: businessPlan?.pricingTiers || undefined,
     });
 
     return newBilling;
@@ -108,16 +129,42 @@ export class OrganizationBillingService {
       billingPeriod
     );
 
-    // Atomic increment to prevent race conditions
-    await this.billingRepository
-      .createQueryBuilder()
-      .update(OrganizationBilling)
-      .set({
-        totalOrders: () => 'total_orders + 1',
-        totalAmount: () => `total_amount + ${Number(orderAmount)}`,
-      })
-      .where('id = :id', { id: billing.id })
-      .execute();
+    if (billing.pricingSnapshot?.tiers?.length) {
+      // Tier-based pricing: recalculate total from scratch
+      // Use transaction with row lock to prevent race conditions
+      await AppDataSource.transaction(async (manager) => {
+        const lockedBilling = await manager
+          .getRepository(OrganizationBilling)
+          .createQueryBuilder('billing')
+          .setLock('pessimistic_write')
+          .where('billing.id = :id', { id: billing.id })
+          .getOne();
+
+        if (!lockedBilling) return;
+
+        const newTotalOrders = lockedBilling.totalOrders + 1;
+        const { breakdown, total } = calculateBillingTotal(
+          lockedBilling.pricingSnapshot!,
+          newTotalOrders
+        );
+
+        lockedBilling.totalOrders = newTotalOrders;
+        lockedBilling.totalAmount = total;
+        lockedBilling.tierBreakdown = breakdown;
+        await manager.save(lockedBilling);
+      });
+    } else {
+      // Fallback: simple atomic increment for flat pricing
+      await this.billingRepository
+        .createQueryBuilder()
+        .update(OrganizationBilling)
+        .set({
+          totalOrders: () => 'total_orders + 1',
+          totalAmount: () => `total_amount + ${Number(orderAmount)}`,
+        })
+        .where('id = :id', { id: billing.id })
+        .execute();
+    }
 
     // Link order to billing
     order.organizationBillingId = billing.id;
@@ -142,16 +189,41 @@ export class OrganizationBillingService {
       return; // Only adjust billing that hasn't been invoiced yet
     }
 
-    // Atomic decrement to prevent race conditions
-    await this.billingRepository
-      .createQueryBuilder()
-      .update(OrganizationBilling)
-      .set({
-        totalOrders: () => 'GREATEST(total_orders - 1, 0)',
-        totalAmount: () => `GREATEST(total_amount - ${Number(orderAmount)}, 0)`,
-      })
-      .where('id = :id', { id: billing.id })
-      .execute();
+    if (billing.pricingSnapshot?.tiers?.length) {
+      // Tier-based pricing: recalculate total from scratch
+      await AppDataSource.transaction(async (manager) => {
+        const lockedBilling = await manager
+          .getRepository(OrganizationBilling)
+          .createQueryBuilder('billing')
+          .setLock('pessimistic_write')
+          .where('billing.id = :id', { id: billing.id })
+          .getOne();
+
+        if (!lockedBilling) return;
+
+        const newTotalOrders = Math.max(lockedBilling.totalOrders - 1, 0);
+        const { breakdown, total } = calculateBillingTotal(
+          lockedBilling.pricingSnapshot!,
+          newTotalOrders
+        );
+
+        lockedBilling.totalOrders = newTotalOrders;
+        lockedBilling.totalAmount = total;
+        lockedBilling.tierBreakdown = breakdown;
+        await manager.save(lockedBilling);
+      });
+    } else {
+      // Fallback: simple atomic decrement for flat pricing
+      await this.billingRepository
+        .createQueryBuilder()
+        .update(OrganizationBilling)
+        .set({
+          totalOrders: () => 'GREATEST(total_orders - 1, 0)',
+          totalAmount: () => `GREATEST(total_amount - ${Number(orderAmount)}, 0)`,
+        })
+        .where('id = :id', { id: billing.id })
+        .execute();
+    }
 
     // Unlink order from billing
     order.organizationBillingId = undefined;

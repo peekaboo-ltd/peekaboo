@@ -20,7 +20,7 @@ export const useUsersColumns = () => {
         header: 'Name',
         accessorKey: 'name',
         cell: ({ row }) => (
-          <span className="font-normal text-[13px]">{row?.original?.name || '-'}</span>
+          <span className="font-normal text-[14px]">{row?.original?.name || '-'}</span>
         ),
       },
       {

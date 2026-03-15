@@ -31,7 +31,7 @@ const BusinessPlansSection = ({
     >
       <motion.header className="text-center mb-4 lg:mb-6" variants={fadeInUp}>
         <motion.span
-          className="inline-block text-primary-900 font-medium text-[13px] tracking-wider uppercase"
+          className="inline-block text-primary-900 font-medium text-[14px] tracking-wider uppercase"
           whileInView={{ opacity: [0, 1], y: [20, 0] }}
           viewport={{ once: true }}
         >
@@ -65,7 +65,7 @@ const BusinessPlansSection = ({
                   <h3 className="text-xl font-semibold text-primary-900 transition-colors duration-300 group-hover:text-white">
                     {plan.name}
                   </h3>
-                  <p className="text-[13px] text-primary-500 mt-2 transition-colors duration-300 group-hover:text-primary-200">
+                  <p className="text-[14px] text-primary-500 mt-2 transition-colors duration-300 group-hover:text-primary-200">
                     {plan.description}
                   </p>
                 </hgroup>
@@ -85,7 +85,7 @@ const BusinessPlansSection = ({
                 </p>
               </section>
 
-              <ul className="space-y-3 text-[13px] text-primary-600 flex-1">
+              <ul className="space-y-3 text-[14px] text-primary-600 flex-1">
                 {plan.features.map((feature: string) => (
                   <li key={feature} className="flex items-start gap-2">
                     <span className="mt-0.5 text-secondary-600 transition-colors duration-300 group-hover:text-secondary-300">
@@ -100,7 +100,7 @@ const BusinessPlansSection = ({
 
               <Link
                 to="/onboarding/organization"
-                className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-[13px] font-medium transition-colors duration-300 ${
+                className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-[14px] font-medium transition-colors duration-300 ${
                   plan.isPopular
                     ? 'bg-secondary-600 text-white hover:bg-secondary-700 group-hover:bg-secondary-500 group-hover:text-white'
                     : 'bg-primary-50 text-primary-700 hover:bg-primary-100 group-hover:bg-white group-hover:text-primary-900'

@@ -136,11 +136,11 @@ export const maskPhoneDigits = (phone: string) => {
  */
 export const getStatusBackgroundColor = (status?: string) => {
   let bgColor =
-    'bg-gray-700 text-center p-[3px] px-3 text-white rounded-md text-[13px]';
+    'bg-gray-700 text-center p-[3px] px-3 text-white rounded-md text-[14px]';
   switch (status) {
     case 'PENDING':
       bgColor =
-        'bg-yellow-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
+        'bg-yellow-700 text-center p-1 px-3 text-white rounded-md text-[14px]';
       break;
     case 'APPROVED':
     case 'ACTIVE':
@@ -149,30 +149,30 @@ export const getStatusBackgroundColor = (status?: string) => {
     case 'PERMIT_APPROVED':
     case 'RECEIVED':
       bgColor =
-        'bg-green-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
+        'bg-green-700 text-center p-1 px-3 text-white rounded-md text-[14px]';
       break;
     case 'REJECTED':
     case 'CANCELLED':
     case 'PERMIT_REJECTED':
     case 'INACTIVE':
       bgColor =
-        'bg-red-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
+        'bg-red-700 text-center p-1 px-3 text-white rounded-md text-[14px]';
       break;
     case 'ACTION_REQUIRED':
       bgColor =
-        'bg-amber-800 text-center p-1 px-3 text-white rounded-md text-[13px]';
+        'bg-amber-800 text-center p-1 px-3 text-white rounded-md text-[14px]';
       break;
     case 'RESUBMITTED':
       bgColor =
-        'bg-gray-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
+        'bg-gray-700 text-center p-1 px-3 text-white rounded-md text-[14px]';
       break;
     case 'SUBMITTED':
       bgColor =
-        'bg-primary text-center p-1 px-3 text-white rounded-md text-[13px]';
+        'bg-primary text-center p-1 px-3 text-white rounded-md text-[14px]';
       break;
     default:
       bgColor =
-        'bg-yellow-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
+        'bg-yellow-700 text-center p-1 px-3 text-white rounded-md text-[14px]';
   }
   return bgColor;
 };

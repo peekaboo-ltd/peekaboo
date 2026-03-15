@@ -385,7 +385,11 @@ const ManageOrganizationPage = () => {
                   <p className="text-xs text-slate-500 uppercase tracking-wide">Current Plan</p>
                   <p className="text-sm font-semibold text-[#25343F]">{currentBusinessPlan.name}</p>
                   <p className="text-xs text-slate-500">
-                    {currentBusinessPlan?.currency} {Number(currentBusinessPlan.pricePerOrder).toLocaleString()} / order
+                    {currentBusinessPlan.isCustomPricing
+                      ? 'Custom pricing'
+                      : currentBusinessPlan.pricePerOrder != null
+                        ? `${currentBusinessPlan?.currency} ${Number(currentBusinessPlan.pricePerOrder).toLocaleString()} / order`
+                        : currentBusinessPlan.billingPeriod?.toLowerCase() ?? 'Volume-based pricing'}
                   </p>
                 </section>
               </div>
@@ -397,7 +401,11 @@ const ManageOrganizationPage = () => {
                 value={selectedPlanId}
                 onChange={(value) => setSelectedPlanId(value)}
                 options={businessPlansList.map((plan) => ({
-                  label: `${plan.name} (${plan.currency} ${Number(plan.pricePerOrder).toLocaleString()}/order)`,
+                  label: plan.isCustomPricing
+                    ? `${plan.name} (Custom pricing)`
+                    : plan.pricePerOrder != null
+                      ? `${plan.name} (${plan.currency} ${Number(plan.pricePerOrder).toLocaleString()}/order)`
+                      : `${plan.name} (${plan.billingPeriod?.toLowerCase() ?? 'volume'} pricing)`,
                   value: plan?.id ?? '',
                 }))}
                 placeholder="Select a plan"

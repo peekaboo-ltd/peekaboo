@@ -40,7 +40,7 @@ const LanguageSelector = ({ className, menuClassName }: LanguageSelectorProps) =
           e.preventDefault();
           setIsOpen((prev) => !prev);
         }}
-        className="inline-flex items-center cursor-pointer justify-between gap-1 px-2 py-1 text-[12px] font-light text-slate-900 uppercase transition-all duration-200 hover:border-primary-900/20 hover:text-primary-900"
+        className="inline-flex items-center cursor-pointer justify-between gap-1 px-2 py-1 text-[13px] font-light text-slate-900 uppercase transition-all duration-200 hover:border-primary-900/20 hover:text-primary-900"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label="Select language"
@@ -69,7 +69,7 @@ const LanguageSelector = ({ className, menuClassName }: LanguageSelectorProps) =
                   setLanguage(code as Language);
                   setIsOpen(false);
                 }}
-                className={`cursor-pointer ${isActive ? 'text-primary-900' : 'text-slate-500 hover:bg-slate-50 hover:text-primary-900'} flex w-full items-center justify-center rounded-md px-2 py-1 text-[12px] font-light uppercase transition-colors duration-150`}
+                className={`cursor-pointer ${isActive ? 'text-primary-900' : 'text-slate-500 hover:bg-slate-50 hover:text-primary-900'} flex w-full items-center justify-center rounded-md px-2 py-1 text-[13px] font-light uppercase transition-colors duration-150`}
                 role="option"
                 aria-selected={isActive}
                 title={option.label}

@@ -52,7 +52,7 @@ const PublicNavbar = () => {
               <li key={label}>
                 <Link
                   to={link}
-                  className={`rounded-sm px-3 py-1.5 text-[12px] font-normal transition-all duration-200 ${
+                  className={`rounded-sm px-3 py-1.5 text-[13px] font-normal transition-all duration-200 ${
                     isActive
                       ? 'bg-primary-900 text-white shadow-sm'
                       : 'text-primary-900 hover:bg-primary-900/6'
@@ -115,7 +115,7 @@ const PublicNavbar = () => {
                 <Link
                   to={link}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center rounded-md px-3 py-2.5 text-[13px] font-normal transition-colors duration-150 ${
+                  className={`flex items-center rounded-md px-3 py-2.5 text-[14px] font-normal transition-colors duration-150 ${
                     isActive
                       ? 'bg-primary-900 text-white'
                       : 'text-primary-800/80 hover:bg-primary-50 hover:text-primary-900'

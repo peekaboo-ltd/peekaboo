@@ -66,7 +66,7 @@ const BusinessSolutionsSection = ({
               <br />
               <span className="text-secondary-400">{title2}</span>
             </h2>
-            <p className="text-[13px] text-primary-300 mb-8 leading-relaxed max-w-xl">{subtitle}</p>
+            <p className="text-[14px] text-primary-300 mb-8 leading-relaxed max-w-xl">{subtitle}</p>
 
             <ul className="space-y-3 mb-8">
               {features.map((feature) => (
@@ -79,11 +79,11 @@ const BusinessSolutionsSection = ({
                   transition={{ duration: 0.4 }}
                 >
                   <span className="w-9 h-9 rounded-lg bg-secondary-600/20 flex items-center justify-center flex-shrink-0">
-                    <FontAwesomeIcon icon={feature.icon} className="text-secondary-300 text-[13px]" />
+                    <FontAwesomeIcon icon={feature.icon} className="text-secondary-300 text-[14px]" />
                   </span>
                   <section>
-                    <h4 className="text-white text-[13px] font-medium mb-0.5">{feature.title}</h4>
-                    <p className="text-primary-300 text-[13px]">{feature.description}</p>
+                    <h4 className="text-white text-[14px] font-medium mb-0.5">{feature.title}</h4>
+                    <p className="text-primary-300 text-[14px]">{feature.description}</p>
                   </section>
                 </motion.li>
               ))}
@@ -112,7 +112,7 @@ const BusinessSolutionsSection = ({
                   <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-primary-500 mb-0.5">
                     Business Dashboard
                   </p>
-                  <h3 className="text-[13px] font-semibold text-white">Delivery Analytics</h3>
+                  <h3 className="text-[14px] font-semibold text-white">Delivery Analytics</h3>
                 </hgroup>
                 <span className="flex items-center gap-1.5 text-[10px] font-medium text-secondary-400 bg-secondary-900/30 border border-secondary-800/40 rounded-full px-2 py-0.5">
                   <span className="relative flex h-1.5 w-1.5">
@@ -216,7 +216,7 @@ const BusinessSolutionsSection = ({
                         transition={{ delay: index * 0.1, type: 'spring', stiffness: 200 }}
                       >
                         <figure className="w-9 h-9 rounded-lg bg-primary-700/40 flex items-center justify-center mx-auto mb-2">
-                          <FontAwesomeIcon icon={stat.icon} className="text-primary-300 text-[13px]" />
+                          <FontAwesomeIcon icon={stat.icon} className="text-primary-300 text-[14px]" />
                         </figure>
                         <span className="block text-lg font-semibold text-white mb-0.5">
                           {stat.value}

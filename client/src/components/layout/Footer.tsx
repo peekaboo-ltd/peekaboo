@@ -119,7 +119,7 @@ const Footer = () => {
               </h3>
               <hr className="mt-2 h-[2px] w-10 bg-secondary-500/60 rounded-full border-0" />
             </header>
-            <p className="text-[13px] leading-relaxed text-primary-600 mb-6 max-w-sm">
+            <p className="text-[14px] leading-relaxed text-primary-600 mb-6 max-w-sm">
               {t('footer.description')}
             </p>
 
@@ -148,9 +148,9 @@ const Footer = () => {
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="group inline-block text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
+                    className="group inline-block text-[14px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
                   >
-                    <span className="relative text-[13px]">
+                    <span className="relative text-[14px]">
                       {t(link.labelKey)}
                       <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-secondary-600/70 group-hover:w-full transition-all duration-300" />
                     </span>
@@ -170,19 +170,19 @@ const Footer = () => {
                   {contact.href ? (
                     <a 
                       href={contact.href}
-                      className="group flex items-start gap-3 text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
+                      className="group flex items-start gap-3 text-[14px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
                     >
                       <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-primary-50 text-primary-500 group-hover:text-primary-700 transition-colors duration-300">
                         <FontAwesomeIcon icon={contact.icon} className="w-3.5 h-3.5" />
                       </span>
-                      <span className="pt-1.5 text-[13px]">{contact.text}</span>
+                      <span className="pt-1.5 text-[14px]">{contact.text}</span>
                     </a>
                   ) : (
-                    <p className="flex items-start gap-3 text-[13px] text-primary-600">
+                    <p className="flex items-start gap-3 text-[14px] text-primary-600">
                       <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-primary-50 text-primary-500">
                         <FontAwesomeIcon icon={contact.icon} className="w-3.5 h-3.5" />
                       </span>
-                      <span className="pt-1.5 text-[13px]">{contact.text}</span>
+                      <span className="pt-1.5 text-[14px]">{contact.text}</span>
                     </p>
                   )}
                 </li>
@@ -196,14 +196,14 @@ const Footer = () => {
             variants={itemVariants as unknown as Variants}
             className="flex flex-col md:flex-row justify-between items-center gap-4 pt-6"
           >
-            <p className="text-[13px] text-primary-500 tracking-wide">
+            <p className="text-[14px] text-primary-500 tracking-wide">
               &copy; {new Date().getFullYear()} Peekaboo. {t('footer.copyright')}
             </p>
 
             <DropdownMenu>
               <DropdownMenuTrigger className="group flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-primary-200 text-primary-500 hover:text-primary-900 hover:border-primary-300 transition-colors cursor-pointer">
                 <FontAwesomeIcon icon={faGlobe} className="w-4 h-4 text-primary-400" />
-                <span className="text-[12px] font-medium tracking-wide">{t(currentLanguageLabel)}</span>
+                <span className="text-[13px] font-medium tracking-wide">{t(currentLanguageLabel)}</span>
                 <FontAwesomeIcon icon={faChevronDown} className="w-2.5 h-2.5 text-primary-400/80 group-hover:rotate-180 transition-transform duration-300" />
               </DropdownMenuTrigger>
               <DropdownMenuContent 
@@ -214,7 +214,7 @@ const Footer = () => {
                   <DropdownMenuItem
                     key={lang.code}
                     onClick={() => setLanguage(lang.code)}
-                    className={`cursor-pointer !text-[12px] ring-0 hover:ring-0 tracking-wide px-4 py-2 text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-all duration-200 ${
+                    className={`cursor-pointer !text-[13px] ring-0 hover:ring-0 tracking-wide px-4 py-2 text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-all duration-200 ${
                       language === lang.code ? 'bg-primary-50 text-primary-900' : ''
                     }`}
                   >

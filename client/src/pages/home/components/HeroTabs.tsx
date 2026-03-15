@@ -23,7 +23,7 @@ const HeroTabs = ({
       onClick={() => onTabChange('personal')}
       role="tab"
       aria-selected={activeTab === 'personal'}
-      className={`flex items-center gap-2 px-4 py-2.5 text-[12px] uppercase tracking-[0.06em] font-medium transition-colors duration-200 cursor-pointer border-b-2 -mb-px ${
+      className={`flex items-center gap-2 px-4 py-2.5 text-[13px] uppercase tracking-[0.06em] font-medium transition-colors duration-200 cursor-pointer border-b-2 -mb-px ${
         activeTab === 'personal'
           ? 'border-primary-900 text-primary-900'
           : 'border-transparent text-primary-400 hover:text-primary-700'
@@ -36,7 +36,7 @@ const HeroTabs = ({
       onClick={() => onTabChange('business')}
       role="tab"
       aria-selected={activeTab === 'business'}
-      className={`flex items-center gap-2 px-4 py-2.5 text-[12px] uppercase tracking-[0.06em] font-medium transition-colors duration-200 cursor-pointer border-b-2 -mb-px ${
+      className={`flex items-center gap-2 px-4 py-2.5 text-[13px] uppercase tracking-[0.06em] font-medium transition-colors duration-200 cursor-pointer border-b-2 -mb-px ${
         activeTab === 'business'
           ? 'border-primary-900 text-primary-900'
           : 'border-transparent text-primary-400 hover:text-primary-700'

@@ -52,7 +52,7 @@ const BusinessPlansPage = () => {
     fetchBusinessPlans({ page, size });
   }, [page, size, fetchBusinessPlans]);
 
-  const plans: BusinessPlan[] = data?.data?.list ?? [];
+  const plans: BusinessPlan[] = data?.data?.rows ?? [];
   const totalPages = data?.data?.totalPages ?? 1;
   const totalCount = data?.data?.totalCount ?? 0;
 
@@ -82,16 +82,45 @@ const BusinessPlansPage = () => {
       {
         header: 'Name',
         accessorKey: 'name',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <span>{row.original.name}</span>
+            {row.original.badge && (
+              <span className="text-[10px] font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full uppercase">
+                {row.original.badge}
+              </span>
+            )}
+          </div>
+        ),
       },
       {
-        header: 'Price / Order',
-        id: 'pricePerOrder',
-        cell: ({ row }) =>
-          `${row.original.currency} ${Number(row.original.pricePerOrder).toLocaleString()}`,
+        header: 'Pricing',
+        id: 'pricing',
+        cell: ({ row }) => {
+          const plan = row.original;
+          if (plan.isCustomPricing) return <span className="text-slate-500">Custom</span>;
+          if (plan.pricingTiers?.tiers?.length) {
+            const tiers = plan.pricingTiers.tiers.filter((t) => !t.isCustom);
+            if (tiers.length === 0) return <span className="text-slate-500">Custom</span>;
+            const prices = tiers
+              .map((t) => t.pricePerUnit ?? t.totalPrice)
+              .filter((p): p is number => p != null);
+            if (prices.length === 0) return '—';
+            return `${plan.currency} ${Math.min(...prices).toLocaleString()} – ${Math.max(...prices).toLocaleString()}`;
+          }
+          if (plan.pricePerOrder != null) {
+            return `${plan.currency} ${Number(plan.pricePerOrder).toLocaleString()} / order`;
+          }
+          return '—';
+        },
       },
       {
-        header: 'Currency',
-        accessorKey: 'currency',
+        header: 'Period',
+        accessorKey: 'billingPeriod',
+        cell: ({ row }) => {
+          const period = row.original.billingPeriod;
+          return period ? period.charAt(0) + period.slice(1).toLowerCase() : '—';
+        },
       },
       {
         header: 'Status',

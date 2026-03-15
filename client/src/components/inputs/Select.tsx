@@ -83,7 +83,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
           {label}{' '}
           <CustomTooltip
             label={required ? `${label} is required` : ''}
-            labelClassName="text-[12px] bg-red-600"
+            labelClassName="text-[13px] bg-red-600"
           >
             <span className={required ? `text-red-600 cursor-pointer` : 'hidden'}>*</span>
           </CustomTooltip>
@@ -103,7 +103,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
               <SelectValue
                 className="!text-[10px] truncate"
                 placeholder={
-                  <p className="text-[13px] text-gray-500 truncate">{placeholder}</p>
+                  <p className="text-[14px] text-gray-500 truncate">{placeholder}</p>
                 }
               />
             </SelectTrigger>
@@ -116,9 +116,9 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                       key={index}
                       value={option.value}
                       disabled={option?.disabled || readOnly}
-                      className="cursor-pointer text-[13px] py-1 hover:bg-background"
+                      className="cursor-pointer text-[14px] py-1 hover:bg-background"
                     >
-                      <p className="text-[13px] py-[3px] truncate">{option?.label}</p>
+                      <p className="text-[14px] py-[3px] truncate">{option?.label}</p>
                     </SelectItem>
                   );
                 })}

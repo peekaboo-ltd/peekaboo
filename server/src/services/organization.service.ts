@@ -230,6 +230,18 @@ export class OrganizationService {
   ): Promise<Organization> {
     const organization = await this.getOrganizationById(organizationId);
     organization.businessPlanId = businessPlanId || undefined;
+
+    // Auto-set billing period from the plan if assigning a new plan
+    if (businessPlanId) {
+      const businessPlan = await AppDataSource.getRepository(
+        (await import('../entities/businessPlan.entity')).BusinessPlan
+      ).findOne({ where: { id: businessPlanId } });
+
+      if (businessPlan?.billingPeriod) {
+        organization.billingPeriod = businessPlan.billingPeriod;
+      }
+    }
+
     return this.organizationRepository.save(organization);
   }
 
@@ -364,7 +376,11 @@ export class OrganizationService {
         ? {
             id: organization.businessPlan.id,
             name: organization.businessPlan.name,
-            pricePerOrder: Number(organization.businessPlan.pricePerOrder),
+            pricePerOrder: organization.businessPlan.pricePerOrder
+              ? Number(organization.businessPlan.pricePerOrder)
+              : undefined,
+            billingPeriod: organization.businessPlan.billingPeriod,
+            isCustomPricing: organization.businessPlan.isCustomPricing,
           }
         : null,
     };

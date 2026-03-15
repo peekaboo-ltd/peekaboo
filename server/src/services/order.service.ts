@@ -28,6 +28,7 @@ import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrganizationService } from './organization.service';
 import { OrganizationBillingService } from './organizationBilling.service';
 import { EmailService } from '../integrations/emails/email.service';
+import { calculateOrderPrice } from '../helpers/pricing.helper';
 import { OrderAssignment } from '../entities/orderAssignment.entity';
 import { Batch } from '../entities/batch.entity';
 import { BatchStatus } from '../constants/batch.constants';
@@ -106,9 +107,24 @@ export class OrderService {
         // Apply business plan pricing if available
         if (membership?.organization?.businessPlan) {
           const businessPlan = membership.organization.businessPlan;
-          order.businessPlanPrice = Number(businessPlan.pricePerOrder);
-          order.initialFee = Number(businessPlan.pricePerOrder);
-          order.finalFee = Number(businessPlan.pricePerOrder);
+          let price: number;
+
+          if (businessPlan.pricingTiers?.tiers?.length) {
+            // Get current billing to determine order count for tier calculation
+            const billing = await this.organizationBillingService
+              .getOrCreateCurrentBillingPeriod(
+                membership.organization.id,
+                membership.organization.billingPeriod
+              );
+            price = calculateOrderPrice(businessPlan.pricingTiers, billing.totalOrders);
+          } else {
+            // Fallback to flat pricePerOrder
+            price = Number(businessPlan.pricePerOrder || 0);
+          }
+
+          order.businessPlanPrice = price;
+          order.initialFee = price;
+          order.finalFee = price;
         }
       }
     }
@@ -168,6 +184,32 @@ export class OrderService {
           })
           .catch(() => {});
       }
+    }
+
+    const senderSMSPhone = formatPhoneNumber(sender?.phoneNumber);
+    if (senderSMSPhone) {
+      this.smsService
+        .send({
+          to: senderSMSPhone,
+          text: buildPublicOrderSenderSMS({
+            orderReference: createdOrder.referenceId || '',
+            trackingId: createdOrder.trackingId || '',
+          }),
+        })
+        .catch(() => {});
+    }
+
+    const recipientSMSPhone = formatPhoneNumber(recipient?.phoneNumber);
+    if (recipientSMSPhone) {
+      this.smsService
+        .send({
+          to: recipientSMSPhone,
+          text: buildPublicOrderRecipientSMS({
+            orderReference: createdOrder.referenceId || '',
+            trackingId: createdOrder.trackingId || '',
+          }),
+        })
+        .catch(() => {});
     }
 
     return createdOrder;
@@ -544,12 +586,23 @@ export class OrderService {
           }
 
           if (membership?.organization?.businessPlan) {
-            const businessPlanPrice = Number(
-              membership.organization.businessPlan.pricePerOrder,
-            );
-            orderPayload.businessPlanPrice = businessPlanPrice;
-            orderPayload.initialFee = businessPlanPrice;
-            orderPayload.finalFee = businessPlanPrice;
+            const businessPlan = membership.organization.businessPlan;
+            let price: number;
+
+            if (businessPlan.pricingTiers?.tiers?.length) {
+              const billing = await this.organizationBillingService
+                .getOrCreateCurrentBillingPeriod(
+                  membership.organizationId,
+                  membership.organization.billingPeriod
+                );
+              price = calculateOrderPrice(businessPlan.pricingTiers, billing.totalOrders);
+            } else {
+              price = Number(businessPlan.pricePerOrder || 0);
+            }
+
+            orderPayload.businessPlanPrice = price;
+            orderPayload.initialFee = price;
+            orderPayload.finalFee = price;
           }
 
           orderToAttach = await orderRepository.save(orderRepository.create(orderPayload));
@@ -606,7 +659,10 @@ export class OrderService {
   // GET ORDER BY REFERENCE ID WITH RELATIONS (FOR PUBLIC ACCESS)
   async getOrderByReferenceIdWithRelations(referenceId: string): Promise<Order> {
     const order = await this.orderRepository.findOne({
-      where: { referenceId },
+      where: [
+        { referenceId },
+        { trackingId: referenceId },
+      ],
       relations: {
         createdBy: true,
         recipient: true,

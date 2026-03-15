@@ -58,7 +58,7 @@ const Sidebar = () => {
         >
           <FontAwesomeIcon
             icon={sidebarOpen ? faAnglesLeft : faBars}
-            className="text-[13px] cursor-pointer"
+            className="text-[14px] cursor-pointer"
           />
         </button>
       </header>
@@ -83,7 +83,7 @@ const Sidebar = () => {
               <li key={nav.label} className="flex flex-col">
                 <Link
                   to={nav.path}
-                  className={`group relative flex items-center gap-3 overflow-hidden rounded-lg text-[13px] font-normal transition-all duration-200
+                  className={`group relative flex items-center gap-3 overflow-hidden rounded-lg text-[14px] font-normal transition-all duration-200
                     ${sidebarOpen ? 'px-3 py-3' : 'justify-center p-3'}
                     ${isActive
                       ? 'bg-white/[0.14] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
@@ -119,7 +119,7 @@ const Sidebar = () => {
                     <motion.span
                       initial={{ opacity: 0, display: 'none' }}
                       animate={{ opacity: 1, display: 'block', transition: { delay: 0.1, duration: 0.2 } }}
-                      className="whitespace-nowrap text-[13px] font-normal"
+                      className="whitespace-nowrap text-[14px] font-normal"
                     >
                       {nav.label}
                     </motion.span>
@@ -153,20 +153,20 @@ const Sidebar = () => {
                             <li key={subCategory.label}>
                               <Link
                                 to={subCategory.path}
-                                className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-[12px] font-medium transition-all duration-200 ${isSubActive
+                                className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-all duration-200 ${isSubActive
                                     ? 'bg-white/[0.12] text-white'
                                     : 'text-white/85 hover:bg-white/[0.06] hover:text-white/90'
                                   }`}
                               >
                                 <FontAwesomeIcon
                                   icon={subCategory.icon}
-                                  className={`text-[12px] flex-shrink-0 ${isSubActive ? 'text-white' : 'text-white/50'
+                                  className={`text-[13px] flex-shrink-0 ${isSubActive ? 'text-white' : 'text-white/50'
                                     }`}
                                 />
                                 <motion.span
                                   initial={{ opacity: 0, display: 'none' }}
                                   animate={{ opacity: 1, display: 'block', transition: { delay: 0.1, duration: 0.2 } }}
-                                  className="whitespace-nowrap text-[13px] font-normal"
+                                  className="whitespace-nowrap text-[14px] font-normal"
                                 >
                                   {subCategory.label}
                                 </motion.span>

@@ -4,7 +4,9 @@ import { UUID } from '../types';
 import { Organization } from './organization.entity';
 import { Order } from './order.entity';
 import { User } from './user.entity';
+import { BusinessPlan } from './businessPlan.entity';
 import { BillingStatus, BillingPeriod } from '../constants/organization.constants';
+import { PricingConfig, TierBreakdown } from '../constants/businessPlan.constants';
 
 @Entity('organization_billings')
 export class OrganizationBilling extends AbstractEntity {
@@ -70,6 +72,18 @@ export class OrganizationBilling extends AbstractEntity {
   @Column({ name: 'paid_at', type: 'timestamp', nullable: true })
   paidAt?: Date;
 
+  // BUSINESS PLAN ID (plan active during this billing period)
+  @Column({ name: 'business_plan_id', type: 'uuid', nullable: true })
+  businessPlanId?: UUID;
+
+  // PRICING SNAPSHOT (immutable copy of pricing tiers at period creation)
+  @Column({ name: 'pricing_snapshot', type: 'jsonb', nullable: true })
+  pricingSnapshot?: PricingConfig;
+
+  // TIER BREAKDOWN (calculated breakdown of how total was computed)
+  @Column({ name: 'tier_breakdown', type: 'jsonb', nullable: true })
+  tierBreakdown?: TierBreakdown[];
+
   // NOTES
   @Column({ name: 'notes', type: 'text', nullable: true })
   notes?: string;
@@ -90,6 +104,11 @@ export class OrganizationBilling extends AbstractEntity {
   // ORDERS IN THIS BILLING PERIOD
   @OneToMany(() => Order, (order) => order.organizationBilling)
   orders: Order[];
+
+  // BUSINESS PLAN
+  @ManyToOne(() => BusinessPlan)
+  @JoinColumn({ name: 'business_plan_id' })
+  businessPlan?: BusinessPlan;
 
   // CREATED BY
   @ManyToOne(() => User)

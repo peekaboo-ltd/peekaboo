@@ -27,39 +27,26 @@ import { useFetchPayments } from '@/hooks/payments/payment.hooks';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { ORDER_FEE_RANGES } from '@/constants/order.constants';
+import {
+  faArrowRight,
+  faLocationDot,
+  faMoneyBillWave,
+  faRoute,
+  faTruckFast,
+} from '@fortawesome/free-solid-svg-icons';
+import {
+  PublicPage,
+  PublicPageHero,
+  PublicSectionCard,
+  PublicStatCard,
+} from '@/components/layout/PublicPage';
 
 const SkeletonLine = ({ className = '' }: { className?: string }) => (
   <span className={`inline-block animate-pulse rounded bg-slate-100 ${className}`} />
 );
 
 const PublicOrderDetails = () => {
-  const observerRef = useRef<IntersectionObserver | null>(null);
   useDocumentTitle('Order Details');
-
-  useEffect(() => {
-    if (!observerRef.current) {
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('pods-visible');
-              observerRef.current?.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
-      );
-    }
-
-    document.querySelectorAll('.pods-reveal:not(.pods-visible)').forEach((el) => {
-      observerRef.current?.observe(el);
-    });
-
-    return () => {
-      observerRef.current?.disconnect();
-      observerRef.current = null;
-    };
-  });
 
   const dispatch = useAppDispatch();
   const { order } = useAppSelector((state) => state.order);
@@ -88,7 +75,7 @@ const PublicOrderDetails = () => {
   const { updateOrder } = useUpdateOrder();
   const { getOrderFee, orderFee } = useGetOrderFees(
     currentOrder?.finalFee !== null && currentOrder?.finalFee !== undefined ? currentOrder.finalFee : undefined,
-    orderId
+    orderId,
   );
 
   const {
@@ -188,7 +175,10 @@ const PublicOrderDetails = () => {
     if (choice === 'skip' || !currentOrder?.id) return;
     const loc = choice === 'user' ? userDefault : orgDefault;
     if (loc) {
-      updateOrder({ id: currentOrder.id, order: { locationFrom: { latitude: loc.latitude, longitude: loc.longitude } } });
+      updateOrder({
+        id: currentOrder.id,
+        order: { locationFrom: { latitude: loc.latitude, longitude: loc.longitude } },
+      });
     }
   };
 
@@ -251,335 +241,351 @@ const PublicOrderDetails = () => {
     return bufferTime < 60 ? 'minutes' : 'hours';
   })();
 
+  const hasSuccessfulPayment = paymentsList?.some(
+    (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL,
+  );
+  const hasBothLocations = !!currentOrder?.locationFrom && !!currentOrder?.locationTo;
+  const displayedFee = orderFee ?? currentOrder?.finalFee ?? currentOrder?.initialFee ?? 0;
+
+  const stats = [
+    {
+      label: 'Pickup',
+      value: currentOrder?.locationFrom ? 'Set' : 'Needed',
+      icon: faLocationDot,
+    },
+    {
+      label: 'Destination',
+      value: currentOrder?.locationTo ? 'Set' : 'Needed',
+      icon: faRoute,
+    },
+    {
+      label: 'Next Action',
+      value: hasSuccessfulPayment ? 'Track Order' : 'Complete Payment',
+      icon: faMoneyBillWave,
+    },
+  ];
+
   return (
-    <>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-          .pods-reveal {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-          }
-          .pods-reveal.pods-visible {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        `,
-        }}
-      />
+    <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY}>
+      {currentOrder?.locationFrom && currentOrder?.locationTo ? (
+        <RouteCalculator
+          locationFrom={{
+            latitude: currentOrder.locationFrom.latitude ?? 0,
+            longitude: currentOrder.locationFrom.longitude ?? 0,
+          }}
+          locationTo={{
+            latitude: currentOrder.locationTo.latitude ?? 0,
+            longitude: currentOrder.locationTo.longitude ?? 0,
+          }}
+          onRouteCalculated={handleRouteCalculated}
+        />
+      ) : null}
 
-      <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY}>
-        {currentOrder?.locationFrom && currentOrder?.locationTo && (
-          <RouteCalculator
-            locationFrom={{
-              latitude: currentOrder.locationFrom.latitude ?? 0,
-              longitude: currentOrder.locationFrom.longitude ?? 0,
-            }}
-            locationTo={{
-              latitude: currentOrder.locationTo.latitude ?? 0,
-              longitude: currentOrder.locationTo.longitude ?? 0,
-            }}
-            onRouteCalculated={handleRouteCalculated}
-          />
-        )}
+      <PublicPage>
+        <PublicPageHero
+          eyebrow="Order"
+          title={currentOrder?.referenceId || 'Set delivery locations'}
+          description="Set pickup and destination, then continue."
+        />
 
-        <main className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-10">
-          <div className="mx-auto max-w-5xl">
-            <header className="pods-reveal mb-8 rounded-xl border border-slate-200 p-6 text-center sm:p-8">
-              <p className="mb-2 text-xs uppercase tracking-widest text-primary">Order details</p>
-              <h1 className="mb-2 text-xl text-slate-900 sm:text-2xl">Confirm your route</h1>
-              <p className="text-sm text-slate-500">
-                We&apos;re almost ready. Review your pickup and delivery locations before payment or tracking.
-              </p>
-            </header>
+        {defaultLocationPrompt === 'both' ? (
+          <PublicSectionCard
+            eyebrow="Saved Locations"
+            title="Choose a pickup default"
+          >
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => handleApplyDefault('user')} className="py-1.5! px-4! text-xs" primary>
+                My Default Location
+              </Button>
+              <Button onClick={() => handleApplyDefault('org')} className="py-1.5! px-4! text-xs">
+                Organization Location
+              </Button>
+              <Button onClick={() => handleApplyDefault('skip')} className="py-1.5! px-4! text-xs text-slate-500!">
+                Set Manually
+              </Button>
+            </div>
+          </PublicSectionCard>
+        ) : null}
 
-            {defaultLocationPrompt === 'both' && (
-              <section className="pods-reveal mb-5 rounded-xl border border-primary/15 bg-primary/5 p-5">
-                <p className="mb-3 text-sm text-slate-700">
-                  You have a saved pickup location. Choose which default you want to use.
-                </p>
-                <nav aria-label="Default pickup options" className="flex flex-wrap gap-2">
-                  <Button onClick={() => handleApplyDefault('user')} className="py-1.5! px-4! text-xs" primary>
-                    My Default Location
-                  </Button>
-                  <Button onClick={() => handleApplyDefault('org')} className="py-1.5! px-4! text-xs">
-                    Organization Location
-                  </Button>
-                  <Button onClick={() => handleApplyDefault('skip')} className="py-1.5! px-4! text-xs text-slate-500!">
-                    Set Manually
-                  </Button>
-                </nav>
-              </section>
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {stats.map((stat) => (
+            <PublicStatCard
+              key={stat.label}
+              label={stat.label}
+              value={currentOrder ? stat.value : 'Loading…'}
+              icon={<FontAwesomeIcon icon={stat.icon} />}
+            />
+          ))}
+        </section>
+
+        <PublicSectionCard
+          className="border-primary-200"
+          eyebrow="Locations"
+          title="Pickup and destination"
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <article className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
+              <header className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    Pickup
+                  </p>
+                </div>
+                {!currentOrder?.locationFrom ? (
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Button
+                      onClick={handleGetCurrentLocation}
+                      isLoading={gettingCurrentLocation}
+                      className="py-1.5! px-3.5! text-xs cursor-pointer"
+                      primary
+                    >
+                      Use Current
+                    </Button>
+                    <Button
+                      onClick={() => dispatch(setUpdateOrderLocationFromModal(true))}
+                      className="py-1.5! px-3.5! text-xs cursor-pointer"
+                    >
+                      Set Location
+                    </Button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="cursor-pointer text-slate-500 transition-colors hover:text-primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      dispatch(setUpdateOrderLocationFromModal(true));
+                    }}
+                    aria-label="Edit pickup location"
+                  >
+                    <FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4" />
+                  </button>
+                )}
+              </header>
+
+              {currentOrder?.locationFrom ? (
+                <div className="space-y-3">
+                  <AdministrativeLocation location={currentOrder.locationFrom} />
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-center">
+                  <p className="text-sm font-medium text-slate-800">Pickup location not set</p>
+                </div>
+              )}
+            </article>
+
+            <article className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
+              <header className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    Destination
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="cursor-pointer text-slate-500 transition-colors hover:text-primary"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(setUpdateOrderLocationToModal(true));
+                  }}
+                  aria-label="Edit delivery destination"
+                >
+                  <FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4" />
+                </button>
+              </header>
+
+              {currentOrder?.locationTo ? (
+                <div className="space-y-3">
+                  <AdministrativeLocation location={currentOrder.locationTo} />
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-center">
+                  <p className="text-sm font-medium text-slate-800">Destination not set</p>
+                </div>
+              )}
+            </article>
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {hasSuccessfulPayment ? (
+              <Button
+                primary
+                isLoading={createOrderAssignmentIsLoading}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentOrder?.id) {
+                    createOrderAssignment({
+                      orderId: currentOrder.id,
+                    });
+                  }
+                }}
+                className="w-full cursor-pointer py-3!"
+              >
+                Track Order
+              </Button>
+            ) : (
+              <Button
+                primary
+                disabled={!currentOrder?.locationFrom || !currentOrder?.locationTo}
+                onClick={(e) => {
+                  e.preventDefault();
+                  dispatch(setSelectedOrder(currentOrder));
+                  dispatch(setOrderPaymentModal(true));
+                }}
+                className="w-full cursor-pointer py-3!"
+              >
+                {!currentOrder?.locationFrom || !currentOrder?.locationTo
+                  ? 'Set Both Locations to Continue'
+                  : 'Complete Payment'}
+              </Button>
             )}
 
-            <div className="space-y-5">
-              {/* Locations — pickup and destination side by side */}
-              <article className="pods-reveal rounded-xl border border-slate-200 p-5 sm:p-6">
-                <header className="mb-5 border-b border-slate-100 pb-4">
-                  <p className="mb-1 text-xs uppercase tracking-widest text-slate-600">Locations</p>
-                  <h2 className="text-sm text-slate-700">Pickup and destination</h2>
-                </header>
-
-                <section className="grid gap-4 sm:grid-cols-2">
-                  <article className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                    <header className="mb-3 flex items-start justify-between gap-3">
-                      <p className="text-xs uppercase tracking-widest text-slate-600">Pickup</p>
-                      {!currentOrder?.locationFrom ? (
-                        <nav aria-label="Pickup actions" className="flex flex-wrap justify-end gap-2">
-                          <Button
-                            onClick={handleGetCurrentLocation}
-                            isLoading={gettingCurrentLocation}
-                            className="py-1! px-3! text-xs cursor-pointer"
-                            primary
-                          >
-                            Use Current
-                          </Button>
-                          <Button
-                            onClick={() => dispatch(setUpdateOrderLocationFromModal(true))}
-                            className="py-1! px-3! text-xs cursor-pointer"
-                          >
-                            Set Location
-                          </Button>
-                        </nav>
-                      ) : (
-                        <button
-                          type="button"
-                          className="cursor-pointer text-slate-500 transition-colors hover:text-primary"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            dispatch(setUpdateOrderLocationFromModal(true));
-                          }}
-                          aria-label="Edit pickup location"
-                        >
-                          <FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4" />
-                        </button>
-                      )}
-                    </header>
-
-                    {currentOrder?.locationFrom ? (
-                      <section className="space-y-3">
-                        <AdministrativeLocation location={currentOrder.locationFrom} />
-                      </section>
-                    ) : (
-                      <section className="rounded-md border border-dashed border-slate-200 bg-white p-4 text-center">
-                        <p className="mb-2 text-sm text-slate-600">No pickup location set</p>
-                        <p className="text-xs text-slate-500">
-                          Use your current position or select a pickup point manually.
-                        </p>
-                      </section>
-                    )}
-                  </article>
-
-                  <article className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                    <header className="mb-3 flex items-start justify-between gap-3">
-                      <p className="text-xs uppercase tracking-widest text-slate-600">Destination</p>
-                      <button
-                        type="button"
-                        className="cursor-pointer text-slate-500 transition-colors hover:text-primary"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          dispatch(setUpdateOrderLocationToModal(true));
-                        }}
-                        aria-label="Edit delivery destination"
-                      >
-                        <FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4" />
-                      </button>
-                    </header>
-
-                    {currentOrder?.locationTo ? (
-                      <section className="space-y-3">
-                        <AdministrativeLocation location={currentOrder.locationTo} />
-                      </section>
-                    ) : (
-                      <section className="rounded-md border border-dashed border-slate-200 bg-white p-4 text-center">
-                        <p className="mb-2 text-sm text-slate-600">No destination set</p>
-                        <p className="text-xs text-slate-500">
-                          Choose where your package should be delivered.
-                        </p>
-                      </section>
-                    )}
-                  </article>
-                </section>
-              </article>
-
-              {/* Route information — shown once both locations are set */}
-              {currentOrder?.locationFrom && currentOrder?.locationTo && (
-                <article className="pods-reveal rounded-xl border border-slate-200 p-5 sm:p-6">
-                  <header className="mb-5 border-b border-slate-100 pb-4">
-                    <p className="mb-1 text-xs uppercase tracking-widest text-slate-600">Route information</p>
-                    <h2 className="text-sm text-slate-700">Calculated delivery overview</h2>
-                  </header>
-
-                  {distance === null || estimatedTime === null ? (
-                    <section className="grid gap-4 md:grid-cols-3">
-                      {[1, 2, 3].map((i) => (
-                        <article key={i} className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                          <SkeletonLine className="h-3 w-20" />
-                          <SkeletonLine className="h-7 w-28" />
-                          <SkeletonLine className="h-3 w-16" />
-                        </article>
-                      ))}
-                    </section>
-                  ) : (
-                    <>
-                      <section className="grid gap-4 md:grid-cols-3">
-                        <article className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                          <p className="mb-1 text-xs uppercase tracking-widest text-slate-600">Distance</p>
-                          <p className="text-2xl text-slate-900">{distance.toFixed(2)}</p>
-                          <p className="text-xs text-slate-500">kilometers</p>
-                        </article>
-
-                        <article className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                          <p className="mb-1 text-xs uppercase tracking-widest text-slate-600">Delivery time</p>
-                          <p className="text-2xl text-slate-900">{renderDeliveryTime()}</p>
-                          <p className="text-xs text-slate-500">{deliveryTimeUnit} • Two-wheeler</p>
-                        </article>
-
-                        <article className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                          <p className="mb-1 text-xs uppercase tracking-widest text-slate-600">Delivery fee</p>
-                          {(orderFee !== undefined && orderFee > 0) ||
-                          (currentOrder?.finalFee !== null &&
-                            currentOrder?.finalFee !== undefined &&
-                            currentOrder.finalFee > 0) ? (
-                            <>
-                              <p className="text-2xl text-slate-900">
-                                {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
-                              </p>
-                              <p className="text-xs text-slate-500">including VAT</p>
-                            </>
-                          ) : (
-                            <div className="space-y-3">
-                              <SkeletonLine className="h-7 w-28" />
-                              <SkeletonLine className="h-3 w-16" />
-                            </div>
-                          )}
-                        </article>
-                      </section>
-
-                      <footer className="mt-5 rounded-lg border border-primary/15 bg-primary/5 p-4">
-                        <p className="text-xs text-slate-600">
-                          Route calculations use Google Maps. Delivery time includes a 15-minute operational buffer and
-                          keeps a minimum 20-30 minute estimate.
-                        </p>
-
-                        {((orderFee !== undefined && orderFee > 0) ||
-                          (currentOrder?.finalFee !== null &&
-                            currentOrder?.finalFee !== undefined &&
-                            currentOrder.finalFee > 0)) && (
-                          <p className="mt-3 text-xs text-slate-600">
-                            The fee is based on distance between locations.
-                            {' '}
-                            <Link
-                              to="/about/orders/fees"
-                              className="text-primary underline underline-offset-2 hover:text-primary-600"
-                            >
-                              View fee breakdown
-                            </Link>
-                          </p>
-                        )}
-
-                        <details className="mt-3 text-xs text-slate-600">
-                          <summary className="cursor-pointer text-slate-700">Fee ranges (RWF)</summary>
-                          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                            {ORDER_FEE_RANGES.map((range) => {
-                              const label =
-                                range.max === Infinity
-                                  ? `${Math.floor(range.min)} km+ (outside Kigali)`
-                                  : `${range.min}-${range.max} km`;
-                              return (
-                                <li
-                                  key={`${range.min}-${range.max}`}
-                                  className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-white px-3 py-2"
-                                >
-                                  <span>{label}</span>
-                                  <span className="text-slate-800">{formatCurrency(range.fee)}</span>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </details>
-                      </footer>
-                    </>
-                  )}
-                </article>
-              )}
-
-              {/* Next step + Continue — side by side below locations */}
-              <section className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-start">
-                <article className="pods-reveal rounded-xl border border-primary/15 bg-primary/5 p-5 sm:p-6">
-                  <header className="mb-4 border-b border-primary/10 pb-4">
-                    <p className="mb-1 text-xs uppercase tracking-widest text-primary">Next step</p>
-                    <h2 className="text-sm text-slate-700">Payment and assignment</h2>
-                  </header>
-
-                  <ol className="space-y-4">
-                    <li className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-white">
-                        1
-                      </span>
-                      <p className="text-sm text-slate-600">Confirm both locations to unlock payment.</p>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-white">
-                        2
-                      </span>
-                      <p className="text-sm text-slate-600">After payment, the order moves into rider assignment.</p>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-white">
-                        3
-                      </span>
-                      <p className="text-sm text-slate-600">Once assigned, tracking becomes available immediately.</p>
-                    </li>
-                  </ol>
-                </article>
-
-                <footer className="pods-reveal rounded-xl border border-slate-200 p-5 sm:p-6">
-                  <p className="mb-4 text-xs uppercase tracking-widest text-slate-600">Continue</p>
-                  {paymentsList?.some((payment) => payment.status === KpayPaymentStatus.SUCCESSFUL) ? (
-                    <Button
-                      primary
-                      isLoading={createOrderAssignmentIsLoading}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentOrder?.id) {
-                          createOrderAssignment({
-                            orderId: currentOrder.id,
-                          });
-                        }
-                      }}
-                      className="w-full cursor-pointer"
-                    >
-                      Track Order
-                    </Button>
-                  ) : (
-                    <Button
-                      primary
-                      disabled={!currentOrder?.locationFrom || !currentOrder?.locationTo}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        dispatch(setSelectedOrder(currentOrder));
-                        dispatch(setOrderPaymentModal(true));
-                      }}
-                      className="w-full cursor-pointer"
-                    >
-                      {!currentOrder?.locationFrom || !currentOrder?.locationTo
-                        ? 'Set Both Locations to Continue'
-                        : 'Complete Payment'}
-                    </Button>
-                  )}
-                </footer>
-              </section>
-            </div>
-
-            <UpdateOrderLocationFrom />
-            <UpdateOrderLocationTo />
-            <OrderPayment />
+            <Button
+              className="w-full cursor-pointer py-3!"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(-1);
+              }}
+            >
+              Back
+            </Button>
           </div>
-        </main>
-      </APIProvider>
-    </>
+        </PublicSectionCard>
+
+        {hasBothLocations ? (
+          <PublicSectionCard
+            eyebrow="Route Summary"
+            title="Distance, time, and fee"
+          >
+            {distance === null || estimatedTime === null ? (
+              <div className="grid gap-4 md:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <article
+                    key={i}
+                    className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/85 p-4"
+                  >
+                    <SkeletonLine className="h-3 w-20" />
+                    <SkeletonLine className="h-7 w-28" />
+                    <SkeletonLine className="h-3 w-16" />
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <article className="rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      Distance
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-slate-900">{distance.toFixed(2)}</p>
+                    <p className="mt-1 text-xs text-slate-500">kilometers</p>
+                  </article>
+
+                  <article className="rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      Delivery Time
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-slate-900">{renderDeliveryTime()}</p>
+                    <p className="mt-1 text-xs text-slate-500">{deliveryTimeUnit}</p>
+                  </article>
+
+                  <article className="rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                      Delivery Fee
+                    </p>
+                    {(orderFee !== undefined && orderFee > 0) ||
+                    (currentOrder?.finalFee !== null &&
+                      currentOrder?.finalFee !== undefined &&
+                      currentOrder.finalFee > 0) ? (
+                      <>
+                        <p className="mt-2 text-2xl font-semibold text-slate-900">
+                          {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">including VAT</p>
+                      </>
+                    ) : (
+                      <div className="mt-2 space-y-3">
+                        <SkeletonLine className="h-7 w-28" />
+                        <SkeletonLine className="h-3 w-16" />
+                      </div>
+                    )}
+                  </article>
+                </div>
+
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
+                  <p className="text-sm text-slate-600">
+                    Fee is based on distance between the two locations.{' '}
+                    <Link
+                      to="/about/orders/fees"
+                      className="text-primary underline underline-offset-2 hover:text-primary-600"
+                    >
+                      View fee breakdown
+                    </Link>
+                  </p>
+                  <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {ORDER_FEE_RANGES.map((range) => {
+                      const label =
+                        range.max === Infinity
+                          ? `${Math.floor(range.min)} km+`
+                          : `${range.min}-${range.max} km`;
+                      return (
+                        <li
+                          key={`${range.min}-${range.max}`}
+                          className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                        >
+                          <span>{label}</span>
+                          <span className="font-medium text-slate-800">
+                            {formatCurrency(range.fee)}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </>
+            )}
+          </PublicSectionCard>
+        ) : null}
+
+        <PublicSectionCard eyebrow="Continue" title="Next">
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+            <Button
+              route="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(-1);
+              }}
+            >
+              Back
+            </Button>
+            <Button
+              primary
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                if (hasSuccessfulPayment && currentOrder?.id) {
+                  navigate(`/p/orders/${currentOrder.id}/tracking`);
+                  return;
+                }
+                if (currentOrder?.locationFrom && currentOrder?.locationTo) {
+                  dispatch(setSelectedOrder(currentOrder));
+                  dispatch(setOrderPaymentModal(true));
+                }
+              }}
+            >
+              {hasSuccessfulPayment ? 'Open Tracking' : 'Review Payment'}
+              <span className="ml-2">
+                <FontAwesomeIcon icon={faArrowRight} />
+              </span>
+            </Button>
+          </div>
+        </PublicSectionCard>
+
+        <UpdateOrderLocationFrom />
+        <UpdateOrderLocationTo />
+        <OrderPayment />
+      </PublicPage>
+    </APIProvider>
   );
 };
 

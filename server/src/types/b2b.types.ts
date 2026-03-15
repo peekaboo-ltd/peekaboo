@@ -70,7 +70,9 @@ export interface OrganizationStatistics {
   currentPlan: {
     id: UUID;
     name: string;
-    pricePerOrder: number;
+    pricePerOrder?: number;
+    billingPeriod?: string;
+    isCustomPricing?: boolean;
   } | null;
 }
 

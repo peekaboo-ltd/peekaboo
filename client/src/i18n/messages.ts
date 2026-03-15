@@ -113,14 +113,17 @@ export const messages: Record<Language, Record<string, string>> = {
     'home.hero.tryQuickDelivery': 'Try a quick delivery',
 
     // Track Order
-    'trackOrder.title': 'Track Your Order',
-    'trackOrder.subtitle': 'Enter your order ID to track the status of your delivery.',
-    'trackOrder.orderIdLabel': 'Order ID',
-    'trackOrder.orderIdPlaceholder': 'e.g., P123456',
+    'trackOrder.eyebrow': 'Public tracking',
+    'trackOrder.title': 'Track your order',
+    'trackOrder.subtitle': 'Enter your reference ID or OTP.',
+    'trackOrder.searchTitle': 'Search order',
+    'trackOrder.searchDescription': 'Use your reference ID or order OTP.',
+    'trackOrder.orderIdLabel': 'Reference ID or OTP',
+    'trackOrder.orderIdPlaceholder': 'e.g., P123456 or 12345',
     'trackOrder.searchButton': 'Track Order',
-    'trackOrder.notFound': 'Order not found. Please check the order ID and try again.',
-    'trackOrder.enterOrderId': 'Please enter an order ID.',
-    'trackOrder.hint': 'Your order ID was provided when you placed your order. It starts with "P" followed by numbers.',
+    'trackOrder.notFound': 'Order not found. Please check the reference ID or OTP and try again.',
+    'trackOrder.enterOrderId': 'Please enter a reference ID or OTP.',
+    'trackOrder.hint': 'Reference IDs usually start with "P".',
 
     // Footer
     'footer.description': 'Fast and reliable package delivery services in Kigali. Connecting senders with trusted riders.',
@@ -394,14 +397,17 @@ export const messages: Record<Language, Record<string, string>> = {
     'home.hero.tryQuickDelivery': 'Essayer une livraison rapide',
 
     // Track Order
-    'trackOrder.title': 'Suivre votre commande',
-    'trackOrder.subtitle': 'Entrez votre numéro de commande pour suivre le statut de votre livraison.',
-    'trackOrder.orderIdLabel': 'Numéro de commande',
-    'trackOrder.orderIdPlaceholder': 'ex: P123456',
+    'trackOrder.eyebrow': 'Suivi public',
+    'trackOrder.title': 'Suivez votre commande',
+    'trackOrder.subtitle': 'Saisissez votre numéro de référence ou OTP.',
+    'trackOrder.searchTitle': 'Rechercher une commande',
+    'trackOrder.searchDescription': 'Utilisez votre numéro de référence ou l’OTP de la commande.',
+    'trackOrder.orderIdLabel': 'Numéro de référence ou OTP',
+    'trackOrder.orderIdPlaceholder': 'ex : P123456 ou 12345',
     'trackOrder.searchButton': 'Suivre la commande',
-    'trackOrder.notFound': 'Commande introuvable. Veuillez vérifier le numéro et réessayer.',
-    'trackOrder.enterOrderId': 'Veuillez entrer un numéro de commande.',
-    'trackOrder.hint': 'Votre numéro de commande vous a été fourni lors de la création de votre commande. Il commence par "P" suivi de chiffres.',
+    'trackOrder.notFound': 'Commande introuvable. Veuillez vérifier le numéro de référence ou l’OTP et réessayer.',
+    'trackOrder.enterOrderId': 'Veuillez saisir un numéro de référence ou un OTP.',
+    'trackOrder.hint': 'Les numéros de référence commencent généralement par "P".',
 
     // Footer
     'footer.description': 'Services de livraison de colis rapides et fiables à Kigali. Connecter les expéditeurs avec des coursiers de confiance.',
@@ -675,14 +681,17 @@ export const messages: Record<Language, Record<string, string>> = {
     'home.hero.tryQuickDelivery': 'Gerageza gutwara vuba',
 
     // Track Order
+    'trackOrder.eyebrow': 'Kwamamaza rusange',
     'trackOrder.title': 'Kurikirana paki yawe',
-    'trackOrder.subtitle': 'Injiza nomero ya paki yawe kugira ngo umenye aho igeze.',
-    'trackOrder.orderIdLabel': 'Nomero ya paki',
-    'trackOrder.orderIdPlaceholder': 'urugero: P123456',
+    'trackOrder.subtitle': 'Injiza reference ID cyangwa OTP.',
+    'trackOrder.searchTitle': 'Shakisha paki',
+    'trackOrder.searchDescription': 'Koresha reference ID cyangwa OTP ya paki.',
+    'trackOrder.orderIdLabel': 'Reference ID cyangwa OTP',
+    'trackOrder.orderIdPlaceholder': 'urugero: P123456 cyangwa 12345',
     'trackOrder.searchButton': 'Kurikirana paki',
-    'trackOrder.notFound': 'Paki ntabwo yabonetse. Reba neza nomero ugerageze ukundi.',
-    'trackOrder.enterOrderId': 'Injiza nomero ya paki.',
-    'trackOrder.hint': 'Nomero ya paki yawe wayihawe igihe woherezaga paki. Itangirira ku "P" hakurikiraho imibare.',
+    'trackOrder.notFound': 'Paki ntabwo yabonetse. Reba neza reference ID cyangwa OTP ugerageze ukundi.',
+    'trackOrder.enterOrderId': 'Injiza reference ID cyangwa OTP.',
+    'trackOrder.hint': 'Reference ID akenshi itangirana na "P".',
 
     // Footer
     'footer.description': 'Serivisi yo gutwara paki yihuse kandi yizewe muri Kigali. Guhuza abohereza n\'abamotari bizerwa.',

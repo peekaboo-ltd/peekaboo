@@ -68,15 +68,15 @@ const HeroSection = ({
         aria-hidden="true"
       />
 
-      <article className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 lg:pt-28 lg:pb-24">
+      <article className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 lg:pt-28 lg:pb-24">
         <motion.section
-          className="w-full flex flex-col lg:flex-row gap-10 lg:gap-14 items-center max-lg:justify-center min-h-[calc(100vh-7rem)]"
+          className="w-full flex flex-col lg:flex-row gap-10 lg:gap-16 items-center max-lg:justify-center min-h-[calc(100vh-7rem)]"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           <motion.header
-            className="w-full lg:w-[48%] lg:self-center flex flex-col max-lg:items-center max-lg:justify-center gap-6 order-2 lg:order-1 text-center lg:text-left"
+            className="w-full lg:w-[46%] lg:self-center flex flex-col max-lg:items-center max-lg:justify-center gap-6 order-2 lg:order-1 text-center lg:text-left"
             variants={itemVariants}
           >
             <HeroTabs
@@ -113,10 +113,10 @@ const HeroSection = ({
           </motion.header>
 
           <motion.aside
-            className="w-full lg:w-[52%] flex justify-end order-1 lg:order-2"
+            className="w-full lg:w-[54%] flex justify-end order-1 lg:order-2"
             variants={itemVariants}
           >
-            <section className="w-full max-w-xl flex items-center justify-end max-lg:justify-center">
+            <section className="w-full max-w-2xl flex items-center justify-end max-lg:justify-center">
               <motion.article
                 className="relative w-full"
                 initial={{ opacity: 0, y: 16 }}

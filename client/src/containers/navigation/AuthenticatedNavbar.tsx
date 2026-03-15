@@ -165,11 +165,11 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                         e.preventDefault();
                                         if (nav?.title === 'Logout') {
                                             dispatch(setLogout());
-                                            navigate('/auth/login');
-                                            window.location.reload();
+                                            if (pathname.includes('/dashboard')) {
+                                                window.location.href = '/auth/login';
+                                            }
                                         }
-                                        navigate(`${nav?.link}`);
-                                        setIsOpen(false);
+                                        window.location.href = `${nav?.link}`;
                                     }}
                                     className={`flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-900 transition-colors duration-200
                   ${['Theme', 'Notifications'].includes(nav?.title)
@@ -274,8 +274,9 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                                     setIsMobileMenuOpen(false);
                                                     if (nav?.title === 'Logout') {
                                                         dispatch(setLogout());
-                                                        navigate('/auth/login');
-                                                        window.location.reload();
+                                                        if (pathname.includes('/dashboard')) {
+                                                            window.location.href = '/auth/login';
+                                                        }
                                                     }
                                                     navigate(`${nav?.link}`);
                                                 }}
