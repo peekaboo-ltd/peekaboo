@@ -5,6 +5,7 @@ import { UserStatus } from '../constants/user.constants';
 import { hashPassword } from '../helpers/auth.helper';
 import { UserRoleService } from '../services/userRole.service';
 import { RoleTypes } from '../constants/role.constants';
+import logger from '../helpers/logger.helper';
 
 async function main() {
   const email = process.env.SEED_ADMIN_EMAIL || 'info@peekaboo.co.rw';
@@ -35,8 +36,7 @@ async function main() {
 
     await userRoleService.assignRolesToUser(created.id, [RoleTypes.ADMIN]);
 
-    // eslint-disable-next-line no-console
-    console.log('[seed:admin] Created admin user:', { email, phoneNumber });
+    logger.success('[seed:admin] Created admin user:', { email, phoneNumber });
   } else {
     const hasAdminRole = existing.userRoles?.some((ur) => ur.role?.name === RoleTypes.ADMIN);
     if (!hasAdminRole) {
@@ -48,20 +48,18 @@ async function main() {
       await userRepo.save(existing);
     }
 
-    // eslint-disable-next-line no-console
-    console.log('[seed:admin] Admin user already exists:', { email, phoneNumber });
+    logger.success('[seed:admin] Admin user already exists:', { email, phoneNumber });
   }
 
   await AppDataSource.destroy();
 }
 
 main().catch(async (err) => {
-  // eslint-disable-next-line no-console
-  console.error('[seed:admin] Failed:', err);
+  logger.error('[seed:admin] Failed:', err);
   try {
     if (AppDataSource.isInitialized) await AppDataSource.destroy();
   } catch {
-    // ignore
+    logger.error('[seed:admin] Failed to destroy database:', err);
   }
   process.exit(1);
 });

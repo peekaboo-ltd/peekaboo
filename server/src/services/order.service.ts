@@ -31,7 +31,10 @@ import { EmailService } from '../integrations/emails/email.service';
 import { OrderAssignment } from '../entities/orderAssignment.entity';
 import { Batch } from '../entities/batch.entity';
 import { BatchStatus } from '../constants/batch.constants';
-import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
+import {
+  formatPhoneNumber,
+  validateAndFormatPhoneNumber,
+} from '../helpers/phone.helper';
 import { RoleTypes } from '../constants/role.constants';
 import {
   BulkImportRequest,
@@ -39,6 +42,11 @@ import {
   BulkImportRowInput,
   BulkImportRowResult,
 } from '../types/orderImport.types';
+import { SMSService } from '../integrations/sms/sms.service';
+import {
+  buildPublicOrderRecipientSMS,
+  buildPublicOrderSenderSMS,
+} from '../integrations/sms/sms.messages';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -52,6 +60,7 @@ export class OrderService {
   private readonly orderActivityRepository: Repository<OrderActivity>;
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
   private readonly batchRepository: Repository<Batch>;
+  private readonly smsService: SMSService;
 
   constructor() {
     this.orderRepository = AppDataSource.getRepository(Order);
@@ -65,6 +74,7 @@ export class OrderService {
     this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
     this.orderAssignmentRepository = AppDataSource.getRepository(OrderAssignment);
     this.batchRepository = AppDataSource.getRepository(Batch);
+    this.smsService = new SMSService();
   }
 
   // GET ORDER BY ID (needed by audit decorators)
@@ -128,10 +138,6 @@ export class OrderService {
     const recipient = await this.userRepository.findOne({
       where: { id: createdOrder.recipientId },
     });
-
-    console.log(recipient);
-    console.log(sender);
-
     // Send order created emails (non-blocking)
     if (createdOrder.senderId) {
       if (sender?.email) {
@@ -254,6 +260,32 @@ export class OrderService {
           recipientPhone: recipient?.phoneNumber || '',
           orderReference: createdOrder.referenceId || '',
           trackingId: createdOrder.trackingId || '',
+        })
+        .catch(() => { });
+    }
+
+    const senderSMSPhone = formatPhoneNumber(sender?.phoneNumber);
+    if (senderSMSPhone) {
+      this.smsService
+        .send({
+          to: senderSMSPhone,
+          text: buildPublicOrderSenderSMS({
+            orderReference: createdOrder.referenceId || '',
+            trackingId: createdOrder.trackingId || '',
+          }),
+        })
+        .catch(() => { });
+    }
+
+    const recipientSMSPhone = formatPhoneNumber(recipient?.phoneNumber);
+    if (recipientSMSPhone) {
+      this.smsService
+        .send({
+          to: recipientSMSPhone,
+          text: buildPublicOrderRecipientSMS({
+            orderReference: createdOrder.referenceId || '',
+            trackingId: createdOrder.trackingId || '',
+          }),
         })
         .catch(() => { });
     }

@@ -10,8 +10,8 @@ import { setToken, setUser, setIsAuthenticated } from '@/states/slices/auth.slic
 import { resetOnboarding } from '@/states/slices/onboarding.slice';
 import { localStorageUtil } from '@/utils/localStorage.util';
 import type { CreateOrganizationPayload, Organization } from '@/types/organization.type';
-import { useLazyFetchOrganizationsQuery } from '@/api/queries/organization.queries';
-import { setOrganizationsList } from '@/states/slices/organization.slice';
+import { useLazyFetchOrganizationByIdQuery, useLazyFetchOrganizationsQuery } from '@/api/queries/organization.queries';
+import { setOrganization, setOrganizationsList } from '@/states/slices/organization.slice';
 import { usePagination } from '../common/pagination.hooks';
 
 /**
@@ -131,13 +131,26 @@ export const useFetchOrganizations = () => {
   const [fetchOrganizations, { data, error, isFetching, isSuccess }] =
     useLazyFetchOrganizationsQuery();
 
-    useEffect(() => {
-      if (isSuccess && data) {
-        dispatch(setOrganizationsList(data?.data?.rows));
-        setTotalPages(data?.data?.totalPages);
-        setTotalCount(data?.data?.totalCount);
-      }
-    }, [isSuccess, data, dispatch, setTotalPages, setTotalCount]);
+  useEffect(() => {
+    if (isSuccess && data) {
+      dispatch(setOrganizationsList(data?.data?.rows));
+      setTotalPages(data?.data?.totalPages);
+      setTotalCount(data?.data?.totalCount);
+    }
+  }, [isSuccess, data, dispatch, setTotalPages, setTotalCount]);
 
   return { fetchOrganizations, data, error, isFetching, isSuccess, page, setPage, size, setSize, totalPages, setTotalPages, totalCount, setTotalCount };
+};
+
+export const useFetchOrganizationById = () => {
+  const dispatch = useAppDispatch();
+  const [fetchOrganizationById, { data, isFetching, isSuccess }] = useLazyFetchOrganizationByIdQuery();
+
+  useEffect(() => {
+    if (isSuccess && data) {
+      dispatch(setOrganization(data?.data));
+    }
+  }, [isSuccess, data, dispatch]);
+
+  return { fetchOrganizationById, data, isFetching, isSuccess };
 };

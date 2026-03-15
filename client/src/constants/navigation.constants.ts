@@ -77,15 +77,23 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     permissions: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
   },
   {
-    label: 'Organizations',
-    path: '/organizations',
+    label: 'Business',
+    path: '',
     icon: faBuilding,
     permissions: [RoleTypes.ADMIN],
-  },
-  {
-    label: 'Business Plans',
-    path: '/business-plans',
-    icon: faTag,
-    permissions: [RoleTypes.ADMIN],
+    subCategories: [
+      {
+        label: 'Organizations',
+        path: '/organizations',
+        icon: faBuilding,
+        permissions: [RoleTypes.ADMIN],
+      },
+      {
+        label: 'Business Plans',
+        path: '/business-plans',
+        icon: faTag,
+        permissions: [RoleTypes.ADMIN],
+      },
+    ]
   },
 ];

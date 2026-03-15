@@ -29,6 +29,7 @@ import { authQueriesApiSlice } from '../api/queries/auth.queries';
 import { businessPlanQueriesApiSlice } from '../api/queries/businessPlan.queries';
 import { businessPlanMutationsApiSlice } from '../api/mutations/businessPlan.mutations';
 import organizationSlice from './slices/organization.slice';
+import businessPlanSlice from './slices/businessPlan.slice';
 
 export const store = configureStore({
   reducer: {
@@ -46,6 +47,7 @@ export const store = configureStore({
     orderActivity: orderActivitySlice,
     batch: batchSlice,
     organization: organizationSlice,
+    businessPlan: businessPlanSlice,
     [ordersQueriesApiSlice.reducerPath]: ordersQueriesApiSlice.reducer,
     [orderActivityQueriesApiSlice.reducerPath]:
       orderActivityQueriesApiSlice.reducer,

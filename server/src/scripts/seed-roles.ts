@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { AppDataSource } from '../data-source';
 import { Role } from '../entities/role.entity';
 import { RoleTypes, RoleStatus } from '../constants/role.constants';
+import logger from '../helpers/logger.helper';
 
 // Role descriptions and labels for better UX
 const roleMetadata: Record<RoleTypes, { description: string; label: string }> = {
@@ -49,8 +50,7 @@ async function main() {
   );
 
   if (missingRoleTypes.length === 0) {
-    // eslint-disable-next-line no-console
-    console.log('[seed:roles] All roles already exist in database:', allRoleTypes);
+    logger.success('[seed:roles] All roles already exist in database:', allRoleTypes);
   } else {
     // Create missing roles
     const rolesToCreate = missingRoleTypes.map((roleType) => {
@@ -65,14 +65,12 @@ async function main() {
 
     await roleRepo.save(rolesToCreate);
 
-    // eslint-disable-next-line no-console
-    console.log('[seed:roles] Created missing roles:', missingRoleTypes);
+    logger.success('[seed:roles] Created missing roles:', missingRoleTypes);
   }
 
   // Log final state
   const finalRoles = await roleRepo.find();
-  // eslint-disable-next-line no-console
-  console.log(
+  logger.success(
     '[seed:roles] Current roles in database:',
     finalRoles.map((r) => ({ name: r.name, label: r.label, status: r.status }))
   );

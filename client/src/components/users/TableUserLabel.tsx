@@ -10,7 +10,7 @@ export interface TableUserLabelProps {
 
 const TableUserLabel = ({ user, label }: TableUserLabelProps) => {
     return (
-        <Link to={`/users/${user?.id}`} className="text-sm bg-gray-100 text-slate-700 px-4 py-2 rounded-md hover:bg-gray-200"><FontAwesomeIcon icon={faUser} /> {label || user?.phoneNumber?.slice(-10)}</Link>
+        <Link to={`/users/${user?.id}`} className="text-sm bg-gray-100 text-slate-700 px-4 py-2 rounded-md hover:bg-gray-200"><FontAwesomeIcon icon={faUser} /> {label || user?.name || user?.phoneNumber?.slice(-10)}</Link>
     )
 }
 

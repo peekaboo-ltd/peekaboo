@@ -19,6 +19,9 @@ import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { OrderAssignmentStatus, OrderStatus } from '../constants/order.constants';
 import { EmailService } from '../integrations/emails/email.service';
 import { OrderAssignment } from '../entities/orderAssignment.entity';
+import { SMSService } from '../integrations/sms/sms.service';
+import { formatPhoneNumber } from '../helpers/phone.helper';
+import { buildOrderCompletedSMS } from '../integrations/sms/sms.messages';
 
 const ORDER_STATUS_MESSAGES: Record<string, string> = {
   [OrderStatus.PAID]:
@@ -36,12 +39,14 @@ export class OrderActivityService {
   private readonly orderRepository: Repository<Order>;
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
   private readonly emailService: EmailService;
+  private readonly smsService: SMSService;
 
   constructor() {
     this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
     this.orderRepository = AppDataSource.getRepository(Order);
     this.orderAssignmentRepository = AppDataSource.getRepository(OrderAssignment);
     this.emailService = new EmailService();
+    this.smsService = new SMSService();
   }
 
   // CREATE ORDER STATUS
@@ -180,12 +185,21 @@ export class OrderActivityService {
 
 
   private async sendCompletionEmails(order: Order): Promise<void> {
-    const recipients = new Map<string, { name?: string; email?: string }>();
+    const recipients = new Map<
+      string,
+      { name?: string; email?: string; phoneNumber?: string | null }
+    >();
 
     if (order.sender?.email) {
       recipients.set(order.sender.id, {
         name: order.sender.name,
         email: order.sender.email,
+        phoneNumber: order.sender.phoneNumber,
+      });
+    } else if (order.sender?.phoneNumber) {
+      recipients.set(order.sender.id, {
+        name: order.sender.name,
+        phoneNumber: order.sender.phoneNumber,
       });
     }
 
@@ -193,6 +207,12 @@ export class OrderActivityService {
       recipients.set(order.recipient.id, {
         name: order.recipient.name,
         email: order.recipient.email,
+        phoneNumber: order.recipient.phoneNumber,
+      });
+    } else if (order.recipient?.phoneNumber) {
+      recipients.set(order.recipient.id, {
+        name: order.recipient.name,
+        phoneNumber: order.recipient.phoneNumber,
       });
     }
 
@@ -200,6 +220,15 @@ export class OrderActivityService {
       recipients.set(order.createdBy.id, {
         name: order.createdBy.name,
         email: order.createdBy.email,
+        phoneNumber: order.createdBy.phoneNumber,
+      });
+    } else if (
+      order.createdBy?.phoneNumber &&
+      order.createdBy.id !== order.sender?.id
+    ) {
+      recipients.set(order.createdBy.id, {
+        name: order.createdBy.name,
+        phoneNumber: order.createdBy.phoneNumber,
       });
     }
 
@@ -224,7 +253,23 @@ export class OrderActivityService {
       });
     });
 
-    await Promise.allSettled(emailPromises);
+    const smsText = buildOrderCompletedSMS({
+      orderReference: order.referenceId || '',
+    });
+    const smsPromises = Array.from(recipients.values()).map((recipient) => {
+      const phoneNumber = formatPhoneNumber(recipient.phoneNumber);
+
+      if (!phoneNumber) {
+        return Promise.resolve();
+      }
+
+      return this.smsService.send({
+        to: phoneNumber,
+        text: smsText,
+      });
+    });
+
+    await Promise.allSettled([...emailPromises, ...smsPromises]);
   }
 
   async confirmOrderDispatch({

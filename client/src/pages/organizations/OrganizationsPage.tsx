@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { motion, Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -7,25 +6,20 @@ import {
   faPlus,
   faCircleCheck,
   faClockRotateLeft,
-  faGear,
 } from '@fortawesome/free-solid-svg-icons';
-import { ColumnDef } from '@tanstack/react-table';
 import Table from '@/components/table/Table';
 import Button from '@/components/inputs/Button';
-import { StatusBadge } from '@/components/inputs/StatusBadge';
-import CustomPopover from '@/components/inputs/CustomPopover';
-import { ellipsisHClassName, tableActionClassName } from '@/constants/inputs.constants';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import type { Organization } from '@/types/organization.type';
 import { OrganizationStatus } from '@/types/organization.type';
-import { formatDate } from '@/utils/strings.util';
-import { faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import {
   InternalPage,
   InternalPageHeader,
   InternalStatCard,
 } from '@/components/layout/InternalPage';
 import { useFetchOrganizations } from '@/hooks/organization/organization.hooks';
+import { useOrganizationsColumns } from '@/hooks/organization/columns.organization';
+import { useAppSelector } from '@/states/hooks';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -39,64 +33,23 @@ const itemVariants: Variants = {
 const OrganizationsPage = () => {
   useDocumentTitle('Organizations');
 
-  const { fetchOrganizations, data, isFetching, page, setPage, size, setSize, totalPages, totalCount } = useFetchOrganizations();
+  // STATE VARIABLES
+  const { organizationsList } = useAppSelector((state) => state.organization);
+
+  const { fetchOrganizations, isFetching, page, setPage, size, setSize, totalPages, totalCount } = useFetchOrganizations();
+
+  const { organizationsColumns } = useOrganizationsColumns();
 
   useEffect(() => {
     fetchOrganizations({ page, size });
   }, [page, size, fetchOrganizations]);
 
   const stats = useMemo(() => {
-    const total = data?.data?.totalCount ?? 0;
-    const active = data?.data?.rows?.filter((o: Organization) => o.status === OrganizationStatus.ACTIVE).length;
-    const pending = data?.data?.rows?.filter((o: Organization) => o.status === OrganizationStatus.PENDING).length;
+    const total = organizationsList?.length ?? 0;
+    const active = organizationsList?.filter((o: Organization) => o?.status === OrganizationStatus.ACTIVE).length ?? 0;
+    const pending = organizationsList?.filter((o: Organization) => o?.status === OrganizationStatus.PENDING).length ?? 0;
     return { total, active, pending };
-  }, [data]);
-
-  const columns: ColumnDef<Organization>[] = useMemo(
-    () => [
-      {
-        header: 'Name',
-        accessorKey: 'name',
-      },
-      {
-        header: 'Email',
-        accessorKey: 'email',
-      },
-      {
-        header: 'Phone',
-        accessorKey: 'phoneNumber',
-      },
-      {
-        header: 'Status',
-        accessorKey: 'status',
-        cell: ({ row }) => <StatusBadge status={row.original.status} />,
-      },
-      {
-        header: 'Created',
-        accessorKey: 'createdAt',
-        cell: ({ row }) => formatDate(row.original.createdAt, 'DD/MM/YYYY HH:mm'),
-      },
-      {
-        header: 'Actions',
-        id: 'actions',
-        cell: ({ row }) => (
-          <CustomPopover
-            trigger={
-              <FontAwesomeIcon icon={faEllipsisH} className={ellipsisHClassName} />
-            }
-          >
-            <menu className="w-full flex flex-col gap-1">
-              <Link className={tableActionClassName} to={`/organizations/${row.original.id}/manage`}>
-                <FontAwesomeIcon icon={faGear} />
-              Manage
-              </Link>
-            </menu>
-          </CustomPopover>
-        ),
-      },
-    ],
-    []
-  );
+  }, [organizationsList]);
 
   return (
     <InternalPage>
@@ -141,8 +94,8 @@ const OrganizationsPage = () => {
 
       <motion.section variants={itemVariants}>
         <Table
-          columns={columns}
-          data={data?.data?.rows ?? []}
+          columns={organizationsColumns}
+          data={organizationsList ?? []}
           showPagination
           page={page}
           setPage={setPage}

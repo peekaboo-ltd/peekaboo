@@ -1,8 +1,7 @@
 import { StatusBadge } from '@/components/inputs/StatusBadge';
-import { RoleBadges } from '@/components/users/RoleBadges';
 import { User, UserRole } from '@/types/user.type';
 import { RoleTypes } from '@/types/auth.type';
-import { formatDate } from '@/utils/strings.util';
+import { capitalizeString, formatDate } from '@/utils/strings.util';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
 import CustomPopover from '@/components/inputs/CustomPopover';
@@ -40,12 +39,12 @@ export const useUsersColumns = () => {
         cell: ({ row }) => {
           const roles = row?.original?.userRoles || [];
           const roleNames = roles
-            .map((userRole: UserRole) => userRole?.role?.name)
+            .map((userRole: UserRole) => capitalizeString(userRole?.role?.name))
             .filter(Boolean) as RoleTypes[];
           if (roleNames.length === 0) {
             return <span className="text-gray-400">-</span>;
           }
-          return <RoleBadges roles={roleNames} />;
+          return <p>{roleNames.join(', ')}</p>;
         },
       },
       {

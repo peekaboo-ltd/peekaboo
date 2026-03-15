@@ -375,7 +375,7 @@ export class OrganizationMembershipService {
       search,
       role,
       status,
-      sortBy = 'createdAt',
+      sortBy = 'updatedAt',
       sortOrder = 'DESC',
       startDate,
       endDate,

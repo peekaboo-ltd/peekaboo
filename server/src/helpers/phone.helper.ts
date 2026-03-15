@@ -12,6 +12,49 @@ export interface PhoneValidationResult {
   error?: string;
 }
 
+function normalizeRwandaPhoneNumber(
+  input: string | null | undefined
+): string | null {
+  if (!input) {
+    return null;
+  }
+
+  let normalizedNumber = input.replace(/\s/g, '');
+  const hasLeadingPlus = normalizedNumber.startsWith('+');
+  const numberWithoutPlus = hasLeadingPlus
+    ? normalizedNumber.slice(1)
+    : normalizedNumber;
+
+  if (!/^\d+$/.test(numberWithoutPlus)) {
+    return null;
+  }
+
+  if (normalizedNumber.startsWith('+2500')) {
+    normalizedNumber = normalizedNumber.slice(4);
+  } else if (normalizedNumber.startsWith('+250')) {
+    normalizedNumber = '0' + normalizedNumber.slice(4);
+  } else if (normalizedNumber.startsWith('2500')) {
+    normalizedNumber = normalizedNumber.slice(3);
+  } else if (normalizedNumber.startsWith('250')) {
+    normalizedNumber = '0' + normalizedNumber.slice(3);
+  }
+
+  if (normalizedNumber.length !== 10) {
+    return null;
+  }
+
+  const prefix = normalizedNumber.slice(0, 3);
+  if (!VALID_PREFIXES.includes(prefix as (typeof VALID_PREFIXES)[number])) {
+    return null;
+  }
+
+  if (!normalizedNumber.startsWith('0')) {
+    return null;
+  }
+
+  return normalizedNumber;
+}
+
 /**
  * Validates and formats a phone number to local format (0XXXXXXXXX)
  *
@@ -35,16 +78,13 @@ export function validateAndFormatPhoneNumber(
     };
   }
 
-  // Remove all whitespace
-  let normalizedNumber = input.replace(/\s/g, '');
-
   // Check for non-numeric characters (except leading +)
-  const hasLeadingPlus = normalizedNumber.startsWith('+');
+  const normalizedInput = input.replace(/\s/g, '');
+  const hasLeadingPlus = normalizedInput.startsWith('+');
   const numberWithoutPlus = hasLeadingPlus
-    ? normalizedNumber.slice(1)
-    : normalizedNumber;
+    ? normalizedInput.slice(1)
+    : normalizedInput;
 
-  // Check if the remaining characters are all digits
   if (!/^\d+$/.test(numberWithoutPlus)) {
     return {
       isValid: false,
@@ -52,44 +92,12 @@ export function validateAndFormatPhoneNumber(
     };
   }
 
-  // Normalize to remove country code prefixes
-  if (normalizedNumber.startsWith('+2500')) {
-    // Format: +2500788478652 -> 0788478652
-    normalizedNumber = normalizedNumber.slice(4);
-  } else if (normalizedNumber.startsWith('+250')) {
-    // Format: +250788478652 -> 0788478652
-    normalizedNumber = '0' + normalizedNumber.slice(4);
-  } else if (normalizedNumber.startsWith('2500')) {
-    // Format: 2500788478652 -> 0788478652
-    normalizedNumber = normalizedNumber.slice(3);
-  } else if (normalizedNumber.startsWith('250')) {
-    // Format: 250788478652 -> 0788478652
-    normalizedNumber = '0' + normalizedNumber.slice(3);
-  }
-  // If starts with '0', keep as is
+  const normalizedNumber = normalizeRwandaPhoneNumber(input);
 
-  // Validate length - must be exactly 10 digits
-  if (normalizedNumber.length !== 10) {
+  if (!normalizedNumber) {
     return {
       isValid: false,
-      error: 'Phone number must be 10 digits',
-    };
-  }
-
-  // Validate prefix
-  const prefix = normalizedNumber.slice(0, 3);
-  if (!VALID_PREFIXES.includes(prefix as (typeof VALID_PREFIXES)[number])) {
-    return {
-      isValid: false,
-      error: `Invalid phone number prefix. Must start with ${VALID_PREFIXES.join(', ')}`,
-    };
-  }
-
-  // Ensure the number starts with 0
-  if (!normalizedNumber.startsWith('0')) {
-    return {
-      isValid: false,
-      error: 'Invalid phone number format',
+      error: `Invalid phone number. Must be a valid Rwandan mobile number starting with ${VALID_PREFIXES.join(', ')}`,
     };
   }
 
@@ -108,6 +116,18 @@ export function isValidPhoneNumber(
   phoneNumber: string | null | undefined
 ): boolean {
   return validateAndFormatPhoneNumber(phoneNumber).isValid;
+}
+
+export function formatPhoneNumber(
+  input: string | null | undefined
+): string | null {
+  const normalizedNumber = normalizeRwandaPhoneNumber(input);
+
+  if (!normalizedNumber) {
+    return null;
+  }
+
+  return `+250${normalizedNumber.slice(-9)}`;
 }
 
 /**

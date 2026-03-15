@@ -4,8 +4,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { motion, Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircleCheck,
-  faUsers,
   faCreditCard,
   faShieldHalved,
   faTag,
@@ -17,23 +15,21 @@ import Select from '@/components/inputs/Select';
 import { Badge } from '@/components/ui/badge';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
-  useFetchOrganizationByIdQuery,
-  useFetchOrganizationMembersQuery,
-} from '@/api/queries/organization.queries';
-import { useFetchBusinessPlansQuery } from '@/api/queries/businessPlan.queries';
-import {
   useUpdateOrganizationMutation,
   useAssignBusinessPlanMutation,
 } from '@/api/mutations/organization.mutations';
-import type { Organization } from '@/types/organization.type';
 import { OrganizationStatus, BillingPeriod } from '@/types/organization.type';
 import {
   InternalPage,
   InternalPageHeader,
   InternalStatCard,
 } from '@/components/layout/InternalPage';
+import { useFetchOrganizationById } from '@/hooks/organization/organization.hooks';
+import { useAppSelector } from '@/states/hooks';
+import { useFetchBusinessPlans } from '@/hooks/business-plan/businessPlan.hooks';
+import { BusinessPlan } from '@/types/businessPlan.type';
 import { UUID } from '@/types';
-import { OrganizationMembership } from '@/types/organizationMembership.types';
+import OrganizationMembers from '@/containers/organizations/OrganizationMembers';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -57,26 +53,42 @@ type OrgFormValues = {
 };
 
 const ManageOrganizationPage = () => {
+
+  // NAVIGATION
   const { id } = useParams<{ id: UUID }>();
   const navigate = useNavigate();
   useDocumentTitle('Manage Organization');
 
-  const { data: orgData, isFetching: isFetchingOrg } = useFetchOrganizationByIdQuery(id!, {
-    skip: !id,
-  });
-  const { data: membersData, isFetching: isFetchingMembers } = useFetchOrganizationMembersQuery(
-    { id: id!, page: 1, size: 50 },
-    { skip: !id }
-  );
-  const { data: plansData } = useFetchBusinessPlansQuery();
+  // STATE VARIABLES
+  const { organization } = useAppSelector((state) => state.organization);
+  const { businessPlansList } = useAppSelector((state) => state.businessPlan);
+  const [currentBusinessPlan, setCurrentBusinessPlan] = useState<BusinessPlan | undefined>(undefined);
+
+  const { fetchOrganizationById, isFetching: organizationIsFetching } = useFetchOrganizationById();
+  const { fetchBusinessPlans, page: businessPlansPage, size: businessPlansSize } = useFetchBusinessPlans();
+
+  // FETCH ORGANIZATION AND MEMBERS
+  useEffect(() => {
+    if (id) {
+      fetchOrganizationById(id);
+    }
+  }, [id, fetchOrganizationById]);
+
+  useEffect(() => {
+    fetchBusinessPlans({ page: businessPlansPage, size: businessPlansSize });
+  }, [businessPlansPage, businessPlansSize, fetchBusinessPlans]);
 
   const [updateOrganization, { isLoading: isUpdating }] = useUpdateOrganizationMutation();
   const [assignBusinessPlan, { isLoading: isAssigning }] = useAssignBusinessPlanMutation();
 
-  const org: Organization | undefined = orgData?.data;
-  const members = membersData?.data?.list ?? [];
-  const businessPlans = plansData?.data?.list ?? [];
+  // SET CURRENT BUSINESS PLAN
+  useEffect(() => {
+    if (organization?.businessPlanId) {
+      setCurrentBusinessPlan(businessPlansList.find((plan) => plan?.id === organization?.businessPlanId) ?? undefined);
+    }
+  }, [organization?.businessPlanId, businessPlansList]);
 
+  // FORM HANDLING
   const {
     control,
     handleSubmit,
@@ -100,23 +112,23 @@ const ManageOrganizationPage = () => {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
 
   useEffect(() => {
-    if (org) {
+    if (organization) {
       reset({
-        name: org.name ?? '',
-        description: org.description ?? '',
-        email: org.email ?? '',
-        phoneNumber: org.phoneNumber ?? '',
-        address: org.address ?? '',
-        tin: org.tin ?? '',
-        status: org.status ?? OrganizationStatus.ACTIVE,
-        billingPeriod: org?.billingPeriod ?? BillingPeriod.MONTHLY,
-        paymentTermsDays: org?.paymentTermsDays ?? 30,
+        name: organization.name ?? '',
+        description: organization.description ?? '',
+        email: organization.email ?? '',
+        phoneNumber: organization.phoneNumber ?? '',
+        address: organization.address ?? '',
+        tin: organization.tin ?? '',
+        status: organization.status ?? OrganizationStatus.ACTIVE,
+        billingPeriod: organization?.billingPeriod ?? BillingPeriod.MONTHLY,
+        paymentTermsDays: organization?.paymentTermsDays ?? 30,
       });
-      if (org.businessPlanId) {
-        setSelectedPlanId(org.businessPlanId);
+      if (organization?.businessPlanId) {
+        setSelectedPlanId(organization?.businessPlanId);
       }
     }
-  }, [org, reset]);
+  }, [organization, reset]);
 
   const onSubmitOrgInfo = handleSubmit(async (data) => {
     if (!id) return;
@@ -144,30 +156,22 @@ const ManageOrganizationPage = () => {
     }
   };
 
-  const currentPlan = businessPlans.find((p) => p.id === org?.businessPlanId);
-
   const stats = [
     {
       label: 'Status',
-      value: org?.status ?? '—',
+      value: organization?.status ?? '—',
       icon: faShieldHalved,
       iconBg: 'bg-primary-50 text-primary-900',
     },
     {
-      label: 'Members',
-      value: (membersData?.data?.totalCount ?? 0).toString(),
-      icon: faUsers,
-      iconBg: 'bg-secondary-50 text-secondary-800',
-    },
-    {
       label: 'Business Plan',
-      value: currentPlan?.name ?? 'No plan assigned',
+      value: currentBusinessPlan?.name ?? 'No plan assigned',
       icon: faCreditCard,
       iconBg: 'bg-amber-50 text-amber-700',
     },
   ];
 
-  if (isFetchingOrg && !org) {
+  if (organizationIsFetching && !organization) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
         <p className="text-sm text-slate-500">Loading organization…</p>
@@ -175,7 +179,7 @@ const ManageOrganizationPage = () => {
     );
   }
 
-  if (!org && !isFetchingOrg) {
+  if (!organization && !organizationIsFetching) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
         <p className="text-sm text-slate-500">Organization not found.</p>
@@ -189,11 +193,11 @@ const ManageOrganizationPage = () => {
       <motion.section variants={itemVariants}>
         <InternalPageHeader
           eyebrow="Organization Management"
-          title={org?.name ?? 'Organization'}
+          title={organization?.name ?? 'Organization'}
           description="Update organization details, assign a billing plan, and view members."
           actions={
             <Badge variant="outline" className="text-xs rounded-full px-3">
-              {org?.status ?? 'Unknown'}
+              {organization?.status ?? 'Unknown'}
             </Badge>
           }
         />
@@ -374,27 +378,27 @@ const ManageOrganizationPage = () => {
               <h2 className="mt-2 text-lg font-semibold text-[#25343F]">Business Plan</h2>
             </header>
 
-            {currentPlan && (
+            {currentBusinessPlan && (
               <div className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
                 <FontAwesomeIcon icon={faTag} className="text-slate-700" />
                 <section>
                   <p className="text-xs text-slate-500 uppercase tracking-wide">Current Plan</p>
-                  <p className="text-sm font-semibold text-[#25343F]">{currentPlan.name}</p>
+                  <p className="text-sm font-semibold text-[#25343F]">{currentBusinessPlan.name}</p>
                   <p className="text-xs text-slate-500">
-                    {currentPlan.currency} {Number(currentPlan.pricePerOrder).toLocaleString()} / order
+                    {currentBusinessPlan?.currency} {Number(currentBusinessPlan.pricePerOrder).toLocaleString()} / order
                   </p>
                 </section>
               </div>
             )}
 
-            <div className="flex flex-col gap-3">
+            <fieldset className="flex flex-col gap-3">
               <Select
                 label="Assign Plan"
                 value={selectedPlanId}
                 onChange={(value) => setSelectedPlanId(value)}
-                options={businessPlans.map((plan) => ({
+                options={businessPlansList.map((plan) => ({
                   label: `${plan.name} (${plan.currency} ${Number(plan.pricePerOrder).toLocaleString()}/order)`,
-                  value: plan.id,
+                  value: plan?.id ?? '',
                 }))}
                 placeholder="Select a plan"
               />
@@ -407,57 +411,16 @@ const ManageOrganizationPage = () => {
               >
                 Assign Plan
               </Button>
-            </div>
-          </article>
-
-          {/* Members */}
-          <article className="border border-slate-200 bg-white p-6">
-            <header className="mb-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Membership</p>
-              <h2 className="mt-2 text-lg font-semibold text-[#25343F]">
-                Members
-                <span className="ml-2 text-sm font-normal text-slate-500">
-                  ({membersData?.data?.totalCount ?? 0})
-                </span>
-              </h2>
-            </header>
-
-            {isFetchingMembers ? (
-              <p className="text-sm text-slate-400">Loading members…</p>
-            ) : members.length === 0 ? (
-              <p className="text-sm text-slate-400">No members found.</p>
-            ) : (
-              <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
-                {members.map((member: OrganizationMembership) => (
-                  <li
-                    key={member.id}
-                    className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
-                  >
-                    <section>
-                      <p className="text-sm font-medium text-[#25343F]">
-                        {member.user?.name || member.user?.email || '—'}
-                      </p>
-                      <p className="text-xs text-slate-500">{member.user?.email || '—'}</p>
-                    </section>
-                    <span className="flex items-center gap-1">
-                      <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-700">
-                        {member.role}
-                      </span>
-                      {member.status === 'ACTIVE' ? (
-                        <FontAwesomeIcon icon={faCircleCheck} className="text-secondary-600 text-xs" />
-                      ) : null}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            </fieldset>
           </article>
         </aside>
       </motion.section>
 
+      <OrganizationMembers organizationId={id} />
+
       {/* Back button */}
       <motion.menu variants={itemVariants} className="flex items-center gap-3 pb-6">
-        <Button type="button" onClick={() => navigate(-1)}>
+        <Button type="button" onClick={(e) => { e.preventDefault(); navigate(-1); }}>
           Back
         </Button>
       </motion.menu>
