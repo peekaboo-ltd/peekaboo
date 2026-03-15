@@ -8,6 +8,7 @@ import { UserStatus } from '../constants/user.constants';
 import { OrderAssignment } from './orderAssignment.entity';
 import { OrganizationMembership } from './organizationMembership.entity';
 import { Batch } from './batch.entity';
+import { PushSubscription } from './pushSubscription.entity';
 
 @Entity('users')
 export class User extends AbstractEntity {
@@ -135,4 +136,8 @@ export class User extends AbstractEntity {
   // BATCHES
   @OneToMany(() => Batch, (batch) => batch.createdBy)
   createdBatches: Batch[];
+
+  // PUSH SUBSCRIPTIONS
+  @OneToMany(() => PushSubscription, (subscription) => subscription.user)
+  pushSubscriptions?: PushSubscription[];
 }

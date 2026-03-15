@@ -19,6 +19,8 @@ import { OrderActivityService } from './orderActivity.service';
 import { EmailService } from '../integrations/emails/email.service';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
+import { pushService } from './push.service';
+import { PushNotificationType } from '../constants/push.constants';
 
 interface RiderAssignmentScope {
   riderId?: UUID;
@@ -129,6 +131,16 @@ export class OrderAssignmentService {
           orderReference: orderExists.referenceId || '',
         })
         .catch(() => {});
+    }
+
+    if (assignedToExists?.id) {
+      this.sendAssignmentPush({
+        userId: assignedToExists.id,
+        assignmentId: createdOrderAssignment.id,
+        orderId: createdOrderAssignment.orderId,
+        title: 'New assignment available',
+        body: 'You have been assigned a new order. Tap to review it.',
+      }).catch(() => {});
     }
 
     return createdOrderAssignment;
@@ -284,6 +296,16 @@ export class OrderAssignmentService {
       });
     }
 
+    if (orderAssignment.assignedToId) {
+      this.sendAssignmentPush({
+        userId: orderAssignment.assignedToId,
+        assignmentId: updatedOrderAssignment.id,
+        orderId: updatedOrderAssignment.orderId,
+        title: 'Assignment accepted',
+        body: 'Assignment marked as accepted.',
+      }).catch(() => {});
+    }
+
     return updatedOrderAssignment;
   }
 
@@ -392,6 +414,42 @@ export class OrderAssignmentService {
       });
     }
 
+    if (assignedToExists?.id) {
+      this.sendAssignmentPush({
+        userId: assignedToExists.id,
+        assignmentId: createdOrderAssignment.id,
+        orderId: createdOrderAssignment.orderId,
+        title: 'New assignment available',
+        body: 'You have been assigned a new order. Tap to review it.',
+      }).catch(() => {});
+    }
+
     return createdOrderAssignment;
+  }
+
+  private async sendAssignmentPush({
+    userId,
+    assignmentId,
+    orderId,
+    title,
+    body,
+  }: {
+    userId: UUID;
+    assignmentId: UUID;
+    orderId?: UUID;
+    title: string;
+    body: string;
+  }): Promise<void> {
+    await pushService.sendPushNotification({
+      userIds: [userId],
+      title,
+      body,
+      type: PushNotificationType.ASSIGNMENT,
+      channelId: 'assignments',
+      data: {
+        assignmentId,
+        orderId,
+      },
+    });
   }
 }

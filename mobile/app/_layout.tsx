@@ -5,6 +5,10 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import { colors } from '../utils/constants';
 import { useLocationTracking } from '../hooks';
+import {
+  addNotificationReceivedListener,
+  addNotificationResponseListener,
+} from '../services/notifications/pushNotifications';
 
 export default function RootLayout() {
   const { isLoading, checkAuth } = useAuthStore();
@@ -17,6 +21,19 @@ export default function RootLayout() {
       setIsInitializing(false);
     };
     initialize();
+  }, []);
+
+  useEffect(() => {
+    const receivedSubscription = addNotificationReceivedListener(() => {
+      // Root-level listener intentionally left minimal for centralized handling.
+    });
+
+    const responseSubscription = addNotificationResponseListener();
+
+    return () => {
+      receivedSubscription.remove();
+      responseSubscription.remove();
+    };
   }, []);
 
   if (isInitializing || isLoading) {

@@ -4,3 +4,4 @@ export { assignmentsAPI } from './assignments';
 export { ordersAPI } from './orders';
 export { dashboardAPI } from './dashboard';
 export { usersAPI } from './users';
+export { pushAPI } from './push';
