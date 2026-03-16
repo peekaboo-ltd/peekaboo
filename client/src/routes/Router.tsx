@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from '../pages/home';
 import { PublicOrderDetails, TrackOrder } from '../pages/public/orders';
@@ -49,10 +50,18 @@ import BatchDetailsPage from '@/pages/batches/BatchDetailsPage';
 import BatchPreviewPage from '@/pages/batches/BatchPreviewPage';
 import OrderAssignmentDetails from '@/pages/order-assignments/OrderAssignmentDetails';
 import PaymentDetailsPage from '@/pages/payments/PaymentDetailsPage';
+import SEO, { SEOProps } from '@/components/seo/SEO';
 
 const allRoles = ['ADMIN', 'STAFF', 'BUSINESS', 'RIDER', 'CUSTOMER'] as const;
 const batchRoles = ['ADMIN', 'STAFF', 'BUSINESS', 'CUSTOMER'] as const;
 const userManagementRoles = ['ADMIN', 'STAFF', 'BUSINESS'] as const;
+
+const withSEO = (seo: SEOProps, element: ReactElement) => (
+  <>
+    <SEO {...seo} />
+    {element}
+  </>
+);
 
 const Router = () => {
   return (
@@ -60,42 +69,240 @@ const Router = () => {
       <Routes>
         {/* ─── Public layout ───────────────────────────────────────────────── */}
         <Route path="/" element={<PublicLayout />}>
-          <Route index element={<Home />} />
+          <Route
+            index
+            element={withSEO(
+              {
+                title: 'Peekaboo | Smart Delivery & Fleet Management Platform',
+                description:
+                  'Peekaboo helps businesses manage deliveries, track riders in real time, automate assignments, and optimize fleet operations from one dashboard.',
+                keywords:
+                  'delivery management, fleet management, logistics software, real-time tracking, route optimization, last-mile delivery',
+                path: '/',
+              },
+              <Home />,
+            )}
+          />
 
           <Route path="auth">
-            <Route path="login" element={<Login />} />
+            <Route
+              path="login"
+              element={withSEO(
+                {
+                  title: 'Login | Peekaboo',
+                  description:
+                    'Sign in to your Peekaboo account to manage deliveries, teams, and logistics operations in one place.',
+                  keywords: 'peekaboo login, delivery platform login, logistics dashboard access',
+                  path: '/auth/login',
+                },
+                <Login />,
+              )}
+            />
             <Route path="register" element={<Navigate to="/auth/login" replace />} />
-            <Route path="callback" element={<AuthCallback />} />
-            <Route path="forgot-password" element={<ForgotPassword />} />
-            <Route path="reset-password" element={<ResetPassword />} />
-            <Route path="complete" element={<CompleteAccount />} />
+            <Route
+              path="callback"
+              element={withSEO(
+                {
+                  title: 'Authenticating | Peekaboo',
+                  description: 'Securely signing you into Peekaboo.',
+                  path: '/auth/callback',
+                  noindex: true,
+                },
+                <AuthCallback />,
+              )}
+            />
+            <Route
+              path="forgot-password"
+              element={withSEO(
+                {
+                  title: 'Forgot Password | Peekaboo',
+                  description: 'Reset your Peekaboo account password securely.',
+                  path: '/auth/forgot-password',
+                  noindex: true,
+                },
+                <ForgotPassword />,
+              )}
+            />
+            <Route
+              path="reset-password"
+              element={withSEO(
+                {
+                  title: 'Reset Password | Peekaboo',
+                  description: 'Create a new secure password for your Peekaboo account.',
+                  path: '/auth/reset-password',
+                  noindex: true,
+                },
+                <ResetPassword />,
+              )}
+            />
+            <Route
+              path="complete"
+              element={withSEO(
+                {
+                  title: 'Complete Account Setup | Peekaboo',
+                  description: 'Finish setting up your Peekaboo account to start managing operations.',
+                  path: '/auth/complete',
+                  noindex: true,
+                },
+                <CompleteAccount />,
+              )}
+            />
           </Route>
 
           <Route path="onboarding">
-            <Route path="organization" element={<OrganizationOnboarding />} />
-            <Route path="admin" element={<AdminOnboarding />} />
-            <Route path="users" element={<UserManagementOnboarding />} />
-            <Route path="complete" element={<CompleteOnboarding />} />
+            <Route
+              path="organization"
+              element={withSEO(
+                {
+                  title: 'Organization Onboarding | Peekaboo',
+                  description: 'Set up your organization profile and delivery workflow in Peekaboo.',
+                  path: '/onboarding/organization',
+                  noindex: true,
+                },
+                <OrganizationOnboarding />,
+              )}
+            />
+            <Route
+              path="admin"
+              element={withSEO(
+                {
+                  title: 'Admin Onboarding | Peekaboo',
+                  description: 'Configure admin access and permissions for your Peekaboo workspace.',
+                  path: '/onboarding/admin',
+                  noindex: true,
+                },
+                <AdminOnboarding />,
+              )}
+            />
+            <Route
+              path="users"
+              element={withSEO(
+                {
+                  title: 'User Management Onboarding | Peekaboo',
+                  description: 'Invite and organize team members during Peekaboo onboarding.',
+                  path: '/onboarding/users',
+                  noindex: true,
+                },
+                <UserManagementOnboarding />,
+              )}
+            />
+            <Route
+              path="complete"
+              element={withSEO(
+                {
+                  title: 'Onboarding Complete | Peekaboo',
+                  description: 'Your Peekaboo onboarding is complete and your workspace is ready.',
+                  path: '/onboarding/complete',
+                  noindex: true,
+                },
+                <CompleteOnboarding />,
+              )}
+            />
           </Route>
 
-          <Route path="about">
-            <Route index element={<About />} />
-            <Route path="orders/fees" element={<OrderFees />} />
-          </Route>
+          <Route
+            path="about"
+            element={withSEO(
+              {
+                title: 'About Peekaboo | Delivery Technology Built for Growth',
+                description:
+                  'Learn about Peekaboo’s mission to simplify logistics through smarter dispatching, live tracking, and actionable delivery insights.',
+                keywords: 'about peekaboo, logistics technology company, delivery software platform',
+                path: '/about',
+              },
+              <About />,
+            )}
+          />
 
-          <Route path="services" element={<Services />} />
+          <Route
+            path="about/orders/fees"
+            element={withSEO(
+              {
+                title: 'Order Fees | Peekaboo',
+                description: 'Explore transparent order fee structure and delivery pricing on Peekaboo.',
+                keywords: 'delivery fees, order pricing, logistics costs',
+                path: '/about/orders/fees',
+              },
+              <OrderFees />,
+            )}
+          />
 
-          <Route path="contact" element={<ContactUsPage />} />
-          <Route path="track" element={<TrackOrder />} />
+          <Route
+            path="services"
+            element={withSEO(
+              {
+                title: 'Services | Peekaboo',
+                description:
+                  'Discover Peekaboo services including delivery management, rider tracking, route planning, and business analytics.',
+                keywords: 'delivery services, fleet services, route planning, logistics analytics',
+                path: '/services',
+              },
+              <Services />,
+            )}
+          />
+
+          <Route
+            path="contact"
+            element={withSEO(
+              {
+                title: 'Contact Us | Peekaboo',
+                description: 'Get in touch with Peekaboo for product support, onboarding, and partnership inquiries.',
+                keywords: 'contact peekaboo, logistics support, delivery software help',
+                path: '/contact',
+              },
+              <ContactUsPage />,
+            )}
+          />
+          <Route
+            path="track"
+            element={withSEO(
+              {
+                title: 'Track Order | Peekaboo',
+                description: 'Track your delivery status in real time with Peekaboo public order tracking.',
+                keywords: 'track order, delivery tracking, real-time shipment tracking',
+                path: '/track',
+              },
+              <TrackOrder />,
+            )}
+          />
         </Route>
 
         {/* ─── Public order pages (e.g. /p/orders/123) ───────────────────────── */}
         <Route path="/p" element={<PublicLayout />}>
-          <Route path="orders">
-            <Route path=":id" element={<PublicOrderDetails />} />
-            <Route path=":id/payment-success" element={<PublicOrderPaymentSuccess />} />
-            <Route path=":id/tracking" element={<PublicOrderTracking />} />
-          </Route>
+          <Route
+            path="orders/:id"
+            element={withSEO(
+              {
+                title: 'Public Order Details | Peekaboo',
+                description: 'View public details and current status of your delivery order.',
+                path: '/p/orders',
+              },
+              <PublicOrderDetails />,
+            )}
+          />
+          <Route
+            path="orders/:id/payment-success"
+            element={withSEO(
+              {
+                title: 'Payment Successful | Peekaboo',
+                description: 'Your order payment has been processed successfully on Peekaboo.',
+                path: '/p/orders/payment-success',
+                noindex: true,
+              },
+              <PublicOrderPaymentSuccess />,
+            )}
+          />
+          <Route
+            path="orders/:id/tracking"
+            element={withSEO(
+              {
+                title: 'Live Order Tracking | Peekaboo',
+                description: 'Follow your order progress and estimated delivery updates in real time.',
+                path: '/p/orders/tracking',
+              },
+              <PublicOrderTracking />,
+            )}
+          />
         </Route>
 
         {/* ─── Authenticated (protected) routes ─────────────────────────────── */}
@@ -104,7 +311,15 @@ const Router = () => {
             path="dashboard"
             element={
               <ProtectedRoute allowedRoles={[...allRoles]}>
-                <Dashboard />
+                {withSEO(
+                  {
+                    title: 'Dashboard | Peekaboo',
+                    description: 'Monitor key delivery metrics, fleet activity, and operational performance.',
+                    path: '/dashboard',
+                    noindex: true,
+                  },
+                  <Dashboard />,
+                )}
               </ProtectedRoute>
             }
           />
@@ -114,7 +329,15 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={[...allRoles]}>
-                  <OrdersPage />
+                  {withSEO(
+                    {
+                      title: 'Orders | Peekaboo',
+                      description: 'Manage, filter, and track all delivery orders from a single workspace.',
+                      path: '/orders',
+                      noindex: true,
+                    },
+                    <OrdersPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -122,7 +345,15 @@ const Router = () => {
               path=":id"
               element={
                 <ProtectedRoute allowedRoles={[...allRoles]}>
-                  <PublicOrderTracking />
+                  {withSEO(
+                    {
+                      title: 'Order Tracking | Peekaboo',
+                      description: 'View detailed status and location updates for a specific order.',
+                      path: '/orders',
+                      noindex: true,
+                    },
+                    <PublicOrderTracking />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -133,7 +364,15 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={[...batchRoles]}>
-                  <BatchesPage />
+                  {withSEO(
+                    {
+                      title: 'Batches | Peekaboo',
+                      description: 'Create and manage batched deliveries for efficient dispatching.',
+                      path: '/batches',
+                      noindex: true,
+                    },
+                    <BatchesPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -141,7 +380,15 @@ const Router = () => {
               path=":id"
               element={
                 <ProtectedRoute allowedRoles={[...batchRoles]}>
-                  <BatchDetailsPage />
+                  {withSEO(
+                    {
+                      title: 'Batch Details | Peekaboo',
+                      description: 'Review orders, riders, and progress for a delivery batch.',
+                      path: '/batches',
+                      noindex: true,
+                    },
+                    <BatchDetailsPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -149,7 +396,15 @@ const Router = () => {
               path=":id/preview"
               element={
                 <ProtectedRoute allowedRoles={[...batchRoles]}>
-                  <BatchPreviewPage />
+                  {withSEO(
+                    {
+                      title: 'Batch Preview | Peekaboo',
+                      description: 'Preview batch assignment and route details before publishing.',
+                      path: '/batches/preview',
+                      noindex: true,
+                    },
+                    <BatchPreviewPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -160,7 +415,15 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={['ADMIN', 'RIDER']}>
-                  <OrderAssignmentsPage />
+                  {withSEO(
+                    {
+                      title: 'Order Assignments | Peekaboo',
+                      description: 'Manage rider assignments and monitor assignment progress.',
+                      path: '/assignments',
+                      noindex: true,
+                    },
+                    <OrderAssignmentsPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -168,7 +431,15 @@ const Router = () => {
               path=":id"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN', 'RIDER']}>
-                  <OrderAssignmentDetails />
+                  {withSEO(
+                    {
+                      title: 'Assignment Details | Peekaboo',
+                      description: 'View complete information for a specific order assignment.',
+                      path: '/assignments',
+                      noindex: true,
+                    },
+                    <OrderAssignmentDetails />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -179,7 +450,15 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={[...userManagementRoles]}>
-                  <UsersPage />
+                  {withSEO(
+                    {
+                      title: 'Users | Peekaboo',
+                      description: 'Manage users, roles, and access permissions across your organization.',
+                      path: '/users',
+                      noindex: true,
+                    },
+                    <UsersPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -187,7 +466,15 @@ const Router = () => {
               path="tracking"
               element={
                 <ProtectedRoute allowedRoles={[...userManagementRoles]}>
-                  <UsersTrackingPage />
+                  {withSEO(
+                    {
+                      title: 'User Tracking | Peekaboo',
+                      description: 'Track live user and rider locations to improve operations.',
+                      path: '/users/tracking',
+                      noindex: true,
+                    },
+                    <UsersTrackingPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -195,7 +482,15 @@ const Router = () => {
               path=":id/location-history"
               element={
                 <ProtectedRoute allowedRoles={[...userManagementRoles]}>
-                  <UserLocationHistoryPage />
+                  {withSEO(
+                    {
+                      title: 'User Location History | Peekaboo',
+                      description: 'Review historical movement and location records for a user.',
+                      path: '/users/location-history',
+                      noindex: true,
+                    },
+                    <UserLocationHistoryPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -203,7 +498,15 @@ const Router = () => {
               path=":id"
               element={
                 <ProtectedRoute allowedRoles={[...userManagementRoles]}>
-                  <UserDetailsPage />
+                  {withSEO(
+                    {
+                      title: 'User Details | Peekaboo',
+                      description: 'View profile, role, and operational details of a team member.',
+                      path: '/users',
+                      noindex: true,
+                    },
+                    <UserDetailsPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -213,18 +516,48 @@ const Router = () => {
             path="user-profile"
             element={
               <ProtectedRoute allowedRoles={[...allRoles]}>
-                <UserProfilePage />
+                {withSEO(
+                  {
+                    title: 'My Profile | Peekaboo',
+                    description: 'Update personal details, preferences, and account settings.',
+                    path: '/user-profile',
+                    noindex: true,
+                  },
+                  <UserProfilePage />,
+                )}
               </ProtectedRoute>
             }
           />
 
-          <Route
-            path="payments"
-          >
-            <Route index element={<ProtectedRoute allowedRoles={['ADMIN']}>
-              <PaymentsPage />
-            </ProtectedRoute>} />
-            <Route path=":id" element={<PaymentDetailsPage />} />
+          <Route path="payments">
+            <Route
+              index
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  {withSEO(
+                    {
+                      title: 'Payments | Peekaboo',
+                      description: 'Track transactions, payment statuses, and financial records.',
+                      path: '/payments',
+                      noindex: true,
+                    },
+                    <PaymentsPage />,
+                  )}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path=":id"
+              element={withSEO(
+                {
+                  title: 'Payment Details | Peekaboo',
+                  description: 'View complete payment details for a selected transaction.',
+                  path: '/payments',
+                  noindex: true,
+                },
+                <PaymentDetailsPage />,
+              )}
+            />
           </Route>
 
           <Route path="organizations">
@@ -232,7 +565,15 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  <OrganizationsPage />
+                  {withSEO(
+                    {
+                      title: 'Organizations | Peekaboo',
+                      description: 'Manage client organizations and workspace configurations.',
+                      path: '/organizations',
+                      noindex: true,
+                    },
+                    <OrganizationsPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -240,7 +581,15 @@ const Router = () => {
               path=":id/manage"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  <ManageOrganizationPage />
+                  {withSEO(
+                    {
+                      title: 'Manage Organization | Peekaboo',
+                      description: 'Update organization details, billing, and operational settings.',
+                      path: '/organizations/manage',
+                      noindex: true,
+                    },
+                    <ManageOrganizationPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -248,7 +597,15 @@ const Router = () => {
               path="invite"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  <InviteOrganization />
+                  {withSEO(
+                    {
+                      title: 'Invite Organization | Peekaboo',
+                      description: 'Invite a new organization to your Peekaboo platform instance.',
+                      path: '/organizations/invite',
+                      noindex: true,
+                    },
+                    <InviteOrganization />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -256,7 +613,15 @@ const Router = () => {
               path="settings"
               element={
                 <ProtectedRoute allowedRoles={['BUSINESS']}>
-                  <OrganizationSettingsPage />
+                  {withSEO(
+                    {
+                      title: 'Organization Settings | Peekaboo',
+                      description: 'Configure organization-level preferences and profile settings.',
+                      path: '/organizations/settings',
+                      noindex: true,
+                    },
+                    <OrganizationSettingsPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -267,7 +632,15 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  <BusinessPlansPage />
+                  {withSEO(
+                    {
+                      title: 'Business Plans | Peekaboo',
+                      description: 'Manage subscription plans, features, and pricing models.',
+                      path: '/business-plans',
+                      noindex: true,
+                    },
+                    <BusinessPlansPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -275,7 +648,15 @@ const Router = () => {
               path="create"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  <CreateBusinessPlanPage />
+                  {withSEO(
+                    {
+                      title: 'Create Business Plan | Peekaboo',
+                      description: 'Create a new business plan with custom pricing and capabilities.',
+                      path: '/business-plans/create',
+                      noindex: true,
+                    },
+                    <CreateBusinessPlanPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -283,7 +664,15 @@ const Router = () => {
               path=":id/manage"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  <ManageBusinessPlanPage />
+                  {withSEO(
+                    {
+                      title: 'Manage Business Plan | Peekaboo',
+                      description: 'Edit and optimize an existing business plan configuration.',
+                      path: '/business-plans/manage',
+                      noindex: true,
+                    },
+                    <ManageBusinessPlanPage />,
+                  )}
                 </ProtectedRoute>
               }
             />
@@ -291,8 +680,29 @@ const Router = () => {
         </Route>
 
         {/* ─── Standalone pages ─────────────────────────────────────────────── */}
-        <Route path="/unauthorized" element={<UnauthorizedPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route
+          path="/unauthorized"
+          element={withSEO(
+            {
+              title: 'Unauthorized Access | Peekaboo',
+              description: 'You do not have permission to access this page.',
+              path: '/unauthorized',
+              noindex: true,
+            },
+            <UnauthorizedPage />,
+          )}
+        />
+        <Route
+          path="*"
+          element={withSEO(
+            {
+              title: 'Page Not Found | Peekaboo',
+              description: 'The page you are looking for does not exist or has been moved.',
+              noindex: true,
+            },
+            <NotFoundPage />,
+          )}
+        />
       </Routes>
       <SessionExpiredModal />
     </>
