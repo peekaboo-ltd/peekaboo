@@ -14,20 +14,20 @@ import {
 
 const accentMap = {
   blue: {
-    icon: 'text-blue-600',
-    iconBg: 'bg-blue-50',
-    iconRing: 'ring-blue-100',
-    spark: '#2563eb',
-    glow: 'from-blue-50 via-white to-white',
-    footer: 'text-blue-700',
+    icon: 'text-slate-700',
+    iconBg: 'bg-slate-50',
+    iconRing: 'ring-slate-200',
+    spark: 'hsl(var(--primary))',
+    glow: 'from-slate-50 via-white to-white',
+    footer: 'text-slate-700',
   },
   teal: {
-    icon: 'text-cyan-700',
-    iconBg: 'bg-cyan-50',
-    iconRing: 'ring-cyan-100',
+    icon: 'text-slate-700',
+    iconBg: 'bg-slate-50',
+    iconRing: 'ring-slate-200',
     spark: '#0891b2',
-    glow: 'from-cyan-50 via-white to-white',
-    footer: 'text-cyan-700',
+    glow: 'from-slate-50 via-white to-white',
+    footer: 'text-slate-700',
   },
   amber: {
     icon: 'text-amber-600',
@@ -46,12 +46,12 @@ const accentMap = {
     footer: 'text-emerald-700',
   },
   violet: {
-    icon: 'text-violet-600',
-    iconBg: 'bg-violet-50',
-    iconRing: 'ring-violet-100',
-    spark: '#7c3aed',
-    glow: 'from-violet-50 via-white to-white',
-    footer: 'text-violet-700',
+    icon: 'text-slate-700',
+    iconBg: 'bg-slate-50',
+    iconRing: 'ring-slate-200',
+    spark: 'hsl(var(--primary))',
+    glow: 'from-slate-50 via-white to-white',
+    footer: 'text-slate-700',
   },
   rose: {
     icon: 'text-rose-600',
@@ -125,10 +125,10 @@ const MetricCard = ({
   const cardContent = (
     <Card
       className={cn(
-        `group relative overflow-hidden rounded-[28px] border border-[rgba(148,163,184,0.18)] bg-gradient-to-br ${accentMap[accent].glow} shadow-[0_20px_60px_-42px_rgba(15,23,42,0.42)] transition-all duration-300`,
+        'group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300',
         destination
-          ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_24px_64px_-40px_rgba(15,23,42,0.48)]'
-          : 'hover:shadow-[0_24px_64px_-40px_rgba(15,23,42,0.48)]',
+          ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md'
+          : 'hover:shadow-md',
       )}
     >
       <CardContent className="relative p-5 sm:p-6">
@@ -137,7 +137,7 @@ const MetricCard = ({
             {icon && (
               <span
                 className={cn(
-                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 transition-transform duration-300 group-hover:scale-[1.03]',
+                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-md ring-1 transition-transform duration-300 group-hover:scale-[1.03]',
                   accentMap[accent].iconBg,
                   accentMap[accent].iconRing,
                 )}
@@ -151,11 +151,11 @@ const MetricCard = ({
               </span>
             )}
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold text-slate-600">
+              <span className="block truncate text-sm font-normal text-slate-600">
                 {label}
               </span>
               {(comparisonLabel || note) && (
-                <span className="mt-0.5 block truncate text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                <span className="mt-0.5 block truncate text-[11px] font-normal uppercase tracking-[0.05em] text-slate-500">
                   {comparisonLabel || note}
                 </span>
               )}
@@ -163,11 +163,10 @@ const MetricCard = ({
           </span>
           {trend && (
             <span
-              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                trend.isPositive
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-normal ${trend.isPositive
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-rose-50 text-rose-700'
-              }`}
+                }`}
               aria-label={`Trend: ${trend.isPositive ? 'increasing' : 'decreasing'} by ${Math.abs(trend.value)}%`}
             >
               {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
@@ -178,7 +177,7 @@ const MetricCard = ({
         <section className="flex items-end justify-between gap-4">
           <div className="min-w-0 flex-1">
             <p
-              className="truncate text-[2rem] font-semibold leading-none tracking-[-0.03em] text-slate-950 sm:text-[2.3rem]"
+              className="truncate text-[2rem] font-bold leading-none tracking-[-0.03em] text-slate-950 sm:text-[2.3rem]"
               aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
             >
               {value}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { useAppSelector } from '@/states/hooks';
 import {
@@ -62,12 +62,6 @@ const itemVariants: Variants = {
     y: 0,
     transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
   },
-};
-
-const dashboardSurfaceStyle: CSSProperties = {
-  ['--dashboard-surface' as string]: '#f3f6fb',
-  ['--dashboard-border' as string]: 'rgba(148, 163, 184, 0.18)',
-  ['--dashboard-shadow' as string]: '0 28px 80px -52px rgba(15, 23, 42, 0.45)',
 };
 
 const metricDefaultsByRole: Record<RoleTypes, string> = {
@@ -259,7 +253,7 @@ const Dashboard = () => {
   const [metric, setMetric] = useState<string>('ORDERS');
 
   const dashboardData = data?.data;
-  const role = dashboardData?.role;
+  const role = dashboardData?.role as RoleTypes | undefined;
 
   const isAdminOrStaff = role === RoleTypes.ADMIN || role === RoleTypes.STAFF;
   const isRider = role === RoleTypes.RIDER;
@@ -330,7 +324,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (!role) return;
     const expectedDefault = metricDefaultsByRole[role];
-    if (metric !== expectedDefault && role === RoleTypes.RIDER) {
+    if (role === RoleTypes.RIDER && metric !== expectedDefault) {
       setMetric(expectedDefault);
     }
   }, [metric, role]);
@@ -340,65 +334,59 @@ const Dashboard = () => {
 
   return (
     <motion.main
-      className="w-full flex flex-col gap-4"
-      style={dashboardSurfaceStyle}
+      className="w-full flex flex-col gap-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <div className="rounded-[36px] bg-[var(--dashboard-surface)] p-3 sm:p-4 lg:p-5">
-        <DashboardHeader
-          userName={user?.name}
-          role={dashboardData?.role}
-          actions={quickActions}
-          variants={itemVariants}
-        />
+      <DashboardHeader
+        userName={user?.name}
+        role={dashboardData?.role}
+        actions={quickActions}
+        variants={itemVariants}
+      />
 
-        <DashboardMetricsSection
-          cards={metricCards}
-          containerVariants={containerVariants}
-          itemVariants={itemVariants}
-        />
+      <DashboardMetricsSection
+        cards={metricCards}
+        containerVariants={containerVariants}
+        itemVariants={itemVariants}
+      />
 
-        <section className="grid grid-cols-12 gap-4">
-          <div className="col-span-12 xl:col-span-8">
-            <DashboardSummaryChart
-              range={range}
-              metric={metric}
-              onRangeChange={setRange}
-              onMetricChange={setMetric}
-              data={summaryData}
-              role={role}
-              breakdown={statusBreakdown}
-              isLoading={summaryChartFetching}
-              containerVariants={containerVariants}
-              itemVariants={itemVariants}
-            />
-          </div>
-
-          <div className="col-span-12 xl:col-span-4">
-            <DashboardChartsSection
-              widgets={supportWidgets}
-              itemVariants={itemVariants}
-            />
-          </div>
+      <section className="grid grid-cols-12 gap-4">
+        <section className="col-span-12 xl:col-span-8">
+          <DashboardSummaryChart
+            range={range}
+            metric={metric}
+            onRangeChange={setRange}
+            onMetricChange={setMetric}
+            data={summaryData}
+            role={role}
+            breakdown={statusBreakdown}
+            isLoading={summaryChartFetching}
+            containerVariants={containerVariants}
+            itemVariants={itemVariants}
+          />
         </section>
 
-        <section className="mt-4 grid grid-cols-12 gap-4">
-          <div className="col-span-12 xl:col-span-8">
-            <DashboardActivityPanel items={recentActivity} variants={itemVariants} />
-          </div>
-          <div className="col-span-12 xl:col-span-4">
-            <DashboardContextPanel
-              title={contextCopy.title}
-              description={contextCopy.description}
-              highlights={spotlightCards}
-              actions={quickActions}
-              variants={itemVariants}
-            />
-          </div>
+        <section className="col-span-12 xl:col-span-4">
+          <DashboardChartsSection widgets={supportWidgets} itemVariants={itemVariants} />
         </section>
-      </div>
+      </section>
+
+      <section className="grid grid-cols-12 gap-4">
+        <section className="col-span-12 xl:col-span-8">
+          <DashboardActivityPanel items={recentActivity} variants={itemVariants} />
+        </section>
+        <section className="col-span-12 xl:col-span-4">
+          <DashboardContextPanel
+            title={contextCopy.title}
+            description={contextCopy.description}
+            highlights={spotlightCards}
+            actions={quickActions}
+            variants={itemVariants}
+          />
+        </section>
+      </section>
     </motion.main>
   );
 };

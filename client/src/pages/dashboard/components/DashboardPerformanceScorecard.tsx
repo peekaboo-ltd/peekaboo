@@ -89,7 +89,7 @@ const DashboardPerformanceScorecard = ({
               {/* Progress bar */}
               <div className="h-1.5 rounded-full bg-[rgba(37,52,63,0.15)]">
                 <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#3D5564,#96AAB4)]"
+                  className="h-full rounded-full bg-[color:var(--primary)] opacity-60"
                   style={{ width: `${Math.min(kpi.progress, 100)}%` }}
                 />
               </div>

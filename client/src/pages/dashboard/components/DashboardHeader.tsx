@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBolt, faFileExport } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { RoleTypes } from '@/types/auth.type';
 import { useI18n } from '@/i18n/i18n';
 import { Button } from '@/components/ui/button';
 import DatePicker from '@/components/inputs/DatePicker';
 import type { DashboardActionLink } from '@/types/dashboard.type';
+import { faFileLines } from '@fortawesome/free-regular-svg-icons';
 
 interface DashboardHeaderProps {
   userName?: string | null;
@@ -41,14 +41,10 @@ const DashboardHeader = ({
 
   return (
     <motion.header className="w-full" variants={variants}>
-      <div className="overflow-hidden rounded-[32px] border border-[rgba(148,163,184,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,249,252,0.95))] p-5 shadow-[0_28px_80px_-52px_rgba(15,23,42,0.45)] sm:p-6">
+      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
-            <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
-              <FontAwesomeIcon icon={faBolt} className="text-[10px]" />
-              Operations overview
-            </span>
-            <h1 className="mt-4 text-[2rem] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2.35rem]">
+            <h1 className="mt-4 text-[2rem] font-bold tracking-[-0.04em] text-slate-950 sm:text-[2.35rem]">
               Dashboard
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[15px]">
@@ -62,7 +58,7 @@ const DashboardHeader = ({
                   <Link
                     key={action.label}
                     to={action.to}
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-200 hover:border-slate-300 hover:bg-slate-50"
+                    className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-normal text-slate-700 transition-colors duration-200 hover:border-slate-300 hover:bg-slate-50"
                   >
                     <FontAwesomeIcon icon={action.icon} className="text-xs text-slate-500" />
                     {action.label}
@@ -94,22 +90,10 @@ const DashboardHeader = ({
             </div>
 
             <div className="flex flex-wrap items-center justify-end gap-2">
-              <Button variant="outline" size="sm" className="h-11 gap-2 rounded-full px-4">
-                <FontAwesomeIcon icon={faFileExport} className="text-xs" />
+              <Button variant="outline" size="sm" className="h-10 gap-2 rounded-md px-4">
+                <FontAwesomeIcon icon={faFileLines} className="text-xs" />
                 Export
               </Button>
-              {actions[0] && (
-                <Button
-                  asChild
-                  size="sm"
-                  className="h-11 rounded-full bg-[#2563eb] px-5 text-white hover:bg-[#1d4ed8]"
-                >
-                  <Link to={actions[0].to}>
-                    <FontAwesomeIcon icon={actions[0].icon} className="text-xs" />
-                    {actions[0].label}
-                  </Link>
-                </Button>
-              )}
             </div>
           </div>
         </div>

@@ -17,11 +17,11 @@ interface DashboardChartsSectionProps {
 }
 
 const accentStroke: Record<NonNullable<DashboardSupportCardData['accent']>, string> = {
-  blue: '#2563eb',
+  blue: 'hsl(var(--primary))',
   teal: '#0891b2',
   amber: '#d97706',
   emerald: '#059669',
-  violet: '#7c3aed',
+  violet: 'hsl(var(--primary))',
   rose: '#e11d48',
   slate: '#475569',
 };
@@ -40,10 +40,10 @@ const DashboardChartsSection = ({
             eyebrow="Support widget"
             title={widget.title}
             description={widget.subtitle}
-            className="rounded-[32px] border-[rgba(148,163,184,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(245,248,252,0.94))] p-0 shadow-[0_28px_80px_-52px_rgba(15,23,42,0.45)]"
+            className="rounded-lg p-0"
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="text-[2rem] font-semibold leading-none tracking-[-0.04em] text-slate-950">
+              <p className="text-[2rem] font-bold leading-none tracking-[-0.04em] text-slate-950">
                 {widget.value}
               </p>
               {widget.chartType !== 'status' && widget.data && widget.data.length > 0 && (
@@ -88,7 +88,7 @@ const DashboardChartsSection = ({
                       </div>
                       <div className="h-2 rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-[#2563eb]"
+                          className="h-full rounded-full bg-primary"
                           style={{ width: `${Math.max(width, 8)}%` }}
                         />
                       </div>
