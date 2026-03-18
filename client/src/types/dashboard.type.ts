@@ -1,5 +1,6 @@
 import { RoleTypes } from './auth.type';
 import { UUID } from '.';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 export interface OrderStatusCount {
   status: string;
@@ -85,7 +86,14 @@ export interface DashboardMetrics {
   metrics: AdminMetrics | RiderMetrics | CustomerMetrics | BusinessMetrics;
 }
 
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
+export type DashboardAccent =
+  | 'blue'
+  | 'teal'
+  | 'amber'
+  | 'emerald'
+  | 'violet'
+  | 'rose'
+  | 'slate';
 
 export interface MetricCardData {
   label: string;
@@ -95,12 +103,39 @@ export interface MetricCardData {
     isPositive: boolean;
   };
   colorClass?: string;
+  accent?: DashboardAccent;
   href?: string;
   query?: Record<string, string>;
   to?: string;
   icon?: IconProp;
   sparklineData?: number[];
   sparklineType?: 'line' | 'bar';
+  comparisonLabel?: string;
+  note?: string;
+  footerText?: string;
+  variant?: 'default' | 'compact';
+}
+
+export interface DashboardActionLink {
+  label: string;
+  to: string;
+  icon: IconProp;
+}
+
+export interface DashboardStatusBreakdownItem {
+  label: string;
+  value: number;
+  tone?: DashboardAccent;
+}
+
+export interface DashboardSupportCardData {
+  title: string;
+  value: string;
+  subtitle: string;
+  chartType: 'line' | 'bar' | 'status';
+  accent?: DashboardAccent;
+  data?: ChartDataPoint[];
+  breakdown?: DashboardStatusBreakdownItem[];
 }
 
 // Fleet efficiency chart data
