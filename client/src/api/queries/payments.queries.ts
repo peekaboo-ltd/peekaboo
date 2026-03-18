@@ -18,6 +18,15 @@ export const paymentsQueriesApiSlice = createApi({
   reducerPath: 'paymentsQueriesApi',
   baseQuery: createBaseQuery(),
   endpoints: (builder) => ({
+    // FETCH PUBLIC PAYMENTS (no auth required)
+    fetchPublicPayments: builder.query({
+      query: ({ entityId, paymentType }: { entityId: string; paymentType?: string }) => ({
+        url: `/payments/public`,
+        method: 'GET',
+        params: { entityId, paymentType },
+      }),
+    }),
+
     fetchPayments: builder.query({
       query: ({ entityId, paymentType }) => ({
         url: `/payments`,
@@ -56,6 +65,7 @@ export const paymentsQueriesApiSlice = createApi({
 });
 
 export const {
+  useLazyFetchPublicPaymentsQuery,
   useLazyFetchPaymentsQuery,
   useLazyGetPaymentQuery,
   useLazyFetchAdminPaymentsQuery,

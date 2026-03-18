@@ -5,6 +5,15 @@ export const paymentsMutationsApiSlice = createApi({
   reducerPath: 'paymentsMutationsApi',
   baseQuery: createBaseQuery(),
   endpoints: (builder) => ({
+    // CREATE PUBLIC PAYMENT (no auth required)
+    createPublicPayment: builder.mutation({
+      query: (payment) => ({
+        url: '/payments/public',
+        method: 'POST',
+        body: payment,
+      }),
+    }),
+
     createPayment: builder.mutation({
       query: (payment) => ({
         url: '/payments',
@@ -23,6 +32,7 @@ export const paymentsMutationsApiSlice = createApi({
 });
 
 export const {
+  useCreatePublicPaymentMutation,
   useCreatePaymentMutation,
   useAdminUpdatePaymentStatusMutation,
 } = paymentsMutationsApiSlice;

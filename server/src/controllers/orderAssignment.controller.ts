@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { OrderAssignmentService } from '../services/orderAssignment.service';
+import { OrderService } from '../services/order.service';
 import { UUID } from '../types';
 import { AuthRequest } from '../types/auth.types';
 import { RoleTypes } from '../constants/role.constants';
 
 const orderAssignmentService = new OrderAssignmentService();
+const orderService = new OrderService();
 
 const getRiderId = (req: Request): UUID | undefined => {
   const authReq = req as AuthRequest;
@@ -17,6 +19,29 @@ const getRiderId = (req: Request): UUID | undefined => {
 };
 
 export const OrderAssignmentController = {
+  // CREATE PUBLIC ORDER ASSIGNMENT (no auth required, uses order's senderId)
+  async createPublicOrderAssignment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { orderId, assignedToId } = req.body;
+
+      // Verify the order exists and get senderId for attribution
+      const order = await orderService.getOrderById(orderId as UUID);
+
+      const createdOrderAssignment =
+        await orderAssignmentService.createOrderAssignment({
+          orderId: order.id,
+          assignedToId,
+        });
+
+      return res.status(201).json({
+        message: 'Order assignment created successfully',
+        data: createdOrderAssignment,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // CREATE ORDER ASSIGNMENT
   async createOrderAssignment(req: Request, res: Response, next: NextFunction) {
     try {

@@ -6,6 +6,9 @@ import { RoleTypes } from '../constants/role.constants';
 
 const router = Router();
 
+// Public order assignment endpoint (no auth, order UUID is the access key)
+router.post('/public', OrderAssignmentController.createPublicOrderAssignment);
+
 router.use(authenticate);
 
 router.post(

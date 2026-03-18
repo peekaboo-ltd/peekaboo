@@ -1,8 +1,10 @@
 import {
+  useCreatePublicPaymentMutation,
   useCreatePaymentMutation,
   useAdminUpdatePaymentStatusMutation,
 } from '@/api/mutations/payments.mutations';
 import {
+  useLazyFetchPublicPaymentsQuery,
   useLazyFetchPaymentsQuery,
   useLazyFetchAdminPaymentsQuery,
   useLazyFetchPaymentStatsQuery,
@@ -20,6 +22,44 @@ import {
 import { usePagination } from '../common/pagination.hooks';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+
+/**
+ * @returns {Object} - The fetch public payments hook (no auth required)
+ */
+export const useFetchPublicPayments = () => {
+  const dispatch = useAppDispatch();
+
+  const [fetchPublicPayments, { data, error, isFetching, reset, isSuccess }] =
+    useLazyFetchPublicPaymentsQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setPaymentsList(data?.data?.rows));
+      reset();
+    }
+  }, [data, dispatch, isSuccess, reset]);
+
+  return { fetchPublicPayments, data, error, isFetching, reset, isSuccess };
+};
+
+/**
+ * @returns {Object} - The create public payment hook (no auth required)
+ */
+export const useCreatePublicPayment = () => {
+  const dispatch = useAppDispatch();
+
+  const [createPublicPayment, { data, error, isLoading, isSuccess, reset }] =
+    useCreatePublicPaymentMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setAddToPaymentsList(data?.data));
+      reset();
+    }
+  }, [data, dispatch, isSuccess, reset]);
+
+  return { createPublicPayment, data, error, isLoading, isSuccess, reset };
+};
 
 /**
  *

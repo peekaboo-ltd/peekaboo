@@ -6,12 +6,14 @@ import { RoleTypes } from '../constants/role.constants';
 
 const router = Router();
 
-// Public order endpoints
+// Public order endpoints (no auth required, order UUID acts as access key)
 router.post('/public', OrderController.createPublicOrder);
 router.get(
   '/public/reference/:referenceId',
   OrderController.getOrderByReferenceId,
 );
+router.get('/public/:id', OrderController.getPublicOrderById);
+router.patch('/public/:id', OrderController.updatePublicOrder);
 
 // Authenticated endpoints
 router.use(authenticate);

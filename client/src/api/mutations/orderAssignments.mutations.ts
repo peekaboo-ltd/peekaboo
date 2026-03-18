@@ -6,6 +6,21 @@ export const orderAssignmentsMutationsApiSlice = createApi({
   reducerPath: 'orderAssignmentsMutationsApi',
   baseQuery: createBaseQuery(),
   endpoints: (builder) => ({
+    // CREATE PUBLIC ORDER ASSIGNMENT (no auth required)
+    createPublicOrderAssignment: builder.mutation({
+      query: ({
+        orderId,
+        assignedToId,
+      }: {
+        orderId: UUID;
+        assignedToId?: UUID;
+      }) => ({
+        url: `/order-assignments/public`,
+        method: 'POST',
+        body: { orderId, assignedToId },
+      }),
+    }),
+
     createOrderAssignment: builder.mutation({
       query: ({
         orderId,
@@ -39,6 +54,7 @@ export const orderAssignmentsMutationsApiSlice = createApi({
 });
 
 export const {
+  useCreatePublicOrderAssignmentMutation,
   useCreateOrderAssignmentMutation,
   useAcceptOrderAssignmentMutation,
   useRejectOrderAssignmentMutation,

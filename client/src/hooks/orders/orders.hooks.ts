@@ -5,21 +5,17 @@ import {
   useDeleteOrderMutation,
   useImportBulkOrdersMutation,
   useUpdateOrderMutation,
+  useUpdatePublicOrderMutation,
 } from '../../api/mutations/orders.mutations';
 import { useNavigate } from 'react-router-dom';
 import {
   useLazyFetchOrdersQuery,
   useLazyGetOrderQuery,
   useLazyGetOrderByReferenceIdQuery,
+  useLazyGetPublicOrderQuery,
 } from '@/api/queries/orders.queries';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrder, setOrdersList } from '@/states/slices/order.slice';
-import {
-  setToken,
-  setUser,
-  setIsAuthenticated,
-} from '@/states/slices/auth.slice';
-import { localStorageUtil } from '@/utils/localStorage.util';
 import { ORDER_FEE_RANGES } from '@/constants/order.constants';
 import { usePagination } from '../common/pagination.hooks';
 import { RoleTypes } from '@/types/auth.type';
@@ -30,35 +26,20 @@ import type { UUID } from '@/types';
  * @returns {Object} - The create public order hook
  */
 export const useCreatePublicOrder = () => {
-  // STATE VARIABLES
-  // NAVIGATION
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [createPublicOrder, { data, error, isLoading, reset, isSuccess }] =
     useCreatePublicOrderMutation();
 
   useEffect(() => {
     if (isSuccess && data?.data) {
-      const { order, auth } = data.data;
+      const { order } = data.data;
 
-      if (!isAuthenticated && auth?.token && auth?.user) {
-        // Store auth data in localStorage
-        localStorageUtil.setItem('token', auth.token);
-        localStorageUtil.setItem('user', auth.user);
-
-        // Update Redux state
-        dispatch(setToken(auth.token));
-        dispatch(setUser(auth.user));
-        dispatch(setIsAuthenticated(true));
-      }
-
-      // Navigate to order details
+      // Navigate to order details (no auth token stored)
       navigate(`/p/orders/${order.id}`);
       reset();
     }
-  }, [data, isSuccess, navigate, reset, dispatch, isAuthenticated]);
+  }, [data, isSuccess, navigate, reset]);
 
   return { createPublicOrder, data, error, isLoading, reset, isSuccess };
 };
@@ -207,6 +188,44 @@ export const useGetOrderFees = (
 /**
  * @returns {Object} - The get order by reference ID hook
  */
+/**
+ * @returns {Object} - The get public order hook (no auth required)
+ */
+export const useGetPublicOrder = () => {
+  const dispatch = useAppDispatch();
+
+  const [getPublicOrder, { data, error, isFetching, reset, isSuccess }] =
+    useLazyGetPublicOrderQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setOrder(data?.data));
+      reset();
+    }
+  }, [data, isSuccess, dispatch, reset]);
+
+  return { getPublicOrder, data, error, isFetching, reset, isSuccess };
+};
+
+/**
+ * @returns {Object} - The update public order hook (no auth required)
+ */
+export const useUpdatePublicOrder = () => {
+  const dispatch = useAppDispatch();
+
+  const [updatePublicOrder, { data, error, isLoading, isSuccess, reset }] =
+    useUpdatePublicOrderMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setOrder(data?.data));
+      reset();
+    }
+  }, [data, isSuccess, dispatch, reset]);
+
+  return { updatePublicOrder, data, error, isLoading, isSuccess, reset };
+};
+
 export const useGetOrderByReferenceId = () => {
   const dispatch = useAppDispatch();
 

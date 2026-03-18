@@ -7,6 +7,28 @@ import { UUID } from '../types';
 const orderActivityService = new OrderActivityService();
 
 export const OrderActivityController = {
+  // FETCH PUBLIC ORDER ACTIVITIES (no auth, requires orderId query param)
+  async fetchPublicOrderActivities(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.query.orderId) {
+        return res.status(400).json({
+          message: 'orderId query parameter is required',
+        });
+      }
+
+      const orderActivity = await orderActivityService.fetchOrderActivities({
+        params: req.query,
+      });
+
+      return res.status(200).json({
+        message: 'Order activity fetched successfully',
+        data: orderActivity,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // GET ORDER ACTIVITY
   async fetchOrderActivities(req: Request, res: Response, next: NextFunction) {
     try {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setUpdateOrderLocationFromModal } from '@/states/slices/order.slice';
-import { useUpdateOrder } from '@/hooks/orders/orders.hooks';
+import { useUpdateOrder, useUpdatePublicOrder } from '@/hooks/orders/orders.hooks';
 import Modal from '../Modal';
 import PlaceSearch, { type PlaceSearchResult } from '../inputs/PlaceSearch';
 import Button from '../inputs/Button';
@@ -10,7 +10,11 @@ import { toast } from 'sonner';
 const UpdateOrderLocationFrom = () => {
   const dispatch = useAppDispatch();
   const { updateOrderLocationFromModal, order } = useAppSelector((state) => state.order);
-  const { updateOrder, isLoading, isSuccess } = useUpdateOrder();
+  const { token } = useAppSelector((state) => state.auth);
+  const { updateOrder, isLoading: authLoading, isSuccess: authSuccess } = useUpdateOrder();
+  const { updatePublicOrder, isLoading: publicLoading, isSuccess: publicSuccess } = useUpdatePublicOrder();
+  const isLoading = token ? authLoading : publicLoading;
+  const isSuccess = token ? authSuccess : publicSuccess;
   const [selectedLocation, setSelectedLocation] = useState<PlaceSearchResult | null>(null);
 
   const handleLocationSelect = (location: PlaceSearchResult) => {
@@ -19,7 +23,7 @@ const UpdateOrderLocationFrom = () => {
 
   const handleSaveLocation = () => {
     if (selectedLocation && order?.id) {
-      updateOrder({
+      const payload = {
         id: order.id,
         order: {
           locationFrom: {
@@ -27,7 +31,12 @@ const UpdateOrderLocationFrom = () => {
             longitude: selectedLocation.coordinates.longitude,
           },
         },
-      });
+      };
+      if (token) {
+        updateOrder(payload);
+      } else {
+        updatePublicOrder(payload);
+      }
     }
   };
 

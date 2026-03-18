@@ -1,4 +1,4 @@
-import { useGetOrder, useGetOrderFees, useUpdateOrder } from '@/hooks/orders/orders.hooks';
+import { useGetPublicOrder, useGetOrderFees, useUpdatePublicOrder } from '@/hooks/orders/orders.hooks';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import {
   setOrder,
@@ -9,13 +9,13 @@ import {
 } from '@/states/slices/order.slice';
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import RouteCalculator from '@/containers/locations/RouteCalculator';
 import AdministrativeLocation from '@/containers/locations/AdministrativeLocation';
-import { useCreateOrderAssignment } from '@/hooks/orders/orderAssignments.hooks';
+import { useCreatePublicOrderAssignment } from '@/hooks/orders/orderAssignments.hooks';
 import Button from '@/components/inputs/Button';
 import { formatCurrency } from '@/utils/strings.util';
 import UpdateOrderLocationFrom from '@/components/modals/UpdateOrderLocationFrom';
@@ -23,7 +23,7 @@ import UpdateOrderLocationTo from '@/components/modals/UpdateOrderLocationTo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import OrderPayment from '@/components/modals/OrderPayment';
-import { useFetchPayments } from '@/hooks/payments/payment.hooks';
+import { useFetchPublicPayments } from '@/hooks/payments/payment.hooks';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { ORDER_FEE_RANGES } from '@/constants/order.constants';
@@ -51,38 +51,35 @@ const PublicOrderDetails = () => {
   const dispatch = useAppDispatch();
   const { order } = useAppSelector((state) => state.order);
   const { paymentsList } = useAppSelector((state) => state.payment);
-  const { user: authUser } = useAppSelector((state) => state.auth);
   const [distance, setDistance] = useState<number | null>(null);
   const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
   const [gettingCurrentLocation, setGettingCurrentLocation] = useState(false);
-  const [defaultLocationPrompt, setDefaultLocationPrompt] = useState<'user' | 'org' | 'both' | null>(null);
-  const hasAppliedDefault = useRef(false);
 
   const { id } = useParams();
   const navigate = useNavigate();
   const orderId = id as UUID | undefined;
   const currentOrder = order?.id === orderId ? order : undefined;
 
-  const { fetchPayments } = useFetchPayments();
+  const { fetchPublicPayments } = useFetchPublicPayments();
 
   useEffect(() => {
     if (currentOrder?.id) {
-      fetchPayments({ entityId: currentOrder.id, paymentType: PaymentType.ORDER });
+      fetchPublicPayments({ entityId: currentOrder.id, paymentType: PaymentType.ORDER });
     }
-  }, [fetchPayments, currentOrder?.id]);
+  }, [fetchPublicPayments, currentOrder?.id]);
 
-  const { getOrder } = useGetOrder();
-  const { updateOrder } = useUpdateOrder();
+  const { getPublicOrder } = useGetPublicOrder();
+  const { updatePublicOrder } = useUpdatePublicOrder();
   const { getOrderFee, orderFee } = useGetOrderFees(
     currentOrder?.finalFee !== null && currentOrder?.finalFee !== undefined ? currentOrder.finalFee : undefined,
     orderId,
   );
 
   const {
-    createOrderAssignment,
+    createPublicOrderAssignment,
     isSuccess: createOrderAssignmentIsSuccess,
     isLoading: createOrderAssignmentIsLoading,
-  } = useCreateOrderAssignment();
+  } = useCreatePublicOrderAssignment();
 
   useEffect(() => {
     if (createOrderAssignmentIsSuccess) {
@@ -96,7 +93,7 @@ const PublicOrderDetails = () => {
     setGettingCurrentLocation(true);
     try {
       const location = await getCurrentLocation();
-      updateOrder({
+      updatePublicOrder({
         id: currentOrder.id,
         order: {
           locationFrom: {
@@ -110,77 +107,21 @@ const PublicOrderDetails = () => {
     } finally {
       setGettingCurrentLocation(false);
     }
-  }, [currentOrder?.id, updateOrder]);
+  }, [currentOrder?.id, updatePublicOrder]);
 
   useLayoutEffect(() => {
     if (order?.id !== orderId) {
       dispatch(setOrder(undefined));
       setDistance(null);
       setEstimatedTime(null);
-      hasAppliedDefault.current = false;
-      setDefaultLocationPrompt(null);
     }
   }, [dispatch, order?.id, orderId]);
 
   useEffect(() => {
     if (orderId) {
-      getOrder({ id: orderId });
+      getPublicOrder({ id: orderId });
     }
-  }, [orderId, getOrder]);
-
-  const userDefaultLat = authUser?.defaultLocation?.latitude ?? null;
-  const userDefaultLng = authUser?.defaultLocation?.longitude ?? null;
-  const orgDefaultLat = authUser?.organizationMembership?.[0]?.organization?.defaultLocation?.latitude ?? null;
-  const orgDefaultLng = authUser?.organizationMembership?.[0]?.organization?.defaultLocation?.longitude ?? null;
-  const userDefault =
-    userDefaultLat !== null && userDefaultLng !== null
-      ? { latitude: userDefaultLat, longitude: userDefaultLng }
-      : null;
-  const orgDefault =
-    orgDefaultLat !== null && orgDefaultLng !== null
-      ? { latitude: orgDefaultLat, longitude: orgDefaultLng }
-      : null;
-
-  useEffect(() => {
-    if (!currentOrder?.id || currentOrder.locationFrom || hasAppliedDefault.current) return;
-
-    if (userDefaultLat !== null && orgDefaultLat !== null) {
-      setDefaultLocationPrompt('both');
-    } else if (userDefaultLat !== null && userDefaultLng !== null) {
-      hasAppliedDefault.current = true;
-      updateOrder({
-        id: currentOrder.id,
-        order: { locationFrom: { latitude: userDefaultLat, longitude: userDefaultLng } },
-      });
-    } else if (orgDefaultLat !== null && orgDefaultLng !== null) {
-      hasAppliedDefault.current = true;
-      updateOrder({
-        id: currentOrder.id,
-        order: { locationFrom: { latitude: orgDefaultLat, longitude: orgDefaultLng } },
-      });
-    }
-  }, [
-    currentOrder?.id,
-    currentOrder?.locationFrom,
-    userDefaultLat,
-    userDefaultLng,
-    orgDefaultLat,
-    orgDefaultLng,
-    updateOrder,
-  ]);
-
-  const handleApplyDefault = (choice: 'user' | 'org' | 'skip') => {
-    setDefaultLocationPrompt(null);
-    hasAppliedDefault.current = true;
-    if (choice === 'skip' || !currentOrder?.id) return;
-    const loc = choice === 'user' ? userDefault : orgDefault;
-    if (loc) {
-      updateOrder({
-        id: currentOrder.id,
-        order: { locationFrom: { latitude: loc.latitude, longitude: loc.longitude } },
-      });
-    }
-  };
+  }, [orderId, getPublicOrder]);
 
   useEffect(() => {
     return () => {
@@ -202,14 +143,14 @@ const PublicOrderDetails = () => {
 
   useEffect(() => {
     if (orderFee && currentOrder?.id) {
-      updateOrder({
+      updatePublicOrder({
         id: currentOrder.id,
         order: {
           finalFee: orderFee,
         },
       });
     }
-  }, [currentOrder?.id, orderFee, updateOrder]);
+  }, [currentOrder?.id, orderFee, updatePublicOrder]);
 
   const renderDeliveryTime = () => {
     if (estimatedTime === null) return null;
@@ -287,25 +228,6 @@ const PublicOrderDetails = () => {
           title={currentOrder?.referenceId || 'Set delivery locations'}
           description="Set pickup and destination, then continue."
         />
-
-        {defaultLocationPrompt === 'both' ? (
-          <PublicSectionCard
-            eyebrow="Saved Locations"
-            title="Choose a pickup default"
-          >
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => handleApplyDefault('user')} className="py-1.5! px-4! text-xs" primary>
-                My Default Location
-              </Button>
-              <Button onClick={() => handleApplyDefault('org')} className="py-1.5! px-4! text-xs">
-                Organization Location
-              </Button>
-              <Button onClick={() => handleApplyDefault('skip')} className="py-1.5! px-4! text-xs text-slate-500!">
-                Set Manually
-              </Button>
-            </div>
-          </PublicSectionCard>
-        ) : null}
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {stats.map((stat) => (
@@ -414,7 +336,7 @@ const PublicOrderDetails = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   if (currentOrder?.id) {
-                    createOrderAssignment({
+                    createPublicOrderAssignment({
                       orderId: currentOrder.id,
                     });
                   }

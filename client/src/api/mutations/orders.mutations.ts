@@ -47,6 +47,15 @@ export const ordersMutationApiSlice = createApi({
       }),
     }),
 
+    // UPDATE PUBLIC ORDER (no auth required, limited fields)
+    updatePublicOrder: builder.mutation({
+      query: ({ id, order }: { id: UUID; order: Partial<Order> }) => ({
+        url: `/orders/public/${id}`,
+        method: 'PATCH',
+        body: { order },
+      }),
+    }),
+
     // DELETE ORDER
     deleteOrder: builder.mutation({
       query: (id: UUID) => ({
@@ -76,6 +85,7 @@ export const {
   useCreateOrderMutation,
   useCreatePublicOrderMutation,
   useUpdateOrderMutation,
+  useUpdatePublicOrderMutation,
   useDeleteOrderMutation,
   useImportBulkOrdersMutation,
 } = ordersMutationApiSlice;

@@ -6,6 +6,9 @@ import { RoleTypes } from '../constants/role.constants';
 
 const router = Router();
 
+// Public order activity endpoint (no auth, requires orderId query param)
+router.get('/public', OrderActivityController.fetchPublicOrderActivities);
+
 router.use(authenticate);
 
 router.get(

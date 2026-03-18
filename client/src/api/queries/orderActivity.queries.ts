@@ -6,6 +6,22 @@ export const orderActivityQueriesApiSlice = createApi({
   reducerPath: 'orderActivityQueriesApi',
   baseQuery: createBaseQuery(),
   endpoints: (builder) => ({
+    // FETCH PUBLIC ORDER ACTIVITIES (no auth required)
+    fetchPublicOrderActivities: builder.query({
+      query: ({
+        page,
+        size,
+        orderId,
+      }: {
+        page?: number;
+        size?: number;
+        orderId: UUID;
+      }) => ({
+        url: '/order-activities/public',
+        params: { page, size, orderId },
+      }),
+    }),
+
     fetchOrderActivities: builder.query({
       query: ({
         page,
@@ -23,5 +39,5 @@ export const orderActivityQueriesApiSlice = createApi({
   }),
 });
 
-export const { useLazyFetchOrderActivitiesQuery } =
+export const { useLazyFetchPublicOrderActivitiesQuery, useLazyFetchOrderActivitiesQuery } =
   orderActivityQueriesApiSlice;

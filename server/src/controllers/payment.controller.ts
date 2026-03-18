@@ -1,13 +1,66 @@
 import { NextFunction, Request, Response } from 'express';
 import { PaymentService } from '../services/payment.service';
+import { OrderService } from '../services/order.service';
 
 import { AuthenticatedRequest } from '../types/auth.types';
 import { KpayPaymentStatus } from '../types/kpay.types';
 import { UUID } from '../types';
+import { ValidationError } from '../helpers/errors.helper';
 
 const paymentService = new PaymentService();
+const orderService = new OrderService();
 
 export const PaymentController = {
+  // CREATE PUBLIC PAYMENT (no auth, uses order's senderId as creator)
+  async createPublicPayment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { body } = req;
+      const { orderId } = body;
+
+      if (!orderId) {
+        throw new ValidationError('orderId is required for public payments');
+      }
+
+      // Verify order exists and get senderId for attribution
+      const order = await orderService.getOrderById(orderId as UUID);
+
+      const result = await paymentService.createPayment({
+        ...body,
+        createdById: order.senderId,
+      });
+
+      if (result) {
+        return res.status(201).json({
+          success: true,
+          message: 'Payment created successfully',
+          data: result,
+          paymentUrl: result.externalReferenceId,
+        });
+      }
+    } catch (error: any) {
+      next(error);
+    }
+  },
+
+  // FETCH PUBLIC PAYMENTS (no auth, requires entityId query param)
+  async fetchPublicPayments(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { query } = req;
+
+      if (!query.entityId) {
+        throw new ValidationError('entityId query parameter is required');
+      }
+
+      const payments = await paymentService.fetchPayments(query);
+      return res.status(200).json({
+        message: 'Payments fetched successfully',
+        data: payments,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   /**
    * Create a new payment
    */

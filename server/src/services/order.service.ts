@@ -23,7 +23,6 @@ import { User } from '../entities/user.entity';
 import { UserService } from './user.service';
 import { OrderActivityService } from './orderActivity.service';
 import { Request } from 'express';
-import jwt from 'jsonwebtoken';
 import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrganizationService } from './organization.service';
 import { OrganizationBillingService } from './organizationBilling.service';
@@ -226,7 +225,7 @@ export class OrderService {
   }: {
     senderPhoneNumber: string;
     recipientPhoneNumber: string;
-  }): Promise<{ order: Order; auth: { token: string; user: User } }> {
+  }): Promise<{ order: Order }> {
     const referenceId = await this.generateUniqueOrderReferenceId();
     const trackingId = await this.generateUniqueTrackingId();
 
@@ -267,16 +266,6 @@ export class OrderService {
       status: OrderStatus.CREATED,
       createdById: createdOrder?.createdById,
     });
-
-    // GENERATE AUTHENTICATION TOKEN FOR THE SENDER
-    const token = jwt.sign(
-      { id: sender.id },
-      process.env.JWT_SECRET || 'default_secret',
-      { expiresIn: '24h' }
-    );
-
-    // FETCH COMPLETE USER DETAILS WITH ROLES
-    const userWithRoles = await this.userService.getUserById(sender.id);
 
     if (sender?.email) {
       this.emailService
@@ -332,13 +321,8 @@ export class OrderService {
         .catch(() => { });
     }
 
-    // RETURN ORDER AND AUTH DATA
     return {
       order: createdOrder,
-      auth: {
-        token,
-        user: userWithRoles,
-      },
     };
   }
 

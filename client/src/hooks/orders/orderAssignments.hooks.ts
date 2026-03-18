@@ -1,4 +1,5 @@
 import {
+  useCreatePublicOrderAssignmentMutation,
   useCreateOrderAssignmentMutation,
   useAcceptOrderAssignmentMutation,
   useRejectOrderAssignmentMutation,
@@ -14,6 +15,19 @@ import {
 } from '@/states/slices/orderAssignment.slice';
 import { usePagination } from '../common/pagination.hooks';
 import { useEffect } from 'react';
+
+export const useCreatePublicOrderAssignment = () => {
+  const [createPublicOrderAssignment, { data, error, isLoading, isSuccess, reset }] =
+    useCreatePublicOrderAssignmentMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      reset();
+    }
+  }, [isSuccess, reset]);
+
+  return { createPublicOrderAssignment, data, error, isLoading, isSuccess, reset };
+};
 
 export const useCreateOrderAssignment = () => {
   const [createOrderAssignment, { data, error, isLoading, isSuccess, reset }] =

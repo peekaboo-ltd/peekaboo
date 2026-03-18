@@ -7,7 +7,7 @@ import { PaymentType } from '@/types/payment.types';
 import { formatCurrency, formatPhone } from '@/utils/strings.util';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import Button from '../inputs/Button';
-import { useCreatePayment } from '@/hooks/payments/payment.hooks';
+import { useCreatePayment, useCreatePublicPayment } from '@/hooks/payments/payment.hooks';
 
 type PayerType = 'sender' | 'recipient' | 'other';
 
@@ -17,6 +17,8 @@ const OrderPayment = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { orderPaymentModal, selectedOrder } = useAppSelector((state) => state.order);
+  const { token } = useAppSelector((state) => state.auth);
+  const isPublic = !token;
   const [payerType, setPayerType] = useState<PayerType>('sender');
   const [customPhone, setCustomPhone] = useState<string>('');
   const [phoneError, setPhoneError] = useState<string>('');
@@ -34,7 +36,12 @@ const OrderPayment = () => {
     setFallbackPhoneError('');
   }, [dispatch]);
 
-  const { createPayment: createPaymentMutation, isSuccess, isLoading } = useCreatePayment();
+  const { createPayment: createAuthPaymentMutation, isSuccess: authPaymentSuccess, isLoading: authPaymentLoading } = useCreatePayment();
+  const { createPublicPayment: createPublicPaymentMutation, isSuccess: publicPaymentSuccess, isLoading: publicPaymentLoading } = useCreatePublicPayment();
+
+  const isSuccess = isPublic ? publicPaymentSuccess : authPaymentSuccess;
+  const isLoading = isPublic ? publicPaymentLoading : authPaymentLoading;
+  const createPaymentMutation = isPublic ? createPublicPaymentMutation : createAuthPaymentMutation;
 
   // Validate phone using shared util; returns 250XXXXXXXXX for API or null
   const validatePhone = (
@@ -111,6 +118,7 @@ const OrderPayment = () => {
 
     createPaymentMutation({
       entityId: selectedOrder?.id,
+      ...(isPublic && { orderId: selectedOrder?.id }),
       amount: selectedOrder?.finalFee || selectedOrder?.initialFee || 0,
       currency: "RWF",
       type: PaymentType.ORDER,

@@ -1,10 +1,10 @@
-import { useFetchOrderActivities } from '@/hooks/orders/orderActivities.hooks';
+import { useFetchPublicOrderActivities } from '@/hooks/orders/orderActivities.hooks';
 import { useAppSelector } from '@/states/hooks';
 import type { UUID } from '@/types';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { OrderStatus } from '@/types/order.type';
-import { useGetOrder } from '@/hooks/orders/orders.hooks';
+import { useGetPublicOrder } from '@/hooks/orders/orders.hooks';
 import { faCopy, faCheckCircle } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { OrderActivity } from '@/types/orderActivity.type';
@@ -58,28 +58,27 @@ const PublicOrderTracking = () => {
   const [currentStatus, setCurrentStatus] = useState<OrderActivity | undefined>(undefined);
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
-  const { token } = useAppSelector((state) => state.auth);
 
   const { id } = useParams();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const { fetchOrderActivities } = useFetchOrderActivities();
-  const { getOrder, isFetching: orderLoading } = useGetOrder();
+  const { fetchPublicOrderActivities } = useFetchPublicOrderActivities();
+  const { getPublicOrder, isFetching: orderLoading } = useGetPublicOrder();
 
   useEffect(() => {
     if (id) {
-      getOrder({ id: id as UUID });
+      getPublicOrder({ id: id as UUID });
     }
-  }, [id, getOrder]);
+  }, [id, getPublicOrder]);
 
   useEffect(() => {
     if (order?.id) {
-      fetchOrderActivities({
+      fetchPublicOrderActivities({
         orderId: order.id,
       });
     }
-  }, [fetchOrderActivities, order?.id]);
+  }, [fetchPublicOrderActivities, order?.id]);
 
   useEffect(() => {
     if (orderActivitiesList?.[0]) {
@@ -124,7 +123,7 @@ const PublicOrderTracking = () => {
   ];
 
   return (
-    <PublicPage className={token ? `sm:!px0 lg:!px0 max-w-[1280px]` : ''}>
+    <PublicPage>
       <PublicPageHero
         eyebrow="Tracking"
         title={order?.referenceId || 'Follow your delivery'}

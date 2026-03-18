@@ -169,7 +169,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                                 window.location.href = '/auth/login';
                                             }
                                         }
-                                        window.location.href = `${nav?.link}`;
+                                        navigate(`${nav?.link}`);
                                     }}
                                     className={`flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-900 transition-colors duration-200
                   ${['Theme', 'Notifications'].includes(nav?.title)

@@ -127,16 +127,63 @@ export const OrderController = {
     try {
       const { senderPhoneNumber, recipientPhoneNumber } = req.body;
 
-      // CREATE PUBLIC ORDER (returns order + auth)
       const result = await orderService.createPublicOrder({
         senderPhoneNumber,
         recipientPhoneNumber,
       });
 
-      // RETURN ORDER AND AUTH DATA
       return res.status(201).json({
         message: 'Order created successfully',
         data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET PUBLIC ORDER BY ID (no auth required, order UUID is the access key)
+  async getPublicOrderById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const order = await orderService.getOrderById(id as UUID);
+
+      return res.status(200).json({
+        message: 'Order fetched successfully',
+        data: order,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // UPDATE PUBLIC ORDER (no auth required, only whitelisted fields)
+  async updatePublicOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { order } = req.body;
+
+      const existingOrder = await orderService.getOrderById(id as UUID);
+
+      // Only allow updating location and fee fields for public orders
+      const allowedFields: (keyof Order)[] = [
+        'locationFrom',
+        'locationTo',
+        'finalFee',
+      ];
+      const sanitized: Partial<Order> = {};
+      for (const key of allowedFields) {
+        if (order?.[key] !== undefined) {
+          (sanitized as Record<string, unknown>)[key] = order[key];
+        }
+      }
+
+      const updatedOrder = await orderService.updateOrder(id as UUID, sanitized, {
+        createdById: existingOrder.createdById,
+      });
+
+      return res.status(200).json({
+        message: 'Order updated successfully',
+        data: updatedOrder,
       });
     } catch (error) {
       next(error);

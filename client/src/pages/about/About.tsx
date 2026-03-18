@@ -276,7 +276,7 @@ const About = () => {
             What drives us
           </p>
           <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <article className="border-t-2 border-secondary-500 bg-primary-800/50 rounded-xl p-8">
+            <article className="bg-primary-800/50 rounded-xl p-8">
               <h3 className="text-[11px] uppercase tracking-[0.14em] text-primary-400 font-medium mb-4">
                 Mission
               </h3>
@@ -285,7 +285,7 @@ const About = () => {
                 transparent, and stress-free — for every person and every business.
               </p>
             </article>
-            <article className="border-t-2 border-secondary-500 bg-primary-800/50 rounded-xl p-8">
+            <article className="bg-primary-800/50 rounded-xl p-8">
               <h3 className="text-[11px] uppercase tracking-[0.14em] text-primary-400 font-medium mb-4">
                 Vision
               </h3>

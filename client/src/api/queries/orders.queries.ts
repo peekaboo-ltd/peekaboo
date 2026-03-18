@@ -58,7 +58,12 @@ export const ordersQueriesApiSlice = createApi({
     getOrderByReferenceId: builder.query({
       query: ({ referenceId }: { referenceId: string }) => `/orders/public/reference/${referenceId}`,
     }),
+
+    // GET PUBLIC ORDER BY ID (no auth required)
+    getPublicOrder: builder.query({
+      query: ({ id }: { id: UUID }) => `/orders/public/${id}`,
+    }),
   }),
 });
 
-export const { useLazyFetchOrdersQuery, useLazyGetOrderQuery, useLazyGetOrderTrackingQuery, useLazyGetOrderByReferenceIdQuery } = ordersQueriesApiSlice;
+export const { useLazyFetchOrdersQuery, useLazyGetOrderQuery, useLazyGetOrderTrackingQuery, useLazyGetOrderByReferenceIdQuery, useLazyGetPublicOrderQuery } = ordersQueriesApiSlice;

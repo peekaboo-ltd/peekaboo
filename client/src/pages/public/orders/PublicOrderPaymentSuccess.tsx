@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAppSelector } from '@/states/hooks';
-import { useGetOrder } from '@/hooks/orders/orders.hooks';
-import { useFetchPayments } from '@/hooks/payments/payment.hooks';
+import { useGetPublicOrder } from '@/hooks/orders/orders.hooks';
+import { useFetchPublicPayments } from '@/hooks/payments/payment.hooks';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import type { UUID } from '@/types';
 import Button from '@/components/inputs/Button';
@@ -45,20 +45,20 @@ const PublicOrderPaymentSuccess = () => {
   const { order } = useAppSelector((state) => state.order);
   const { paymentsList } = useAppSelector((state) => state.payment);
 
-  const { getOrder, isFetching: orderLoading } = useGetOrder();
-  const { fetchPayments, isFetching: paymentsLoading } = useFetchPayments();
+  const { getPublicOrder, isFetching: orderLoading } = useGetPublicOrder();
+  const { fetchPublicPayments, isFetching: paymentsLoading } = useFetchPublicPayments();
 
   useEffect(() => {
     if (id) {
-      getOrder({ id: id as UUID });
+      getPublicOrder({ id: id as UUID });
     }
-  }, [id, getOrder]);
+  }, [id, getPublicOrder]);
 
   useEffect(() => {
     if (order?.id) {
-      fetchPayments({ entityId: order.id, paymentType: PaymentType.ORDER });
+      fetchPublicPayments({ entityId: order.id, paymentType: PaymentType.ORDER });
     }
-  }, [fetchPayments, order?.id]);
+  }, [fetchPublicPayments, order?.id]);
 
   const successfulPayment = paymentsList?.find(
     (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL

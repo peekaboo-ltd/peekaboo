@@ -6,6 +6,10 @@ import { RoleTypes } from '../constants/role.constants';
 
 const router = Router();
 
+// Public payment endpoints (no auth, scoped by order/entity ID)
+router.post('/public', PaymentController.createPublicPayment);
+router.get('/public', PaymentController.fetchPublicPayments);
+
 router.use(authenticate);
 
 // Create payment

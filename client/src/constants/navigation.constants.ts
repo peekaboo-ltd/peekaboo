@@ -43,7 +43,7 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     label: 'Batches',
     path: '/batches',
     icon: faLayerGroup,
-    roles: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS, RoleTypes.CUSTOMER],
+    roles: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
   },
   {
     label: 'Riders',

@@ -9,7 +9,10 @@ const App = () => {
   return (
     <I18nProvider messages={messages}>
       <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY || ''}>
-        <Toaster style={{ fontSize: 11 }} duration={2000} />
+        <Toaster
+          toastOptions={{ style: { fontSize: '11px', fontWeight: '100' } }}
+          duration={2000}
+        />
         <Router />
       </APIProvider>
     </I18nProvider>
