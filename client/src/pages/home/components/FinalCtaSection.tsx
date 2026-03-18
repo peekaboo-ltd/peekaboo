@@ -17,9 +17,17 @@ const FinalCtaSection = ({
   buttonLabel,
   onScrollToForm,
 }: FinalCtaSectionProps) => (
-  <section className="w-full py-20 lg:py-28 bg-primary-900">
+  <section className="w-full py-20 lg:py-28 bg-primary-900 relative overflow-hidden">
+    <figure
+      className="pointer-events-none absolute -top-56 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-secondary-300/18 blur-3xl"
+      aria-hidden="true"
+    />
+    <figure
+      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-secondary-400/10 via-transparent to-primary-950/0"
+      aria-hidden="true"
+    />
     <motion.article
-      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+      className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-100px' }}

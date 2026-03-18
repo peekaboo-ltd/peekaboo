@@ -12,6 +12,7 @@ interface BusinessPlansSectionProps {
   popularLabel: string;
   perMonthLabel: string;
   ctaLabel: string;
+  detailsCtaLabel?: string;
   plans: BusinessPlan[];
   isLoading?: boolean;
 }
@@ -23,6 +24,7 @@ const BusinessPlansSection = ({
   popularLabel,
   perMonthLabel,
   ctaLabel,
+  detailsCtaLabel = 'View more details',
   plans,
   isLoading,
 }: BusinessPlansSectionProps) => {
@@ -122,17 +124,28 @@ const BusinessPlansSection = ({
                     ))}
                   </ul>
 
-                  <Link
-                    to="/contact"
-                    className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-[13px] font-medium transition-colors duration-300 ${
-                      plan.isPopular
-                        ? 'bg-secondary-600 text-white hover:bg-secondary-700'
-                        : 'bg-primary-50 text-primary-700 hover:bg-primary-100'
-                    }`}
-                  >
-                    {ctaLabel}
-                    <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
-                  </Link>
+                  <div className="mt-auto flex flex-col gap-3">
+                    <Link
+                      to="/contact"
+                      className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-[13px] font-medium transition-colors duration-300 ${
+                        plan.isPopular
+                          ? 'bg-secondary-600 text-white hover:bg-secondary-700'
+                          : 'bg-primary-50 text-primary-700 hover:bg-primary-100'
+                      }`}
+                    >
+                      {ctaLabel}
+                      <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
+                    </Link>
+
+                    {plan.detailsTo ? (
+                      <Link
+                        to={plan.detailsTo}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary-200 px-4 py-2 text-[12px] font-medium text-primary-700 transition-colors duration-300 hover:bg-primary-50"
+                      >
+                        {detailsCtaLabel}
+                      </Link>
+                    ) : null}
+                  </div>
                 </article>
               </motion.li>
             ))}

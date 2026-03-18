@@ -24,7 +24,7 @@ import {
   UserLocationHistoryPage,
 } from '@/pages/users';
 import { About, OrderFees } from '@/pages/about';
-import { Services } from '@/pages/services';
+import { PublicServiceDetailsPage, Services } from '@/pages/services';
 import { ContactUsPage } from '@/pages/contact';
 import {
   InviteOrganization,
@@ -238,6 +238,19 @@ const Router = () => {
                 path: '/services',
               },
               <Services />,
+            )}
+          />
+          <Route
+            path="services/:slug"
+            element={withSEO(
+              {
+                title: 'Service Details | Peekaboo',
+                description:
+                  'Explore detailed pricing, features, and delivery plan information for Peekaboo business services.',
+                keywords: 'business plan details, delivery pricing, dedicated rider plan, logistics pricing',
+                path: '/services',
+              },
+              <PublicServiceDetailsPage />,
             )}
           />
 

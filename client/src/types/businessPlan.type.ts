@@ -24,6 +24,7 @@ export interface PricingConfig {
 }
 
 export interface BusinessPlan extends BaseDomain {
+  slug: string;
   name: string;
   currency?: string;
   description?: string;
@@ -39,6 +40,7 @@ export interface BusinessPlan extends BaseDomain {
 
 export interface CreateBusinessPlanPayload {
   name: string;
+  slug?: string;
   description?: string;
   currency: string;
   features: string[];

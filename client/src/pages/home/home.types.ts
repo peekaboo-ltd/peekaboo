@@ -80,4 +80,5 @@ export interface BusinessPlan {
   price: string;
   features: string[];
   isPopular?: boolean;
+  detailsTo?: string;
 }

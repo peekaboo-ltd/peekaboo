@@ -26,13 +26,10 @@ import OrderPayment from '@/components/modals/OrderPayment';
 import { useFetchPublicPayments } from '@/hooks/payments/payment.hooks';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import { ORDER_FEE_RANGES } from '@/constants/order.constants';
 import {
-  faArrowRight,
   faLocationDot,
   faMoneyBillWave,
   faRoute,
-  faTruckFast,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   PublicPage,
@@ -186,7 +183,6 @@ const PublicOrderDetails = () => {
     (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL,
   );
   const hasBothLocations = !!currentOrder?.locationFrom && !!currentOrder?.locationTo;
-  const displayedFee = orderFee ?? currentOrder?.finalFee ?? currentOrder?.initialFee ?? 0;
 
   const stats = [
     {
@@ -246,10 +242,10 @@ const PublicOrderDetails = () => {
           title="Pickup and destination"
         >
           <div className="grid gap-4 lg:grid-cols-2">
-            <article className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
+            <article className="min-w-0 rounded-lg border border-slate-200 bg-slate-50/85 p-4">
               <header className="mb-4 flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
                     Pickup
                   </p>
                 </div>
@@ -290,16 +286,16 @@ const PublicOrderDetails = () => {
                   <AdministrativeLocation location={currentOrder.locationFrom} />
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-center">
-                  <p className="text-sm font-medium text-slate-800">Pickup location not set</p>
+                <div className="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-center">
+                  <p className="text-sm font-normal text-slate-800">Pickup location not set</p>
                 </div>
               )}
             </article>
 
-            <article className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
+            <article className="min-w-0 rounded-lg border border-slate-200 bg-slate-50/85 p-4">
               <header className="mb-4 flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
                     Destination
                   </p>
                 </div>
@@ -321,14 +317,102 @@ const PublicOrderDetails = () => {
                   <AdministrativeLocation location={currentOrder.locationTo} />
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-center">
-                  <p className="text-sm font-medium text-slate-800">Destination not set</p>
+                <div className="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-center">
+                  <p className="text-sm font-normal text-slate-800">Destination not set</p>
                 </div>
               )}
             </article>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {hasBothLocations ? (
+            <PublicSectionCard
+              eyebrow="Route Summary"
+              title="Distance, time, and fee"
+              className='mt-4'
+            >
+              {distance === null || estimatedTime === null ? (
+                <div className="grid gap-4 md:grid-cols-3">
+                  {[1, 2, 3].map((i) => (
+                    <article
+                      key={i}
+                      className="space-y-3 rounded-lg border border-slate-200 bg-slate-50/85 p-4"
+                    >
+                      <SkeletonLine className="h-3 w-20" />
+                      <SkeletonLine className="h-7 w-28" />
+                      <SkeletonLine className="h-3 w-16" />
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <article className="rounded-md border border-slate-200 bg-slate-50/85 p-4">
+                      <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                        Distance
+                      </p>
+                      <p className="mt-2 text-2xl font-normal text-slate-900">{distance.toFixed(2)}</p>
+                      <p className="mt-1 text-xs text-slate-500">kilometers</p>
+                    </article>
+
+                    <article className="rounded-lg border border-slate-200 bg-slate-50/85 p-4">
+                      <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                        Delivery Time
+                      </p>
+                      <p className="mt-2 text-2xl font-normal text-slate-900">{renderDeliveryTime()}</p>
+                      <p className="mt-1 text-xs text-slate-500">{deliveryTimeUnit}</p>
+                    </article>
+
+                    <article className="rounded-lg border border-slate-200 bg-slate-50/85 p-4">
+                      <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                        Delivery Fee
+                      </p>
+                      {(orderFee !== undefined && orderFee > 0) ||
+                        (currentOrder?.finalFee !== null &&
+                          currentOrder?.finalFee !== undefined &&
+                          currentOrder.finalFee > 0) ? (
+                        <>
+                          <p className="mt-2 text-2xl font-normal text-slate-900">
+                            {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500">including VAT</p>
+                        </>
+                      ) : (
+                        <div className="mt-2 space-y-3">
+                          <SkeletonLine className="h-7 w-28" />
+                          <SkeletonLine className="h-3 w-16" />
+                        </div>
+                      )}
+                    </article>
+                  </div>
+
+                  <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/85 p-4">
+                    <p className="text-sm text-slate-600 font-normal inline-block flex items-center gap-2">
+                      Fee is based on distance between the two locations.{' '}
+                      <span className="inline-block">
+                        <Button
+                          route="/about/orders/fees"
+                          styled={false}
+                          className="!inline-block !px-0 text-sm text-primary underline underline-offset-2 hover:text-primary-600"
+                        >
+                          Learn more about fees
+                        </Button>
+                      </span>
+                    </p>
+                  </div>
+                </>
+              )}
+            </PublicSectionCard>
+          ) : null}
+
+          <div className="mt-5 flex items-center gap-3 justify-between">
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(-1);
+              }}
+            >
+              Back
+            </Button>
             {hasSuccessfulPayment ? (
               <Button
                 primary
@@ -341,7 +425,6 @@ const PublicOrderDetails = () => {
                     });
                   }
                 }}
-                className="w-full cursor-pointer py-3!"
               >
                 Track Order
               </Button>
@@ -354,152 +437,12 @@ const PublicOrderDetails = () => {
                   dispatch(setSelectedOrder(currentOrder));
                   dispatch(setOrderPaymentModal(true));
                 }}
-                className="w-full cursor-pointer py-3!"
               >
                 {!currentOrder?.locationFrom || !currentOrder?.locationTo
                   ? 'Set Both Locations to Continue'
                   : 'Complete Payment'}
               </Button>
             )}
-
-            <Button
-              className="w-full cursor-pointer py-3!"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(-1);
-              }}
-            >
-              Back
-            </Button>
-          </div>
-        </PublicSectionCard>
-
-        {hasBothLocations ? (
-          <PublicSectionCard
-            eyebrow="Route Summary"
-            title="Distance, time, and fee"
-          >
-            {distance === null || estimatedTime === null ? (
-              <div className="grid gap-4 md:grid-cols-3">
-                {[1, 2, 3].map((i) => (
-                  <article
-                    key={i}
-                    className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/85 p-4"
-                  >
-                    <SkeletonLine className="h-3 w-20" />
-                    <SkeletonLine className="h-7 w-28" />
-                    <SkeletonLine className="h-3 w-16" />
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <article className="rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                      Distance
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-900">{distance.toFixed(2)}</p>
-                    <p className="mt-1 text-xs text-slate-500">kilometers</p>
-                  </article>
-
-                  <article className="rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                      Delivery Time
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-900">{renderDeliveryTime()}</p>
-                    <p className="mt-1 text-xs text-slate-500">{deliveryTimeUnit}</p>
-                  </article>
-
-                  <article className="rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                      Delivery Fee
-                    </p>
-                    {(orderFee !== undefined && orderFee > 0) ||
-                    (currentOrder?.finalFee !== null &&
-                      currentOrder?.finalFee !== undefined &&
-                      currentOrder.finalFee > 0) ? (
-                      <>
-                        <p className="mt-2 text-2xl font-semibold text-slate-900">
-                          {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">including VAT</p>
-                      </>
-                    ) : (
-                      <div className="mt-2 space-y-3">
-                        <SkeletonLine className="h-7 w-28" />
-                        <SkeletonLine className="h-3 w-16" />
-                      </div>
-                    )}
-                  </article>
-                </div>
-
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
-                  <p className="text-sm text-slate-600">
-                    Fee is based on distance between the two locations.{' '}
-                    <Link
-                      to="/about/orders/fees"
-                      className="text-primary underline underline-offset-2 hover:text-primary-600"
-                    >
-                      View fee breakdown
-                    </Link>
-                  </p>
-                  <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {ORDER_FEE_RANGES.map((range) => {
-                      const label =
-                        range.max === Infinity
-                          ? `${Math.floor(range.min)} km+`
-                          : `${range.min}-${range.max} km`;
-                      return (
-                        <li
-                          key={`${range.min}-${range.max}`}
-                          className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                        >
-                          <span>{label}</span>
-                          <span className="font-medium text-slate-800">
-                            {formatCurrency(range.fee)}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              </>
-            )}
-          </PublicSectionCard>
-        ) : null}
-
-        <PublicSectionCard eyebrow="Continue" title="Next">
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-            <Button
-              route="#"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(-1);
-              }}
-            >
-              Back
-            </Button>
-            <Button
-              primary
-              className="cursor-pointer"
-              onClick={(e) => {
-                e.preventDefault();
-                if (hasSuccessfulPayment && currentOrder?.id) {
-                  navigate(`/p/orders/${currentOrder.id}/tracking`);
-                  return;
-                }
-                if (currentOrder?.locationFrom && currentOrder?.locationTo) {
-                  dispatch(setSelectedOrder(currentOrder));
-                  dispatch(setOrderPaymentModal(true));
-                }
-              }}
-            >
-              {hasSuccessfulPayment ? 'Open Tracking' : 'Review Payment'}
-              <span className="ml-2">
-                <FontAwesomeIcon icon={faArrowRight} />
-              </span>
-            </Button>
           </div>
         </PublicSectionCard>
 

@@ -23,7 +23,7 @@ const DashboardMetricsSection = ({
       className="mb-6 sm:mb-8"
       variants={containerVariants}
     >
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {primaryCards.map((card, index) => (
           <motion.section key={index} variants={itemVariants}>
             <MetricCard {...card} />

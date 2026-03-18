@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAppSelector } from '@/states/hooks';
 import { useGetPublicOrder } from '@/hooks/orders/orders.hooks';
 import { useFetchPublicPayments } from '@/hooks/payments/payment.hooks';
@@ -21,6 +21,7 @@ const PublicOrderPaymentSuccess = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   useDocumentTitle('Payment Successful');
+  const navigate = useNavigate();
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -75,7 +76,8 @@ const PublicOrderPaymentSuccess = () => {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .ps-reveal {
           opacity: 0;
           transform: translateY(20px);
@@ -90,16 +92,16 @@ const PublicOrderPaymentSuccess = () => {
         .ps-reveal:nth-child(4) { transition-delay: 0.24s; }
       ` }} />
 
-      <main className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-10">
+      <main className="min-h-screen bg-[#FAFAF7] bg-opacity-50 px-4 py-8 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-5xl">
 
           {/* Header */}
-          <header className="ps-reveal mb-8 border border-slate-200 rounded-xl p-6 sm:p-8 text-center">
+          <header className="ps-reveal mb-8 border border-slate-200 rounded-lg p-6 sm:p-8 text-center">
             <figure className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-slate-200">
               <FontAwesomeIcon icon={faCheckCircle} className="h-5 w-5 text-primary" aria-hidden="true" />
             </figure>
             <p className="mb-2 text-xs uppercase tracking-widest text-slate-600">Payment confirmed</p>
-            <h1 className="mb-2 text-xl text-slate-900 sm:text-2xl">
+            <h1 className="mb-2 text-xl font-bold text-slate-900 sm:text-2xl">
               Your order is ready for the next step
             </h1>
             <p className="text-sm text-slate-500">
@@ -113,7 +115,7 @@ const PublicOrderPaymentSuccess = () => {
             <div className="space-y-5">
 
               {/* Payment details */}
-              <article className="ps-reveal border border-slate-200 rounded-xl p-5 sm:p-6">
+              <article className="ps-reveal border border-slate-200 rounded-lg p-5 sm:p-6">
                 <header className="mb-4 border-b border-slate-100 pb-4">
                   <p className="text-xs uppercase tracking-widest text-slate-600 mb-1">Payment details</p>
                   <p className="text-sm text-slate-700">Transaction confirmation</p>
@@ -190,7 +192,7 @@ const PublicOrderPaymentSuccess = () => {
               </article>
 
               {/* Order summary */}
-              <article className="ps-reveal border border-slate-200 rounded-xl p-5 sm:p-6">
+              <article className="ps-reveal border border-slate-200 rounded-lg p-5 sm:p-6">
                 <header className="mb-5 border-b border-slate-100 pb-4">
                   <p className="text-xs uppercase tracking-widest text-slate-600 mb-1">Order summary</p>
                   <p className="text-sm text-slate-700">Pickup and delivery overview</p>
@@ -214,7 +216,7 @@ const PublicOrderPaymentSuccess = () => {
                       {order?.locationFrom ? (
                         <ul className='space-y-2'>
                           <AdministrativeLocation location={order.locationFrom} />
-                          </ul>
+                        </ul>
                       ) : (
                         <p className="text-sm text-slate-600">Not set</p>
                       )}
@@ -248,7 +250,7 @@ const PublicOrderPaymentSuccess = () => {
 
             {/* Right column */}
             <aside className="space-y-5">
-              <article className="ps-reveal border border-slate-200 rounded-xl p-5 sm:p-6">
+              <article className="ps-reveal border border-slate-200 rounded-lg p-5 sm:p-6">
                 <header className="mb-4 border-b border-slate-100 pb-4">
                   <p className="text-xs uppercase tracking-widest text-slate-600 mb-1">What happens next</p>
                   <p className="text-sm text-slate-700">Delivery progress after payment</p>
@@ -258,8 +260,6 @@ const PublicOrderPaymentSuccess = () => {
                   {[
                     'Your order is being assigned to a nearby rider.',
                     'Once assigned, you can track your order in real time.',
-                    'The rider will collect your package and head to the destination.',
-                    'You\'ll receive updates as the delivery moves through each stage.',
                   ].map((step, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 text-xs text-slate-500">
@@ -270,20 +270,22 @@ const PublicOrderPaymentSuccess = () => {
                   ))}
                 </ol>
               </article>
-
-              <div className="ps-reveal border border-slate-200 rounded-xl p-5 sm:p-6">
-                <p className="mb-4 text-xs text-slate-600 uppercase tracking-widest">Continue</p>
-                <nav aria-label="Order actions" className="flex flex-col gap-2.5">
-                  <Button route={`/p/orders/${order?.id}`} className="cursor-pointer">
-                    View Order Details
-                  </Button>
-                  <Button primary route={`/p/orders/${order?.id}/tracking`} className="cursor-pointer">
-                    Track Order
-                  </Button>
-                </nav>
-              </div>
             </aside>
           </div>
+          <footer className="flex items-center gap-3 justify-between mt-5">
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(-1);
+              }}
+              route="#"
+            >
+              Back
+            </Button>
+            <Button primary route={`/p/orders/${order?.id}/tracking`}>
+              Track Order
+            </Button>
+          </footer>
         </div>
       </main>
     </>

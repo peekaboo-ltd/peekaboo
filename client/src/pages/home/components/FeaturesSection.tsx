@@ -35,7 +35,7 @@ const FeaturesSection = ({ badgeLabel, title, subtitle, features }: FeaturesSect
       >
         {features.map((feature) => (
           <motion.li key={feature.title} variants={scaleIn}>
-            <article className="h-full rounded-xl p-6 border border-primary-100 bg-[#FAFAF7] transition-all duration-300 hover:border-secondary-300 hover:shadow-sm">
+            <article className="h-full rounded-xl p-6 border border-primary-100 bg-white transition-all duration-300 hover:border-secondary-200 hover:shadow-[0_18px_45px_rgba(37,52,63,0.08)] hover:-translate-y-0.5">
               <figure className="w-10 h-10 rounded-lg bg-secondary-50 border border-secondary-200 flex items-center justify-center mb-4">
                 <FontAwesomeIcon icon={feature.icon} className="text-secondary-700 text-[13px]" />
               </figure>

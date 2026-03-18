@@ -34,7 +34,7 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
         variants={containerVariants}
       >
         <motion.hr
-          className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-primary-200 border-0 origin-left"
+          className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-secondary-200/70 border-0 origin-left"
           aria-hidden="true"
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
@@ -52,11 +52,11 @@ const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSec
             transition={{ delay: index * 0.15, duration: 0.5 }}
           >
             <figure className="relative inline-flex flex-col items-center mb-5">
-              <span className="text-4xl sm:text-5xl font-bold text-secondary-200 tracking-tight mb-3">
+              <span className="text-4xl sm:text-5xl font-bold text-secondary-400 tracking-tight mb-3">
                 {step.step}
               </span>
-              <figcaption className="w-12 h-12 rounded-xl bg-white border border-primary-100 flex items-center justify-center shadow-sm">
-                <FontAwesomeIcon icon={step.icon} className="text-lg text-primary-700" />
+              <figcaption className="w-12 h-12 rounded-xl bg-secondary-50 border border-secondary-200 flex items-center justify-center shadow-sm">
+                <FontAwesomeIcon icon={step.icon} className="text-lg text-secondary-600" />
               </figcaption>
             </figure>
 

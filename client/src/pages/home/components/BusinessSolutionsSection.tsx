@@ -48,7 +48,19 @@ const BusinessSolutionsSection = ({
   const hasStats = Boolean(stats?.length);
 
   return (
-    <section className="w-full py-20 lg:py-28 bg-primary-900">
+    <section className="w-full py-20 lg:py-28 bg-primary-900 relative overflow-hidden">
+      <figure
+        className="pointer-events-none absolute -top-48 -right-48 h-[520px] w-[520px] rounded-full bg-secondary-300/20 blur-3xl"
+        aria-hidden="true"
+      />
+      <figure
+        className="pointer-events-none absolute -bottom-60 -left-48 h-[620px] w-[620px] rounded-full bg-primary-200/10 blur-3xl"
+        aria-hidden="true"
+      />
+      <figure
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-secondary-400/10 via-transparent to-transparent"
+        aria-hidden="true"
+      />
       <motion.article
         className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8"
         initial="hidden"

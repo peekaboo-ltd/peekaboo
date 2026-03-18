@@ -86,7 +86,11 @@ const HeroForm = ({
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="relative isolate">
-      <article className="relative rounded-2xl bg-white border border-primary-100 p-7 sm:p-8 shadow-[0_20px_50px_rgba(37,52,63,0.08)]">
+      <article className="relative overflow-hidden rounded-2xl bg-white border border-primary-100 p-7 sm:p-8 shadow-[0_20px_50px_rgba(37,52,63,0.08)] transition-shadow duration-300 hover:shadow-[0_28px_70px_rgba(37,52,63,0.12)]">
+        <figure
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-secondary-50/70 via-transparent to-primary-50/40"
+          aria-hidden="true"
+        />
         <header className="mb-6">
           <h2 className="text-lg font-semibold text-primary-900">
             {copy?.formTitle}

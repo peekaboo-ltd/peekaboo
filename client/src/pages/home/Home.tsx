@@ -20,11 +20,14 @@ import type {
   FeatureItem,
   HeroCopy,
   HowItWorksStep,
+  Testimonial,
 } from './home.types';
 import HeroSection from './components/HeroSection';
 import FeaturesSection from './components/FeaturesSection';
 import BusinessSolutionsSection from './components/BusinessSolutionsSection';
 import HowItWorksSection from './components/HowItWorksSection';
+import TrustedBySection from './components/TrustedBySection';
+import TestimonialsSection from './components/TestimonialsSection';
 import FinalCtaSection from './components/FinalCtaSection';
 
 const Home = () => {
@@ -136,6 +139,39 @@ const Home = () => {
     },
   ];
 
+  const trustedIndustries = [
+    t('onboarding.organization.industryOptionEcommerce'),
+    t('onboarding.organization.industryOptionRetail'),
+    t('onboarding.organization.industryOptionRestaurants'),
+    t('onboarding.organization.industryOptionPharmacy'),
+  ];
+
+  const trustedByLabel =
+    typeof landingStats?.activeCustomers === 'number'
+      ? t('home.hero.badgeWithCount', { count: landingStats.activeCustomers })
+      : t('home.hero.badgeLoading');
+
+  const testimonials: Testimonial[] = [
+    {
+      name: t('home.testimonials.t1.name'),
+      role: t('home.testimonials.t1.role'),
+      content: t('home.testimonials.t1.content'),
+      type: 'business',
+    },
+    {
+      name: t('home.testimonials.t2.name'),
+      role: t('home.testimonials.t2.role'),
+      content: t('home.testimonials.t2.content'),
+      type: 'personal',
+    },
+    {
+      name: t('home.testimonials.t3.name'),
+      role: t('home.testimonials.t3.role'),
+      content: t('home.testimonials.t3.content'),
+      type: 'personal',
+    },
+  ];
+
   return (
     <main className="relative min-h-screen w-full bg-[#FAFAF7] overflow-x-hidden mt-0 max-lg:mt-16">
       <HeroSection
@@ -151,6 +187,15 @@ const Home = () => {
         title={t('home.features.title')}
         subtitle={t('home.features.subtitle')}
         features={features}
+      />
+
+      <TrustedBySection label={trustedByLabel} industries={trustedIndustries} />
+
+      <TestimonialsSection
+        badgeLabel="Customer stories"
+        title={t('home.testimonials.title')}
+        subtitle={t('home.testimonials.subtitle')}
+        testimonials={testimonials}
       />
 
       <BusinessSolutionsSection

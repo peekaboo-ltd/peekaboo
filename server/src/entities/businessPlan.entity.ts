@@ -10,6 +10,16 @@ export class BusinessPlan extends AbstractEntity {
   @Column({ name: 'name', type: 'varchar', length: 255, nullable: false })
   name: string;
 
+  // SLUG
+  @Column({
+    name: 'slug',
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+    unique: true,
+  })
+  slug: string;
+
   // DESCRIPTION
   @Column({ name: 'description', type: 'text', nullable: true })
   description?: string;

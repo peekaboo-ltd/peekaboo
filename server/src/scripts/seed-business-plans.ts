@@ -10,6 +10,7 @@ import logger from '../helpers/logger.helper';
 
 interface BusinessPlanSeed {
   name: string;
+  slug: string;
   description: string;
   billingPeriod: BillingPeriod;
   pricePerOrder?: number;
@@ -25,6 +26,7 @@ interface BusinessPlanSeed {
 const businessPlans: BusinessPlanSeed[] = [
   {
     name: 'Business Growth Plan',
+    slug: 'business-growth-plan',
     description:
       'Scale your monthly deliveries with volume-based pricing that rewards growth.',
     billingPeriod: BillingPeriod.MONTHLY,
@@ -71,6 +73,7 @@ const businessPlans: BusinessPlanSeed[] = [
   },
   {
     name: 'Weekly Boost Plan',
+    slug: 'weekly-boost-plan',
     description:
       'Perfect for campaigns, launches, and short-term spikes in demand.',
     billingPeriod: BillingPeriod.WEEKLY,
@@ -112,6 +115,7 @@ const businessPlans: BusinessPlanSeed[] = [
   },
   {
     name: 'Daily Power Pack',
+    slug: 'daily-power-pack',
     description: 'Ideal for flash sales, peak days, and busy periods.',
     billingPeriod: BillingPeriod.DAILY,
     pricePerOrder: 1600,
@@ -152,6 +156,7 @@ const businessPlans: BusinessPlanSeed[] = [
   },
   {
     name: 'Dedicated Rider Solution',
+    slug: 'dedicated-rider-solution',
     description:
       'Your own full-time rider dedicated to your business operations.',
     billingPeriod: BillingPeriod.MONTHLY,
@@ -186,6 +191,7 @@ async function main() {
   const planRepo = AppDataSource.getRepository(BusinessPlan);
 
   let created = 0;
+  let updated = 0;
   let skipped = 0;
 
   for (const planData of businessPlans) {
@@ -194,6 +200,31 @@ async function main() {
     });
 
     if (existing) {
+      const needsUpdate =
+        existing.slug !== planData.slug ||
+        existing.description !== planData.description ||
+        existing.billingPeriod !== planData.billingPeriod ||
+        existing.pricePerOrder !== planData.pricePerOrder ||
+        existing.currency !== planData.currency ||
+        JSON.stringify(existing.features || []) !== JSON.stringify(planData.features) ||
+        JSON.stringify(existing.pricingTiers || null) !== JSON.stringify(planData.pricingTiers) ||
+        existing.badge !== planData.badge ||
+        existing.isCustomPricing !== planData.isCustomPricing ||
+        existing.isDefault !== planData.isDefault ||
+        existing.status !== planData.status;
+
+      if (needsUpdate) {
+        await planRepo.save({
+          ...existing,
+          ...planData,
+        });
+        logger.success(
+          `[seed:business-plans] Updated plan "${planData.name}" with slug "${planData.slug}".`,
+        );
+        updated++;
+        continue;
+      }
+
       logger.info(
         `[seed:business-plans] Plan "${planData.name}" already exists — skipping.`,
       );
@@ -209,7 +240,7 @@ async function main() {
   }
 
   logger.success(
-    `[seed:business-plans] Done. Created: ${created}, Skipped: ${skipped}.`,
+    `[seed:business-plans] Done. Created: ${created}, Updated: ${updated}, Skipped: ${skipped}.`,
   );
 
   await AppDataSource.destroy();

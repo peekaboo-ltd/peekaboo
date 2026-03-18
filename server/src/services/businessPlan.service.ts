@@ -27,6 +27,36 @@ export class BusinessPlanService {
     return this.getBusinessPlanById(id);
   }
 
+  private normalizeSlug(value: string): string {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .replace(/-{2,}/g, '-');
+  }
+
+  private async ensureUniqueSlug(
+    rawSlug: string,
+    excludeId?: UUID,
+  ): Promise<string> {
+    const normalizedSlug = this.normalizeSlug(rawSlug);
+
+    if (!normalizedSlug) {
+      throw new ValidationError('Business plan slug is required');
+    }
+
+    const existingPlan = await this.businessPlanRepository.findOne({
+      where: { slug: normalizedSlug },
+    });
+
+    if (existingPlan && existingPlan.id !== excludeId) {
+      throw new ConflictError('Business plan slug already exists');
+    }
+
+    return normalizedSlug;
+  }
+
   // CREATE BUSINESS PLAN
   @AuditCreate({
     entityType: AuditLogEntityTypes.BUSINESS_PLAN,
@@ -42,6 +72,12 @@ export class BusinessPlanService {
         throw new ConflictError('Business plan with this name already exists');
       }
     }
+
+    if (!data.name) {
+      throw new ValidationError('Business plan name is required');
+    }
+
+    data.slug = await this.ensureUniqueSlug(data.slug || data.name);
 
     // Validate pricing tiers if provided
     if (data.pricingTiers) {
@@ -99,6 +135,13 @@ export class BusinessPlanService {
       if (existingPlan) {
         throw new ConflictError('Business plan with this name already exists');
       }
+    }
+
+    if (data.slug || data.name) {
+      data.slug = await this.ensureUniqueSlug(
+        data.slug || data.name || businessPlan.slug,
+        id
+      );
     }
 
     // Validate pricing tiers if provided
@@ -256,6 +299,7 @@ export class BusinessPlanService {
       },
       select: {
         id: true,
+        slug: true,
         name: true,
         description: true,
         pricePerOrder: true,
@@ -266,6 +310,7 @@ export class BusinessPlanService {
         billingPeriod: true,
         badge: true,
         isCustomPricing: true,
+        status: true,
       },
       order: {
         name: 'ASC',
@@ -281,6 +326,7 @@ export class BusinessPlanService {
       },
       select: {
         id: true,
+        slug: true,
         name: true,
         description: true,
         pricePerOrder: true,
@@ -291,11 +337,51 @@ export class BusinessPlanService {
         badge: true,
         isCustomPricing: true,
         isDefault: true,
+        status: true,
       },
       order: {
         name: 'ASC',
       },
     });
+  }
+
+  // GET PUBLIC BUSINESS PLAN BY SLUG
+  async getPublicBusinessPlanBySlug(slug: string): Promise<BusinessPlan> {
+    const normalizedSlug = this.normalizeSlug(slug);
+
+    if (!normalizedSlug) {
+      throw new NotFoundError('Business plan not found');
+    }
+
+    const plan = await this.businessPlanRepository.findOne({
+      where: {
+        slug: normalizedSlug,
+        status: BusinessPlanStatus.ACTIVE,
+      },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        description: true,
+        pricePerOrder: true,
+        currency: true,
+        features: true,
+        pricingTiers: true,
+        billingPeriod: true,
+        badge: true,
+        isCustomPricing: true,
+        isDefault: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!plan) {
+      throw new NotFoundError('Business plan not found');
+    }
+
+    return plan;
   }
 
   // GET ORGANIZATION COUNT FOR A PLAN

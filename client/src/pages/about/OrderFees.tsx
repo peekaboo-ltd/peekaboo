@@ -1,7 +1,7 @@
 import Button from '@/components/inputs/Button';
 import { ORDER_FEE_RANGES } from '@/constants/order.constants';
 import { formatCurrency } from '@/utils/strings.util';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
 const OrderFees = () => {
@@ -11,15 +11,15 @@ const OrderFees = () => {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <section className="bg-primary-900 text-white py-16">
-        <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12">
-          <p className="text-sm uppercase tracking-[0.3em] text-primary-200">
+      <section className="bg-primary-900 text-white py-10">
+        <article className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-normal uppercase tracking-[0.3em] text-primary-200">
             Transparent Pricing
           </p>
-          <h1 className="text-3xl sm:text-4xl font-bold mt-3">
+          <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
             Order Fee Breakdown
           </h1>
-          <p className="text-base sm:text-lg text-primary-100 mt-4 max-w-3xl">
+          <p className="mt-4 max-w-3xl text-base sm:text-lg font-normal text-primary-100">
             Fees are calculated from the distance between pickup and delivery.
             The table below shows the fee range we apply per order.
           </p>
@@ -27,13 +27,13 @@ const OrderFees = () => {
       </section>
 
       <section className="py-12 lg:py-16">
-        <article className="max-w-[1330px] mx-auto px-4 sm:px-6 lg:px-12">
+        <article className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900">
+              <h2 className="text-2xl font-bold text-gray-900">
                 Distance-Based Pricing
               </h2>
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="mt-2 text-sm font-normal text-gray-600">
                 Prices are quoted in RWF and include VAT.
               </p>
             </div>
@@ -42,7 +42,7 @@ const OrderFees = () => {
           <section className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
             <article className="lg:col-span-2 bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden">
               <header className="px-6 py-5 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-bold text-gray-900">
                   Fee Ranges
                 </h3>
               </header>
@@ -60,14 +60,14 @@ const OrderFees = () => {
                     >
                       <div>
                         <p className="text-sm text-gray-500">Distance</p>
-                        <p className="text-base font-semibold text-gray-900">
+                        <p className="text-sm font-normal text-gray-900">
                           {rangeLabel}
                         </p>
                       </div>
                       <div className="text-left sm:text-right">
                         <p className="text-sm text-gray-500">Fee</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {formatCurrency(range.fee)}
+                        <p className="text-base font-normal text-gray-900">
+                          {formatCurrency(range.fee, 'RWF')}
                         </p>
                       </div>
                     </div>
@@ -77,7 +77,7 @@ const OrderFees = () => {
             </article>
 
             <aside className="bg-white border border-gray-100 rounded-lg shadow-sm p-6 space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-bold text-gray-900">
                 How We Calculate
               </h3>
               <p className="text-sm text-gray-600">
@@ -89,12 +89,13 @@ const OrderFees = () => {
                 The fee is displayed before you complete payment, so you always
                 know the cost upfront.
               </p>
-              <Link
-                to="/track"
-                className="inline-flex items-center justify-center w-full rounded-md bg-primary-900 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-800"
+              <Button
+                route="/track"
+                className="w-full"
+                primary
               >
                 Track an Order
-              </Link>
+              </Button>
             </aside>
             <div className="lg:col-span-3 flex flex-wrap gap-3">
               <Button
@@ -103,7 +104,6 @@ const OrderFees = () => {
                   e.preventDefault();
                   navigate(-1);
                 }}
-                primary
                 className="w-fit"
               >
                 Back

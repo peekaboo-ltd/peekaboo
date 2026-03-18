@@ -115,11 +115,6 @@ const PublicOrderTracking = () => {
       value: formatTimestamp(currentStatus?.createdAt || order?.updatedAt),
       icon: faClockRotateLeft,
     },
-    {
-      label: 'Tracking Code',
-      value: order?.trackingId || '—',
-      icon: faKey,
-    },
   ];
 
   return (
@@ -131,7 +126,7 @@ const PublicOrderTracking = () => {
         actions={
           order?.referenceId ? (
             <div className="flex flex-wrap items-center gap-2">
-              <code className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
+              <code className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-normal text-slate-700">
                 {order.referenceId}
               </code>
               <button
@@ -161,7 +156,7 @@ const PublicOrderTracking = () => {
         description="Latest movement across the delivery steps."
       >
         <nav className="relative">
-          <ol className="space-y-6 sm:hidden">
+          <ol className="space-y-4 sm:hidden">
             <span
               className="absolute left-5 top-0 bottom-0 w-px bg-slate-200"
               aria-hidden="true"
@@ -205,7 +200,7 @@ const PublicOrderTracking = () => {
                     />
                   </span>
 
-                  <section className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50/85 p-4">
+                  <section className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50/85 p-4">
                     <header className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className={`text-sm ${hasActivity || isCurrent ? 'text-slate-900' : 'text-slate-500'}`}>
@@ -215,7 +210,7 @@ const PublicOrderTracking = () => {
                       </div>
                       <aside className="shrink-0 text-right">
                         {isCurrent ? (
-                          <span className="inline-flex rounded-full border border-primary/15 bg-primary/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                          <span className="inline-flex rounded-full border border-primary/15 bg-primary/5 px-2.5 py-1 text-[10px] font-normal uppercase tracking-wide text-primary">
                             Current
                           </span>
                         ) : null}
@@ -298,7 +293,7 @@ const PublicOrderTracking = () => {
                       />
                     </span>
 
-                    <div className="mt-4 w-full max-w-[150px] rounded-2xl border border-slate-200 bg-slate-50/85 p-3 text-center">
+                    <div className="mt-4 w-full max-w-[150px] rounded-lg border border-slate-200 bg-slate-50/85 p-3 text-center">
                       <p className={`text-xs ${hasActivity || isCurrent ? 'text-slate-900' : 'text-slate-500'}`}>
                         {status.label}
                       </p>
@@ -321,7 +316,7 @@ const PublicOrderTracking = () => {
                       </p>
 
                       {isCurrent ? (
-                        <span className="mt-2 inline-flex rounded-full border border-primary/15 bg-primary/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                        <span className="mt-2 inline-flex rounded-full border border-primary/15 bg-primary/5 px-2 py-1 text-[10px] font-normal uppercase tracking-wide text-primary">
                           Current
                         </span>
                       ) : null}
@@ -370,17 +365,17 @@ const PublicOrderTracking = () => {
           ].map((item) => (
             <article
               key={item.label}
-              className="rounded-2xl border border-slate-200 bg-slate-50/85 p-4"
+              className="rounded-lg border border-slate-200 bg-slate-50/85 p-4"
             >
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700">
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
                     {item.label}
                   </p>
-                  <p className="mt-1 break-all text-sm font-medium text-slate-900">
+                  <p className="mt-1 break-all text-sm font-normal text-slate-900">
                     {orderLoading ? 'Loading…' : item.value}
                   </p>
                 </div>
@@ -390,8 +385,7 @@ const PublicOrderTracking = () => {
         </div>
       </PublicSectionCard>
 
-      <PublicSectionCard eyebrow="Continue" title="Next">
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+        <footer className="flex items-center gap-3 justify-between mt-5">
           <Button
             route="#"
             onClick={(e) => {
@@ -402,12 +396,11 @@ const PublicOrderTracking = () => {
             Back
           </Button>
           {pathname.includes(`/p/orders/${id}/tracking`) ? (
-            <Button route="/dashboard" primary className="cursor-pointer">
+            <Button route="/dashboard" primary>
               Continue to Dashboard
             </Button>
           ) : null}
-        </div>
-      </PublicSectionCard>
+        </footer>
     </PublicPage>
   );
 };

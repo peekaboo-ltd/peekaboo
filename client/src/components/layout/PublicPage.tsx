@@ -94,7 +94,7 @@ export const PublicSectionCard = ({
 }: PublicSectionCardProps) => (
   <section
     className={cn(
-      'overflow-hidden rounded-[20px] border border-slate-200 bg-white',
+      'overflow-hidden rounded-md border border-slate-200 bg-white',
       className,
     )}
   >
@@ -132,7 +132,7 @@ export const PublicStatCard = ({
 }: PublicStatCardProps) => (
   <article
     className={cn(
-      'rounded-[18px] border border-slate-200 bg-white px-4 py-4',
+      'rounded-md border border-slate-200 bg-white px-4 py-4',
       className,
     )}
   >

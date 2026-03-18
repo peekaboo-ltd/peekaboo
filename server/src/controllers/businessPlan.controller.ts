@@ -144,6 +144,26 @@ export const BusinessPlanController = {
     }
   },
 
+  // GET PUBLIC BUSINESS PLAN BY SLUG
+  async getPublicBusinessPlanBySlug(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { slug } = req.params;
+
+      const plan = await businessPlanService.getPublicBusinessPlanBySlug(slug);
+
+      return res.status(200).json({
+        message: 'Public business plan fetched successfully',
+        data: plan,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // GET ORGANIZATION COUNT FOR PLAN
   async getOrganizationCountForPlan(req: Request, res: Response, next: NextFunction) {
     try {

@@ -60,6 +60,10 @@ const HeroSection = ({
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-[#FAFAF7]">
       <figure
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-secondary-200/10 via-transparent to-primary-200/10"
+        aria-hidden="true"
+      />
+      <figure
         className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-secondary-200/30 blur-3xl"
         aria-hidden="true"
       />

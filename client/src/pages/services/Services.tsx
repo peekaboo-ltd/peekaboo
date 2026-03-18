@@ -82,6 +82,7 @@ const mapPlanToCard = (plan: ApiBusinessPlan): BusinessPlan => ({
           })
           .filter(Boolean),
   isPopular: Boolean(plan.badge) || plan.isDefault,
+  detailsTo: `/services/${plan.slug}`,
 });
 
 const Services = () => {
@@ -133,6 +134,7 @@ const Services = () => {
         popularLabel="Most popular"
         perMonthLabel="Transparent, predictable pricing for growing teams"
         ctaLabel="Talk to our team"
+        detailsCtaLabel="View more details"
         plans={businessPlans}
         isLoading={isFetching}
       />

@@ -7,17 +7,17 @@ interface TrustedBySectionProps {
 }
 
 const TrustedBySection = ({ label, industries }: TrustedBySectionProps) => (
-  <section className="w-full py-12 border-y border-slate-100">
+  <section className="w-full py-12 border-y border-primary-100">
     <article className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16">
       <motion.figure
-        className="flex flex-col md:flex-row items-center justify-between gap-8 rounded-2xl border border-slate-200 bg-white/90 px-6 py-5 shadow-sm"
+        className="flex flex-col md:flex-row items-center justify-between gap-8 rounded-2xl border border-primary-100 bg-white/95 px-6 py-5 shadow-sm"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
         variants={containerVariants}
       >
         <motion.figcaption
-          className="text-sm text-slate-500 font-medium uppercase tracking-wider"
+          className="text-sm text-primary-500 font-medium uppercase tracking-wider"
           variants={fadeInUp}
         >
           {label}
@@ -26,12 +26,12 @@ const TrustedBySection = ({ label, industries }: TrustedBySectionProps) => (
           {industries.map((industry, index) => (
             <motion.li
               key={industry}
-              className="text-slate-400 font-normal text-sm uppercase tracking-wide hover:text-black transition-colors cursor-default"
+              className="text-primary-400 font-normal text-sm uppercase tracking-wide hover:text-primary-900 transition-colors cursor-default"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.08, duration: 0.5 }}
-              whileHover={{ scale: 1.1, color: '#5f9598' }}
+              whileHover={{ scale: 1.08 }}
             >
               {industry}
             </motion.li>

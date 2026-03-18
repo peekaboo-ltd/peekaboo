@@ -8,6 +8,7 @@ const router = Router();
 
 // Public routes
 router.get('/public', BusinessPlanController.getPublicBusinessPlans);
+router.get('/public/:slug', BusinessPlanController.getPublicBusinessPlanBySlug);
 
 // Admin only routes
 // All routes below require authentication
