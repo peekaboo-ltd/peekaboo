@@ -21,6 +21,7 @@ import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { pushService } from './push.service';
 import { PushNotificationType } from '../constants/push.constants';
+import logger from '../helpers/logger.helper';
 
 interface RiderAssignmentScope {
   riderId?: UUID;
@@ -62,15 +63,28 @@ export class OrderAssignmentService {
 
     if (orderExists?.assignments?.length >= 0) {
       // CANCEL ALL OTHER ACTIVE ASSIGNMENTS
+      const activeAssignments = orderExists?.assignments?.filter(
+        (assignment) => assignment.status === OrderAssignmentStatus.ACTIVE
+      );
+
       await Promise.all(
-        orderExists?.assignments
-          ?.filter(
-            (assignment) => assignment.status === OrderAssignmentStatus.ACTIVE
-          )
-          .map((assignment) => {
-            assignment.status = OrderAssignmentStatus.CANCELLED;
-            return this.orderAssignmentRepository.save(assignment);
-          })
+        activeAssignments.map(async (assignment) => {
+          assignment.status = OrderAssignmentStatus.CANCELLED;
+          await this.orderAssignmentRepository.save(assignment);
+
+          // Notify the cancelled rider
+          if (assignment.assignedToId) {
+            this.sendAssignmentPush({
+              userId: assignment.assignedToId,
+              assignmentId: assignment.id,
+              orderId: assignment.orderId,
+              title: 'Assignment cancelled',
+              body: `Order #${orderExists.referenceId || ''} has been reassigned.`,
+            }).catch((error) =>
+              logger.error('Failed to send cancellation push', error)
+            );
+          }
+        })
       );
     }
 
@@ -134,13 +148,16 @@ export class OrderAssignmentService {
     }
 
     if (assignedToExists?.id) {
+      const orderRef = orderExists.referenceId || '';
       this.sendAssignmentPush({
         userId: assignedToExists.id,
         assignmentId: createdOrderAssignment.id,
         orderId: createdOrderAssignment.orderId,
-        title: 'New assignment available',
-        body: 'You have been assigned a new order. Tap to review it.',
-      }).catch(() => {});
+        title: `New Order #${orderRef}`,
+        body: `You've been assigned order #${orderRef}. Tap to review.`,
+      }).catch((error) =>
+        logger.error('Failed to send assignment push', error)
+      );
     }
 
     return createdOrderAssignment;
@@ -296,14 +313,17 @@ export class OrderAssignmentService {
       });
     }
 
-    if (orderAssignment.assignedToId) {
+    // Notify the assignment creator that the rider accepted
+    if (orderAssignment.createdById && orderAssignment.createdById !== orderAssignment.assignedToId) {
       this.sendAssignmentPush({
-        userId: orderAssignment.assignedToId,
+        userId: orderAssignment.createdById,
         assignmentId: updatedOrderAssignment.id,
         orderId: updatedOrderAssignment.orderId,
         title: 'Assignment accepted',
-        body: 'Assignment marked as accepted.',
-      }).catch(() => {});
+        body: `Rider has accepted order #${orderAssignment.order?.referenceId || ''}.`,
+      }).catch((error) =>
+        logger.error('Failed to send assignment accepted push', error)
+      );
     }
 
     return updatedOrderAssignment;
@@ -352,15 +372,28 @@ export class OrderAssignmentService {
 
     if (orderExists?.assignments?.length >= 0) {
       // CANCEL ALL OTHER ACTIVE ASSIGNMENTS
+      const activeAssignments = orderExists?.assignments?.filter(
+        (assignment) => assignment.status === OrderAssignmentStatus.ACTIVE
+      );
+
       await Promise.all(
-        orderExists?.assignments
-          ?.filter(
-            (assignment) => assignment.status === OrderAssignmentStatus.ACTIVE
-          )
-          .map((assignment) => {
-            assignment.status = OrderAssignmentStatus.CANCELLED;
-            return this.orderAssignmentRepository.save(assignment);
-          })
+        activeAssignments.map(async (assignment) => {
+          assignment.status = OrderAssignmentStatus.CANCELLED;
+          await this.orderAssignmentRepository.save(assignment);
+
+          // Notify the cancelled rider
+          if (assignment.assignedToId) {
+            this.sendAssignmentPush({
+              userId: assignment.assignedToId,
+              assignmentId: assignment.id,
+              orderId: assignment.orderId,
+              title: 'Assignment cancelled',
+              body: `Order #${orderExists.referenceId || ''} has been reassigned.`,
+            }).catch((error) =>
+              logger.error('Failed to send cancellation push', error)
+            );
+          }
+        })
       );
     }
 
@@ -415,13 +448,16 @@ export class OrderAssignmentService {
     }
 
     if (assignedToExists?.id) {
+      const orderRef = orderExists.referenceId || '';
       this.sendAssignmentPush({
         userId: assignedToExists.id,
         assignmentId: createdOrderAssignment.id,
         orderId: createdOrderAssignment.orderId,
-        title: 'New assignment available',
-        body: 'You have been assigned a new order. Tap to review it.',
-      }).catch(() => {});
+        title: `New Order #${orderRef}`,
+        body: `You've been assigned order #${orderRef}. Tap to review.`,
+      }).catch((error) =>
+        logger.error('Failed to send assignment push', error)
+      );
     }
 
     return createdOrderAssignment;
@@ -433,19 +469,21 @@ export class OrderAssignmentService {
     orderId,
     title,
     body,
+    urgent = false,
   }: {
     userId: UUID;
     assignmentId: UUID;
     orderId?: UUID;
     title: string;
     body: string;
+    urgent?: boolean;
   }): Promise<void> {
     await pushService.sendPushNotification({
       userIds: [userId],
       title,
       body,
       type: PushNotificationType.ASSIGNMENT,
-      channelId: 'assignments',
+      channelId: urgent ? 'assignments_urgent' : 'assignments',
       data: {
         assignmentId,
         orderId,
