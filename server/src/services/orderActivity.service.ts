@@ -22,6 +22,9 @@ import { OrderAssignment } from '../entities/orderAssignment.entity';
 import { SMSService } from '../integrations/sms/sms.service';
 import { formatPhoneNumber } from '../helpers/phone.helper';
 import { buildOrderCompletedSMS } from '../integrations/sms/sms.messages';
+import { pushService } from './push.service';
+import { PushNotificationType } from '../constants/push.constants';
+import logger from '../helpers/logger.helper';
 
 const ORDER_STATUS_MESSAGES: Record<string, string> = {
   [OrderStatus.PAID]:
@@ -86,8 +89,15 @@ export class OrderActivityService {
     order.status = orderStatus?.status as OrderStatus;
     await this.orderRepository.save(order);
 
-    // Send order status email for key status changes (non-blocking)
+    // Send push notification to assigned rider for key status changes (non-blocking)
     const statusStr = orderStatus.status as string;
+    if (statusStr && [OrderStatus.PAID, OrderStatus.CANCELLED].includes(statusStr as OrderStatus)) {
+      this.sendOrderStatusPushToRider(order.id, order.referenceId || '', statusStr).catch(
+        (error) => logger.error('Failed to send order status push to rider', error)
+      );
+    }
+
+    // Send order status email for key status changes (non-blocking)
     if (
       statusStr &&
       ORDER_STATUS_MESSAGES[statusStr] &&
@@ -114,6 +124,48 @@ export class OrderActivityService {
     }
 
     return activity;
+  }
+
+  private async sendOrderStatusPushToRider(
+    orderId: UUID,
+    orderReference: string,
+    status: string,
+  ): Promise<void> {
+    const activeAssignment = await this.orderAssignmentRepository.findOne({
+      where: { orderId, status: OrderAssignmentStatus.ACTIVE },
+    });
+
+    if (!activeAssignment?.assignedToId) {
+      return;
+    }
+
+    const STATUS_PUSH_MESSAGES: Record<string, { title: string; body: string }> = {
+      [OrderStatus.PAID]: {
+        title: `Order #${orderReference} paid`,
+        body: `Payment received for order #${orderReference}. Ready for pickup.`,
+      },
+      [OrderStatus.CANCELLED]: {
+        title: `Order #${orderReference} cancelled`,
+        body: `Order #${orderReference} has been cancelled.`,
+      },
+    };
+
+    const message = STATUS_PUSH_MESSAGES[status];
+    if (!message) {
+      return;
+    }
+
+    await pushService.sendPushNotification({
+      userIds: [activeAssignment.assignedToId],
+      title: message.title,
+      body: message.body,
+      type: PushNotificationType.ORDER,
+      channelId: 'assignments',
+      data: {
+        orderId,
+        assignmentId: activeAssignment.id,
+      },
+    });
   }
 
   private async getLatestActivityByOrderId(
