@@ -41,4 +41,10 @@ router.patch(
   OrderAssignmentController.rejectOrderAssignment
 );
 
+router.patch(
+  '/:id/recover',
+  authorize([RoleTypes.RIDER, RoleTypes.ADMIN]),
+  OrderAssignmentController.recoverOrderAssignment
+);
+
 export default router;

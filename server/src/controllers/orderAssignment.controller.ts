@@ -145,4 +145,23 @@ export const OrderAssignmentController = {
       next(error);
     }
   },
+
+  // RECOVER REJECTED ORDER ASSIGNMENT
+  async recoverOrderAssignment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const recoveredOrderAssignment =
+        await orderAssignmentService.recoverOrderAssignment(id as UUID, {
+          riderId: getRiderId(req),
+        });
+
+      return res.status(200).json({
+        message: 'Order assignment recovered successfully',
+        data: recoveredOrderAssignment,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
