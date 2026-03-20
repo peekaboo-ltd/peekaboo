@@ -47,6 +47,7 @@ export default function AssignmentDetailScreen() {
     fetchAssignmentById,
     acceptAssignment,
     rejectAssignment,
+    recoverAssignment,
     confirmOrderDispatch,
     completeOrder,
     clearError,
@@ -142,6 +143,29 @@ export default function AssignmentDetailScreen() {
     } else {
       const message = useAssignmentStore.getState().error || 'Failed to confirm dispatch.';
       Alert.alert('Error', message);
+    }
+  };
+
+  const handleRecover = async () => {
+    if (!id) return;
+
+    setIsActionLoading(true);
+    const success = await recoverAssignment(id);
+    setIsActionLoading(false);
+
+    if (success) {
+      refresh();
+      Alert.alert(
+        'Assignment Recovered',
+        'This assignment has been restored and is ready for you to accept.',
+        [{ text: 'OK' }]
+      );
+    } else {
+      const message =
+        useAssignmentStore.getState().error ||
+        'Failed to recover assignment.';
+      Alert.alert('Unable to Recover', message);
+      refresh();
     }
   };
 
@@ -255,6 +279,7 @@ export default function AssignmentDetailScreen() {
           showConfirmDispatch={canConfirmDispatch}
           onAccept={handleAccept}
           onReject={handleReject}
+          onRecover={selectedAssignment.status === OrderAssignmentStatus.REJECTED ? handleRecover : undefined}
           onConfirmDispatch={canConfirmDispatch ? handleConfirmDispatch : undefined}
           onComplete={canComplete ? handleComplete : undefined}
           isLoading={isActionLoading}

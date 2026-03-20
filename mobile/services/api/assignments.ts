@@ -109,6 +109,14 @@ export const assignmentsAPI = {
     return response.data.data;
   },
 
+  /**
+   * Recover a previously rejected assignment when it has not been reassigned to another rider
+   */
+  recover: async (id: string): Promise<Assignment> => {
+    const response = await apiClient.patch<AcceptAssignmentResponse>(`/order-assignments/${id}/recover`);
+    return response.data.data;
+  },
+
 
 
   /**

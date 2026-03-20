@@ -22,6 +22,7 @@ interface AssignmentState {
   fetchAssignmentById: (id: string) => Promise<Assignment | null>;
   acceptAssignment: (id: string) => Promise<boolean>;
   rejectAssignment: (id: string, reason?: string) => Promise<boolean>;
+  recoverAssignment: (id: string) => Promise<boolean>;
   confirmOrderDispatch: (orderId: string, trackingId?: string) => Promise<boolean>;
   completeOrder: (orderId: string, trackingId: string) => Promise<boolean>;
   refreshAssignments: () => Promise<void>;
@@ -176,6 +177,33 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     }
   },
 
+  recoverAssignment: async (id: string): Promise<boolean> => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const recoveredAssignment = await assignmentsAPI.recover(id);
+
+      set(state => ({
+        assignments: state.assignments.map(a =>
+          a.id === id ? { ...a, ...recoveredAssignment } : a
+        ),
+        selectedAssignment: state.selectedAssignment?.id === id
+          ? { ...state.selectedAssignment, ...recoveredAssignment }
+          : state.selectedAssignment,
+        isLoading: false,
+      }));
+
+      return true;
+    } catch (error) {
+      const appError = handleAPIError(error);
+      set({
+        isLoading: false,
+        error: getErrorMessage(appError),
+      });
+      return false;
+    }
+  },
+
 
 
   confirmOrderDispatch: async (orderId: string, trackingId?: string): Promise<boolean> => {
@@ -185,7 +213,7 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
       await assignmentsAPI.confirmOrderDispatch(orderId, trackingId);
 
       set(state => {
-        const updateOrderInTransit = (order: { status?: OrderStatus } | undefined) =>
+        const updateOrderInTransit = (order: Assignment['order']): Assignment['order'] =>
           order ? { ...order, status: OrderStatus.IN_TRANSIT } : undefined;
         return {
           assignments: state.assignments.map(a =>
