@@ -34,6 +34,78 @@ export class OrganizationBillingService {
     this.emailService = new EmailService();
   }
 
+  // CHECK WHETHER NEW BUSINESS ORDERS SHOULD BE BLOCKED UNTIL BILLING IS SETTLED
+  async getOrderCreationBillingGuard(
+    organizationId: UUID,
+    billingPeriod: BillingPeriod = BillingPeriod.MONTHLY
+  ): Promise<{
+    blocked: boolean;
+    reason?: string;
+    billing?: OrganizationBilling;
+  }> {
+    const now = new Date();
+
+    // 1) Hard block when there is already an invoiced/overdue billing
+    const payableStatuses = [BillingStatus.INVOICED, BillingStatus.OVERDUE];
+    const blockingDueBilling = await this.billingRepository
+      .createQueryBuilder('billing')
+      .where('billing.organizationId = :organizationId', { organizationId })
+      .andWhere('billing.status IN (:...statuses)', { statuses: payableStatuses })
+      .orderBy('billing.periodEnd', 'ASC')
+      .getOne();
+
+    if (blockingDueBilling) {
+      return {
+        blocked: true,
+        reason:
+          'An invoiced/overdue billing exists. Please complete billing payment before creating new deliveries.',
+        billing: blockingDueBilling,
+      };
+    }
+
+    // 2) Block if a previous billing period ended and remains unpaid (time threshold exceeded)
+    const expiredUnpaidBilling = await this.billingRepository
+      .createQueryBuilder('billing')
+      .where('billing.organizationId = :organizationId', { organizationId })
+      .andWhere('billing.status = :pending', { pending: BillingStatus.PENDING })
+      .andWhere('billing.periodEnd < :now', { now })
+      .orderBy('billing.periodEnd', 'ASC')
+      .getOne();
+
+    if (expiredUnpaidBilling) {
+      return {
+        blocked: true,
+        reason:
+          'A previous billing period has ended and is still unpaid. Please settle billing first.',
+        billing: expiredUnpaidBilling,
+      };
+    }
+
+    // 3) Enforce plan delivery threshold for the current billing period
+    const currentBilling = await this.getOrCreateCurrentBillingPeriod(
+      organizationId,
+      billingPeriod
+    );
+    const tiers = currentBilling.pricingSnapshot?.tiers || [];
+    const finiteMaxQuantities = tiers
+      .map((tier) => tier.maxQuantity)
+      .filter((value): value is number => value != null);
+
+    if (finiteMaxQuantities.length > 0) {
+      const maxAllowedOrders = Math.max(...finiteMaxQuantities);
+      if (currentBilling.totalOrders >= maxAllowedOrders) {
+        return {
+          blocked: true,
+          reason:
+            'Your plan delivery limit for the current billing cycle has been reached. Please pay billing before creating new deliveries.',
+          billing: currentBilling,
+        };
+      }
+    }
+
+    return { blocked: false };
+  }
+
   // GET OR CREATE CURRENT BILLING PERIOD
   async getOrCreateCurrentBillingPeriod(
     organizationId: UUID,
@@ -389,6 +461,9 @@ export class OrganizationBillingService {
     const queryBuilder = this.billingRepository
       .createQueryBuilder('billing')
       .leftJoinAndSelect('billing.createdBy', 'createdBy')
+      .leftJoinAndSelect('billing.businessPlan', 'businessPlan')
+      .leftJoinAndSelect('billing.orders', 'orders')
+      .leftJoinAndSelect('orders.recipient', 'recipient')
       .where('billing.organizationId = :organizationId', { organizationId });
 
     if (status) {
@@ -552,6 +627,9 @@ export class OrganizationBillingService {
     const queryBuilder = this.billingRepository
       .createQueryBuilder('billing')
       .leftJoinAndSelect('billing.organization', 'organization')
+      .leftJoinAndSelect('billing.businessPlan', 'businessPlan')
+      .leftJoinAndSelect('billing.orders', 'orders')
+      .leftJoinAndSelect('orders.recipient', 'recipient')
       .leftJoinAndSelect('billing.createdBy', 'createdBy');
 
     if (status) {
