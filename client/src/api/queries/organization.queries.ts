@@ -2,6 +2,16 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
 import type { Organization } from '@/types/organization.type';
 import { UUID } from '@/types';
+import { BillingPeriod } from '@/types/organization.type';
+
+interface BillingQueryParams {
+  page?: number;
+  size?: number;
+  status?: string;
+  billingPeriod?: BillingPeriod;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+}
 
 export const organizationQueriesApiSlice = createApi({
   reducerPath: 'organizationQueriesApi',
@@ -32,6 +42,40 @@ export const organizationQueriesApiSlice = createApi({
         params: { page, size },
       }),
     }),
+
+    fetchMyBillingHistory: builder.query({
+      query: (params: BillingQueryParams | void) => ({
+        url: '/organizations/me/billing',
+        params: {
+          page: params?.page ?? 0,
+          size: params?.size ?? 50,
+          status: params?.status,
+          billingPeriod: params?.billingPeriod,
+          sortBy: params?.sortBy,
+          sortOrder: params?.sortOrder,
+        },
+      }),
+    }),
+
+    fetchMyBillingSummary: builder.query({
+      query: () => ({
+        url: '/organizations/me/billing/summary',
+      }),
+    }),
+
+    fetchAllBillings: builder.query({
+      query: (params: BillingQueryParams | void) => ({
+        url: '/organizations/billing/all',
+        params: {
+          page: params?.page ?? 0,
+          size: params?.size ?? 100,
+          status: params?.status,
+          billingPeriod: params?.billingPeriod,
+          sortBy: params?.sortBy,
+          sortOrder: params?.sortOrder,
+        },
+      }),
+    }),
   }),
 });
 
@@ -44,4 +88,10 @@ export const {
   useFetchOrganizationByIdQuery,
   useLazyFetchOrganizationMembersQuery,
   useFetchOrganizationMembersQuery,
+  useFetchMyBillingHistoryQuery,
+  useLazyFetchMyBillingHistoryQuery,
+  useFetchMyBillingSummaryQuery,
+  useLazyFetchMyBillingSummaryQuery,
+  useFetchAllBillingsQuery,
+  useLazyFetchAllBillingsQuery,
 } = organizationQueriesApiSlice;

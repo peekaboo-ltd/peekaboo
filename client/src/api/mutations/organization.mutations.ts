@@ -111,6 +111,28 @@ export const organizationMutationApiSlice = createApi({
         body: { businessPlanId },
       }),
     }),
+
+    markBillingAsPaid: builder.mutation<
+      { message: string; data: unknown },
+      { organizationId: string; billingId: string; notes?: string }
+    >({
+      query: ({ organizationId, billingId, notes }) => ({
+        url: `/organizations/${organizationId}/billing/${billingId}/pay`,
+        method: 'POST',
+        body: { notes },
+      }),
+    }),
+
+    markMyBillingAsPaid: builder.mutation<
+      { message: string; data: unknown },
+      { billingId: string; notes?: string }
+    >({
+      query: ({ billingId, notes }) => ({
+        url: `/organizations/me/billing/${billingId}/pay`,
+        method: 'POST',
+        body: { notes },
+      }),
+    }),
   }),
 });
 
@@ -123,4 +145,6 @@ export const {
   useUpdateMyOrganizationMutation,
   useUpdateOrganizationMutation,
   useAssignBusinessPlanMutation,
+  useMarkBillingAsPaidMutation,
+  useMarkMyBillingAsPaidMutation,
 } = organizationMutationApiSlice;
