@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  StyleProp,
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../../utils/constants';
 
@@ -18,8 +19,8 @@ interface ButtonProps {
   disabled?: boolean;
   icon?: React.ReactNode;
   fullWidth?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 export const Button: React.FC<ButtonProps> = ({

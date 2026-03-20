@@ -31,6 +31,40 @@ interface AssignmentState {
   clearError: () => void;
 }
 
+const getAssignmentRecency = (assignment: Assignment): number => {
+  const updatedAtMs = new Date(assignment.updatedAt).getTime();
+  if (!Number.isNaN(updatedAtMs)) {
+    return updatedAtMs;
+  }
+
+  const createdAtMs = new Date(assignment.createdAt).getTime();
+  if (!Number.isNaN(createdAtMs)) {
+    return createdAtMs;
+  }
+
+  return 0;
+};
+
+const normalizeLatestAssignments = (assignments: Assignment[]): Assignment[] => {
+  const latestByOrder = new Map<string, Assignment>();
+
+  assignments.forEach((assignment) => {
+    const key = assignment.orderId || assignment.id;
+    const existing = latestByOrder.get(key);
+
+    if (!existing) {
+      latestByOrder.set(key, assignment);
+      return;
+    }
+
+    if (getAssignmentRecency(assignment) >= getAssignmentRecency(existing)) {
+      latestByOrder.set(key, assignment);
+    }
+  });
+
+  return Array.from(latestByOrder.values());
+};
+
 export const useAssignmentStore = create<AssignmentState>((set, get) => ({
   assignments: [],
   selectedAssignment: null,
@@ -47,15 +81,15 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     set({ isLoading: true, error: null, filter: currentFilter, page: 1 });
     
     try {
-      const params =
-        currentFilter !== 'ALL'
-          ? { status: currentFilter, page: 1, size: 20 }
-          : { page: 1, size: 20 };
+      const params = { page: 1, size: 20 };
       
       const response = await assignmentsAPI.getAll(params);
       
       set({
-        assignments: Array.isArray(response.data) ? response.data : [],
+        assignments: normalizeLatestAssignments(
+          Array.isArray(response.data) ? response.data : []
+        ),
+        page: response.page,
         totalPages: response.totalPages,
         hasMore: response.page < response.totalPages,
         isLoading: false,
@@ -70,7 +104,7 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
   },
 
   fetchMoreAssignments: async (): Promise<void> => {
-    const { page, hasMore, filter, isLoading } = get();
+    const { page, hasMore, isLoading } = get();
     
     if (!hasMore || isLoading) return;
     
@@ -78,16 +112,16 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     
     try {
       const nextPage = page + 1;
-      const params =
-        filter !== 'ALL'
-          ? { status: filter, page: nextPage, size: 20 }
-          : { page: nextPage, size: 20 };
+      const params = { page: nextPage, size: 20 };
       
       const response = await assignmentsAPI.getAll(params);
       
       const newAssignments = Array.isArray(response.data) ? response.data : [];
       set(state => ({
-        assignments: [...state.assignments, ...newAssignments],
+        assignments: normalizeLatestAssignments([
+          ...state.assignments,
+          ...newAssignments,
+        ]),
         page: nextPage,
         hasMore: nextPage < response.totalPages,
         isLoading: false,
@@ -128,15 +162,21 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
       const updatedAssignment = await assignmentsAPI.accept(id);
 
       // Update assignment in list with server response data
-      set(state => ({
-        assignments: state.assignments.map(a =>
-          a.id === id ? { ...a, ...updatedAssignment } : a
-        ),
-        selectedAssignment: state.selectedAssignment?.id === id
-          ? { ...state.selectedAssignment, ...updatedAssignment }
-          : state.selectedAssignment,
-        isLoading: false,
-      }));
+      set(state => {
+        const updatedAssignments = normalizeLatestAssignments(
+          state.assignments.map(a =>
+            a.id === id ? { ...a, ...updatedAssignment } : a
+          )
+        );
+
+        return {
+          assignments: updatedAssignments,
+          selectedAssignment: state.selectedAssignment?.id === id
+            ? { ...state.selectedAssignment, ...updatedAssignment }
+            : state.selectedAssignment,
+          isLoading: false,
+        };
+      });
 
       return true;
     } catch (error) {
@@ -153,18 +193,25 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await assignmentsAPI.reject(id, reason);
+      const updatedAssignment = await assignmentsAPI.reject(id, reason);
 
       // Update rejected assignment in list and remove from pending view
-      set(state => ({
-        assignments: state.assignments.map(a =>
-          a.id === id ? { ...a, status: OrderAssignmentStatus.REJECTED } : a
-        ),
-        selectedAssignment: state.selectedAssignment?.id === id
-          ? { ...state.selectedAssignment, status: OrderAssignmentStatus.REJECTED }
-          : state.selectedAssignment,
-        isLoading: false,
-      }));
+      set(state => {
+        const nextAssignment = { ...updatedAssignment };
+        const updatedAssignments = normalizeLatestAssignments(
+          state.assignments.map(a =>
+            a.id === id ? { ...a, ...nextAssignment } : a
+          )
+        );
+
+        return {
+          assignments: updatedAssignments,
+          selectedAssignment: state.selectedAssignment?.id === id
+            ? { ...state.selectedAssignment, ...nextAssignment }
+            : state.selectedAssignment,
+          isLoading: false,
+        };
+      });
 
       return true;
     } catch (error) {
@@ -183,15 +230,21 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     try {
       const recoveredAssignment = await assignmentsAPI.recover(id);
 
-      set(state => ({
-        assignments: state.assignments.map(a =>
-          a.id === id ? { ...a, ...recoveredAssignment } : a
-        ),
-        selectedAssignment: state.selectedAssignment?.id === id
-          ? { ...state.selectedAssignment, ...recoveredAssignment }
-          : state.selectedAssignment,
-        isLoading: false,
-      }));
+      set(state => {
+        const updatedAssignments = normalizeLatestAssignments(
+          state.assignments.map(a =>
+            a.id === id ? { ...a, ...recoveredAssignment } : a
+          )
+        );
+
+        return {
+          assignments: updatedAssignments,
+          selectedAssignment: state.selectedAssignment?.id === id
+            ? { ...state.selectedAssignment, ...recoveredAssignment }
+            : state.selectedAssignment,
+          isLoading: false,
+        };
+      });
 
       return true;
     } catch (error) {
@@ -246,18 +299,39 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     try {
       await assignmentsAPI.completeOrder(orderId, trackingId);
 
-      set(state => ({
-        selectedAssignment: state.selectedAssignment
-          ? {
-              ...state.selectedAssignment,
-              status: OrderAssignmentStatus.COMPLETED,
-              order: state.selectedAssignment.order
-                ? { ...state.selectedAssignment.order, status: OrderStatus.COMPLETED }
-                : state.selectedAssignment.order,
-            }
-          : state.selectedAssignment,
-        isLoading: false,
-      }));
+      set(state => {
+        const assignmentToComplete = state.selectedAssignment;
+        const completedAssignmentId = assignmentToComplete?.id;
+        const updatedAssignments = completedAssignmentId
+          ? normalizeLatestAssignments(
+              state.assignments.map((assignment) =>
+                assignment.id === completedAssignmentId
+                  ? {
+                      ...assignment,
+                      status: OrderAssignmentStatus.COMPLETED,
+                      order: assignment.order
+                        ? { ...assignment.order, status: OrderStatus.COMPLETED }
+                        : assignment.order,
+                    }
+                  : assignment
+              )
+            )
+          : state.assignments;
+
+        return {
+          assignments: updatedAssignments,
+          selectedAssignment: assignmentToComplete
+            ? {
+                ...assignmentToComplete,
+                status: OrderAssignmentStatus.COMPLETED,
+                order: assignmentToComplete.order
+                  ? { ...assignmentToComplete.order, status: OrderStatus.COMPLETED }
+                  : assignmentToComplete.order,
+              }
+            : assignmentToComplete,
+          isLoading: false,
+        };
+      });
 
       return true;
     } catch (error) {
@@ -274,17 +348,15 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
     set({ isRefreshing: true });
     
     try {
-      const { filter } = get();
-      const params =
-        filter !== 'ALL'
-          ? { status: filter, page: 1, size: 20 }
-          : { page: 1, size: 20 };
+      const params = { page: 1, size: 20 };
       
       const response = await assignmentsAPI.getAll(params);
       
       set({
-        assignments: Array.isArray(response.data) ? response.data : [],
-        page: 1,
+        assignments: normalizeLatestAssignments(
+          Array.isArray(response.data) ? response.data : []
+        ),
+        page: response.page,
         totalPages: response.totalPages,
         hasMore: response.page < response.totalPages,
         isRefreshing: false,
@@ -300,7 +372,6 @@ export const useAssignmentStore = create<AssignmentState>((set, get) => ({
 
   setFilter: (filter: OrderAssignmentStatus | 'ALL'): void => {
     set({ filter });
-    get().fetchAssignments(filter);
   },
 
   setSelectedAssignment: (assignment: Assignment | null): void => {

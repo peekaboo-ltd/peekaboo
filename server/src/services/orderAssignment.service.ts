@@ -212,7 +212,11 @@ export class OrderAssignmentService {
       skip,
       take,
       relations: {
-        order: true,
+        order: {
+          sender: true,
+          recipient: true,
+          activities: true,
+        },
         assignedTo: true,
         createdBy: true,
       },
@@ -242,6 +246,8 @@ export class OrderAssignmentService {
       where: whereCondition,
       relations: {
         order: {
+          sender: true,
+          recipient: true,
           activities: true,
         },
         assignedTo: true,

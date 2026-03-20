@@ -136,6 +136,10 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
 }) => {
   const order = assignment.order;
   const [directionsVisible, setDirectionsVisible] = useState(false);
+  const senderPhone =
+    order?.sender?.phoneNumber || order?.senderPhoneNumber;
+  const recipientPhone =
+    order?.recipient?.phoneNumber || order?.recipientPhoneNumber;
 
   const openPhoneDialer = (phoneNumber: string) => {
     const url = Platform.OS === 'ios' ? `tel:${phoneNumber}` : `tel:${phoneNumber}`;
@@ -181,6 +185,18 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
         <View style={styles.row}>
           <Text style={styles.label}>Created</Text>
           <Text style={styles.value}>{formatDateTime(assignment.createdAt)}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Sender Number</Text>
+          <Text style={styles.value}>
+            {senderPhone ? formatPhoneNumber(senderPhone) : 'N/A'}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Receiver Number</Text>
+          <Text style={styles.value}>
+            {recipientPhone ? formatPhoneNumber(recipientPhone) : 'N/A'}
+          </Text>
         </View>
         {assignment.description && (
           <View style={styles.row}>
