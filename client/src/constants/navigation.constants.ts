@@ -95,6 +95,18 @@ export const SIDEBAR_NAV: SidebarNav[] = [
         icon: faTag,
         roles: [RoleTypes.ADMIN],
       },
+      {
+        label: 'Billing & Payments',
+        path: '/billing-payments',
+        icon: faCreditCard,
+        roles: [RoleTypes.ADMIN],
+      },
     ]
+  },
+  {
+    label: 'Billing & Payments',
+    path: '/billing-payments',
+    icon: faCreditCard,
+    roles: [RoleTypes.BUSINESS],
   },
 ];

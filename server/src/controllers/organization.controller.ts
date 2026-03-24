@@ -594,13 +594,60 @@ export const OrganizationController = {
   async markBillingAsPaid(req: Request, res: Response, next: NextFunction) {
     try {
       const { billingId } = req.params;
-      const { notes } = req.body;
+      const { notes, amountPaid } = req.body;
 
-      const billing = await billingService.markAsPaid(billingId as UUID, notes);
+      const billing = await billingService.markAsPaid(
+        billingId as UUID,
+        notes,
+        amountPaid != null ? Number(amountPaid) : undefined
+      );
 
       return res.status(200).json({
         message: 'Billing marked as paid successfully',
         data: billing,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // MARK MY ORGANIZATION BILLING AS PAID (BUSINESS)
+  async markMyBillingAsPaid(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+      const { billingId } = req.params;
+      const { notes, amountPaid } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const organization = await organizationService.getOrganizationByUserId(userId);
+
+      if (!organization) {
+        return res.status(404).json({
+          message: 'You are not a member of any organization',
+        });
+      }
+
+      const billing = await billingService.getBillingById(billingId as UUID);
+
+      if (billing.organizationId !== organization.id) {
+        return res.status(403).json({
+          message: 'You are not allowed to update this billing record',
+        });
+      }
+
+      const updated = await billingService.markAsPaid(
+        billingId as UUID,
+        notes,
+        amountPaid != null ? Number(amountPaid) : undefined
+      );
+
+      return res.status(200).json({
+        message: 'Billing marked as paid successfully',
+        data: updated,
       });
     } catch (error) {
       next(error);

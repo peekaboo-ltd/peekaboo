@@ -81,6 +81,12 @@ export const useAssignments = () => {
    * Ensure assignments is always an array to prevent filter errors
    */
   const assignmentsArray = Array.isArray(assignments) ? assignments : [];
+  const filteredAssignments = assignmentsArray.filter((assignment) => {
+    if (filter === 'ALL') {
+      return true;
+    }
+    return assignment.status === filter;
+  });
   
   const pendingCount = assignmentsArray.filter(
     a => a.status === OrderAssignmentStatus.PENDING
@@ -94,7 +100,7 @@ export const useAssignments = () => {
   ).length;
 
   return {
-    assignments: assignmentsArray,
+    assignments: filteredAssignments,
     selectedAssignment,
     isLoading,
     isRefreshing,

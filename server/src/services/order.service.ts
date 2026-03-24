@@ -103,6 +103,22 @@ export class OrderService {
         order.organizationId = membership.organization.id;
         order.isBusinessOrder = true;
 
+        const billingGuard =
+          await this.organizationBillingService.getOrderCreationBillingGuard(
+            membership.organization.id,
+            membership.organization.billingPeriod
+          );
+
+        if (billingGuard.blocked) {
+          throw new ValidationError(billingGuard.reason || 'Please settle billing before creating new deliveries.', {
+            referenceType: LogReferenceTypes.ORDER,
+            referenceId: order.createdById,
+            billingId: billingGuard.billing?.id,
+            billingStatus: billingGuard.billing?.status,
+            billingBlockType: billingGuard.blockType,
+          } as any);
+        }
+
         // Apply business plan pricing if available
         if (membership?.organization?.businessPlan) {
           const businessPlan = membership.organization.businessPlan;
@@ -565,6 +581,31 @@ export class OrderService {
           };
 
           if (membership?.organizationId) {
+            const billingGuard =
+              await this.organizationBillingService.getOrderCreationBillingGuard(
+                membership.organizationId,
+                membership.organization.billingPeriod
+              );
+
+            if (billingGuard.blocked) {
+              throw new ValidationError('Bulk import validation failed', {
+                referenceType: LogReferenceTypes.ORDER,
+                referenceId: currentUser.id,
+                errors: [
+                  {
+                    rowNumber: row.rowNumber,
+                    field: 'recipientPhoneNumber',
+                    message:
+                      billingGuard.reason ||
+                      'Billing must be settled before creating new deliveries.',
+                  },
+                ],
+                billingId: billingGuard.billing?.id,
+                billingStatus: billingGuard.billing?.status,
+                billingBlockType: billingGuard.blockType,
+              } as any);
+            }
+
             orderPayload.organizationId = membership.organizationId;
             orderPayload.isBusinessOrder = true;
           }
@@ -943,7 +984,9 @@ export class OrderService {
     organizationId: UUID,
     query: Request['query']
   ): Promise<Pagination<Order>> {
-    const { page = 0, size = 10, status } = query;
+    const { page = 0, size = 10 } = query;
+    const parsedSize = Number(size) || 10;
+    const safeSize = Math.min(Math.max(parsedSize, 1), 10);
 
     let condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[] = {
       organizationId,
@@ -951,7 +994,7 @@ export class OrderService {
 
     const { take, skip } = getPagination({
       page: Number(page),
-      size: Number(size),
+      size: safeSize,
     });
 
     const orders = await this.orderRepository.findAndCount({
@@ -976,7 +1019,7 @@ export class OrderService {
     return getPagingData({
       data: orders,
       page: Number(page),
-      size: Number(size),
+      size: safeSize,
     });
   }
 }

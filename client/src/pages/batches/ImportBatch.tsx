@@ -9,6 +9,7 @@ import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
 import { Badge } from '@/components/ui/badge';
 import { useImportBulkOrders } from '@/hooks/orders/orders.hooks';
+import { parseBillingGuardPrompt, type BillingGuardPrompt } from '@/utils/billingGuard.util';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -56,6 +57,7 @@ const ImportBatch = () => {
   const navigate = useNavigate();
   const { importBatchModal } = useAppSelector((state) => state.batch);
   const [fileName, setFileName] = useState<string>('');
+  const [billingGuardPrompt, setBillingGuardPrompt] = useState<BillingGuardPrompt | null>(null);
   const [preview, setPreview] = useState<ImportPreviewState>({
     rows: [],
     errors: [],
@@ -269,6 +271,13 @@ const ImportBatch = () => {
         navigate('/batches');
       }
     } catch (submissionError) {
+      const billingPrompt = parseBillingGuardPrompt(submissionError);
+      if (billingPrompt) {
+        setBillingGuardPrompt(billingPrompt);
+        dispatch(setImportBatchModal(false));
+        return;
+      }
+
       const backendErrors = (submissionError as {
         data?: { data?: { errors?: ImportRowValidationError[] } };
       })?.data?.data?.errors as ImportRowValidationError[] | undefined;
@@ -280,15 +289,25 @@ const ImportBatch = () => {
     }
   }, [closeModal, getValues, hasBlockingErrors, importBulkOrders, navigate, preview.rows]);
 
+  const closeBillingGuardModal = useCallback(() => {
+    setBillingGuardPrompt(null);
+  }, []);
+
+  const handlePayFirst = useCallback(() => {
+    setBillingGuardPrompt(null);
+    navigate('/billing-payments');
+  }, [navigate]);
+
   return (
-    <Modal
-      isOpen={importBatchModal}
-      onClose={closeModal}
-      heading="Import Batch Orders"
-      description="Upload the official template, review, then complete the batch after validating."
-      className="!max-w-[96vw] !w-[86vw] lg:!w-[78vw]"
-    >
-      <section className="w-full flex flex-col gap-4 pb-2">
+    <>
+      <Modal
+        isOpen={importBatchModal}
+        onClose={closeModal}
+        heading="Import Batch Orders"
+        description="Upload the official template, review, then complete the batch after validating."
+        className="!max-w-[96vw] !w-[86vw] lg:!w-[78vw]"
+      >
+        <section className="w-full flex flex-col gap-4 pb-2">
         {/* File Upload */}
         <motion.article
           initial={{ opacity: 0, y: 6 }}
@@ -434,8 +453,35 @@ const ImportBatch = () => {
             Create Batch &amp; Review
           </Button>
         </footer>
-      </section>
-    </Modal>
+        </section>
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(billingGuardPrompt)}
+        onClose={closeBillingGuardModal}
+        heading={billingGuardPrompt?.title || 'Billing Action Needed'}
+        description={billingGuardPrompt?.description || ''}
+      >
+        <section className="flex flex-col gap-4">
+          {billingGuardPrompt?.billingStatus ? (
+            <p className="text-sm text-slate-600">
+              Billing status:{' '}
+              <span className="font-medium text-slate-900">
+                {billingGuardPrompt.billingStatus}
+              </span>
+            </p>
+          ) : null}
+          <footer className="flex justify-end gap-3 pt-2 border-t">
+            <Button type="button" onClick={closeBillingGuardModal}>
+              Close
+            </Button>
+            <Button type="button" primary onClick={handlePayFirst}>
+              Pay First To Continue
+            </Button>
+          </footer>
+        </section>
+      </Modal>
+    </>
   );
 };
 

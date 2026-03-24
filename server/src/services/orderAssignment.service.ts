@@ -8,7 +8,7 @@ import {
   OrderStatus,
 } from '../constants/order.constants';
 import { Order } from '../entities/order.entity';
-import { NotFoundError } from '../helpers/errors.helper';
+import { ConflictError, NotFoundError } from '../helpers/errors.helper';
 import { UserService } from './user.service';
 import { RoleTypes } from '../constants/role.constants';
 import { UserStatus } from '../constants/user.constants';
@@ -212,7 +212,11 @@ export class OrderAssignmentService {
       skip,
       take,
       relations: {
-        order: true,
+        order: {
+          sender: true,
+          recipient: true,
+          activities: true,
+        },
         assignedTo: true,
         createdBy: true,
       },
@@ -242,6 +246,8 @@ export class OrderAssignmentService {
       where: whereCondition,
       relations: {
         order: {
+          sender: true,
+          recipient: true,
           activities: true,
         },
         assignedTo: true,
@@ -347,6 +353,72 @@ export class OrderAssignmentService {
     });
 
     return newOrderAssignment;
+  }
+
+  // RECOVER REJECTED ORDER ASSIGNMENT
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.ORDER_ASSIGNMENT,
+    getEntityId: (args) => args[0],
+  })
+  async recoverOrderAssignment(
+    id: UUID,
+    scope?: RiderAssignmentScope
+  ): Promise<OrderAssignment> {
+    const orderAssignment = await this.getOrderAssignmentById(id, scope);
+
+    if (orderAssignment.status !== OrderAssignmentStatus.REJECTED) {
+      throw new ConflictError('Only rejected assignments can be recovered.');
+    }
+
+    const siblingAssignments = await this.orderAssignmentRepository.find({
+      where: {
+        orderId: orderAssignment.orderId,
+      },
+      order: {
+        updatedAt: 'DESC',
+      },
+    });
+
+    const openStatuses = [
+      OrderAssignmentStatus.PENDING,
+      OrderAssignmentStatus.ACTIVE,
+    ];
+
+    const assignmentForAnotherRider = siblingAssignments.find(
+      (assignment) =>
+        assignment.id !== orderAssignment.id &&
+        openStatuses.includes(assignment.status) &&
+        Boolean(assignment.assignedToId) &&
+        assignment.assignedToId !== orderAssignment.assignedToId
+    );
+
+    if (assignmentForAnotherRider) {
+      throw new ConflictError(
+        'This assignment has already been assigned to another rider.'
+      );
+    }
+
+    const supersededAssignments = siblingAssignments.filter(
+      (assignment) =>
+        assignment.id !== orderAssignment.id &&
+        openStatuses.includes(assignment.status)
+    );
+
+    await Promise.all(
+      supersededAssignments.map((assignment) =>
+        this.orderAssignmentRepository.save({
+          ...assignment,
+          status: OrderAssignmentStatus.CANCELLED,
+        })
+      )
+    );
+
+    const recoveredAssignment = await this.orderAssignmentRepository.save({
+      ...orderAssignment,
+      status: OrderAssignmentStatus.PENDING,
+    });
+
+    return this.getOrderAssignmentById(recoveredAssignment.id, scope);
   }
 
   // HANDLE ORDER ASSIGNMENT

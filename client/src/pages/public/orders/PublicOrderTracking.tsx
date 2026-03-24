@@ -16,7 +16,9 @@ import {
   faClockRotateLeft,
   faHashtag,
   faKey,
+  faPhone,
   faTruckFast,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   PublicPage,
@@ -116,6 +118,13 @@ const PublicOrderTracking = () => {
       icon: faClockRotateLeft,
     },
   ];
+
+  const senderName = order?.sender?.name || order?.senderName || '—';
+  const senderPhone =
+    order?.sender?.phoneNumber || order?.senderPhoneNumber || '—';
+  const recipientName = order?.recipient?.name || order?.recipientName || '—';
+  const recipientPhone =
+    order?.recipient?.phoneNumber || order?.recipientPhoneNumber || '—';
 
   return (
     <PublicPage>
@@ -378,6 +387,46 @@ const PublicOrderTracking = () => {
                   <p className="mt-1 break-all text-sm font-normal text-slate-900">
                     {orderLoading ? 'Loading…' : item.value}
                   </p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </PublicSectionCard>
+
+      <PublicSectionCard
+        eyebrow="Contacts"
+        title="Sender and receiver"
+        description="Account details when available."
+      >
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {[
+            {
+              title: 'Sender',
+              name: senderName,
+              phone: senderPhone,
+            },
+            {
+              title: 'Receiver',
+              name: recipientName,
+              phone: recipientPhone,
+            },
+          ].map((contact) => (
+            <article
+              key={contact.title}
+              className="rounded-lg border border-slate-200 bg-slate-50/85 p-4"
+            >
+              <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                {contact.title}
+              </p>
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center gap-2 text-sm text-slate-800">
+                  <FontAwesomeIcon icon={faUser} className="h-3.5 w-3.5 text-slate-500" />
+                  <span>{orderLoading ? 'Loading…' : contact.name}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-800">
+                  <FontAwesomeIcon icon={faPhone} className="h-3.5 w-3.5 text-slate-500" />
+                  <span>{orderLoading ? 'Loading…' : contact.phone}</span>
                 </div>
               </div>
             </article>

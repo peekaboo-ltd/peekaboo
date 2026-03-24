@@ -60,6 +60,11 @@ router.get(
   authorize([RoleTypes.BUSINESS]),
   OrganizationController.getMyBillingSummary
 );
+router.post(
+  '/me/billing/:billingId/pay',
+  authorize([RoleTypes.BUSINESS]),
+  OrganizationController.markMyBillingAsPaid
+);
 
 // Org admin can manage members
 router.post(

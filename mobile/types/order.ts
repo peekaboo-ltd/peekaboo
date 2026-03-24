@@ -46,6 +46,10 @@ export interface Order {
   conversationId?: string;
   locationFrom?: Location;
   locationTo?: Location;
+  senderName?: string;
+  senderPhoneNumber?: string;
+  recipientName?: string;
+  recipientPhoneNumber?: string;
   recipient?: User;
   sender?: User;
   createdBy?: User;

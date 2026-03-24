@@ -34,6 +34,82 @@ export class OrganizationBillingService {
     this.emailService = new EmailService();
   }
 
+  // CHECK WHETHER NEW BUSINESS ORDERS SHOULD BE BLOCKED UNTIL BILLING IS SETTLED
+  async getOrderCreationBillingGuard(
+    organizationId: UUID,
+    billingPeriod: BillingPeriod = BillingPeriod.MONTHLY
+  ): Promise<{
+    blocked: boolean;
+    blockType?: 'UNPAID_INVOICED_OR_OVERDUE' | 'PREVIOUS_PERIOD_UNPAID' | 'PLAN_LIMIT_REACHED';
+    reason?: string;
+    billing?: OrganizationBilling;
+  }> {
+    const now = new Date();
+
+    // 1) Hard block when there is already an invoiced/overdue billing
+    const payableStatuses = [BillingStatus.INVOICED, BillingStatus.OVERDUE];
+    const blockingDueBilling = await this.billingRepository
+      .createQueryBuilder('billing')
+      .where('billing.organizationId = :organizationId', { organizationId })
+      .andWhere('billing.status IN (:...statuses)', { statuses: payableStatuses })
+      .orderBy('billing.periodEnd', 'ASC')
+      .getOne();
+
+    if (blockingDueBilling) {
+      return {
+        blocked: true,
+        blockType: 'UNPAID_INVOICED_OR_OVERDUE',
+        reason:
+          'You have an unpaid invoiced or overdue billing. Please pay first to continue creating deliveries.',
+        billing: blockingDueBilling,
+      };
+    }
+
+    // 2) Block if a previous billing period ended and remains unpaid (time threshold exceeded)
+    const expiredUnpaidBilling = await this.billingRepository
+      .createQueryBuilder('billing')
+      .where('billing.organizationId = :organizationId', { organizationId })
+      .andWhere('billing.status = :pending', { pending: BillingStatus.PENDING })
+      .andWhere('billing.periodEnd < :now', { now })
+      .orderBy('billing.periodEnd', 'ASC')
+      .getOne();
+
+    if (expiredUnpaidBilling) {
+      return {
+        blocked: true,
+        blockType: 'PREVIOUS_PERIOD_UNPAID',
+        reason:
+          'A previous billing period ended and is still unpaid. Please settle the old amount first to continue.',
+        billing: expiredUnpaidBilling,
+      };
+    }
+
+    // 3) Enforce plan delivery threshold for the current billing period
+    const currentBilling = await this.getOrCreateCurrentBillingPeriod(
+      organizationId,
+      billingPeriod
+    );
+    const tiers = currentBilling.pricingSnapshot?.tiers || [];
+    const finiteMaxQuantities = tiers
+      .map((tier) => tier.maxQuantity)
+      .filter((value): value is number => value != null);
+
+    if (finiteMaxQuantities.length > 0) {
+      const maxAllowedOrders = Math.max(...finiteMaxQuantities);
+      if (currentBilling.totalOrders >= maxAllowedOrders) {
+        return {
+          blocked: true,
+          blockType: 'PLAN_LIMIT_REACHED',
+          reason:
+            'You reached your current plan delivery limit. Please pay the old amount on your current plan, then move to a convenient new business plan to keep creating deliveries.',
+          billing: currentBilling,
+        };
+      }
+    }
+
+    return { blocked: false };
+  }
+
   // GET OR CREATE CURRENT BILLING PERIOD
   async getOrCreateCurrentBillingPeriod(
     organizationId: UUID,
@@ -71,8 +147,12 @@ export class OrganizationBillingService {
     const billing = await this.billingRepository.findOne({
       where: {
         organizationId,
+        status: BillingStatus.PENDING,
         periodStart: LessThanOrEqual(now),
         periodEnd: MoreThanOrEqual(now),
+      },
+      order: {
+        createdAt: 'DESC',
       },
     });
 
@@ -323,11 +403,25 @@ export class OrganizationBillingService {
     entityType: AuditLogEntityTypes.ORGANIZATION_BILLING,
     getEntityId: (args) => args[0],
   })
-  async markAsPaid(billingId: UUID, notes?: string): Promise<OrganizationBilling> {
+  async markAsPaid(
+    billingId: UUID,
+    notes?: string,
+    amountPaid?: number
+  ): Promise<OrganizationBilling> {
     const billing = await this.getBillingById(billingId);
 
     if (billing.status === BillingStatus.PAID) {
       throw new ValidationError('Billing already marked as paid');
+    }
+
+    if (amountPaid != null) {
+      if (Number.isNaN(amountPaid) || amountPaid <= 0) {
+        throw new ValidationError('Paid amount must be greater than zero');
+      }
+
+      // Early payment support: settle this billing with the provided amount.
+      // Keep within current billed amount to avoid accidental overpayment records.
+      billing.totalAmount = Math.min(Number(amountPaid), Number(billing.totalAmount));
     }
 
     billing.status = BillingStatus.PAID;
@@ -389,6 +483,9 @@ export class OrganizationBillingService {
     const queryBuilder = this.billingRepository
       .createQueryBuilder('billing')
       .leftJoinAndSelect('billing.createdBy', 'createdBy')
+      .leftJoinAndSelect('billing.businessPlan', 'businessPlan')
+      .leftJoinAndSelect('billing.orders', 'orders')
+      .leftJoinAndSelect('orders.recipient', 'recipient')
       .where('billing.organizationId = :organizationId', { organizationId });
 
     if (status) {
@@ -552,6 +649,9 @@ export class OrganizationBillingService {
     const queryBuilder = this.billingRepository
       .createQueryBuilder('billing')
       .leftJoinAndSelect('billing.organization', 'organization')
+      .leftJoinAndSelect('billing.businessPlan', 'businessPlan')
+      .leftJoinAndSelect('billing.orders', 'orders')
+      .leftJoinAndSelect('orders.recipient', 'recipient')
       .leftJoinAndSelect('billing.createdBy', 'createdBy');
 
     if (status) {

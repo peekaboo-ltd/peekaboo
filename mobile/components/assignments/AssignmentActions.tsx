@@ -9,6 +9,7 @@ interface AssignmentActionsProps {
   showConfirmDispatch?: boolean;
   onAccept: () => void;
   onReject: () => void;
+  onRecover?: () => void;
   onConfirmDispatch?: () => void;
   onComplete?: () => void;
   isLoading?: boolean;
@@ -19,6 +20,7 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
   showConfirmDispatch = false,
   onAccept,
   onReject,
+  onRecover,
   onConfirmDispatch,
   onComplete,
   isLoading = false,
@@ -75,6 +77,23 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
     );
   };
 
+  const handleRecover = () => {
+    Alert.alert(
+      'Recover Assignment',
+      'Recover this assignment if it has not already been assigned to another rider?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Recover',
+          onPress: onRecover,
+        },
+      ]
+    );
+  };
+
   if (status === OrderAssignmentStatus.PENDING) {
     return (
       <View style={styles.container}>
@@ -118,6 +137,20 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
             style={styles.completeButton}
           />
         )}
+      </View>
+    );
+  }
+
+  if (status === OrderAssignmentStatus.REJECTED && onRecover) {
+    return (
+      <View style={styles.containerColumn}>
+        <Button
+          title="Recover Assignment"
+          onPress={handleRecover}
+          variant="primary"
+          loading={isLoading}
+          fullWidth
+        />
       </View>
     );
   }

@@ -23,5 +23,5 @@ export function buildOrderCompletedSMS({
 }: {
   orderReference: string;
 }): string {
-  return `Peekaboo order ${orderReference} has been completed successfully. Thank you for using Peekaboo.`;
+  return `Peekaboo order ${orderReference} has been completed. visit https://peekaboo.co.rw for more details. Thank you for using Peekaboo.`;
 }

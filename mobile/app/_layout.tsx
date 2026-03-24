@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/authStore';
+import { useAssignmentStore } from '../store/assignmentStore';
 import { colors } from '../utils/constants';
 import { useLocationTracking } from '../hooks';
 import {
@@ -11,7 +12,7 @@ import {
 } from '../services/notifications/pushNotifications';
 
 export default function RootLayout() {
-  const { isLoading, checkAuth } = useAuthStore();
+  const { isLoading, isAuthenticated, checkAuth } = useAuthStore();
   const [isInitializing, setIsInitializing] = useState(true);
   useLocationTracking();
 
@@ -24,17 +25,25 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    const receivedSubscription = addNotificationReceivedListener(() => {
-      // Root-level listener intentionally left minimal for centralized handling.
+    const receivedSubscription = addNotificationReceivedListener((notification) => {
+      const type = notification.request.content.data?.type;
+      if (type === 'assignment' && isAuthenticated) {
+        useAssignmentStore.getState().refreshAssignments().catch(() => {});
+      }
     });
 
-    const responseSubscription = addNotificationResponseListener();
+    const responseSubscription = addNotificationResponseListener((response) => {
+      const type = response.notification.request.content.data?.type;
+      if (type === 'assignment' && isAuthenticated) {
+        useAssignmentStore.getState().refreshAssignments().catch(() => {});
+      }
+    });
 
     return () => {
       receivedSubscription.remove();
       responseSubscription.remove();
     };
-  }, []);
+  }, [isAuthenticated]);
 
   if (isInitializing || isLoading) {
     return (

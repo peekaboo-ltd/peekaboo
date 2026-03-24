@@ -38,6 +38,7 @@ import {
   ManageBusinessPlanPage,
 } from '@/pages/business-plans';
 import { PaymentsPage } from '@/pages/payments';
+import { BillingPaymentsPage } from '@/pages/billing';
 import {
   OrganizationOnboarding,
   AdminOnboarding,
@@ -572,6 +573,23 @@ const Router = () => {
               )}
             />
           </Route>
+
+          <Route
+            path="billing-payments"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'BUSINESS']}>
+                {withSEO(
+                  {
+                    title: 'Billing & Payments | Peekaboo',
+                    description: 'Track delivery billings, payment status, and organization plan costs.',
+                    path: '/billing-payments',
+                    noindex: true,
+                  },
+                  <BillingPaymentsPage />,
+                )}
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="organizations">
             <Route
