@@ -594,9 +594,13 @@ export const OrganizationController = {
   async markBillingAsPaid(req: Request, res: Response, next: NextFunction) {
     try {
       const { billingId } = req.params;
-      const { notes } = req.body;
+      const { notes, amountPaid } = req.body;
 
-      const billing = await billingService.markAsPaid(billingId as UUID, notes);
+      const billing = await billingService.markAsPaid(
+        billingId as UUID,
+        notes,
+        amountPaid != null ? Number(amountPaid) : undefined
+      );
 
       return res.status(200).json({
         message: 'Billing marked as paid successfully',
@@ -613,7 +617,7 @@ export const OrganizationController = {
       const authReq = req as AuthRequest;
       const userId = authReq.user?.id;
       const { billingId } = req.params;
-      const { notes } = req.body;
+      const { notes, amountPaid } = req.body;
 
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -635,7 +639,11 @@ export const OrganizationController = {
         });
       }
 
-      const updated = await billingService.markAsPaid(billingId as UUID, notes);
+      const updated = await billingService.markAsPaid(
+        billingId as UUID,
+        notes,
+        amountPaid != null ? Number(amountPaid) : undefined
+      );
 
       return res.status(200).json({
         message: 'Billing marked as paid successfully',

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { toast } from 'sonner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,13 +8,16 @@ import {
   faCreditCard,
   faMoneyBillWave,
 } from '@fortawesome/free-solid-svg-icons';
+import { ColumnDef } from '@tanstack/react-table';
 import { useAppSelector } from '@/states/hooks';
 import {
   useFetchAllBillingsQuery,
   useFetchMyBillingHistoryQuery,
   useFetchMyOrganizationQuery,
+  useFetchOrganizationBillingHistoryQuery,
+  useFetchOrganizationOrdersQuery,
+  useFetchOrganizationsQuery,
 } from '@/api/queries/organization.queries';
-import { useFetchBusinessPlansQuery } from '@/api/queries/businessPlan.queries';
 import {
   useMarkBillingAsPaidMutation,
   useMarkMyBillingAsPaidMutation,
@@ -22,21 +25,29 @@ import {
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import Button from '@/components/inputs/Button';
+import Modal from '@/components/Modal';
 import {
   InternalPage,
   InternalPageHeader,
   InternalSectionCard,
   InternalStatCard,
 } from '@/components/layout/InternalPage';
+import { StatusBadge } from '@/components/inputs/StatusBadge';
+import Table from '@/components/table/Table';
+import { Order } from '@/types/order.type';
 
-type BillingTab = 'organizations' | 'businessPlans';
+interface PricingTier {
+  minQuantity: number;
+  maxQuantity: number | null;
+  pricePerUnit?: number;
+  totalPrice?: number;
+  label?: string;
+  isCustom?: boolean;
+}
 
-interface BillingOrder {
-  id: string;
-  referenceId?: string;
-  recipientPhoneNumber?: string;
-  recipient?: { phoneNumber?: string };
-  createdAt?: string;
+interface PricingSnapshot {
+  tiers?: PricingTier[];
+  overflowRate?: number;
 }
 
 interface BillingRow {
@@ -47,12 +58,34 @@ interface BillingRow {
   currency?: string;
   status: string;
   paidAt?: string;
+  updatedAt?: string;
   periodStart?: string;
   periodEnd?: string;
   invoiceNumber?: string;
   organization?: { id: string; name?: string };
-  businessPlan?: { id: string; name?: string };
-  orders?: BillingOrder[];
+  businessPlan?: {
+    id: string;
+    name?: string;
+    billingPeriod?: string;
+    currency?: string;
+    pricePerOrder?: number;
+  };
+  pricingSnapshot?: PricingSnapshot;
+  orders?: Order[];
+}
+
+interface OrganizationRow {
+  id: string;
+  name: string;
+  billingPeriod?: string;
+  phoneNumber?: string;
+  businessPlan?: {
+    id: string;
+    name?: string;
+    billingPeriod?: string;
+    pricePerOrder?: number;
+    currency?: string;
+  };
 }
 
 const itemVariants: Variants = {
@@ -64,7 +97,9 @@ const itemVariants: Variants = {
   },
 };
 
+const PAGE_SIZE = 10;
 const NON_PAID_STATUSES = new Set(['PENDING', 'INVOICED', 'OVERDUE']);
+
 const isBillingPaymentRequired = (row?: BillingRow) => {
   if (!row) return false;
   if (row.status === 'INVOICED' || row.status === 'OVERDUE') return true;
@@ -72,6 +107,51 @@ const isBillingPaymentRequired = (row?: BillingRow) => {
     return new Date(row.periodEnd).getTime() < Date.now();
   }
   return false;
+};
+
+const resolveAssignmentLabel = (order: Order) => {
+  if (!order.assignments?.length) return 'Not assigned';
+  const latest = [...order.assignments].sort(
+    (a, b) =>
+      new Date(b.updatedAt || b.createdAt).getTime() -
+      new Date(a.updatedAt || a.createdAt).getTime(),
+  )[0];
+
+  const assignedName =
+    latest?.assignedTo?.name || latest?.assignedTo?.phoneNumber || 'Unknown rider';
+  return `${assignedName} (${latest?.status || 'PENDING'})`;
+};
+
+const resolvePlanTargetAmount = (billing?: BillingRow): number | null => {
+  if (!billing) return null;
+
+  const tiers = (billing.pricingSnapshot?.tiers || []).filter((tier) => !tier.isCustom);
+  if (tiers.length > 0) {
+    const matchingTier = tiers.find(
+      (tier) =>
+        billing.totalOrders >= tier.minQuantity &&
+        (tier.maxQuantity == null || billing.totalOrders <= tier.maxQuantity),
+    );
+
+    if (matchingTier?.totalPrice != null) {
+      return Number(matchingTier.totalPrice);
+    }
+
+    if (matchingTier?.pricePerUnit != null) {
+      return Number(matchingTier.pricePerUnit) * Number(billing.totalOrders || 0);
+    }
+  }
+
+  if (billing.businessPlan?.pricePerOrder != null) {
+    return Number(billing.businessPlan.pricePerOrder) * Number(billing.totalOrders || 0);
+  }
+
+  return null;
+};
+
+const amountEquals = (a?: number | null, b?: number | null) => {
+  if (a == null || b == null) return false;
+  return Math.abs(Number(a) - Number(b)) < 0.01;
 };
 
 const BillingPaymentsPage = () => {
@@ -85,86 +165,251 @@ const BillingPaymentsPage = () => {
   const isAdmin = roleNames.includes('ADMIN');
   const isBusiness = roleNames.includes('BUSINESS');
 
-  const [tab, setTab] = useState<BillingTab>('organizations');
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<string>('');
+  const [adminOrdersPage, setAdminOrdersPage] = useState(0);
+  const [businessOrdersPage, setBusinessOrdersPage] = useState(0);
+  const [showBusinessHistory, setShowBusinessHistory] = useState(false);
+  const [showAdminHistory, setShowAdminHistory] = useState(false);
+  const [businessHistoryPage, setBusinessHistoryPage] = useState(0);
+  const [adminHistoryPage, setAdminHistoryPage] = useState(0);
+  const [paymentWorkflowOpen, setPaymentWorkflowOpen] = useState(false);
+  const [editableBusinessNumber, setEditableBusinessNumber] = useState('');
+  const [invoiceDeliveriesModalOpen, setInvoiceDeliveriesModalOpen] = useState(false);
+  const [selectedHistoryBilling, setSelectedHistoryBilling] = useState<BillingRow | null>(null);
+
+  const { data: organizationsResp } = useFetchOrganizationsQuery(
+    { page: 0, size: 100 },
+    { skip: !isAdmin },
+  );
 
   const {
     data: adminBillingsResp,
-    isFetching: adminBillingsLoading,
     refetch: refetchAdminBillings,
   } = useFetchAllBillingsQuery(undefined, { skip: !isAdmin });
+
   const {
     data: myBillingsResp,
-    isFetching: myBillingsLoading,
     refetch: refetchMyBillings,
   } = useFetchMyBillingHistoryQuery(undefined, { skip: !isBusiness });
+
+  const {
+    data: myPaidBillingsResp,
+    isFetching: myPaidBillingsLoading,
+  } = useFetchMyBillingHistoryQuery(
+    {
+      page: businessHistoryPage,
+      size: PAGE_SIZE,
+      status: 'PAID',
+    },
+    { skip: !isBusiness || !showBusinessHistory },
+  );
+
   const { data: myOrgResp } = useFetchMyOrganizationQuery(undefined, { skip: !isBusiness });
-  const { data: businessPlansResp } = useFetchBusinessPlansQuery();
+
+  const {
+    data: adminOrdersResp,
+    isFetching: adminOrdersLoading,
+  } = useFetchOrganizationOrdersQuery(
+    {
+      organizationId: selectedOrganizationId,
+      page: adminOrdersPage,
+      size: PAGE_SIZE,
+    },
+    { skip: !isAdmin || !selectedOrganizationId },
+  );
+
+  const {
+    data: adminPaidBillingsResp,
+    isFetching: adminPaidBillingsLoading,
+  } = useFetchOrganizationBillingHistoryQuery(
+    {
+      organizationId: selectedOrganizationId,
+      page: adminHistoryPage,
+      size: PAGE_SIZE,
+      status: 'PAID',
+    },
+    { skip: !isAdmin || !showAdminHistory || !selectedOrganizationId },
+  );
 
   const [markBillingAsPaid, { isLoading: markingAdminPaid }] = useMarkBillingAsPaidMutation();
-  const [markMyBillingAsPaid, { isLoading: markingBusinessPaid }] = useMarkMyBillingAsPaidMutation();
+  const [markMyBillingAsPaid, { isLoading: markingBusinessPaid }] =
+    useMarkMyBillingAsPaidMutation();
 
-  const adminBillingRows = ((adminBillingsResp as { data?: { rows?: BillingRow[] } })?.data?.rows ||
-    []) as BillingRow[];
+  const organizations =
+    ((organizationsResp as { data?: { rows?: OrganizationRow[] } })?.data?.rows ||
+      []) as OrganizationRow[];
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    if (!selectedOrganizationId && organizations.length > 0) {
+      setSelectedOrganizationId(organizations[0].id);
+    }
+  }, [isAdmin, organizations, selectedOrganizationId]);
+
+  useEffect(() => {
+    setAdminOrdersPage(0);
+  }, [selectedOrganizationId]);
+
+  useEffect(() => {
+    setAdminHistoryPage(0);
+  }, [selectedOrganizationId]);
+
+  useEffect(() => {
+    if (!showBusinessHistory) return;
+    setBusinessHistoryPage(0);
+  }, [showBusinessHistory]);
+
+  useEffect(() => {
+    if (!showAdminHistory) return;
+    setAdminHistoryPage(0);
+  }, [showAdminHistory]);
+
+  useEffect(() => {
+    if (!isBusiness) return;
+    setEditableBusinessNumber(
+      myOrgResp?.data?.phoneNumber || user?.phoneNumber || '',
+    );
+  }, [isBusiness, myOrgResp?.data?.phoneNumber, user?.phoneNumber]);
+
+  const adminBillingRows = ((adminBillingsResp as { data?: { rows?: BillingRow[] } })?.data
+    ?.rows || []) as BillingRow[];
   const myBillingRows = ((myBillingsResp as { data?: { rows?: BillingRow[] } })?.data?.rows ||
     []) as BillingRow[];
-  const businessPlans =
-    ((businessPlansResp as { data?: { rows?: Array<{ id: string; name: string; currency?: string; pricePerOrder?: number; billingPeriod?: string; isCustomPricing?: boolean; }> } })?.data?.rows || []);
 
-  const groupedAdminBillings = useMemo(() => {
-    const grouped = new Map<string, BillingRow[]>();
-    adminBillingRows.forEach((row) => {
-      const key = row.organizationId;
-      const current = grouped.get(key) || [];
-      current.push(row);
-      grouped.set(key, current);
-    });
+  const adminOrdersRows = ((adminOrdersResp as { data?: { rows?: Order[] } })?.data?.rows ||
+    []) as Order[];
+  const adminOrdersTotalPages =
+    ((adminOrdersResp as { data?: { totalPages?: number } })?.data?.totalPages || 0) as number;
+  const adminOrdersTotalCount =
+    ((adminOrdersResp as { data?: { totalCount?: number } })?.data?.totalCount || 0) as number;
 
-    return Array.from(grouped.entries())
-      .map(([organizationId, rows]) => {
-        const sorted = [...rows].sort(
-          (a, b) =>
-            new Date(b.periodEnd || b.createdAt || '').getTime() -
-            new Date(a.periodEnd || a.createdAt || '').getTime(),
-        );
-        const currentDue = sorted.find((r) => NON_PAID_STATUSES.has(r.status));
-        const history = sorted.filter((r) => r.status === 'PAID');
-        return {
-          organizationId,
-          organizationName:
-            sorted[0]?.organization?.name || `Organization ${organizationId.slice(0, 8)}`,
-          currentDue,
-          history,
-        };
-      })
-      .sort((a, b) => a.organizationName.localeCompare(b.organizationName));
-  }, [adminBillingRows]);
-
-  const myCurrentDue = useMemo(
-    () => {
-      const sorted = myBillingRows
-        .slice()
-        .sort(
-          (a, b) =>
-            new Date(b.periodEnd || b.createdAt || '').getTime() -
-            new Date(a.periodEnd || a.createdAt || '').getTime(),
-        )
-        .filter((row) => NON_PAID_STATUSES.has(row.status));
-      return sorted.find((row) => isBillingPaymentRequired(row)) || sorted[0];
-    },
-    [myBillingRows],
+  const selectedOrganization = useMemo(
+    () => organizations.find((org) => org.id === selectedOrganizationId),
+    [organizations, selectedOrganizationId],
   );
 
-  const myBillingHistory = useMemo(
+  const selectedOrganizationDue = useMemo(() => {
+    const sorted = adminBillingRows
+      .filter((row) => row.organizationId === selectedOrganizationId)
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(b.periodEnd || b.createdAt || '').getTime() -
+          new Date(a.periodEnd || a.createdAt || '').getTime(),
+      );
+
+    return sorted.find((row) => NON_PAID_STATUSES.has(row.status));
+  }, [adminBillingRows, selectedOrganizationId]);
+
+  const myCurrentDue = useMemo(() => {
+    const sorted = myBillingRows
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(b.periodEnd || b.createdAt || '').getTime() -
+          new Date(a.periodEnd || a.createdAt || '').getTime(),
+      )
+      .filter((row) => NON_PAID_STATUSES.has(row.status));
+    return sorted.find((row) => isBillingPaymentRequired(row)) || sorted[0];
+  }, [myBillingRows]);
+
+  useEffect(() => {
+    setBusinessOrdersPage(0);
+  }, [myCurrentDue?.id]);
+
+  const businessOrdersRows = useMemo(
+    () => ((myCurrentDue?.orders || []) as Order[]),
+    [myCurrentDue?.orders],
+  );
+
+  const businessOrdersTotalCount = businessOrdersRows.length;
+  const businessOrdersTotalPages = Math.max(
+    1,
+    Math.ceil(businessOrdersTotalCount / PAGE_SIZE),
+  );
+  const businessPagedOrders = useMemo(
+    () =>
+      businessOrdersRows.slice(
+        businessOrdersPage * PAGE_SIZE,
+        businessOrdersPage * PAGE_SIZE + PAGE_SIZE,
+      ),
+    [businessOrdersPage, businessOrdersRows],
+  );
+
+  const myBillingHistory = ((myPaidBillingsResp as { data?: { rows?: BillingRow[] } })?.data
+    ?.rows || []) as BillingRow[];
+  const myBillingHistoryTotalPages =
+    ((myPaidBillingsResp as { data?: { totalPages?: number } })?.data?.totalPages || 1) as number;
+
+  const selectedOrganizationPaidHistory =
+    ((adminPaidBillingsResp as { data?: { rows?: BillingRow[] } })?.data?.rows || []) as BillingRow[];
+  const selectedOrganizationPaidHistoryTotalPages =
+    ((adminPaidBillingsResp as { data?: { totalPages?: number } })?.data?.totalPages || 1) as number;
+
+  const pendingAmountAdminGlobal = useMemo(
+    () =>
+      adminBillingRows
+        .filter((row) => NON_PAID_STATUSES.has(row.status))
+        .reduce((sum, row) => sum + Number(row.totalAmount || 0), 0),
+    [adminBillingRows],
+  );
+
+  const pendingAmountAdminSelectedOrganization = useMemo(
+    () =>
+      adminBillingRows
+        .filter((row) => row.organizationId === selectedOrganizationId)
+        .filter((row) => NON_PAID_STATUSES.has(row.status))
+        .reduce((sum, row) => sum + Number(row.totalAmount || 0), 0),
+    [adminBillingRows, selectedOrganizationId],
+  );
+
+  const pendingAmountBusiness = useMemo(
     () =>
       myBillingRows
-        .filter((row) => row.status === 'PAID')
-        .sort(
-          (a, b) =>
-            new Date(b.paidAt || b.updatedAt || '').getTime() -
-            new Date(a.paidAt || a.updatedAt || '').getTime(),
-        ),
+        .filter((row) => NON_PAID_STATUSES.has(row.status))
+        .reduce((sum, row) => sum + Number(row.totalAmount || 0), 0),
     [myBillingRows],
   );
+
+  const adminCurrentPageDeliveriesTotal = useMemo(
+    () =>
+      adminOrdersRows.reduce(
+        (sum, order) => sum + Number(order.finalFee || order.initialFee || 0),
+        0,
+      ),
+    [adminOrdersRows],
+  );
+
+  const businessCurrentPageDeliveriesTotal = useMemo(
+    () =>
+      businessPagedOrders.reduce(
+        (sum, order) => sum + Number(order.finalFee || order.initialFee || 0),
+        0,
+      ),
+    [businessPagedOrders],
+  );
+
+  const businessPlanTargetAmount = useMemo(
+    () => resolvePlanTargetAmount(myCurrentDue),
+    [myCurrentDue],
+  );
+
+  const businessPayableAmount = useMemo(() => {
+    if (!myCurrentDue) return 0;
+    return amountEquals(pendingAmountBusiness, businessCurrentPageDeliveriesTotal)
+      ? pendingAmountBusiness
+      : businessCurrentPageDeliveriesTotal;
+  }, [businessCurrentPageDeliveriesTotal, myCurrentDue, pendingAmountBusiness]);
+
+  const canBusinessPay = useMemo(() => {
+    return Boolean(myCurrentDue) && Number(businessPayableAmount) > 0;
+  }, [businessPayableAmount, myCurrentDue]);
+
+  const businessPayDisabledReason = useMemo(() => {
+    if (!myCurrentDue) return 'No unpaid billing available right now.';
+    if (canBusinessPay) return '';
+    return 'No payable delivery amount found in the current page.';
+  }, [canBusinessPay, myCurrentDue]);
 
   const handleAdminMarkPaid = async (organizationId: string, billingId: string) => {
     try {
@@ -181,9 +426,18 @@ const BillingPaymentsPage = () => {
 
   const handleBusinessPay = async (billingId: string) => {
     try {
-      await markMyBillingAsPaid({ billingId }).unwrap();
-      toast.success('Payment done successfully.');
+      await markMyBillingAsPaid({
+        billingId,
+        amountPaid: businessPayableAmount,
+        notes: editableBusinessNumber
+          ? `Business payment contact: ${editableBusinessNumber}`
+          : undefined,
+      }).unwrap();
+      toast.success('Payment completed. A new billing cycle will start for upcoming deliveries.');
+      setPaymentWorkflowOpen(false);
+      setBusinessOrdersPage(0);
       refetchMyBillings();
+      setShowBusinessHistory(true);
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
@@ -192,15 +446,205 @@ const BillingPaymentsPage = () => {
     }
   };
 
-  const pendingAmountAdmin = useMemo(
-    () =>
-      adminBillingRows
-        .filter((row) => NON_PAID_STATUSES.has(row.status))
-        .reduce((sum, row) => sum + Number(row.totalAmount || 0), 0),
-    [adminBillingRows],
+  const adminOrdersColumns = useMemo<ColumnDef<Order>[]>(
+    () => [
+      {
+        header: 'Reference ID',
+        accessorKey: 'referenceId',
+        cell: ({ row }) => row.original.referenceId || row.original.id,
+      },
+      {
+        header: 'Tracking ID',
+        accessorKey: 'trackingId',
+        cell: ({ row }) => row.original.trackingId || 'N/A',
+      },
+      {
+        header: 'Status',
+        accessorKey: 'status',
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        header: 'Recipient Number',
+        id: 'recipientNumber',
+        cell: ({ row }) =>
+          row.original.recipientPhoneNumber || row.original.recipient?.phoneNumber || 'N/A',
+      },
+      {
+        header: 'Sender Number',
+        id: 'senderNumber',
+        cell: ({ row }) =>
+          row.original.sender?.phoneNumber || row.original.senderPhoneNumber || 'N/A',
+      },
+      {
+        header: 'Assigned Rider',
+        id: 'assignedRider',
+        cell: ({ row }) => resolveAssignmentLabel(row.original),
+      },
+      {
+        header: 'Fee',
+        accessorKey: 'finalFee',
+        cell: ({ row }) =>
+          formatCurrency(row.original.finalFee || row.original.initialFee || 0, 'RWF'),
+      },
+      {
+        header: 'Created By',
+        id: 'createdBy',
+        cell: ({ row }) =>
+          row.original.createdBy?.name || row.original.createdBy?.phoneNumber || 'N/A',
+      },
+      {
+        header: 'Created At',
+        accessorKey: 'createdAt',
+        cell: ({ row }) => formatDate(row.original.createdAt, 'YYYY-MM-DD HH:mm'),
+      },
+    ],
+    [],
   );
 
-  const pendingAmountBusiness = Number(myCurrentDue?.totalAmount || 0);
+  const businessOrdersColumns = useMemo<ColumnDef<Order>[]>(
+    () => [
+      {
+        header: 'Reference ID',
+        accessorKey: 'referenceId',
+        cell: ({ row }) => row.original.referenceId || row.original.id,
+      },
+      {
+        header: 'Tracking ID',
+        accessorKey: 'trackingId',
+        cell: ({ row }) => row.original.trackingId || 'N/A',
+      },
+      {
+        header: 'Status',
+        accessorKey: 'status',
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        header: 'Recipient Number',
+        id: 'recipientNumber',
+        cell: ({ row }) =>
+          row.original.recipientPhoneNumber || row.original.recipient?.phoneNumber || 'N/A',
+      },
+      {
+        header: 'Sender Number',
+        id: 'senderNumber',
+        cell: ({ row }) =>
+          row.original.sender?.phoneNumber || row.original.senderPhoneNumber || 'N/A',
+      },
+      {
+        header: 'Fee',
+        accessorKey: 'finalFee',
+        cell: ({ row }) =>
+          formatCurrency(row.original.finalFee || row.original.initialFee || 0, 'RWF'),
+      },
+      {
+        header: 'Created At',
+        accessorKey: 'createdAt',
+        cell: ({ row }) => formatDate(row.original.createdAt, 'YYYY-MM-DD HH:mm'),
+      },
+    ],
+    [],
+  );
+
+  const billingHistoryColumns = useMemo<ColumnDef<BillingRow>[]>(
+    () => [
+      {
+        header: 'Invoice',
+        accessorKey: 'invoiceNumber',
+        cell: ({ row }) => row.original.invoiceNumber || row.original.id,
+      },
+      {
+        header: 'Paid Date',
+        id: 'paidDate',
+        cell: ({ row }) => formatDate(row.original.paidAt || row.original.updatedAt, 'YYYY-MM-DD'),
+      },
+      {
+        header: 'Deliveries',
+        accessorKey: 'totalOrders',
+      },
+      {
+        header: 'Amount',
+        id: 'amount',
+        cell: ({ row }) =>
+          formatCurrency(row.original.totalAmount, row.original.currency || 'RWF'),
+      },
+      {
+        header: 'Status',
+        accessorKey: 'status',
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        header: 'Action',
+        id: 'action',
+        cell: ({ row }) => (
+          <button
+            type="button"
+            className="px-3 py-1 rounded border border-slate-300 text-xs hover:bg-slate-50"
+            onClick={() => {
+              setSelectedHistoryBilling(row.original);
+              setInvoiceDeliveriesModalOpen(true);
+            }}
+          >
+            View Deliveries
+          </button>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const invoiceDeliveryColumns = useMemo<ColumnDef<Order>[]>(
+    () => [
+      {
+        header: 'Reference ID',
+        accessorKey: 'referenceId',
+        cell: ({ row }) => row.original.referenceId || row.original.id,
+      },
+      {
+        header: 'Tracking ID',
+        accessorKey: 'trackingId',
+        cell: ({ row }) => row.original.trackingId || 'N/A',
+      },
+      {
+        header: 'Status',
+        accessorKey: 'status',
+        cell: ({ row }) => <StatusBadge status={row.original.status} />,
+      },
+      {
+        header: 'Recipient Number',
+        id: 'recipientNumber',
+        cell: ({ row }) =>
+          row.original.recipientPhoneNumber || row.original.recipient?.phoneNumber || 'N/A',
+      },
+      {
+        header: 'Sender Number',
+        id: 'senderNumber',
+        cell: ({ row }) =>
+          row.original.sender?.phoneNumber || row.original.senderPhoneNumber || 'N/A',
+      },
+      {
+        header: 'Fee',
+        accessorKey: 'finalFee',
+        cell: ({ row }) =>
+          formatCurrency(row.original.finalFee || row.original.initialFee || 0, 'RWF'),
+      },
+      {
+        header: 'Created At',
+        accessorKey: 'createdAt',
+        cell: ({ row }) => formatDate(row.original.createdAt, 'YYYY-MM-DD HH:mm'),
+      },
+    ],
+    [],
+  );
+
+  const invoicePaidDeliveries = useMemo(
+    () => ((selectedHistoryBilling?.orders || []) as Order[]),
+    [selectedHistoryBilling?.orders],
+  );
+
+  const closeInvoiceDeliveriesModal = useCallback(() => {
+    setInvoiceDeliveriesModalOpen(false);
+    setSelectedHistoryBilling(null);
+  }, []);
 
   return (
     <InternalPage>
@@ -216,17 +660,17 @@ const BillingPaymentsPage = () => {
         <motion.section className="grid grid-cols-1 md:grid-cols-3 gap-4" variants={itemVariants}>
           <InternalStatCard
             label="Organizations"
-            value={groupedAdminBillings.length}
+            value={organizations.length}
             icon={<FontAwesomeIcon icon={faBuilding} />}
           />
           <InternalStatCard
             label="Pending Amount"
-            value={formatCurrency(pendingAmountAdmin, 'RWF')}
+            value={formatCurrency(pendingAmountAdminGlobal, 'RWF')}
             icon={<FontAwesomeIcon icon={faMoneyBillWave} />}
           />
           <InternalStatCard
-            label="Plans"
-            value={businessPlans.length}
+            label="Deliveries (Selected Business)"
+            value={adminOrdersTotalCount}
             icon={<FontAwesomeIcon icon={faCreditCard} />}
           />
         </motion.section>
@@ -241,261 +685,489 @@ const BillingPaymentsPage = () => {
           />
           <InternalStatCard
             label="Deliveries In Current Billing"
-            value={myCurrentDue?.totalOrders || 0}
+            value={businessOrdersTotalCount}
             icon={<FontAwesomeIcon icon={faBuilding} />}
           />
         </motion.section>
       )}
 
-      {isAdmin && (
-        <motion.section variants={itemVariants} className="flex gap-2">
-          <Button
-            type="button"
-            submit
-            primary={tab === 'organizations'}
-            onClick={() => setTab('organizations')}
-          >
-            Organisations
-          </Button>
-          <Button
-            type="button"
-            submit
-            primary={tab === 'businessPlans'}
-            onClick={() => setTab('businessPlans')}
-          >
-            Business Plans
-          </Button>
-        </motion.section>
-      )}
+      <motion.section variants={itemVariants} className="grid grid-cols-1 gap-4">
+        <InternalSectionCard
+          eyebrow="Current Plan"
+          title={
+            isAdmin
+              ? selectedOrganization?.businessPlan?.name ||
+                selectedOrganizationDue?.businessPlan?.name ||
+                'No plan assigned'
+              : myOrgResp?.data?.businessPlan?.name ||
+                myCurrentDue?.businessPlan?.name ||
+                'No plan assigned'
+          }
+          description={
+            isAdmin
+              ? selectedOrganization
+                ? `${selectedOrganization.name} • ${
+                    selectedOrganization.businessPlan?.billingPeriod ||
+                    selectedOrganization.billingPeriod ||
+                    'N/A'
+                  } cycle`
+                : 'Select a business to see current plan in use.'
+              : `${myOrgResp?.data?.name || 'My Organization'} • ${
+                  myOrgResp?.data?.businessPlan?.billingPeriod ||
+                  myOrgResp?.data?.billingPeriod ||
+                  'N/A'
+                } cycle`
+          }
+        >
+          <p className="text-sm text-slate-600">
+            {isAdmin
+              ? 'Highlighted plan is based on the currently selected business.'
+              : 'This is the active business plan currently used for your deliveries.'}
+          </p>
+        </InternalSectionCard>
+      </motion.section>
 
-      {isAdmin && tab === 'organizations' && (
+      {isAdmin && (
         <motion.section variants={itemVariants} className="grid grid-cols-1 gap-4">
-          {groupedAdminBillings.map((org) => (
-            <InternalSectionCard
-              key={org.organizationId}
-              eyebrow="Organisation"
-              title={org.organizationName}
-              description={
-                org.currentDue
-                  ? `Current amount to pay: ${formatCurrency(org.currentDue.totalAmount, org.currentDue.currency || 'RWF')}`
-                  : 'No unpaid billing cycle'
-              }
-              actions={
-                org.currentDue ? (
-                  <Button
+          <InternalSectionCard
+            eyebrow="Businesses"
+            title="Select Business"
+            description="Click a business to load all deliveries and billing details for that organization."
+          >
+            <div className="flex flex-wrap gap-2">
+              {organizations.map((org) => (
+                <Button
+                  key={org.id}
+                  type="button"
+                  submit
+                  primary={selectedOrganizationId === org.id}
+                  onClick={() => setSelectedOrganizationId(org.id)}
+                >
+                  {org.name}
+                </Button>
+              ))}
+            </div>
+          </InternalSectionCard>
+
+          <InternalSectionCard
+            eyebrow="Deliveries"
+            title={selectedOrganization ? `${selectedOrganization.name} Deliveries` : 'Deliveries'}
+            description="All deliveries made by the selected company, including assignment details."
+          >
+            <Table
+              columns={adminOrdersColumns}
+              data={adminOrdersRows}
+              showPagination={false}
+              isLoading={adminOrdersLoading}
+              noDataMessage="No deliveries found for the selected business."
+            />
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">
+              <p>Showing up to 10 deliveries per page.</p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="px-3 py-1 rounded border border-slate-300 disabled:opacity-50"
+                  disabled={adminOrdersPage <= 0}
+                  onClick={() => setAdminOrdersPage((prev) => Math.max(prev - 1, 0))}
+                >
+                  Prev
+                </button>
+                <span>
+                  Page {adminOrdersTotalPages === 0 ? 1 : adminOrdersPage + 1} of{' '}
+                  {adminOrdersTotalPages || 1}
+                </span>
+                <button
+                  type="button"
+                  className="px-3 py-1 rounded border border-slate-300 disabled:opacity-50"
+                  disabled={
+                    adminOrdersTotalPages === 0 || adminOrdersPage >= adminOrdersTotalPages - 1
+                  }
+                  onClick={() =>
+                    setAdminOrdersPage((prev) =>
+                      adminOrdersTotalPages > 0
+                        ? Math.min(prev + 1, adminOrdersTotalPages - 1)
+                        : 0,
+                    )
+                  }
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+            <div className="mt-4 rounded border border-slate-200 bg-slate-50 p-3 text-sm">
+              <p className="text-slate-600">
+                Current page deliveries total:{' '}
+                <span className="font-semibold text-slate-900">
+                  {formatCurrency(adminCurrentPageDeliveriesTotal, 'RWF')}
+                </span>
+              </p>
+              <p className="text-slate-700 mt-1">
+                Total to be paid (selected business):{' '}
+                <span className="font-semibold text-slate-900">
+                  {formatCurrency(
+                    pendingAmountAdminSelectedOrganization,
+                    selectedOrganizationDue?.currency || 'RWF',
+                  )}
+                </span>
+              </p>
+            </div>
+          </InternalSectionCard>
+
+          <InternalSectionCard
+            eyebrow="Total To Be Paid"
+            title={formatCurrency(
+              pendingAmountAdminSelectedOrganization,
+              selectedOrganizationDue?.currency || 'RWF',
+            )}
+            description="Total outstanding amount for the selected business."
+            actions={
+              selectedOrganizationDue ? (
+                <Button
+                  type="button"
+                  submit
+                  primary
+                  isLoading={markingAdminPaid}
+                  onClick={() =>
+                    handleAdminMarkPaid(
+                      selectedOrganizationDue.organizationId,
+                      selectedOrganizationDue.id,
+                    )
+                  }
+                >
+                  Mark as Paid
+                </Button>
+              ) : null
+            }
+          >
+            <p className="text-sm text-slate-600">
+              {selectedOrganizationDue
+                ? `Current unpaid invoice: ${
+                    selectedOrganizationDue.invoiceNumber || selectedOrganizationDue.id
+                  }`
+                : 'No unpaid billing at the moment for this business.'}
+            </p>
+          </InternalSectionCard>
+
+          <InternalSectionCard
+            eyebrow="Payment History"
+            title="Selected Business Payment History"
+            description="Toggle to show paid billing history."
+            actions={
+              <Button
+                type="button"
+                submit
+                primary={showAdminHistory}
+                onClick={() => setShowAdminHistory((prev) => !prev)}
+              >
+                {showAdminHistory ? 'Hide History' : 'Show History'}
+              </Button>
+            }
+          >
+            {showAdminHistory ? (
+              <div className="space-y-3">
+                <Table
+                  columns={billingHistoryColumns}
+                  data={selectedOrganizationPaidHistory}
+                  showPagination={false}
+                  isLoading={adminPaidBillingsLoading}
+                  noDataMessage="No payment history for this business yet."
+                />
+                <div className="flex items-center justify-end gap-2 text-sm text-slate-600">
+                  <button
                     type="button"
-                    submit
-                    primary
-                    isLoading={markingAdminPaid}
+                    className="px-3 py-1 rounded border border-slate-300 disabled:opacity-50"
+                    disabled={adminHistoryPage <= 0}
+                    onClick={() => setAdminHistoryPage((prev) => Math.max(prev - 1, 0))}
+                  >
+                    Prev
+                  </button>
+                  <span>
+                    Page {adminHistoryPage + 1} of {selectedOrganizationPaidHistoryTotalPages || 1}
+                  </span>
+                  <button
+                    type="button"
+                    className="px-3 py-1 rounded border border-slate-300 disabled:opacity-50"
+                    disabled={adminHistoryPage >= (selectedOrganizationPaidHistoryTotalPages - 1)}
                     onClick={() =>
-                      handleAdminMarkPaid(org.organizationId, org.currentDue!.id)
+                      setAdminHistoryPage((prev) =>
+                        Math.min(prev + 1, Math.max(selectedOrganizationPaidHistoryTotalPages - 1, 0)),
+                      )
                     }
                   >
-                    Mark as Paid
-                  </Button>
-                ) : null
-              }
-            >
-              {org.currentDue ? (
-                <section className="space-y-3">
-                  {isBillingPaymentRequired(org.currentDue) ? (
-                    <p className="text-sm text-amber-700 font-medium">
-                      Payment required before new deliveries proceed.
-                    </p>
-                  ) : null}
-                  <div className="text-sm text-slate-600">
-                    Plan:{' '}
-                    <span className="font-medium text-slate-900">
-                      {org.currentDue.businessPlan?.name || 'Not assigned'}
-                    </span>{' '}
-                    | Deliveries: <span className="font-medium text-slate-900">{org.currentDue.totalOrders}</span>
-                  </div>
-                  <div className="space-y-2">
-                    {(org.currentDue.orders || []).slice(0, 8).map((order) => (
-                      <article
-                        key={order.id}
-                        className="rounded border border-slate-200 bg-slate-50 p-3 text-sm"
-                      >
-                        <p className="font-medium text-slate-900">
-                          Reference ID: {order.referenceId || order.id}
-                        </p>
-                        <p className="text-slate-600">
-                          Delivery Date: {formatDate(order.createdAt, 'YYYY-MM-DD')}
-                        </p>
-                        <p className="text-slate-600">
-                          Recipient Number:{' '}
-                          {order.recipientPhoneNumber || order.recipient?.phoneNumber || 'N/A'}
-                        </p>
-                      </article>
-                    ))}
-                  </div>
-                  {org.history.length > 0 ? (
-                    <div className="pt-2">
-                      <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">
-                        Payment history
-                      </p>
-                      <div className="space-y-1">
-                        {org.history.slice(0, 5).map((entry) => (
-                          <div
-                            key={entry.id}
-                            className="flex items-center justify-between text-sm text-slate-700"
-                          >
-                            <span>{formatDate(entry.paidAt || entry.updatedAt, 'YYYY-MM-DD')}</span>
-                            <span>{formatCurrency(entry.totalAmount, entry.currency || 'RWF')}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                </section>
-              ) : (
-                <p className="text-sm text-slate-500">No unpaid billing at the moment.</p>
-              )}
-            </InternalSectionCard>
-          ))}
-          {groupedAdminBillings.length === 0 && !adminBillingsLoading ? (
-            <InternalSectionCard title="No Billing Data">
-              <p className="text-sm text-slate-500">No organization billing records found.</p>
-            </InternalSectionCard>
-          ) : null}
-        </motion.section>
-      )}
-
-      {isAdmin && tab === 'businessPlans' && (
-        <motion.section variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {businessPlans.map((plan) => (
-            <InternalSectionCard
-              key={plan.id}
-              eyebrow="Plan"
-              title={plan.name}
-              description={
-                plan.isCustomPricing
-                  ? 'Custom pricing'
-                  : `${formatCurrency(plan.pricePerOrder || 0, plan.currency || 'RWF')} / delivery`
-              }
-            >
-              <p className="text-sm text-slate-600">
-                Billing period: <span className="font-medium text-slate-900">{plan.billingPeriod || 'N/A'}</span>
-              </p>
-            </InternalSectionCard>
-          ))}
+                    Next
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">History is hidden. Toggle to view.</p>
+            )}
+          </InternalSectionCard>
         </motion.section>
       )}
 
       {!isAdmin && isBusiness && (
         <motion.section variants={itemVariants} className="grid grid-cols-1 gap-4">
           <InternalSectionCard
-            eyebrow="My Organization"
-            title={myOrgResp?.data?.name || 'Organization'}
-            description="Amounts are auto-calculated from deliveries and your assigned business plan cycle."
-            actions={
-              myCurrentDue ? (
-                <Button
-                  type="button"
-                  submit
-                  primary
-                  isLoading={markingBusinessPaid}
-                  onClick={() => handleBusinessPay(myCurrentDue.id)}
-                >
-                  {isBillingPaymentRequired(myCurrentDue) ? 'Pay Required Bill' : 'Pay Now (Optional)'}{' '}
-                  {formatCurrency(myCurrentDue.totalAmount, myCurrentDue.currency || 'RWF')}
-                </Button>
-              ) : null
-            }
+            eyebrow="Deliveries"
+            title="All Deliveries Made By Your Company"
+            description="All delivery information is included in this table except assignments."
           >
-            {myCurrentDue ? (
-              <section className="space-y-3">
-                <p className="text-sm text-slate-700">
-                  Total amount to pay:{' '}
-                  <span className="font-semibold text-slate-900">
-                    {formatCurrency(myCurrentDue.totalAmount, myCurrentDue.currency || 'RWF')}
-                  </span>
-                </p>
-                <p className="text-sm text-slate-700">
-                  Number of deliveries:{' '}
-                  <span className="font-semibold text-slate-900">{myCurrentDue.totalOrders}</span>
-                </p>
-                <p className="text-sm text-slate-700">
-                  Billing cycle:{' '}
-                  <span className="font-semibold text-slate-900">
-                    {formatDate(myCurrentDue.periodStart, 'YYYY-MM-DD')} - {formatDate(myCurrentDue.periodEnd, 'YYYY-MM-DD')}
-                  </span>
-                </p>
-                {isBillingPaymentRequired(myCurrentDue) ? (
-                  <aside className="rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-                    Your plan threshold/time cycle has been exceeded. Billing payment is required before proceeding with new deliveries.
-                  </aside>
-                ) : (
-                  <aside className="rounded border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-                    You are currently billed by plan cycle. Payment is optional now, and required automatically once limit/time is exceeded.
-                  </aside>
-                )}
-                <div className="space-y-2">
-                  {(myCurrentDue.orders || []).map((order) => (
-                    <article key={order.id} className="rounded border border-slate-200 bg-slate-50 p-3 text-sm">
-                      <p className="font-medium text-slate-900">
-                        Reference ID: {order.referenceId || order.id}
-                      </p>
-                      <p className="text-slate-600">
-                        Delivery Date: {formatDate(order.createdAt, 'YYYY-MM-DD')}
-                      </p>
-                      <p className="text-slate-600">
-                        Recipient Number:{' '}
-                        {order.recipientPhoneNumber || order.recipient?.phoneNumber || 'N/A'}
-                      </p>
-                    </article>
-                  ))}
-                </div>
-                <aside className="rounded border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-xs uppercase tracking-wide text-emerald-700">
-                    MoMo code
-                  </p>
-                  <p className="text-base font-semibold text-emerald-900">
-                    0464641 PEEKABOO LTD
-                  </p>
-                  <p className="text-sm text-emerald-800 mt-1">
-                    Contact our official for confirmation.
-                  </p>
-                </aside>
-              </section>
-            ) : (
-              <p className="text-sm text-slate-500">No unpaid billing found.</p>
-            )}
+            <Table
+              columns={businessOrdersColumns}
+              data={businessPagedOrders}
+              showPagination={false}
+              noDataMessage="No deliveries in current billing cycle."
+            />
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">
+              <p>Showing up to 10 deliveries per page.</p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="px-3 py-1 rounded border border-slate-300 disabled:opacity-50"
+                  disabled={businessOrdersPage <= 0}
+                  onClick={() => setBusinessOrdersPage((prev) => Math.max(prev - 1, 0))}
+                >
+                  Prev
+                </button>
+                <span>
+                  Page {businessOrdersTotalPages === 0 ? 1 : businessOrdersPage + 1} of{' '}
+                  {businessOrdersTotalPages || 1}
+                </span>
+                <button
+                  type="button"
+                  className="px-3 py-1 rounded border border-slate-300 disabled:opacity-50"
+                  disabled={
+                    businessOrdersTotalPages === 0 ||
+                    businessOrdersPage >= businessOrdersTotalPages - 1
+                  }
+                  onClick={() =>
+                    setBusinessOrdersPage((prev) =>
+                      businessOrdersTotalPages > 0
+                        ? Math.min(prev + 1, businessOrdersTotalPages - 1)
+                        : 0,
+                    )
+                  }
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+            <div className="mt-4 rounded border border-slate-200 bg-slate-50 p-3 text-sm">
+              <p className="text-slate-600">
+                Current page deliveries total:{' '}
+                <span className="font-semibold text-slate-900">
+                  {formatCurrency(businessCurrentPageDeliveriesTotal, 'RWF')}
+                </span>
+              </p>
+              <p className="text-slate-700 mt-1">
+                Total to be paid at the moment:{' '}
+                <span className="font-semibold text-slate-900">
+                  {formatCurrency(pendingAmountBusiness, myCurrentDue?.currency || 'RWF')}
+                </span>
+              </p>
+            </div>
           </InternalSectionCard>
 
           <InternalSectionCard
-            eyebrow="History"
-            title="Payments Completed"
-            description="Past paid billing records for your business."
+            eyebrow="Pay Business Plan"
+            title={formatCurrency(businessPayableAmount, myCurrentDue?.currency || 'RWF')}
+            description="Payment workflow for your current business plan."
+            actions={
+              <Button
+                type="button"
+                submit
+                primary
+                disabled={!canBusinessPay || !myCurrentDue}
+                onClick={() => setPaymentWorkflowOpen(true)}
+              >
+                Start Payment Workflow
+              </Button>
+            }
           >
-            {myBillingHistory.length === 0 && !myBillingsLoading ? (
-              <p className="text-sm text-slate-500">No payment history yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {myBillingHistory.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="flex items-center justify-between rounded border border-slate-200 p-3 text-sm"
+            <div className="space-y-2 text-sm text-slate-700">
+              <p>
+                Current plan:{' '}
+                <span className="font-medium text-slate-900">
+                  {myOrgResp?.data?.businessPlan?.name ||
+                    myCurrentDue?.businessPlan?.name ||
+                    'No plan assigned'}
+                </span>
+              </p>
+              <p>
+                Deliveries in billing:{' '}
+                <span className="font-medium text-slate-900">{myCurrentDue?.totalOrders || 0}</span>
+              </p>
+              <p>
+                Billed amount:{' '}
+                <span className="font-medium text-slate-900">
+                  {formatCurrency(myCurrentDue?.totalAmount || 0, myCurrentDue?.currency || 'RWF')}
+                </span>
+              </p>
+              <p>
+                Pay now amount:{' '}
+                <span className="font-medium text-slate-900">
+                  {formatCurrency(businessPayableAmount, myCurrentDue?.currency || 'RWF')}
+                </span>
+              </p>
+              <p>
+                Plan target amount:{' '}
+                <span className="font-medium text-slate-900">
+                  {businessPlanTargetAmount != null
+                    ? formatCurrency(businessPlanTargetAmount, myCurrentDue?.currency || 'RWF')
+                    : 'N/A'}
+                </span>
+              </p>
+              {businessPayDisabledReason ? (
+                <p className="text-amber-700">{businessPayDisabledReason}</p>
+              ) : (
+                <p className="text-emerald-700">
+                  Payment is active. After payment, new deliveries continue on a new billing record.
+                </p>
+              )}
+            </div>
+          </InternalSectionCard>
+
+          <InternalSectionCard
+            eyebrow="Payment History"
+            title="Payments Completed"
+            description="Keep this table and toggle it whenever you want to review paid bills."
+            actions={
+              <Button
+                type="button"
+                submit
+                primary={showBusinessHistory}
+                onClick={() => setShowBusinessHistory((prev) => !prev)}
+              >
+                {showBusinessHistory ? 'Hide History' : 'Show History'}
+              </Button>
+            }
+          >
+            {showBusinessHistory ? (
+              <div className="space-y-3">
+                <Table
+                  columns={billingHistoryColumns}
+                  data={myBillingHistory}
+                  showPagination={false}
+                  isLoading={myPaidBillingsLoading}
+                  noDataMessage="No payment history yet."
+                />
+                <div className="flex items-center justify-end gap-2 text-sm text-slate-600">
+                  <button
+                    type="button"
+                    className="px-3 py-1 rounded border border-slate-300 disabled:opacity-50"
+                    disabled={businessHistoryPage <= 0}
+                    onClick={() => setBusinessHistoryPage((prev) => Math.max(prev - 1, 0))}
                   >
-                    <div>
-                      <p className="font-medium text-slate-900">
-                        {entry.invoiceNumber || 'Billing payment'}
-                      </p>
-                      <p className="text-slate-500">
-                        {formatDate(entry.paidAt || entry.updatedAt, 'YYYY-MM-DD')}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-green-700">
-                      <FontAwesomeIcon icon={faCheckCircle} />
-                      <span>{formatCurrency(entry.totalAmount, entry.currency || 'RWF')}</span>
-                    </div>
-                  </div>
-                ))}
+                    Prev
+                  </button>
+                  <span>
+                    Page {businessHistoryPage + 1} of {myBillingHistoryTotalPages || 1}
+                  </span>
+                  <button
+                    type="button"
+                    className="px-3 py-1 rounded border border-slate-300 disabled:opacity-50"
+                    disabled={businessHistoryPage >= (myBillingHistoryTotalPages - 1)}
+                    onClick={() =>
+                      setBusinessHistoryPage((prev) =>
+                        Math.min(prev + 1, Math.max(myBillingHistoryTotalPages - 1, 0)),
+                      )
+                    }
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
+            ) : (
+              <p className="text-sm text-slate-500">History is hidden. Toggle to view.</p>
             )}
           </InternalSectionCard>
         </motion.section>
       )}
+
+      <Modal
+        isOpen={paymentWorkflowOpen}
+        onClose={() => setPaymentWorkflowOpen(false)}
+        heading="Business Plan Payment Workflow"
+        description="Review and confirm payment details for your current business plan."
+      >
+        <section className="space-y-4">
+          <div className="rounded border border-slate-200 bg-slate-50 p-3 text-sm space-y-2">
+            <p>
+              Current business plan:{' '}
+              <span className="font-medium text-slate-900">
+                {myOrgResp?.data?.businessPlan?.name || myCurrentDue?.businessPlan?.name || 'N/A'}
+              </span>
+            </p>
+            <p>
+              Amount to pay:{' '}
+              <span className="font-medium text-slate-900">
+                {formatCurrency(businessPayableAmount, myCurrentDue?.currency || 'RWF')}
+              </span>
+            </p>
+            <p>
+              Number of deliveries:{' '}
+              <span className="font-medium text-slate-900">{myCurrentDue?.totalOrders || 0}</span>
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700">Business Number (editable)</label>
+            <input
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              value={editableBusinessNumber}
+              onChange={(e) => setEditableBusinessNumber(e.target.value)}
+              placeholder="Enter business phone number"
+            />
+          </div>
+
+          {!canBusinessPay ? (
+            <p className="text-sm text-amber-700">{businessPayDisabledReason}</p>
+          ) : null}
+
+          <footer className="flex justify-end gap-3 pt-2 border-t">
+            <Button type="button" onClick={() => setPaymentWorkflowOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              primary
+              isLoading={markingBusinessPaid}
+              disabled={!canBusinessPay || !myCurrentDue}
+              onClick={() => myCurrentDue && handleBusinessPay(myCurrentDue.id)}
+            >
+              Pay Business Plan
+            </Button>
+          </footer>
+        </section>
+      </Modal>
+
+      <Modal
+        isOpen={invoiceDeliveriesModalOpen}
+        onClose={closeInvoiceDeliveriesModal}
+        heading="Invoice Deliveries"
+        description={
+          selectedHistoryBilling
+            ? `Deliveries paid in invoice ${selectedHistoryBilling.invoiceNumber || selectedHistoryBilling.id}`
+            : 'Deliveries paid in this invoice.'
+        }
+      >
+        <section className="space-y-3">
+          <p className="text-sm text-slate-600">
+            Total deliveries: <span className="font-medium text-slate-900">{invoicePaidDeliveries.length}</span>
+          </p>
+          <Table
+            columns={invoiceDeliveryColumns}
+            data={invoicePaidDeliveries}
+            showPagination={false}
+            noDataMessage="No deliveries found for this invoice."
+          />
+          <footer className="flex justify-end pt-2 border-t">
+            <Button type="button" onClick={closeInvoiceDeliveriesModal}>
+              Close
+            </Button>
+          </footer>
+        </section>
+      </Modal>
     </InternalPage>
   );
 };

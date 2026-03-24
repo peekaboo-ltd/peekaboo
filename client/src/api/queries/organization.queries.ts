@@ -13,6 +13,12 @@ interface BillingQueryParams {
   sortOrder?: 'ASC' | 'DESC';
 }
 
+interface OrganizationOrdersQueryParams {
+  page?: number;
+  size?: number;
+  status?: string;
+}
+
 export const organizationQueriesApiSlice = createApi({
   reducerPath: 'organizationQueriesApi',
   baseQuery: createBaseQuery(),
@@ -76,6 +82,48 @@ export const organizationQueriesApiSlice = createApi({
         },
       }),
     }),
+
+    fetchOrganizationBillingHistory: builder.query({
+      query: ({
+        organizationId,
+        ...params
+      }: BillingQueryParams & { organizationId: UUID }) => ({
+        url: `/organizations/${organizationId}/billing`,
+        params: {
+          page: params?.page ?? 0,
+          size: params?.size ?? 10,
+          status: params?.status,
+          billingPeriod: params?.billingPeriod,
+          sortBy: params?.sortBy,
+          sortOrder: params?.sortOrder,
+        },
+      }),
+    }),
+
+    fetchMyOrganizationOrders: builder.query({
+      query: (params: OrganizationOrdersQueryParams | void) => ({
+        url: '/organizations/me/orders',
+        params: {
+          page: params?.page ?? 0,
+          size: params?.size ?? 10,
+          status: params?.status,
+        },
+      }),
+    }),
+
+    fetchOrganizationOrders: builder.query({
+      query: ({
+        organizationId,
+        ...params
+      }: OrganizationOrdersQueryParams & { organizationId: UUID }) => ({
+        url: `/organizations/${organizationId}/orders`,
+        params: {
+          page: params?.page ?? 0,
+          size: params?.size ?? 10,
+          status: params?.status,
+        },
+      }),
+    }),
   }),
 });
 
@@ -94,4 +142,10 @@ export const {
   useLazyFetchMyBillingSummaryQuery,
   useFetchAllBillingsQuery,
   useLazyFetchAllBillingsQuery,
+  useFetchOrganizationBillingHistoryQuery,
+  useLazyFetchOrganizationBillingHistoryQuery,
+  useFetchMyOrganizationOrdersQuery,
+  useLazyFetchMyOrganizationOrdersQuery,
+  useFetchOrganizationOrdersQuery,
+  useLazyFetchOrganizationOrdersQuery,
 } = organizationQueriesApiSlice;

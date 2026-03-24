@@ -40,6 +40,7 @@ export class OrganizationBillingService {
     billingPeriod: BillingPeriod = BillingPeriod.MONTHLY
   ): Promise<{
     blocked: boolean;
+    blockType?: 'UNPAID_INVOICED_OR_OVERDUE' | 'PREVIOUS_PERIOD_UNPAID' | 'PLAN_LIMIT_REACHED';
     reason?: string;
     billing?: OrganizationBilling;
   }> {
@@ -57,8 +58,9 @@ export class OrganizationBillingService {
     if (blockingDueBilling) {
       return {
         blocked: true,
+        blockType: 'UNPAID_INVOICED_OR_OVERDUE',
         reason:
-          'An invoiced/overdue billing exists. Please complete billing payment before creating new deliveries.',
+          'You have an unpaid invoiced or overdue billing. Please pay first to continue creating deliveries.',
         billing: blockingDueBilling,
       };
     }
@@ -75,8 +77,9 @@ export class OrganizationBillingService {
     if (expiredUnpaidBilling) {
       return {
         blocked: true,
+        blockType: 'PREVIOUS_PERIOD_UNPAID',
         reason:
-          'A previous billing period has ended and is still unpaid. Please settle billing first.',
+          'A previous billing period ended and is still unpaid. Please settle the old amount first to continue.',
         billing: expiredUnpaidBilling,
       };
     }
@@ -96,8 +99,9 @@ export class OrganizationBillingService {
       if (currentBilling.totalOrders >= maxAllowedOrders) {
         return {
           blocked: true,
+          blockType: 'PLAN_LIMIT_REACHED',
           reason:
-            'Your plan delivery limit for the current billing cycle has been reached. Please pay billing before creating new deliveries.',
+            'You reached your current plan delivery limit. Please pay the old amount on your current plan, then move to a convenient new business plan to keep creating deliveries.',
           billing: currentBilling,
         };
       }
@@ -143,8 +147,12 @@ export class OrganizationBillingService {
     const billing = await this.billingRepository.findOne({
       where: {
         organizationId,
+        status: BillingStatus.PENDING,
         periodStart: LessThanOrEqual(now),
         periodEnd: MoreThanOrEqual(now),
+      },
+      order: {
+        createdAt: 'DESC',
       },
     });
 
@@ -395,11 +403,25 @@ export class OrganizationBillingService {
     entityType: AuditLogEntityTypes.ORGANIZATION_BILLING,
     getEntityId: (args) => args[0],
   })
-  async markAsPaid(billingId: UUID, notes?: string): Promise<OrganizationBilling> {
+  async markAsPaid(
+    billingId: UUID,
+    notes?: string,
+    amountPaid?: number
+  ): Promise<OrganizationBilling> {
     const billing = await this.getBillingById(billingId);
 
     if (billing.status === BillingStatus.PAID) {
       throw new ValidationError('Billing already marked as paid');
+    }
+
+    if (amountPaid != null) {
+      if (Number.isNaN(amountPaid) || amountPaid <= 0) {
+        throw new ValidationError('Paid amount must be greater than zero');
+      }
+
+      // Early payment support: settle this billing with the provided amount.
+      // Keep within current billed amount to avoid accidental overpayment records.
+      billing.totalAmount = Math.min(Number(amountPaid), Number(billing.totalAmount));
     }
 
     billing.status = BillingStatus.PAID;

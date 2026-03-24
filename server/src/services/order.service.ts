@@ -115,6 +115,7 @@ export class OrderService {
             referenceId: order.createdById,
             billingId: billingGuard.billing?.id,
             billingStatus: billingGuard.billing?.status,
+            billingBlockType: billingGuard.blockType,
           } as any);
         }
 
@@ -601,6 +602,7 @@ export class OrderService {
                 ],
                 billingId: billingGuard.billing?.id,
                 billingStatus: billingGuard.billing?.status,
+                billingBlockType: billingGuard.blockType,
               } as any);
             }
 
@@ -982,7 +984,9 @@ export class OrderService {
     organizationId: UUID,
     query: Request['query']
   ): Promise<Pagination<Order>> {
-    const { page = 0, size = 10, status } = query;
+    const { page = 0, size = 10 } = query;
+    const parsedSize = Number(size) || 10;
+    const safeSize = Math.min(Math.max(parsedSize, 1), 10);
 
     let condition: FindOptionsWhere<Order> | FindOptionsWhere<Order>[] = {
       organizationId,
@@ -990,7 +994,7 @@ export class OrderService {
 
     const { take, skip } = getPagination({
       page: Number(page),
-      size: Number(size),
+      size: safeSize,
     });
 
     const orders = await this.orderRepository.findAndCount({
@@ -1015,7 +1019,7 @@ export class OrderService {
     return getPagingData({
       data: orders,
       page: Number(page),
-      size: Number(size),
+      size: safeSize,
     });
   }
 }

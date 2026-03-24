@@ -114,23 +114,23 @@ export const organizationMutationApiSlice = createApi({
 
     markBillingAsPaid: builder.mutation<
       { message: string; data: unknown },
-      { organizationId: string; billingId: string; notes?: string }
+      { organizationId: string; billingId: string; notes?: string; amountPaid?: number }
     >({
-      query: ({ organizationId, billingId, notes }) => ({
+      query: ({ organizationId, billingId, notes, amountPaid }) => ({
         url: `/organizations/${organizationId}/billing/${billingId}/pay`,
         method: 'POST',
-        body: { notes },
+        body: { notes, amountPaid },
       }),
     }),
 
     markMyBillingAsPaid: builder.mutation<
       { message: string; data: unknown },
-      { billingId: string; notes?: string }
+      { billingId: string; notes?: string; amountPaid?: number }
     >({
-      query: ({ billingId, notes }) => ({
+      query: ({ billingId, notes, amountPaid }) => ({
         url: `/organizations/me/billing/${billingId}/pay`,
         method: 'POST',
-        body: { notes },
+        body: { notes, amountPaid },
       }),
     }),
   }),
