@@ -35,4 +35,38 @@ export const usersAPI = {
     );
     return response.data.data;
   },
+
+  uploadAvatar: async (id: string, fileUri: string): Promise<User> => {
+    const formData: FormData = new FormData();
+
+    // The React Native file object type isn't in the DOM lib,
+    // so we deliberately bypass the strict typing here.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const file: any = {
+      uri: fileUri,
+      name: 'avatar.jpg',
+      type: 'image/jpeg',
+    };
+
+    formData.append('avatar', file);
+
+    const response = await apiClient.post<ApiResponse<User>>(
+      `/users/${id}/avatar`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    return response.data.data;
+  },
+
+  removeAvatar: async (id: string): Promise<User> => {
+    const response = await apiClient.delete<ApiResponse<User>>(
+      `/users/${id}/avatar`
+    );
+    return response.data.data;
+  },
 };

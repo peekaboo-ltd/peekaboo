@@ -5,7 +5,10 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useDashboard } from '../../hooks/useDashboard';
@@ -30,6 +33,7 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAvatarLoading, setIsAvatarLoading] = useState(false);
 
   const initials = useMemo(() => {
     if (user?.name) {
@@ -49,6 +53,111 @@ export default function ProfileScreen() {
     if (!user?.status) return '';
     return user.status.charAt(0) + user.status.slice(1).toLowerCase();
   }, [user]);
+
+  const handlePickImage = async (fromCamera: boolean) => {
+    if (!user) return;
+
+    const permissionResult = fromCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert(
+        'Permission required',
+        fromCamera
+          ? 'Camera permission is required to take a profile photo.'
+          : 'Photo library permission is required to choose a profile photo.'
+      );
+      return;
+    }
+
+    const pickerResult = fromCamera
+      ? await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.8,
+        })
+      : await ImagePicker.launchImageLibraryAsync({
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.8,
+        });
+
+    if (pickerResult.canceled) {
+      return;
+    }
+
+    const asset = pickerResult.assets[0];
+    if (!asset.uri) return;
+
+    setIsAvatarLoading(true);
+    setError(null);
+
+    try {
+      const updatedUser = await usersAPI.uploadAvatar(user.id, asset.uri);
+      setUser(updatedUser);
+    } catch (e) {
+      Alert.alert('Upload failed', 'Failed to update profile photo. Please try again.');
+    } finally {
+      setIsAvatarLoading(false);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    if (!user) return;
+
+    Alert.alert(
+      'Remove profile photo',
+      'Are you sure you want to remove your profile photo?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            setIsAvatarLoading(true);
+            setError(null);
+            try {
+              const updatedUser = await usersAPI.removeAvatar(user.id);
+              setUser(updatedUser);
+            } catch (e) {
+              Alert.alert('Remove failed', 'Failed to remove profile photo. Please try again.');
+            } finally {
+              setIsAvatarLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleChangePhoto = () => {
+    if (!user) return;
+
+    Alert.alert(
+      'Profile photo',
+      'Update your profile photo',
+      [
+        {
+          text: 'Take photo',
+          onPress: () => handlePickImage(true),
+        },
+        {
+          text: 'Choose from library',
+          onPress: () => handlePickImage(false),
+        },
+        {
+          text: 'Remove photo',
+          style: 'destructive',
+          onPress: handleRemoveAvatar,
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]
+    );
+  };
 
   const handleStartEdit = () => {
     if (!user) return;
@@ -115,9 +224,25 @@ export default function ProfileScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.headerCard}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials}</Text>
-        </View>
+        <TouchableOpacity
+          onPress={handleChangePhoto}
+          disabled={isAvatarLoading}
+          activeOpacity={0.7}
+          style={styles.avatarButton}
+        >
+          <View style={styles.avatar}>
+            {user && (user as any).profilePhotoUrl ? (
+              <Image
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                source={{ uri: (user as any).profilePhotoUrl as string }}
+                style={styles.avatarImage}
+                contentFit="cover"
+              />
+            ) : (
+              <Text style={styles.avatarText}>{initials}</Text>
+            )}
+          </View>
+        </TouchableOpacity>
         <View style={styles.headerTextContainer}>
           <Text style={styles.name}>{user.name || 'Unnamed rider'}</Text>
           <Text style={styles.subtitle}>{user.phoneNumber}</Text>
@@ -259,6 +384,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     ...shadows.md,
   },
+  avatarButton: {
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+  },
   avatar: {
     width: 64,
     height: 64,
@@ -266,6 +395,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: borderRadius.full,
   },
   avatarText: {
     color: colors.text.inverse,
