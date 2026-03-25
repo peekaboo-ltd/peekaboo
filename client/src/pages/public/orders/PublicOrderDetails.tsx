@@ -10,7 +10,7 @@ import {
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import RouteCalculator from '@/containers/locations/RouteCalculator';
@@ -37,6 +37,7 @@ import {
   PublicSectionCard,
   PublicStatCard,
 } from '@/components/layout/PublicPage';
+import { useFetchUserById } from '@/hooks/users/users.hooks';
 
 const SkeletonLine = ({ className = '' }: { className?: string }) => (
   <span className={`inline-block animate-pulse rounded bg-slate-100 ${className}`} />
@@ -47,6 +48,8 @@ const PublicOrderDetails = () => {
 
   const dispatch = useAppDispatch();
   const { order } = useAppSelector((state) => state.order);
+  const { user: authenticatedUser } = useAppSelector((state) => state.auth);
+  const { user } = useAppSelector((state) => state.user);
   const { paymentsList } = useAppSelector((state) => state.payment);
   const [distance, setDistance] = useState<number | null>(null);
   const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
@@ -56,6 +59,18 @@ const PublicOrderDetails = () => {
   const navigate = useNavigate();
   const orderId = id as UUID | undefined;
   const currentOrder = order?.id === orderId ? order : undefined;
+
+  // GET USER
+  const { fetchUserById } = useFetchUserById();
+
+  console.log(authenticatedUser);
+
+  useEffect(() => {
+    if (authenticatedUser?.id) {
+      console.log('fetching user', authenticatedUser.id);
+      fetchUserById(authenticatedUser.id);
+    }
+  }, [authenticatedUser?.id, fetchUserById]);
 
   const { fetchPublicPayments } = useFetchPublicPayments();
 
@@ -84,6 +99,7 @@ const PublicOrderDetails = () => {
     }
   }, [createOrderAssignmentIsSuccess, navigate, currentOrder?.id]);
 
+  // GET CURRENT LOCATION
   const handleGetCurrentLocation = useCallback(async () => {
     if (!currentOrder?.id) return;
 
@@ -106,6 +122,22 @@ const PublicOrderDetails = () => {
     }
   }, [currentOrder?.id, updatePublicOrder]);
 
+  // SET USER DEFAULT LOCATION
+  useEffect(() => {
+    let defaultLocation = user?.organizationMembership?.[0]?.organization?.defaultLocation;
+    if (user?.defaultLocation) defaultLocation = user.defaultLocation;
+    if (defaultLocation && currentOrder?.id && !currentOrder?.locationFrom) {
+      console.log('setting user default location', defaultLocation);
+      updatePublicOrder({
+        id: currentOrder?.id,
+        order: {
+          locationFrom: defaultLocation,
+        },
+      });
+    }
+  }, [currentOrder?.id, currentOrder?.locationFrom, updatePublicOrder, user?.defaultLocation, user?.organizationMembership]);
+
+  // UPDATE ORDER LOCATION FROM
   useLayoutEffect(() => {
     if (order?.id !== orderId) {
       dispatch(setOrder(undefined));
@@ -226,12 +258,12 @@ const PublicOrderDetails = () => {
         />
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {stats.map((stat) => (
+          {stats?.map((stat) => (
             <PublicStatCard
               key={stat.label}
               label={stat.label}
-              value={currentOrder ? stat.value : 'Loading…'}
-              icon={<FontAwesomeIcon icon={stat.icon} />}
+              value={currentOrder ? stat?.value : 'Loading…'}
+              icon={<FontAwesomeIcon icon={stat?.icon} />}
             />
           ))}
         </section>
@@ -283,7 +315,7 @@ const PublicOrderDetails = () => {
 
               {currentOrder?.locationFrom ? (
                 <div className="space-y-3">
-                  <AdministrativeLocation location={currentOrder.locationFrom} />
+                  <AdministrativeLocation location={currentOrder?.locationFrom} />
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-center">

@@ -136,20 +136,20 @@ export const PublicStatCard = ({
       className,
     )}
   >
-    <div className="flex items-start justify-between gap-4">
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+    <menu className="flex items-start justify-between gap-2">
+      <ul className="min-w-0">
+        <p className="text-[11px] font-normal uppercase tracking-[0.14em] text-slate-500">
           {label}
         </p>
-        <p className="mt-2 text-xl font-semibold text-slate-900 break-words">
+        <p className="mt-2 text-sm font-normal text-slate-900 break-words">
           {value}
         </p>
-      </div>
+      </ul>
       {icon ? (
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center text-slate-700">
           {icon}
         </span>
       ) : null}
-    </div>
+    </menu>
   </article>
 );

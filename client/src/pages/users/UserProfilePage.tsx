@@ -21,25 +21,15 @@ import {
 } from '@/states/slices/user.slice';
 import UpdateUserProfileModal from './UpdateUserProfileModal';
 import SetUserDefaultLocationModal from './SetUserDefaultLocationModal';
-import { faPenToSquare, faUser } from '@fortawesome/free-regular-svg-icons';
+import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { Link, useNavigate } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getProfilePhotoUrl } from '@/utils/profilePhoto.util';
 import {
   InternalPage,
   InternalPageHeader,
   InternalSectionCard,
   InternalStatCard,
 } from '@/components/layout/InternalPage';
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-};
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },

@@ -25,6 +25,7 @@ export interface UpdateUserRequest {
   nationality?: string;
   dateOfBirth?: string;
   profilePhotoUrl?: string | null;
+  defaultLocation?: { latitude: number; longitude: number };
 }
 
 export interface UpdateUserStatusRequest {

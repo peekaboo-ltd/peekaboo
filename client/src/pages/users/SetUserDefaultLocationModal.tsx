@@ -33,12 +33,12 @@ const SetUserDefaultLocationModal = () => {
   }, [isSuccess, data, dispatch, handleClose]);
 
   const handleSave = () => {
-    if (selectedLocation && selectedUser?.id) {
+    if (selectedLocation?.coordinates && selectedUser?.id) {
       updateUser({
         id: selectedUser.id,
         defaultLocation: {
-          latitude: selectedLocation.coordinates.latitude,
-          longitude: selectedLocation.coordinates.longitude,
+          latitude: selectedLocation?.coordinates?.latitude,
+          longitude: selectedLocation?.coordinates?.longitude,
         },
       });
     }

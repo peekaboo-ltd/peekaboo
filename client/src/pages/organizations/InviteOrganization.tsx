@@ -38,6 +38,7 @@ const InviteOrganization = () => {
         `Invite sent! An onboarding email was sent to ${data.adminEmail}.`
       );
       toast.success('Invite sent. Onboarding email delivered.');
+      navigate(-1);
       reset();
     } catch (error) {
       const message =

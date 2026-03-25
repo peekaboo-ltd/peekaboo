@@ -67,12 +67,6 @@ export const UserController = {
 
       const user = await userService.getUserById(id as UUID);
 
-      if (!user) {
-        return res.status(404).json({
-          message: "User not found",
-        });
-      }
-
       return res.status(200).json({
         message: "User fetched successfully",
         data: user,
@@ -169,7 +163,7 @@ export const UserController = {
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { name, email, phoneNumber, nationality, dateOfBirth, profilePhotoUrl } = req.body;
+      const { name, email, phoneNumber, nationality, dateOfBirth, profilePhotoUrl, defaultLocation } = req.body;
       const updateData: Record<string, unknown> = {};
       if (name !== undefined) updateData.name = name;
       if (email !== undefined) updateData.email = email;
@@ -177,6 +171,7 @@ export const UserController = {
       if (nationality !== undefined) updateData.nationality = nationality;
       if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
       if (profilePhotoUrl !== undefined) updateData.profilePhotoUrl = profilePhotoUrl;
+      if (defaultLocation !== undefined) updateData.defaultLocation = defaultLocation;
 
       const user = await userService.updateUser(id as UUID, updateData);
 

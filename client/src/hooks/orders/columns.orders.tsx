@@ -48,17 +48,7 @@ export const useOrdersColumns = () => {
         header: 'Status',
         accessorKey: 'status',
         cell: ({ row }) => {
-          const activities = row?.original?.activities
-            ? [...row.original.activities].sort(
-                (a, b) =>
-                  new Date(b?.updatedAt ?? '').getTime() -
-                  new Date(a?.updatedAt ?? '').getTime(),
-              )
-            : [];
-          const firstActivity = activities.shift() || {
-            status: row?.original?.status,
-          };
-          return <StatusBadge status={firstActivity?.status ?? ''} />;
+          return <StatusBadge status={row?.original?.status ?? ''} />;
         },
       },
       {
@@ -118,7 +108,7 @@ export const useOrdersColumns = () => {
                   <FontAwesomeIcon icon={faCircleInfo} />
                   View details
                 </Link>
-                {['CREATED'].includes(row.original.status) && (
+                {['CREATED', 'PENDING'].includes(row.original.status) && (
                   <>
                     <Link
                       className={tableActionClassName}

@@ -21,6 +21,7 @@ import { usePagination } from '../common/pagination.hooks';
 import { UUID } from '@/types';
 import { toast } from 'sonner';
 
+// FETCH USERS
 export const useFetchUsers = () => {
   const dispatch = useAppDispatch();
 
@@ -64,6 +65,7 @@ export const useFetchUsers = () => {
   };
 };
 
+// CREATE USER
 export const useCreateUser = () => {
   const dispatch = useAppDispatch();
 
@@ -95,6 +97,7 @@ export const useCreateUser = () => {
   return { createUser: handleCreateUser, data, error, isLoading, isSuccess, reset };
 };
 
+// UPDATE USER
 export const useUpdateUser = () => {
   const dispatch = useAppDispatch();
 
@@ -125,6 +128,7 @@ export const useUpdateUser = () => {
   return { updateUser: handleUpdateUser, data, error, isLoading, isSuccess, reset };
 };
 
+// UPDATE USER STATUS
 export const useUpdateUserStatus = () => {
   const dispatch = useAppDispatch();
 
@@ -162,6 +166,7 @@ export const useUpdateUserStatus = () => {
   };
 };
 
+// DELETE USER
 export const useDeleteUser = () => {
   const [deleteUser, { data, error, isLoading, isSuccess, reset }] =
     useDeleteUserMutation();
@@ -205,6 +210,7 @@ export const useFetchUserById = () => {
   return { fetchUserById, data, error, isFetching, isSuccess, reset };
 }
 
+// FETCH USERS TRACKING
 export const useFetchUsersTracking = () => {
   const {
     page,

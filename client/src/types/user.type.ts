@@ -21,13 +21,13 @@ export interface User extends BaseDomain {
   nationality?: string;
   profilePhotoUrl?: string | null;
   passwordHash?: string;
-  defaultLocation?: { latitude: number; longitude: number };
   createdAt: Date;
   updatedAt: Date;
   assignments: OrderAssignment[];
   orders: Order[];
   userRoles?: UserRole[];
   organizationMembership?: OrganizationMembership[];
+  defaultLocation?: { latitude: number; longitude: number };
 }
 
 export type RiderManagementTimeframe = 'daily' | 'weekly' | 'monthly' | 'custom';
