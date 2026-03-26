@@ -334,6 +334,20 @@ export class EmailService {
     });
   }
 
+  async sendBusinessReportEmail(data: {
+    to: string;
+    name: string;
+    html: string;
+    periodStart: Date;
+    periodEnd: Date;
+  }): Promise<void> {
+    await this.sendEmail({
+      to: data.to,
+      subject: `Peekaboo Business Report (${data.periodStart.toDateString()} - ${data.periodEnd.toDateString()})`,
+      html: data.html,
+    });
+  }
+
   // ==================== ORDER EMAILS ====================
 
   async sendOrderCreatedSenderEmail(

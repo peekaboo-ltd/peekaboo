@@ -38,7 +38,7 @@ import {
   ManageBusinessPlanPage,
 } from '@/pages/business-plans';
 import { PaymentsPage } from '@/pages/payments';
-import { BillingPaymentsPage } from '@/pages/billing';
+import { BillingPaymentsPage, BillingReportPage } from '@/pages/billing';
 import {
   OrganizationOnboarding,
   AdminOnboarding,
@@ -586,6 +586,23 @@ const Router = () => {
                     noindex: true,
                   },
                   <BillingPaymentsPage />,
+                )}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="billing-payments/report"
+            element={
+              <ProtectedRoute allowedRoles={['BUSINESS']}>
+                {withSEO(
+                  {
+                    title: 'Billing Report | Peekaboo',
+                    description:
+                      'Generate and send business billing and delivery reports.',
+                    path: '/billing-payments/report',
+                    noindex: true,
+                  },
+                  <BillingReportPage />,
                 )}
               </ProtectedRoute>
             }

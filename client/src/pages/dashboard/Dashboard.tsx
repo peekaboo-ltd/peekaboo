@@ -27,7 +27,6 @@ import {
   getDashboardStatusBreakdown,
   getRiderMetricCards,
 } from '@/utils/dashboard.util';
-import { sparklineMockData } from '@/data/dashboard.mock';
 import {
   faShoppingCart,
   faClipboardList,
@@ -74,9 +73,73 @@ const metricDefaultsByRole: Record<RoleTypes, string> = {
   [RoleTypes.GUEST]: 'ORDERS',
 };
 
+const getAverage = (values: number[]) => {
+  if (!values.length) return 0;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+};
+
+const calculateTrendFromSeries = (series: number[]) => {
+  if (series.length < 2) return undefined;
+
+  const midpoint = Math.floor(series.length / 2);
+  const previousWindow = series.slice(0, Math.max(1, midpoint));
+  const currentWindow = series.slice(Math.max(1, midpoint));
+
+  const previousAvg = getAverage(previousWindow);
+  const currentAvg = getAverage(currentWindow);
+
+  if (previousAvg <= 0) {
+    if (currentAvg <= 0) {
+      return { value: 0, isPositive: true };
+    }
+    return { value: 100, isPositive: true };
+  }
+
+  const delta = ((currentAvg - previousAvg) / previousAvg) * 100;
+  return {
+    value: Math.min(999, Math.round(Math.abs(delta))),
+    isPositive: delta >= 0,
+  };
+};
+
+const selectSeriesForCard = ({
+  cardLabel,
+  role,
+  ordersSeries,
+  revenueSeries,
+  deliveriesSeries,
+}: {
+  cardLabel: string;
+  role?: RoleTypes;
+  ordersSeries: number[];
+  revenueSeries: number[];
+  deliveriesSeries: number[];
+}) => {
+  const label = cardLabel.toLowerCase();
+
+  if (role === RoleTypes.RIDER) {
+    return deliveriesSeries.length ? deliveriesSeries : ordersSeries;
+  }
+
+  if (label.includes('billing') || label.includes('payment') || label.includes('revenue')) {
+    return revenueSeries.length ? revenueSeries : ordersSeries;
+  }
+
+  if (label.includes('assignment') || label.includes('deliver')) {
+    return deliveriesSeries.length ? deliveriesSeries : ordersSeries;
+  }
+
+  return ordersSeries;
+};
+
 const buildMetricCards = (
   role: RoleTypes | undefined,
   metrics: AdminMetrics | BusinessMetrics | RiderMetrics | CustomerMetrics | undefined,
+  seriesByCategory: {
+    orders: number[];
+    revenue: number[];
+    deliveries: number[];
+  },
 ): MetricCardData[] => {
   if (!role || !metrics) return [];
 
@@ -100,23 +163,20 @@ const buildMetricCards = (
   }
 
   return baseCards.map((card, index) => {
-    const seriesOptions = [
-      sparklineMockData.orders,
-      sparklineMockData.revenue,
-      sparklineMockData.profit,
-      sparklineMockData.shipments,
-      sparklineMockData.delivered,
-    ];
-    const series = seriesOptions[index % seriesOptions.length];
-    const first = series[0] ?? 0;
-    const last = series[series.length - 1] ?? 0;
-    const delta = first === 0 ? 0 : Math.round(((last - first) / first) * 100);
+    const selectedSeries = selectSeriesForCard({
+      cardLabel: card.label,
+      role,
+      ordersSeries: seriesByCategory.orders,
+      revenueSeries: seriesByCategory.revenue,
+      deliveriesSeries: seriesByCategory.deliveries,
+    });
+    const trend = card.trend ?? calculateTrendFromSeries(selectedSeries);
 
     return {
       ...card,
-      sparklineData: card.sparklineData ?? series,
+      sparklineData: card.sparklineData ?? selectedSeries,
       sparklineType: card.sparklineType ?? (index % 2 === 0 ? 'line' : 'bar'),
-      trend: card.trend ?? { value: Math.abs(delta), isPositive: delta >= 0 },
+      trend,
     };
   });
 };
@@ -279,11 +339,6 @@ const Dashboard = () => {
     { skip: !role },
   );
 
-  const metricCards = useMemo(
-    () => buildMetricCards(dashboardData?.role, dashboardData?.metrics),
-    [dashboardData?.role, dashboardData?.metrics],
-  );
-
   const quickActions = useMemo(() => getQuickActionsForRole(role), [role]);
   const statusBreakdown = useMemo(
     () => getDashboardStatusBreakdown(role, dashboardData?.metrics),
@@ -307,6 +362,24 @@ const Dashboard = () => {
   );
   const deliveriesChartData = normalizeChartData(
     (deliveriesChartResp as { data?: Array<{ label: string; value: number }> })?.data,
+  );
+  const ordersSeries = useMemo(() => ordersChartData.map((point) => point.value), [ordersChartData]);
+  const revenueSeries = useMemo(
+    () => revenueChartData.map((point) => point.value),
+    [revenueChartData],
+  );
+  const deliveriesSeries = useMemo(
+    () => deliveriesChartData.map((point) => point.value),
+    [deliveriesChartData],
+  );
+  const metricCards = useMemo(
+    () =>
+      buildMetricCards(dashboardData?.role, dashboardData?.metrics, {
+        orders: ordersSeries,
+        revenue: revenueSeries,
+        deliveries: deliveriesSeries,
+      }),
+    [dashboardData?.metrics, dashboardData?.role, deliveriesSeries, ordersSeries, revenueSeries],
   );
 
   const summaryData = useMemo(() => {

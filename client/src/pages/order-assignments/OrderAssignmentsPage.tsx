@@ -37,6 +37,10 @@ const OrderAssignmentsPage = () => {
             .map((status) => status.trim())
             .filter((status) => statusOptions.includes(status as (typeof statusOptions)[number]));
     }, [searchParams, statusOptions]);
+    const prioritizeUnassigned = useMemo(() => {
+        const prioritizeValue = searchParams.get('prioritizeUnassigned');
+        return prioritizeValue === 'true' || prioritizeValue === '1';
+    }, [searchParams]);
 
     const { statusFilter, applicationStatus } = useStatusFilter({
         control: filterControl,
@@ -76,9 +80,10 @@ const OrderAssignmentsPage = () => {
                 size,
                 assignedToId: userId,
                 status: applicationStatus.length ? applicationStatus.join(',') : undefined,
+                prioritizeUnassigned,
             });
         }
-    }, [fetchOrderAssignments, page, size, acceptOrderAssignmentModal, rejectOrderAssignmentModal, reassignOrderAssignmentModal, user?.userRoles, user?.id, applicationStatus]);
+    }, [fetchOrderAssignments, page, size, acceptOrderAssignmentModal, rejectOrderAssignmentModal, reassignOrderAssignmentModal, user?.userRoles, user?.id, applicationStatus, prioritizeUnassigned]);
 
     const { orderAssignmentsColumns } = useOrderAssignmentsColumns();
 

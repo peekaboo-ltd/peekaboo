@@ -168,7 +168,14 @@ export class OrderAssignmentService {
     query: Request['query'],
     scope?: RiderAssignmentScope
   ): Promise<Pagination> {
-    const { page = 0, size = 10, orderId, assignedToId, status } = query;
+    const {
+      page = 0,
+      size = 10,
+      orderId,
+      assignedToId,
+      status,
+      prioritizeUnassigned,
+    } = query;
 
     let condition:
       | FindOptionsWhere<OrderAssignment>
@@ -206,6 +213,13 @@ export class OrderAssignmentService {
     if (scope?.riderId) {
       scopedCondition.assignedToId = scope.riderId;
     }
+    const shouldPrioritizeUnassigned =
+      !scope?.riderId &&
+      ['1', 'true', 'yes'].includes(
+        String(prioritizeUnassigned || '')
+          .trim()
+          .toLowerCase()
+      );
 
     const orderAssignments = await this.orderAssignmentRepository.findAndCount({
       where: scopedCondition,
@@ -220,9 +234,14 @@ export class OrderAssignmentService {
         assignedTo: true,
         createdBy: true,
       },
-      order: {
-        updatedAt: 'DESC',
-      },
+      order: shouldPrioritizeUnassigned
+        ? {
+            assignedToId: 'DESC',
+            updatedAt: 'DESC',
+          }
+        : {
+            updatedAt: 'DESC',
+          },
     });
 
     return getPagingData({

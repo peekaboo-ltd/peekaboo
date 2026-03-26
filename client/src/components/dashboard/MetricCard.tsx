@@ -81,6 +81,7 @@ const MetricCard = ({
   icon,
   sparklineData,
   sparklineType,
+  sparkColor,
   accent = 'slate',
   comparisonLabel,
   note,
@@ -107,14 +108,18 @@ const MetricCard = ({
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={accentMap[accent].spark}
+                stroke={sparkColor || accentMap[accent].spark}
                 strokeWidth={2.4}
                 dot={false}
               />
             </LineChart>
           ) : (
             <BarChart data={chartData}>
-              <Bar dataKey="value" fill={accentMap[accent].spark} radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="value"
+                fill={sparkColor || accentMap[accent].spark}
+                radius={[4, 4, 0, 0]}
+              />
             </BarChart>
           )}
         </ResponsiveContainer>
