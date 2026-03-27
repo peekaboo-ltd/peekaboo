@@ -29,3 +29,20 @@ export interface User extends BaseDomain {
   userRoles?: UserRole[];
   organizationMembership?: OrganizationMembership[];
 }
+
+export type RiderManagementTimeframe = 'daily' | 'weekly' | 'monthly' | 'custom';
+
+export interface RiderManagementItem {
+  rank: number;
+  riderId: UUID;
+  riderName?: string;
+  riderEmail?: string;
+  riderPhoneNumber?: string;
+  riderStatus: UserStatus;
+  totalDeliveriesCompleted: number;
+  totalEarnings: number;
+  canceledDeliveries: number;
+  failedDeliveries: number;
+  activeDays: number;
+  activeHours: number;
+}

@@ -18,6 +18,8 @@ import { OrganizationMembershipService } from './organizationMembership.service'
 import { MembershipStatus, OrganizationRole } from '../constants/organization.constants';
 import { AuditCreate, AuditUpdate, AuditDelete } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
+import { OrderAssignment } from '../entities/orderAssignment.entity';
+import { OrderAssignmentStatus } from '../constants/order.constants';
 
 
 interface UserTrackingListItem {
@@ -33,14 +35,39 @@ interface UserTrackingListItem {
   }>;
 }
 
+interface RiderManagementListItem {
+  rank: number;
+  riderId: UUID;
+  riderName?: string;
+  riderEmail?: string;
+  riderPhoneNumber?: string;
+  riderStatus: UserStatus;
+  totalDeliveriesCompleted: number;
+  totalEarnings: number;
+  canceledDeliveries: number;
+  failedDeliveries: number;
+  activeDays: number;
+  activeHours: number;
+}
+
+type RiderManagementSortBy =
+  | 'deliveries'
+  | 'earnings'
+  | 'canceled'
+  | 'failed'
+  | 'activeDays'
+  | 'activeHours';
+
 
 export class UserService {
   private readonly userRepository: Repository<User>;
+  private readonly orderAssignmentRepository: Repository<OrderAssignment>;
   private readonly userRoleService: UserRoleService;
   private readonly organizationMembershipService: OrganizationMembershipService;
 
   constructor() {
     this.userRepository = AppDataSource.getRepository(User);
+    this.orderAssignmentRepository = AppDataSource.getRepository(OrderAssignment);
     this.userRoleService = new UserRoleService();
     this.organizationMembershipService = new OrganizationMembershipService();
   }
@@ -463,6 +490,257 @@ export class UserService {
       rows,
       totalCount,
       totalPages: Math.ceil(totalCount / sizeNumber),
+      currentPage: pageNumber + 1,
+      size: sizeNumber,
+      page: pageNumber,
+    };
+  }
+
+  // GET RIDER MANAGEMENT PERFORMANCE (ADMIN)
+  async getRiderManagementPerformance(
+    query: Request['query']
+  ): Promise<Pagination<RiderManagementListItem>> {
+    const {
+      page = 0,
+      size = 10,
+      search,
+      status,
+      timeframe = 'monthly',
+      startDate,
+      endDate,
+      sortBy = 'deliveries',
+      sortOrder = 'desc',
+    } = query;
+
+    const pageNumber = Number(page) >= 0 ? Number(page) : 0;
+    const sizeNumber = Number(size) > 0 ? Number(size) : 10;
+    const sortDirection = String(sortOrder).toLowerCase() === 'asc' ? 'asc' : 'desc';
+    const normalizedSortBy = String(sortBy) as RiderManagementSortBy;
+    const allowedSortBy: RiderManagementSortBy[] = [
+      'deliveries',
+      'earnings',
+      'canceled',
+      'failed',
+      'activeDays',
+      'activeHours',
+    ];
+    const safeSortBy = allowedSortBy.includes(normalizedSortBy)
+      ? normalizedSortBy
+      : 'deliveries';
+
+    const normalizeTextQuery = (value: Request['query'][string]): string | undefined => {
+      if (typeof value !== 'string') return undefined;
+      const trimmedValue = value.trim();
+      return trimmedValue.length ? trimmedValue : undefined;
+    };
+
+    const searchValue = normalizeTextQuery(search);
+    const statusValue = normalizeTextQuery(status);
+    const timeframeValue = normalizeTextQuery(timeframe)?.toLowerCase() ?? 'monthly';
+    const startDateValue = normalizeTextQuery(startDate);
+    const endDateValue = normalizeTextQuery(endDate);
+
+    let fromDate: Date | undefined;
+    let toDate: Date | undefined;
+
+    const now = new Date();
+
+    if (timeframeValue === 'daily') {
+      fromDate = new Date(now);
+      fromDate.setHours(0, 0, 0, 0);
+    }
+
+    if (timeframeValue === 'weekly') {
+      fromDate = new Date(now);
+      fromDate.setDate(now.getDate() - 7);
+    }
+
+    if (timeframeValue === 'monthly') {
+      fromDate = new Date(now);
+      fromDate.setDate(now.getDate() - 30);
+    }
+
+    if (startDateValue) {
+      const parsedStartDate = new Date(startDateValue);
+      if (!Number.isNaN(parsedStartDate.getTime())) {
+        fromDate = parsedStartDate;
+      }
+    }
+
+    if (endDateValue) {
+      const parsedEndDate = new Date(endDateValue);
+      if (!Number.isNaN(parsedEndDate.getTime())) {
+        parsedEndDate.setHours(23, 59, 59, 999);
+        toDate = parsedEndDate;
+      }
+    }
+
+    if (fromDate && toDate && fromDate > toDate) {
+      const swappedDate = fromDate;
+      fromDate = toDate;
+      toDate = swappedDate;
+    }
+
+    const ridersQueryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.userRoles', 'userRole')
+      .leftJoinAndSelect('userRole.role', 'role')
+      .where('role.name = :riderRole', { riderRole: RoleTypes.RIDER });
+
+    if (searchValue) {
+      ridersQueryBuilder.andWhere(
+        '(user.name ILIKE :search OR user.email ILIKE :search OR user.phoneNumber ILIKE :search)',
+        { search: `%${searchValue}%` }
+      );
+    }
+
+    const allowedStatuses = Object.values(UserStatus);
+    if (statusValue && allowedStatuses.includes(statusValue as UserStatus)) {
+      ridersQueryBuilder.andWhere('user.status = :status', {
+        status: statusValue as UserStatus,
+      });
+    }
+
+    const riders = await ridersQueryBuilder.getMany();
+    const riderIds = riders.map((rider) => rider.id);
+
+    const emptyResponse: Pagination<RiderManagementListItem> = {
+      rows: [],
+      totalCount: 0,
+      totalPages: 0,
+      currentPage: pageNumber + 1,
+      size: sizeNumber,
+      page: pageNumber,
+    };
+
+    if (riderIds.length === 0) {
+      return emptyResponse;
+    }
+
+    const assignmentStatsQueryBuilder = this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .leftJoin('assignment.order', 'order')
+      .select('assignment.assignedToId', 'riderId')
+      .addSelect(
+        `SUM(CASE WHEN assignment.status = :completedStatus THEN 1 ELSE 0 END)`,
+        'totalDeliveriesCompleted'
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN assignment.status = :completedStatus THEN COALESCE(order.finalFee, order.initialFee, 0) ELSE 0 END), 0)`,
+        'totalEarnings'
+      )
+      .addSelect(
+        `SUM(CASE WHEN assignment.status = :cancelledStatus THEN 1 ELSE 0 END)`,
+        'canceledDeliveries'
+      )
+      .addSelect(
+        `SUM(CASE WHEN assignment.status = :failedStatus THEN 1 ELSE 0 END)`,
+        'failedDeliveries'
+      )
+      .addSelect(`COUNT(DISTINCT DATE_TRUNC('day', assignment.updatedAt))`, 'activeDays')
+      .addSelect(`COUNT(DISTINCT DATE_TRUNC('hour', assignment.updatedAt))`, 'activeHours')
+      .where('assignment.assignedToId IN (:...riderIds)', { riderIds })
+      .setParameters({
+        completedStatus: OrderAssignmentStatus.COMPLETED,
+        cancelledStatus: OrderAssignmentStatus.CANCELLED,
+        failedStatus: OrderAssignmentStatus.REJECTED,
+      });
+
+    if (fromDate) {
+      assignmentStatsQueryBuilder.andWhere('assignment.updatedAt >= :fromDate', { fromDate });
+    }
+
+    if (toDate) {
+      assignmentStatsQueryBuilder.andWhere('assignment.updatedAt <= :toDate', { toDate });
+    }
+
+    const assignmentStats = await assignmentStatsQueryBuilder
+      .groupBy('assignment.assignedToId')
+      .getRawMany<{
+        riderId: UUID;
+        totalDeliveriesCompleted: string;
+        totalEarnings: string;
+        canceledDeliveries: string;
+        failedDeliveries: string;
+        activeDays: string;
+        activeHours: string;
+      }>();
+
+    const statsMap = new Map(
+      assignmentStats.map((stats) => [stats.riderId, stats])
+    );
+
+    const mergedRows: RiderManagementListItem[] = riders.map((rider) => {
+      const stats = statsMap.get(rider.id);
+      return {
+        rank: 0,
+        riderId: rider.id,
+        riderName: rider.name,
+        riderEmail: rider.email,
+        riderPhoneNumber: rider.phoneNumber,
+        riderStatus: rider.status,
+        totalDeliveriesCompleted: Number(stats?.totalDeliveriesCompleted ?? 0),
+        totalEarnings: Number(stats?.totalEarnings ?? 0),
+        canceledDeliveries: Number(stats?.canceledDeliveries ?? 0),
+        failedDeliveries: Number(stats?.failedDeliveries ?? 0),
+        activeDays: Number(stats?.activeDays ?? 0),
+        activeHours: Number(stats?.activeHours ?? 0),
+      };
+    });
+
+    const metricValue = (row: RiderManagementListItem): number => {
+      switch (safeSortBy) {
+        case 'earnings':
+          return row.totalEarnings;
+        case 'canceled':
+          return row.canceledDeliveries;
+        case 'failed':
+          return row.failedDeliveries;
+        case 'activeDays':
+          return row.activeDays;
+        case 'activeHours':
+          return row.activeHours;
+        case 'deliveries':
+        default:
+          return row.totalDeliveriesCompleted;
+      }
+    };
+
+    const sortedRows = mergedRows.sort((firstRow, secondRow) => {
+      const firstMetric = metricValue(firstRow);
+      const secondMetric = metricValue(secondRow);
+      const difference =
+        sortDirection === 'asc' ? firstMetric - secondMetric : secondMetric - firstMetric;
+
+      if (difference !== 0) {
+        return difference;
+      }
+
+      if (safeSortBy !== 'deliveries') {
+        const deliveryDifference =
+          secondRow.totalDeliveriesCompleted - firstRow.totalDeliveriesCompleted;
+        if (deliveryDifference !== 0) {
+          return deliveryDifference;
+        }
+      }
+
+      return (firstRow.riderName ?? '').localeCompare(secondRow.riderName ?? '');
+    });
+
+    const rankedRows = sortedRows.map((row, index) => ({
+      ...row,
+      rank: index + 1,
+    }));
+
+    const totalCount = rankedRows.length;
+    const totalPages = totalCount > 0 ? Math.ceil(totalCount / sizeNumber) : 0;
+    const startIndex = pageNumber * sizeNumber;
+    const rows = rankedRows.slice(startIndex, startIndex + sizeNumber);
+
+    return {
+      rows,
+      totalCount,
+      totalPages,
       currentPage: pageNumber + 1,
       size: sizeNumber,
       page: pageNumber,

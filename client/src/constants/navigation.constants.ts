@@ -46,7 +46,7 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     roles: [RoleTypes.ADMIN, RoleTypes.STAFF, RoleTypes.BUSINESS],
   },
   {
-    label: 'Riders',
+    label: 'Rider Management',
     path: '/riders',
     icon: faUserCheck,
     roles: [RoleTypes.ADMIN, RoleTypes.RIDER],
@@ -56,6 +56,12 @@ export const SIDEBAR_NAV: SidebarNav[] = [
         path: '/assignments',
         icon: faUserCheck,
         roles: [RoleTypes.ADMIN, RoleTypes.RIDER],
+      },
+      {
+        label: 'Rider Management',
+        path: '/rider-management',
+        icon: faUserGroup,
+        roles: [RoleTypes.ADMIN],
       },
       {
         label: 'Users Tracking',

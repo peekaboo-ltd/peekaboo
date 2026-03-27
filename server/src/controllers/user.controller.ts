@@ -46,6 +46,20 @@ export const UserController = {
     }
   },
 
+  // GET RIDER MANAGEMENT PERFORMANCE
+  async getRiderManagement(req: Request, res: Response, next: NextFunction) {
+    try {
+      const riderPerformance = await userService.getRiderManagementPerformance(req.query);
+
+      return res.status(200).json({
+        message: 'Rider management fetched successfully',
+        data: riderPerformance,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // GET USER BY ID
   async getUserById(req: Request, res: Response, next: NextFunction) {
     try {

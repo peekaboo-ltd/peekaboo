@@ -60,6 +60,42 @@ export const usersQueriesApiSlice = createApi({
         },
       }),
     }),
+    fetchRiderManagement: builder.query({
+      query: ({
+        page,
+        size,
+        search,
+        status,
+        timeframe,
+        startDate,
+        endDate,
+        sortBy,
+        sortOrder,
+      }: {
+        page: number;
+        size: number;
+        search?: string;
+        status?: string;
+        timeframe?: 'daily' | 'weekly' | 'monthly' | 'custom';
+        startDate?: string;
+        endDate?: string;
+        sortBy?: 'deliveries' | 'earnings' | 'canceled' | 'failed' | 'activeDays' | 'activeHours';
+        sortOrder?: 'asc' | 'desc';
+      }) => ({
+        url: '/users/rider-management',
+        params: {
+          page,
+          size,
+          search,
+          status,
+          timeframe,
+          startDate,
+          endDate,
+          sortBy,
+          sortOrder,
+        },
+      }),
+    }),
     fetchUserCurrentLocationHistory: builder.query({
       query: ({
         userId,
@@ -84,5 +120,6 @@ export const {
   useLazyFetchUsersQuery,
   useLazyFetchUserByIdQuery,
   useLazyFetchUsersTrackingQuery,
+  useLazyFetchRiderManagementQuery,
   useLazyFetchUserCurrentLocationHistoryQuery,
 } = usersQueriesApiSlice;
