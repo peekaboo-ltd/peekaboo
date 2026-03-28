@@ -22,9 +22,23 @@ export const businessPlanMutationsApiSlice = createApi({
       }),
     }),
 
-    deleteBusinessPlan: builder.mutation<{ message: string }, string>({
+    deactivateBusinessPlan: builder.mutation<{ message: string }, string>({
       query: (id) => ({
         url: `/business-plans/${id}`,
+        method: 'DELETE',
+      }),
+    }),
+
+    restoreBusinessPlan: builder.mutation<{ message: string; data: BusinessPlan }, string>({
+      query: (id) => ({
+        url: `/business-plans/${id}/restore`,
+        method: 'POST',
+      }),
+    }),
+
+    permanentlyDeleteBusinessPlan: builder.mutation<{ message: string }, string>({
+      query: (id) => ({
+        url: `/business-plans/${id}/permanent`,
         method: 'DELETE',
       }),
     }),
@@ -34,5 +48,7 @@ export const businessPlanMutationsApiSlice = createApi({
 export const {
   useCreateBusinessPlanMutation,
   useUpdateBusinessPlanMutation,
-  useDeleteBusinessPlanMutation,
+  useDeactivateBusinessPlanMutation,
+  useRestoreBusinessPlanMutation,
+  usePermanentlyDeleteBusinessPlanMutation,
 } = businessPlanMutationsApiSlice;

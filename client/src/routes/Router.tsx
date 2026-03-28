@@ -593,7 +593,7 @@ const Router = () => {
           <Route
             path="billing-payments/report"
             element={
-              <ProtectedRoute allowedRoles={['BUSINESS']}>
+              <ProtectedRoute allowedRoles={['ADMIN', 'BUSINESS']}>
                 {withSEO(
                   {
                     title: 'Billing Report | Peekaboo',

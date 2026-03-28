@@ -29,6 +29,16 @@ router.delete(
   authorize([RoleTypes.ADMIN]),
   BusinessPlanController.deleteBusinessPlan
 );
+router.post(
+  '/:id/restore',
+  authorize([RoleTypes.ADMIN]),
+  BusinessPlanController.restoreBusinessPlan
+);
+router.delete(
+  '/:id/permanent',
+  authorize([RoleTypes.ADMIN]),
+  BusinessPlanController.permanentlyDeleteBusinessPlan
+);
 
 // Admin and Staff can view
 router.get(

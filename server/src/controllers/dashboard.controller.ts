@@ -187,8 +187,8 @@ export const DashboardController = {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
-      if (!userRoles.includes(RoleTypes.BUSINESS)) {
-        return res.status(403).json({ message: 'Business report is only available for business accounts' });
+      if (!userRoles.includes(RoleTypes.BUSINESS) && !userRoles.includes(RoleTypes.ADMIN)) {
+        return res.status(403).json({ message: 'Business report is only available for business and admin accounts' });
       }
 
       const now = new Date();
@@ -217,8 +217,8 @@ export const DashboardController = {
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
-      if (!userRoles.includes(RoleTypes.BUSINESS)) {
-        return res.status(403).json({ message: 'Business report is only available for business accounts' });
+      if (!userRoles.includes(RoleTypes.BUSINESS) && !userRoles.includes(RoleTypes.ADMIN)) {
+        return res.status(403).json({ message: 'Business report is only available for business and admin accounts' });
       }
 
       const now = new Date();
@@ -251,8 +251,8 @@ export const DashboardController = {
       if (!userId || !userEmail) {
         return res.status(401).json({ message: 'Unauthorized or missing email' });
       }
-      if (!userRoles.includes(RoleTypes.BUSINESS)) {
-        return res.status(403).json({ message: 'Business report is only available for business accounts' });
+      if (!userRoles.includes(RoleTypes.BUSINESS) && !userRoles.includes(RoleTypes.ADMIN)) {
+        return res.status(403).json({ message: 'Business report is only available for business and admin accounts' });
       }
 
       const now = new Date();

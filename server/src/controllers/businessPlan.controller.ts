@@ -57,7 +57,7 @@ export const BusinessPlanController = {
     }
   },
 
-  // DELETE BUSINESS PLAN
+  // DEACTIVATE BUSINESS PLAN (soft delete)
   async deleteBusinessPlan(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -65,7 +65,38 @@ export const BusinessPlanController = {
       await businessPlanService.deleteBusinessPlan(id as UUID);
 
       return res.status(200).json({
-        message: 'Business plan deleted successfully',
+        message: 'Business plan moved to deactivated plans',
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // RESTORE BUSINESS PLAN
+  async restoreBusinessPlan(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const businessPlan = await businessPlanService.restoreBusinessPlan(id as UUID);
+
+      return res.status(200).json({
+        message: 'Business plan restored successfully',
+        data: businessPlan,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // PERMANENTLY DELETE BUSINESS PLAN
+  async permanentlyDeleteBusinessPlan(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      await businessPlanService.permanentlyDeleteBusinessPlan(id as UUID);
+
+      return res.status(200).json({
+        message: 'Business plan permanently deleted',
       });
     } catch (error) {
       next(error);

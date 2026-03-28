@@ -35,6 +35,7 @@ import {
   faPlus,
   faMotorcycle,
   faCreditCard,
+  faFileLines,
 } from '@fortawesome/free-solid-svg-icons';
 import DashboardHeader from './components/DashboardHeader';
 import DashboardMetricsSection from './components/DashboardMetricsSection';
@@ -210,6 +211,7 @@ const getQuickActionsForRole = (role?: RoleTypes): DashboardActionLink[] => {
         { label: 'New Order', to: '/orders', icon: faPlus },
         { label: 'My Orders', to: '/orders', icon: faShoppingCart },
         { label: 'Billing & Payments', to: '/billing-payments', icon: faCreditCard },
+        { label: 'Request a Report', to: '/billing-payments', icon: faFileLines },
         { label: 'Team', to: '/users', icon: faUserGroup },
       ];
     case RoleTypes.RIDER:

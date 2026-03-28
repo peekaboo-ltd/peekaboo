@@ -9,8 +9,23 @@ import CustomPopover from "@/components/inputs/CustomPopover";
 import { ellipsisHClassName, tableActionClassName } from "@/constants/inputs.constants";
 import { Link } from "react-router-dom";
 import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
+import Button from "@/components/inputs/Button";
+import { BusinessPlanStatus } from "@/types/businessPlan.type";
+import { faRotateLeft, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
-export const useBusinessPlansColumns = () => {
+interface UseBusinessPlansColumnsParams {
+  onRestorePlan?: (id: string, name: string) => void;
+  onPermanentlyDeletePlan?: (id: string, name: string) => void;
+  isActionLoading?: boolean;
+  actionPlanId?: string;
+}
+
+export const useBusinessPlansColumns = ({
+  onRestorePlan,
+  onPermanentlyDeletePlan,
+  isActionLoading = false,
+  actionPlanId,
+}: UseBusinessPlansColumnsParams = {}) => {
   const businessPlansColumns: ColumnDef<BusinessPlan>[] = useMemo(() => [
     {
       header: 'Name',
@@ -86,27 +101,65 @@ export const useBusinessPlansColumns = () => {
     {
       header: 'Actions',
       id: 'actions',
-      cell: ({ row }) => (
-        <CustomPopover
-          trigger={
-            <FontAwesomeIcon
-              icon={faEllipsisH}
-              className={ellipsisHClassName}
-            />
-          }
-        >
-          <menu className="flex w-full flex-col gap-1">
-            <Link
-              className={tableActionClassName}
-              to={`/business-plans/${row.original.id}/manage`}
-            >
-              <FontAwesomeIcon icon={faPenToSquare} />
-              Manage
-            </Link>
-          </menu>
-        </CustomPopover>
-      ),
+      cell: ({ row }) => {
+        const plan = row.original;
+        const isArchived = plan.status === BusinessPlanStatus.ARCHIVED;
+        const isProcessingThisPlan = isActionLoading && actionPlanId === plan.id;
+        const planId = plan.id;
+
+        if (!planId) {
+          return <span className="text-slate-400 text-[13px]">—</span>;
+        }
+
+        if (isArchived && onRestorePlan && onPermanentlyDeletePlan) {
+          return (
+            <menu className="flex items-center gap-2">
+              <Button
+                type="button"
+                onClick={() => onRestorePlan(planId, plan.name)}
+                disabled={isProcessingThisPlan}
+                className="h-8 px-3 text-xs"
+              >
+                <FontAwesomeIcon icon={faRotateLeft} className="mr-1.5" />
+                Restore
+              </Button>
+              <Button
+                type="button"
+                danger
+                onClick={() => onPermanentlyDeletePlan(planId, plan.name)}
+                isLoading={isProcessingThisPlan}
+                disabled={isProcessingThisPlan}
+                className="h-8 px-3 text-xs"
+              >
+                <FontAwesomeIcon icon={faTrashCan} className="mr-1.5" />
+                Delete Forever
+              </Button>
+            </menu>
+          );
+        }
+
+        return (
+          <CustomPopover
+            trigger={
+              <FontAwesomeIcon
+                icon={faEllipsisH}
+                className={ellipsisHClassName}
+              />
+            }
+          >
+            <menu className="flex w-full flex-col gap-1">
+              <Link
+                className={tableActionClassName}
+                to={`/business-plans/${planId}/manage`}
+              >
+                <FontAwesomeIcon icon={faPenToSquare} />
+                Manage
+              </Link>
+            </menu>
+          </CustomPopover>
+        );
+      },
     },
-  ], []);
+  ], [onRestorePlan, onPermanentlyDeletePlan, isActionLoading, actionPlanId]);
   return { businessPlansColumns };
 };

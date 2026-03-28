@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBuilding,
-  faCheckCircle,
   faCreditCard,
+  faFileLines,
   faMoneyBillWave,
 } from '@fortawesome/free-solid-svg-icons';
 import { ColumnDef } from '@tanstack/react-table';
@@ -24,6 +24,8 @@ import {
 } from '@/api/mutations/organization.mutations';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
+import { localStorageUtil } from '@/utils/localStorage.util';
+import { ENVIRONMENTS } from '@/constants/environments.constants';
 import Button from '@/components/inputs/Button';
 import Modal from '@/components/Modal';
 import {
@@ -99,6 +101,7 @@ const itemVariants: Variants = {
 
 const PAGE_SIZE = 10;
 const NON_PAID_STATUSES = new Set(['PENDING', 'INVOICED', 'OVERDUE']);
+const formatDateInput = (date: Date) => date.toISOString().slice(0, 10);
 
 const isBillingPaymentRequired = (row?: BillingRow) => {
   if (!row) return false;
@@ -176,6 +179,16 @@ const BillingPaymentsPage = () => {
   const [editableBusinessNumber, setEditableBusinessNumber] = useState('');
   const [invoiceDeliveriesModalOpen, setInvoiceDeliveriesModalOpen] = useState(false);
   const [selectedHistoryBilling, setSelectedHistoryBilling] = useState<BillingRow | null>(null);
+  const [isRequestingReport, setIsRequestingReport] = useState(false);
+  const [isSubmittingAdminReport, setIsSubmittingAdminReport] = useState(false);
+  const [adminReportAction, setAdminReportAction] = useState<'download' | 'email' | null>(null);
+  const [adminReportConfirmOpen, setAdminReportConfirmOpen] = useState(false);
+  const [reportStartDate, setReportStartDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 30);
+    return formatDateInput(date);
+  });
+  const [reportEndDate, setReportEndDate] = useState(() => formatDateInput(new Date()));
 
   const { data: organizationsResp } = useFetchOrganizationsQuery(
     { page: 0, size: 100 },
@@ -646,6 +659,132 @@ const BillingPaymentsPage = () => {
     setSelectedHistoryBilling(null);
   }, []);
 
+  const openAdminReportConfirmation = useCallback(
+    (action: 'download' | 'email') => {
+      if (!selectedOrganizationId) {
+        toast.error('Please select a business first.');
+        return;
+      }
+
+      if (!reportStartDate || !reportEndDate) {
+        toast.error('Please select both start and end dates.');
+        return;
+      }
+
+      if (new Date(reportStartDate).getTime() > new Date(reportEndDate).getTime()) {
+        toast.error('Start date cannot be after end date.');
+        return;
+      }
+
+      setAdminReportAction(action);
+      setAdminReportConfirmOpen(true);
+    },
+    [reportEndDate, reportStartDate, selectedOrganizationId],
+  );
+
+  const handleConfirmAdminReport = useCallback(async () => {
+    if (!adminReportAction || !selectedOrganizationId) return;
+
+    const token = localStorageUtil.getItem('token');
+    if (!token) {
+      toast.error('Please sign in again to continue.');
+      return;
+    }
+
+    setIsSubmittingAdminReport(true);
+    try {
+      const query = new URLSearchParams({
+        organizationId: selectedOrganizationId,
+        startDate: reportStartDate,
+        endDate: reportEndDate,
+      });
+
+      if (adminReportAction === 'download') {
+        const response = await fetch(
+          `${ENVIRONMENTS.API_URL}/dashboard/business-report/download?${query.toString()}`,
+          {
+            method: 'GET',
+            headers: { authorization: `Bearer ${token}` },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('Unable to download report');
+        }
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = `peekaboo_business_report_${selectedOrganizationId}_${reportStartDate}_${reportEndDate}.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(objectUrl);
+        toast.success('Report downloaded successfully.');
+      } else {
+        const response = await fetch(
+          `${ENVIRONMENTS.API_URL}/dashboard/business-report/email?${query.toString()}`,
+          {
+            method: 'POST',
+            headers: { authorization: `Bearer ${token}` },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('Unable to request report');
+        }
+
+        toast.success('Report requested and sent to email.');
+      }
+
+      setAdminReportConfirmOpen(false);
+      setAdminReportAction(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Report action failed.');
+    } finally {
+      setIsSubmittingAdminReport(false);
+    }
+  }, [adminReportAction, reportEndDate, reportStartDate, selectedOrganizationId]);
+
+  const handleRequestReport = useCallback(async () => {
+    const token = localStorageUtil.getItem('token');
+    if (!token) {
+      toast.error('Please sign in again to request report.');
+      return;
+    }
+
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    const formatDateInput = (date: Date) => date.toISOString().slice(0, 10);
+
+    setIsRequestingReport(true);
+    try {
+      const query = new URLSearchParams({
+        startDate: formatDateInput(startDate),
+        endDate: formatDateInput(endDate),
+      });
+      const response = await fetch(
+        `${ENVIRONMENTS.API_URL}/dashboard/business-report/email?${query.toString()}`,
+        {
+          method: 'POST',
+          headers: { authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('Unable to request report');
+      }
+
+      toast.success('Report requested. It will be sent to your email.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to request report.');
+    } finally {
+      setIsRequestingReport(false);
+    }
+  }, []);
+
   return (
     <InternalPage>
       <motion.section variants={itemVariants}>
@@ -676,8 +815,83 @@ const BillingPaymentsPage = () => {
         </motion.section>
       )}
 
+      {isAdmin && (
+        <motion.section variants={itemVariants} className="grid grid-cols-1 gap-4">
+          <InternalSectionCard
+            eyebrow="Reports"
+            title="Business Report"
+            description="Pick a business and date range, then request or download its billing report."
+            actions={
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  submit
+                  primary
+                  disabled={isSubmittingAdminReport}
+                  onClick={() => openAdminReportConfirmation('email')}
+                >
+                  Request Report
+                </Button>
+                <Button
+                  type="button"
+                  submit
+                  disabled={isSubmittingAdminReport}
+                  onClick={() => openAdminReportConfirmation('download')}
+                >
+                  Download Report
+                </Button>
+              </div>
+            }
+          >
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <label className="text-sm text-slate-700">
+                Business
+                <select
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                  value={selectedOrganizationId}
+                  onChange={(event) => setSelectedOrganizationId(event.target.value)}
+                >
+                  <option value="" disabled>
+                    Select business
+                  </option>
+                  {organizations.map((org) => (
+                    <option key={org.id} value={org.id}>
+                      {org.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="text-sm text-slate-700">
+                Start date
+                <input
+                  type="date"
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                  value={reportStartDate}
+                  onChange={(event) => setReportStartDate(event.target.value)}
+                />
+              </label>
+
+              <label className="text-sm text-slate-700">
+                End date
+                <input
+                  type="date"
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                  value={reportEndDate}
+                  onChange={(event) => setReportEndDate(event.target.value)}
+                />
+              </label>
+            </div>
+            <p className="mt-3 text-sm text-slate-600">
+              Selected: <span className="font-medium text-slate-900">{selectedOrganization?.name || 'N/A'}</span>{' '}
+              | {reportStartDate} to {reportEndDate}
+            </p>
+          </InternalSectionCard>
+        </motion.section>
+      )}
+
       {isBusiness && (
-        <motion.section className="grid grid-cols-1 md:grid-cols-2 gap-4" variants={itemVariants}>
+        <motion.section className="grid grid-cols-1 md:grid-cols-3 gap-4" variants={itemVariants}>
           <InternalStatCard
             label="Total Amount To Pay"
             value={formatCurrency(pendingAmountBusiness, myCurrentDue?.currency || 'RWF')}
@@ -687,6 +901,22 @@ const BillingPaymentsPage = () => {
             label="Deliveries In Current Billing"
             value={businessOrdersTotalCount}
             icon={<FontAwesomeIcon icon={faBuilding} />}
+          />
+          <InternalStatCard
+            label="Report"
+            value={
+              <Button
+                type="button"
+                submit
+                primary
+                isLoading={isRequestingReport}
+                disabled={isRequestingReport}
+                onClick={handleRequestReport}
+              >
+                Request Report
+              </Button>
+            }
+            icon={<FontAwesomeIcon icon={faFileLines} />}
           />
         </motion.section>
       )}
@@ -732,21 +962,25 @@ const BillingPaymentsPage = () => {
           <InternalSectionCard
             eyebrow="Businesses"
             title="Select Business"
-            description="Click a business to load all deliveries and billing details for that organization."
+            description="Choose a business to load deliveries and billing details for that organization."
           >
-            <div className="flex flex-wrap gap-2">
-              {organizations.map((org) => (
-                <Button
-                  key={org.id}
-                  type="button"
-                  submit
-                  primary={selectedOrganizationId === org.id}
-                  onClick={() => setSelectedOrganizationId(org.id)}
-                >
-                  {org.name}
-                </Button>
-              ))}
-            </div>
+            <label className="block text-sm text-slate-700 max-w-md">
+              Business
+              <select
+                className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                value={selectedOrganizationId}
+                onChange={(event) => setSelectedOrganizationId(event.target.value)}
+              >
+                <option value="" disabled>
+                  Select business
+                </option>
+                {organizations.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           </InternalSectionCard>
 
           <InternalSectionCard
@@ -1083,6 +1317,68 @@ const BillingPaymentsPage = () => {
           </InternalSectionCard>
         </motion.section>
       )}
+
+      <Modal
+        isOpen={adminReportConfirmOpen}
+        onClose={() => {
+          if (isSubmittingAdminReport) return;
+          setAdminReportConfirmOpen(false);
+          setAdminReportAction(null);
+        }}
+        heading="Confirm Report Details"
+        description="Please confirm the selected business and report time range."
+      >
+        <section className="space-y-4">
+          <div className="rounded border border-slate-200 bg-slate-50 p-3 text-sm space-y-2">
+            <p>
+              Business:{' '}
+              <span className="font-medium text-slate-900">
+                {selectedOrganization?.name || 'Not selected'}
+              </span>
+            </p>
+            <p>
+              Start date:{' '}
+              <span className="font-medium text-slate-900">{reportStartDate || 'Not selected'}</span>
+            </p>
+            <p>
+              End date:{' '}
+              <span className="font-medium text-slate-900">{reportEndDate || 'Not selected'}</span>
+            </p>
+            <p>
+              Action:{' '}
+              <span className="font-medium text-slate-900">
+                {adminReportAction === 'download' ? 'Download report' : 'Request report by email'}
+              </span>
+            </p>
+          </div>
+
+          <p className="text-sm text-slate-700">
+            Is this the correct business and time range for your report?
+          </p>
+
+          <footer className="flex justify-end gap-3 pt-2 border-t">
+            <Button
+              type="button"
+              onClick={() => {
+                if (isSubmittingAdminReport) return;
+                setAdminReportConfirmOpen(false);
+                setAdminReportAction(null);
+              }}
+            >
+              No, Edit
+            </Button>
+            <Button
+              type="button"
+              primary
+              isLoading={isSubmittingAdminReport}
+              disabled={isSubmittingAdminReport}
+              onClick={handleConfirmAdminReport}
+            >
+              Yes, Continue
+            </Button>
+          </footer>
+        </section>
+      </Modal>
 
       <Modal
         isOpen={paymentWorkflowOpen}
