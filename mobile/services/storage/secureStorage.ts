@@ -195,3 +195,33 @@ export const isAuthenticated = async (): Promise<boolean> => {
   const token = await getToken();
   return token !== null;
 };
+
+/**
+ * Save language preference
+ */
+export const saveLanguagePreference = async (language: 'en' | 'rw'): Promise<void> => {
+  try {
+    if (isWeb) {
+      await webStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
+    } else {
+      await SecureStore.setItemAsync(STORAGE_KEYS.LANGUAGE, language);
+    }
+  } catch (error) {
+    console.error('Error saving language preference:', error);
+  }
+};
+
+/**
+ * Get saved language preference
+ */
+export const getLanguagePreference = async (): Promise<string | null> => {
+  try {
+    if (isWeb) {
+      return await webStorage.getItem(STORAGE_KEYS.LANGUAGE);
+    }
+    return await SecureStore.getItemAsync(STORAGE_KEYS.LANGUAGE);
+  } catch (error) {
+    console.error('Error getting language preference:', error);
+    return null;
+  }
+};

@@ -17,9 +17,11 @@ import { Button } from '../../components/ui/Button';
 import { useAssignments } from '../../hooks/useAssignments';
 import { Assignment, OrderAssignmentStatus, OrderStatus } from '../../types';
 import { useAssignmentStore } from '../../store/assignmentStore';
+import { useI18n } from '../../i18n';
 import { colors, typography, spacing } from '../../utils/constants';
 
 export default function AssignmentsScreen() {
+  const { t } = useI18n();
   const params = useLocalSearchParams<{ filter?: string }>();
   const {
     assignments,
@@ -60,16 +62,16 @@ export default function AssignmentsScreen() {
   const handleAccept = async (id: string) => {
     const success = await acceptAssignment(id);
     if (!success) {
-      const message = useAssignmentStore.getState().error || 'Failed to accept assignment.';
-      Alert.alert('Error', message);
+      const message = useAssignmentStore.getState().error || t('assignments.acceptFailed');
+      Alert.alert(t('common.error'), message);
     }
   };
 
   const handleReject = async (id: string) => {
     const success = await rejectAssignment(id);
     if (!success) {
-      const message = useAssignmentStore.getState().error || 'Failed to reject assignment.';
-      Alert.alert('Error', message);
+      const message = useAssignmentStore.getState().error || t('assignments.rejectFailed');
+      Alert.alert(t('common.error'), message);
     }
   };
 
@@ -117,12 +119,12 @@ export default function AssignmentsScreen() {
     if (!assignment?.orderId) return;
 
     Alert.alert(
-      'Confirm & Start Transit',
-      'This will mark the order as confirmed and in transit.',
+      t('assignments.confirmTransit'),
+      t('assignments.confirmTransitMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Confirm & Start Transit',
+          text: t('assignments.confirmTransit'),
           onPress: async () => {
             const orderId = assignment.orderId;
             setConfirmingOrderId(orderId);
@@ -130,10 +132,10 @@ export default function AssignmentsScreen() {
               const success = await confirmOrderDispatch(orderId);
               if (success) {
                 await refreshAssignments();
-                Alert.alert('Success', 'Order is now in transit.');
+                Alert.alert(t('common.success'), t('assignments.transitSuccess'));
               } else {
-                const message = useAssignmentStore.getState().error || 'Unable to start transit. Please try again.';
-                Alert.alert('Error', message);
+                const message = useAssignmentStore.getState().error || t('assignments.transitFailed');
+                Alert.alert(t('common.error'), message);
               }
             } finally {
               setConfirmingOrderId(null);
@@ -172,7 +174,7 @@ export default function AssignmentsScreen() {
         {canConfirmAndTransit && (
           <View style={styles.quickActionWrap}>
             <Button
-              title="Confirm & Start Transit"
+              title={t('assignments.confirmTransit')}
               onPress={() => handleConfirmAndTransit(item)}
               variant="primary"
               fullWidth
@@ -191,11 +193,11 @@ export default function AssignmentsScreen() {
     return (
       <View style={styles.emptyContainer}>
         <Ionicons name="document-text-outline" size={64} color={colors.text.disabled} />
-        <Text style={styles.emptyTitle}>No Assignments</Text>
+        <Text style={styles.emptyTitle}>{t('assignments.emptyTitle')}</Text>
         <Text style={styles.emptyText}>
           {filter === 'ALL'
-            ? "You don't have any assignments yet."
-            : `No ${filter.toLowerCase()} assignments found.`}
+            ? t('assignments.emptyAll')
+            : t('assignments.emptyFiltered', { filter: filter.toLowerCase() })}
         </Text>
       </View>
     );
@@ -230,23 +232,23 @@ export default function AssignmentsScreen() {
           <View>
             <View style={styles.kickerRow}>
               <View style={styles.kickerDot} />
-              <Text style={styles.kicker}>Assignments</Text>
+              <Text style={styles.kicker}>{t('assignments.title')}</Text>
             </View>
-            <Text style={styles.title}>Your delivery queue</Text>
-            <Text style={styles.subtitle}>{assignments.length} total assignments</Text>
+            <Text style={styles.title}>{t('assignments.queueTitle')}</Text>
+            <Text style={styles.subtitle}>{t('assignments.totalAssignments', { count: assignments.length })}</Text>
           </View>
           <View style={styles.summaryPill}>
-            <Text style={styles.summaryLabel}>Active</Text>
+            <Text style={styles.summaryLabel}>{t('assignments.active')}</Text>
             <Text style={styles.summaryValue}>{summary.active}</Text>
           </View>
         </View>
         <View style={styles.summaryRow}>
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Pending</Text>
+            <Text style={styles.summaryLabel}>{t('assignments.pending')}</Text>
             <Text style={styles.summaryValue}>{summary.pending}</Text>
           </View>
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Completed</Text>
+            <Text style={styles.summaryLabel}>{t('assignments.completed')}</Text>
             <Text style={styles.summaryValue}>{summary.completed}</Text>
           </View>
         </View>

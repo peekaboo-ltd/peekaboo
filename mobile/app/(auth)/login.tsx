@@ -15,7 +15,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../../i18n';
 import { colors, spacing, typography } from '../../utils/constants';
 import { getPasswordError, getUsernameError } from '../../utils/validators';
 
@@ -27,6 +29,7 @@ export default function LoginScreen() {
   const headerAnim = useRef(new Animated.Value(0)).current;
   const formAnim = useRef(new Animated.Value(0)).current;
   const footerAnim = useRef(new Animated.Value(0)).current;
+  const { t } = useI18n();
 
   const { login, isLoading, error, clearError } = useAuth();
 
@@ -72,7 +75,7 @@ export default function LoginScreen() {
     if (success) {
       router.replace('/(tabs)/dashboard');
     } else if (error) {
-      Alert.alert('Login Failed', error);
+      Alert.alert(t('auth.loginFailed'), error);
     }
   };
 
@@ -111,14 +114,17 @@ export default function LoginScreen() {
           >
             <View style={styles.kickerRow}>
               <View style={styles.kickerDot} />
-              <Text style={styles.kicker}>Rider Portal</Text>
+              <Text style={styles.kicker}>{t('auth.riderPortal')}</Text>
+            </View>
+            <View style={styles.languageSwitchWrap}>
+              <LanguageSwitcher compact />
             </View>
             <View style={styles.logoContainer}>
               <Ionicons name="bicycle" size={40} color={colors.text.inverse} />
             </View>
-            <Text style={styles.title}>Peekaboo Rider</Text>
+            <Text style={styles.title}>{t('auth.title')}</Text>
             <Text style={styles.subtitle}>
-              Sign in to manage assignments, deliveries, and daily targets.
+              {t('auth.subtitle')}
             </Text>
           </Animated.View>
 
@@ -140,8 +146,8 @@ export default function LoginScreen() {
             ]}
           >
             <View style={styles.formHeader}>
-              <Text style={styles.formTitle}>Sign in</Text>
-              <Text style={styles.formSubtitle}>Continue with your rider account.</Text>
+              <Text style={styles.formTitle}>{t('auth.signIn')}</Text>
+              <Text style={styles.formSubtitle}>{t('auth.formSubtitle')}</Text>
             </View>
             <Input
               value={username}
@@ -149,8 +155,8 @@ export default function LoginScreen() {
                 setUsername(text);
                 setUsernameError(null);
               }}
-              label="Username or Email"
-              placeholder="Enter your username or email"
+              label={t('auth.usernameOrEmail')}
+              placeholder={t('auth.usernamePlaceholder')}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -164,8 +170,8 @@ export default function LoginScreen() {
                 setPassword(text);
                 setPasswordError(null);
               }}
-              label="Password"
-              placeholder="Enter your password"
+              label={t('auth.password')}
+              placeholder={t('auth.passwordPlaceholder')}
               secureTextEntry
               error={passwordError || undefined}
               icon={<Ionicons name="lock-closed-outline" size={20} color={colors.text.secondary} />}
@@ -179,7 +185,7 @@ export default function LoginScreen() {
             )}
 
             <Button
-              title="Sign In"
+              title={t('auth.signInButton')}
               onPress={handleLogin}
               loading={isLoading}
               fullWidth
@@ -206,13 +212,8 @@ export default function LoginScreen() {
           >
             <View style={styles.footerCard}>
               <Ionicons name="help-circle-outline" size={18} color={colors.primary} />
-              <Text style={styles.footerText}>Having trouble signing in?</Text>
-              <TouchableOpacity
-                onPress={() => router.push('/(auth)/support')}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.footerLink}>Contact support</Text>
-              </TouchableOpacity>
+              <Text style={styles.footerText}>{t('auth.troubleSigningIn')}</Text>
+              <Text style={styles.footerLink}>{t('auth.contactSupport')}</Text>
             </View>
           </Animated.View>
         </ScrollView>
@@ -287,6 +288,9 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.text.secondary,
     fontWeight: '600',
+  },
+  languageSwitchWrap: {
+    marginBottom: spacing.sm,
   },
   logoContainer: {
     width: 76,

@@ -2,18 +2,20 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Link, Stack } from 'expo-router';
 import { colors, typography, spacing } from '../utils/constants';
+import { useI18n } from '../i18n';
 
 export default function NotFoundScreen() {
+  const { t } = useI18n();
   return (
     <>
-      <Stack.Screen options={{ title: 'Not Found' }} />
+      <Stack.Screen options={{ title: t('common.notFound') }} />
       <View style={styles.container}>
-        <Text style={styles.title}>Page Not Found</Text>
+        <Text style={styles.title}>{t('notFound.title')}</Text>
         <Text style={styles.subtitle}>
-          The page you're looking for doesn't exist.
+          {t('notFound.subtitle')}
         </Text>
         <Link href="/(tabs)/dashboard" style={styles.link}>
-          <Text style={styles.linkText}>Go to Dashboard</Text>
+          <Text style={styles.linkText}>{t('notFound.goDashboard')}</Text>
         </Link>
       </View>
     </>

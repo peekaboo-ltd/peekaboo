@@ -17,8 +17,10 @@ import { Input } from '../../components/ui/Input';
 import { useAssignmentStore } from '../../store/assignmentStore';
 import { OrderAssignmentStatus, OrderStatus } from '../../types';
 import { colors, spacing, typography } from '../../utils/constants';
+import { useI18n } from '../../i18n';
 
 export default function AssignmentDetailScreen() {
+  const { t } = useI18n();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [trackingIdInput, setTrackingIdInput] = useState('');
@@ -101,13 +103,13 @@ export default function AssignmentDetailScreen() {
     if (success) {
       refresh();
       Alert.alert(
-        'Assignment Accepted',
-        'You have successfully accepted this assignment.',
-        [{ text: 'OK' }]
+        t('assignmentDetail.acceptedTitle'),
+        t('assignmentDetail.acceptedMessage'),
+        [{ text: t('common.ok') }]
       );
     } else {
-      const message = useAssignmentStore.getState().error || 'Failed to accept assignment.';
-      Alert.alert('Error', message);
+      const message = useAssignmentStore.getState().error || t('assignments.acceptFailed');
+      Alert.alert(t('common.error'), message);
     }
   };
 
@@ -120,13 +122,13 @@ export default function AssignmentDetailScreen() {
 
     if (success) {
       Alert.alert(
-        'Assignment Rejected',
-        'You have rejected this assignment.',
-        [{ text: 'OK', onPress: () => router.back() }]
+        t('assignmentDetail.rejectedTitle'),
+        t('assignmentDetail.rejectedMessage'),
+        [{ text: t('common.ok'), onPress: () => router.back() }]
       );
     } else {
-      const message = useAssignmentStore.getState().error || 'Failed to reject assignment.';
-      Alert.alert('Error', message);
+      const message = useAssignmentStore.getState().error || t('assignments.rejectFailed');
+      Alert.alert(t('common.error'), message);
     }
   };
 
@@ -139,10 +141,10 @@ export default function AssignmentDetailScreen() {
 
     if (success) {
       refresh();
-      Alert.alert('Order in Transit', 'Order has been confirmed and marked as in transit.');
+      Alert.alert(t('assignmentDetail.transitTitle'), t('assignmentDetail.transitMessage'));
     } else {
-      const message = useAssignmentStore.getState().error || 'Failed to confirm dispatch.';
-      Alert.alert('Error', message);
+      const message = useAssignmentStore.getState().error || t('assignmentDetail.confirmDispatchFailed');
+      Alert.alert(t('common.error'), message);
     }
   };
 
@@ -156,15 +158,15 @@ export default function AssignmentDetailScreen() {
     if (success) {
       refresh();
       Alert.alert(
-        'Assignment Recovered',
-        'This assignment has been restored and is ready for you to accept.',
-        [{ text: 'OK' }]
+        t('assignmentDetail.recoveredTitle'),
+        t('assignmentDetail.recoveredMessage'),
+        [{ text: t('common.ok') }]
       );
     } else {
       const message =
         useAssignmentStore.getState().error ||
-        'Failed to recover assignment.';
-      Alert.alert('Unable to Recover', message);
+        t('assignmentDetail.recoverFailed');
+      Alert.alert(t('assignmentDetail.unableRecover'), message);
       refresh();
     }
   };
@@ -174,7 +176,7 @@ export default function AssignmentDetailScreen() {
 
     const enteredTrackingId = trackingIdInput.trim();
     if (!enteredTrackingId) {
-      Alert.alert('OTP required', 'Enter the order OTP to complete this delivery.');
+      Alert.alert(t('assignmentDetail.otpRequiredTitle'), t('assignmentDetail.otpRequiredMessage'));
       return;
     }
 
@@ -184,10 +186,10 @@ export default function AssignmentDetailScreen() {
 
     if (success) {
       refresh();
-      Alert.alert('Order Completed', 'Order has been marked as completed.');
+      Alert.alert(t('assignmentDetail.completedTitle'), t('assignmentDetail.completedMessage'));
     } else {
-      const message = useAssignmentStore.getState().error || 'Failed to complete order.';
-      Alert.alert('Error', message);
+      const message = useAssignmentStore.getState().error || t('assignmentDetail.completeFailed');
+      Alert.alert(t('common.error'), message);
       refresh();
     }
   };
@@ -197,8 +199,8 @@ export default function AssignmentDetailScreen() {
       <View style={styles.loadingContainer}>
         <Stack.Screen
           options={{
-            title: 'Loading...',
-            headerBackTitle: 'Back',
+            title: t('assignmentDetail.loadingTitle'),
+            headerBackTitle: t('common.back'),
           }}
         />
         <AssignmentDetailsSkeleton />
@@ -211,8 +213,8 @@ export default function AssignmentDetailScreen() {
       <View style={styles.errorContainer}>
         <Stack.Screen
           options={{
-            title: 'Not Found',
-            headerBackTitle: 'Back',
+            title: t('assignmentDetail.notFound'),
+            headerBackTitle: t('common.back'),
           }}
         />
       </View>
@@ -223,7 +225,7 @@ export default function AssignmentDetailScreen() {
     if (selectedAssignment.order?.referenceId) {
       return `Order #${selectedAssignment.order.referenceId}`;
     }
-    return 'Assignment Details';
+    return t('assignmentDetail.title');
   };
 
   const handleOtpFocus = () => {
@@ -245,7 +247,7 @@ export default function AssignmentDetailScreen() {
       <Stack.Screen
         options={{
           title: getHeaderTitle(),
-          headerBackTitle: 'Back',
+          headerBackTitle: t('common.back'),
         }}
       />
 
@@ -263,11 +265,11 @@ export default function AssignmentDetailScreen() {
 
         {canComplete && (
           <View style={styles.trackingCard}>
-            <Text style={styles.trackingLabel}>Complete Order Verification</Text>
+            <Text style={styles.trackingLabel}>{t('assignmentDetail.completeVerification')}</Text>
             <Input
               value={trackingIdInput}
               onChangeText={setTrackingIdInput}
-              placeholder="Enter OTP"
+              placeholder={t('assignmentDetail.enterOtp')}
               keyboardType="number-pad"
               onFocus={handleOtpFocus}
             />

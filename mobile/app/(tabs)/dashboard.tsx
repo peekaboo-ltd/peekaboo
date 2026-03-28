@@ -16,12 +16,14 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useAuthStore } from '../../store/authStore';
+import { useI18n } from '../../i18n';
 import { colors, typography, spacing } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatters';
 import { OrderAssignmentStatus } from '../../types';
 
 export default function DashboardScreen() {
   const { user, logout } = useAuthStore();
+  const { t } = useI18n();
   const insets = useSafeAreaInsets();
   const { 
     stats, 
@@ -40,16 +42,16 @@ export default function DashboardScreen() {
     const collectedAt = user?.currentLocation?.collectedAt;
 
     if (!collectedAt) {
-      return 'Location updates are active. Waiting for your first location sync.';
+      return t('dashboard.locationWaiting');
     }
 
     const parsedDate = new Date(collectedAt);
     if (Number.isNaN(parsedDate.getTime())) {
-      return 'Location was collected recently.';
+      return t('dashboard.locationRecent');
     }
 
-    return `Last location collected: ${parsedDate.toLocaleString()}`;
-  }, [user?.currentLocation?.collectedAt]);
+    return t('dashboard.lastLocationCollected', { date: parsedDate.toLocaleString() });
+  }, [t, user?.currentLocation?.collectedAt]);
 
 
   const handleRefresh = useCallback(() => {
@@ -129,16 +131,16 @@ export default function DashboardScreen() {
           <View style={styles.headerLeft}>
             <View style={styles.kickerRow}>
               <View style={styles.kickerDot} />
-              <Text style={styles.kicker}>Dashboard</Text>
+              <Text style={styles.kicker}>{t('dashboard.kicker')}</Text>
             </View>
-            <Text style={styles.greeting}>Welcome back,</Text>
-            <Text style={styles.userName}>{user?.name || 'Rider'}</Text>
-            <Text style={styles.subline}>Ready to take on today’s routes.</Text>
+            <Text style={styles.greeting}>{t('dashboard.welcomeBack')}</Text>
+            <Text style={styles.userName}>{user?.name || t('dashboard.defaultRider')}</Text>
+            <Text style={styles.subline}>{t('dashboard.readyRoutes')}</Text>
           </View>
           <View style={styles.headerRight}>
             <View style={styles.statusPill}>
               <Ionicons name="pulse" size={14} color={colors.success} />
-              <Text style={styles.statusText}>Shift Active</Text>
+              <Text style={styles.statusText}>{t('dashboard.shiftActive')}</Text>
             </View>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
@@ -190,27 +192,27 @@ export default function DashboardScreen() {
           <View style={styles.heroHighlight} />
           <View style={styles.heroHeader}>
             <View>
-              <Text style={styles.heroKicker}>Today’s Focus</Text>
-              <Text style={styles.heroSubtitle}>Keep momentum with active stops.</Text>
+              <Text style={styles.heroKicker}>{t('dashboard.todaysFocus')}</Text>
+              <Text style={styles.heroSubtitle}>{t('dashboard.keepMomentum')}</Text>
             </View>
             <View style={styles.heroBadge}>
               <Ionicons name="time-outline" size={14} color={colors.warning} />
               <Text style={styles.heroBadgeText}>
-                {pendingCount} Pending
+                {pendingCount} {t('dashboard.pending')}
               </Text>
             </View>
           </View>
-          <Text style={styles.heroTitle}>Stay on top of active deliveries</Text>
+          <Text style={styles.heroTitle}>{t('dashboard.stayTop')}</Text>
           <View style={styles.heroStatsRow}>
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatLabel}>Earnings</Text>
+              <Text style={styles.heroStatLabel}>{t('dashboard.earnings')}</Text>
               <Text style={styles.heroStatValue}>
                 {formatCurrency(stats?.totalEarnings ?? 0)}
               </Text>
             </View>
             <View style={styles.heroDivider} />
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatLabel}>Completed</Text>
+              <Text style={styles.heroStatLabel}>{t('dashboard.completed')}</Text>
               <Text style={styles.heroStatValue}>
                 {stats?.completedToday ?? 0}
               </Text>
@@ -224,9 +226,11 @@ export default function DashboardScreen() {
                 </View>
                 <View style={styles.alertText}>
                   <Text style={styles.alertTitle}>
-                    {pendingCount} Pending {pendingCount === 1 ? 'Assignment' : 'Assignments'}
+                    {pendingCount === 1
+                      ? t('dashboard.pendingAssignment', { count: pendingCount })
+                      : t('dashboard.pendingAssignments', { count: pendingCount })}
                   </Text>
-                  <Text style={styles.alertSubtitle}>Tap to view and accept</Text>
+                  <Text style={styles.alertSubtitle}>{t('dashboard.tapToView')}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
               </View>
@@ -260,35 +264,35 @@ export default function DashboardScreen() {
         >
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={styles.sectionKicker}>Overview</Text>
-              <Text style={styles.sectionTitle}>Today’s Snapshot</Text>
+              <Text style={styles.sectionKicker}>{t('dashboard.overview')}</Text>
+              <Text style={styles.sectionTitle}>{t('dashboard.snapshot')}</Text>
             </View>
-            <Text style={styles.sectionHint}>Updated just now</Text>
+            <Text style={styles.sectionHint}>{t('dashboard.updatedNow')}</Text>
           </View>
           <View style={styles.statsGrid}>
             <StatCard
-              title="Deliveries"
+              title={t('dashboard.deliveries')}
               value={stats?.todayDeliveries ?? 0}
               icon="bicycle"
               iconColor={colors.primary}
               onPress={() => navigateToAssignments('ALL')}
             />
             <StatCard
-              title="Pending"
+              title={t('assignments.pending')}
               value={stats?.pendingAssignments ?? pendingCount}
               icon="time"
               iconColor={colors.warning}
               onPress={() => navigateToAssignments(OrderAssignmentStatus.PENDING)}
             />
             <StatCard
-              title="Completed"
+              title={t('assignments.completed')}
               value={stats?.completedToday ?? 0}
               icon="checkmark-circle"
               iconColor={colors.success}
               onPress={() => navigateToAssignments(OrderAssignmentStatus.COMPLETED)}
             />
             <StatCard
-              title="Earnings"
+              title={t('dashboard.earnings')}
               value={formatCurrency(stats?.totalEarnings ?? 0)}
               icon="cash"
               iconColor={colors.success}
@@ -298,15 +302,15 @@ export default function DashboardScreen() {
 
           <View style={styles.earningsSummary}>
             <View style={styles.earningsRow}>
-              <Text style={styles.earningsLabel}>Deliveries Today</Text>
+              <Text style={styles.earningsLabel}>{t('profile.deliveriesToday')}</Text>
               <Text style={styles.earningsValue}>{stats?.completedToday ?? 0}</Text>
             </View>
             <View style={styles.earningsRow}>
-              <Text style={styles.earningsLabel}>Bonus Activated</Text>
-              <Text style={styles.earningsValue}>{stats?.bonusActive ? 'YES' : 'NO'}</Text>
+              <Text style={styles.earningsLabel}>{t('dashboard.bonusActivated')}</Text>
+              <Text style={styles.earningsValue}>{stats?.bonusActive ? t('common.yes') : t('common.no')}</Text>
             </View>
             <View style={styles.earningsRow}>
-              <Text style={styles.earningsLabel}>Earnings</Text>
+              <Text style={styles.earningsLabel}>{t('dashboard.earnings')}</Text>
               <Text style={styles.earningsValue}>{formatCurrency(stats?.totalEarnings ?? 0)}</Text>
             </View>
           </View>
@@ -314,10 +318,10 @@ export default function DashboardScreen() {
           {/* Quick Actions */}
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={styles.sectionKicker}>Shortcuts</Text>
-              <Text style={styles.sectionTitle}>Quick Actions</Text>
+              <Text style={styles.sectionKicker}>{t('dashboard.shortcuts')}</Text>
+              <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
             </View>
-            <Text style={styles.sectionHint}>Stay on track</Text>
+            <Text style={styles.sectionHint}>{t('dashboard.stayOnTrack')}</Text>
           </View>
           <View style={styles.quickActions}>
             <Card style={styles.actionCard} onPress={handleViewAssignments}>
@@ -325,8 +329,8 @@ export default function DashboardScreen() {
                 <Ionicons name="list" size={22} color={colors.primary} />
               </View>
               <View>
-                <Text style={styles.actionText}>View Assignments</Text>
-                <Text style={styles.actionSubtext}>Accept and start deliveries</Text>
+                <Text style={styles.actionText}>{t('dashboard.viewAssignments')}</Text>
+                <Text style={styles.actionSubtext}>{t('dashboard.acceptAndStart')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
             </Card>
@@ -352,10 +356,10 @@ export default function DashboardScreen() {
         >
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={styles.sectionKicker}>Timeline</Text>
-              <Text style={styles.sectionTitle}>Recent Activity</Text>
+              <Text style={styles.sectionKicker}>{t('dashboard.timeline')}</Text>
+              <Text style={styles.sectionTitle}>{t('dashboard.recentActivity')}</Text>
             </View>
-            <Text style={styles.sectionHint}>Last 7 days</Text>
+            <Text style={styles.sectionHint}>{t('dashboard.last7Days')}</Text>
           </View>
           <RecentActivity 
             activities={recentActivity || []} 
@@ -372,7 +376,7 @@ export default function DashboardScreen() {
               <Ionicons name="alert-circle" size={24} color={colors.danger} />
               <Text style={styles.errorText}>{error}</Text>
               <Button
-                title="Retry"
+                title={t('common.retry')}
                 onPress={handleRefresh}
                 variant="outline"
                 size="small"

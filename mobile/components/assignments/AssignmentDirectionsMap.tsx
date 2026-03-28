@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Linking, useWindowDimensions, Platform } from '
 import { Button } from '../ui/Button';
 import { formatDistance } from '../../utils/formatters';
 import { colors, typography, spacing } from '../../utils/constants';
+import { useI18n } from '../../i18n';
 
 type WebViewComponentType = React.ComponentType<{
   source: { uri: string };
@@ -62,6 +63,7 @@ export const AssignmentDirectionsMap: React.FC<AssignmentDirectionsMapProps> = (
   destination,
   onClose,
 }) => {
+  const { t } = useI18n();
   const WebView = useNativeWebView();
   const { height } = useWindowDimensions();
   const mapHeight = Math.min(height * 0.5, 360);
@@ -83,19 +85,17 @@ export const AssignmentDirectionsMap: React.FC<AssignmentDirectionsMapProps> = (
   return (
     <View style={styles.container}>
       <View style={styles.distanceRow}>
-        <Text style={styles.distanceLabel}>Approx. distance</Text>
+        <Text style={styles.distanceLabel}>{t('map.approxDistance')}</Text>
         <Text style={styles.distanceValue}>{formatDistance(distanceMeters)}</Text>
       </View>
       <View style={[styles.webViewContainer, { height: mapHeight }]}>
         {isWeb || !WebView ? (
           <View style={styles.webFallback}>
             <Text style={styles.webFallbackText}>
-              {Platform.OS === 'web'
-                ? 'Map is available in the iOS or Android app. Open the route in Google Maps below.'
-                : 'Embedded map needs a dev build with react-native-webview. Open the route in Google Maps below.'}
+              {t('map.webFallback')}
             </Text>
             <Button
-              title="Open in Google Maps"
+              title={t('map.openGoogleMaps')}
               onPress={handleOpenInMaps}
               variant="primary"
               size="small"
@@ -114,7 +114,7 @@ export const AssignmentDirectionsMap: React.FC<AssignmentDirectionsMapProps> = (
       </View>
       <View style={styles.actions}>
         <Button
-          title="Open in Google Maps"
+          title={t('map.openGoogleMaps')}
           onPress={handleOpenInMaps}
           variant="outline"
           size="small"
@@ -122,7 +122,7 @@ export const AssignmentDirectionsMap: React.FC<AssignmentDirectionsMapProps> = (
         />
         {onClose && (
           <Button
-            title="Close"
+            title={t('common.close')}
             onPress={onClose}
             variant="ghost"
             size="small"

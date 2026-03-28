@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { OrderAssignmentStatus } from '../../types';
+import { useI18n } from '../../i18n';
 import { colors, typography, spacing, borderRadius } from '../../utils/constants';
 
 type FilterOption = OrderAssignmentStatus | 'ALL';
@@ -10,17 +11,18 @@ interface AssignmentFiltersProps {
   onFilterChange: (filter: FilterOption) => void;
 }
 
-const filters: { key: FilterOption; label: string }[] = [
-  { key: 'ALL', label: 'All' },
-  { key: OrderAssignmentStatus.PENDING, label: 'Pending' },
-  { key: OrderAssignmentStatus.ACTIVE, label: 'Active' },
-  { key: OrderAssignmentStatus.COMPLETED, label: 'Completed' },
-];
-
 export const AssignmentFilters: React.FC<AssignmentFiltersProps> = ({
   activeFilter,
   onFilterChange,
 }) => {
+  const { t } = useI18n();
+  const filters: { key: FilterOption; label: string }[] = [
+    { key: 'ALL', label: t('assignments.filterAll') },
+    { key: OrderAssignmentStatus.PENDING, label: t('assignments.pending') },
+    { key: OrderAssignmentStatus.ACTIVE, label: t('assignments.active') },
+    { key: OrderAssignmentStatus.COMPLETED, label: t('assignments.completed') },
+  ];
+
   return (
     <View style={styles.container}>
       <ScrollView 
