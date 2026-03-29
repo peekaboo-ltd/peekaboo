@@ -1,16 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import moment from 'moment';
-import { Link, useParams } from 'react-router-dom';
-import { ColumnDef } from '@tanstack/react-table';
-import { APIProvider, AdvancedMarker, Map, Pin, useMap } from '@vis.gl/react-google-maps';
-import { toast } from 'sonner';
-import Table from '@/components/table/Table';
-import { ENVIRONMENTS } from '@/constants/environments.constants';
-import { useFetchUserCurrentLocationHistory } from '@/hooks/users/users.hooks';
-import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import { useLazyFetchOrderAssignmentsQuery } from '@/api/queries/orderAssignment.queries';
-import { useLazyFetchOrdersQuery } from '@/api/queries/orders.queries';
-import LocationDisplay from '@/containers/locations/LocationDisplay';
+import { useEffect, useMemo, useRef, useState } from "react";
+import moment from "moment";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  APIProvider,
+  AdvancedMarker,
+  Map as GoogleMap,
+  Pin,
+  useMap,
+} from "@vis.gl/react-google-maps";
+import { toast } from "sonner";
+import Table from "@/components/table/Table";
+import { ENVIRONMENTS } from "@/constants/environments.constants";
+import { useFetchUserCurrentLocationHistory } from "@/hooks/users/users.hooks";
+import { useDocumentTitle } from "@/hooks/common/useDocumentTitle";
+import { useLazyFetchOrderAssignmentsQuery } from "@/api/queries/orderAssignment.queries";
+import { useLazyFetchOrdersQuery } from "@/api/queries/orders.queries";
+import LocationDisplay from "@/containers/locations/LocationDisplay";
+import { UUID } from "@/types";
+import Select from "@/components/inputs/Select";
+import Button from "@/components/inputs/Button";
 
 type CoordinateRecord = {
   id: string;
@@ -39,12 +48,13 @@ const getCoordinates = (item: CoordinateRecord) => {
   const lat = item.latitude ?? item.lat;
   const lng = item.longitude ?? item.lng;
 
-  if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+  if (typeof lat !== "number" || typeof lng !== "number") return null;
 
   return { lat, lng };
 };
 
-const toInputDateTime = (isoString: string) => moment(isoString).format('YYYY-MM-DDTHH:mm');
+const toInputDateTime = (isoString: string) =>
+  moment(isoString).format("YYYY-MM-DDTHH:mm");
 
 const toUtcIsoString = (value: string) => {
   if (!value) return undefined;
@@ -53,18 +63,22 @@ const toUtcIsoString = (value: string) => {
 
 const getDefaultRange = () => {
   const end = moment();
-  const start = end.clone().subtract(7, 'days');
+  const start = end.clone().subtract(7, "days");
 
   return {
-    startTime: start.format('YYYY-MM-DDTHH:mm'),
-    endTime: end.format('YYYY-MM-DDTHH:mm'),
+    startTime: start.format("YYYY-MM-DDTHH:mm"),
+    endTime: end.format("YYYY-MM-DDTHH:mm"),
   };
 };
 
 const DEFAULT_RANGE = getDefaultRange();
 
 // Draws a polyline connecting all path points and keeps it in sync with map
-const TrajectoryPolyline = ({ path }: { path: google.maps.LatLngLiteral[] }) => {
+const TrajectoryPolyline = ({
+  path,
+}: {
+  path: google.maps.LatLngLiteral[];
+}) => {
   const map = useMap();
   const polylineRef = useRef<google.maps.Polyline | null>(null);
 
@@ -74,7 +88,7 @@ const TrajectoryPolyline = ({ path }: { path: google.maps.LatLngLiteral[] }) => 
     polylineRef.current = new google.maps.Polyline({
       path,
       map,
-      strokeColor: '#4F46E5',
+      strokeColor: "#4F46E5",
       strokeWeight: 3,
       strokeOpacity: 0.8,
       geodesic: true,
@@ -90,10 +104,13 @@ const TrajectoryPolyline = ({ path }: { path: google.maps.LatLngLiteral[] }) => 
 };
 
 const UserLocationHistoryPage = () => {
-  useDocumentTitle('User Location History');
+  useDocumentTitle("User Location History");
 
-  const { id } = useParams<{ id: string }>();
+  // NAVIGATION
+  const { id } = useParams<{ id: UUID }>();
+  const navigate = useNavigate();
 
+  // FETCH USER CURRENT LOCATION HISTORY
   const {
     fetchUserCurrentLocationHistory,
     data,
@@ -106,14 +123,23 @@ const UserLocationHistoryPage = () => {
     totalCount,
   } = useFetchUserCurrentLocationHistory();
 
-  const [fetchOrderAssignments, { data: assignmentsData, isFetching: isFetchingAssignments }] =
-    useLazyFetchOrderAssignmentsQuery();
-  const [fetchOrders, { data: searchedOrdersData, isFetching: isSearchingOrders }] =
-    useLazyFetchOrdersQuery();
+  // FETCH ORDER ASSIGNMENTS
+  const [
+    fetchOrderAssignments,
+    { data: assignmentsData, isFetching: isFetchingAssignments },
+  ] = useLazyFetchOrderAssignmentsQuery();
 
-  const [selectedAssignmentOrderId, setSelectedAssignmentOrderId] = useState('');
-  const [selectedSearchedOrderId, setSelectedSearchedOrderId] = useState('');
-  const [orderSearchTerm, setOrderSearchTerm] = useState('');
+  // FETCH SEARCHED ORDERS
+  const [
+    fetchOrders,
+    { data: searchedOrdersData, isFetching: isSearchingOrders },
+  ] = useLazyFetchOrdersQuery();
+
+  // STATE
+  const [selectedAssignmentOrderId, setSelectedAssignmentOrderId] =
+    useState("");
+  const [selectedSearchedOrderId, setSelectedSearchedOrderId] = useState("");
+  const [orderSearchTerm, setOrderSearchTerm] = useState("");
   const [hasSearchedOrder, setHasSearchedOrder] = useState(false);
   const [appliedStartTime, setAppliedStartTime] = useState<string | undefined>(
     toUtcIsoString(DEFAULT_RANGE.startTime),
@@ -123,11 +149,16 @@ const UserLocationHistoryPage = () => {
   );
   const [dateRange, setDateRange] = useState(DEFAULT_RANGE);
 
-  const rows = useMemo(() => (data?.data?.rows ?? []) as CoordinateRecord[], [data]);
+  // MEMOIZED VALUES
+  const rows = useMemo(
+    () => (data?.data?.rows ?? []) as CoordinateRecord[],
+    [data],
+  );
 
   const assignedOrderOptions = useMemo<OrderSummary[]>(() => {
-    const assignmentRows = (assignmentsData?.data?.rows ?? []) as AssignmentRecord[];
-    const weekAgo = moment().subtract(7, 'days');
+    const assignmentRows = (assignmentsData?.data?.rows ??
+      []) as AssignmentRecord[];
+    const weekAgo = moment().subtract(7, "days");
 
     const normalized = assignmentRows
       .map((assignment) => assignment.order)
@@ -137,7 +168,9 @@ const UserLocationHistoryPage = () => {
         return moment(order.updatedAt).isSameOrAfter(weekAgo);
       });
 
-    return Array.from(new Map(normalized.map((order) => [order.id, order])).values());
+    return Array.from(
+      new Map(normalized.map((order) => [order.id, order])).values(),
+    );
   }, [assignmentsData]);
 
   const searchedOrders = useMemo(() => {
@@ -147,11 +180,20 @@ const UserLocationHistoryPage = () => {
 
   const selectedOrder = useMemo(() => {
     if (selectedSearchedOrderId) {
-      return searchedOrders.find((order) => order.id === selectedSearchedOrderId);
+      return searchedOrders.find(
+        (order) => order.id === selectedSearchedOrderId,
+      );
     }
 
-    return assignedOrderOptions.find((order) => order.id === selectedAssignmentOrderId);
-  }, [assignedOrderOptions, searchedOrders, selectedAssignmentOrderId, selectedSearchedOrderId]);
+    return assignedOrderOptions.find(
+      (order) => order.id === selectedAssignmentOrderId,
+    );
+  }, [
+    assignedOrderOptions,
+    searchedOrders,
+    selectedAssignmentOrderId,
+    selectedSearchedOrderId,
+  ]);
 
   useEffect(() => {
     if (!id) return;
@@ -173,53 +215,73 @@ const UserLocationHistoryPage = () => {
       startTime: appliedStartTime,
       endTime: appliedEndTime,
     });
-  }, [appliedEndTime, appliedStartTime, fetchUserCurrentLocationHistory, id, page, size]);
+  }, [
+    appliedEndTime,
+    appliedStartTime,
+    fetchUserCurrentLocationHistory,
+    id,
+    page,
+    size,
+  ]);
 
   const mapRecords = useMemo(
     () =>
       rows
         .map((entry) => ({ entry, coordinates: getCoordinates(entry) }))
         .filter(
-          (item): item is { entry: CoordinateRecord; coordinates: { lat: number; lng: number } } =>
-            Boolean(item.coordinates),
+          (
+            item,
+          ): item is {
+            entry: CoordinateRecord;
+            coordinates: { lat: number; lng: number };
+          } => Boolean(item.coordinates),
         ),
     [rows],
   );
 
-  const path = useMemo(() => mapRecords.map(({ coordinates }) => coordinates), [mapRecords]);
+  const path = useMemo(
+    () => mapRecords.map(({ coordinates }) => coordinates),
+    [mapRecords],
+  );
 
-  const mapCenter = mapRecords[0]?.coordinates ?? { lat: -1.9441, lng: 30.0619 };
+  const mapCenter = mapRecords[0]?.coordinates ?? {
+    lat: -1.9441,
+    lng: 30.0619,
+  };
 
+  // COLUMNS
   const columns = useMemo<ColumnDef<CoordinateRecord>[]>(
     () => [
       {
-        id: 'timestamp',
-        header: 'Timestamp',
+        id: "timestamp",
+        header: "Timestamp",
         cell: ({ row }) => {
-          if (!row.original.timestamp) return '—';
-          return moment(row.original.timestamp).local().format('lll');
+          if (!row.original.timestamp) return "—";
+          return moment(row.original.timestamp).local().format("lll");
         },
       },
       {
-        id: 'location',
-        header: 'Location',
+        id: "location",
+        header: "Location",
         cell: ({ row }) => <LocationDisplay location={row.original} />,
       },
     ],
     [],
   );
 
+  // FIRST AND LAST RECORDS
   const first = mapRecords[0];
   const last = mapRecords[mapRecords.length - 1];
 
+  // HANDLERS
   const onSearchOrders = async () => {
     if (!orderSearchTerm.trim()) {
-      toast.error('Enter an order reference id or tracking id first');
+      toast.error("Enter an order reference id or tracking id first");
       return;
     }
 
     setHasSearchedOrder(true);
-    setSelectedSearchedOrderId('');
+    setSelectedSearchedOrderId("");
 
     await fetchOrders({
       page: 0,
@@ -230,7 +292,7 @@ const UserLocationHistoryPage = () => {
 
   const onSelectAssignmentOrder = (orderId: string) => {
     setSelectedAssignmentOrderId(orderId);
-    setSelectedSearchedOrderId('');
+    setSelectedSearchedOrderId("");
   };
 
   const onSelectSearchedOrder = (orderId: string) => {
@@ -257,12 +319,12 @@ const UserLocationHistoryPage = () => {
     const normalizedEnd = toUtcIsoString(nextEnd);
 
     if (!normalizedStart || !normalizedEnd) {
-      toast.error('Please provide a valid date range');
+      toast.error("Please provide a valid date range");
       return;
     }
 
     if (moment(normalizedStart).isAfter(moment(normalizedEnd))) {
-      toast.error('Start time must be before end time');
+      toast.error("Start time must be before end time");
       return;
     }
 
@@ -271,11 +333,14 @@ const UserLocationHistoryPage = () => {
     setAppliedEndTime(normalizedEnd);
   };
 
+  // RENDER
   return (
     <main className="w-full flex flex-col gap-6">
       <header className="flex items-center justify-between gap-3 flex-wrap">
         <article>
-          <h1 className="text-2xl font-bold text-black">User location history</h1>
+          <h1 className="text-2xl font-bold text-black">
+            User location history
+          </h1>
           <p className="text-sm text-muted-foreground">
             Paginated timeline of the user&apos;s latest tracked locations.
           </p>
@@ -287,27 +352,28 @@ const UserLocationHistoryPage = () => {
 
       <section className="border rounded-md p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <article className="flex flex-col gap-2">
-          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="assigned-order">
+          <label
+            className="text-xs font-semibold uppercase tracking-wide text-slate-600"
+            htmlFor="assigned-order"
+          >
             Assigned orders (last 7 days)
           </label>
-          <select
-            id="assigned-order"
-            className="border rounded px-3 py-2 text-sm"
+          <Select
+            options={assignedOrderOptions.map((order) => ({
+              label: `${order?.referenceId || order?.id} · ${order?.trackingId || "No OTP"}`,
+              value: order?.id,
+            }))}
+            isLoading={isFetchingAssignments}
             value={selectedAssignmentOrderId}
-            onChange={(event) => onSelectAssignmentOrder(event.target.value)}
-            disabled={isFetchingAssignments}
-          >
-            <option value="">Select an assigned order</option>
-            {assignedOrderOptions.map((order) => (
-              <option key={order.id} value={order.id}>
-                {order.referenceId || order.id} · {order.trackingId || 'No OTP'}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => onSelectAssignmentOrder(value)}
+          />
         </article>
 
         <article className="flex flex-col gap-2">
-          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="order-search">
+          <label
+            className="text-xs font-semibold uppercase tracking-wide text-slate-600"
+            htmlFor="order-search"
+          >
             Search order (reference id or tracking id)
           </label>
           <div className="flex gap-2">
@@ -318,34 +384,33 @@ const UserLocationHistoryPage = () => {
               value={orderSearchTerm}
               onChange={(event) => setOrderSearchTerm(event.target.value)}
             />
-            <button
+            <Button
               type="button"
               className="px-3 py-2 rounded bg-primary text-white text-sm"
               onClick={onSearchOrders}
               disabled={isSearchingOrders}
             >
               Search
-            </button>
+            </Button>
           </div>
           {hasSearchedOrder && (
-            <select
-              className="border rounded px-3 py-2 text-sm"
+            <Select
+              options={searchedOrders.map((order) => ({
+                label: `${order?.referenceId || order?.id} · ${order?.trackingId || "No OTP"}`,
+                value: order?.id,
+              }))}
               value={selectedSearchedOrderId}
-              onChange={(event) => onSelectSearchedOrder(event.target.value)}
-              disabled={isSearchingOrders}
-            >
-              <option value="">Select searched order</option>
-              {searchedOrders.map((order) => (
-                <option key={order.id} value={order.id}>
-                  {order.referenceId || order.id} · {order.trackingId || 'No OTP'}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => onSelectSearchedOrder(value)}
+              isLoading={isSearchingOrders}
+            />
           )}
         </article>
 
         <article className="flex flex-col gap-2">
-          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="start-time">
+          <label
+            className="text-xs font-semibold uppercase tracking-wide text-slate-600"
+            htmlFor="start-time"
+          >
             Start time (local)
           </label>
           <input
@@ -353,12 +418,20 @@ const UserLocationHistoryPage = () => {
             type="datetime-local"
             className="border rounded px-3 py-2 text-sm"
             value={dateRange.startTime}
-            onChange={(event) => setDateRange((prev) => ({ ...prev, startTime: event.target.value }))}
+            onChange={(event) =>
+              setDateRange((prev) => ({
+                ...prev,
+                startTime: event.target.value,
+              }))
+            }
           />
         </article>
 
         <article className="flex flex-col gap-2">
-          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="end-time">
+          <label
+            className="text-xs font-semibold uppercase tracking-wide text-slate-600"
+            htmlFor="end-time"
+          >
             End time (local)
           </label>
           <input
@@ -366,38 +439,48 @@ const UserLocationHistoryPage = () => {
             type="datetime-local"
             className="border rounded px-3 py-2 text-sm"
             value={dateRange.endTime}
-            onChange={(event) => setDateRange((prev) => ({ ...prev, endTime: event.target.value }))}
+            onChange={(event) =>
+              setDateRange((prev) => ({ ...prev, endTime: event.target.value }))
+            }
           />
         </article>
 
         <article className="lg:col-span-2 flex justify-end">
-          <button
-            type="button"
-            className="px-4 py-2 rounded bg-primary text-white text-sm"
-            onClick={onApplyFilters}
-          >
+          <Button primary onClick={onApplyFilters} submit>
             Apply
-          </button>
+          </Button>
         </article>
       </section>
 
       <section className="border rounded-md overflow-hidden h-[420px]">
-        <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY || ''}>
-          <Map defaultCenter={mapCenter} defaultZoom={12} mapId="user-location-history-map">
+        <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY || ""}>
+          <GoogleMap
+            defaultCenter={mapCenter}
+            defaultZoom={12}
+            mapId="user-location-history-map"
+          >
             <TrajectoryPolyline path={path} />
 
             {first && (
               <AdvancedMarker position={first.coordinates} title="Start">
-                <Pin background="#22c55e" borderColor="#16a34a" glyphColor="#ffffff" />
+                <Pin
+                  background="#22c55e"
+                  borderColor="#16a34a"
+                  glyphColor="#ffffff"
+                />
               </AdvancedMarker>
             )}
 
             {last && last.entry.id !== first?.entry.id && (
               <AdvancedMarker position={last.coordinates} title="Latest">
-                <Pin background="#ef4444" borderColor="#dc2626" glyphColor="#ffffff" />
+                <Pin
+                  background="#ef4444"
+                  borderColor="#dc2626"
+                  glyphColor="#ffffff"
+                />
               </AdvancedMarker>
             )}
-          </Map>
+          </GoogleMap>
         </APIProvider>
       </section>
 
@@ -414,6 +497,16 @@ const UserLocationHistoryPage = () => {
         isLoading={isFetching}
         noDataMessage="No location history records found."
       />
+      <footer className="w-full flex items-center justify-between">
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            navigate(-1);
+          }}
+        >
+          Back
+        </Button>
+      </footer>
     </main>
   );
 };
