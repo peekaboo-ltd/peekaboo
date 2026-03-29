@@ -1,4 +1,5 @@
 import type { BaseDomain, UUID } from './index';
+import type { Order } from './order.type';
 import type { User } from './user.type';
 
 // Form data types for onboarding steps
@@ -77,6 +78,13 @@ export interface Organization extends BaseDomain {
   paymentTermsDays: number;
   createdById: UUID;
   defaultLocation?: { latitude: number; longitude: number };
+  businessPlan?: {
+    id: UUID;
+    name?: string;
+    billingPeriod?: string;
+    currency?: string;
+    pricePerOrder?: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -169,4 +177,87 @@ export interface InviteOrganizationPayload {
 
 export interface InviteOrganizationResponse {
   message: string;
+}
+
+export type TierBreakdownType = 'package' | 'fallback' | 'per_unit' | 'overflow';
+
+export interface TierBreakdown {
+  tierLabel: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+  type?: TierBreakdownType;
+}
+
+export interface BillingPricingTierSnapshot {
+  minQuantity: number;
+  maxQuantity: number | null;
+  pricePerUnit?: number;
+  totalPrice?: number;
+  label?: string;
+  isCustom?: boolean;
+}
+
+export interface BillingPricingSnapshot {
+  tiers?: BillingPricingTierSnapshot[];
+  overflowRate?: number;
+  fallbackRate?: number;
+}
+
+export interface OrganizationBillingPlanSummary {
+  id: UUID;
+  name?: string;
+  billingPeriod?: string;
+  currency?: string;
+  pricePerOrder?: number;
+}
+
+export interface OrganizationBillingSummary {
+  id: UUID;
+  organizationId: UUID;
+  totalOrders: number;
+  totalAmount: number;
+  currency?: string;
+  status: string;
+  paidAt?: string | Date;
+  updatedAt?: string | Date;
+  createdAt?: string | Date;
+  periodStart?: string | Date;
+  periodEnd?: string | Date;
+  invoiceNumber?: string;
+  organization?: { id: UUID; name?: string };
+  businessPlan?: OrganizationBillingPlanSummary;
+  pricingSnapshot?: BillingPricingSnapshot;
+  tierBreakdown?: TierBreakdown[];
+  orders?: Order[];
+}
+
+export interface BillingBreakdownResponseData {
+  billing: OrganizationBillingSummary;
+  breakdown: TierBreakdown[];
+  planName: string;
+  billingPeriod: string;
+  periodStart: string | Date;
+  periodEnd: string | Date;
+  totalOrders: number;
+  totalAmount: number;
+  currency: string;
+}
+
+export interface BillingBreakdownResponse {
+  message: string;
+  data: BillingBreakdownResponseData;
+}
+
+export interface EarlyPaymentEstimateResponseData {
+  billing: OrganizationBillingSummary;
+  breakdown: TierBreakdown[];
+  totalAmount: number;
+  currency: string;
+  note: string;
+}
+
+export interface EarlyPaymentEstimateResponse {
+  message: string;
+  data: EarlyPaymentEstimateResponseData;
 }

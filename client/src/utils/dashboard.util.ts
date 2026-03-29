@@ -307,7 +307,7 @@ export const getBusinessMetricCards = (
     accent: 'emerald',
     href: '/billing-payments',
     icon: faCreditCard,
-    comparisonLabel: 'Current amount due',
+    comparisonLabel: 'Live server-calculated amount due',
     footerText: `${formatNumbers(metrics.completedOrders)} completed orders, ${formatNumbers(metrics.pendingOrders)} pending orders`,
   },
   {

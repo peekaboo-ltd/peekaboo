@@ -1,6 +1,10 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
-import type { Organization } from '@/types/organization.type';
+import type {
+  BillingBreakdownResponse,
+  EarlyPaymentEstimateResponse,
+  Organization,
+} from '@/types/organization.type';
 import { UUID } from '@/types';
 import { BillingPeriod } from '@/types/organization.type';
 
@@ -17,6 +21,11 @@ interface OrganizationOrdersQueryParams {
   page?: number;
   size?: number;
   status?: string;
+}
+
+interface BillingRecordPathParams {
+  organizationId: UUID;
+  billingId: UUID;
 }
 
 export const organizationQueriesApiSlice = createApi({
@@ -100,6 +109,36 @@ export const organizationQueriesApiSlice = createApi({
       }),
     }),
 
+    fetchMyBillingBreakdown: builder.query<BillingBreakdownResponse, UUID>({
+      query: (billingId) => ({
+        url: `/organizations/me/billing/${billingId}/breakdown`,
+      }),
+    }),
+
+    fetchOrganizationBillingBreakdown: builder.query<
+      BillingBreakdownResponse,
+      BillingRecordPathParams
+    >({
+      query: ({ organizationId, billingId }) => ({
+        url: `/organizations/${organizationId}/billing/${billingId}/breakdown`,
+      }),
+    }),
+
+    fetchMyBillingEstimate: builder.query<EarlyPaymentEstimateResponse, UUID>({
+      query: (billingId) => ({
+        url: `/organizations/me/billing/${billingId}/estimate`,
+      }),
+    }),
+
+    fetchOrganizationBillingEstimate: builder.query<
+      EarlyPaymentEstimateResponse,
+      BillingRecordPathParams
+    >({
+      query: ({ organizationId, billingId }) => ({
+        url: `/organizations/${organizationId}/billing/${billingId}/estimate`,
+      }),
+    }),
+
     fetchMyOrganizationOrders: builder.query({
       query: (params: OrganizationOrdersQueryParams | void) => ({
         url: '/organizations/me/orders',
@@ -144,6 +183,14 @@ export const {
   useLazyFetchAllBillingsQuery,
   useFetchOrganizationBillingHistoryQuery,
   useLazyFetchOrganizationBillingHistoryQuery,
+  useFetchMyBillingBreakdownQuery,
+  useLazyFetchMyBillingBreakdownQuery,
+  useFetchOrganizationBillingBreakdownQuery,
+  useLazyFetchOrganizationBillingBreakdownQuery,
+  useFetchMyBillingEstimateQuery,
+  useLazyFetchMyBillingEstimateQuery,
+  useFetchOrganizationBillingEstimateQuery,
+  useLazyFetchOrganizationBillingEstimateQuery,
   useFetchMyOrganizationOrdersQuery,
   useLazyFetchMyOrganizationOrdersQuery,
   useFetchOrganizationOrdersQuery,

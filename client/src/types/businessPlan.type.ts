@@ -21,6 +21,7 @@ export interface PricingTier {
 export interface PricingConfig {
   tiers: PricingTier[];
   overflowRate?: number;
+  fallbackRate?: number;
 }
 
 export interface BusinessPlan extends BaseDomain {

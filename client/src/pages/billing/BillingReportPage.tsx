@@ -111,7 +111,7 @@ const BillingReportPage = () => {
         <InternalPageHeader
           eyebrow="Billing & Payments"
           title="Report"
-          description="Generate a complete business report with graph, pie chart, and completed deliveries table."
+          description="Generate a business report that includes delivery activity and the current billing breakdown for your organization."
         />
       </motion.section>
 
@@ -119,7 +119,7 @@ const BillingReportPage = () => {
         <InternalSectionCard
           eyebrow="Report Range"
           title="Business Report"
-          description="Monthly reports are also sent automatically on the 1st."
+          description="Monthly reports are also sent automatically on the 1st, and current-period billing totals remain estimates until the cycle closes."
           actions={
             <div className="flex flex-wrap gap-2">
               <Button
@@ -164,6 +164,14 @@ const BillingReportPage = () => {
               />
             </label>
           </div>
+          <div className="mt-4 rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <p className="font-medium">What the report includes</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              <li>Current billing breakdown details from the server for the active billing record.</li>
+              <li>Delivery activity for the selected report period.</li>
+              <li>Early-period billing totals that may still change until the billing cycle ends.</li>
+            </ul>
+          </div>
           <p className="mt-3 text-sm text-slate-600">
             Provided by Peekaboo. Any enquiry: +250 788 000 000 | info@peekaboo.co.rw
           </p>
@@ -174,4 +182,3 @@ const BillingReportPage = () => {
 };
 
 export default BillingReportPage;
-
