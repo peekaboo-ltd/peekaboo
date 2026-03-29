@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   View,
@@ -6,10 +6,17 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  Alert,
+  Switch,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
+import { Image } from 'expo-image';
 import { StatCard } from '../../components/dashboard/StatCard';
 import { RecentActivity } from '../../components/dashboard/RecentActivity';
 import { Card } from '../../components/ui/Card';
@@ -17,13 +24,15 @@ import { Button } from '../../components/ui/Button';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useAuthStore } from '../../store/authStore';
 import { useI18n } from '../../i18n';
+import { usersAPI } from '../../services/api/users';
 import { colors, typography, spacing } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatters';
-import { OrderAssignmentStatus } from '../../types';
+import { OrderAssignmentStatus, UserStatus } from '../../types';
 
 export default function DashboardScreen() {
   const { user, logout } = useAuthStore();
   const { t } = useI18n();
+  const { setUser } = useAuthStore();
   const insets = useSafeAreaInsets();
   const { 
     stats, 
@@ -38,6 +47,11 @@ export default function DashboardScreen() {
   const heroAnim = useRef(new Animated.Value(0)).current;
   const statsAnim = useRef(new Animated.Value(0)).current;
   const activityAnim = useRef(new Animated.Value(0)).current;
+  const [isAvailabilityUpdating, setIsAvailabilityUpdating] = useState(false);
+  const [proofImageUri, setProofImageUri] = useState<string | null>(null);
+  const [proofTimestamp, setProofTimestamp] = useState<string>('');
+  const [proofLocationLabel, setProofLocationLabel] = useState<string>('');
+  const [isProofModalVisible, setIsProofModalVisible] = useState(false);
   const locationCollectedText = useMemo(() => {
     const collectedAt = user?.currentLocation?.collectedAt;
 
@@ -76,6 +90,59 @@ export default function DashboardScreen() {
 
   const handleViewAssignments = () => {
     navigateToAssignments('ALL');
+  };
+
+  const handleAvailabilityToggle = async (value: boolean) => {
+    if (!user || isAvailabilityUpdating) return;
+
+    setIsAvailabilityUpdating(true);
+    const nextStatus = value ? UserStatus.ACTIVE : UserStatus.INACTIVE;
+
+    try {
+      const locationPermission = await Location.requestForegroundPermissionsAsync();
+      if (!locationPermission.granted) {
+        Alert.alert('Location permission required', 'Please allow location access to continue.');
+        return;
+      }
+
+      const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
+      if (!cameraPermission.granted) {
+        Alert.alert('Camera permission required', 'Please allow camera access to continue.');
+        return;
+      }
+
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      const timestamp = new Date().toLocaleString();
+      const locationLabel = `${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)}`;
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: false,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        setProofImageUri(result.assets[0].uri);
+        setProofTimestamp(timestamp);
+        setProofLocationLabel(locationLabel);
+        setIsProofModalVisible(true);
+      }
+
+      usersAPI
+        .updateCurrentLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        })
+        .catch(() => {});
+
+      const updatedUser = await usersAPI.updateUser(user.id, { status: nextStatus });
+      setUser(updatedUser);
+    } catch {
+      Alert.alert('Update failed', 'Failed to update availability. Please try again.');
+    } finally {
+      setIsAvailabilityUpdating(false);
+    }
   };
 
   useEffect(() => {
@@ -141,6 +208,21 @@ export default function DashboardScreen() {
             <View style={styles.statusPill}>
               <Ionicons name="pulse" size={14} color={colors.success} />
               <Text style={styles.statusText}>{t('dashboard.shiftActive')}</Text>
+            </View>
+            <View style={styles.shiftControlRow}>
+              <View style={styles.statusPill}>
+                <Ionicons name="pulse" size={14} color={colors.success} />
+                <Text style={styles.statusText}>
+                  {user?.status === UserStatus.ACTIVE ? 'Shift Active' : 'Shift Inactive'}
+                </Text>
+              </View>
+              <Switch
+                value={user?.status === UserStatus.ACTIVE}
+                onValueChange={handleAvailabilityToggle}
+                disabled={isAvailabilityUpdating}
+                trackColor={{ false: 'rgba(95, 149, 152, 0.2)', true: colors.primaryLight }}
+                thumbColor={colors.text.inverse}
+              />
             </View>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
@@ -385,6 +467,40 @@ export default function DashboardScreen() {
           )}
         </Animated.View>
       </ScrollView>
+
+      <Modal
+        visible={isProofModalVisible}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setIsProofModalVisible(false)}
+      >
+        <View style={styles.proofModalContainer}>
+          <View style={styles.proofHeader}>
+            <Image
+              source={require('../../assets/images/icon.png')}
+              style={styles.proofLogo}
+              contentFit="contain"
+            />
+            <TouchableOpacity
+              onPress={() => setIsProofModalVisible(false)}
+              style={styles.proofCloseButton}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="close" size={20} color={colors.text.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {proofImageUri ? (
+            <View style={styles.proofImageWrap}>
+              <Image source={{ uri: proofImageUri }} style={styles.proofImage} contentFit="cover" />
+              <View style={styles.proofOverlay}>
+                <Text style={styles.proofOverlayText}>Timestamp: {proofTimestamp}</Text>
+                <Text style={styles.proofOverlayText}>Location: {proofLocationLabel}</Text>
+              </View>
+            </View>
+          ) : null}
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -449,6 +565,11 @@ const styles = StyleSheet.create({
   headerRight: {
     alignItems: 'flex-end',
     gap: spacing.sm,
+  },
+  shiftControlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   statusPill: {
     flexDirection: 'row',
@@ -777,5 +898,54 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.bodySmall.fontSize,
     color: colors.danger,
+  },
+  proofModalContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+    padding: spacing.lg,
+    paddingTop: spacing.xl,
+  },
+  proofHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+  },
+  proofLogo: {
+    width: 120,
+    height: 42,
+  },
+  proofCloseButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
+  proofImageWrap: {
+    flex: 1,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: colors.surface,
+  },
+  proofImage: {
+    width: '100%',
+    height: '100%',
+  },
+  proofOverlay: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    bottom: spacing.md,
+    backgroundColor: 'rgba(0, 0, 0, 0.58)',
+    borderRadius: 12,
+    padding: spacing.sm,
+    gap: spacing.xs,
+  },
+  proofOverlayText: {
+    color: colors.text.inverse,
+    fontSize: typography.bodySmall.fontSize,
+    fontWeight: '500',
   },
 });

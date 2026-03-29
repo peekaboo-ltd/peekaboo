@@ -1,5 +1,5 @@
 import apiClient from './client';
-import { User, UserLocation } from '../../types';
+import { User, UserLocation, UserStatus } from '../../types';
 
 interface ApiResponse<T> {
   message: string;
@@ -14,6 +14,7 @@ export interface UpdateUserPayload {
   phoneNumber?: string;
   dateOfBirth?: string;
   nationality?: string;
+  status?: UserStatus;
 }
 
 export const usersAPI = {

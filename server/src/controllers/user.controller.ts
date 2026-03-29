@@ -186,7 +186,16 @@ export const UserController = {
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { name, email, phoneNumber, nationality, dateOfBirth, profilePhotoUrl, defaultLocation } = req.body;
+      const {
+        name,
+        email,
+        phoneNumber,
+        nationality,
+        dateOfBirth,
+        profilePhotoUrl,
+        defaultLocation,
+        status,
+      } = req.body;
       const updateData: Record<string, unknown> = {};
       if (name !== undefined) updateData.name = name;
       if (email !== undefined) updateData.email = email;
@@ -195,6 +204,14 @@ export const UserController = {
       if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
       if (profilePhotoUrl !== undefined) updateData.profilePhotoUrl = profilePhotoUrl;
       if (defaultLocation !== undefined) updateData.defaultLocation = defaultLocation;
+      if (status !== undefined) {
+        if (![UserStatus.ACTIVE, UserStatus.INACTIVE].includes(status as UserStatus)) {
+          return res.status(400).json({
+            message: 'Invalid status provided',
+          });
+        }
+        updateData.status = status;
+      }
 
       const user = await userService.updateUser(id as UUID, updateData);
 
