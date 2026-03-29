@@ -1016,11 +1016,13 @@ export class OrderService {
       status,
       statusGroup,
       referenceId,
+      orderLookup,
       batchId,
     } = query as Request['query'] & {
       status?: string | string[];
       statusGroup?: 'recent' | 'pending' | 'active' | 'completed';
       referenceId?: string;
+      orderLookup?: string;
     };
 
     const { take, skip } = getPagination({
@@ -1047,6 +1049,20 @@ export class OrderService {
     if (referenceId) condition.referenceId = ILike(`%${referenceId}%`);
     if (normalizedStatuses.length > 0) condition.status = In(normalizedStatuses as OrderStatus[]);
     if (batchId) condition.batchId = batchId as UUID;
+
+    if (orderLookup) {
+      const baseCondition = { ...condition } as FindOptionsWhere<Order>;
+      condition = [
+        {
+          ...baseCondition,
+          referenceId: ILike(`%${String(orderLookup).trim()}%`),
+        },
+        {
+          ...baseCondition,
+          trackingId: ILike(`%${String(orderLookup).trim()}%`),
+        },
+      ];
+    }
 
     const orders = await this.orderRepository.findAndCount({
       where: condition,

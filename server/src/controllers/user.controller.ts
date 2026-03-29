@@ -80,7 +80,7 @@ export const UserController = {
   async getCurrentLocationHistory(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { page = '0', size = '10' } = req.query;
+      const { page = '0', size = '10', startTime, endTime } = req.query;
 
       if (!UUID_REGEX.test(id)) {
         return res.status(400).json({
@@ -102,10 +102,33 @@ export const UserController = {
         });
       }
 
+      const startTimeValue = typeof startTime === 'string' ? new Date(startTime) : undefined;
+      const endTimeValue = typeof endTime === 'string' ? new Date(endTime) : undefined;
+
+      if (startTime && (!startTimeValue || Number.isNaN(startTimeValue.getTime()))) {
+        return res.status(400).json({
+          message: 'Invalid startTime provided',
+        });
+      }
+
+      if (endTime && (!endTimeValue || Number.isNaN(endTimeValue.getTime()))) {
+        return res.status(400).json({
+          message: 'Invalid endTime provided',
+        });
+      }
+
+      if (startTimeValue && endTimeValue && startTimeValue.getTime() > endTimeValue.getTime()) {
+        return res.status(400).json({
+          message: 'startTime must be before endTime',
+        });
+      }
+
       const timeline = await auditLogService.fetchUserCurrentLocationHistory({
         userId: id as UUID,
         page: pageNumber,
         size: sizeNumber,
+        startTime: startTimeValue,
+        endTime: endTimeValue,
       });
 
       return res.status(200).json({
