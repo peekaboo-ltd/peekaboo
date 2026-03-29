@@ -28,7 +28,7 @@ export class ExpoPushClient {
   private readonly endpoint = 'https://exp.host/--/api/v2/push';
 
   isExpoPushToken(token: string): boolean {
-    return /^ExponentPushToken\[[\w-]+\]$/.test(token);
+    return /^(Expo|Exponent)PushToken\[[\w-]+\]$/.test(token);
   }
 
   chunkPushNotifications(messages: ExpoPushMessage[]): ExpoPushMessage[][] {

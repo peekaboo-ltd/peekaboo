@@ -28,6 +28,9 @@ export class PushService {
 
   async registerPushToken(userId: UUID, payload: RegisterPushTokenDto) {
     if (!this.expoPushClient.isExpoPushToken(payload.expoPushToken)) {
+      logger.warn(
+        `[push] Rejected invalid Expo push token for user ${userId}: ${payload.expoPushToken}`
+      );
       throw new ValidationError('Invalid Expo push token');
     }
 
@@ -45,6 +48,9 @@ export class PushService {
     });
 
     await this.pushSubscriptionRepository.save(subscription);
+    logger.info(
+      `[push] Registered subscription for user ${userId} on ${payload.platform}: ${payload.expoPushToken}`
+    );
 
     return subscription;
   }

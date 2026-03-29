@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { router } from 'expo-router';
+import { pushAPI } from '../api/push';
 
 let currentPushToken: string | null = null;
 
@@ -33,7 +34,7 @@ export interface PushNotificationData {
 
 export const registerForPushNotifications = async (): Promise<string | null> => {
   if (!Device.isDevice) {
-    console.log('Push notifications only work on physical devices');
+    console.log('[peekaboo/push] Push notifications only work on physical devices');
     return null;
   }
 
@@ -47,14 +48,14 @@ export const registerForPushNotifications = async (): Promise<string | null> => 
     }
 
     if (finalStatus !== 'granted') {
-      console.log('Failed to get push notification permissions');
+      console.log('[peekaboo/push] Notification permission not granted');
       return null;
     }
 
     const projectId = getExpoProjectId();
     if (!projectId) {
       console.error(
-        'Expo project id missing: set EXPO_PUBLIC_PROJECT_ID or expo.extra.eas.projectId in app config'
+        '[peekaboo/push] Expo project id missing: set EXPO_PUBLIC_PROJECT_ID or expo.extra.eas.projectId in app config'
       );
       return null;
     }
@@ -64,6 +65,11 @@ export const registerForPushNotifications = async (): Promise<string | null> => 
     });
 
     const token = tokenData.data;
+    if (!token) {
+      console.warn('[peekaboo/push] Expo push token request succeeded without a token');
+      return null;
+    }
+
     currentPushToken = token;
 
     if (__DEV__) {
@@ -101,7 +107,7 @@ export const registerForPushNotifications = async (): Promise<string | null> => 
 
     return token;
   } catch (error) {
-    console.error('Error registering for push notifications:', error);
+    console.error('[peekaboo/push] Error obtaining Expo push token:', error);
     return null;
   }
 };
@@ -115,6 +121,42 @@ export const getPushDeviceMetadata = () => ({
   osVersion: Device.osVersion || undefined,
   notificationsEnabled: true,
 });
+
+export const syncPushSubscription = async (): Promise<void> => {
+  try {
+    const expoPushToken = await registerForPushNotifications();
+
+    if (!expoPushToken) {
+      console.log('[peekaboo/push] Skipping backend push subscription sync');
+      return;
+    }
+
+    await pushAPI.registerPushSubscription({
+      expoPushToken,
+      ...getPushDeviceMetadata(),
+    });
+
+    console.log('[peekaboo/push] Push subscription synced with backend');
+  } catch (error) {
+    console.error('[peekaboo/push] Failed to sync push subscription with backend:', error);
+  }
+};
+
+export const disableCurrentPushSubscription = async (): Promise<void> => {
+  const token = getCurrentPushToken();
+
+  if (!token) {
+    console.log('[peekaboo/push] No current push token to disable');
+    return;
+  }
+
+  try {
+    await pushAPI.disablePushSubscription(token);
+    console.log('[peekaboo/push] Push subscription disabled on backend');
+  } catch (error) {
+    console.error('[peekaboo/push] Failed to disable push subscription on backend:', error);
+  }
+};
 
 export const addNotificationReceivedListener = (
   callback: (notification: Notifications.Notification) => void

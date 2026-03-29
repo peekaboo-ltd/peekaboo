@@ -231,6 +231,7 @@ Run on physical devices for the best experience:
 2. **iOS Simulator not launching**: Run `npx expo run:ios`
 3. **Android emulator issues**: Make sure ANDROID_HOME is set
 4. **API connection issues**: Check `EXPO_PUBLIC_API_BASE_URL` in `.env` and ensure EAS build env/secrets are configured.
+5. **Push subscriptions not saving**: Push registration only works on a physical device, requires notification permission, and needs a valid Expo project ID. Login should still succeed even if push registration is skipped or the backend sync fails.
 
 ### Logs
 

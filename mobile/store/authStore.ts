@@ -9,11 +9,9 @@ import {
   getUserData 
 } from '../services/storage/secureStorage';
 import { handleAPIError, getErrorMessage } from '../utils/errorHandler';
-import { pushAPI } from '../services/api';
 import {
-  getCurrentPushToken,
-  getPushDeviceMetadata,
-  registerForPushNotifications,
+  disableCurrentPushSubscription,
+  syncPushSubscription,
 } from '../services/notifications/pushNotifications';
 
 interface AuthState {
@@ -31,7 +29,7 @@ interface AuthState {
   clearError: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   isAuthenticated: false,
@@ -56,13 +54,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         error: null,
       });
 
-      const expoPushToken = await registerForPushNotifications();
-      if (expoPushToken) {
-        await pushAPI.registerPushSubscription({
-          expoPushToken,
-          ...getPushDeviceMetadata(),
-        });
-      }
+      void syncPushSubscription();
 
       return true;
     } catch (error) {
@@ -80,10 +72,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     
     try {
-      const currentToken = getCurrentPushToken();
-      if (currentToken) {
-        await pushAPI.disablePushSubscription(currentToken).catch(() => {});
-      }
+      await disableCurrentPushSubscription();
 
       // Try to logout from server (optional - might fail if token expired)
       await authAPI.logout().catch(() => {});
@@ -138,13 +127,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isLoading: false,
         });
 
-        const expoPushToken = await registerForPushNotifications();
-        if (expoPushToken) {
-          await pushAPI.registerPushSubscription({
-            expoPushToken,
-            ...getPushDeviceMetadata(),
-          });
-        }
+        void syncPushSubscription();
 
         return true;
       } catch (error) {
