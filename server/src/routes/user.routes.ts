@@ -20,6 +20,13 @@ router.get(
   UserController.getUsersTracking
 );
 
+// GET rider management performance (ADMIN only)
+router.get(
+  "/rider-management",
+  authorize([RoleTypes.ADMIN]),
+  UserController.getRiderManagement
+);
+
 // GET user by ID (ADMIN or own profile)
 router.get("/:id", UserController.getUserById);
 

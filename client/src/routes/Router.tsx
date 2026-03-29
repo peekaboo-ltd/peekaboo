@@ -22,6 +22,7 @@ import {
   UserDetailsPage,
   UsersTrackingPage,
   UserLocationHistoryPage,
+  RiderManagementPage,
 } from '@/pages/users';
 import { About, OrderFees } from '@/pages/about';
 import { PublicServiceDetailsPage, Services } from '@/pages/services';
@@ -525,6 +526,24 @@ const Router = () => {
               }
             />
           </Route>
+
+          <Route
+            path="rider-management"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                {withSEO(
+                  {
+                    title: 'Rider Management | Peekaboo',
+                    description:
+                      'Admin dashboard for rider deliveries, earnings, reliability, and activity ranking.',
+                    path: '/rider-management',
+                    noindex: true,
+                  },
+                  <RiderManagementPage />,
+                )}
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="user-profile"

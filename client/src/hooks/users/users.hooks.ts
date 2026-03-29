@@ -6,6 +6,7 @@ import {
   useLazyFetchUserCurrentLocationHistoryQuery,
   useLazyFetchUsersQuery,
   useLazyFetchUsersTrackingQuery,
+  useLazyFetchRiderManagementQuery,
 } from '@/api/queries/users.queries';
 import {
   useCreateUserMutation,
@@ -228,6 +229,44 @@ export const useFetchUsersTracking = () => {
 
   return {
     fetchUsersTracking,
+    data,
+    error,
+    isFetching,
+    isSuccess,
+    reset,
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    totalCount,
+  };
+};
+
+export const useFetchRiderManagement = () => {
+  const {
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    setTotalPages,
+    totalCount,
+    setTotalCount,
+  } = usePagination();
+
+  const [fetchRiderManagement, { data, error, isFetching, isSuccess, reset }] =
+    useLazyFetchRiderManagementQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      setTotalPages(data?.data?.totalPages ?? 0);
+      setTotalCount(data?.data?.totalCount ?? 0);
+    }
+  }, [data, isSuccess, setTotalPages, setTotalCount]);
+
+  return {
+    fetchRiderManagement,
     data,
     error,
     isFetching,
