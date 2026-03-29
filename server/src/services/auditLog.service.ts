@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { AuditLog } from '../entities/auditLog.entity';
-import { Between, FindOptionsWhere } from 'typeorm';
+import { FindOptionsWhere } from 'typeorm';
 import { UUID } from '../types';
 import {
   getPagination,
@@ -193,14 +193,18 @@ export class AuditLogService {
     userId,
     page = 0,
     size = 10,
+    startTime,
+    endTime,
   }: {
     userId: UUID;
     page?: number;
     size?: number;
+    startTime?: Date;
+    endTime?: Date;
   }): Promise<Pagination<CurrentLocationTimelineItem>> {
     const { skip, take } = getPagination({ page, size });
 
-    const [auditLogs, total] = await this.auditLogRepository
+    const queryBuilder = this.auditLogRepository
       .createQueryBuilder('auditLog')
       .leftJoinAndSelect('auditLog.createdBy', 'createdBy')
       .where('auditLog.entityType = :entityType', {
@@ -216,7 +220,17 @@ export class AuditLogService {
       )
       .andWhere(
         `(COALESCE(auditLog.oldValues -> 'currentLocation', '{}'::jsonb) IS DISTINCT FROM COALESCE(auditLog.newValues -> 'currentLocation', '{}'::jsonb))`
-      )
+      );
+
+    if (startTime) {
+      queryBuilder.andWhere('auditLog.createdAt >= :startTime', { startTime });
+    }
+
+    if (endTime) {
+      queryBuilder.andWhere('auditLog.createdAt <= :endTime', { endTime });
+    }
+
+    const [auditLogs, total] = await queryBuilder
       .orderBy('auditLog.createdAt', 'DESC')
       .skip(skip)
       .take(take)

@@ -101,15 +101,21 @@ export const usersQueriesApiSlice = createApi({
         userId,
         page,
         size,
+        startTime,
+        endTime,
       }: {
         userId: string;
         page: number;
         size: number;
+        startTime?: string;
+        endTime?: string;
       }) => ({
         url: `/users/${userId}/current-location-history`,
         params: {
           page,
           size,
+          startTime,
+          endTime,
         },
       }),
     }),

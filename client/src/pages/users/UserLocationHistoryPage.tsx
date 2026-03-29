@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import moment from 'moment';
 import { Link, useParams } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import { APIProvider, AdvancedMarker, Map, Pin, useMap } from '@vis.gl/react-google-maps';
+import { toast } from 'sonner';
 import Table from '@/components/table/Table';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import { useFetchUserCurrentLocationHistory } from '@/hooks/users/users.hooks';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { useLazyFetchOrderAssignmentsQuery } from '@/api/queries/orderAssignment.queries';
+import { useLazyFetchOrdersQuery } from '@/api/queries/orders.queries';
 import LocationDisplay from '@/containers/locations/LocationDisplay';
 
 type CoordinateRecord = {
@@ -18,6 +22,19 @@ type CoordinateRecord = {
   timestamp?: string;
 };
 
+type OrderSummary = {
+  id: string;
+  referenceId?: string;
+  trackingId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+type AssignmentRecord = {
+  id: string;
+  order?: OrderSummary;
+};
+
 const getCoordinates = (item: CoordinateRecord) => {
   const lat = item.latitude ?? item.lat;
   const lng = item.longitude ?? item.lng;
@@ -26,6 +43,25 @@ const getCoordinates = (item: CoordinateRecord) => {
 
   return { lat, lng };
 };
+
+const toInputDateTime = (isoString: string) => moment(isoString).format('YYYY-MM-DDTHH:mm');
+
+const toUtcIsoString = (value: string) => {
+  if (!value) return undefined;
+  return moment(value).utc().toISOString();
+};
+
+const getDefaultRange = () => {
+  const end = moment();
+  const start = end.clone().subtract(7, 'days');
+
+  return {
+    startTime: start.format('YYYY-MM-DDTHH:mm'),
+    endTime: end.format('YYYY-MM-DDTHH:mm'),
+  };
+};
+
+const DEFAULT_RANGE = getDefaultRange();
 
 // Draws a polyline connecting all path points and keeps it in sync with map
 const TrajectoryPolyline = ({ path }: { path: google.maps.LatLngLiteral[] }) => {
@@ -70,7 +106,62 @@ const UserLocationHistoryPage = () => {
     totalCount,
   } = useFetchUserCurrentLocationHistory();
 
+  const [fetchOrderAssignments, { data: assignmentsData, isFetching: isFetchingAssignments }] =
+    useLazyFetchOrderAssignmentsQuery();
+  const [fetchOrders, { data: searchedOrdersData, isFetching: isSearchingOrders }] =
+    useLazyFetchOrdersQuery();
+
+  const [selectedAssignmentOrderId, setSelectedAssignmentOrderId] = useState('');
+  const [selectedSearchedOrderId, setSelectedSearchedOrderId] = useState('');
+  const [orderSearchTerm, setOrderSearchTerm] = useState('');
+  const [hasSearchedOrder, setHasSearchedOrder] = useState(false);
+  const [appliedStartTime, setAppliedStartTime] = useState<string | undefined>(
+    toUtcIsoString(DEFAULT_RANGE.startTime),
+  );
+  const [appliedEndTime, setAppliedEndTime] = useState<string | undefined>(
+    toUtcIsoString(DEFAULT_RANGE.endTime),
+  );
+  const [dateRange, setDateRange] = useState(DEFAULT_RANGE);
+
   const rows = useMemo(() => (data?.data?.rows ?? []) as CoordinateRecord[], [data]);
+
+  const assignedOrderOptions = useMemo<OrderSummary[]>(() => {
+    const assignmentRows = (assignmentsData?.data?.rows ?? []) as AssignmentRecord[];
+    const weekAgo = moment().subtract(7, 'days');
+
+    const normalized = assignmentRows
+      .map((assignment) => assignment.order)
+      .filter((order): order is OrderSummary => Boolean(order?.id))
+      .filter((order) => {
+        if (!order.updatedAt) return false;
+        return moment(order.updatedAt).isSameOrAfter(weekAgo);
+      });
+
+    return Array.from(new Map(normalized.map((order) => [order.id, order])).values());
+  }, [assignmentsData]);
+
+  const searchedOrders = useMemo(() => {
+    const orderRows = (searchedOrdersData?.data?.rows ?? []) as OrderSummary[];
+    return orderRows;
+  }, [searchedOrdersData]);
+
+  const selectedOrder = useMemo(() => {
+    if (selectedSearchedOrderId) {
+      return searchedOrders.find((order) => order.id === selectedSearchedOrderId);
+    }
+
+    return assignedOrderOptions.find((order) => order.id === selectedAssignmentOrderId);
+  }, [assignedOrderOptions, searchedOrders, selectedAssignmentOrderId, selectedSearchedOrderId]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    fetchOrderAssignments({
+      page: 0,
+      size: 100,
+      assignedToId: id,
+    });
+  }, [fetchOrderAssignments, id]);
 
   useEffect(() => {
     if (!id) return;
@@ -79,8 +170,10 @@ const UserLocationHistoryPage = () => {
       userId: id,
       page,
       size,
+      startTime: appliedStartTime,
+      endTime: appliedEndTime,
     });
-  }, [fetchUserCurrentLocationHistory, id, page, size]);
+  }, [appliedEndTime, appliedStartTime, fetchUserCurrentLocationHistory, id, page, size]);
 
   const mapRecords = useMemo(
     () =>
@@ -104,7 +197,7 @@ const UserLocationHistoryPage = () => {
         header: 'Timestamp',
         cell: ({ row }) => {
           if (!row.original.timestamp) return '—';
-          return new Date(row.original.timestamp).toLocaleString();
+          return moment(row.original.timestamp).local().format('lll');
         },
       },
       {
@@ -118,6 +211,65 @@ const UserLocationHistoryPage = () => {
 
   const first = mapRecords[0];
   const last = mapRecords[mapRecords.length - 1];
+
+  const onSearchOrders = async () => {
+    if (!orderSearchTerm.trim()) {
+      toast.error('Enter an order reference id or tracking id first');
+      return;
+    }
+
+    setHasSearchedOrder(true);
+    setSelectedSearchedOrderId('');
+
+    await fetchOrders({
+      page: 0,
+      size: 20,
+      orderLookup: orderSearchTerm.trim(),
+    });
+  };
+
+  const onSelectAssignmentOrder = (orderId: string) => {
+    setSelectedAssignmentOrderId(orderId);
+    setSelectedSearchedOrderId('');
+  };
+
+  const onSelectSearchedOrder = (orderId: string) => {
+    setSelectedSearchedOrderId(orderId);
+  };
+
+  const onApplyFilters = () => {
+    let nextStart = dateRange.startTime;
+    let nextEnd = dateRange.endTime;
+
+    if (selectedOrder?.createdAt) {
+      nextStart = toInputDateTime(selectedOrder.createdAt);
+      nextEnd = selectedOrder.updatedAt
+        ? toInputDateTime(selectedOrder.updatedAt)
+        : toInputDateTime(new Date().toISOString());
+
+      setDateRange({
+        startTime: nextStart,
+        endTime: nextEnd,
+      });
+    }
+
+    const normalizedStart = toUtcIsoString(nextStart);
+    const normalizedEnd = toUtcIsoString(nextEnd);
+
+    if (!normalizedStart || !normalizedEnd) {
+      toast.error('Please provide a valid date range');
+      return;
+    }
+
+    if (moment(normalizedStart).isAfter(moment(normalizedEnd))) {
+      toast.error('Start time must be before end time');
+      return;
+    }
+
+    setPage(0);
+    setAppliedStartTime(normalizedStart);
+    setAppliedEndTime(normalizedEnd);
+  };
 
   return (
     <main className="w-full flex flex-col gap-6">
@@ -133,19 +285,113 @@ const UserLocationHistoryPage = () => {
         </Link>
       </header>
 
+      <section className="border rounded-md p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <article className="flex flex-col gap-2">
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="assigned-order">
+            Assigned orders (last 7 days)
+          </label>
+          <select
+            id="assigned-order"
+            className="border rounded px-3 py-2 text-sm"
+            value={selectedAssignmentOrderId}
+            onChange={(event) => onSelectAssignmentOrder(event.target.value)}
+            disabled={isFetchingAssignments}
+          >
+            <option value="">Select an assigned order</option>
+            {assignedOrderOptions.map((order) => (
+              <option key={order.id} value={order.id}>
+                {order.referenceId || order.id} · {order.trackingId || 'No OTP'}
+              </option>
+            ))}
+          </select>
+        </article>
+
+        <article className="flex flex-col gap-2">
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="order-search">
+            Search order (reference id or tracking id)
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="order-search"
+              className="border rounded px-3 py-2 text-sm w-full"
+              placeholder="Type reference id or tracking id"
+              value={orderSearchTerm}
+              onChange={(event) => setOrderSearchTerm(event.target.value)}
+            />
+            <button
+              type="button"
+              className="px-3 py-2 rounded bg-primary text-white text-sm"
+              onClick={onSearchOrders}
+              disabled={isSearchingOrders}
+            >
+              Search
+            </button>
+          </div>
+          {hasSearchedOrder && (
+            <select
+              className="border rounded px-3 py-2 text-sm"
+              value={selectedSearchedOrderId}
+              onChange={(event) => onSelectSearchedOrder(event.target.value)}
+              disabled={isSearchingOrders}
+            >
+              <option value="">Select searched order</option>
+              {searchedOrders.map((order) => (
+                <option key={order.id} value={order.id}>
+                  {order.referenceId || order.id} · {order.trackingId || 'No OTP'}
+                </option>
+              ))}
+            </select>
+          )}
+        </article>
+
+        <article className="flex flex-col gap-2">
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="start-time">
+            Start time (local)
+          </label>
+          <input
+            id="start-time"
+            type="datetime-local"
+            className="border rounded px-3 py-2 text-sm"
+            value={dateRange.startTime}
+            onChange={(event) => setDateRange((prev) => ({ ...prev, startTime: event.target.value }))}
+          />
+        </article>
+
+        <article className="flex flex-col gap-2">
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-600" htmlFor="end-time">
+            End time (local)
+          </label>
+          <input
+            id="end-time"
+            type="datetime-local"
+            className="border rounded px-3 py-2 text-sm"
+            value={dateRange.endTime}
+            onChange={(event) => setDateRange((prev) => ({ ...prev, endTime: event.target.value }))}
+          />
+        </article>
+
+        <article className="lg:col-span-2 flex justify-end">
+          <button
+            type="button"
+            className="px-4 py-2 rounded bg-primary text-white text-sm"
+            onClick={onApplyFilters}
+          >
+            Apply
+          </button>
+        </article>
+      </section>
+
       <section className="border rounded-md overflow-hidden h-[420px]">
         <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY || ''}>
           <Map defaultCenter={mapCenter} defaultZoom={12} mapId="user-location-history-map">
             <TrajectoryPolyline path={path} />
 
-            {/* Start pin — green */}
             {first && (
               <AdvancedMarker position={first.coordinates} title="Start">
                 <Pin background="#22c55e" borderColor="#16a34a" glyphColor="#ffffff" />
               </AdvancedMarker>
             )}
 
-            {/* End pin — red (only shown when there are at least 2 points) */}
             {last && last.entry.id !== first?.entry.id && (
               <AdvancedMarker position={last.coordinates} title="Latest">
                 <Pin background="#ef4444" borderColor="#dc2626" glyphColor="#ffffff" />

@@ -17,6 +17,7 @@ export const ordersQueriesApiSlice = createApi({
         status,
         statusGroup,
         referenceId,
+        orderLookup,
       }: {
         page: number;
         size: number;
@@ -27,6 +28,7 @@ export const ordersQueriesApiSlice = createApi({
         status?: string;
         statusGroup?: 'recent' | 'pending' | 'active' | 'completed';
         referenceId?: string;
+        orderLookup?: string;
       }) => {
         return {
           url: '/orders',
@@ -40,6 +42,7 @@ export const ordersQueriesApiSlice = createApi({
             status,
             statusGroup,
             referenceId,
+            orderLookup,
           },
         };
       },
