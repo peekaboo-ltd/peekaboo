@@ -17,11 +17,98 @@ import {
   ChartDataPoint,
   SummaryChartMetric,
   SummaryChartPeriod,
+  BusinessReportData,
+  BusinessReportPieSlice,
 } from '../types/dashboard.types';
 import { UUID } from '../types';
 import { UserRole } from '../entities/userRole.entity';
 import { OrganizationMembership } from '../entities/organizationMembership.entity';
-import { MembershipStatus } from '../constants/organization.constants';
+import { BillingStatus, MembershipStatus } from '../constants/organization.constants';
+import { OrganizationBilling } from '../entities/organizationBilling.entity';
+
+const REPORT_PIE_COLORS = ['#0f766e', '#1d4ed8', '#d97706', '#be123c', '#475569'];
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+const buildLineChartSvg = (points: ChartDataPoint[]) => {
+  if (!points.length) {
+    return '<div style="color:#64748b;font-size:12px;">No chart data available</div>';
+  }
+
+  const width = 680;
+  const height = 220;
+  const padding = 24;
+  const plotWidth = width - padding * 2;
+  const plotHeight = height - padding * 2;
+  const maxValue = Math.max(1, ...points.map((p) => Number(p.value) || 0));
+
+  const coords = points.map((point, index) => {
+    const x = padding + (plotWidth * index) / Math.max(1, points.length - 1);
+    const y = padding + plotHeight - (plotHeight * (Number(point.value) || 0)) / maxValue;
+    return { x, y, label: point.label, value: Number(point.value) || 0 };
+  });
+
+  const path = coords.map((c, index) => `${index === 0 ? 'M' : 'L'}${c.x} ${c.y}`).join(' ');
+  const dots = coords
+    .map((c) => `<circle cx="${c.x}" cy="${c.y}" r="3" fill="#0f766e" />`)
+    .join('');
+
+  return `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Deliveries trend line chart">
+      <rect x="0" y="0" width="${width}" height="${height}" fill="#f8fafc" rx="12" />
+      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#cbd5e1" stroke-width="1" />
+      <line x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}" stroke="#cbd5e1" stroke-width="1" />
+      <path d="${path}" fill="none" stroke="#0f766e" stroke-width="3" />
+      ${dots}
+      <text x="${padding}" y="${height - 6}" font-size="11" fill="#64748b">${escapeHtml(coords[0]?.label || '')}</text>
+      <text x="${width - padding}" y="${height - 6}" text-anchor="end" font-size="11" fill="#64748b">${escapeHtml(coords[coords.length - 1]?.label || '')}</text>
+    </svg>
+  `;
+};
+
+const buildPieChartSvg = (slices: BusinessReportPieSlice[]) => {
+  const total = slices.reduce((sum, slice) => sum + slice.value, 0);
+  if (!total) {
+    return '<div style="color:#64748b;font-size:12px;">No status distribution available</div>';
+  }
+
+  const size = 220;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = 82;
+
+  const toPoint = (angle: number) => ({
+    x: cx + radius * Math.cos(angle),
+    y: cy + radius * Math.sin(angle),
+  });
+
+  let cumulative = -Math.PI / 2;
+  const paths = slices
+    .map((slice, index) => {
+      const angle = (slice.value / total) * Math.PI * 2;
+      const start = toPoint(cumulative);
+      const end = toPoint(cumulative + angle);
+      const largeArc = angle > Math.PI ? 1 : 0;
+      cumulative += angle;
+      return `<path d="M ${cx} ${cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y} Z" fill="${slice.color || REPORT_PIE_COLORS[index % REPORT_PIE_COLORS.length]}" />`;
+    })
+    .join('');
+
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="Assignment status pie chart">
+      ${paths}
+      <circle cx="${cx}" cy="${cy}" r="36" fill="#ffffff" />
+      <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-size="11" fill="#0f172a" font-weight="700">${total}</text>
+      <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="10" fill="#64748b">Total</text>
+    </svg>
+  `;
+};
 
 export class DashboardService {
   private orderRepository = AppDataSource.getRepository(Order);
@@ -31,6 +118,7 @@ export class DashboardService {
   private userRoleRepository = AppDataSource.getRepository(UserRole);
   private orderActivityRepository = AppDataSource.getRepository(OrderActivity);
   private organizationMembershipRepository = AppDataSource.getRepository(OrganizationMembership);
+  private organizationBillingRepository = AppDataSource.getRepository(OrganizationBilling);
 
   /**
    * Determine the primary role for dashboard display
@@ -94,7 +182,7 @@ export class DashboardService {
     const ordersByStatus = await this.getOrdersByStatus();
 
     // Revenue calculations
-    const { totalRevenue, revenueThisMonth } = await this.getRevenueMetrics();
+    const { totalRevenue, billingAndPaymentsThisMonth } = await this.getRevenueMetrics();
 
     // Assignment metrics
     const activeAssignments = await this.orderAssignmentRepository.count({
@@ -118,6 +206,11 @@ export class DashboardService {
       where: { status: KpayPaymentStatus.SUCCESSFUL },
     });
 
+    const pendingAssignments = await this.orderAssignmentRepository.count({
+      where: { status: OrderAssignmentStatus.PENDING },
+    });
+    const pendingStatuses = pendingAssignments;
+
     // Recent activity
     const recentActivity = await this.getAdminRecentActivity();
 
@@ -125,7 +218,8 @@ export class DashboardService {
       totalOrders,
       ordersByStatus,
       totalRevenue,
-      revenueThisMonth,
+      billingAndPaymentsThisMonth,
+      pendingStatuses,
       activeAssignments,
       totalAssignments,
       activeRiders,
@@ -266,14 +360,12 @@ export class DashboardService {
       .getCount();
 
     const ordersByStatus = await this.getCustomerOrdersByStatus(userId);
+    const pendingOrders =
+      ordersByStatus.find((s) => s.status === OrderStatus.PENDING)?.count || 0;
 
     const activeStatuses = [
-      OrderStatus.CREATED,
-      OrderStatus.PENDING,
       OrderStatus.CONFIRMED,
       OrderStatus.ACCEPTED,
-      OrderStatus.PAID,
-      OrderStatus.ACTIVE,
       OrderStatus.IN_TRANSIT,
     ];
     const activeOrders = ordersByStatus
@@ -288,6 +380,19 @@ export class DashboardService {
     const pendingPayments = await this.paymentRepository.count({
       where: { createdById: userId, status: KpayPaymentStatus.PENDING },
     });
+    const completedPayments = await this.paymentRepository.count({
+      where: { createdById: userId, status: KpayPaymentStatus.SUCCESSFUL },
+    });
+    const billingAndPaymentsThisMonthResult = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .select('COALESCE(SUM(payment.amount), 0)', 'total')
+      .where('payment.createdById = :userId', { userId })
+      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .andWhere('payment.createdAt >= DATE_TRUNC(\'month\', CURRENT_DATE)')
+      .getRawOne();
+    const billingAndPaymentsThisMonth = parseFloat(
+      billingAndPaymentsThisMonthResult?.total || '0'
+    );
 
     // Average order value (from successful payments / completed orders)
     const totalPaidResult = await this.paymentRepository
@@ -305,6 +410,7 @@ export class DashboardService {
 
     // Team members: count active organization memberships for user's organization
     let teamMembers = 0;
+    let currentAmountDue = 0;
     const userMembership = await this.organizationMembershipRepository.findOne({
       where: { userId, status: MembershipStatus.ACTIVE },
     });
@@ -312,6 +418,40 @@ export class DashboardService {
       teamMembers = await this.organizationMembershipRepository.count({
         where: { organizationId: userMembership.organizationId, status: MembershipStatus.ACTIVE },
       });
+
+      const dueBillings = await this.organizationBillingRepository
+        .createQueryBuilder('billing')
+        .where('billing.organizationId = :organizationId', {
+          organizationId: userMembership.organizationId,
+        })
+        .andWhere('billing.status IN (:...statuses)', {
+          statuses: [BillingStatus.PENDING, BillingStatus.INVOICED, BillingStatus.OVERDUE],
+        })
+        .orderBy('billing.periodEnd', 'DESC')
+        .addOrderBy('billing.createdAt', 'DESC')
+        .getMany();
+
+      const prioritizedBilling =
+        dueBillings.find(
+          (billing) =>
+            billing.status === BillingStatus.INVOICED ||
+            billing.status === BillingStatus.OVERDUE ||
+            (billing.status === BillingStatus.PENDING &&
+              new Date(billing.periodEnd).getTime() < Date.now())
+        ) || dueBillings[0];
+
+      if (prioritizedBilling) {
+        const currentPageOrders = await this.orderRepository.find({
+          where: { organizationBillingId: prioritizedBilling.id },
+          order: { createdAt: 'DESC' },
+          take: 10,
+        });
+
+        currentAmountDue = currentPageOrders.reduce(
+          (sum, order) => sum + Number(order.finalFee || order.initialFee || 0),
+          0
+        );
+      }
     }
 
     // Orders this week
@@ -330,18 +470,284 @@ export class DashboardService {
     const recentActivity = await this.getCustomerRecentActivity(userId);
 
     return {
+      currentAmountDue,
       totalOrders,
+      pendingOrders,
       activeOrders,
       completedOrders,
       teamMembers,
       ordersThisWeek,
       pendingPayments,
+      completedPayments,
+      billingAndPaymentsThisMonth,
       ordersByStatus,
       recentActivity,
       monthlyOrderVolume,
       averageOrderValue,
       deliverySuccessRate,
     };
+  }
+
+  async getBusinessReport(
+    userId: UUID,
+    periodStart?: Date,
+    periodEnd?: Date
+  ): Promise<BusinessReportData> {
+    const now = new Date();
+    const start = periodStart ? new Date(periodStart) : new Date(now);
+    if (!periodStart) {
+      start.setDate(start.getDate() - 30);
+    }
+    start.setHours(0, 0, 0, 0);
+
+    const end = periodEnd ? new Date(periodEnd) : new Date(now);
+    end.setHours(23, 59, 59, 999);
+
+    const orderCondition = '(order.senderId = :userId OR order.createdById = :userId)';
+
+    const [totalOrders, completedDeliveries, pendingPayments, completedPayments] =
+      await Promise.all([
+        this.orderRepository
+          .createQueryBuilder('order')
+          .where(orderCondition, { userId })
+          .andWhere('order.createdAt BETWEEN :start AND :end', { start, end })
+          .getCount(),
+        this.orderAssignmentRepository
+          .createQueryBuilder('assignment')
+          .innerJoin('assignment.order', 'order')
+          .where(orderCondition, { userId })
+          .andWhere('assignment.status = :status', {
+            status: OrderAssignmentStatus.COMPLETED,
+          })
+          .andWhere('assignment.updatedAt BETWEEN :start AND :end', { start, end })
+          .getCount(),
+        this.paymentRepository.count({
+          where: {
+            createdById: userId,
+            status: KpayPaymentStatus.PENDING,
+          },
+        }),
+        this.paymentRepository.count({
+          where: {
+            createdById: userId,
+            status: KpayPaymentStatus.SUCCESSFUL,
+          },
+        }),
+      ]);
+
+    const totalRevenueResult = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .select('COALESCE(SUM(payment.amount), 0)', 'total')
+      .where('payment.createdById = :userId', { userId })
+      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .andWhere('payment.createdAt BETWEEN :start AND :end', { start, end })
+      .getRawOne();
+
+    const totalRevenue = parseFloat(totalRevenueResult?.total || '0');
+    const completionRate =
+      totalOrders > 0 ? Math.round((completedDeliveries / totalOrders) * 100) : 0;
+    const averageOrderValue =
+      completedDeliveries > 0
+        ? Math.round((totalRevenue / completedDeliveries) * 100) / 100
+        : 0;
+
+    const deliveriesByDay = await this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .innerJoin('assignment.order', 'order')
+      .select(`TO_CHAR(DATE_TRUNC('day', assignment.updatedAt), 'YYYY-MM-DD')`, 'label')
+      .addSelect('COUNT(*)', 'value')
+      .where(orderCondition, { userId })
+      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
+      .andWhere('assignment.updatedAt BETWEEN :start AND :end', { start, end })
+      .groupBy(`DATE_TRUNC('day', assignment.updatedAt)`)
+      .orderBy(`DATE_TRUNC('day', assignment.updatedAt)`, 'ASC')
+      .getRawMany();
+
+    const deliveriesByDayMap = new Map<string, number>(
+      deliveriesByDay.map((row: { label: string; value: string }) => [
+        row.label,
+        parseInt(row.value, 10),
+      ])
+    );
+
+    const deliveriesLineChart: ChartDataPoint[] = [];
+    const cursor = new Date(start);
+    while (cursor <= end) {
+      const label = cursor.toISOString().slice(0, 10);
+      deliveriesLineChart.push({
+        label,
+        value: deliveriesByDayMap.get(label) || 0,
+      });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    const statusRows = await this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .innerJoin('assignment.order', 'order')
+      .select('assignment.status', 'status')
+      .addSelect('COUNT(*)', 'value')
+      .where(orderCondition, { userId })
+      .andWhere('assignment.createdAt BETWEEN :start AND :end', { start, end })
+      .groupBy('assignment.status')
+      .getRawMany();
+
+    const assignmentStatusPie: BusinessReportPieSlice[] = statusRows.map(
+      (row: { status: string; value: string }, index: number) => ({
+        label: row.status,
+        value: parseInt(row.value, 10),
+        color: REPORT_PIE_COLORS[index % REPORT_PIE_COLORS.length],
+      })
+    );
+
+    const deliveriesRows = await this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .innerJoin('assignment.order', 'order')
+      .leftJoin('assignment.assignedTo', 'rider')
+      .select('order.referenceId', 'referenceId')
+      .addSelect('COALESCE(rider.name, :fallbackRider)', 'riderName')
+      .addSelect('assignment.updatedAt', 'completedAt')
+      .addSelect('COALESCE(order.finalFee, 0)', 'amount')
+      .addSelect('assignment.status', 'status')
+      .where(orderCondition, { userId })
+      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
+      .andWhere('assignment.updatedAt BETWEEN :start AND :end', { start, end })
+      .setParameter('fallbackRider', 'Unassigned')
+      .orderBy('assignment.updatedAt', 'DESC')
+      .limit(20)
+      .getRawMany();
+
+    const membership = await this.organizationMembershipRepository.findOne({
+      where: { userId, status: MembershipStatus.ACTIVE },
+      relations: { organization: true },
+    });
+
+    return {
+      organizationName: membership?.organization?.name,
+      generatedAt: new Date(),
+      periodStart: start,
+      periodEnd: end,
+      summary: {
+        totalOrders,
+        completedDeliveries,
+        completionRate,
+        totalRevenue,
+        pendingPayments,
+        completedPayments,
+        averageOrderValue,
+      },
+      deliveriesLineChart,
+      assignmentStatusPie,
+      deliveriesTable: deliveriesRows.map(
+        (row: {
+          referenceId: string;
+          riderName: string;
+          completedAt: string;
+          amount: string;
+          status: OrderAssignmentStatus;
+        }) => ({
+          referenceId: row.referenceId,
+          riderName: row.riderName,
+          completedAt: new Date(row.completedAt),
+          amount: Number(row.amount || 0),
+          status: row.status,
+        })
+      ),
+    };
+  }
+
+  buildBusinessReportHtml(report: BusinessReportData): string {
+    const supportEmail = process.env.PEEKABOO_SUPPORT_EMAIL || 'info@peekaboo.co.rw';
+    const supportPhone = process.env.PEEKABOO_SUPPORT_PHONE || '+250 788 000 000';
+    const lineChartSvg = buildLineChartSvg(report.deliveriesLineChart);
+    const pieChartSvg = buildPieChartSvg(report.assignmentStatusPie);
+
+    const pieLegend = report.assignmentStatusPie.length
+      ? report.assignmentStatusPie
+          .map(
+            (item) =>
+              `<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#334155;"><span style="display:inline-block;width:10px;height:10px;border-radius:999px;background:${item.color};"></span>${escapeHtml(item.label)} (${item.value})</div>`
+          )
+          .join('')
+      : '<div style="font-size:12px;color:#64748b;">No status records in selected period</div>';
+
+    const deliveriesTableRows = report.deliveriesTable.length
+      ? report.deliveriesTable
+          .map(
+            (row) => `<tr>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;">${escapeHtml(row.referenceId)}</td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;">${escapeHtml(row.riderName)}</td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;">${new Date(row.completedAt).toLocaleString()}</td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;">RWF ${row.amount.toLocaleString()}</td>
+          </tr>`
+          )
+          .join('')
+      : '<tr><td colspan="4" style="padding:10px;color:#64748b;">No completed deliveries in this period</td></tr>';
+
+    return `
+      <!doctype html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Peekaboo Business Report</title>
+      </head>
+      <body style="font-family:Arial,Helvetica,sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:24px;">
+        <main style="max-width:980px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;">
+          <header style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+            <div>
+              <h1 style="margin:0 0 8px;font-size:26px;">Business Performance Report</h1>
+              <p style="margin:0;color:#475569;">${escapeHtml(report.organizationName || 'Business Account')} | ${new Date(report.periodStart).toDateString()} to ${new Date(report.periodEnd).toDateString()}</p>
+            </div>
+            <div style="font-size:12px;color:#64748b;">Generated: ${new Date(report.generatedAt).toLocaleString()}</div>
+          </header>
+
+          <section style="margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+            <article style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;"><div style="font-size:12px;color:#64748b;">Total Orders</div><div style="font-size:24px;font-weight:700;">${report.summary.totalOrders}</div></article>
+            <article style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;"><div style="font-size:12px;color:#64748b;">Completed Deliveries</div><div style="font-size:24px;font-weight:700;">${report.summary.completedDeliveries}</div></article>
+            <article style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;"><div style="font-size:12px;color:#64748b;">Completion Rate</div><div style="font-size:24px;font-weight:700;">${report.summary.completionRate}%</div></article>
+            <article style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;"><div style="font-size:12px;color:#64748b;">Total Revenue</div><div style="font-size:24px;font-weight:700;">RWF ${report.summary.totalRevenue.toLocaleString()}</div></article>
+            <article style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;"><div style="font-size:12px;color:#64748b;">Pending Payments</div><div style="font-size:24px;font-weight:700;">${report.summary.pendingPayments}</div></article>
+            <article style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;"><div style="font-size:12px;color:#64748b;">Avg Order Value</div><div style="font-size:24px;font-weight:700;">RWF ${report.summary.averageOrderValue.toLocaleString()}</div></article>
+          </section>
+
+          <section style="margin-top:26px;">
+            <h2 style="margin:0 0 10px;font-size:18px;">Deliveries Trend (Graph)</h2>
+            ${lineChartSvg}
+          </section>
+
+          <section style="margin-top:26px;display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:center;">
+            <div>
+              <h2 style="margin:0 0 8px;font-size:18px;">Assignment Mix (Pie Chart)</h2>
+              ${pieChartSvg}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              ${pieLegend}
+            </div>
+          </section>
+
+          <section style="margin-top:26px;">
+            <h2 style="margin:0 0 10px;font-size:18px;">Completed Deliveries Table</h2>
+            <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+              <thead>
+                <tr style="background:#f1f5f9;text-align:left;">
+                  <th style="padding:10px;font-size:12px;">Order Ref</th>
+                  <th style="padding:10px;font-size:12px;">Rider</th>
+                  <th style="padding:10px;font-size:12px;">Completed At</th>
+                  <th style="padding:10px;font-size:12px;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>${deliveriesTableRows}</tbody>
+            </table>
+          </section>
+
+          <footer style="margin-top:28px;border-top:1px solid #e2e8f0;padding-top:14px;color:#475569;font-size:12px;">
+            <div><strong>Provided by Peekaboo.</strong></div>
+            <div>Any enquiry: ${escapeHtml(supportPhone)} | ${escapeHtml(supportEmail)}</div>
+          </footer>
+        </main>
+      </body>
+      </html>
+    `;
   }
 
   private async getMonthlyOrderVolume(userId: UUID): Promise<ChartDataPoint[]> {
@@ -829,7 +1235,7 @@ export class DashboardService {
       .getRawOne();
 
     // Revenue this month
-    const revenueThisMonthResult = await this.paymentRepository
+    const billingAndPaymentsThisMonthResult = await this.paymentRepository
       .createQueryBuilder('payment')
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
       .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
@@ -838,7 +1244,9 @@ export class DashboardService {
 
     return {
       totalRevenue: parseFloat(totalRevenueResult?.total || '0'),
-      revenueThisMonth: parseFloat(revenueThisMonthResult?.total || '0'),
+      billingAndPaymentsThisMonth: parseFloat(
+        billingAndPaymentsThisMonthResult?.total || '0'
+      ),
     };
   }
 

@@ -25,6 +25,10 @@ export const StatusBadge = ({ status }: { status?: string }) => {
         case 'CREATED':
             className = 'bg-gray-700 text-white';
             break;
+        case 'ARCHIVED':
+        case 'INACTIVE':
+            className = 'bg-slate-600 text-white';
+            break;
     }
 
     return (

@@ -49,7 +49,8 @@ export interface AdminMetrics {
   totalOrders: number;
   ordersByStatus: OrderStatusCount[];
   totalRevenue: number;
-  revenueThisMonth: number;
+  billingAndPaymentsThisMonth: number;
+  pendingStatuses: number;
   activeAssignments: number;
   totalAssignments: number;
   activeRiders: number;
@@ -82,12 +83,16 @@ export interface CustomerMetrics {
 }
 
 export interface BusinessMetrics {
+  currentAmountDue: number;
   totalOrders: number;
+  pendingOrders: number;
   activeOrders: number;
   completedOrders: number;
   teamMembers: number;
   ordersThisWeek: number;
   pendingPayments: number;
+  completedPayments: number;
+  billingAndPaymentsThisMonth: number;
   ordersByStatus: OrderStatusCount[];
   recentActivity: RecentActivity[];
   monthlyOrderVolume: ChartDataPoint[];
@@ -98,4 +103,39 @@ export interface BusinessMetrics {
 export interface DashboardMetrics {
   role: RoleTypes;
   metrics: AdminMetrics | RiderMetrics | CustomerMetrics | BusinessMetrics;
+}
+
+export interface BusinessReportSummary {
+  totalOrders: number;
+  completedDeliveries: number;
+  completionRate: number;
+  totalRevenue: number;
+  pendingPayments: number;
+  completedPayments: number;
+  averageOrderValue: number;
+}
+
+export interface BusinessReportPieSlice {
+  label: string;
+  value: number;
+  color: string;
+}
+
+export interface BusinessReportDeliveryRow {
+  referenceId: string;
+  riderName: string;
+  completedAt: Date;
+  amount: number;
+  status: OrderAssignmentStatus;
+}
+
+export interface BusinessReportData {
+  organizationName?: string;
+  generatedAt: Date;
+  periodStart: Date;
+  periodEnd: Date;
+  summary: BusinessReportSummary;
+  deliveriesLineChart: ChartDataPoint[];
+  assignmentStatusPie: BusinessReportPieSlice[];
+  deliveriesTable: BusinessReportDeliveryRow[];
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -6,9 +6,11 @@ import {
   faPlus,
   faCircleCheck,
   faLayerGroup,
+  faBoxArchive,
 } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/components/table/Table';
 import Button from '@/components/inputs/Button';
+import { toast } from 'sonner';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import type { BusinessPlan } from '@/types/businessPlan.type';
 import { BusinessPlanStatus } from '@/types/businessPlan.type';
@@ -20,6 +22,10 @@ import {
 import { useBusinessPlansColumns } from '@/hooks/business-plan/columns.businessPlan';
 import { useFetchBusinessPlans } from '@/hooks/business-plan/businessPlan.hooks';
 import { useAppSelector } from '@/states/hooks';
+import {
+  usePermanentlyDeleteBusinessPlanMutation,
+  useRestoreBusinessPlanMutation,
+} from '@/api/mutations/businessPlan.mutations';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -36,24 +42,78 @@ const BusinessPlansPage = () => {
   // STATE VARIABLES
   const { businessPlansList } = useAppSelector((state) => state.businessPlan);
 
-  const { fetchBusinessPlans, isFetching, page, setPage, size, setSize, totalPages, totalCount } = useFetchBusinessPlans();
+  const { fetchBusinessPlans, isFetching } = useFetchBusinessPlans();
+  const [restoreBusinessPlan, { isLoading: isRestoring }] = useRestoreBusinessPlanMutation();
+  const [permanentlyDeleteBusinessPlan, { isLoading: isPermanentlyDeleting }] = usePermanentlyDeleteBusinessPlanMutation();
 
   useEffect(() => {
-    fetchBusinessPlans({ page, size });
-  }, [page, size, fetchBusinessPlans]);
+    fetchBusinessPlans({ page: 0, size: 500 });
+  }, [fetchBusinessPlans]);
 
   const plans = useMemo<BusinessPlan[]>(
     () => businessPlansList ?? [],
     [businessPlansList],
   );
   const stats = useMemo(() => {
-    const total = totalCount ?? 0;
+    const total = plans.length;
     const active = plans.filter((p) => p.status === BusinessPlanStatus.ACTIVE).length;
+    const deactivated = plans.filter((p) => p.status === BusinessPlanStatus.ARCHIVED).length;
     const defaultPlan = plans.find((p) => p.isDefault);
-    return { total, active, defaultPlan };
-  }, [totalCount, plans]);
+    return { total, active, deactivated, defaultPlan };
+  }, [plans]);
 
-  const { businessPlansColumns } = useBusinessPlansColumns();
+  const activePlans = useMemo(
+    () => plans.filter((plan) => plan.status !== BusinessPlanStatus.ARCHIVED),
+    [plans]
+  );
+  const deactivatedPlans = useMemo(
+    () => plans.filter((plan) => plan.status === BusinessPlanStatus.ARCHIVED),
+    [plans]
+  );
+
+  const [actionPlanId, setActionPlanId] = useState<string | undefined>(undefined);
+
+  const handleRestorePlan = async (id: string, name: string) => {
+    try {
+      setActionPlanId(id);
+      await restoreBusinessPlan(id).unwrap();
+      toast.success(`Plan "${name}" restored successfully.`);
+      fetchBusinessPlans({ page: 0, size: 500 });
+    } catch (error) {
+      const message =
+        (error as { data?: { message?: string } })?.data?.message ||
+        'Failed to restore business plan.';
+      toast.error(message);
+    } finally {
+      setActionPlanId(undefined);
+    }
+  };
+
+  const handlePermanentlyDeletePlan = async (id: string, name: string) => {
+    if (!window.confirm(`Permanently delete "${name}"? This cannot be undone.`)) return;
+
+    try {
+      setActionPlanId(id);
+      await permanentlyDeleteBusinessPlan(id).unwrap();
+      toast.success(`Plan "${name}" permanently deleted.`);
+      fetchBusinessPlans({ page: 0, size: 500 });
+    } catch (error) {
+      const message =
+        (error as { data?: { message?: string } })?.data?.message ||
+        'Failed to permanently delete business plan.';
+      toast.error(message);
+    } finally {
+      setActionPlanId(undefined);
+    }
+  };
+
+  const { businessPlansColumns: activePlansColumns } = useBusinessPlansColumns();
+  const { businessPlansColumns: deactivatedPlansColumns } = useBusinessPlansColumns({
+    onRestorePlan: handleRestorePlan,
+    onPermanentlyDeletePlan: handlePermanentlyDeletePlan,
+    isActionLoading: isRestoring || isPermanentlyDeleting,
+    actionPlanId,
+  });
 
   return (
     <InternalPage>
@@ -97,17 +157,33 @@ const BusinessPlansPage = () => {
       </motion.section>
 
       <motion.section variants={itemVariants}>
+        <h3 className="mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+          Active Plans
+        </h3>
         <Table
-          columns={businessPlansColumns}
-          data={plans}
-          showPagination
-          page={page}
-          setPage={setPage}
-          size={size}
-          setSize={setSize}
-          totalPages={totalPages}
-          totalCount={totalCount}
+          columns={activePlansColumns}
+          data={activePlans}
+          showPagination={false}
           isLoading={isFetching}
+        />
+      </motion.section>
+
+      <motion.section variants={itemVariants}>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            Deactivated Plans
+          </h3>
+          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+            <FontAwesomeIcon icon={faBoxArchive} />
+            {stats.deactivated}
+          </span>
+        </div>
+        <Table
+          columns={deactivatedPlansColumns}
+          data={deactivatedPlans}
+          showPagination={false}
+          isLoading={isFetching}
+          noDataMessage="No deactivated plans."
         />
       </motion.section>
     </InternalPage>

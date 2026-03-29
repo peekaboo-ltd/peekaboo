@@ -18,7 +18,7 @@ import { StatusBadge } from '@/components/inputs/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useFetchBusinessPlanByIdQuery, useFetchBusinessPlanOrganizationCountQuery } from '@/api/queries/businessPlan.queries';
-import { useUpdateBusinessPlanMutation, useDeleteBusinessPlanMutation } from '@/api/mutations/businessPlan.mutations';
+import { useUpdateBusinessPlanMutation, useDeactivateBusinessPlanMutation } from '@/api/mutations/businessPlan.mutations';
 import { useFetchOrganizationsQuery } from '@/api/queries/organization.queries';
 import type { UpdateBusinessPlanPayload, PricingTier } from '@/types/businessPlan.type';
 import { BusinessPlanStatus, BillingPeriod } from '@/types/businessPlan.type';
@@ -70,7 +70,7 @@ const ManageBusinessPlanPage = () => {
   );
 
   const [updateBusinessPlan, { isLoading: isUpdating }] = useUpdateBusinessPlanMutation();
-  const [deleteBusinessPlan, { isLoading: isDeleting }] = useDeleteBusinessPlanMutation();
+  const [deactivateBusinessPlan, { isLoading: isDeactivating }] = useDeactivateBusinessPlanMutation();
 
   const plan = planData?.data;
   const orgCount = countData?.data?.count ?? 0;
@@ -172,10 +172,10 @@ const ManageBusinessPlanPage = () => {
       toast.error('Cannot delete a plan with active organizations.');
       return;
     }
-    if (!window.confirm(`Delete plan "${plan?.name}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Move plan "${plan?.name}" to deactivated plans? You can restore it later.`)) return;
     try {
-      await deleteBusinessPlan(id).unwrap();
-      toast.success('Business plan deleted.');
+      await deactivateBusinessPlan(id).unwrap();
+      toast.success('Business plan moved to deactivated plans.');
       navigate('/business-plans');
     } catch (error) {
       const message =
@@ -695,17 +695,17 @@ const ManageBusinessPlanPage = () => {
             <p className="text-xs text-red-500 mb-4">
               {orgCount > 0
                 ? `This plan has ${orgCount} organization(s). Reassign them before deleting.`
-                : 'Permanently removes this plan. This action cannot be undone.'}
+                : 'Moves this plan to deactivated plans. You can restore it there or permanently delete it.'}
             </p>
             <Button
               type="button"
               danger
               onClick={handleDelete}
-              disabled={orgCount > 0 || isDeleting}
-              isLoading={isDeleting}
+              disabled={orgCount > 0 || isDeactivating}
+              isLoading={isDeactivating}
             >
               <FontAwesomeIcon icon={faTrash} className="mr-2" />
-              Delete Plan
+              Deactivate Plan
             </Button>
           </article>
         </aside>

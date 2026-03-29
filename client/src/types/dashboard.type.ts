@@ -30,7 +30,8 @@ export interface AdminMetrics {
   totalOrders: number;
   ordersByStatus: OrderStatusCount[];
   totalRevenue: number;
-  revenueThisMonth: number;
+  billingAndPaymentsThisMonth: number;
+  pendingStatuses: number;
   activeAssignments: number;
   totalAssignments: number;
   activeRiders: number;
@@ -68,12 +69,16 @@ export interface ChartDataPoint {
 }
 
 export interface BusinessMetrics {
+  currentAmountDue: number;
   totalOrders: number;
+  pendingOrders: number;
   activeOrders: number;
   completedOrders: number;
   teamMembers: number;
   ordersThisWeek: number;
   pendingPayments: number;
+  completedPayments: number;
+  billingAndPaymentsThisMonth: number;
   ordersByStatus: OrderStatusCount[];
   recentActivity: RecentActivity[];
   monthlyOrderVolume: { label: string; value: number }[] | ChartDataPoint[];
@@ -110,6 +115,7 @@ export interface MetricCardData {
   icon?: IconProp;
   sparklineData?: number[];
   sparklineType?: 'line' | 'bar';
+  sparkColor?: string;
   comparisonLabel?: string;
   note?: string;
   footerText?: string;

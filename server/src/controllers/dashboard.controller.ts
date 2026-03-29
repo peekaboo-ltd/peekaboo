@@ -4,9 +4,24 @@ import { OrderService } from '../services/order.service';
 import { AuthRequest } from '../types/auth.types';
 import { RoleTypes } from '../constants/role.constants';
 import { SummaryChartMetric, SummaryChartPeriod } from '../types/dashboard.types';
+import { EmailService } from '../integrations/emails/email.service';
+import { UUID } from '../types';
 
 const dashboardService = new DashboardService();
 const orderService = new OrderService();
+const emailService = new EmailService();
+
+const parseDateBoundary = (value: unknown, fallback: Date, endOfDay = false) => {
+  if (!value) return fallback;
+  const parsed = new Date(String(value));
+  if (Number.isNaN(parsed.getTime())) return fallback;
+  if (endOfDay) {
+    parsed.setHours(23, 59, 59, 999);
+  } else {
+    parsed.setHours(0, 0, 0, 0);
+  }
+  return parsed;
+};
 
 export const DashboardController = {
   async getDashboardMetrics(req: Request, res: Response, next: NextFunction) {
@@ -155,6 +170,110 @@ export const DashboardController = {
       return res.status(200).json({
         message: order ? 'Order found' : 'Order not found',
         data: order,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getBusinessReport(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+      const userRoles =
+        authReq.user?.userRoles?.map((ur) => ur.role.name as RoleTypes) || [];
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      if (!userRoles.includes(RoleTypes.BUSINESS) && !userRoles.includes(RoleTypes.ADMIN)) {
+        return res.status(403).json({ message: 'Business report is only available for business and admin accounts' });
+      }
+
+      const now = new Date();
+      const defaultStart = new Date(now);
+      defaultStart.setDate(defaultStart.getDate() - 30);
+      const startDate = parseDateBoundary(req.query.startDate, defaultStart);
+      const endDate = parseDateBoundary(req.query.endDate, now, true);
+
+      const report = await dashboardService.getBusinessReport(userId as UUID, startDate, endDate);
+      return res.status(200).json({
+        message: 'Business report fetched successfully',
+        data: report,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async downloadBusinessReport(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+      const userRoles =
+        authReq.user?.userRoles?.map((ur) => ur.role.name as RoleTypes) || [];
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+      if (!userRoles.includes(RoleTypes.BUSINESS) && !userRoles.includes(RoleTypes.ADMIN)) {
+        return res.status(403).json({ message: 'Business report is only available for business and admin accounts' });
+      }
+
+      const now = new Date();
+      const defaultStart = new Date(now);
+      defaultStart.setDate(defaultStart.getDate() - 30);
+      const startDate = parseDateBoundary(req.query.startDate, defaultStart);
+      const endDate = parseDateBoundary(req.query.endDate, now, true);
+
+      const report = await dashboardService.getBusinessReport(userId as UUID, startDate, endDate);
+      const html = dashboardService.buildBusinessReportHtml(report);
+      const fileName = `peekaboo_business_report_${startDate.toISOString().slice(0, 10)}_${endDate.toISOString().slice(0, 10)}.html`;
+
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      return res.status(200).send(html);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async emailBusinessReport(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+      const userEmail = authReq.user?.email;
+      const userName = authReq.user?.name || 'Business user';
+      const userRoles =
+        authReq.user?.userRoles?.map((ur) => ur.role.name as RoleTypes) || [];
+
+      if (!userId || !userEmail) {
+        return res.status(401).json({ message: 'Unauthorized or missing email' });
+      }
+      if (!userRoles.includes(RoleTypes.BUSINESS) && !userRoles.includes(RoleTypes.ADMIN)) {
+        return res.status(403).json({ message: 'Business report is only available for business and admin accounts' });
+      }
+
+      const now = new Date();
+      const defaultStart = new Date(now);
+      defaultStart.setDate(defaultStart.getDate() - 30);
+      const startDate = parseDateBoundary(req.query.startDate, defaultStart);
+      const endDate = parseDateBoundary(req.query.endDate, now, true);
+
+      const report = await dashboardService.getBusinessReport(userId as UUID, startDate, endDate);
+      const html = dashboardService.buildBusinessReportHtml(report);
+
+      await emailService.sendBusinessReportEmail({
+        to: userEmail,
+        name: userName,
+        html,
+        periodStart: startDate,
+        periodEnd: endDate,
+      });
+
+      return res.status(200).json({
+        message: `Business report emailed to ${userEmail}`,
       });
     } catch (error) {
       next(error);

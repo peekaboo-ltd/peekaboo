@@ -1,4 +1,4 @@
-import { FindOptionsWhere, Repository, ILike } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { BusinessPlan } from '../entities/businessPlan.entity';
 import { BusinessPlanStatus } from '../constants/businessPlan.constants';
@@ -166,7 +166,7 @@ export class BusinessPlanService {
     });
   }
 
-  // DELETE BUSINESS PLAN (soft delete by archiving)
+  // DEACTIVATE BUSINESS PLAN (soft delete by archiving)
   @AuditDelete({
     entityType: AuditLogEntityTypes.BUSINESS_PLAN,
     getEntityId: (args) => args[0],
@@ -181,9 +181,49 @@ export class BusinessPlanService {
       );
     }
 
-    // Archive the plan
+    if (businessPlan.status === BusinessPlanStatus.ARCHIVED) {
+      return;
+    }
+
     businessPlan.status = BusinessPlanStatus.ARCHIVED;
+
+    // Archived plans should never remain default.
+    if (businessPlan.isDefault) {
+      businessPlan.isDefault = false;
+    }
+
     await this.businessPlanRepository.save(businessPlan);
+  }
+
+  // RESTORE ARCHIVED PLAN
+  async restoreBusinessPlan(id: UUID): Promise<BusinessPlan> {
+    const businessPlan = await this.getBusinessPlanById(id);
+
+    if (businessPlan.status !== BusinessPlanStatus.ARCHIVED) {
+      throw new ValidationError('Only archived plans can be restored');
+    }
+
+    businessPlan.status = BusinessPlanStatus.ACTIVE;
+    return this.businessPlanRepository.save(businessPlan);
+  }
+
+  // PERMANENT DELETE (only allowed from archived/deactivated list)
+  async permanentlyDeleteBusinessPlan(id: UUID): Promise<void> {
+    const businessPlan = await this.getBusinessPlanById(id);
+
+    if (businessPlan.status !== BusinessPlanStatus.ARCHIVED) {
+      throw new ValidationError(
+        'Please deactivate the business plan before permanently deleting it'
+      );
+    }
+
+    if (businessPlan.organizations && businessPlan.organizations.length > 0) {
+      throw new ValidationError(
+        'Cannot permanently delete business plan with active organizations'
+      );
+    }
+
+    await this.businessPlanRepository.remove(businessPlan);
   }
 
   // FETCH BUSINESS PLANS
@@ -395,6 +435,6 @@ export class BusinessPlanService {
       throw new NotFoundError('Business plan not found');
     }
 
-    return plan.organizations?.filter(org => org.status === OrganizationStatus.ACTIVE).length || 0;
+    return plan.organizations?.filter((org) => org.status === OrganizationStatus.ACTIVE).length || 0;
   }
 }

@@ -19,4 +19,9 @@ router.get('/charts/summary', DashboardController.getSummaryChartData);
 // Quick order lookup
 router.get('/orders/search', DashboardController.searchOrderByReferenceId);
 
+// Business reports
+router.get('/business-report', DashboardController.getBusinessReport);
+router.get('/business-report/download', DashboardController.downloadBusinessReport);
+router.post('/business-report/email', DashboardController.emailBusinessReport);
+
 export default router;

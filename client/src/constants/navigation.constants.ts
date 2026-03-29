@@ -114,5 +114,19 @@ export const SIDEBAR_NAV: SidebarNav[] = [
     path: '/billing-payments',
     icon: faCreditCard,
     roles: [RoleTypes.BUSINESS],
+    subCategories: [
+      {
+        label: 'Billing & Payments',
+        path: '/billing-payments',
+        icon: faCreditCard,
+        roles: [RoleTypes.BUSINESS],
+      },
+      {
+        label: 'Report',
+        path: '/billing-payments/report',
+        icon: faFileLines,
+        roles: [RoleTypes.BUSINESS],
+      },
+    ],
   },
 ];

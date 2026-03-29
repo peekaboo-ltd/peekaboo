@@ -12,15 +12,17 @@ export const orderAssignmentQueriesApiSlice = createApi({
         size,
         assignedToId,
         status,
+        prioritizeUnassigned,
       }: {
         page: number;
         size: number;
         assignedToId?: UUID;
         status?: string;
+        prioritizeUnassigned?: boolean;
       }) => {
         return {
           url: '/order-assignments',
-          params: { page, size, assignedToId, status },
+          params: { page, size, assignedToId, status, prioritizeUnassigned },
         };
       },
     }),
