@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.peekaboo.rider",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We need your location to show delivery routes",
-        "NSLocationAlwaysUsageDescription": "We need your location for real-time tracking during deliveries"
+        "NSLocationAlwaysUsageDescription": "We need your location for real-time tracking during deliveries",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
