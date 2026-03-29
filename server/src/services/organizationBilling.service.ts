@@ -20,6 +20,7 @@ import { EmailService } from '../integrations/emails/email.service';
 import { AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { calculateBillingTotal } from '../helpers/pricing.helper';
+import { TierBreakdown } from '../constants/businessPlan.constants';
 
 export class OrganizationBillingService {
   private readonly billingRepository: Repository<OrganizationBilling>;
@@ -36,6 +37,42 @@ export class OrganizationBillingService {
     this.organizationRepository = AppDataSource.getRepository(Organization);
     this.businessPlanRepository = AppDataSource.getRepository(BusinessPlan);
     this.emailService = new EmailService();
+  }
+
+  private resolveBillingBreakdown(
+    billing: Pick<
+      OrganizationBilling,
+      "pricingSnapshot" | "tierBreakdown" | "totalOrders" | "totalAmount"
+    >,
+    forceRecalculate = false,
+  ): { breakdown: TierBreakdown[]; totalAmount: number } {
+    if (billing.pricingSnapshot?.tiers?.length && forceRecalculate) {
+      const result = calculateBillingTotal(
+        billing.pricingSnapshot,
+        billing.totalOrders,
+      );
+      return {
+        breakdown: result.breakdown,
+        totalAmount: result.total,
+      };
+    }
+
+    const breakdown = billing.tierBreakdown ?? [];
+    if (breakdown.length === 0 && billing.pricingSnapshot?.tiers?.length) {
+      const result = calculateBillingTotal(
+        billing.pricingSnapshot,
+        billing.totalOrders,
+      );
+      return {
+        breakdown: result.breakdown,
+        totalAmount: result.total,
+      };
+    }
+
+    return {
+      breakdown,
+      totalAmount: Number(billing.totalAmount),
+    };
   }
 
   // CHECK WHETHER NEW BUSINESS ORDERS SHOULD BE BLOCKED UNTIL BILLING IS SETTLED
@@ -97,8 +134,18 @@ export class OrganizationBillingService {
     const finiteMaxQuantities = tiers
       .map((tier) => tier.maxQuantity)
       .filter((value): value is number => value != null);
+    const hasOverflowPricing =
+      typeof currentBilling.pricingSnapshot?.overflowRate === 'number' &&
+      currentBilling.pricingSnapshot.overflowRate > 0;
+    const hasUnlimitedNonCustomTier = tiers.some(
+      (tier) => !tier.isCustom && tier.maxQuantity == null,
+    );
 
-    if (finiteMaxQuantities.length > 0) {
+    if (
+      finiteMaxQuantities.length > 0 &&
+      !hasOverflowPricing &&
+      !hasUnlimitedNonCustomTier
+    ) {
       const maxAllowedOrders = Math.max(...finiteMaxQuantities);
       if (currentBilling.totalOrders >= maxAllowedOrders) {
         return {
@@ -332,6 +379,19 @@ export class OrganizationBillingService {
     return billing;
   }
 
+  async getBillingByIdForOrganization(
+    id: UUID,
+    organizationId: UUID,
+  ): Promise<OrganizationBilling> {
+    const billing = await this.getBillingById(id);
+
+    if (billing.organizationId !== organizationId) {
+      throw new NotFoundError('Billing record not found for this organization');
+    }
+
+    return billing;
+  }
+
   // Alias for audit decorators
   async getEntityById(id: UUID): Promise<OrganizationBilling> {
     return this.getBillingById(id);
@@ -369,6 +429,9 @@ export class OrganizationBillingService {
       });
     }
 
+    const resolvedBilling = this.resolveBillingBreakdown(billing, true);
+    billing.totalAmount = resolvedBilling.totalAmount;
+    billing.tierBreakdown = resolvedBilling.breakdown;
     billing.invoiceNumber = invoiceNumber;
     billing.status = BillingStatus.INVOICED;
     billing.invoicedAt = new Date();
@@ -395,6 +458,7 @@ export class OrganizationBillingService {
           totalAmount: Number(billing.totalAmount),
           currency: billing.currency || 'RWF',
           totalOrders: billing.totalOrders,
+          tierBreakdown: billing.tierBreakdown ?? undefined,
         })
         .catch(() => {});
     }
@@ -639,6 +703,70 @@ export class OrganizationBillingService {
         totalPending: Number(row.totalPending || 0),
         totalOverdue: Number(row.totalOverdue || 0),
       })),
+    };
+  }
+
+  // GET BILLING BREAKDOWN
+  async getBillingBreakdown(billingId: UUID): Promise<{
+    billing: OrganizationBilling;
+    breakdown: TierBreakdown[];
+    planName: string;
+    billingPeriod: string;
+    periodStart: Date;
+    periodEnd: Date;
+    totalOrders: number;
+    totalAmount: number;
+    currency: string;
+  }> {
+    const billing = await this.billingRepository.findOne({
+      where: { id: billingId },
+      relations: { organization: true, businessPlan: true },
+    });
+ 
+    if (!billing) {
+      throw new NotFoundError('Billing record not found');
+    }
+
+    const resolvedBilling = this.resolveBillingBreakdown(billing);
+
+    return {
+      billing,
+      breakdown: resolvedBilling.breakdown,
+      planName: billing.businessPlan?.name ?? 'Unknown Plan',
+      billingPeriod: billing.billingPeriod,
+      periodStart: billing.periodStart,
+      periodEnd: billing.periodEnd,
+      totalOrders: billing.totalOrders,
+      totalAmount: resolvedBilling.totalAmount,
+      currency: billing.currency || 'RWF',
+    };
+  }
+
+  // CALCULATE EARLY PAYMENT AMOUNT
+  async calculateEarlyPaymentAmount(billingId: UUID): Promise<{
+    billing: OrganizationBilling;
+    breakdown: TierBreakdown[];
+    totalAmount: number;
+    currency: string;
+    note: string;
+  }> {
+    const billing = await this.billingRepository.findOne({
+      where: { id: billingId },
+      relations: { organization: true, businessPlan: true },
+    });
+ 
+    if (!billing) {
+      throw new NotFoundError('Billing record not found');
+    }
+
+    const resolvedBilling = this.resolveBillingBreakdown(billing, true);
+
+    return {
+      billing,
+      breakdown: resolvedBilling.breakdown,
+      totalAmount: resolvedBilling.totalAmount,
+      currency: billing.currency || 'RWF',
+      note: `Based on ${billing.totalOrders} deliveries so far this period`,
     };
   }
 

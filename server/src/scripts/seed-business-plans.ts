@@ -80,10 +80,11 @@ const businessPlans: BusinessPlanSeed[] = [
     currency: 'RWF',
     features: [
       'Transparent, predictable pricing for growing teams',
-      '30 deliveries per week → 48,000 RWF',
-      '50 deliveries per week → 75,000 RWF',
-      '80 deliveries per week → 120,000 RWF',
+      'First 30 deliveries per week → 48,000 RWF',
+      'Deliveries 31 – 50 per week → 75,000 RWF package',
+      'Deliveries 51 – 80 per week → 120,000 RWF package',
       'Extra deliveries → 1,500 RWF each',
+      'Orders below tier minimum → 1,600 RWF each',
     ],
     pricingTiers: {
       tiers: [
@@ -107,6 +108,7 @@ const businessPlans: BusinessPlanSeed[] = [
         },
       ],
       overflowRate: 1500,
+      fallbackRate: 1600,
     },
     badge: 'MOST POPULAR',
     isCustomPricing: false,
@@ -122,10 +124,11 @@ const businessPlans: BusinessPlanSeed[] = [
     currency: 'RWF',
     features: [
       'Transparent, predictable pricing for growing teams',
-      '5 deliveries per day → 8,500 RWF',
-      '10 deliveries per day → 16,000 RWF',
-      '20 deliveries per day → 30,000 RWF',
+      'First 5 deliveries per day → 8,500 RWF',
+      'Deliveries 6 – 10 per day → 16,000 RWF package',
+      'Deliveries 11 – 20 per day → 30,000 RWF package',
       'Extra deliveries → 1,600 RWF each',
+      'Orders below tier minimum → 1,700 RWF each',
     ],
     pricingTiers: {
       tiers: [
@@ -149,6 +152,7 @@ const businessPlans: BusinessPlanSeed[] = [
         },
       ],
       overflowRate: 1600,
+      fallbackRate: 1700,
     },
     isCustomPricing: false,
     isDefault: false,

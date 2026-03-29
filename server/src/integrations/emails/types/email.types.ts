@@ -1,3 +1,5 @@
+import { TierBreakdown } from '../../../constants/businessPlan.constants';
+
 // ==================== AUTH EMAILS ====================
 
 export interface WelcomeEmailData {
@@ -111,6 +113,7 @@ export interface InvoiceGeneratedEmailData {
   totalAmount: number;
   currency: string;
   totalOrders: number;
+  tierBreakdown?: TierBreakdown[];
 }
 
 export interface PaymentReceivedEmailData {

@@ -66,6 +66,17 @@ router.post(
   OrganizationController.markMyBillingAsPaid
 );
 
+router.get(
+  '/me/billing/:billingId/breakdown',
+  authorize([RoleTypes.BUSINESS]),
+  OrganizationController.getMyBillingBreakdown
+);
+router.get(
+  '/me/billing/:billingId/estimate',
+  authorize([RoleTypes.BUSINESS]),
+  OrganizationController.getMyEarlyPaymentEstimate
+);
+
 // Org admin can manage members
 router.post(
   '/me/members',
@@ -182,6 +193,17 @@ router.post(
   '/:id/billing/:billingId/pay',
   authorize([RoleTypes.ADMIN]),
   OrganizationController.markBillingAsPaid
+);
+
+router.get(
+  '/:id/billing/:billingId/breakdown',
+  authorize([RoleTypes.ADMIN, RoleTypes.STAFF]),
+  OrganizationController.getBillingBreakdown
+);
+router.get(
+  '/:id/billing/:billingId/estimate',
+  authorize([RoleTypes.ADMIN, RoleTypes.STAFF]),
+  OrganizationController.getEarlyPaymentEstimate
 );
 
 export default router;

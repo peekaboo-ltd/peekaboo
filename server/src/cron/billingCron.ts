@@ -7,13 +7,10 @@ import { EmailService } from '../integrations/emails/email.service';
 import { generateReferenceNumber } from '../helpers/string.helper';
 import { LessThan } from 'typeorm';
 import logger from '../helpers/logger.helper';
+import { calculateBillingTotal } from '../helpers/pricing.helper';
 
 const emailService = new EmailService();
 
-/**
- * Auto-generate invoices for completed billing periods.
- * Runs daily at midnight.
- */
 async function autoGenerateInvoices(): Promise<void> {
   const billingRepository = AppDataSource.getRepository(OrganizationBilling);
   const now = new Date();
@@ -33,13 +30,24 @@ async function autoGenerateInvoices(): Promise<void> {
       continue;
     }
 
+    // Safety recalculation to ensure accuracy with new pricing logic
+    if (billing.pricingSnapshot?.tiers?.length) {
+      const { breakdown, total } = calculateBillingTotal(
+        billing.pricingSnapshot,
+        billing.totalOrders,
+      );
+      billing.totalAmount = total;
+      billing.tierBreakdown = breakdown;
+    }
+
     // Generate unique invoice number
     let invoiceNumber = generateReferenceNumber({ prefix: 'INV', length: 8 });
     while (await billingRepository.findOne({ where: { invoiceNumber } })) {
       invoiceNumber = generateReferenceNumber({ prefix: 'INV', length: 8 });
     }
 
-    const paymentTermsDays = billing.organization?.paymentTermsDays || billing.paymentTermsDays || 30;
+    const paymentTermsDays =
+      billing.organization?.paymentTermsDays || billing.paymentTermsDays || 30;
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + paymentTermsDays);
 
@@ -63,22 +71,23 @@ async function autoGenerateInvoices(): Promise<void> {
           totalAmount: Number(billing.totalAmount),
           currency: billing.currency || 'RWF',
           totalOrders: billing.totalOrders,
+          tierBreakdown: billing.tierBreakdown ?? undefined,
         })
         .catch(() => {});
     }
 
-    logger.info(`Auto-generated invoice ${invoiceNumber} for org ${billing.organizationId}`);
+    logger.info(
+      `Auto-generated invoice ${invoiceNumber} for org ${billing.organizationId}`,
+    );
   }
 
   if (pendingBillings.length > 0) {
-    logger.info(`Auto-invoicing complete: ${pendingBillings.length} billing period(s) processed`);
+    logger.info(
+      `Auto-invoicing complete: ${pendingBillings.length} billing period(s) processed`,
+    );
   }
 }
 
-/**
- * Mark overdue invoices and send notification emails.
- * Runs daily at 6 AM.
- */
 async function markOverdueInvoices(): Promise<void> {
   const billingRepository = AppDataSource.getRepository(OrganizationBilling);
   const now = new Date();
@@ -98,7 +107,8 @@ async function markOverdueInvoices(): Promise<void> {
 
     // Calculate days overdue
     const daysOverdue = Math.floor(
-      (now.getTime() - (billing.dueDate?.getTime() || now.getTime())) / (1000 * 60 * 60 * 24)
+      (now.getTime() - (billing.dueDate?.getTime() || now.getTime())) /
+        (1000 * 60 * 60 * 24),
     );
 
     // Send overdue notification email
@@ -116,7 +126,9 @@ async function markOverdueInvoices(): Promise<void> {
         .catch(() => {});
     }
 
-    logger.info(`Marked billing ${billing.id} as overdue (invoice ${billing.invoiceNumber})`);
+    logger.info(
+      `Marked billing ${billing.id} as overdue (invoice ${billing.invoiceNumber})`,
+    );
   }
 
   if (overdueBillings.length > 0) {

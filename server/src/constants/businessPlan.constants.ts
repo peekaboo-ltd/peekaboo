@@ -1,7 +1,7 @@
 export enum BusinessPlanStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  ARCHIVED = 'ARCHIVED',
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  ARCHIVED = "ARCHIVED",
 }
 
 export interface PricingTier {
@@ -16,6 +16,7 @@ export interface PricingTier {
 export interface PricingConfig {
   tiers: PricingTier[];
   overflowRate?: number; // price per extra delivery beyond defined tiers
+  fallbackRate?: number; // price per order when a package tier's minimum is not fully met
 }
 
 export interface TierBreakdown {
@@ -23,4 +24,5 @@ export interface TierBreakdown {
   quantity: number;
   unitPrice: number;
   subtotal: number;
+  type?: "package" | "fallback" | "per_unit" | "overflow";
 }

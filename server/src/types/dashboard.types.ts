@@ -1,7 +1,11 @@
-import { UUID } from '.';
-import { RoleTypes } from '../constants/role.constants';
-import { OrderStatus, OrderAssignmentStatus } from '../constants/order.constants';
-import { KpayPaymentStatus } from './kpay.types';
+import { UUID } from ".";
+import { RoleTypes } from "../constants/role.constants";
+import {
+  OrderStatus,
+  OrderAssignmentStatus,
+} from "../constants/order.constants";
+import { TierBreakdown } from "../constants/businessPlan.constants";
+import { KpayPaymentStatus } from "./kpay.types";
 
 export interface OrderStatusCount {
   status: OrderStatus;
@@ -13,8 +17,12 @@ export interface ChartDataPoint {
   value: number;
 }
 
-export type SummaryChartMetric = 'ORDERS' | 'REVENUE' | 'DELIVERIES' | 'ACTIVE_USERS';
-export type SummaryChartPeriod = '7d' | '30d' | '90d';
+export type SummaryChartMetric =
+  | "ORDERS"
+  | "REVENUE"
+  | "DELIVERIES"
+  | "ACTIVE_USERS";
+export type SummaryChartPeriod = "7d" | "30d" | "90d";
 
 export interface OrderTrendData {
   period: string;
@@ -38,7 +46,7 @@ export interface PaymentStatusCount {
 
 export interface RecentActivity {
   id: UUID;
-  type: 'order' | 'assignment' | 'payment';
+  type: "order" | "assignment" | "payment";
   title: string;
   description: string;
   status: string;
@@ -138,4 +146,6 @@ export interface BusinessReportData {
   deliveriesLineChart: ChartDataPoint[];
   assignmentStatusPie: BusinessReportPieSlice[];
   deliveriesTable: BusinessReportDeliveryRow[];
+  currentBillingBreakdown?: TierBreakdown[];
+  currentBillingPlanName?: string;
 }

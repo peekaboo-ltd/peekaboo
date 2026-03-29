@@ -17,6 +17,13 @@ const dashboardService = new OrganizationDashboardService();
 const orderService = new OrderService();
 const userService = new UserService();
 
+async function assertBillingMatchesOrganization(
+  organizationId: UUID,
+  billingId: UUID,
+): Promise<void> {
+  await billingService.getBillingByIdForOrganization(billingId, organizationId);
+}
+
 export const OrganizationController = {
   // CREATE ORGANIZATION (PUBLIC REGISTRATION)
   async createOrganization(req: Request, res: Response, next: NextFunction) {
@@ -570,12 +577,13 @@ export const OrganizationController = {
     try {
       const authReq = req as AuthRequest;
       const userId = authReq.user?.id;
-      const { billingId } = req.params;
+      const { id, billingId } = req.params;
 
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
+      await assertBillingMatchesOrganization(id as UUID, billingId as UUID);
       const billing = await billingService.generateInvoice(
         billingId as UUID,
         userId
@@ -593,9 +601,10 @@ export const OrganizationController = {
   // MARK BILLING AS PAID (ADMIN)
   async markBillingAsPaid(req: Request, res: Response, next: NextFunction) {
     try {
-      const { billingId } = req.params;
+      const { id, billingId } = req.params;
       const { notes, amountPaid } = req.body;
 
+      await assertBillingMatchesOrganization(id as UUID, billingId as UUID);
       const billing = await billingService.markAsPaid(
         billingId as UUID,
         notes,
@@ -653,6 +662,118 @@ export const OrganizationController = {
       next(error);
     }
   },
+
+    // GET BILLING BREAKDOWN (ADMIN/STAFF)
+    async getBillingBreakdown(req: Request, res: Response, next: NextFunction) {
+      try {
+        const { id, billingId } = req.params;
+
+        await assertBillingMatchesOrganization(id as UUID, billingId as UUID);
+   
+        const result = await billingService.getBillingBreakdown(billingId as UUID);
+   
+        return res.status(200).json({
+          message: 'Billing breakdown fetched successfully',
+          data: result,
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+   
+    // GET MY BILLING BREAKDOWN (BUSINESS USER)
+    async getMyBillingBreakdown(req: Request, res: Response, next: NextFunction) {
+      try {
+        const authReq = req as AuthRequest;
+        const userId = authReq.user?.id;
+        const { billingId } = req.params;
+   
+        if (!userId) {
+          return res.status(401).json({ message: 'Unauthorized' });
+        }
+   
+        const organization = await organizationService.getOrganizationByUserId(userId);
+   
+        if (!organization) {
+          return res.status(404).json({
+            message: 'You are not a member of any organization',
+          });
+        }
+   
+        const billing = await billingService.getBillingById(billingId as UUID);
+   
+        if (billing.organizationId !== organization.id) {
+          return res.status(403).json({
+            message: 'You are not allowed to view this billing record',
+          });
+        }
+   
+        const result = await billingService.getBillingBreakdown(billingId as UUID);
+   
+        return res.status(200).json({
+          message: 'Billing breakdown fetched successfully',
+          data: result,
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+   
+    // GET EARLY PAYMENT ESTIMATE (ADMIN/STAFF)
+    async getEarlyPaymentEstimate(req: Request, res: Response, next: NextFunction) {
+      try {
+        const { id, billingId } = req.params;
+
+        await assertBillingMatchesOrganization(id as UUID, billingId as UUID);
+   
+        const result = await billingService.calculateEarlyPaymentAmount(billingId as UUID);
+   
+        return res.status(200).json({
+          message: 'Early payment estimate fetched successfully',
+          data: result,
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+   
+    // GET MY EARLY PAYMENT ESTIMATE (BUSINESS USER)
+    async getMyEarlyPaymentEstimate(req: Request, res: Response, next: NextFunction) {
+      try {
+        const authReq = req as AuthRequest;
+        const userId = authReq.user?.id;
+        const { billingId } = req.params;
+   
+        if (!userId) {
+          return res.status(401).json({ message: 'Unauthorized' });
+        }
+   
+        const organization = await organizationService.getOrganizationByUserId(userId);
+   
+        if (!organization) {
+          return res.status(404).json({
+            message: 'You are not a member of any organization',
+          });
+        }
+   
+        const billing = await billingService.getBillingById(billingId as UUID);
+   
+        if (billing.organizationId !== organization.id) {
+          return res.status(403).json({
+            message: 'You are not allowed to view this billing record',
+          });
+        }
+   
+        const result = await billingService.calculateEarlyPaymentAmount(billingId as UUID);
+   
+        return res.status(200).json({
+          message: 'Early payment estimate fetched successfully',
+          data: result,
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
 
   // GET DASHBOARD METRICS (ADMIN/STAFF)
   async getDashboardMetrics(req: Request, res: Response, next: NextFunction) {

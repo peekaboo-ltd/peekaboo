@@ -6,6 +6,7 @@ import { User } from '../entities/user.entity';
 import { OrderActivity } from '../entities/orderActivity.entity';
 import { RoleTypes } from '../constants/role.constants';
 import { OrderStatus, OrderAssignmentStatus } from '../constants/order.constants';
+import { TierBreakdown } from '../constants/businessPlan.constants';
 import { KpayPaymentStatus } from '../types/kpay.types';
 import {
   DashboardMetrics,
@@ -25,6 +26,7 @@ import { UserRole } from '../entities/userRole.entity';
 import { OrganizationMembership } from '../entities/organizationMembership.entity';
 import { BillingStatus, MembershipStatus } from '../constants/organization.constants';
 import { OrganizationBilling } from '../entities/organizationBilling.entity';
+import { calculateBillingTotal } from '../helpers/pricing.helper';
 
 const REPORT_PIE_COLORS = ['#0f766e', '#1d4ed8', '#d97706', '#be123c', '#475569'];
 
@@ -119,6 +121,86 @@ export class DashboardService {
   private orderActivityRepository = AppDataSource.getRepository(OrderActivity);
   private organizationMembershipRepository = AppDataSource.getRepository(OrganizationMembership);
   private organizationBillingRepository = AppDataSource.getRepository(OrganizationBilling);
+
+  private resolveBillingBreakdown(
+    billing: Pick<
+      OrganizationBilling,
+      'pricingSnapshot' | 'tierBreakdown' | 'totalOrders' | 'totalAmount'
+    >
+  ): { breakdown: TierBreakdown[]; totalAmount: number } {
+    if (billing.pricingSnapshot?.tiers?.length) {
+      const result = calculateBillingTotal(
+        billing.pricingSnapshot,
+        billing.totalOrders,
+      );
+      return {
+        breakdown: result.breakdown,
+        totalAmount: result.total,
+      };
+    }
+
+    return {
+      breakdown: billing.tierBreakdown ?? [],
+      totalAmount: Number(billing.totalAmount),
+    };
+  }
+
+  private async getPrioritizedBilling(organizationId: UUID): Promise<{
+    billing?: OrganizationBilling;
+    breakdown: TierBreakdown[];
+    totalAmount: number;
+    planName?: string;
+  }> {
+    const dueBillings = await this.organizationBillingRepository.find({
+      where: {
+        organizationId,
+        status: BillingStatus.PENDING,
+      },
+      relations: { businessPlan: true },
+      order: {
+        periodEnd: 'DESC',
+        createdAt: 'DESC',
+      },
+    });
+
+    const actionableBillings = await this.organizationBillingRepository.find({
+      where: [
+        { organizationId, status: BillingStatus.INVOICED },
+        { organizationId, status: BillingStatus.OVERDUE },
+      ],
+      relations: { businessPlan: true },
+      order: {
+        periodEnd: 'DESC',
+        createdAt: 'DESC',
+      },
+    });
+
+    const orderedBillings = [...actionableBillings, ...dueBillings];
+    const prioritizedBilling =
+      orderedBillings.find(
+        (billing) =>
+          billing.status === BillingStatus.INVOICED ||
+          billing.status === BillingStatus.OVERDUE ||
+          (billing.status === BillingStatus.PENDING &&
+            new Date(billing.periodEnd).getTime() < Date.now()),
+      ) || orderedBillings[0];
+
+    if (!prioritizedBilling) {
+      return {
+        breakdown: [],
+        totalAmount: 0,
+      };
+    }
+
+    const resolvedBilling = this.resolveBillingBreakdown(prioritizedBilling);
+
+    return {
+      billing: prioritizedBilling,
+      breakdown: resolvedBilling.breakdown,
+      totalAmount: resolvedBilling.totalAmount,
+      planName: prioritizedBilling.businessPlan?.name,
+    };
+  }
 
   /**
    * Determine the primary role for dashboard display
@@ -419,39 +501,10 @@ export class DashboardService {
         where: { organizationId: userMembership.organizationId, status: MembershipStatus.ACTIVE },
       });
 
-      const dueBillings = await this.organizationBillingRepository
-        .createQueryBuilder('billing')
-        .where('billing.organizationId = :organizationId', {
-          organizationId: userMembership.organizationId,
-        })
-        .andWhere('billing.status IN (:...statuses)', {
-          statuses: [BillingStatus.PENDING, BillingStatus.INVOICED, BillingStatus.OVERDUE],
-        })
-        .orderBy('billing.periodEnd', 'DESC')
-        .addOrderBy('billing.createdAt', 'DESC')
-        .getMany();
-
-      const prioritizedBilling =
-        dueBillings.find(
-          (billing) =>
-            billing.status === BillingStatus.INVOICED ||
-            billing.status === BillingStatus.OVERDUE ||
-            (billing.status === BillingStatus.PENDING &&
-              new Date(billing.periodEnd).getTime() < Date.now())
-        ) || dueBillings[0];
-
-      if (prioritizedBilling) {
-        const currentPageOrders = await this.orderRepository.find({
-          where: { organizationBillingId: prioritizedBilling.id },
-          order: { createdAt: 'DESC' },
-          take: 10,
-        });
-
-        currentAmountDue = currentPageOrders.reduce(
-          (sum, order) => sum + Number(order.finalFee || order.initialFee || 0),
-          0
-        );
-      }
+      const prioritizedBilling = await this.getPrioritizedBilling(
+        userMembership.organizationId,
+      );
+      currentAmountDue = prioritizedBilling.totalAmount;
     }
 
     // Orders this week
@@ -621,6 +674,10 @@ export class DashboardService {
       relations: { organization: true },
     });
 
+    const currentBilling = membership
+      ? await this.getPrioritizedBilling(membership.organizationId)
+      : { breakdown: [], totalAmount: 0, planName: undefined };
+
     return {
       organizationName: membership?.organization?.name,
       generatedAt: new Date(),
@@ -652,6 +709,8 @@ export class DashboardService {
           status: row.status,
         })
       ),
+      currentBillingBreakdown: currentBilling.breakdown,
+      currentBillingPlanName: currentBilling.planName,
     };
   }
 
@@ -682,6 +741,19 @@ export class DashboardService {
           )
           .join('')
       : '<tr><td colspan="4" style="padding:10px;color:#64748b;">No completed deliveries in this period</td></tr>';
+
+    const billingBreakdownRows = report.currentBillingBreakdown?.length
+      ? report.currentBillingBreakdown
+          .map(
+            (row) => `<tr>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;">${escapeHtml(row.tierLabel)}</td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;text-align:right;">${row.quantity}</td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;text-align:right;">RWF ${row.unitPrice.toLocaleString()}</td>
+            <td style="padding:10px;border-bottom:1px solid #e2e8f0;text-align:right;">RWF ${row.subtotal.toLocaleString()}</td>
+          </tr>`
+          )
+          .join('')
+      : '<tr><td colspan="4" style="padding:10px;color:#64748b;">No current billing breakdown available</td></tr>';
 
     return `
       <!doctype html>
@@ -737,6 +809,21 @@ export class DashboardService {
                 </tr>
               </thead>
               <tbody>${deliveriesTableRows}</tbody>
+            </table>
+          </section>
+
+          <section style="margin-top:26px;">
+            <h2 style="margin:0 0 10px;font-size:18px;">Current Billing Breakdown${report.currentBillingPlanName ? ` - ${escapeHtml(report.currentBillingPlanName)}` : ''}</h2>
+            <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+              <thead>
+                <tr style="background:#f1f5f9;text-align:left;">
+                  <th style="padding:10px;font-size:12px;">Tier</th>
+                  <th style="padding:10px;font-size:12px;text-align:right;">Deliveries</th>
+                  <th style="padding:10px;font-size:12px;text-align:right;">Unit Price</th>
+                  <th style="padding:10px;font-size:12px;text-align:right;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>${billingBreakdownRows}</tbody>
             </table>
           </section>
 

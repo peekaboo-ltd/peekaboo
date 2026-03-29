@@ -6,6 +6,14 @@ import { router } from 'expo-router';
 
 let currentPushToken: string | null = null;
 
+const getExpoProjectId = (): string | undefined => {
+  const fromEnv = process.env.EXPO_PUBLIC_PROJECT_ID;
+  if (typeof fromEnv === 'string' && fromEnv.length > 0) return fromEnv;
+  const fromConfig = Constants.expoConfig?.extra?.eas?.projectId;
+  if (typeof fromConfig === 'string' && fromConfig.length > 0) return fromConfig;
+  return undefined;
+};
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -43,12 +51,27 @@ export const registerForPushNotifications = async (): Promise<string | null> => 
       return null;
     }
 
+    const projectId = getExpoProjectId();
+    if (!projectId) {
+      console.error(
+        'Expo project id missing: set EXPO_PUBLIC_PROJECT_ID or expo.extra.eas.projectId in app config'
+      );
+      return null;
+    }
+
     const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
+      projectId,
     });
 
     const token = tokenData.data;
     currentPushToken = token;
+
+    if (__DEV__) {
+      console.log(
+        '[peekaboo/push] Expo push token (paste at https://expo.dev/notifications):',
+        token
+      );
+    }
 
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
