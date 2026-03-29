@@ -5,6 +5,7 @@ import { Order } from '../entities/order.entity';
 import { UserService } from '../services/user.service';
 import { AuthRequest } from '../types/auth.types';
 import { ForbiddenError, UnauthorizedError } from '../helpers/errors.helper';
+import { RoleTypes } from '../constants/role.constants';
 
 const orderService = new OrderService();
 const userService = new UserService();
@@ -202,6 +203,30 @@ export const OrderController = {
       return res.status(200).json({
         message: 'Order fetched successfully',
         data: order,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async deferPayment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { user } = req as AuthRequest;
+
+      if (!user?.id) {
+        throw new UnauthorizedError('User not authenticated');
+      }
+
+      const deferredPayment = await orderService.deferOrderPayment(id as UUID, {
+        actorId: user.id,
+        actorRoles:
+          user.userRoles?.map((userRole) => userRole.role.name as RoleTypes) || [],
+      });
+
+      return res.status(200).json({
+        message: 'Order payment deferred successfully',
+        data: deferredPayment,
       });
     } catch (error) {
       next(error);

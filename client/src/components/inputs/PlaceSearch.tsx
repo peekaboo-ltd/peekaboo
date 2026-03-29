@@ -221,6 +221,7 @@ const PlaceSearch = ({
   const dropdownContent = predictions.length > 0 && dropdownPosition ? (
     <ul
       ref={dropdownRef}
+      data-place-search-dropdown
       className="fixed z-[10000] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto pointer-events-auto"
       role="listbox"
       style={{

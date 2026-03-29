@@ -1,4 +1,9 @@
-import { useGetPublicOrder, useGetOrderFees, useUpdatePublicOrder } from '@/hooks/orders/orders.hooks';
+import {
+  useDeferOrderPayment,
+  useGetPublicOrder,
+  useGetOrderFees,
+  useUpdatePublicOrder,
+} from '@/hooks/orders/orders.hooks';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import {
   setOrder,
@@ -15,7 +20,6 @@ import { APIProvider } from '@vis.gl/react-google-maps';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import RouteCalculator from '@/containers/locations/RouteCalculator';
 import AdministrativeLocation from '@/containers/locations/AdministrativeLocation';
-import { useCreatePublicOrderAssignment } from '@/hooks/orders/orderAssignments.hooks';
 import Button from '@/components/inputs/Button';
 import { formatCurrency } from '@/utils/strings.util';
 import UpdateOrderLocationFrom from '@/components/modals/UpdateOrderLocationFrom';
@@ -26,6 +30,7 @@ import OrderPayment from '@/components/modals/OrderPayment';
 import { useFetchPublicPayments } from '@/hooks/payments/payment.hooks';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { OrderPaymentStatus } from '@/types/order.type';
 import {
   faLocationDot,
   faMoneyBillWave,
@@ -63,11 +68,8 @@ const PublicOrderDetails = () => {
   // GET USER
   const { fetchUserById } = useFetchUserById();
 
-  console.log(authenticatedUser);
-
   useEffect(() => {
     if (authenticatedUser?.id) {
-      console.log('fetching user', authenticatedUser.id);
       fetchUserById(authenticatedUser.id);
     }
   }, [authenticatedUser?.id, fetchUserById]);
@@ -88,16 +90,16 @@ const PublicOrderDetails = () => {
   );
 
   const {
-    createPublicOrderAssignment,
-    isSuccess: createOrderAssignmentIsSuccess,
-    isLoading: createOrderAssignmentIsLoading,
-  } = useCreatePublicOrderAssignment();
+    deferOrderPayment,
+    isSuccess: deferOrderPaymentIsSuccess,
+    isLoading: deferOrderPaymentIsLoading,
+  } = useDeferOrderPayment();
 
   useEffect(() => {
-    if (createOrderAssignmentIsSuccess) {
+    if (deferOrderPaymentIsSuccess) {
       navigate(`/p/orders/${currentOrder?.id}/tracking`);
     }
-  }, [createOrderAssignmentIsSuccess, navigate, currentOrder?.id]);
+  }, [deferOrderPaymentIsSuccess, navigate, currentOrder?.id]);
 
   // GET CURRENT LOCATION
   const handleGetCurrentLocation = useCallback(async () => {
@@ -127,7 +129,6 @@ const PublicOrderDetails = () => {
     let defaultLocation = user?.organizationMembership?.[0]?.organization?.defaultLocation;
     if (user?.defaultLocation) defaultLocation = user.defaultLocation;
     if (defaultLocation && currentOrder?.id && !currentOrder?.locationFrom) {
-      console.log('setting user default location', defaultLocation);
       updatePublicOrder({
         id: currentOrder?.id,
         order: {
@@ -214,6 +215,13 @@ const PublicOrderDetails = () => {
   const hasSuccessfulPayment = paymentsList?.some(
     (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL,
   );
+  const hasDeferredPayment =
+    currentOrder?.paymentStatus === OrderPaymentStatus.PENDING ||
+    currentOrder?.paymentStatus === OrderPaymentStatus.COMPLETED;
+  const hasPaidEquivalent = hasSuccessfulPayment || hasDeferredPayment;
+  const isOrganizationUser = !!user?.organizationMembership?.length;
+  const canDeferPayment =
+    isOrganizationUser && !!(currentOrder?.isBusinessOrder || currentOrder?.organizationId);
   const hasBothLocations = !!currentOrder?.locationFrom && !!currentOrder?.locationTo;
 
   const stats = [
@@ -229,7 +237,11 @@ const PublicOrderDetails = () => {
     },
     {
       label: 'Next Action',
-      value: hasSuccessfulPayment ? 'Track Order' : 'Complete Payment',
+      value: hasPaidEquivalent
+        ? 'Track Order'
+        : canDeferPayment
+          ? 'Defer Payment'
+          : 'Complete Payment',
       icon: faMoneyBillWave,
     },
   ];
@@ -445,34 +457,43 @@ const PublicOrderDetails = () => {
             >
               Back
             </Button>
-            {hasSuccessfulPayment ? (
+            {hasPaidEquivalent ? (
               <Button
                 primary
-                isLoading={createOrderAssignmentIsLoading}
                 onClick={(e) => {
                   e.preventDefault();
                   if (currentOrder?.id) {
-                    createPublicOrderAssignment({
-                      orderId: currentOrder.id,
-                    });
+                    navigate(`/p/orders/${currentOrder.id}/tracking`);
                   }
                 }}
               >
                 Track Order
               </Button>
+            ) : canDeferPayment ? (
+              <Button
+                primary
+                isLoading={deferOrderPaymentIsLoading}
+                disabled={!hasBothLocations}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentOrder?.id) {
+                    deferOrderPayment({ id: currentOrder.id });
+                  }
+                }}
+              >
+                {!hasBothLocations ? 'Set Both Locations to Continue' : 'Defer Payment'}
+              </Button>
             ) : (
               <Button
                 primary
-                disabled={!currentOrder?.locationFrom || !currentOrder?.locationTo}
+                disabled={!hasBothLocations}
                 onClick={(e) => {
                   e.preventDefault();
                   dispatch(setSelectedOrder(currentOrder));
                   dispatch(setOrderPaymentModal(true));
                 }}
               >
-                {!currentOrder?.locationFrom || !currentOrder?.locationTo
-                  ? 'Set Both Locations to Continue'
-                  : 'Complete Payment'}
+                {!hasBothLocations ? 'Set Both Locations to Continue' : 'Complete Payment'}
               </Button>
             )}
           </div>

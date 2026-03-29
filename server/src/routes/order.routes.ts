@@ -43,6 +43,12 @@ router.patch(
   OrderController.updateOrder,
 );
 
+router.post(
+  '/:id/defer-payment',
+  authorize([RoleTypes.BUSINESS, RoleTypes.ADMIN, RoleTypes.STAFF]),
+  OrderController.deferPayment,
+);
+
 router.delete(
   '/:id',
   authorize([RoleTypes.CUSTOMER, RoleTypes.BUSINESS]),

@@ -1,5 +1,10 @@
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
+import {
+  PublicPageHero,
+  PublicSectionCard,
+  PublicStatCard,
+} from '@/components/layout/PublicPage';
 import Table from '@/components/table/Table';
 import { Badge } from '@/components/ui/badge';
 import { useGetBatchById } from '@/hooks/batches/batches.hooks';
@@ -11,6 +16,13 @@ import { OrderStatus } from '@/types/order.type';
 import type { UUID } from '@/types';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import { formatDate } from '@/utils/strings.util';
+import {
+  faClipboardList,
+  faFileLines,
+  faPhoneSlash,
+  faTableList,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -103,20 +115,25 @@ const BatchDetailsPage = () => {
 
   const { ordersColumns } = useOrdersColumns();
 
-
   if (isFetchingBatch && !batch) {
     return (
-      <div className="p-8 flex items-center justify-center">
-        <div className="text-sm text-slate-500">Loading batch details...</div>
-      </div>
+      <main className="w-full flex flex-col gap-6">
+        <PublicSectionCard title="Loading" description="Fetching batch details…">
+          <p className="text-sm text-slate-500 text-center py-8">
+            Loading batch details...
+          </p>
+        </PublicSectionCard>
+      </main>
     );
   }
 
   if (!id || (!batch && batchError)) {
     return (
-      <div className="p-8 flex items-center justify-center">
-        <div className="text-sm text-slate-500">Batch not found.</div>
-      </div>
+      <main className="w-full flex flex-col gap-6">
+        <PublicSectionCard title="Not found">
+          <p className="text-sm text-slate-500 text-center py-8">Batch not found.</p>
+        </PublicSectionCard>
+      </main>
     );
   }
 
@@ -126,80 +143,80 @@ const BatchDetailsPage = () => {
 
   return (
     <main className="w-full flex flex-col gap-6">
-      <motion.header
+      <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col gap-4"
       >
-        <section className="flex items-start justify-between gap-4 flex-wrap">
-          <article>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-black">
-                {batch.name || 'Unnamed Batch'}
-              </h1>
+        <PublicPageHero
+          eyebrow="Batch"
+          title={
+            <span className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <span>{batch.name || 'Unnamed Batch'}</span>
               <Badge
                 variant={batchStatusVariantMap[batch.status] ?? 'outline'}
-                className="text-[11px]"
+                className="text-[11px] font-normal"
               >
                 {batch.status}
               </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
+            </span>
+          }
+          description={
+            <span>
               Ref: {batch.referenceId} · Created by{' '}
               {batch.createdBy?.name || batch.createdBy?.phoneNumber || 'Unknown'} ·{' '}
               {formatDate(batch.createdAt, 'DD/MM/YYYY HH:mm')}
-            </p>
-          </article>
-          <menu className="flex items-center gap-2 flex-wrap">
-            <Button type="button" onClick={() => navigate('/batches')}>
-              Back to Batches
-            </Button>
-            {batch.status === BatchStatus.DRAFT && (
-              <Button
-                type="button"
-                primary
-                onClick={() => navigate(`/batches/${batch.id}/preview`)}
-              >
-                Open Preview
+            </span>
+          }
+          actions={
+            <>
+              <Button type="button" onClick={() => navigate('/batches')}>
+                Back to Batches
               </Button>
-            )}
-          </menu>
-        </section>
+              {batch.status === BatchStatus.DRAFT && (
+                <Button
+                  type="button"
+                  primary
+                  onClick={() => navigate(`/batches/${batch.id}/preview`)}
+                >
+                  Open Preview
+                </Button>
+              )}
+            </>
+          }
+        />
 
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[
-            {
-              label: 'Total orders',
-              value: batch.orders?.length ?? 0,
-            },
-            {
-              label: 'Draft orders',
-              value: draftCount,
-            },
-            {
-              label: 'Current page invalid phones',
-              value: invalidCurrentPageCount,
-            },
-            {
-              label: 'Paginated records',
-              value: totalCount,
-            },
-          ].map((card) => (
-            <article
-              key={card.label}
-              className="bg-white border border-slate-200 rounded-xl p-4"
-            >
-              <p className="text-xs uppercase tracking-wide text-slate-500">
-                {card.label}
-              </p>
-              <p className="text-lg font-semibold text-slate-900 mt-1">
-                {card.value}
-              </p>
-            </article>
-          ))}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <PublicStatCard
+            label="Total orders"
+            value={batch.orders?.length ?? 0}
+            icon={<FontAwesomeIcon icon={faTableList} className="h-5 w-5" />}
+          />
+          <PublicStatCard
+            label="Draft orders"
+            value={draftCount}
+            icon={<FontAwesomeIcon icon={faFileLines} className="h-5 w-5" />}
+          />
+          <PublicStatCard
+            label="Current page invalid phones"
+            value={invalidCurrentPageCount}
+            icon={<FontAwesomeIcon icon={faPhoneSlash} className="h-5 w-5" />}
+          />
+          <PublicStatCard
+            label="Paginated records"
+            value={totalCount}
+            icon={<FontAwesomeIcon icon={faClipboardList} className="h-5 w-5" />}
+          />
         </section>
+      </motion.div>
 
-        <fieldset className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+      <PublicSectionCard
+        eyebrow="Orders"
+        title="Batch orders"
+        description="Filter by status or order reference. Pagination applies to this list."
+        contentClassName="space-y-4 px-0 pb-0 pt-0 sm:px-0"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-5 sm:px-6 pt-5 sm:pt-6">
           {statusFilter}
           <Input
             value={referenceFilter}
@@ -207,24 +224,23 @@ const BatchDetailsPage = () => {
             placeholder="Search by order reference"
             className="bg-white"
           />
-        </fieldset>
-      </motion.header>
-
-      <section className="w-full flex flex-col gap-4">
-        <Table
-          columns={ordersColumns}
-          data={ordersList}
-          showPagination={true}
-          page={page}
-          setPage={setPage}
-          size={size}
-          setSize={setSize}
-          totalPages={totalPages}
-          totalCount={totalCount}
-          isLoading={isFetchingOrders}
-          noDataMessage="No orders found for this batch and filters."
-        />
-      </section>
+        </div>
+        <div className="px-0 sm:px-0">
+          <Table
+            columns={ordersColumns}
+            data={ordersList}
+            showPagination={true}
+            page={page}
+            setPage={setPage}
+            size={size}
+            setSize={setSize}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            isLoading={isFetchingOrders}
+            noDataMessage="No orders found for this batch and filters."
+          />
+        </div>
+      </PublicSectionCard>
     </main>
   );
 };

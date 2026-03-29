@@ -3,11 +3,18 @@ import { Order } from '../entities/order.entity';
 import { AppDataSource } from '../data-source';
 import { generateReferenceNumber } from '../helpers/string.helper';
 import { UUID } from '../types';
-import { NotFoundError, ValidationError } from '../helpers/errors.helper';
+import {
+  ForbiddenError,
+  NotFoundError,
+  ValidationError,
+} from '../helpers/errors.helper';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import {
+  OrderActivityStatus,
   OrderAssignmentStatus,
+  OrderPaymentStatus,
   OrderStatus,
+  isLifecycleOrderActivityStatus,
 } from '../constants/order.constants';
 import { ConversationService } from './conversation.service';
 import { sendMessage } from '../helpers/whatsapp.helper';
@@ -47,6 +54,9 @@ import {
   buildPublicOrderRecipientSMS,
   buildPublicOrderSenderSMS,
 } from '../integrations/sms/sms.messages';
+import { Payment } from '../entities/payment.entity';
+import { PaymentType } from '../constants/payment.constants';
+import { KpayPaymentStatus } from '../types/kpay.types';
 
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
@@ -60,6 +70,7 @@ export class OrderService {
   private readonly orderActivityRepository: Repository<OrderActivity>;
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
   private readonly batchRepository: Repository<Batch>;
+  private readonly paymentRepository: Repository<Payment>;
   private readonly smsService: SMSService;
 
   constructor() {
@@ -74,6 +85,7 @@ export class OrderService {
     this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
     this.orderAssignmentRepository = AppDataSource.getRepository(OrderAssignment);
     this.batchRepository = AppDataSource.getRepository(Batch);
+    this.paymentRepository = AppDataSource.getRepository(Payment);
     this.smsService = new SMSService();
   }
 
@@ -150,7 +162,7 @@ export class OrderService {
     // CREATE ORDER STATUS
     await this.orderActivityService.createOrderActivity({
       orderId: createdOrder.id,
-      status: OrderStatus.CREATED,
+      status: OrderActivityStatus.CREATED,
       createdById: createdOrder?.createdById,
     });
 
@@ -279,7 +291,7 @@ export class OrderService {
     // CREATE ORDER STATUS
     await this.orderActivityService.createOrderActivity({
       orderId: createdOrder.id,
-      status: OrderStatus.CREATED,
+      status: OrderActivityStatus.CREATED,
       createdById: createdOrder?.createdById,
     });
 
@@ -633,8 +645,8 @@ export class OrderService {
           orderToAttach = await orderRepository.save(orderRepository.create(orderPayload));
           await orderActivityRepository.save(
             orderActivityRepository.create({
-              orderId: orderToAttach.id,
-              status: OrderStatus.DRAFT,
+            orderId: orderToAttach.id,
+              status: OrderActivityStatus.DRAFT,
               createdById: currentUser.id,
             }),
           );
@@ -750,7 +762,7 @@ export class OrderService {
 
     await this.orderActivityService.createOrderActivity({
       orderId: order.id,
-      status: OrderStatus.CANCELLED,
+      status: OrderActivityStatus.CANCELLED,
       createdById: createdById || order?.createdById,
     });
 
@@ -807,9 +819,12 @@ export class OrderService {
         )[0]
       : undefined;
 
-    const statusToValidate = latestActivity?.status ?? order.status;
+    const statusToValidate =
+      latestActivity?.status && isLifecycleOrderActivityStatus(latestActivity.status)
+        ? latestActivity.status
+        : order.status;
 
-    if (![OrderStatus.CREATED, OrderStatus.PENDING].includes(statusToValidate)) {
+    if (![OrderStatus.CREATED, OrderStatus.PENDING].includes(statusToValidate as OrderStatus)) {
       throw new ValidationError('Only orders in CREATED or PENDING can be deleted');
     }
 
@@ -847,16 +862,96 @@ export class OrderService {
 
     if (
       (order?.locationTo || order?.locationFrom) &&
-      orderExists?.activities?.shift()?.status === OrderStatus.CREATED
+      orderExists?.activities?.shift()?.status === OrderActivityStatus.CREATED
     ) {
       this.orderActivityService.createOrderActivity({
         orderId: updatedOrder.id,
-        status: OrderStatus.PENDING,
+        status: OrderActivityStatus.PENDING,
         createdById: createdById || orderExists?.createdById,
       });
     }
 
     return updatedOrder;
+  }
+
+  async deferOrderPayment(
+    id: UUID,
+    {
+      actorId,
+      actorRoles,
+    }: {
+      actorId: UUID;
+      actorRoles: RoleTypes[];
+    }
+  ): Promise<{
+    order: Order;
+    assignment: OrderAssignment;
+    activity: OrderActivity;
+  }> {
+    const orderExists = await this.getOrderById(id);
+
+    if (!orderExists.isBusinessOrder || !orderExists.organizationId) {
+      throw new ValidationError('Only business orders can defer payment');
+    }
+
+    const isPrivilegedActor = actorRoles.some((role) =>
+      [RoleTypes.ADMIN, RoleTypes.STAFF].includes(role)
+    );
+
+    if (!isPrivilegedActor) {
+      const membership = await this.organizationService.getUserMembership(actorId);
+
+      if (!membership || membership.organizationId !== orderExists.organizationId) {
+        throw new ForbiddenError(
+          'You do not have permission to defer payment for this order'
+        );
+      }
+    }
+
+    if (!orderExists.locationFrom || !orderExists.locationTo) {
+      throw new ValidationError(
+        'Both pickup and destination must be set before deferring payment'
+      );
+    }
+
+    const successfulDirectPayment = await this.paymentRepository.findOne({
+      where: {
+        entityId: id,
+        type: PaymentType.ORDER,
+        status: KpayPaymentStatus.SUCCESSFUL,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    if (successfulDirectPayment) {
+      throw new ValidationError('This order has already been paid directly');
+    }
+
+    const activity = await this.orderActivityService.createOrderActivity({
+      orderId: orderExists.id,
+      status: OrderActivityStatus.PAYMENT_DEFERRED,
+      createdById: actorId,
+    });
+
+    if (orderExists.paymentStatus !== OrderPaymentStatus.PENDING) {
+      await this.orderRepository.update(orderExists.id, {
+        paymentStatus: OrderPaymentStatus.PENDING,
+      });
+    }
+
+    const assignment = await this.orderAssignmentService.handleOrderAssignment({
+      orderId: orderExists.id,
+    });
+
+    const updatedOrder = await this.getOrderById(orderExists.id);
+
+    return {
+      order: updatedOrder,
+      assignment,
+      activity,
+    };
   }
 
   // GET ORDER BY CONVERSATION ID
@@ -883,7 +978,7 @@ export class OrderService {
     // CREATE ORDER ACTIVITY
     await this.orderActivityService.createOrderActivity({
       orderId: orderExists.id,
-      status: OrderStatus.ACCEPTED,
+      status: OrderActivityStatus.ACCEPTED,
       createdById: createdById || orderExists?.createdById,
     });
 

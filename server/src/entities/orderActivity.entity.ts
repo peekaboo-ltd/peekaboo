@@ -3,7 +3,7 @@ import { AbstractEntity } from './index';
 import { Order } from './order.entity';
 import { User } from './user.entity';
 import { UUID } from '../types';
-import { OrderStatus } from '../constants/order.constants';
+import { OrderActivityStatus } from '../constants/order.constants';
 
 @Entity('order_activities')
 export class OrderActivity extends AbstractEntity {
@@ -16,9 +16,9 @@ export class OrderActivity extends AbstractEntity {
     name: 'status',
     type: 'enum',
     nullable: false,
-    enum: OrderStatus,
+    enum: OrderActivityStatus,
   })
-  status: OrderStatus;
+  status: OrderActivityStatus;
 
   // NOTES
   @Column({ name: 'notes', type: 'text', nullable: true })

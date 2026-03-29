@@ -8,7 +8,7 @@ import { generateReferenceNumber } from '../helpers/string.helper';
 import { NotFoundError, ValidationError } from '../helpers/errors.helper';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import { BatchStatus } from '../constants/batch.constants';
-import { OrderStatus } from '../constants/order.constants';
+import { OrderActivityStatus, OrderStatus } from '../constants/order.constants';
 import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
@@ -179,7 +179,7 @@ export class BatchService {
         await orderActivityRepository.save(
           orderActivityRepository.create({
             orderId: order.id,
-            status: OrderStatus.PENDING,
+            status: OrderActivityStatus.PENDING,
             createdById: userId,
           }),
         );

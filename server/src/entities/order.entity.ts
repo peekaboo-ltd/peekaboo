@@ -2,7 +2,11 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractEntity } from './index';
 import { User } from './user.entity';
 import { UUID } from '../types';
-import { OrderStatus, OrderType } from '../constants/order.constants';
+import {
+  OrderPaymentStatus,
+  OrderStatus,
+  OrderType,
+} from '../constants/order.constants';
 import { Conversation } from './conversation.entity';
 import { OrderAssignment } from './orderAssignment.entity';
 import { OrderActivity } from './orderActivity.entity';
@@ -80,6 +84,15 @@ export class Order extends AbstractEntity {
   // FINAL FEE
   @Column({ name: 'final_fee', type: 'numeric', nullable: true })
   finalFee: number;
+
+  // PAYMENT STATUS
+  @Column({
+    name: 'payment_status',
+    type: 'enum',
+    enum: OrderPaymentStatus,
+    nullable: true,
+  })
+  paymentStatus?: OrderPaymentStatus | null;
 
   // CONVERSATION ID
   @Column({ name: 'conversation_id', type: 'uuid', nullable: true })

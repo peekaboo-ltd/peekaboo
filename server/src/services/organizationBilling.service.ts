@@ -1,4 +1,4 @@
-import { FindOptionsWhere, Repository, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { FindOptionsWhere, Repository, Between, In, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { OrganizationBilling } from '../entities/organizationBilling.entity';
 import { BillingStatus, BillingPeriod, OrganizationStatus } from '../constants/organization.constants';
@@ -7,7 +7,11 @@ import { NotFoundError, ValidationError } from '../helpers/errors.helper';
 import { getPagination, getPagingData, Pagination } from '../helpers/pagination.helper';
 import { Order } from '../entities/order.entity';
 import { OrderActivity } from '../entities/orderActivity.entity';
-import { OrderStatus } from '../constants/order.constants';
+import {
+  OrderActivityStatus,
+  OrderPaymentStatus,
+  OrderStatus,
+} from '../constants/order.constants';
 import { generateReferenceNumber } from '../helpers/string.helper';
 import { BillingQuery, GlobalBillingSummary } from '../types/b2b.types';
 import { Organization } from '../entities/organization.entity';
@@ -436,10 +440,20 @@ export class OrganizationBillingService {
     if (billing.orders && billing.orders.length > 0) {
       const activities = billing.orders.map((order) => ({
         orderId: order.id,
-        status: OrderStatus.BILLING_PAID,
+        status: OrderActivityStatus.BILLING_PAID,
         notes: `Billing invoice ${billing.invoiceNumber} paid`,
       }));
       await this.orderActivityRepository.save(activities);
+
+      await this.orderRepository.update(
+        {
+          id: In(billing.orders.map((order) => order.id)),
+          paymentStatus: OrderPaymentStatus.PENDING,
+        },
+        {
+          paymentStatus: OrderPaymentStatus.COMPLETED,
+        }
+      );
     }
 
     // Send payment received email (non-blocking)

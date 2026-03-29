@@ -5,7 +5,7 @@ import { Order } from '../entities/order.entity';
 import { OrganizationMembership } from '../entities/organizationMembership.entity';
 import { UUID } from '../types';
 import { NotFoundError } from '../helpers/errors.helper';
-import { OrderStatus } from '../constants/order.constants';
+import { OrderStatus, isLifecycleOrderActivityStatus } from '../constants/order.constants';
 import { MembershipStatus } from '../constants/organization.constants';
 
 export class OrganizationDashboardService {
@@ -67,7 +67,10 @@ export class OrganizationDashboardService {
 
     for (const order of orders) {
       const latestActivity = order.activities?.[0];
-      const status = latestActivity?.status || OrderStatus.CREATED;
+      const status =
+        latestActivity?.status && isLifecycleOrderActivityStatus(latestActivity.status)
+          ? latestActivity.status
+          : order.status || OrderStatus.CREATED;
 
       // Count by status
       ordersByStatus.set(status, (ordersByStatus.get(status) || 0) + 1);

@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { OrderStatus } from '@/types/order.type';
+import { OrderActivityStatus } from '@/types/orderActivity.type';
 import { faCheckCircle } from '@fortawesome/free-regular-svg-icons';
 
 export enum OrderFee {
@@ -78,3 +79,31 @@ export const workflowStatuses: {
       icon: faTrophy,
     },
   ];
+
+const PAID_EQUIVALENT_ACTIVITY_STATUSES = new Set<OrderActivityStatus>([
+  OrderActivityStatus.PAID,
+  OrderActivityStatus.PAYMENT_DEFERRED,
+]);
+
+const WORKFLOW_STATUS_KEYS = new Set<OrderStatus>(
+  workflowStatuses.map((status) => status.key),
+);
+
+export const isPaidEquivalentOrderActivityStatus = (
+  status?: string | null,
+): status is OrderActivityStatus.PAID | OrderActivityStatus.PAYMENT_DEFERRED =>
+  !!status && PAID_EQUIVALENT_ACTIVITY_STATUSES.has(status as OrderActivityStatus);
+
+export const getWorkflowStatusForActivity = (
+  status?: OrderActivityStatus | OrderStatus | string | null,
+): OrderStatus | undefined => {
+  if (!status) return undefined;
+
+  if (isPaidEquivalentOrderActivityStatus(status)) {
+    return OrderStatus.PAID;
+  }
+
+  return WORKFLOW_STATUS_KEYS.has(status as OrderStatus)
+    ? (status as OrderStatus)
+    : undefined;
+};

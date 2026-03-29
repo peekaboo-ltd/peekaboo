@@ -16,7 +16,12 @@ import { Request } from 'express';
 import { UUID } from '../types';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
-import { OrderAssignmentStatus, OrderStatus } from '../constants/order.constants';
+import {
+  OrderActivityStatus,
+  OrderAssignmentStatus,
+  OrderStatus,
+  isLifecycleOrderActivityStatus,
+} from '../constants/order.constants';
 import { EmailService } from '../integrations/emails/email.service';
 import { OrderAssignment } from '../entities/orderAssignment.entity';
 import { SMSService } from '../integrations/sms/sms.service';
@@ -27,13 +32,13 @@ import { PushNotificationType } from '../constants/push.constants';
 import logger from '../helpers/logger.helper';
 
 const ORDER_STATUS_MESSAGES: Record<string, string> = {
-  [OrderStatus.PAID]:
+  [OrderActivityStatus.PAID]:
     'Your payment has been received and your order is being processed.',
-  [OrderStatus.CONFIRMED]: 'Your order has been confirmed by the rider.',
-  [OrderStatus.ACTIVE]: 'Your order is now active and being processed.',
-  [OrderStatus.IN_TRANSIT]: 'Your package is on the way!',
-  [OrderStatus.DELIVERED]: 'Your package has been delivered.',
-  [OrderStatus.COMPLETED]:
+  [OrderActivityStatus.CONFIRMED]: 'Your order has been confirmed by the rider.',
+  [OrderActivityStatus.ACTIVE]: 'Your order is now active and being processed.',
+  [OrderActivityStatus.IN_TRANSIT]: 'Your package is on the way!',
+  [OrderActivityStatus.DELIVERED]: 'Your package has been delivered.',
+  [OrderActivityStatus.COMPLETED]:
     'Your order has been completed. Thank you for using Peekaboo!',
 };
 
@@ -73,25 +78,34 @@ export class OrderActivityService {
     const existingActivity = await this.orderActivityRepository.findOne({
       where: {
         orderId: orderStatus?.orderId,
-        status: orderStatus?.status as OrderStatus,
+        status: orderStatus?.status as OrderActivityStatus,
       },
     });
 
     if (existingActivity) {
-      await this.orderRepository.update(order.id, {
-        status: orderStatus.status as OrderStatus,
-      });
+      if (isLifecycleOrderActivityStatus(orderStatus.status)) {
+        await this.orderRepository.update(order.id, {
+          status: orderStatus.status,
+        });
+      }
       return existingActivity;
     }
 
     const activity = await this.orderActivityRepository.save(orderStatus);
 
-    order.status = orderStatus?.status as OrderStatus;
-    await this.orderRepository.save(order);
+    if (isLifecycleOrderActivityStatus(orderStatus.status)) {
+      order.status = orderStatus.status;
+      await this.orderRepository.save(order);
+    }
 
     // Send push notification to assigned rider for key status changes (non-blocking)
     const statusStr = orderStatus.status as string;
-    if (statusStr && [OrderStatus.PAID, OrderStatus.CANCELLED].includes(statusStr as OrderStatus)) {
+    if (
+      statusStr &&
+      [OrderActivityStatus.PAID, OrderActivityStatus.CANCELLED].includes(
+        statusStr as OrderActivityStatus
+      )
+    ) {
       this.sendOrderStatusPushToRider(order.id, order.referenceId || '', statusStr).catch(
         (error) => logger.error('Failed to send order status push to rider', error)
       );
@@ -101,7 +115,7 @@ export class OrderActivityService {
     if (
       statusStr &&
       ORDER_STATUS_MESSAGES[statusStr] &&
-      ['PAID'].includes(statusStr)
+      [OrderActivityStatus.PAID].includes(statusStr as OrderActivityStatus)
     ) {
       const statusMessage = ORDER_STATUS_MESSAGES[statusStr];
       const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, '');
@@ -140,11 +154,11 @@ export class OrderActivityService {
     }
 
     const STATUS_PUSH_MESSAGES: Record<string, { title: string; body: string }> = {
-      [OrderStatus.PAID]: {
+      [OrderActivityStatus.PAID]: {
         title: `Order #${orderReference} paid`,
         body: `Payment received for order #${orderReference}. Ready for pickup.`,
       },
-      [OrderStatus.CANCELLED]: {
+      [OrderActivityStatus.CANCELLED]: {
         title: `Order #${orderReference} cancelled`,
         body: `Order #${orderReference} has been cancelled.`,
       },
@@ -284,7 +298,7 @@ export class OrderActivityService {
       });
     }
 
-    const statusMessage = ORDER_STATUS_MESSAGES[OrderStatus.COMPLETED];
+    const statusMessage = ORDER_STATUS_MESSAGES[OrderActivityStatus.COMPLETED];
     const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, '');
     const trackingUrl = frontendUrl
       ? `${frontendUrl}/p/orders/${order.id}/tracking`
@@ -299,7 +313,7 @@ export class OrderActivityService {
         userName: recipient.name || '',
         userEmail: recipient.email,
         orderReference: order.referenceId || '',
-        status: OrderStatus.COMPLETED,
+        status: OrderActivityStatus.COMPLETED,
         statusMessage,
         trackingUrl,
       });
@@ -352,18 +366,18 @@ export class OrderActivityService {
     await this.assertRiderCanUpdateOrder(order, actorId, isAdmin);
 
     const existingConfirmed = await this.orderActivityRepository.findOne({
-      where: { orderId, status: OrderStatus.CONFIRMED },
+      where: { orderId, status: OrderActivityStatus.CONFIRMED },
     });
 
     const existingInTransit = await this.orderActivityRepository.findOne({
-      where: { orderId, status: OrderStatus.IN_TRANSIT },
+      where: { orderId, status: OrderActivityStatus.IN_TRANSIT },
     });
 
     const confirmed =
       existingConfirmed ||
       (await this.orderActivityRepository.save({
         orderId,
-        status: OrderStatus.CONFIRMED,
+        status: OrderActivityStatus.CONFIRMED,
         createdById: actorId,
       }));
 
@@ -371,7 +385,7 @@ export class OrderActivityService {
       existingInTransit ||
       (await this.orderActivityRepository.save({
         orderId,
-        status: OrderStatus.IN_TRANSIT,
+        status: OrderActivityStatus.IN_TRANSIT,
         createdById: actorId,
       }));
 
@@ -408,7 +422,12 @@ export class OrderActivityService {
 
     const latestActivity = await this.getLatestActivityByOrderId(orderId);
 
-    if (!latestActivity || !['IN_TRANSIT', 'DELIVERED'].includes(latestActivity.status)) {
+    if (
+      !latestActivity ||
+      ![OrderActivityStatus.IN_TRANSIT, OrderActivityStatus.DELIVERED].includes(
+        latestActivity.status
+      )
+    ) {
       throw new ValidationError('Only orders in transit or delivered can be marked as completed');
     }
 
@@ -417,13 +436,13 @@ export class OrderActivityService {
 
     // First mark as delivered, then completed (only when trackingId is matched or not required)
     const existingDelivered = await this.orderActivityRepository.findOne({
-      where: { orderId, status: OrderStatus.DELIVERED },
+      where: { orderId, status: OrderActivityStatus.DELIVERED },
     });
 
     if (!existingDelivered) {
       await this.orderActivityRepository.save({
         orderId,
-        status: OrderStatus.DELIVERED,
+        status: OrderActivityStatus.DELIVERED,
         createdById: actorId,
       });
       await this.orderRepository.update(orderId, { status: OrderStatus.DELIVERED });
@@ -440,7 +459,7 @@ export class OrderActivityService {
     }
 
     const existingCompleted = await this.orderActivityRepository.findOne({
-      where: { orderId, status: OrderStatus.COMPLETED },
+      where: { orderId, status: OrderActivityStatus.COMPLETED },
     });
 
     if (existingCompleted) {
@@ -450,7 +469,7 @@ export class OrderActivityService {
 
     const completedActivity = await this.orderActivityRepository.save({
       orderId,
-      status: OrderStatus.COMPLETED,
+      status: OrderActivityStatus.COMPLETED,
       createdById: actorId,
     });
 
@@ -521,9 +540,11 @@ export class OrderActivityService {
       ...orderStatus,
     });
 
-    await this.orderRepository.update(orderActivity.orderId, {
-      status: orderStatus.status as OrderStatus,
-    });
+    if (isLifecycleOrderActivityStatus(orderStatus.status)) {
+      await this.orderRepository.update(orderActivity.orderId, {
+        status: orderStatus.status,
+      });
+    }
 
     return orderActivity;
   }

@@ -22,6 +22,11 @@ export enum OrderStatus {
   CANCELLED = 'CANCELLED',
 }
 
+export enum OrderPaymentStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+}
+
 export interface OrderLocation {
   latitude: number | null;
   longitude: number | null;
@@ -39,6 +44,7 @@ export interface Order extends BaseDomain {
   type: keyof typeof OrderType;
   discount?: number | null;
   finalFee?: number | null;
+  paymentStatus?: OrderPaymentStatus | null;
   conversationId?: UUID | null;
   locationFrom?: OrderLocation | null;
   locationTo?: OrderLocation | null;
@@ -50,6 +56,8 @@ export interface Order extends BaseDomain {
   description?: string;
   batchId?: UUID | null;
   externalReferenceId?: string | null;
+  organizationId?: UUID | null;
+  isBusinessOrder?: boolean;
   createdAt: Date;
   updatedAt: Date;
 

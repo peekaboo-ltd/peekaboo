@@ -35,6 +35,17 @@ const TEMPLATE_HEADERS_LEGACY = [
   'DESCRIPTION (OPTIONAL)',
 ] as const;
 
+/** Single-row example after headers (optional columns may be left empty). */
+const TEMPLATE_CSV_EXAMPLE_ROW =
+  '+250788123456,Kigali City Tower,REF-001,Electronics sample,Notes here';
+
+const buildBatchImportCsvTemplate = (): string => {
+  const esc = (cell: string) =>
+    /[",\n\r]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell;
+  const header = TEMPLATE_HEADERS_CURRENT.map(esc).join(',');
+  return `${header}\n${TEMPLATE_CSV_EXAMPLE_ROW}\n`;
+};
+
 const normalizeHeader = (value: string) =>
   value.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
 
@@ -47,6 +58,106 @@ const trimTrailingEmpty = (values: string[]) => {
 };
 
 const MAX_TEXT_LENGTH = 255;
+
+function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewState {
+  const headerRow = trimTrailingEmpty(
+    (rows[0] || []).map((value) => String(value || '')),
+  );
+  const normalizedHeaderRow = headerRow.map(normalizeHeader);
+
+  const normalizedCurrent = TEMPLATE_HEADERS_CURRENT.map(normalizeHeader);
+  const normalizedLegacy = TEMPLATE_HEADERS_LEGACY.map(normalizeHeader);
+
+  const matchesCurrent =
+    normalizedHeaderRow.length === normalizedCurrent.length &&
+    normalizedCurrent.every((h, i) => h === normalizedHeaderRow[i]);
+  const matchesLegacy =
+    normalizedHeaderRow.length === normalizedLegacy.length &&
+    normalizedLegacy.every((h, i) => h === normalizedHeaderRow[i]);
+
+  if (!matchesCurrent && !matchesLegacy) {
+    return {
+      rows: [],
+      errors: [{
+        rowNumber: 1,
+        field: 'headers',
+        message: 'Invalid template headers. Please use the official Bulk Import Template.',
+      }],
+    };
+  }
+
+  const parsedRows: ImportTemplateRow[] = [];
+  const validationErrors: ImportRowValidationError[] = [];
+
+  rows.slice(1).forEach((row, index) => {
+    const rowNumber = index + 2;
+    const recipientPhoneNumber = String(row?.[0] || '').trim();
+    const deliveryLocation = String(row?.[1] || '').trim();
+    const productReferenceNo = String(row?.[2] || '').trim();
+    const column4 = String(row?.[3] || '').trim();
+    const column5 = String(row?.[4] || '').trim();
+    const productName = matchesLegacy ? column4 : undefined;
+    const description = matchesLegacy
+      ? column5
+      : [column4, column5].filter(Boolean).join(' - ');
+
+    const isCompletelyEmpty = [
+      recipientPhoneNumber,
+      deliveryLocation,
+      productReferenceNo,
+      productName || '',
+      description,
+    ].every((value) => !value);
+
+    if (isCompletelyEmpty) return;
+
+    const phoneValidation = validateAndFormatPhoneNumber(
+      cleanPhoneNumber(recipientPhoneNumber)?.formattedNumber || '',
+    );
+    if (!phoneValidation.isValid || !phoneValidation.formattedNumber) {
+      validationErrors.push({
+        rowNumber,
+        field: 'recipientPhoneNumber',
+        message: phoneValidation.error || 'Recipient phone number is required and must be valid',
+      });
+    }
+
+    if (productReferenceNo.length > MAX_TEXT_LENGTH) {
+      validationErrors.push({
+        rowNumber,
+        field: 'productReferenceNo',
+        message: `Product reference cannot exceed ${MAX_TEXT_LENGTH} characters`,
+      });
+    }
+
+    if ((productName?.length ?? 0) > MAX_TEXT_LENGTH) {
+      validationErrors.push({
+        rowNumber,
+        field: 'productName',
+        message: `Product name cannot exceed ${MAX_TEXT_LENGTH} characters`,
+      });
+    }
+
+    parsedRows.push({
+      rowNumber,
+      recipientPhoneNumber: phoneValidation.formattedNumber || recipientPhoneNumber,
+      deliveryLocation: deliveryLocation || undefined,
+      productReferenceNo: productReferenceNo || undefined,
+      productName: productName || undefined,
+      description: description || undefined,
+    });
+  });
+
+  if (!parsedRows.length) {
+    validationErrors.push({
+      rowNumber: 2,
+      field: 'rows',
+      message: 'No valid data rows found. Add at least one order row.',
+    });
+  }
+
+  return { rows: parsedRows, errors: validationErrors };
+}
 
 interface ImportBatchFormData {
   batchName: string;
@@ -96,12 +207,18 @@ const ImportBatch = () => {
     reset();
   }, [dispatch, reset, resetForm]);
 
-  const parseWorkbook = useCallback((file: File) => {
+  const parseWorkbook = useCallback((file: File, format: 'xlsx' | 'csv') => {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const binaryData = event.target?.result;
-        const workbook = XLSX.read(binaryData, { type: 'binary' });
+        let workbook: XLSX.WorkBook;
+        if (format === 'csv') {
+          const text = String(event.target?.result ?? '');
+          workbook = XLSX.read(text, { type: 'string', raw: false });
+        } else {
+          workbook = XLSX.read(event.target?.result as string, { type: 'binary' });
+        }
+
         const firstSheet = workbook.SheetNames[0];
         if (!firstSheet) {
           setPreview({
@@ -119,112 +236,24 @@ const ImportBatch = () => {
           raw: false,
         });
 
-        const headerRow = trimTrailingEmpty(
-          (rows[0] || []).map((value) => String(value || '')),
-        );
-        const normalizedHeaderRow = headerRow.map(normalizeHeader);
-
-        const normalizedCurrent = TEMPLATE_HEADERS_CURRENT.map(normalizeHeader);
-        const normalizedLegacy = TEMPLATE_HEADERS_LEGACY.map(normalizeHeader);
-
-        const matchesCurrent =
-          normalizedHeaderRow.length === normalizedCurrent.length &&
-          normalizedCurrent.every((h, i) => h === normalizedHeaderRow[i]);
-        const matchesLegacy =
-          normalizedHeaderRow.length === normalizedLegacy.length &&
-          normalizedLegacy.every((h, i) => h === normalizedHeaderRow[i]);
-
-        if (!matchesCurrent && !matchesLegacy) {
-          setPreview({
-            rows: [],
-            errors: [{
-              rowNumber: 1,
-              field: 'headers',
-              message: 'Invalid template headers. Please use the official Bulk Import Template.',
-            }],
-          });
-          return;
-        }
-
-        const parsedRows: ImportTemplateRow[] = [];
-        const validationErrors: ImportRowValidationError[] = [];
-
-        rows.slice(1).forEach((row, index) => {
-          const rowNumber = index + 2;
-          const recipientPhoneNumber = String(row?.[0] || '').trim();
-          const deliveryLocation = String(row?.[1] || '').trim();
-          const productReferenceNo = String(row?.[2] || '').trim();
-          const column4 = String(row?.[3] || '').trim();
-          const column5 = String(row?.[4] || '').trim();
-          const productName = matchesLegacy ? column4 : undefined;
-          const description = matchesLegacy
-            ? column5
-            : [column4, column5].filter(Boolean).join(' - ');
-
-          const isCompletelyEmpty = [
-            recipientPhoneNumber,
-            deliveryLocation,
-            productReferenceNo,
-            productName || '',
-            description,
-          ].every((value) => !value);
-
-          if (isCompletelyEmpty) return;
-
-          const phoneValidation = validateAndFormatPhoneNumber(
-            cleanPhoneNumber(recipientPhoneNumber)?.formattedNumber || '',
-          );
-          if (!phoneValidation.isValid || !phoneValidation.formattedNumber) {
-            validationErrors.push({
-              rowNumber,
-              field: 'recipientPhoneNumber',
-              message: phoneValidation.error || 'Recipient phone number is required and must be valid',
-            });
-          }
-
-          if (productReferenceNo.length > MAX_TEXT_LENGTH) {
-            validationErrors.push({
-              rowNumber,
-              field: 'productReferenceNo',
-              message: `Product reference cannot exceed ${MAX_TEXT_LENGTH} characters`,
-            });
-          }
-
-          if ((productName?.length ?? 0) > MAX_TEXT_LENGTH) {
-            validationErrors.push({
-              rowNumber,
-              field: 'productName',
-              message: `Product name cannot exceed ${MAX_TEXT_LENGTH} characters`,
-            });
-          }
-
-          parsedRows.push({
-            rowNumber,
-            recipientPhoneNumber: phoneValidation.formattedNumber || recipientPhoneNumber,
-            deliveryLocation: deliveryLocation || undefined,
-            productReferenceNo: productReferenceNo || undefined,
-            productName: productName || undefined,
-            description: description || undefined,
-          });
-        });
-
-        if (!parsedRows.length) {
-          validationErrors.push({
-            rowNumber: 2,
-            field: 'rows',
-            message: 'No valid data rows found. Add at least one order row.',
-          });
-        }
-
-        setPreview({ rows: parsedRows, errors: validationErrors });
+        setPreview(buildImportPreviewFromGrid(rows));
       } catch {
         setPreview({
           rows: [],
-          errors: [{ rowNumber: 1, field: 'file', message: 'Unable to parse file. Please upload a valid .xlsx template.' }],
+          errors: [{
+            rowNumber: 1,
+            field: 'file',
+            message: 'Unable to parse file. Please upload a valid .xlsx or .csv template.',
+          }],
         });
       }
     };
-    reader.readAsBinaryString(file);
+
+    if (format === 'csv') {
+      reader.readAsText(file);
+    } else {
+      reader.readAsBinaryString(file);
+    }
   }, []);
 
   const onFileChange = useCallback(
@@ -232,23 +261,39 @@ const ImportBatch = () => {
       const selectedFile = event.target.files?.[0];
       if (!selectedFile) return;
 
+      const lower = selectedFile.name.toLowerCase();
       const isXlsx =
         selectedFile.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-        selectedFile.name.toLowerCase().endsWith('.xlsx');
+        lower.endsWith('.xlsx');
+      const isCsv =
+        selectedFile.type === 'text/csv' ||
+        selectedFile.type === 'application/vnd.ms-excel' ||
+        lower.endsWith('.csv');
 
-      if (!isXlsx) {
+      if (!isXlsx && !isCsv) {
         setPreview({
           rows: [],
-          errors: [{ rowNumber: 1, field: 'file', message: 'Only .xlsx files are supported' }],
+          errors: [{ rowNumber: 1, field: 'file', message: 'Only .xlsx or .csv files are supported' }],
         });
         return;
       }
 
       setFileName(selectedFile.name);
-      parseWorkbook(selectedFile);
+      parseWorkbook(selectedFile, isCsv ? 'csv' : 'xlsx');
     },
     [parseWorkbook],
   );
+
+  const downloadCsvTemplate = useCallback(() => {
+    const csv = '\uFEFF' + buildBatchImportCsvTemplate();
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'peekaboo-batch-import-template.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
 
   const onSubmit = useCallback(async () => {
     if (hasBlockingErrors) return;
@@ -287,7 +332,7 @@ const ImportBatch = () => {
       }
       toast.error('Bulk import failed. Fix highlighted errors and retry.');
     }
-  }, [closeModal, getValues, hasBlockingErrors, importBulkOrders, navigate, preview.rows]);
+  }, [closeModal, dispatch, getValues, hasBlockingErrors, importBulkOrders, navigate, preview?.rows]);
 
   const closeBillingGuardModal = useCallback(() => {
     setBillingGuardPrompt(null);
@@ -320,13 +365,18 @@ const ImportBatch = () => {
                 Template Upload
               </h3>
               <p className="text-xs text-slate-600 mt-1">
-                Accepted format: <code>.xlsx</code> with exact 5-column template headers.
+                Accepted formats: <code>.xlsx</code> or <code>.csv</code> with exact 5-column template headers.
               </p>
             </div>
-            {fileName && <Badge variant="secondary">{fileName}</Badge>}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button type="button" className="text-xs py-1.5 px-3" onClick={downloadCsvTemplate}>
+                Download CSV template
+              </Button>
+              {fileName && <Badge variant="secondary">{fileName}</Badge>}
+            </div>
           </header>
           <label className="mt-4 block rounded-lg border border-dashed border-slate-300 bg-white p-4 cursor-pointer hover:border-primary-900 transition-colors">
-            <input type="file" accept=".xlsx" onChange={onFileChange} className="hidden" />
+            <input type="file" accept=".xlsx,.csv,text/csv" onChange={onFileChange} className="hidden" />
             <p className="text-sm text-slate-700">Click to select import file</p>
             <p className="text-xs text-slate-500 mt-1">
               Recipient phone is required. Delivery location, product ref, and description are optional.
@@ -439,7 +489,7 @@ const ImportBatch = () => {
           </p>
         )}
 
-        <footer className="flex justify-end gap-3 pt-2 border-t">
+        <footer className="flex justify-between gap-3 pt-2 border-t">
           <Button type="button" onClick={closeModal}>
             Cancel
           </Button>

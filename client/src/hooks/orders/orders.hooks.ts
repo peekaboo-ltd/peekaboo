@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   useCreateOrderMutation,
   useCreatePublicOrderMutation,
+  useDeferOrderPaymentMutation,
   useDeleteOrderMutation,
   useImportBulkOrdersMutation,
   useUpdateOrderMutation,
@@ -224,6 +225,22 @@ export const useUpdatePublicOrder = () => {
   }, [data, isSuccess, dispatch, reset]);
 
   return { updatePublicOrder, data, error, isLoading, isSuccess, reset };
+};
+
+export const useDeferOrderPayment = () => {
+  const dispatch = useAppDispatch();
+
+  const [deferOrderPayment, { data, error, isLoading, isSuccess, reset }] =
+    useDeferOrderPaymentMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setOrder(data?.data?.order));
+      reset();
+    }
+  }, [data, isSuccess, dispatch, reset]);
+
+  return { deferOrderPayment, data, error, isLoading, isSuccess, reset };
 };
 
 export const useGetOrderByReferenceId = () => {

@@ -20,7 +20,7 @@ import { PaymentType } from '../constants/payment.constants';
 import { NotFoundError } from '../helpers/errors.helper';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import { OrderActivityService } from './orderActivity.service';
-import { OrderStatus } from '../constants/order.constants';
+import { OrderActivityStatus } from '../constants/order.constants';
 import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrderAssignmentService } from './orderAssignment.service';
 import { EmailService } from '../integrations/emails/email.service';
@@ -189,7 +189,7 @@ export class PaymentService {
     if (status === KpayPaymentStatus.SUCCESSFUL) {
       orderActivity = await this.orderActivityService.createOrderActivity({
         orderId: payment?.entityId,
-        status: OrderStatus.PAID,
+        status: OrderActivityStatus.PAID,
         notes: payment?.externalReferenceId ?? undefined,
         createdById: payment?.createdById ?? undefined,
       });

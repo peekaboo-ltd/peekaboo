@@ -56,6 +56,13 @@ export const ordersMutationApiSlice = createApi({
       }),
     }),
 
+    deferOrderPayment: builder.mutation({
+      query: ({ id }: { id: UUID }) => ({
+        url: `/orders/${id}/defer-payment`,
+        method: 'POST',
+      }),
+    }),
+
     // DELETE ORDER
     deleteOrder: builder.mutation({
       query: (id: UUID) => ({
@@ -86,6 +93,7 @@ export const {
   useCreatePublicOrderMutation,
   useUpdateOrderMutation,
   useUpdatePublicOrderMutation,
+  useDeferOrderPaymentMutation,
   useDeleteOrderMutation,
   useImportBulkOrdersMutation,
 } = ordersMutationApiSlice;

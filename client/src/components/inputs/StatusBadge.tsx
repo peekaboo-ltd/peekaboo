@@ -9,6 +9,7 @@ export const StatusBadge = ({ status }: { status?: string }) => {
         case 'ACCEPTED':
         case 'DELIVERED':
         case 'PAID':
+        case 'PAYMENT_DEFERRED':
             className = 'bg-green-700 text-white';
             break;
         case 'CONFIRMED':
@@ -27,6 +28,7 @@ export const StatusBadge = ({ status }: { status?: string }) => {
             break;
         case 'ARCHIVED':
         case 'INACTIVE':
+        case 'DRAFT':
             className = 'bg-slate-600 text-white';
             break;
     }

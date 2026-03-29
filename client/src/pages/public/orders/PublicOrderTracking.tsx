@@ -7,9 +7,12 @@ import { OrderStatus } from '@/types/order.type';
 import { useGetPublicOrder } from '@/hooks/orders/orders.hooks';
 import { faCopy, faCheckCircle } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { OrderActivity } from '@/types/orderActivity.type';
+import { type OrderActivity } from '@/types/orderActivity.type';
 import { toast } from 'sonner';
-import { workflowStatuses } from '@/constants/order.constants';
+import {
+  getWorkflowStatusForActivity,
+  workflowStatuses,
+} from '@/constants/order.constants';
 import Button from '@/components/inputs/Button';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
@@ -88,19 +91,33 @@ const PublicOrderTracking = () => {
     }
   }, [orderActivitiesList]);
 
-  const currentStepIndex = workflowStatuses.findIndex(
-    (status) => status.key === currentStatus?.status,
-  );
-
   const statusActivityMap = useMemo(() => {
     const map = new Map<OrderStatus, OrderActivity>();
     orderActivitiesList?.forEach((activity) => {
-      if (!map.has(activity.status)) {
-        map.set(activity.status, activity);
+      const workflowStatus = getWorkflowStatusForActivity(activity.status);
+      if (workflowStatus && !map.has(workflowStatus)) {
+        map.set(workflowStatus, activity);
       }
     });
     return map;
   }, [orderActivitiesList]);
+
+  const currentWorkflowActivity = useMemo(
+    () =>
+      orderActivitiesList?.find((activity) =>
+        Boolean(getWorkflowStatusForActivity(activity.status)),
+      ),
+    [orderActivitiesList],
+  );
+
+  const currentWorkflowStatus =
+    getWorkflowStatusForActivity(currentWorkflowActivity?.status) ||
+    getWorkflowStatusForActivity(order?.status) ||
+    undefined;
+
+  const currentStepIndex = workflowStatuses.findIndex(
+    (status) => status.key === currentWorkflowStatus,
+  );
 
   const furthestActivityIndex = workflowStatuses.reduce((maxIndex, status, index) => {
     return statusActivityMap.has(status.key) ? Math.max(maxIndex, index) : maxIndex;

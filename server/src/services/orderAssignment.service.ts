@@ -4,8 +4,9 @@ import { AppDataSource } from '../data-source';
 import { getPagination, getPagingData } from '../helpers/pagination.helper';
 import { Pagination } from '../helpers/pagination.helper';
 import {
+  OrderActivityStatus,
   OrderAssignmentStatus,
-  OrderStatus,
+  isPaidEquivalentOrderActivityStatus,
 } from '../constants/order.constants';
 import { Order } from '../entities/order.entity';
 import { ConflictError, NotFoundError } from '../helpers/errors.helper';
@@ -40,6 +41,16 @@ export class OrderAssignmentService {
     this.userService = new UserService();
     this.orderActivityService = new OrderActivityService();
     this.emailService = new EmailService();
+  }
+
+  private getLatestActivityStatus(order?: Order): OrderActivityStatus | undefined {
+    return order?.activities?.length
+      ? [...order.activities].sort(
+          (a, b) =>
+            new Date(b.updatedAt ?? b.createdAt ?? 0).getTime() -
+            new Date(a.updatedAt ?? a.createdAt ?? 0).getTime()
+        )[0]?.status
+      : undefined;
   }
 
   // CREATE ORDER ASSIGNMENT
@@ -302,13 +313,14 @@ export class OrderAssignmentService {
     });
 
     if (
-      orderAssignmentExists?.order?.activities?.shift()?.status ===
-        OrderStatus.PAID &&
+      isPaidEquivalentOrderActivityStatus(
+        this.getLatestActivityStatus(orderAssignmentExists?.order)
+      ) &&
       orderAssignmentExists?.status === OrderAssignmentStatus.ACTIVE
     ) {
       await this.orderActivityService.createOrderActivity({
         orderId: orderAssignmentExists?.orderId,
-        status: OrderStatus.CONFIRMED,
+        status: OrderActivityStatus.CONFIRMED,
         createdById: orderAssignmentExists?.createdById,
       });
     }
@@ -329,11 +341,13 @@ export class OrderAssignmentService {
     });
 
     if (
-      orderAssignment?.order?.activities?.shift()?.status === OrderStatus.PAID
+      isPaidEquivalentOrderActivityStatus(
+        this.getLatestActivityStatus(orderAssignment?.order)
+      )
     ) {
       await this.orderActivityService.createOrderActivity({
         orderId: orderAssignment?.orderId,
-        status: OrderStatus.CONFIRMED,
+        status: OrderActivityStatus.CONFIRMED,
         createdById: orderAssignment?.createdById,
       });
     }
@@ -530,10 +544,10 @@ export class OrderAssignmentService {
       assignedToId: assignedToExists?.id,
     });
 
-    if (orderExists?.activities?.shift()?.status === OrderStatus.PAID) {
+    if (isPaidEquivalentOrderActivityStatus(this.getLatestActivityStatus(orderExists))) {
       await this.orderActivityService.createOrderActivity({
         orderId,
-        status: OrderStatus.ACCEPTED,
+        status: OrderActivityStatus.ACCEPTED,
         createdById: orderExists?.createdById,
       });
     }
