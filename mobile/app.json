@@ -17,6 +17,10 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.peekaboo.rider",
       "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSAllowsLocalNetworking": true
+        },
         "NSCameraUsageDescription": "We need camera access to capture rider status proof photos with timestamp and location.",
         "NSLocationWhenInUseUsageDescription": "We need your location to show delivery routes",
         "NSLocationAlwaysUsageDescription": "We need your location for real-time tracking during deliveries",
@@ -31,6 +35,7 @@
         "backgroundColor": "#1D546D"
       },
       "package": "com.peekaboo.rider",
+      "usesCleartextTraffic": true,
       "edgeToEdgeEnabled": true,
       "permissions": [
         "CAMERA",

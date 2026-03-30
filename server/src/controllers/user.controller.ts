@@ -350,10 +350,30 @@ export const UserController = {
         });
       }
 
-      const cloudinaryUrl = await uploadUserStatusProofToCloudinary(localFilePath, {
-        userId: user.id,
-        status,
-      });
+      let proofImageUrl = '';
+      try {
+        proofImageUrl = await uploadUserStatusProofToCloudinary(localFilePath, {
+          userId: user.id,
+          status,
+        });
+      } catch (error) {
+        try {
+          if (fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath);
+          }
+        } catch {
+          // ignore local file delete errors
+        }
+
+        const uploadErrorMessage =
+          error instanceof Error && error.message
+            ? error.message
+            : 'Failed to upload status proof image';
+
+        return res.status(502).json({
+          message: uploadErrorMessage,
+        });
+      }
 
       const existingUser = await userService.getUserById(user.id as UUID);
       const currentTimestamp = capturedAt || new Date().toISOString();
@@ -371,7 +391,7 @@ export const UserController = {
         statusProofs: [
           ...existingProofs,
           {
-            imageUrl: cloudinaryUrl,
+            imageUrl: proofImageUrl,
             status,
             timestamp: currentTimestamp,
             locationLabel: locationLabel || undefined,

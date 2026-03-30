@@ -18,6 +18,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import * as MediaLibrary from 'expo-media-library';
 import { Image } from 'expo-image';
+import axios from 'axios';
 import { StatCard } from '../../components/dashboard/StatCard';
 import { RecentActivity } from '../../components/dashboard/RecentActivity';
 import { Card } from '../../components/ui/Card';
@@ -155,8 +156,16 @@ export default function DashboardScreen() {
         status: requestedStatus,
       });
       resetProofState();
-    } catch {
-      Alert.alert('Update failed', 'Failed to send check proof. Please try again.');
+    } catch (error) {
+      const apiError =
+        axios.isAxiosError<{ message?: string }>(error) && error.response?.data?.message
+          ? error.response.data.message
+          : null;
+
+      Alert.alert(
+        'Update failed',
+        apiError || 'Failed to send check proof. Please try again.'
+      );
     } finally {
       setIsSubmittingProof(false);
     }
