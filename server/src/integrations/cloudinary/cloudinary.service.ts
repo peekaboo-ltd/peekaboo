@@ -10,6 +10,11 @@ interface UploadAvatarOptions {
   userId?: string;
 }
 
+interface UploadStatusProofOptions {
+  userId?: string;
+  status?: string;
+}
+
 export async function uploadUserAvatarToCloudinary(
   localFilePath: string,
   options: UploadAvatarOptions = {},
@@ -33,3 +38,21 @@ export async function uploadUserAvatarToCloudinary(
   return result.secure_url;
 }
 
+export async function uploadUserStatusProofToCloudinary(
+  localFilePath: string,
+  options: UploadStatusProofOptions = {},
+): Promise<string> {
+  const folder = process.env.CLOUDINARY_STATUS_PROOF_FOLDER || 'peekaboo/status-proofs';
+  const suffix = options.status ? options.status.toLowerCase() : 'status';
+  const publicId = options.userId
+    ? `${options.userId}-${suffix}-${Date.now()}`
+    : undefined;
+
+  const result = await cloudinary.uploader.upload(localFilePath, {
+    folder,
+    overwrite: false,
+    ...(publicId ? { public_id: publicId } : {}),
+  });
+
+  return result.secure_url;
+}

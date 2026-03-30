@@ -10,6 +10,15 @@ import { OrganizationMembership } from './organizationMembership.entity';
 import { Batch } from './batch.entity';
 import { PushSubscription } from './pushSubscription.entity';
 
+export interface UserStatusProofRecord {
+  imageUrl: string;
+  status: UserStatus;
+  timestamp: string;
+  locationLabel?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 @Entity('users')
 export class User extends AbstractEntity {
   // NAME
@@ -109,6 +118,10 @@ export class User extends AbstractEntity {
     longitude: number;
     collectedAt?: string;
   };
+
+  // CHECK-IN/CHECK-OUT STATUS PROOF RECORDS
+  @Column({ name: 'status_proofs', type: 'jsonb', nullable: true, default: () => "'[]'::jsonb" })
+  statusProofs?: UserStatusProofRecord[];
 
   /**
    * RELATIONS

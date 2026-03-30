@@ -20,6 +20,8 @@
         "NSCameraUsageDescription": "We need camera access to capture rider status proof photos with timestamp and location.",
         "NSLocationWhenInUseUsageDescription": "We need your location to show delivery routes",
         "NSLocationAlwaysUsageDescription": "We need your location for real-time tracking during deliveries",
+        "NSPhotoLibraryUsageDescription": "We need photo library access to save rider proof photos to your gallery.",
+        "NSPhotoLibraryAddUsageDescription": "We need permission to add rider proof photos to your gallery.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -34,6 +36,8 @@
         "CAMERA",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
+        "READ_MEDIA_IMAGES",
+        "WRITE_EXTERNAL_STORAGE",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ]
@@ -57,6 +61,13 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Peekaboo Rider to use your location for deliveries."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Peekaboo Rider to access your photos for saving proof images.",
+          "savePhotosPermission": "Allow Peekaboo Rider to save proof images to your gallery."
         }
       ]
     ],

@@ -45,4 +45,12 @@ export interface RiderManagementItem {
   failedDeliveries: number;
   activeDays: number;
   activeHours: number;
+  dailyAttendance?: {
+    date: string;
+    isPresent: boolean;
+    checkInAt?: string;
+    checkOutAt?: string;
+    checkInImageUrl?: string;
+    checkOutImageUrl?: string;
+  };
 }

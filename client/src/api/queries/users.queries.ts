@@ -69,6 +69,8 @@ export const usersQueriesApiSlice = createApi({
         timeframe,
         startDate,
         endDate,
+        attendanceDate,
+        name,
         sortBy,
         sortOrder,
       }: {
@@ -79,6 +81,8 @@ export const usersQueriesApiSlice = createApi({
         timeframe?: 'daily' | 'weekly' | 'monthly' | 'custom';
         startDate?: string;
         endDate?: string;
+        attendanceDate?: string;
+        name?: string;
         sortBy?: 'deliveries' | 'earnings' | 'canceled' | 'failed' | 'activeDays' | 'activeHours';
         sortOrder?: 'asc' | 'desc';
       }) => ({
@@ -91,6 +95,8 @@ export const usersQueriesApiSlice = createApi({
           timeframe,
           startDate,
           endDate,
+          attendanceDate,
+          name,
           sortBy,
           sortOrder,
         },

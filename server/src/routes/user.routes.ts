@@ -2,7 +2,7 @@ import { Router } from "express";
 import { UserController } from "../controllers/user.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
-import { uploadAvatar } from "../middlewares/upload.middleware";
+import { uploadAvatar, uploadStatusProof } from "../middlewares/upload.middleware";
 import { RoleTypes } from "../constants/role.constants";
 
 const router = Router();
@@ -38,6 +38,9 @@ router.post("/", authorize([RoleTypes.ADMIN, RoleTypes.BUSINESS]), UserControlle
 
 // UPDATE current user location
 router.patch('/me/current-location', UserController.updateCurrentLocation);
+
+// UPDATE current user status with proof image
+router.patch('/me/status-with-proof', uploadStatusProof, UserController.updateMyStatusWithProof);
 
 // UPDATE user (ADMIN or own profile)
 router.patch("/:id", UserController.updateUser);

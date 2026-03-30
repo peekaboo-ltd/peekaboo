@@ -17,6 +17,15 @@ export interface UpdateUserPayload {
   status?: UserStatus;
 }
 
+export interface UpdateMyStatusWithProofPayload {
+  status: UserStatus;
+  latitude: number;
+  longitude: number;
+  locationLabel?: string;
+  capturedAt?: string;
+  proofImageUri: string;
+}
+
 export const usersAPI = {
   updateCurrentLocation: async (
     location: Pick<UserLocation, 'latitude' | 'longitude'>
@@ -34,6 +43,44 @@ export const usersAPI = {
       `/users/${id}`,
       payload
     );
+    return response.data.data;
+  },
+
+  updateMyStatusWithProof: async (payload: UpdateMyStatusWithProofPayload): Promise<User> => {
+    const formData: FormData = new FormData();
+
+    formData.append('status', payload.status);
+    formData.append('latitude', String(payload.latitude));
+    formData.append('longitude', String(payload.longitude));
+
+    if (payload.locationLabel) {
+      formData.append('locationLabel', payload.locationLabel);
+    }
+
+    if (payload.capturedAt) {
+      formData.append('capturedAt', payload.capturedAt);
+    }
+
+    // React Native file object typing is not available in DOM lib.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const proofImage: any = {
+      uri: payload.proofImageUri,
+      name: `status-proof-${Date.now()}.jpg`,
+      type: 'image/jpeg',
+    };
+
+    formData.append('proofImage', proofImage);
+
+    const response = await apiClient.patch<ApiResponse<User>>(
+      `/users/me/status-with-proof`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
     return response.data.data;
   },
 
