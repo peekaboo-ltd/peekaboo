@@ -1131,7 +1131,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-<<<<<<< HEAD
+
   proofWatermark: {
     position: 'absolute',
     top: spacing.md,
@@ -1140,8 +1140,6 @@ const styles = StyleSheet.create({
     height: 40,
     opacity: 0.78,
   },
-=======
->>>>>>> 5d4fc0c (toggle to be active or inactive)
   proofOverlay: {
     position: 'absolute',
     left: spacing.md,
@@ -1157,11 +1155,8 @@ const styles = StyleSheet.create({
     fontSize: typography.bodySmall.fontSize,
     fontWeight: '500',
   },
-<<<<<<< HEAD
   proofActions: {
     gap: spacing.sm,
     marginTop: spacing.md,
   },
-=======
->>>>>>> 5d4fc0c (toggle to be active or inactive)
 });
