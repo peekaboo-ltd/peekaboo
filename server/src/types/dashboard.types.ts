@@ -80,6 +80,11 @@ export interface RiderMetrics {
   completionRate: number;
   acceptanceRate: number;
   pendingAssignments: number;
+  completedToday: number;
+  todayDeliveries: number;
+  totalEarnings: number;
+  totalAssignments: number;
+  bonusActive: boolean;
   assignmentsByStatus: AssignmentStatusCount[];
   recentActivity: RecentActivity[];
   totalEarnings: number;

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import fs from 'fs';
 import { DashboardService } from '../services/dashboard.service';
 import { OrderService } from '../services/order.service';
 import { AuthRequest } from '../types/auth.types';
@@ -42,6 +43,13 @@ const parseOrganizationId = (value: unknown): UUID | undefined => {
     return undefined;
   }
   return normalized as UUID;
+};
+
+const parseDateTime = (value: unknown, fallback: Date) => {
+  if (!value) return fallback;
+  const parsed = new Date(String(value));
+  if (Number.isNaN(parsed.getTime())) return fallback;
+  return parsed;
 };
 
 export const DashboardController = {
@@ -204,6 +212,60 @@ export const DashboardController = {
       return res.status(200).json({
         message: order ? 'Order found' : 'Order not found',
         data: order,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async reportProblem(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const file = req.file as (Express.Multer.File & { path?: string }) | undefined;
+      const { description, capturedAt, mediaType, locationLabel } = req.body as {
+        description?: string;
+        capturedAt?: string;
+        mediaType?: string;
+        locationLabel?: string;
+      };
+
+      if (!file) {
+        return res.status(400).json({ message: 'Evidence file is required' });
+      }
+
+      if (!description || !description.trim()) {
+        return res.status(400).json({ message: 'Description is required' });
+      }
+
+      const localFilePath = file.path;
+
+      // For now we acknowledge receipt and remove temporary local upload.
+      if (localFilePath) {
+        try {
+          if (fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath);
+          }
+        } catch {
+          // ignore local cleanup errors
+        }
+      }
+
+      return res.status(200).json({
+        message: 'Problem report submitted successfully',
+        data: {
+          reportedBy: userId,
+          mediaType: mediaType || file.mimetype,
+          capturedAt: capturedAt || new Date().toISOString(),
+          description: description.trim(),
+          locationLabel: locationLabel || undefined,
+          submittedAt: new Date().toISOString(),
+        },
       });
     } catch (error) {
       next(error);

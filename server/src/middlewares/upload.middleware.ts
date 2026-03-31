@@ -6,6 +6,7 @@ import { UUID } from '../types';
 
 const AVATARS_DIR = path.join(process.cwd(), 'uploads', 'avatars');
 const STATUS_PROOFS_DIR = path.join(process.cwd(), 'uploads', 'status-proofs');
+const PROBLEM_REPORTS_DIR = path.join(process.cwd(), 'uploads', 'problem-reports');
 
 const ensureDir = (dirPath: string) => {
   try {
@@ -17,6 +18,7 @@ const ensureDir = (dirPath: string) => {
 
 ensureDir(AVATARS_DIR);
 ensureDir(STATUS_PROOFS_DIR);
+ensureDir(PROBLEM_REPORTS_DIR);
 
 const storage = multer.diskStorage({
   destination: (
@@ -80,3 +82,48 @@ export const uploadStatusProof = multer({
   fileFilter,
   limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
 }).single('proofImage');
+
+const problemReportStorage = multer.diskStorage({
+  destination: (
+    _req: Request,
+    _file: unknown,
+    cb: (error: Error | null, destination: string) => void
+  ) => {
+    cb(null, PROBLEM_REPORTS_DIR);
+  },
+  filename: (
+    req: Request,
+    file: { mimetype: string },
+    cb: (error: Error | null, filename: string) => void
+  ) => {
+    const userId = ((req as Request & { user?: { id?: UUID } }).user?.id || 'user') as string;
+    const ext = file.mimetype.split('/')[1] || 'bin';
+    cb(null, `${userId}-problem-report-${Date.now()}.${ext}`);
+  },
+});
+
+const problemReportFileFilter = (
+  _req: Request,
+  file: { mimetype: string },
+  cb: multer.FileFilterCallback
+) => {
+  const allowed = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'video/mp4',
+    'video/quicktime',
+  ];
+  if (allowed.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image and mp4/mov video files are allowed'));
+  }
+};
+
+export const uploadProblemReportEvidence = multer({
+  storage: problemReportStorage,
+  fileFilter: problemReportFileFilter,
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
+}).single('evidence');

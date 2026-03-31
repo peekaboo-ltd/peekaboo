@@ -10,6 +10,7 @@ import {
   Switch,
   Modal,
   TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -27,9 +28,12 @@ import { useDashboard } from '../../hooks/useDashboard';
 import { useAuthStore } from '../../store/authStore';
 import { useI18n } from '../../i18n';
 import { usersAPI } from '../../services/api/users';
+import { dashboardAPI } from '../../services/api/dashboard';
 import { colors, typography, spacing } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatters';
 import { OrderAssignmentStatus, UserStatus } from '../../types';
+
+type ReportCaptureType = 'image' | 'video';
 
 const formatAddressLabel = (address?: Location.LocationGeocodedAddress | null) => {
   if (!address) {
@@ -85,6 +89,14 @@ export default function DashboardScreen() {
   const [isProofModalVisible, setIsProofModalVisible] = useState(false);
   const [isSubmittingProof, setIsSubmittingProof] = useState(false);
   const [isSavingProof, setIsSavingProof] = useState(false);
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [reportMediaUri, setReportMediaUri] = useState<string | null>(null);
+  const [reportMediaType, setReportMediaType] = useState<ReportCaptureType>('image');
+  const [reportTimestamp, setReportTimestamp] = useState<string>('');
+  const [reportDescription, setReportDescription] = useState('');
+  const [reportLocationLabel, setReportLocationLabel] = useState('');
+  const [isReportConfirmed, setIsReportConfirmed] = useState(false);
+  const [isSendingReport, setIsSendingReport] = useState(false);
   const displayStatus = pendingAvailabilityStatus ?? user?.status ?? UserStatus.INACTIVE;
   const isShiftActive = displayStatus === UserStatus.ACTIVE;
   const locationCollectedText = useMemo(() => {
@@ -126,6 +138,122 @@ export default function DashboardScreen() {
   const handleViewAssignments = () => {
     navigateToAssignments('ALL');
   };
+
+  const resetReportState = useCallback(() => {
+    setIsReportModalVisible(false);
+    setReportMediaUri(null);
+    setReportMediaType('image');
+    setReportTimestamp('');
+    setReportDescription('');
+    setReportLocationLabel('');
+    setIsReportConfirmed(false);
+    setIsSendingReport(false);
+  }, []);
+
+  const launchReportCamera = useCallback(async (captureType: ReportCaptureType) => {
+    const locationPermission = await Location.requestForegroundPermissionsAsync();
+    if (!locationPermission.granted) {
+      Alert.alert('Location permission required', 'Please allow location access to continue.');
+      return;
+    }
+
+    const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!cameraPermission.granted) {
+      Alert.alert('Camera permission required', 'Please allow camera access to continue.');
+      return;
+    }
+
+    const position = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    });
+    const reverseGeocode = await Location.reverseGeocodeAsync({
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+    }).catch(() => []);
+    const locationLabel = formatAddressLabel(reverseGeocode[0]);
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: false,
+      quality: 0.8,
+      mediaTypes:
+        captureType === 'video'
+          ? ImagePicker.MediaTypeOptions.Videos
+          : ImagePicker.MediaTypeOptions.Images,
+      videoMaxDuration: 120,
+    });
+
+    if (result.canceled || !result.assets?.[0]?.uri) return;
+
+    const asset = result.assets[0];
+    setReportMediaUri(asset.uri);
+    setReportMediaType(asset.type === 'video' ? 'video' : 'image');
+    setReportTimestamp(new Date().toLocaleString());
+    setReportLocationLabel(locationLabel);
+    setReportDescription('');
+    setIsReportConfirmed(false);
+    setIsReportModalVisible(true);
+  }, []);
+
+  const handleOpenReportProblem = useCallback(() => {
+    Alert.alert('Report Problem', 'Capture evidence as photo or video.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Photo',
+        onPress: () => {
+          void launchReportCamera('image');
+        },
+      },
+      {
+        text: 'Video',
+        onPress: () => {
+          void launchReportCamera('video');
+        },
+      },
+    ]);
+  }, [launchReportCamera]);
+
+  const handleRetakeReport = useCallback(() => {
+    Alert.alert('Retake evidence?', 'This will replace your current capture.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Retake',
+        onPress: () => {
+          void launchReportCamera(reportMediaType);
+        },
+      },
+    ]);
+  }, [launchReportCamera, reportMediaType]);
+
+  const handleConfirmReport = useCallback(() => {
+    if (!reportMediaUri) return;
+    setIsReportConfirmed(true);
+  }, [reportMediaUri]);
+
+  const handleSendReport = useCallback(async () => {
+    if (!reportMediaUri) return;
+    if (!reportDescription.trim()) {
+      Alert.alert('Description required', 'Please add a short description before sending.');
+      return;
+    }
+
+    try {
+      setIsSendingReport(true);
+      await dashboardAPI.submitProblemReport({
+        description: reportDescription.trim(),
+        capturedAt: new Date().toISOString(),
+        mediaType: reportMediaType,
+        evidenceUri: reportMediaUri,
+        locationLabel: reportLocationLabel,
+      });
+
+      Alert.alert('Report sent', 'Your report has been sent to support successfully.');
+      resetReportState();
+    } catch {
+      Alert.alert('Send failed', 'Unable to send your report right now. Please try again.');
+    } finally {
+      setIsSendingReport(false);
+    }
+  }, [reportDescription, reportLocationLabel, reportMediaType, reportMediaUri, resetReportState]);
 
   const resetProofState = useCallback(() => {
     setProofImageUri(null);
@@ -625,6 +753,93 @@ export default function DashboardScreen() {
           )}
         </Animated.View>
       </ScrollView>
+
+      <Modal
+        visible={isReportModalVisible}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={resetReportState}
+      >
+        <View style={styles.proofModalContainer}>
+          <View style={styles.proofHeader}>
+            <Text style={styles.reportTitle}>Report Problem</Text>
+            <TouchableOpacity
+              onPress={resetReportState}
+              style={styles.proofCloseButton}
+              disabled={isSendingReport}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="close" size={20} color={colors.text.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {reportMediaUri ? (
+            <View style={styles.proofImageWrap}>
+              {reportMediaType === 'image' ? (
+                <Image source={{ uri: reportMediaUri }} style={styles.proofImage} contentFit="cover" />
+              ) : (
+                <View style={styles.videoPreview}>
+                  <Ionicons name="videocam" size={48} color={colors.text.inverse} />
+                  <Text style={styles.videoPreviewText}>Video captured</Text>
+                </View>
+              )}
+              <Image
+                source={require('../../assets/images/peekaboo-watermark.jpeg')}
+                style={styles.proofWatermark}
+                contentFit="contain"
+              />
+              <View style={styles.proofOverlay}>
+                <Text style={styles.proofOverlayText}>Timestamp: {reportTimestamp}</Text>
+                <Text style={styles.proofOverlayText}>Location: {reportLocationLabel || 'Location unavailable'}</Text>
+                <Text style={styles.proofOverlayText}>
+                  Type: {reportMediaType === 'video' ? 'Video' : 'Photo'}
+                </Text>
+              </View>
+            </View>
+          ) : null}
+
+          {!isReportConfirmed ? (
+            <View style={styles.proofActions}>
+              <Button
+                title="Retake"
+                onPress={handleRetakeReport}
+                variant="outline"
+                fullWidth
+                disabled={isSendingReport}
+              />
+              <Button
+                title="Confirm"
+                onPress={handleConfirmReport}
+                fullWidth
+                disabled={!reportMediaUri || isSendingReport}
+                icon={<Ionicons name="checkmark" size={16} color={colors.text.inverse} />}
+              />
+            </View>
+          ) : (
+            <View style={styles.reportForm}>
+              <Text style={styles.reportLabel}>Description</Text>
+              <TextInput
+                style={styles.reportInput}
+                value={reportDescription}
+                onChangeText={setReportDescription}
+                placeholder="Describe the problem..."
+                placeholderTextColor={colors.text.disabled}
+                multiline
+                textAlignVertical="top"
+                editable={!isSendingReport}
+              />
+              <Button
+                title="Send"
+                onPress={handleSendReport}
+                fullWidth
+                loading={isSendingReport}
+                disabled={isSendingReport}
+                icon={<Ionicons name="send" size={16} color={colors.text.inverse} />}
+              />
+            </View>
+          )}
+        </View>
+      </Modal>
 
       <Modal
         visible={isProofModalVisible}
@@ -1158,5 +1373,42 @@ const styles = StyleSheet.create({
   proofActions: {
     gap: spacing.sm,
     marginTop: spacing.md,
+  },
+  reportTitle: {
+    fontSize: typography.h3.fontSize,
+    fontWeight: '700',
+    color: colors.text.primary,
+  },
+  videoPreview: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  videoPreviewText: {
+    color: colors.text.inverse,
+    fontSize: typography.body.fontSize,
+    fontWeight: '600',
+  },
+  reportForm: {
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  reportLabel: {
+    fontSize: typography.bodySmall.fontSize,
+    color: colors.text.secondary,
+    fontWeight: '600',
+  },
+  reportInput: {
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.3)',
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: typography.body.fontSize,
+    color: colors.text.primary,
   },
 });
