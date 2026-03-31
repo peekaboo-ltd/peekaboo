@@ -55,6 +55,13 @@ interface RiderManagementListItem {
     checkOutAt?: string;
     checkInImageUrl?: string;
     checkOutImageUrl?: string;
+    problemReports?: Array<{
+      imageUrl: string;
+      mediaType?: 'photo' | 'video';
+      description?: string;
+      timestamp: string;
+      locationLabel?: string;
+    }>;
   };
 }
 
@@ -609,8 +616,21 @@ export class UserService {
             firstRecord.parsedTimestamp.getTime() - secondRecord.parsedTimestamp.getTime()
         );
 
-      const firstCheckIn = filtered.find((record) => record.status === UserStatus.ACTIVE);
-      const latestCheckOut = [...filtered]
+      const attendanceProofs = filtered.filter(
+        (record) => record.category !== 'PROBLEM_REPORT'
+      );
+      const problemReports = filtered
+        .filter((record) => record.category === 'PROBLEM_REPORT')
+        .map((record) => ({
+          imageUrl: record.imageUrl,
+          mediaType: record.mediaType,
+          description: record.description,
+          timestamp: record.timestamp,
+          locationLabel: record.locationLabel,
+        }));
+
+      const firstCheckIn = attendanceProofs.find((record) => record.status === UserStatus.ACTIVE);
+      const latestCheckOut = [...attendanceProofs]
         .reverse()
         .find((record) => record.status === UserStatus.INACTIVE);
 
@@ -621,6 +641,7 @@ export class UserService {
         checkOutAt: latestCheckOut?.timestamp,
         checkInImageUrl: firstCheckIn?.imageUrl,
         checkOutImageUrl: latestCheckOut?.imageUrl,
+        problemReports,
       };
     };
 

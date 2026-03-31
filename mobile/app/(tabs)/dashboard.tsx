@@ -34,6 +34,13 @@ import { formatCurrency } from '../../utils/formatters';
 import { OrderAssignmentStatus, UserStatus } from '../../types';
 
 type ReportCaptureType = 'image' | 'video';
+type ReportSubmissionPreview = {
+  mediaUri: string;
+  mediaType: ReportCaptureType;
+  description: string;
+  timestamp: string;
+  locationLabel: string;
+};
 
 const formatAddressLabel = (address?: Location.LocationGeocodedAddress | null) => {
   if (!address) {
@@ -97,6 +104,7 @@ export default function DashboardScreen() {
   const [reportLocationLabel, setReportLocationLabel] = useState('');
   const [isReportConfirmed, setIsReportConfirmed] = useState(false);
   const [isSendingReport, setIsSendingReport] = useState(false);
+  const [reportSubmissionPreview, setReportSubmissionPreview] = useState<ReportSubmissionPreview | null>(null);
   const displayStatus = pendingAvailabilityStatus ?? user?.status ?? UserStatus.INACTIVE;
   const isShiftActive = displayStatus === UserStatus.ACTIVE;
   const locationCollectedText = useMemo(() => {
@@ -246,7 +254,13 @@ export default function DashboardScreen() {
         locationLabel: reportLocationLabel,
       });
 
-      Alert.alert('Report sent', 'Your report has been sent to support successfully.');
+      setReportSubmissionPreview({
+        mediaUri: reportMediaUri,
+        mediaType: reportMediaType,
+        description: reportDescription.trim(),
+        timestamp: reportTimestamp || new Date().toLocaleString(),
+        locationLabel: reportLocationLabel || 'Location unavailable',
+      });
       resetReportState();
     } catch {
       Alert.alert('Send failed', 'Unable to send your report right now. Please try again.');
@@ -779,6 +793,11 @@ export default function DashboardScreen() {
                 <Image source={{ uri: reportMediaUri }} style={styles.proofImage} contentFit="cover" />
               ) : (
                 <View style={styles.videoPreview}>
+                  <Image
+                    source={require('../../assets/images/peekaboo-watermark.jpeg')}
+                    style={styles.proofWatermark}
+                    contentFit="contain"
+                  />
                   <Ionicons name="videocam" size={48} color={colors.text.inverse} />
                   <Text style={styles.videoPreviewText}>Video captured</Text>
                 </View>
@@ -838,6 +857,67 @@ export default function DashboardScreen() {
               />
             </View>
           )}
+        </View>
+      </Modal>
+
+      <Modal
+        visible={Boolean(reportSubmissionPreview)}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setReportSubmissionPreview(null)}
+      >
+        <View style={styles.proofModalContainer}>
+          <View style={styles.proofHeader}>
+            <Text style={styles.reportTitle}>Report Submitted</Text>
+            <TouchableOpacity
+              onPress={() => setReportSubmissionPreview(null)}
+              style={styles.proofCloseButton}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="close" size={20} color={colors.text.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {reportSubmissionPreview?.mediaType === 'image' ? (
+            <View style={styles.proofImageWrap}>
+              <Image source={{ uri: reportSubmissionPreview.mediaUri }} style={styles.proofImage} contentFit="cover" />
+              <Image
+                source={require('../../assets/images/peekaboo-watermark.jpeg')}
+                style={styles.proofWatermark}
+                contentFit="contain"
+              />
+              <View style={styles.proofOverlay}>
+                <Text style={styles.proofOverlayText}>Timestamp: {reportSubmissionPreview.timestamp}</Text>
+                <Text style={styles.proofOverlayText}>Location: {reportSubmissionPreview.locationLabel}</Text>
+                <Text style={styles.proofOverlayText}>Type: Photo</Text>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.videoPreviewSubmitted}>
+              <Image
+                source={require('../../assets/images/peekaboo-watermark.jpeg')}
+                style={styles.proofWatermark}
+                contentFit="contain"
+              />
+              <Ionicons name="videocam" size={56} color={colors.text.inverse} />
+              <Text style={styles.videoPreviewText}>Video evidence submitted</Text>
+              <Text style={styles.videoMetaText}>Timestamp: {reportSubmissionPreview?.timestamp}</Text>
+              <Text style={styles.videoMetaText}>Location: {reportSubmissionPreview?.locationLabel}</Text>
+            </View>
+          )}
+
+          <View style={styles.reportSubmissionSummary}>
+            <Text style={styles.reportLabel}>Description</Text>
+            <Text style={styles.reportSummaryText}>
+              {reportSubmissionPreview?.description || 'No description provided.'}
+            </Text>
+            <Button
+              title="Done"
+              onPress={() => setReportSubmissionPreview(null)}
+              fullWidth
+              icon={<Ionicons name="checkmark-circle-outline" size={16} color={colors.text.inverse} />}
+            />
+          </View>
         </View>
       </Modal>
 
@@ -1349,11 +1429,12 @@ const styles = StyleSheet.create({
 
   proofWatermark: {
     position: 'absolute',
-    top: spacing.md,
-    right: spacing.md,
-    width: 120,
-    height: 40,
-    opacity: 0.78,
+    top: 10,
+    right: 10,
+    width: 76,
+    height: 48,
+    opacity: 0.95,
+    borderRadius: 6,
   },
   proofOverlay: {
     position: 'absolute',
@@ -1391,9 +1472,38 @@ const styles = StyleSheet.create({
     fontSize: typography.body.fontSize,
     fontWeight: '600',
   },
+  videoPreviewSubmitted: {
+    minHeight: 260,
+    borderRadius: 16,
+    backgroundColor: '#0f172a',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+  },
+  videoMetaText: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: typography.caption.fontSize,
+    textAlign: 'center',
+  },
   reportForm: {
     gap: spacing.sm,
     marginTop: spacing.md,
+  },
+  reportSubmissionSummary: {
+    marginTop: spacing.md,
+    gap: spacing.sm,
+  },
+  reportSummaryText: {
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.3)',
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    fontSize: typography.bodySmall.fontSize,
+    color: colors.text.primary,
   },
   reportLabel: {
     fontSize: typography.bodySmall.fontSize,

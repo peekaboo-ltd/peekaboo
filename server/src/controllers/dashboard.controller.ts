@@ -7,10 +7,14 @@ import { RoleTypes } from '../constants/role.constants';
 import { SummaryChartMetric, SummaryChartPeriod } from '../types/dashboard.types';
 import { EmailService } from '../integrations/emails/email.service';
 import { UUID } from '../types';
+import { UserService } from '../services/user.service';
+import { UserStatus } from '../constants/user.constants';
+import { uploadProblemReportEvidenceToCloudinary } from '../integrations/cloudinary/cloudinary.service';
 
 const dashboardService = new DashboardService();
 const orderService = new OrderService();
 const emailService = new EmailService();
+const userService = new UserService();
 
 const parseDateBoundary = (value: unknown, fallback: Date, endOfDay = false) => {
   if (!value) return fallback;
@@ -244,9 +248,48 @@ export const DashboardController = {
       }
 
       const localFilePath = file.path;
+      if (!localFilePath) {
+        return res.status(500).json({ message: 'Failed to process uploaded evidence file' });
+      }
 
-      // For now we acknowledge receipt and remove temporary local upload.
-      if (localFilePath) {
+      const normalizedMediaType =
+        mediaType === 'video' || file.mimetype.startsWith('video/') ? 'video' : 'photo';
+      const reportTimestamp = capturedAt || new Date().toISOString();
+
+      let evidenceUrl = '';
+      try {
+        evidenceUrl = await uploadProblemReportEvidenceToCloudinary(localFilePath, {
+          userId,
+          mediaType: normalizedMediaType,
+        });
+
+        const existingUser = await userService.getUserById(userId as UUID);
+        const existingProofs = Array.isArray(existingUser.statusProofs)
+          ? existingUser.statusProofs
+          : [];
+
+        await userService.updateUser(userId as UUID, {
+          statusProofs: [
+            ...existingProofs,
+            {
+              imageUrl: evidenceUrl,
+              status: existingUser.status || UserStatus.ACTIVE,
+              timestamp: reportTimestamp,
+              locationLabel: locationLabel || undefined,
+              description: description.trim(),
+              mediaType: normalizedMediaType,
+              category: 'PROBLEM_REPORT',
+              source: 'dashboard:report-problem',
+            },
+          ],
+        });
+      } catch (error) {
+        const uploadErrorMessage =
+          error instanceof Error && error.message
+            ? error.message
+            : 'Failed to upload problem report evidence';
+        return res.status(502).json({ message: uploadErrorMessage });
+      } finally {
         try {
           if (fs.existsSync(localFilePath)) {
             fs.unlinkSync(localFilePath);
@@ -260,8 +303,9 @@ export const DashboardController = {
         message: 'Problem report submitted successfully',
         data: {
           reportedBy: userId,
-          mediaType: mediaType || file.mimetype,
-          capturedAt: capturedAt || new Date().toISOString(),
+          mediaType: normalizedMediaType,
+          evidenceUrl,
+          capturedAt: reportTimestamp,
           description: description.trim(),
           locationLabel: locationLabel || undefined,
           submittedAt: new Date().toISOString(),
