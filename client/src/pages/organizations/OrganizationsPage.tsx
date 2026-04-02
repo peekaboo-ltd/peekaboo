@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -9,6 +9,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/components/table/Table';
 import Button from '@/components/inputs/Button';
+import Input from '@/components/inputs/Input';
+import Select from '@/components/inputs/Select';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import type { Organization } from '@/types/organization.type';
 import { OrganizationStatus } from '@/types/organization.type';
@@ -32,6 +34,8 @@ const itemVariants: Variants = {
 
 const OrganizationsPage = () => {
   useDocumentTitle('Organizations');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   // STATE VARIABLES
   const { organizationsList } = useAppSelector((state) => state.organization);
@@ -50,6 +54,23 @@ const OrganizationsPage = () => {
     const pending = organizationsList?.filter((o: Organization) => o?.status === OrganizationStatus.PENDING).length ?? 0;
     return { total, active, pending };
   }, [organizationsList]);
+
+  const filteredOrganizations = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    return (organizationsList ?? []).filter((organization: Organization) => {
+      const statusMatches =
+        statusFilter === 'ALL' || organization?.status === statusFilter;
+
+      const searchMatches =
+        !normalizedSearch ||
+        organization?.name?.toLowerCase().includes(normalizedSearch) ||
+        organization?.email?.toLowerCase().includes(normalizedSearch) ||
+        organization?.phoneNumber?.toLowerCase().includes(normalizedSearch);
+
+      return statusMatches && searchMatches;
+    });
+  }, [organizationsList, searchTerm, statusFilter]);
 
   return (
     <InternalPage>
@@ -92,10 +113,32 @@ const OrganizationsPage = () => {
         />
       </motion.section>
 
+      <motion.section
+        className="grid grid-cols-1 gap-3 md:grid-cols-2"
+        variants={itemVariants}
+      >
+        <Input
+          label="Search"
+          placeholder="Search by name, email, or phone number..."
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+        />
+        <Select
+          label="Status"
+          value={statusFilter}
+          onChange={(value) => setStatusFilter(value)}
+          options={[
+            { label: 'All', value: 'ALL' },
+            { label: 'Active', value: OrganizationStatus.ACTIVE },
+            { label: 'Inactive', value: OrganizationStatus.INACTIVE },
+          ]}
+        />
+      </motion.section>
+
       <motion.section variants={itemVariants}>
         <Table
           columns={organizationsColumns}
-          data={organizationsList ?? []}
+          data={filteredOrganizations}
           showPagination
           page={page}
           setPage={setPage}
