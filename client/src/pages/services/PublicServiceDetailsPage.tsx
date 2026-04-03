@@ -78,6 +78,24 @@ const getFirstDisplayTier = (tiers?: PricingTier[]) => {
     })[0];
 };
 
+const getTierRangeLabel = (tier: PricingTier, billingPeriod: BillingPeriod) => {
+  if (tier.label) return tier.label;
+
+  if (tier.isCustom) return 'Custom range';
+
+  const periodUnit = billingPeriod === BillingPeriod.DAILY
+    ? 'day'
+    : billingPeriod === BillingPeriod.WEEKLY
+      ? 'week'
+      : 'month';
+
+  if (tier.maxQuantity == null) {
+    return `${tier.minQuantity}+ deliveries per ${periodUnit}`;
+  }
+
+  return `${tier.minQuantity} – ${tier.maxQuantity} deliveries per ${periodUnit}`;
+};
+
 const getHeadlinePrice = (plan: BusinessPlan) => {
   if (plan.isCustomPricing) {
     return 'Custom monthly pricing';
@@ -112,7 +130,7 @@ const getPricingRows = (plan: BusinessPlan) => {
           : 'Included in custom agreement';
 
     return {
-      label: tier.label || 'Custom range',
+      label: getTierRangeLabel(tier, plan.billingPeriod),
       priceLabel,
     };
   });
