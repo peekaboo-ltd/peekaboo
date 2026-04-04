@@ -23,6 +23,7 @@ import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { pushService } from './push.service';
 import { PushNotificationType } from '../constants/push.constants';
 import logger from '../helpers/logger.helper';
+import { sortRidersByProximity } from '../helpers/distance.helper';
 
 interface RiderAssignmentScope {
   riderId?: UUID;
@@ -116,7 +117,7 @@ export class OrderAssignmentService {
     if (!assignedToExists) {
       let availableRiders = await this.userService.fetchUsers({
         page: 0,
-        size: 10,
+        size: 100,
         condition: {
           userRoles: {
             role: {
@@ -132,12 +133,20 @@ export class OrderAssignmentService {
         throw new NotFoundError('No available riders found');
       }
 
-      // SORT BY ASSIGNMENTS
-      availableRiders?.rows.sort((a, b) => {
-        return a.assignments.length - b.assignments.length;
-      });
-
-      assignedToExists = availableRiders?.rows[0];
+      // SORT BY PROXIMITY TO PICKUP, WITH ASSIGNMENT COUNT TIEBREAKER
+      if (orderExists.locationFrom) {
+        const sortedRiders = sortRidersByProximity(
+          availableRiders.rows,
+          orderExists.locationFrom
+        );
+        assignedToExists = sortedRiders[0];
+      } else {
+        // Fallback: sort by active assignment count when no pickup location
+        availableRiders?.rows.sort((a, b) => {
+          return a.assignments.length - b.assignments.length;
+        });
+        assignedToExists = availableRiders?.rows[0];
+      }
     }
 
     // CREATE ORDER ASSIGNMENT
@@ -519,7 +528,7 @@ export class OrderAssignmentService {
     if (!assignedToExists) {
       let availableRiders = await this.userService.fetchUsers({
         page: 0,
-        size: 10,
+        size: 100,
         condition: {
           userRoles: {
             role: {
@@ -531,12 +540,20 @@ export class OrderAssignmentService {
         relations: ['userRoles.role', 'assignments'],
       });
 
-      // SORT BY ASSIGNMENTS
-      availableRiders?.rows.sort((a, b) => {
-        return a.assignments.length - b.assignments.length;
-      });
-
-      assignedToExists = availableRiders?.rows[0];
+      // SORT BY PROXIMITY TO PICKUP, WITH ASSIGNMENT COUNT TIEBREAKER
+      if (orderExists.locationFrom) {
+        const sortedRiders = sortRidersByProximity(
+          availableRiders.rows,
+          orderExists.locationFrom
+        );
+        assignedToExists = sortedRiders[0];
+      } else {
+        // Fallback: sort by active assignment count when no pickup location
+        availableRiders?.rows.sort((a, b) => {
+          return a.assignments.length - b.assignments.length;
+        });
+        assignedToExists = availableRiders?.rows[0];
+      }
     }
 
     const createdOrderAssignment = await this.orderAssignmentRepository.save({

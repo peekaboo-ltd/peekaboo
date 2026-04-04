@@ -17,6 +17,7 @@
   "author": "Nishimwe Prince",
   "license": "ISC",
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.2",
     "@react-email/components": "^1.0.7",
     "@react-email/render": "^2.0.4",
     "@types/jsonwebtoken": "^9.0.10",
