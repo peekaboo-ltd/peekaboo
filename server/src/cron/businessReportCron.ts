@@ -29,7 +29,14 @@ async function sendMonthlyBusinessReports(): Promise<void> {
   for (const user of businessUsers) {
     if (!user.email) continue;
 
-    const report = await dashboardService.getBusinessReport(user.id, periodStart, periodEnd);
+    const report = await dashboardService.getBusinessReport(
+      {
+        requesterUserId: user.id,
+        requesterRoles: [RoleTypes.BUSINESS],
+      },
+      periodStart,
+      periodEnd,
+    );
     if (report.summary.totalOrders === 0 && report.summary.totalRevenue === 0) {
       continue;
     }
@@ -60,4 +67,3 @@ export function startBusinessReportCronJobs(): void {
 
   logger.info('Business report cron job scheduled');
 }
-

@@ -36,6 +36,14 @@ const parseOptionalDateBoundary = (value: unknown, endOfDay = false) => {
   return parsed;
 };
 
+const parseOrganizationId = (value: unknown): UUID | undefined => {
+  const normalized = String(value || '').trim();
+  if (!normalized) {
+    return undefined;
+  }
+  return normalized as UUID;
+};
+
 export const DashboardController = {
   async getDashboardMetrics(req: Request, res: Response, next: NextFunction) {
     try {
@@ -205,6 +213,7 @@ export const DashboardController = {
       const userId = authReq.user?.id;
       const userRoles =
         authReq.user?.userRoles?.map((ur) => ur.role.name as RoleTypes) || [];
+      const organizationId = parseOrganizationId(req.query.organizationId);
 
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -213,6 +222,9 @@ export const DashboardController = {
       if (!userRoles.includes(RoleTypes.BUSINESS) && !userRoles.includes(RoleTypes.ADMIN)) {
         return res.status(403).json({ message: 'Business report is only available for business and admin accounts' });
       }
+      if (userRoles.includes(RoleTypes.ADMIN) && !organizationId) {
+        return res.status(400).json({ message: 'organizationId query parameter is required for admin business reports' });
+      }
 
       const now = new Date();
       const defaultStart = new Date(now);
@@ -220,7 +232,15 @@ export const DashboardController = {
       const startDate = parseDateBoundary(req.query.startDate, defaultStart);
       const endDate = parseDateBoundary(req.query.endDate, now, true);
 
-      const report = await dashboardService.getBusinessReport(userId as UUID, startDate, endDate);
+      const report = await dashboardService.getBusinessReport(
+        {
+          requesterUserId: userId as UUID,
+          requesterRoles: userRoles,
+          organizationId,
+        },
+        startDate,
+        endDate
+      );
       return res.status(200).json({
         message: 'Business report fetched successfully',
         data: report,
@@ -236,12 +256,16 @@ export const DashboardController = {
       const userId = authReq.user?.id;
       const userRoles =
         authReq.user?.userRoles?.map((ur) => ur.role.name as RoleTypes) || [];
+      const organizationId = parseOrganizationId(req.query.organizationId);
 
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
       if (!userRoles.includes(RoleTypes.BUSINESS) && !userRoles.includes(RoleTypes.ADMIN)) {
         return res.status(403).json({ message: 'Business report is only available for business and admin accounts' });
+      }
+      if (userRoles.includes(RoleTypes.ADMIN) && !organizationId) {
+        return res.status(400).json({ message: 'organizationId query parameter is required for admin business reports' });
       }
 
       const now = new Date();
@@ -250,7 +274,15 @@ export const DashboardController = {
       const startDate = parseDateBoundary(req.query.startDate, defaultStart);
       const endDate = parseDateBoundary(req.query.endDate, now, true);
 
-      const report = await dashboardService.getBusinessReport(userId as UUID, startDate, endDate);
+      const report = await dashboardService.getBusinessReport(
+        {
+          requesterUserId: userId as UUID,
+          requesterRoles: userRoles,
+          organizationId,
+        },
+        startDate,
+        endDate
+      );
       const html = dashboardService.buildBusinessReportHtml(report);
       const fileName = `peekaboo_business_report_${startDate.toISOString().slice(0, 10)}_${endDate.toISOString().slice(0, 10)}.html`;
 
@@ -270,12 +302,16 @@ export const DashboardController = {
       const userName = authReq.user?.name || 'Business user';
       const userRoles =
         authReq.user?.userRoles?.map((ur) => ur.role.name as RoleTypes) || [];
+      const organizationId = parseOrganizationId(req.query.organizationId);
 
       if (!userId || !userEmail) {
         return res.status(401).json({ message: 'Unauthorized or missing email' });
       }
       if (!userRoles.includes(RoleTypes.BUSINESS) && !userRoles.includes(RoleTypes.ADMIN)) {
         return res.status(403).json({ message: 'Business report is only available for business and admin accounts' });
+      }
+      if (userRoles.includes(RoleTypes.ADMIN) && !organizationId) {
+        return res.status(400).json({ message: 'organizationId query parameter is required for admin business reports' });
       }
 
       const now = new Date();
@@ -284,7 +320,15 @@ export const DashboardController = {
       const startDate = parseDateBoundary(req.query.startDate, defaultStart);
       const endDate = parseDateBoundary(req.query.endDate, now, true);
 
-      const report = await dashboardService.getBusinessReport(userId as UUID, startDate, endDate);
+      const report = await dashboardService.getBusinessReport(
+        {
+          requesterUserId: userId as UUID,
+          requesterRoles: userRoles,
+          organizationId,
+        },
+        startDate,
+        endDate
+      );
       const html = dashboardService.buildBusinessReportHtml(report);
 
       await emailService.sendBusinessReportEmail({
