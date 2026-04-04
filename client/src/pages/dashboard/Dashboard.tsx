@@ -143,23 +143,31 @@ const buildMetricCards = (
   },
 ): MetricCardData[] => {
   if (!role || !metrics) return [];
+  const isAdminMetrics = (value: typeof metrics): value is AdminMetrics =>
+    'totalCustomers' in value && 'activeRiders' in value;
+  const isBusinessMetrics = (value: typeof metrics): value is BusinessMetrics =>
+    'teamMembers' in value && 'currentAmountDue' in value;
+  const isRiderMetrics = (value: typeof metrics): value is RiderMetrics =>
+    'assignmentsByStatus' in value && 'acceptanceRate' in value;
+  const isCustomerMetrics = (value: typeof metrics): value is CustomerMetrics =>
+    'deliverySuccessRate' in value && 'pendingOrders' in value && !('teamMembers' in value);
 
   let baseCards: MetricCardData[] = [];
 
   switch (role) {
     case RoleTypes.ADMIN:
     case RoleTypes.STAFF:
-      baseCards = getAdminMetricCards(metrics as AdminMetrics);
+      baseCards = isAdminMetrics(metrics) ? getAdminMetricCards(metrics) : [];
       break;
     case RoleTypes.BUSINESS:
-      baseCards = getBusinessMetricCards(metrics as BusinessMetrics);
+      baseCards = isBusinessMetrics(metrics) ? getBusinessMetricCards(metrics) : [];
       break;
     case RoleTypes.RIDER:
-      baseCards = getRiderMetricCards(metrics as RiderMetrics);
+      baseCards = isRiderMetrics(metrics) ? getRiderMetricCards(metrics) : [];
       break;
     case RoleTypes.CUSTOMER:
     default:
-      baseCards = getCustomerMetricCards(metrics as CustomerMetrics);
+      baseCards = isCustomerMetrics(metrics) ? getCustomerMetricCards(metrics) : [];
       break;
   }
 
