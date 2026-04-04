@@ -921,12 +921,18 @@ export class DashboardService {
   /**
    * Chart data: orders count over time
    */
-  async getOrderChartData(userId: UUID, userRoles: RoleTypes[], period: string): Promise<ChartDataPoint[]> {
+  async getOrderChartData(
+    userId: UUID,
+    userRoles: RoleTypes[],
+    period: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<ChartDataPoint[]> {
     const scopeIsAdmin = userRoles.includes(RoleTypes.ADMIN) || userRoles.includes(RoleTypes.STAFF);
 
     const normalizedPeriod = ['week', 'month', 'year'].includes(period) ? period : 'month';
 
-    const now = new Date();
+    const now = endDate ?? new Date();
     let start: Date;
     let truncUnit: 'day' | 'month';
     let format: string;
@@ -952,11 +958,14 @@ export class DashboardService {
       format = 'YYYY-MM-DD';
     }
 
+    const effectiveStart = startDate ?? start;
+
     const qb = this.orderRepository
       .createQueryBuilder('order')
       .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', order.createdAt), '${format}')`, 'label')
       .addSelect('COUNT(*)', 'value')
-      .where('order.createdAt >= :start', { start });
+      .where('order.createdAt >= :start', { start: effectiveStart })
+      .andWhere('order.createdAt <= :end', { end: now });
 
     if (!scopeIsAdmin) {
       qb.andWhere('(order.senderId = :userId OR order.createdById = :userId)', { userId });
@@ -967,18 +976,24 @@ export class DashboardService {
       .orderBy(`DATE_TRUNC('${truncUnit}', order.createdAt)`, 'ASC')
       .getRawMany();
 
-    return this.fillTimeSeries(rows, start, now, normalizedPeriod);
+    return this.fillTimeSeries(rows, effectiveStart, now, normalizedPeriod);
   }
 
   /**
    * Chart data: revenue over time (successful payments)
    */
-  async getRevenueChartData(userId: UUID, userRoles: RoleTypes[], period: string): Promise<ChartDataPoint[]> {
+  async getRevenueChartData(
+    userId: UUID,
+    userRoles: RoleTypes[],
+    period: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<ChartDataPoint[]> {
     const scopeIsAdmin = userRoles.includes(RoleTypes.ADMIN) || userRoles.includes(RoleTypes.STAFF);
 
     const normalizedPeriod = ['week', 'month', 'year'].includes(period) ? period : 'month';
 
-    const now = new Date();
+    const now = endDate ?? new Date();
     let start: Date;
     let truncUnit: 'day' | 'month';
     let format: string;
@@ -1002,6 +1017,8 @@ export class DashboardService {
       truncUnit = 'day';
       format = 'YYYY-MM-DD';
     }
+
+    const effectiveStart = startDate ?? start;
 
     const qb = this.paymentRepository
       .createQueryBuilder('payment')
@@ -1025,16 +1042,21 @@ export class DashboardService {
       .orderBy(`DATE_TRUNC('${truncUnit}', payment.createdAt)`, 'ASC')
       .getRawMany();
 
-    return this.fillTimeSeries(rows, start, now, normalizedPeriod, true);
+    return this.fillTimeSeries(rows, effectiveStart, now, normalizedPeriod, true);
   }
 
   /**
    * Chart data: deliveries (completed assignments) over time for a rider
    */
-  async getDeliveryChartData(userId: UUID, period: string): Promise<ChartDataPoint[]> {
+  async getDeliveryChartData(
+    userId: UUID,
+    period: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<ChartDataPoint[]> {
     const normalizedPeriod = ['week', 'month', 'year'].includes(period) ? period : 'month';
 
-    const now = new Date();
+    const now = endDate ?? new Date();
     let start: Date;
     let truncUnit: 'day' | 'month';
     let format: string;
@@ -1059,18 +1081,21 @@ export class DashboardService {
       format = 'YYYY-MM-DD';
     }
 
+    const effectiveStart = startDate ?? start;
+
     const rows = await this.orderAssignmentRepository
       .createQueryBuilder('assignment')
       .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', assignment.updatedAt), '${format}')`, 'label')
       .addSelect('COUNT(*)', 'value')
       .where('assignment.assignedToId = :userId', { userId })
       .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
-      .andWhere('assignment.updatedAt >= :start', { start })
+      .andWhere('assignment.updatedAt >= :start', { start: effectiveStart })
+      .andWhere('assignment.updatedAt <= :end', { end: now })
       .groupBy(`DATE_TRUNC('${truncUnit}', assignment.updatedAt)`)
       .orderBy(`DATE_TRUNC('${truncUnit}', assignment.updatedAt)`, 'ASC')
       .getRawMany();
 
-    return this.fillTimeSeries(rows, start, now, normalizedPeriod);
+    return this.fillTimeSeries(rows, effectiveStart, now, normalizedPeriod);
   }
 
   /**
@@ -1081,13 +1106,16 @@ export class DashboardService {
     userId: UUID,
     userRoles: RoleTypes[],
     metric: SummaryChartMetric,
-    period: SummaryChartPeriod
+    period: SummaryChartPeriod,
+    startDate?: Date,
+    endDate?: Date
   ): Promise<ChartDataPoint[]> {
     const isAdmin = userRoles.includes(RoleTypes.ADMIN) || userRoles.includes(RoleTypes.STAFF);
     const isRider = userRoles.includes(RoleTypes.RIDER);
 
     const { start, truncUnit, format } = this.getSummaryPeriodConfig(period);
-    const now = new Date();
+    const effectiveStart = startDate ?? start;
+    const now = endDate ?? new Date();
 
     switch (metric) {
       case 'ORDERS': {
@@ -1095,7 +1123,8 @@ export class DashboardService {
           .createQueryBuilder('order')
           .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', order.createdAt), '${format}')`, 'label')
           .addSelect('COUNT(*)', 'value')
-          .where('order.createdAt >= :start', { start });
+          .where('order.createdAt >= :start', { start: effectiveStart })
+          .andWhere('order.createdAt <= :end', { end: now });
 
         if (!isAdmin) {
           qb.andWhere('(order.senderId = :userId OR order.createdById = :userId)', { userId });
@@ -1107,8 +1136,8 @@ export class DashboardService {
           .getRawMany();
 
         return period === '90d'
-          ? this.fillWeeklyTimeSeries(rows, start, now)
-          : this.fillTimeSeries(rows, start, now, period === '7d' ? 'week' : 'month');
+          ? this.fillWeeklyTimeSeries(rows, effectiveStart, now)
+          : this.fillTimeSeries(rows, effectiveStart, now, period === '7d' ? 'week' : 'month');
       }
 
       case 'REVENUE': {
@@ -1137,8 +1166,8 @@ export class DashboardService {
           .getRawMany();
 
         return period === '90d'
-          ? this.fillWeeklyTimeSeries(rows, start, now, true)
-          : this.fillTimeSeries(rows, start, now, period === '7d' ? 'week' : 'month', true);
+          ? this.fillWeeklyTimeSeries(rows, effectiveStart, now, true)
+          : this.fillTimeSeries(rows, effectiveStart, now, period === '7d' ? 'week' : 'month', true);
       }
 
       case 'DELIVERIES': {
@@ -1147,7 +1176,8 @@ export class DashboardService {
           .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', assignment.updatedAt), '${format}')`, 'label')
           .addSelect('COUNT(*)', 'value')
           .where('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
-          .andWhere('assignment.updatedAt >= :start', { start });
+          .andWhere('assignment.updatedAt >= :start', { start: effectiveStart })
+          .andWhere('assignment.updatedAt <= :end', { end: now });
 
         if (!isAdmin) {
           if (isRider) {
@@ -1164,8 +1194,8 @@ export class DashboardService {
           .getRawMany();
 
         return period === '90d'
-          ? this.fillWeeklyTimeSeries(rows, start, now)
-          : this.fillTimeSeries(rows, start, now, period === '7d' ? 'week' : 'month');
+          ? this.fillWeeklyTimeSeries(rows, effectiveStart, now)
+          : this.fillTimeSeries(rows, effectiveStart, now, period === '7d' ? 'week' : 'month');
       }
 
       case 'ACTIVE_USERS': {
@@ -1174,22 +1204,22 @@ export class DashboardService {
         const rows: Array<{ label: string; value: string }> = await AppDataSource.query(
           `SELECT label, COUNT(DISTINCT user_id)::int as value FROM (
             SELECT TO_CHAR(DATE_TRUNC($1, created_at), $2) as label, created_by_id as user_id
-            FROM orders WHERE created_at >= $3
+            FROM orders WHERE created_at >= $3 AND created_at <= $4
             UNION ALL
             SELECT TO_CHAR(DATE_TRUNC($1, created_at), $2) as label, created_by_id as user_id
-            FROM payments WHERE created_at >= $3
+            FROM payments WHERE created_at >= $3 AND created_at <= $4
             UNION ALL
             SELECT TO_CHAR(DATE_TRUNC($1, updated_at), $2) as label, assigned_to_id as user_id
-            FROM order_assignments WHERE updated_at >= $3
+            FROM order_assignments WHERE updated_at >= $3 AND updated_at <= $4
           ) combined
           GROUP BY label
           ORDER BY label ASC`,
-          [truncUnit, format, start]
+          [truncUnit, format, effectiveStart, now]
         );
 
         return period === '90d'
-          ? this.fillWeeklyTimeSeries(rows, start, now)
-          : this.fillTimeSeries(rows, start, now, period === '7d' ? 'week' : 'month');
+          ? this.fillWeeklyTimeSeries(rows, effectiveStart, now)
+          : this.fillTimeSeries(rows, effectiveStart, now, period === '7d' ? 'week' : 'month');
       }
 
       default:

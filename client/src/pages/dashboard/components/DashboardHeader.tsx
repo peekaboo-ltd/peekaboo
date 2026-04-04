@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
@@ -14,6 +13,10 @@ interface DashboardHeaderProps {
   role?: RoleTypes;
   actions?: DashboardActionLink[];
   variants?: Variants;
+  startDate?: Date;
+  endDate?: Date;
+  onStartDateChange?: (date?: Date) => void;
+  onEndDateChange?: (date?: Date) => void;
 }
 
 const DashboardHeader = ({
@@ -21,14 +24,12 @@ const DashboardHeader = ({
   role,
   actions = [],
   variants,
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
 }: DashboardHeaderProps) => {
   const { t } = useI18n();
-
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  const [startDate, setStartDate] = useState<Date | undefined>(thirtyDaysAgo);
-  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
 
   const description =
     role === RoleTypes.ADMIN || role === RoleTypes.STAFF
@@ -73,7 +74,7 @@ const DashboardHeader = ({
               <div className="w-full">
                 <DatePicker
                   value={startDate}
-                  onChange={(e) => setStartDate(e as unknown as Date)}
+                  onChange={(e) => onStartDateChange?.(e as Date | undefined)}
                   placeholder="Start date"
                   toDate={endDate}
                 />
@@ -82,7 +83,7 @@ const DashboardHeader = ({
               <div className="w-full">
                 <DatePicker
                   value={endDate}
-                  onChange={(e) => setEndDate(e as unknown as Date)}
+                  onChange={(e) => onEndDateChange?.(e as Date | undefined)}
                   placeholder="End date"
                   fromDate={startDate}
                 />

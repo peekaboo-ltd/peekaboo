@@ -23,6 +23,19 @@ const parseDateBoundary = (value: unknown, fallback: Date, endOfDay = false) => 
   return parsed;
 };
 
+
+const parseOptionalDateBoundary = (value: unknown, endOfDay = false) => {
+  if (!value) return undefined;
+  const parsed = new Date(String(value));
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  if (endOfDay) {
+    parsed.setHours(23, 59, 59, 999);
+  } else {
+    parsed.setHours(0, 0, 0, 0);
+  }
+  return parsed;
+};
+
 export const DashboardController = {
   async getDashboardMetrics(req: Request, res: Response, next: NextFunction) {
     try {
@@ -58,7 +71,9 @@ export const DashboardController = {
       }
 
       const period = String(req.query.period || 'month');
-      const data = await dashboardService.getOrderChartData(userId, userRoles, period);
+      const startDate = parseOptionalDateBoundary(req.query.startDate);
+      const endDate = parseOptionalDateBoundary(req.query.endDate, true);
+      const data = await dashboardService.getOrderChartData(userId, userRoles, period, startDate, endDate);
 
       return res.status(200).json({
         message: 'Order chart data fetched successfully',
@@ -80,7 +95,9 @@ export const DashboardController = {
       }
 
       const period = String(req.query.period || 'month');
-      const data = await dashboardService.getRevenueChartData(userId, userRoles, period);
+      const startDate = parseOptionalDateBoundary(req.query.startDate);
+      const endDate = parseOptionalDateBoundary(req.query.endDate, true);
+      const data = await dashboardService.getRevenueChartData(userId, userRoles, period, startDate, endDate);
 
       return res.status(200).json({
         message: 'Revenue chart data fetched successfully',
@@ -101,7 +118,9 @@ export const DashboardController = {
       }
 
       const period = String(req.query.period || 'month');
-      const data = await dashboardService.getDeliveryChartData(userId, period);
+      const startDate = parseOptionalDateBoundary(req.query.startDate);
+      const endDate = parseOptionalDateBoundary(req.query.endDate, true);
+      const data = await dashboardService.getDeliveryChartData(userId, period, startDate, endDate);
 
       return res.status(200).json({
         message: 'Delivery chart data fetched successfully',
@@ -124,6 +143,8 @@ export const DashboardController = {
 
       const metric = String(req.query.metric || 'ORDERS');
       const period = String(req.query.period || '30d');
+      const startDate = parseOptionalDateBoundary(req.query.startDate);
+      const endDate = parseOptionalDateBoundary(req.query.endDate, true);
 
       const validMetrics: SummaryChartMetric[] = ['ORDERS', 'REVENUE', 'DELIVERIES', 'ACTIVE_USERS'];
       if (!validMetrics.includes(metric as SummaryChartMetric)) {
@@ -139,7 +160,9 @@ export const DashboardController = {
         userId,
         userRoles,
         metric as SummaryChartMetric,
-        period as SummaryChartPeriod
+        period as SummaryChartPeriod,
+        startDate,
+        endDate
       );
 
       return res.status(200).json({
