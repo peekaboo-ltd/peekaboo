@@ -80,11 +80,28 @@ const RiderManagementPage = () => {
       return { startDate: endDate, endDate };
     }
 
+    if (startDate && endDate && startDate > endDate) {
+      return { startDate: endDate, endDate: startDate };
+    }
+
     return {
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     };
   }, [timeframe, startDate, endDate]);
+
+  const comparisonDateFilterLabel = useMemo(() => {
+    if (timeframe === 'custom') {
+      if (normalizedCustomRange.startDate && normalizedCustomRange.endDate) {
+        return `${normalizedCustomRange.startDate} to ${normalizedCustomRange.endDate}`;
+      }
+      return 'Custom date range';
+    }
+
+    if (timeframe === 'daily') return 'Daily';
+    if (timeframe === 'weekly') return 'Weekly';
+    return 'Monthly';
+  }, [timeframe, normalizedCustomRange.startDate, normalizedCustomRange.endDate]);
 
   useEffect(() => {
     fetchRiderManagement({
@@ -388,7 +405,55 @@ const RiderManagementPage = () => {
           <p className="text-xs text-slate-500">
             Green means winner on that metric, red means lower performance for that metric.
           </p>
+          <p className="text-xs text-slate-500 mt-1">
+            Comparison data period: <span className="font-medium text-slate-700">{comparisonDateFilterLabel}</span>
+          </p>
         </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <Select
+            label="Comparison timeframe"
+            value={timeframe}
+            onChange={(value) => setTimeframe(value as RiderManagementTimeframe)}
+            options={[
+              { label: 'Daily', value: 'daily' },
+              { label: 'Weekly', value: 'weekly' },
+              { label: 'Monthly', value: 'monthly' },
+              { label: 'Custom', value: 'custom' },
+            ]}
+          />
+          <Input
+            label="Compare from"
+            type="date"
+            placeholder="Start date"
+            value={startDate}
+            onChange={(value) => {
+              setTimeframe('custom');
+              setStartDate(resolveDateInputValue(value as Date | { target?: { value?: string } }));
+            }}
+          />
+          <Input
+            label="Compare to"
+            type="date"
+            placeholder="End date"
+            value={endDate}
+            onChange={(value) => {
+              setTimeframe('custom');
+              setEndDate(resolveDateInputValue(value as Date | { target?: { value?: string } }));
+            }}
+          />
+          <button
+            type="button"
+            className="h-10 border border-slate-200 rounded-lg px-3 text-sm text-slate-700 hover:bg-slate-50"
+            onClick={() => {
+              setStartDate('');
+              setEndDate('');
+              setTimeframe('monthly');
+            }}
+          >
+            Reset dates
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Select
