@@ -34,7 +34,9 @@ import { formatCurrency } from '../../utils/formatters';
 import { OrderAssignmentStatus, UserStatus } from '../../types';
 
 type ReportCaptureType = 'image' | 'video';
+type ReportCategory = 'problem' | 'reciept';
 type ReportSubmissionPreview = {
+  category: ReportCategory;
   mediaUri: string;
   mediaType: ReportCaptureType;
   description: string;
@@ -102,6 +104,7 @@ export default function DashboardScreen() {
   const [reportTimestamp, setReportTimestamp] = useState<string>('');
   const [reportDescription, setReportDescription] = useState('');
   const [reportLocationLabel, setReportLocationLabel] = useState('');
+  const [reportCategory, setReportCategory] = useState<ReportCategory | null>(null);
   const [isReportConfirmed, setIsReportConfirmed] = useState(false);
   const [isSendingReport, setIsSendingReport] = useState(false);
   const [reportSubmissionPreview, setReportSubmissionPreview] = useState<ReportSubmissionPreview | null>(null);
@@ -154,6 +157,7 @@ export default function DashboardScreen() {
     setReportTimestamp('');
     setReportDescription('');
     setReportLocationLabel('');
+    setReportCategory(null);
     setIsReportConfirmed(false);
     setIsSendingReport(false);
   }, []);
@@ -198,12 +202,13 @@ export default function DashboardScreen() {
     setReportTimestamp(new Date().toLocaleString());
     setReportLocationLabel(locationLabel);
     setReportDescription('');
+    setReportCategory(null);
     setIsReportConfirmed(false);
     setIsReportModalVisible(true);
   }, []);
 
   const handleOpenReportProblem = useCallback(() => {
-    Alert.alert('Report Problem', 'Capture evidence as photo or video.', [
+    Alert.alert('Report Problem / Reciept', 'Capture evidence as photo or video.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Photo',
@@ -234,20 +239,31 @@ export default function DashboardScreen() {
 
   const handleConfirmReport = useCallback(() => {
     if (!reportMediaUri) return;
+    if (!reportCategory) {
+      Alert.alert('Type required', 'Please choose Problem or Reciept before continuing.');
+      return;
+    }
     setIsReportConfirmed(true);
-  }, [reportMediaUri]);
+  }, [reportCategory, reportMediaUri]);
 
   const handleSendReport = useCallback(async () => {
     if (!reportMediaUri) return;
+    if (!reportCategory) {
+      Alert.alert('Type required', 'Please choose Problem or Reciept before sending.');
+      return;
+    }
     if (!reportDescription.trim()) {
       Alert.alert('Description required', 'Please add a short description before sending.');
       return;
     }
 
+    const reportPrefix = reportCategory === 'problem' ? '[Problem]' : '[Reciept]';
+    const descriptionWithCategory = reportPrefix + ' ' + reportDescription.trim();
+
     try {
       setIsSendingReport(true);
       await dashboardAPI.submitProblemReport({
-        description: reportDescription.trim(),
+        description: descriptionWithCategory,
         capturedAt: new Date().toISOString(),
         mediaType: reportMediaType,
         evidenceUri: reportMediaUri,
@@ -255,9 +271,10 @@ export default function DashboardScreen() {
       });
 
       setReportSubmissionPreview({
+        category: reportCategory,
         mediaUri: reportMediaUri,
         mediaType: reportMediaType,
-        description: reportDescription.trim(),
+        description: descriptionWithCategory,
         timestamp: reportTimestamp || new Date().toLocaleString(),
         locationLabel: reportLocationLabel || 'Location unavailable',
       });
@@ -267,7 +284,7 @@ export default function DashboardScreen() {
     } finally {
       setIsSendingReport(false);
     }
-  }, [reportDescription, reportLocationLabel, reportMediaType, reportMediaUri, resetReportState]);
+  }, [reportCategory, reportDescription, reportLocationLabel, reportMediaType, reportMediaUri, reportTimestamp, resetReportState]);
 
   const resetProofState = useCallback(() => {
     setProofImageUri(null);
@@ -776,7 +793,7 @@ export default function DashboardScreen() {
       >
         <View style={styles.proofModalContainer}>
           <View style={styles.proofHeader}>
-            <Text style={styles.reportTitle}>Report Problem</Text>
+            <Text style={styles.reportTitle}>Report Problem / Reciept</Text>
             <TouchableOpacity
               onPress={resetReportState}
               style={styles.proofCloseButton}
@@ -817,6 +834,48 @@ export default function DashboardScreen() {
             </View>
           ) : null}
 
+          <View style={styles.reportTypeSection}>
+            <Text style={styles.reportLabel}>Choose type</Text>
+            <View style={styles.reportTypeSelector}>
+              <TouchableOpacity
+                onPress={() => setReportCategory('problem')}
+                style={[
+                  styles.reportTypeChip,
+                  reportCategory === 'problem' && styles.reportTypeChipActive,
+                ]}
+                activeOpacity={0.85}
+                disabled={isSendingReport}
+              >
+                <Text
+                  style={[
+                    styles.reportTypeChipText,
+                    reportCategory === 'problem' && styles.reportTypeChipTextActive,
+                  ]}
+                >
+                  Problem
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setReportCategory('reciept')}
+                style={[
+                  styles.reportTypeChip,
+                  reportCategory === 'reciept' && styles.reportTypeChipActive,
+                ]}
+                activeOpacity={0.85}
+                disabled={isSendingReport}
+              >
+                <Text
+                  style={[
+                    styles.reportTypeChipText,
+                    reportCategory === 'reciept' && styles.reportTypeChipTextActive,
+                  ]}
+                >
+                  Reciept
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           {!isReportConfirmed ? (
             <View style={styles.proofActions}>
               <Button
@@ -830,7 +889,7 @@ export default function DashboardScreen() {
                 title="Confirm"
                 onPress={handleConfirmReport}
                 fullWidth
-                disabled={!reportMediaUri || isSendingReport}
+                disabled={!reportMediaUri || !reportCategory || isSendingReport}
                 icon={<Ionicons name="checkmark" size={16} color={colors.text.inverse} />}
               />
             </View>
@@ -841,7 +900,7 @@ export default function DashboardScreen() {
                 style={styles.reportInput}
                 value={reportDescription}
                 onChangeText={setReportDescription}
-                placeholder="Describe the problem..."
+                placeholder={reportCategory === 'reciept' ? 'Describe the reciept...' : 'Describe the problem...'}
                 placeholderTextColor={colors.text.disabled}
                 multiline
                 textAlignVertical="top"
@@ -907,6 +966,10 @@ export default function DashboardScreen() {
           )}
 
           <View style={styles.reportSubmissionSummary}>
+            <Text style={styles.reportLabel}>Type</Text>
+            <Text style={styles.reportSummaryText}>
+              {reportSubmissionPreview?.category === 'reciept' ? 'Reciept' : 'Problem'}
+            </Text>
             <Text style={styles.reportLabel}>Description</Text>
             <Text style={styles.reportSummaryText}>
               {reportSubmissionPreview?.description || 'No description provided.'}
@@ -1486,6 +1549,35 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.85)',
     fontSize: typography.caption.fontSize,
     textAlign: 'center',
+  },
+  reportTypeSection: {
+    marginTop: spacing.md,
+    gap: spacing.xs,
+  },
+  reportTypeSelector: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  reportTypeChip: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(95, 149, 152, 0.35)',
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  reportTypeChipActive: {
+    backgroundColor: 'rgba(29, 84, 109, 0.12)',
+    borderColor: colors.primary,
+  },
+  reportTypeChipText: {
+    fontSize: typography.bodySmall.fontSize,
+    fontWeight: '600',
+    color: colors.text.secondary,
+  },
+  reportTypeChipTextActive: {
+    color: colors.primaryDark,
   },
   reportForm: {
     gap: spacing.sm,
