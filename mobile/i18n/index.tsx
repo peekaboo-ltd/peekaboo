@@ -356,8 +356,8 @@ const translations = {
     'activity.empty': 'Nta bikorwa biheruka',
 
     'profile.loading': 'Birimo gufungura umwirondoro wawe...',
-    'profile.noData': 'Nta makuru y\'umukoresha abonetse.',
-    'profile.unnamedRider': 'Umutwara utazwi',
+    'profile.noData': 'Nta makuru y\'yanyu abonetse.',
+    'profile.unnamedRider': 'Umumotari utazwi',
     'profile.infoTitle': 'Amakuru y\'umwirondoro',
     'profile.fullName': 'Amazina yuzuye',
     'profile.fullNamePlaceholder': 'Andika amazina yawe yuzuye',
