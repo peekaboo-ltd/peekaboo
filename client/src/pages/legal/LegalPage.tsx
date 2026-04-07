@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useI18n } from '@/i18n/i18n';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { PublicPage, PublicPageHero, PublicSectionCard } from '@/components/layout/PublicPage';
+import LegalBreadcrumb from './LegalBreadcrumb';
 
 interface LegalHubLink {
   to: string;
@@ -33,6 +34,8 @@ const LegalPage = () => {
 
   return (
     <PublicPage className="max-lg:mt-16">
+      <LegalBreadcrumb />
+
       <PublicPageHero
         eyebrow={t('legal.eyebrow')}
         title={t('legal.hub.title')}
