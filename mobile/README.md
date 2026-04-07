@@ -63,6 +63,12 @@ EXPO_PUBLIC_PROJECT_ID=your-expo-project-id
 EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES=5
 ```
 
+Physical device local testing note:
+
+- Do not use `localhost` for `EXPO_PUBLIC_API_BASE_URL` when testing on a phone.
+- Use your computer LAN IP instead, for example: `http://192.168.1.20:8080/api/v1`.
+- On macOS, you can usually get it with: `ipconfig getifaddr en0` (Wi-Fi) or `ipconfig getifaddr en1`.
+
 For EAS builds, make sure `EXPO_PUBLIC_*` values are provided via `eas.json` `env` or EAS secrets. Local `.env` files are not used in cloud builds.
 
 `EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES` controls how often rider location is sent to the backend (defaults to 5 minutes). Set it to `1` for faster testing.

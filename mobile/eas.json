@@ -7,7 +7,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://server.peekaboo.co.rw/api/v1",
+        "EXPO_PUBLIC_API_BASE_URL": "http://192.168.1.64:8080/api/v1",
         "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574",
         "EXPO_PUBLIC_ONESIGNAL_APP_ID": "276e86c4-5af1-4ad2-ba8a-20908c155564"
       },
@@ -19,7 +19,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://server.peekaboo.co.rw/api/v1",
+        "EXPO_PUBLIC_API_BASE_URL": "http://192.168.1.64:8080/api/v1",
         "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574",
         "EXPO_PUBLIC_ONESIGNAL_APP_ID": "276e86c4-5af1-4ad2-ba8a-20908c155564"
       },

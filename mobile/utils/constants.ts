@@ -11,6 +11,12 @@ if (!apiBaseUrlFromEnv) {
 export const API_BASE_URL = apiBaseUrlFromEnv || (__DEV__ ? 'http://localhost:8080/api/v1' : '');
 export const API_TIMEOUT = 30000;
 
+if (__DEV__ && API_BASE_URL.includes('localhost')) {
+  console.warn(
+    'EXPO_PUBLIC_API_BASE_URL uses localhost. On a physical device, use your computer LAN IP (for example http://192.168.x.x:8080/api/v1).'
+  );
+}
+
 
 const locationUpdateIntervalMinutesFromEnv = Number(
   process.env.EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES || '5'
