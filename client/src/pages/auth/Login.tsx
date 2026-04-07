@@ -126,7 +126,7 @@ export const Login = () => {
   }
 
   return (
-    <PublicPage className="min-h-0 max-h-[calc(100vh-4rem-5.5rem)] overflow-y-auto max-lg:mt-16">
+    <PublicPage className="max-lg:mt-16">
       <PublicSectionCard
         className="mx-auto w-full max-w-3xl border-primary-200"
         title={authMode === 'login' ? 'Sign In' : 'Create Account'}
@@ -216,6 +216,10 @@ export const Login = () => {
                     {...field}
                     label="Phone Number or Email"
                     placeholder="Enter phone number or email"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     required
                     errorMessage={loginErrors?.username?.message}
                   />
@@ -231,6 +235,10 @@ export const Login = () => {
                     label="Password"
                     type="password"
                     placeholder="Enter password"
+                    autoComplete="current-password"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     required
                     showPasswordToggle
                     errorMessage={loginErrors?.password?.message}

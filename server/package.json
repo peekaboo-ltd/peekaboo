@@ -10,7 +10,8 @@
     "seed:admin": "ts-node ./src/scripts/seed-admin.ts",
     "seed:roles": "ts-node ./src/scripts/seed-roles.ts",
     "seed:business-plans": "ts-node ./src/scripts/seed-business-plans.ts",
-    "seed:rider-attendance": "ts-node ./src/scripts/seed-rider-attendance.ts"
+    "seed:rider-attendance": "ts-node ./src/scripts/seed-rider-attendance.ts",
+    "seed:rider-problem-reports": "ts-node ./src/scripts/seed-rider-problem-reports.ts"
   },
   "keywords": [
     "peekaboo"

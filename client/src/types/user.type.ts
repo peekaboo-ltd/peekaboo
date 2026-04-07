@@ -52,5 +52,12 @@ export interface RiderManagementItem {
     checkOutAt?: string;
     checkInImageUrl?: string;
     checkOutImageUrl?: string;
+    problemReports?: Array<{
+      imageUrl: string;
+      mediaType?: 'photo' | 'video';
+      description?: string;
+      timestamp: string;
+      locationLabel?: string;
+    }>;
   };
 }

@@ -8,7 +8,7 @@ if (!apiBaseUrlFromEnv) {
   }
 }
 
-export const API_BASE_URL = apiBaseUrlFromEnv || (__DEV__ ? 'http://localhost:3000/api' : '');
+export const API_BASE_URL = apiBaseUrlFromEnv || (__DEV__ ? 'http://localhost:8080/api/v1' : '');
 export const API_TIMEOUT = 30000;
 
 

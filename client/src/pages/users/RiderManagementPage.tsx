@@ -15,6 +15,13 @@ import { formatCurrency, formatNumbers } from '@/utils/strings.util';
 
 type SortBy = 'deliveries' | 'earnings' | 'canceled' | 'failed' | 'activeDays' | 'activeHours';
 type SortOrder = 'asc' | 'desc';
+type ProblemReportViewItem = {
+  imageUrl: string;
+  mediaType?: 'photo' | 'video';
+  description?: string;
+  timestamp: string;
+  locationLabel?: string;
+};
 
 const formatDateForInput = (date: Date) => {
   const year = date.getFullYear();
@@ -35,6 +42,20 @@ const formatAttendanceTime = (value?: string) => {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return '-';
   return parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const formatAttendanceDateTime = (value?: string) => {
+  if (!value) return '-';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '-';
+  return parsed.toLocaleString();
+};
+
+const formatYmdFromTimestamp = (value?: string) => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
 };
 
 type AttendanceStatus = 'present' | 'atWork' | 'absent' | 'late';
@@ -83,6 +104,11 @@ const RiderManagementPage = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedRider, setSelectedRider] = useState<RiderManagementItem | null>(null);
   const [attendanceProofRider, setAttendanceProofRider] = useState<RiderManagementItem | null>(null);
+  const [problemReportModalState, setProblemReportModalState] = useState<{
+    rider: RiderManagementItem;
+    reports: ProblemReportViewItem[];
+    isDemo: boolean;
+  } | null>(null);
   const [compareLeftId, setCompareLeftId] = useState('');
   const [compareRightId, setCompareRightId] = useState('');
   const debouncedSearch = useDebounce(search, 350);
@@ -338,6 +364,64 @@ const RiderManagementPage = () => {
     });
   }, [rows, attendanceDate, attendanceName]);
 
+  const demoProblemReports = useMemo<ProblemReportViewItem[]>(
+    () => [
+      {
+        imageUrl:
+          'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=1200&q=80',
+        mediaType: 'photo',
+        description: 'Demo: Front-side collision damage captured after incident.',
+        timestamp: '2026-03-31T09:12:00+09:00',
+        locationLabel: 'Goseong-gun, Gangwon-do, South Korea',
+      },
+      {
+        imageUrl: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
+        mediaType: 'video',
+        description: 'Demo: Short video clip of the accident scene and traffic condition.',
+        timestamp: '2026-03-31T09:47:00+09:00',
+        locationLabel: 'Goseong-gun, Gangwon-do, South Korea',
+      },
+      {
+        imageUrl:
+          'https://images.unsplash.com/photo-1617654112322-7844ebd6d79f?auto=format&fit=crop&w=1200&q=80',
+        mediaType: 'photo',
+        description: 'Demo: Rear wheel and side frame proof after the same event.',
+        timestamp: '2026-03-31T10:05:00+09:00',
+        locationLabel: 'Goseong-gun, Gangwon-do, South Korea',
+      },
+    ],
+    [],
+  );
+
+  const resolveProblemReports = (row: RiderManagementItem) => {
+    const sortByUploadedDate = (reports: ProblemReportViewItem[]) =>
+      [...reports].sort((firstReport, secondReport) => {
+        const firstDate = new Date(firstReport.timestamp).getTime();
+        const secondDate = new Date(secondReport.timestamp).getTime();
+        if (Number.isNaN(firstDate) || Number.isNaN(secondDate)) return 0;
+        return secondDate - firstDate;
+      });
+    const filterBySelectedDate = (reports: ProblemReportViewItem[]) => {
+      const selectedDate = attendanceDate || row.dailyAttendance?.date;
+      if (!selectedDate) return reports;
+      return reports.filter(
+        (report) => formatYmdFromTimestamp(report.timestamp) === selectedDate
+      );
+    };
+
+    const fromDb = row.dailyAttendance?.problemReports || [];
+    if (fromDb.length > 0) {
+      return {
+        reports: sortByUploadedDate(filterBySelectedDate(fromDb as ProblemReportViewItem[])),
+        isDemo: false,
+      };
+    }
+    return {
+      reports: sortByUploadedDate(filterBySelectedDate(demoProblemReports)),
+      isDemo: true,
+    };
+  };
+
   return (
     <main className="w-full flex flex-col gap-6">
       <header className="flex flex-col gap-2">
@@ -522,6 +606,7 @@ const RiderManagementPage = () => {
                 <th className="text-left py-2 px-2">Check-in</th>
                 <th className="text-left py-2 px-2">Check-out</th>
                 <th className="text-left py-2 px-2">Proofs</th>
+                <th className="text-left py-2 px-2">Problem Reports</th>
               </tr>
             </thead>
             <tbody>
@@ -588,11 +673,34 @@ const RiderManagementPage = () => {
                       <span className="text-slate-400 text-xs">No proofs</span>
                     )}
                   </td>
+                  <td className="py-2 px-2">
+                    {(() => {
+                      const { reports, isDemo } = resolveProblemReports(row);
+                      if (!reports.length) {
+                        return <span className="text-slate-400 text-xs">No reports</span>;
+                      }
+                      return (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setProblemReportModalState({
+                            rider: row,
+                            reports,
+                            isDemo,
+                          })
+                        }
+                        className="text-primary underline text-xs"
+                      >
+                        View
+                      </button>
+                      );
+                    })()}
+                  </td>
                 </tr>
               ))}
               {attendanceRows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center text-slate-500">
+                  <td colSpan={8} className="py-6 text-center text-slate-500">
                     No attendance records for the selected filters.
                   </td>
                 </tr>
@@ -634,6 +742,56 @@ const RiderManagementPage = () => {
                 <p className="text-sm text-slate-500">No check-out proof.</p>
               )}
             </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(problemReportModalState)}
+        onClose={() => setProblemReportModalState(null)}
+        heading={`Problem Reports${problemReportModalState?.rider?.riderName ? ` - ${problemReportModalState.rider.riderName}` : ''}`}
+        description={`${problemReportModalState?.isDemo ? 'Demo data preview' : 'Attendance date'}: ${problemReportModalState?.rider?.dailyAttendance?.date || attendanceDate || '-'}`}
+      >
+        {problemReportModalState && (
+          <div className="flex flex-col gap-4">
+            {problemReportModalState.reports.map((report, index) => (
+              <article
+                key={`${problemReportModalState.rider.riderId}-problem-report-${index}`}
+                className="border border-slate-200 rounded-lg p-3 bg-slate-50 flex flex-col gap-3"
+              >
+                <div className="flex flex-col gap-1 text-xs text-slate-600">
+                  <p>
+                    <strong>Type:</strong> {report.mediaType === 'video' ? 'Video' : 'Photo'}
+                  </p>
+                  <p>
+                    <strong>Timestamp:</strong> {formatAttendanceDateTime(report.timestamp)}
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {report.locationLabel || '-'}
+                  </p>
+                  <p>
+                    <strong>Description:</strong> {report.description || '-'}
+                  </p>
+                </div>
+
+                {report.mediaType === 'video' ? (
+                  <video
+                    controls
+                    src={report.imageUrl}
+                    className="w-full max-h-72 rounded-lg border border-slate-200 bg-black"
+                  />
+                ) : (
+                  <img
+                    src={report.imageUrl}
+                    alt={`${problemReportModalState.rider.riderName || 'Rider'} problem report proof`}
+                    className="w-full max-h-72 object-contain rounded-lg border border-slate-200 bg-white"
+                  />
+                )}
+              </article>
+            ))}
+            {problemReportModalState.reports.length === 0 && (
+              <p className="text-sm text-slate-500">No problem reports for this date.</p>
+            )}
           </div>
         )}
       </Modal>

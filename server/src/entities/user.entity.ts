@@ -17,6 +17,10 @@ export interface UserStatusProofRecord {
   locationLabel?: string;
   latitude?: number;
   longitude?: number;
+  description?: string;
+  mediaType?: 'photo' | 'video';
+  category?: 'STATUS_PROOF' | 'PROBLEM_REPORT';
+  source?: string;
 }
 
 @Entity('users')

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import fs from 'fs';
 import { DashboardService } from '../services/dashboard.service';
 import { OrderService } from '../services/order.service';
 import { AuthRequest } from '../types/auth.types';
@@ -6,10 +7,14 @@ import { RoleTypes } from '../constants/role.constants';
 import { SummaryChartMetric, SummaryChartPeriod } from '../types/dashboard.types';
 import { EmailService } from '../integrations/emails/email.service';
 import { UUID } from '../types';
+import { UserService } from '../services/user.service';
+import { UserStatus } from '../constants/user.constants';
+import { uploadProblemReportEvidenceToCloudinary } from '../integrations/cloudinary/cloudinary.service';
 
 const dashboardService = new DashboardService();
 const orderService = new OrderService();
 const emailService = new EmailService();
+const userService = new UserService();
 
 const parseDateBoundary = (value: unknown, fallback: Date, endOfDay = false) => {
   if (!value) return fallback;
@@ -42,6 +47,13 @@ const parseOrganizationId = (value: unknown): UUID | undefined => {
     return undefined;
   }
   return normalized as UUID;
+};
+
+const parseDateTime = (value: unknown, fallback: Date) => {
+  if (!value) return fallback;
+  const parsed = new Date(String(value));
+  if (Number.isNaN(parsed.getTime())) return fallback;
+  return parsed;
 };
 
 export const DashboardController = {
@@ -204,6 +216,100 @@ export const DashboardController = {
       return res.status(200).json({
         message: order ? 'Order found' : 'Order not found',
         data: order,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async reportProblem(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthRequest;
+      const userId = authReq.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const file = req.file as (Express.Multer.File & { path?: string }) | undefined;
+      const { description, capturedAt, mediaType, locationLabel } = req.body as {
+        description?: string;
+        capturedAt?: string;
+        mediaType?: string;
+        locationLabel?: string;
+      };
+
+      if (!file) {
+        return res.status(400).json({ message: 'Evidence file is required' });
+      }
+
+      if (!description || !description.trim()) {
+        return res.status(400).json({ message: 'Description is required' });
+      }
+
+      const localFilePath = file.path;
+      if (!localFilePath) {
+        return res.status(500).json({ message: 'Failed to process uploaded evidence file' });
+      }
+
+      const normalizedMediaType =
+        mediaType === 'video' || file.mimetype.startsWith('video/') ? 'video' : 'photo';
+      const reportTimestamp = capturedAt || new Date().toISOString();
+
+      let evidenceUrl = '';
+      try {
+        evidenceUrl = await uploadProblemReportEvidenceToCloudinary(localFilePath, {
+          userId,
+          mediaType: normalizedMediaType,
+        });
+
+        const existingUser = await userService.getUserById(userId as UUID);
+        const existingProofs = Array.isArray(existingUser.statusProofs)
+          ? existingUser.statusProofs
+          : [];
+
+        await userService.updateUser(userId as UUID, {
+          statusProofs: [
+            ...existingProofs,
+            {
+              imageUrl: evidenceUrl,
+              status: existingUser.status || UserStatus.ACTIVE,
+              timestamp: reportTimestamp,
+              locationLabel: locationLabel || undefined,
+              description: description.trim(),
+              mediaType: normalizedMediaType,
+              category: 'PROBLEM_REPORT',
+              source: 'dashboard:report-problem',
+            },
+          ],
+        });
+      } catch (error) {
+        const uploadErrorMessage =
+          error instanceof Error && error.message
+            ? error.message
+            : 'Failed to upload problem report evidence';
+        return res.status(502).json({ message: uploadErrorMessage });
+      } finally {
+        try {
+          if (fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath);
+          }
+        } catch {
+          // ignore local cleanup errors
+        }
+      }
+
+      return res.status(200).json({
+        message: 'Problem report submitted successfully',
+        data: {
+          reportedBy: userId,
+          mediaType: normalizedMediaType,
+          evidenceUrl,
+          capturedAt: reportTimestamp,
+          description: description.trim(),
+          locationLabel: locationLabel || undefined,
+          submittedAt: new Date().toISOString(),
+        },
       });
     } catch (error) {
       next(error);

@@ -255,6 +255,26 @@ export interface InputProps {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 
   /**
+   * Browser autocomplete hint for this input.
+   */
+  autoComplete?: string;
+
+  /**
+   * Mobile text auto-capitalization behavior.
+   */
+  autoCapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+
+  /**
+   * Mobile/browser autocorrect behavior.
+   */
+  autoCorrect?: 'on' | 'off';
+
+  /**
+   * Browser spellcheck behavior.
+   */
+  spellCheck?: boolean;
+
+  /**
    * Error message to display below the input
    * @property {string} [errorMessage]
    */
@@ -301,6 +321,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       pattern,
       step,
       onBlur,
+      autoComplete,
+      autoCapitalize,
+      autoCorrect,
+      spellCheck,
       errorMessage,
       showPasswordToggle = false,
     },
@@ -541,6 +565,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               inputMode={inputMode}
               pattern={pattern}
               step={step}
+              autoComplete={autoComplete}
+              autoCapitalize={autoCapitalize}
+              autoCorrect={autoCorrect}
+              spellCheck={spellCheck}
               className={`
                 py-[7px] px-4 
                 font-normal

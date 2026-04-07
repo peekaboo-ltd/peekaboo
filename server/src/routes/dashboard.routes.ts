@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { DashboardController } from '../controllers/dashboard.controller';
 import { authenticate } from '../middlewares/auth.middleware';
+import { uploadProblemReportEvidence } from '../middlewares/upload.middleware';
 
 const router = Router();
 
@@ -18,6 +19,7 @@ router.get('/charts/summary', DashboardController.getSummaryChartData);
 
 // Quick order lookup
 router.get('/orders/search', DashboardController.searchOrderByReferenceId);
+router.post('/report-problem', uploadProblemReportEvidence, DashboardController.reportProblem);
 
 // Business reports
 router.get('/business-report', DashboardController.getBusinessReport);

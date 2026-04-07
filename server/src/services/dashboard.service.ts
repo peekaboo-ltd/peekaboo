@@ -163,6 +163,16 @@ export class DashboardService {
     return qb.andWhere(scope.predicate, scope.params);
   }
 
+  private getDateRange(range?: { startDate?: Date; endDate?: Date }) {
+    const start = range?.startDate ? new Date(range.startDate) : new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = range?.endDate ? new Date(range.endDate) : new Date();
+    end.setHours(23, 59, 59, 999);
+
+    return { start, end };
+  }
+
   private resolveBillingBreakdown(
     billing: Pick<
       OrganizationBilling,
@@ -450,6 +460,48 @@ export class DashboardService {
     }
     const deliveriesThisMonth = await deliveriesThisMonthQb.getCount();
 
+    const periodRange =
+      options?.period === 'today' || options?.startDate || options?.endDate
+        ? this.getDateRange(options)
+        : undefined;
+
+    const completedTodayQuery = this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .where('assignment.assignedToId = :userId', { userId })
+      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED });
+
+    if (periodRange) {
+      completedTodayQuery.andWhere('assignment.updatedAt BETWEEN :start AND :end', {
+        start: periodRange.start,
+        end: periodRange.end,
+      });
+    }
+
+    const completedToday = await completedTodayQuery.getCount();
+
+    const earningsQuery = this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .innerJoin('assignment.order', 'order')
+      .select(
+        `COALESCE(SUM(CASE WHEN assignment.status = :status THEN COALESCE(order.finalFee, order.initialFee - COALESCE(order.discount, 0), 0) ELSE 0 END), 0)`,
+        'total'
+      )
+      .where('assignment.assignedToId = :userId', { userId })
+      .setParameter('status', OrderAssignmentStatus.COMPLETED);
+
+    if (periodRange) {
+      earningsQuery.andWhere('assignment.updatedAt BETWEEN :start AND :end', {
+        start: periodRange.start,
+        end: periodRange.end,
+      });
+    }
+
+    const earningsResult = await earningsQuery.getRawOne<{ total: string }>();
+    const totalEarnings = Number(earningsResult?.total || 0);
+
+    const todayDeliveries = completedToday;
+    const bonusActive = completedToday > 15;
+
     // Completion rate (completed / (completed + cancelled))
     const cancelledAssignments = await this.orderAssignmentRepository.count({
       where: { assignedToId: userId, status: OrderAssignmentStatus.CANCELLED },
@@ -466,7 +518,7 @@ export class DashboardService {
     const assignmentsByStatus = await this.getAssignmentsByStatus(userId);
 
     // Recent activity
-    const recentActivity = await this.getRiderRecentActivity(userId);
+    const recentActivity = await this.getRiderRecentActivity(userId, periodRange);
 
     // Earnings: sum finalFee from orders linked to completed assignments
     const totalEarningsResult = await this.orderAssignmentRepository
@@ -506,6 +558,11 @@ export class DashboardService {
       completionRate,
       acceptanceRate,
       pendingAssignments,
+      completedToday,
+      todayDeliveries,
+      totalEarnings,
+      totalAssignments,
+      bonusActive,
       assignmentsByStatus,
       recentActivity,
       totalEarnings,
@@ -1827,14 +1884,25 @@ export class DashboardService {
   /**
    * Get rider recent activity
    */
-  private async getRiderRecentActivity(userId: UUID): Promise<RecentActivity[]> {
-    const assignments = await this.orderAssignmentRepository
+  private async getRiderRecentActivity(
+    userId: UUID,
+    range?: { start: Date; end: Date }
+  ): Promise<RecentActivity[]> {
+    const query = this.orderAssignmentRepository
       .createQueryBuilder('assignment')
       .innerJoinAndSelect('assignment.order', 'order')
       .where('assignment.assignedToId = :userId', { userId })
       .orderBy('assignment.updatedAt', 'DESC')
-      .take(10)
-      .getMany();
+      .take(10);
+
+    if (range) {
+      query.andWhere('assignment.updatedAt BETWEEN :start AND :end', {
+        start: range.start,
+        end: range.end,
+      });
+    }
+
+    const assignments = await query.getMany();
 
     return assignments.map((assignment) => ({
       id: assignment.id,
