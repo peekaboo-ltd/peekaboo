@@ -57,7 +57,9 @@ export const DashboardController = {
         });
       }
 
-      const metrics = await dashboardService.getDashboardMetrics(userId, userRoles);
+      const startDate = parseOptionalDateBoundary(req.query.startDate);
+      const endDate = parseOptionalDateBoundary(req.query.endDate, true);
+      const metrics = await dashboardService.getDashboardMetrics(userId, userRoles, startDate, endDate);
 
       return res.status(200).json({
         message: 'Dashboard metrics fetched successfully',
@@ -120,6 +122,7 @@ export const DashboardController = {
     try {
       const authReq = req as AuthRequest;
       const userId = authReq.user?.id;
+      const userRoles = authReq.user?.userRoles?.map((ur) => ur.role.name as RoleTypes) || [];
 
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -128,7 +131,7 @@ export const DashboardController = {
       const period = String(req.query.period || 'month');
       const startDate = parseOptionalDateBoundary(req.query.startDate);
       const endDate = parseOptionalDateBoundary(req.query.endDate, true);
-      const data = await dashboardService.getDeliveryChartData(userId, period, startDate, endDate);
+      const data = await dashboardService.getDeliveryChartData(userId, period, startDate, endDate, userRoles);
 
       return res.status(200).json({
         message: 'Delivery chart data fetched successfully',
