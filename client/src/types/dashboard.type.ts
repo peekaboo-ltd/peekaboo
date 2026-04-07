@@ -28,6 +28,7 @@ export interface RecentActivity {
 
 export interface AdminMetrics {
   totalOrders: number;
+  ordersThisMonth: number;
   ordersByStatus: OrderStatusCount[];
   totalRevenue: number;
   billingAndPaymentsThisMonth: number;
@@ -44,6 +45,7 @@ export interface AdminMetrics {
 export interface RiderMetrics {
   activeAssignments: number;
   completedDeliveries: number;
+  cancelledAssignments: number;
   deliveriesThisMonth: number;
   completionRate: number;
   acceptanceRate: number;
@@ -55,6 +57,7 @@ export interface RiderMetrics {
 export interface CustomerMetrics {
   totalOrders: number;
   activeOrders: number;
+  pendingOrders: number;
   completedOrders: number;
   ordersThisMonth: number;
   cancelledOrders: number;

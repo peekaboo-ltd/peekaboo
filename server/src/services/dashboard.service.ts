@@ -294,6 +294,15 @@ export class DashboardService {
     // Orders by status (using latest activity)
     const ordersByStatus = await this.getOrdersByStatus();
 
+    // Orders this month
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    const ordersThisMonth = await this.orderRepository
+      .createQueryBuilder('order')
+      .where('order.createdAt >= :startOfMonth', { startOfMonth })
+      .getCount();
+
     // Revenue calculations
     const { totalRevenue, billingAndPaymentsThisMonth } = await this.getRevenueMetrics();
 
@@ -329,6 +338,7 @@ export class DashboardService {
 
     return {
       totalOrders,
+      ordersThisMonth,
       ordersByStatus,
       totalRevenue,
       billingAndPaymentsThisMonth,
@@ -395,6 +405,7 @@ export class DashboardService {
     return {
       activeAssignments,
       completedDeliveries,
+      cancelledAssignments,
       deliveriesThisMonth,
       completionRate,
       acceptanceRate,
@@ -426,6 +437,9 @@ export class DashboardService {
     // Completed orders
     const completedOrders = ordersByStatus.find((s) => s.status === OrderStatus.COMPLETED)?.count || 0;
 
+    // Pending orders
+    const pendingOrders = ordersByStatus.find((s) => s.status === OrderStatus.PENDING)?.count || 0;
+
     // Orders this month
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
@@ -452,6 +466,7 @@ export class DashboardService {
     return {
       totalOrders,
       activeOrders,
+      pendingOrders,
       completedOrders,
       ordersThisMonth,
       cancelledOrders,
