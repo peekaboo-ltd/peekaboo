@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -206,7 +207,12 @@ export default function LoginScreen() {
             <View style={styles.footerCard}>
               <Ionicons name="help-circle-outline" size={18} color={colors.primary} />
               <Text style={styles.footerText}>Having trouble signing in?</Text>
-              <Text style={styles.footerLink}>Contact support</Text>
+              <TouchableOpacity
+                onPress={() => router.push('/(auth)/support')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.footerLink}>Contact support</Text>
+              </TouchableOpacity>
             </View>
           </Animated.View>
         </ScrollView>
