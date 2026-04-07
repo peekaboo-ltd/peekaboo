@@ -95,8 +95,13 @@ const PaymentsPage = () => {
 
   const { adminPaymentsColumns } = useAdminPaymentsColumns();
 
-  const buildFilterParams = useCallback((): AdminPaymentsQueryParams => {
-    const params: AdminPaymentsQueryParams = { page, size };
+  const buildFilterParams = useCallback((
+    override?: Partial<Pick<AdminPaymentsQueryParams, 'page' | 'size'>>,
+  ): AdminPaymentsQueryParams => {
+    const params: AdminPaymentsQueryParams = {
+      page: override?.page ?? page,
+      size: override?.size ?? size,
+    };
     if (statusFilter && statusFilter !== 'all') params.status = statusFilter;
     if (currencyFilter && currencyFilter !== 'all')
       params.currency = currencyFilter;
@@ -105,7 +110,7 @@ const PaymentsPage = () => {
     if (endDate) params.endDate = endDate;
     if (minAmount) params.minAmount = Number(minAmount);
     if (maxAmount) params.maxAmount = Number(maxAmount);
-    if (searchKey) params.searchKey = searchKey;
+    if (searchKey.trim()) params.searchKey = searchKey.trim();
     return params;
   }, [
     page,
@@ -122,10 +127,35 @@ const PaymentsPage = () => {
 
   // Fetch payments and stats on mount and filter changes
   useEffect(() => {
-    if (!updateStatusModal) {
+    const hasOnlyOneDateSet = Boolean(startDate) !== Boolean(endDate);
+
+    if (!updateStatusModal && !hasOnlyOneDateSet) {
       fetchAdminPayments(buildFilterParams());
     }
-  }, [buildFilterParams, fetchAdminPayments, page, size, updateStatusModal]);
+  }, [
+    buildFilterParams,
+    fetchAdminPayments,
+    page,
+    size,
+    updateStatusModal,
+    startDate,
+    endDate,
+  ]);
+
+  useEffect(() => {
+    if (!updateStatusModal && startDate && endDate && page !== 0) {
+      setPage(0);
+      fetchAdminPayments(buildFilterParams({ page: 0 }));
+    }
+  }, [
+    startDate,
+    endDate,
+    page,
+    setPage,
+    updateStatusModal,
+    fetchAdminPayments,
+    buildFilterParams,
+  ]);
 
   useEffect(() => {
     fetchPaymentStats({
@@ -137,7 +167,25 @@ const PaymentsPage = () => {
 
   const handleApplyFilters = () => {
     setPage(0);
-    fetchAdminPayments(buildFilterParams());
+    fetchAdminPayments(buildFilterParams({ page: 0 }));
+  };
+
+  const handleStartDateChange = (value: string) => {
+    setStartDate(value);
+
+    // Keep a valid range: startDate must be <= endDate
+    if (endDate && value && value > endDate) {
+      setEndDate(value);
+    }
+  };
+
+  const handleEndDateChange = (value: string) => {
+    setEndDate(value);
+
+    // Keep a valid range: endDate must be >= startDate
+    if (startDate && value && value < startDate) {
+      setStartDate(value);
+    }
   };
 
   const handleResetFilters = () => {
@@ -263,6 +311,46 @@ const PaymentsPage = () => {
               Export CSV
             </Button>
           </menu>
+        </section>
+
+        <section className="bg-white border border-slate-200 rounded-xl p-4">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-3">
+            <div className="relative">
+              <FontAwesomeIcon
+                icon={faSearch}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+              />
+              <input
+                type="text"
+                placeholder="Search by reference, customer name, email, phone..."
+                value={searchKey}
+                onChange={(e) => setSearchKey(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleApplyFilters();
+                }}
+                className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+              />
+            </div>
+            <input
+              type="date"
+              aria-label="From date"
+              value={startDate}
+              max={endDate || undefined}
+              onChange={(e) => handleStartDateChange(e.target.value)}
+              className="w-full md:w-[170px] px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+            />
+            <input
+              type="date"
+              aria-label="To date"
+              value={endDate}
+              min={startDate || undefined}
+              onChange={(e) => handleEndDateChange(e.target.value)}
+              className="w-full md:w-[170px] px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+            />
+            <Button primary type="button" onClick={handleApplyFilters}>
+              Apply
+            </Button>
+          </div>
         </section>
 
         {/* Stats Cards */}
@@ -417,7 +505,8 @@ const PaymentsPage = () => {
                 <input
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  max={endDate || undefined}
+                  onChange={(e) => handleStartDateChange(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                 />
               </div>
@@ -430,7 +519,8 @@ const PaymentsPage = () => {
                 <input
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate || undefined}
+                  onChange={(e) => handleEndDateChange(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
                 />
               </div>
