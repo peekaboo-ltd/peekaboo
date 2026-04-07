@@ -29,4 +29,13 @@ export class UserProblemReport extends AbstractEntity {
 
   @Column({ name: 'source', type: 'varchar', length: 128, nullable: true })
   source?: string;
+
+  @Column({ name: 'overlay_applied', type: 'boolean', default: false })
+  overlayApplied: boolean;
+
+  @Column({ name: 'overlay_version', type: 'varchar', length: 32, nullable: true })
+  overlayVersion?: string;
+
+  @Column({ name: 'overlay_source', type: 'varchar', length: 64, nullable: true })
+  overlaySource?: string;
 }

@@ -328,8 +328,26 @@ export const useFetchRiderManagementAttendance = () => {
 };
 
 export const useFetchRiderManagementProblemReports = () => {
+  const {
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    setTotalPages,
+    totalCount,
+    setTotalCount,
+  } = usePagination();
+
   const [fetchRiderManagementProblemReports, { data, error, isFetching, isSuccess, reset }] =
     useLazyFetchRiderManagementProblemReportsQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      setTotalPages(data?.data?.totalPages ?? 0);
+      setTotalCount(data?.data?.totalCount ?? 0);
+    }
+  }, [data, isSuccess, setTotalPages, setTotalCount]);
 
   return {
     fetchRiderManagementProblemReports,
@@ -338,6 +356,12 @@ export const useFetchRiderManagementProblemReports = () => {
     isFetching,
     isSuccess,
     reset,
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    totalCount,
   };
 };
 

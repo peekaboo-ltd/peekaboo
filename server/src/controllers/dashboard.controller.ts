@@ -236,6 +236,9 @@ export const DashboardController = {
         capturedAt?: string;
         mediaType?: string;
         locationLabel?: string;
+        overlayTimestamp?: string;
+        overlayLocationLabel?: string;
+        overlayAppliedOnClient?: string;
       };
 
       if (!file) {
@@ -254,12 +257,20 @@ export const DashboardController = {
       const normalizedMediaType =
         mediaType === 'video' || file.mimetype.startsWith('video/') ? 'video' : 'photo';
       const reportTimestamp = capturedAt || new Date().toISOString();
+      const overlayAppliedOnClient = String(req.body?.overlayAppliedOnClient || '').toLowerCase() === 'true';
+      const overlayTimestamp = String(req.body?.overlayTimestamp || '').trim();
+      const overlayLocationLabel = String(
+        req.body?.overlayLocationLabel || locationLabel || 'Location unavailable'
+      ).trim();
 
       let evidenceUrl = '';
       try {
         evidenceUrl = await uploadProblemReportEvidenceToCloudinary(localFilePath, {
           userId,
           mediaType: normalizedMediaType,
+          overlayTimestamp,
+          overlayLocationLabel,
+          overlayAppliedOnClient,
         });
 
         await userService.createProblemReport({
@@ -270,6 +281,9 @@ export const DashboardController = {
           capturedAt: reportTimestamp,
           locationLabel: locationLabel || undefined,
           source: 'dashboard:report-problem',
+          overlayApplied: true,
+          overlayVersion: 'v1',
+          overlaySource: overlayAppliedOnClient ? 'client_and_server' : 'server',
         });
       } catch (error) {
         const uploadErrorMessage =

@@ -25,6 +25,9 @@ export interface UpdateMyStatusWithProofPayload {
   locationLabel?: string;
   capturedAt?: string;
   proofImageUri: string;
+  overlayTimestamp?: string;
+  overlayLocationLabel?: string;
+  overlayAppliedOnClient?: boolean;
 }
 
 export const usersAPI = {
@@ -61,6 +64,15 @@ export const usersAPI = {
 
       if (payload.capturedAt) {
         formData.append('capturedAt', payload.capturedAt);
+      }
+      if (payload.overlayTimestamp) {
+        formData.append('overlayTimestamp', payload.overlayTimestamp);
+      }
+      if (payload.overlayLocationLabel) {
+        formData.append('overlayLocationLabel', payload.overlayLocationLabel);
+      }
+      if (payload.overlayAppliedOnClient !== undefined) {
+        formData.append('overlayAppliedOnClient', String(payload.overlayAppliedOnClient));
       }
 
       // React Native file object typing is not available in DOM lib.

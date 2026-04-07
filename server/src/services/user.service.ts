@@ -755,12 +755,13 @@ export class UserService {
   async getRiderManagementProblemReports(
     query: Request['query']
   ): Promise<Pagination<RiderProblemReportListItem>> {
-    const { page = 0, size = 10, attendanceDate, riderId } = query;
+    const { page = 0, size = 10, attendanceDate, riderId, name } = query;
     const pageNumber = Number(page) >= 0 ? Number(page) : 0;
     const sizeNumber = Number(size) > 0 ? Number(size) : 10;
 
     const riderIdValue = typeof riderId === 'string' && riderId.trim() ? riderId.trim() : undefined;
     const attendanceDateValue = typeof attendanceDate === 'string' && attendanceDate.trim() ? attendanceDate.trim() : undefined;
+    const nameValue = typeof name === 'string' && name.trim() ? name.trim() : undefined;
 
     const reportQuery = this.userProblemReportRepository
       .createQueryBuilder('report')
@@ -771,6 +772,9 @@ export class UserService {
 
     if (riderIdValue) {
       reportQuery.andWhere('report.userId = :riderId', { riderId: riderIdValue });
+    }
+    if (nameValue) {
+      reportQuery.andWhere('user.name ILIKE :name', { name: `%${nameValue}%` });
     }
 
     if (attendanceDateValue) {
@@ -820,6 +824,9 @@ export class UserService {
     locationLabel?: string;
     latitude?: number;
     longitude?: number;
+    overlayApplied?: boolean;
+    overlayVersion?: string;
+    overlaySource?: string;
   }): Promise<UserStatusProof> {
     return this.userStatusProofRepository.save({
       userId: payload.userId,
@@ -829,6 +836,9 @@ export class UserService {
       locationLabel: payload.locationLabel,
       latitude: payload.latitude,
       longitude: payload.longitude,
+      overlayApplied: Boolean(payload.overlayApplied),
+      overlayVersion: payload.overlayVersion,
+      overlaySource: payload.overlaySource,
     });
   }
 
@@ -840,6 +850,9 @@ export class UserService {
     capturedAt: string;
     locationLabel?: string;
     source?: string;
+    overlayApplied?: boolean;
+    overlayVersion?: string;
+    overlaySource?: string;
   }): Promise<UserProblemReport> {
     return this.userProblemReportRepository.save({
       userId: payload.userId,
@@ -849,6 +862,9 @@ export class UserService {
       capturedAt: new Date(payload.capturedAt),
       locationLabel: payload.locationLabel,
       source: payload.source,
+      overlayApplied: Boolean(payload.overlayApplied),
+      overlayVersion: payload.overlayVersion,
+      overlaySource: payload.overlaySource,
     });
   }
 

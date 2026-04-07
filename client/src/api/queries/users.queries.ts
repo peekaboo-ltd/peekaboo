@@ -126,11 +126,13 @@ export const usersQueriesApiSlice = createApi({
         size,
         attendanceDate,
         riderId,
+        name,
       }: {
         page: number;
         size: number;
         attendanceDate?: string;
         riderId?: string;
+        name?: string;
       }) => ({
         url: '/users/rider-management/problem-reports',
         params: {
@@ -138,6 +140,7 @@ export const usersQueriesApiSlice = createApi({
           size,
           attendanceDate,
           riderId,
+          name,
         },
       }),
     }),

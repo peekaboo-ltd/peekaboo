@@ -47,7 +47,7 @@ cd mobile
 npm install
 ```
 
-### 2. Configure Environment
+### 2. Configure Environment (LAN-first for team testing)
 
 Create a `.env` file from the example:
 
@@ -63,20 +63,37 @@ EXPO_PUBLIC_PROJECT_ID=your-expo-project-id
 EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES=5
 ```
 
-Physical device local testing note:
+LAN setup (required for colleagues on phones or separate laptops):
 
-- Do not use `localhost` for `EXPO_PUBLIC_API_BASE_URL` when testing on a phone.
-- Use your computer LAN IP instead, for example: `http://192.168.1.20:8080/api/v1`.
-- On macOS, you can usually get it with: `ipconfig getifaddr en0` (Wi-Fi) or `ipconfig getifaddr en1`.
+1. Find your machine LAN IP (host running backend), e.g. `192.168.1.20`.
+   - macOS (Wi-Fi): `ipconfig getifaddr en0`
+   - macOS (alternate): `ipconfig getifaddr en1`
+2. Set `EXPO_PUBLIC_API_BASE_URL` using that IP, for example:
+   - `EXPO_PUBLIC_API_BASE_URL=http://192.168.1.20:8080/api/v1`
+3. Start backend so it is reachable on LAN (bind to `0.0.0.0`, not only `127.0.0.1`).
+4. Ensure everyone is on the same Wi-Fi / local network.
+5. Open firewall access for the backend port (example `8080`) if needed.
+
+Important:
+
+- Do not use `localhost` or `127.0.0.1` in `EXPO_PUBLIC_API_BASE_URL` for teammates using physical devices.
+- `localhost` points to each person/device itself, not your computer.
+- If API calls fail for teammates, first verify they can open `http://<LAN_IP>:<PORT>/api/v1` from their browser.
 
 For EAS builds, make sure `EXPO_PUBLIC_*` values are provided via `eas.json` `env` or EAS secrets. Local `.env` files are not used in cloud builds.
 
 `EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES` controls how often rider location is sent to the backend (defaults to 5 minutes). Set it to `1` for faster testing.
 
-### 3. Start Development Server
+### 3. Start Development Server (LAN)
 
 ```bash
 npx expo start
+```
+
+Expo should run in LAN mode for teammates. If needed, force LAN:
+
+```bash
+npx expo start --lan
 ```
 
 This will start the Expo development server. You can then:
@@ -236,7 +253,11 @@ Run on physical devices for the best experience:
 1. **Metro bundler issues**: Clear cache with `npx expo start -c`
 2. **iOS Simulator not launching**: Run `npx expo run:ios`
 3. **Android emulator issues**: Make sure ANDROID_HOME is set
-4. **API connection issues**: Check `EXPO_PUBLIC_API_BASE_URL` in `.env` and ensure EAS build env/secrets are configured.
+4. **API connection issues**:
+   - Confirm `EXPO_PUBLIC_API_BASE_URL` uses LAN IP (not `localhost`)
+   - Confirm backend listens on `0.0.0.0`
+   - Confirm teammates can reach `http://<LAN_IP>:<PORT>/api/v1` from their devices
+   - Ensure EAS build env/secrets are configured for non-local builds
 5. **Push subscriptions not saving**: Push registration only works on a physical device, requires notification permission, and needs a valid Expo project ID. Login should still succeed even if push registration is skipped or the backend sync fails.
 
 ### Logs

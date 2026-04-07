@@ -80,7 +80,31 @@ export const UserController = {
   // GET RIDER MANAGEMENT PROBLEM REPORTS
   async getRiderManagementProblemReports(req: Request, res: Response, next: NextFunction) {
     try {
-      const problemReports = await userService.getRiderManagementProblemReports(req.query);
+      const { page = '0', size = '10', attendanceDate, riderId, name } = req.query;
+      const pageNumber = Number(page);
+      const sizeNumber = Number(size);
+
+      if (!Number.isInteger(pageNumber) || pageNumber < 0) {
+        return res.status(400).json({
+          message: 'Invalid page parameter provided',
+        });
+      }
+
+      if (!Number.isInteger(sizeNumber) || sizeNumber <= 0) {
+        return res.status(400).json({
+          message: 'Invalid size parameter provided',
+        });
+      }
+
+      const normalizedQuery = {
+        page: String(pageNumber),
+        size: String(sizeNumber),
+        attendanceDate: typeof attendanceDate === 'string' ? attendanceDate : undefined,
+        riderId: typeof riderId === 'string' ? riderId : undefined,
+        name: typeof name === 'string' ? name : undefined,
+      };
+
+      const problemReports = await userService.getRiderManagementProblemReports(normalizedQuery);
 
       return res.status(200).json({
         message: 'Rider problem reports fetched successfully',
@@ -331,6 +355,9 @@ export const UserController = {
         longitude?: string | number;
         locationLabel?: string;
         capturedAt?: string;
+        overlayTimestamp?: string;
+        overlayLocationLabel?: string;
+        overlayAppliedOnClient?: string;
       };
 
       if (!user?.id) {
@@ -379,10 +406,19 @@ export const UserController = {
       }
 
       let proofImageUrl = '';
+      const overlayAppliedOnClient =
+        String(req.body?.overlayAppliedOnClient || '').toLowerCase() === 'true';
+      const overlayTimestamp = String(req.body?.overlayTimestamp || '').trim();
+      const overlayLocationLabel = String(
+        req.body?.overlayLocationLabel || locationLabel || 'Location unavailable'
+      ).trim();
       try {
         proofImageUrl = await uploadUserStatusProofToCloudinary(localFilePath, {
           userId: user.id,
           status,
+          overlayTimestamp,
+          overlayLocationLabel,
+          overlayAppliedOnClient,
         });
       } catch (error) {
         try {
@@ -421,6 +457,9 @@ export const UserController = {
         locationLabel: locationLabel || undefined,
         latitude: parsedLatitude,
         longitude: parsedLongitude,
+        overlayApplied: true,
+        overlayVersion: 'v1',
+        overlaySource: overlayAppliedOnClient ? 'client_and_server' : 'server',
       });
 
       try {

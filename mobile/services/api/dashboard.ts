@@ -14,6 +14,9 @@ export interface SubmitProblemReportPayload {
   mediaType: 'image' | 'video';
   evidenceUri: string;
   locationLabel?: string;
+  overlayTimestamp?: string;
+  overlayLocationLabel?: string;
+  overlayAppliedOnClient?: boolean;
 }
 
 interface ServerRecentActivity {
@@ -172,6 +175,15 @@ export const dashboardAPI = {
     formData.append('mediaType', payload.mediaType);
     if (payload.locationLabel) {
       formData.append('locationLabel', payload.locationLabel);
+    }
+    if (payload.overlayTimestamp) {
+      formData.append('overlayTimestamp', payload.overlayTimestamp);
+    }
+    if (payload.overlayLocationLabel) {
+      formData.append('overlayLocationLabel', payload.overlayLocationLabel);
+    }
+    if (payload.overlayAppliedOnClient !== undefined) {
+      formData.append('overlayAppliedOnClient', String(payload.overlayAppliedOnClient));
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

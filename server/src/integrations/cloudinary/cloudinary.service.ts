@@ -33,12 +33,33 @@ interface UploadAvatarOptions {
 interface UploadStatusProofOptions {
   userId?: string;
   status?: string;
+  overlayTimestamp?: string;
+  overlayLocationLabel?: string;
+  overlayAppliedOnClient?: boolean;
 }
 
 interface UploadProblemReportEvidenceOptions {
   userId?: string;
   mediaType?: 'photo' | 'video';
+  overlayTimestamp?: string;
+  overlayLocationLabel?: string;
+  overlayAppliedOnClient?: boolean;
 }
+
+const normalizeOverlayText = (value?: string): string | undefined => {
+  if (!value) return undefined;
+  const normalized = value.trim().replace(/\s+/g, ' ');
+  return normalized.length ? normalized.slice(0, 120) : undefined;
+};
+
+const buildOverlayLines = (timestamp?: string, location?: string): string[] => {
+  const lines: string[] = [];
+  const ts = normalizeOverlayText(timestamp);
+  const loc = normalizeOverlayText(location);
+  if (ts) lines.push(`Timestamp: ${ts}`);
+  if (loc) lines.push(`Location: ${loc}`);
+  return lines;
+};
 
 const ensureCloudinaryConfigured = () => {
   if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
@@ -131,10 +152,48 @@ export async function uploadUserStatusProofToCloudinary(
     ? `${options.userId}-${suffix}-${Date.now()}`
     : undefined;
 
-  return uploadWithRetry(localFilePath, {
+  const uploadResult = await uploadResultWithRetry(localFilePath, {
     folder,
     overwrite: false,
     ...(publicId ? { public_id: publicId } : {}),
+  });
+  const uploadedUrl = uploadResult.secure_url;
+
+  const overlayLines = buildOverlayLines(options.overlayTimestamp, options.overlayLocationLabel);
+  if (overlayLines.length === 0 || options.overlayAppliedOnClient) {
+    return uploadedUrl;
+  }
+
+  const uploadedPublicId = publicId
+    ? `${folder}/${publicId}`
+    : normalizeCloudinaryPublicId(uploadResult.public_id);
+  const [lineOne, lineTwo] = overlayLines;
+  const textOverlays = [
+    {
+      overlay: { font_family: 'Arial', font_size: 32, font_weight: 'bold', text: lineOne || '' },
+      color: 'white',
+      gravity: 'south_west',
+      x: 24,
+      y: lineTwo ? 84 : 28,
+      flags: 'layer_apply',
+    },
+  ];
+  if (lineTwo) {
+    textOverlays.push({
+      overlay: { font_family: 'Arial', font_size: 30, font_weight: 'normal', text: lineTwo },
+      color: 'white',
+      gravity: 'south_west',
+      x: 24,
+      y: 28,
+      flags: 'layer_apply',
+    });
+  }
+
+  return cloudinary.url(uploadedPublicId, {
+    secure: true,
+    resource_type: 'image',
+    format: 'jpg',
+    transformation: [{ effect: 'brightness:-5' }, ...textOverlays],
   });
 }
 
@@ -214,9 +273,59 @@ export async function uploadProblemReportEvidenceToCloudinary(
 
   const uploadResult = await uploadResultWithRetry(localFilePath, uploadOptions);
   const uploadUrl = uploadResult.secure_url;
+  const overlayLines = buildOverlayLines(options.overlayTimestamp, options.overlayLocationLabel);
+  const [lineOne, lineTwo] = overlayLines;
+  const overlayTextTransforms =
+    overlayLines.length === 0
+      ? []
+      : [
+          {
+            overlay: {
+              font_family: 'Arial',
+              font_size: 32,
+              font_weight: 'bold',
+              text: lineOne || '',
+            },
+            color: 'white',
+            gravity: 'south_west',
+            x: 24,
+            y: lineTwo ? 84 : 28,
+            flags: 'layer_apply',
+          },
+          ...(lineTwo
+            ? [
+                {
+                  overlay: {
+                    font_family: 'Arial',
+                    font_size: 30,
+                    font_weight: 'normal',
+                    text: lineTwo,
+                  },
+                  color: 'white',
+                  gravity: 'south_west',
+                  x: 24,
+                  y: 28,
+                  flags: 'layer_apply',
+                },
+              ]
+            : []),
+        ];
 
   if (options.mediaType !== 'video') {
-    return uploadUrl;
+    if (options.overlayAppliedOnClient || overlayTextTransforms.length === 0) {
+      return uploadUrl;
+    }
+
+    const uploadedPublicId = publicId
+      ? `${folder}/${publicId}`
+      : normalizeCloudinaryPublicId(uploadResult.public_id);
+
+    return cloudinary.url(uploadedPublicId, {
+      secure: true,
+      resource_type: 'image',
+      format: 'jpg',
+      transformation: [{ effect: 'brightness:-5' }, ...overlayTextTransforms],
+    });
   }
 
   const watermarkPublicId = await uploadLocalProblemReportWatermarkIfNeeded();
@@ -243,6 +352,7 @@ export async function uploadProblemReportEvidenceToCloudinary(
     format: 'mp4',
     transformation: [
       { quality: 'auto:good' },
+      ...overlayTextTransforms,
       { overlay: watermarkPublicId, width: 220, crop: 'scale', opacity: 78 },
       { gravity: 'south_east', x: 24, y: 24, flags: 'layer_apply' },
     ],

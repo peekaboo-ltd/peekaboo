@@ -83,7 +83,7 @@ export function DataTablePagination<TData>({
               }
             }}
           >
-            <SelectTrigger className="h-8 w-[70px] cursor-pointer">
+            <SelectTrigger className="h-8 w-[70px] !text-[11px] cursor-pointer">
               <SelectValue placeholder={size} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -91,7 +91,7 @@ export function DataTablePagination<TData>({
                 <SelectItem
                   value={`${option.value}`}
                   key={option.value}
-                  className="cursor-pointer hover:bg-background"
+                  className="cursor-pointer !text-[11px] hover:bg-background"
                 >
                   {option?.label}
                 </SelectItem>
@@ -109,7 +109,7 @@ export function DataTablePagination<TData>({
             min={1}
             max={totalPages || 1}
             defaultValue={page + 1}
-            className="w-12 text-center placeholder:text-xs text-xs py-1 px-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-12 text-center placeholder:!text-[11px] !text-[11px] py-1 px-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             onChange={(e) => {
               const targetPage = e.target.value ? Number(e.target.value) : 0;
               if (targetPage >= 1 && targetPage <= (totalPages || 1)) {

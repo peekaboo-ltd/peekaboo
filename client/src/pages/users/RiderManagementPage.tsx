@@ -30,13 +30,6 @@ import { faCircleCheck, faCircleXmark } from '@fortawesome/free-regular-svg-icon
 
 type SortBy = 'deliveries' | 'earnings' | 'canceled' | 'failed' | 'activeDays' | 'activeHours';
 type SortOrder = 'asc' | 'desc';
-type ProblemReportViewItem = {
-  imageUrl: string;
-  mediaType?: 'photo' | 'video';
-  description?: string;
-  timestamp: string;
-  locationLabel?: string;
-};
 
 const formatDateForInput = (date: Date) => {
   const year = date.getFullYear();
@@ -59,6 +52,55 @@ const formatAttendanceDateTime = (value?: string) => {
   return parsed.toLocaleString();
 };
 
+const normalizeProblemMediaUrl = (value?: string) => {
+  if (!value) return '';
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+
+  try {
+    return new URL(trimmed).toString();
+  } catch {
+    return encodeURI(trimmed);
+  }
+};
+
+const isLikelyVideoMedia = (mediaType?: string, url?: string) => {
+  if (mediaType === 'video') return true;
+  if (!url) return false;
+  return /\.(mp4|webm|ogg|m3u8|mov|qt)(\?.*)?$/i.test(url);
+};
+
+const getCloudinaryVideoSourceCandidates = (url: string) => {
+  if (!url) return [] as string[];
+
+  const candidates = new Set<string>([url]);
+  if (!url.includes('/res.cloudinary.com/') || !url.includes('/video/upload/')) {
+    return Array.from(candidates);
+  }
+
+  const urlObj = new URL(url);
+
+  // Transcode to MP4/H.264 — required for MOV and other formats that browsers
+  // (Chrome, Firefox) cannot play natively. Cloudinary applies this server-side.
+  candidates.add(url.replace('/video/upload/', '/video/upload/f_mp4,vc_h264/'));
+
+  // Fallback: strip the full transformation chain and request the raw asset
+  // transcoded to MP4. Useful when the overlay/watermark chain fails for the
+  // source format (e.g. MOV with complex named-layer overlays).
+  // Use [^?]+ to exclude the query string so urlObj.search isn't duplicated.
+  const pathMatch = url.match(/\/v\d+\/[^?]+/);
+  if (pathMatch?.[0]) {
+    // Preserve the Cloudinary cloud name (first path segment after the host).
+    const cloudName = urlObj.pathname.split('/')[1];
+    const base = `${urlObj.protocol}//${urlObj.host}/${cloudName}`;
+    const plainPathUrl = `${base}/video/upload/f_mp4,vc_h264${pathMatch[0]}`;
+    const querySuffix = urlObj.search || '';
+    candidates.add(`${plainPathUrl}${querySuffix}`);
+  }
+
+  return Array.from(candidates);
+};
+
 const RiderManagementPage = () => {
   useDocumentTitle('Rider Management');
 
@@ -69,15 +111,14 @@ const RiderManagementPage = () => {
   const [endDate, setEndDate] = useState('');
   const [attendanceDate, setAttendanceDate] = useState(formatDateForInput(new Date()));
   const [attendanceName, setAttendanceName] = useState('');
+  const [problemReportsDate, setProblemReportsDate] = useState(formatDateForInput(new Date()));
+  const [problemReportsName, setProblemReportsName] = useState('');
   const [sortBy, setSortBy] = useState<SortBy>('deliveries');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedRider, setSelectedRider] = useState<RiderPerformanceItem | null>(null);
   const [attendanceProofRider, setAttendanceProofRider] = useState<RiderAttendanceItem | null>(null);
-  const [problemReportModalState, setProblemReportModalState] = useState<{
-    rider: RiderAttendanceItem;
-    reports: ProblemReportViewItem[];
-    isLoading: boolean;
-  } | null>(null);
+  const [selectedProblemReport, setSelectedProblemReport] = useState<RiderProblemReportItem | null>(null);
+  const [problemVideoPreviewError, setProblemVideoPreviewError] = useState(false);
   const [compareLeftId, setCompareLeftId] = useState('');
   const [compareRightId, setCompareRightId] = useState('');
   const debouncedSearch = useDebounce(search, 350);
@@ -105,7 +146,11 @@ const RiderManagementPage = () => {
 
   const {
     fetchRiderManagementProblemReports,
+    data: problemReportsData,
     isFetching: isProblemReportsFetching,
+    page: problemReportsPage,
+    setPage: setProblemReportsPage,
+    size: problemReportsSize,
   } = useFetchRiderManagementProblemReports();
 
   const performanceRows = useMemo(
@@ -115,6 +160,22 @@ const RiderManagementPage = () => {
   const attendanceRows = useMemo(
     () => (attendanceData?.data?.rows ?? []) as RiderAttendanceItem[],
     [attendanceData],
+  );
+  const problemReportRows = useMemo(
+    () => (problemReportsData?.data?.rows ?? []) as RiderProblemReportItem[],
+    [problemReportsData],
+  );
+  const selectedProblemMediaUrl = useMemo(
+    () => normalizeProblemMediaUrl(selectedProblemReport?.imageUrl),
+    [selectedProblemReport?.imageUrl],
+  );
+  const selectedProblemIsVideo = useMemo(
+    () => isLikelyVideoMedia(selectedProblemReport?.mediaType, selectedProblemMediaUrl),
+    [selectedProblemReport?.mediaType, selectedProblemMediaUrl],
+  );
+  const selectedProblemVideoSources = useMemo(
+    () => getCloudinaryVideoSourceCandidates(selectedProblemMediaUrl),
+    [selectedProblemMediaUrl],
   );
   const { riderManagementColumns } = useRiderManagementColumns(setSelectedRider);
 
@@ -196,6 +257,9 @@ const RiderManagementPage = () => {
   useEffect(() => {
     setAttendancePage(0);
   }, [attendanceDate, attendanceName, setAttendancePage]);
+  useEffect(() => {
+    setProblemReportsPage(0);
+  }, [problemReportsDate, problemReportsName, setProblemReportsPage]);
 
   useEffect(() => {
     fetchRiderManagementAttendance({
@@ -210,6 +274,20 @@ const RiderManagementPage = () => {
     attendanceSize,
     attendanceDate,
     attendanceName,
+  ]);
+  useEffect(() => {
+    fetchRiderManagementProblemReports({
+      page: problemReportsPage,
+      size: problemReportsSize,
+      attendanceDate: problemReportsDate || undefined,
+      name: problemReportsName.trim() ? problemReportsName.trim() : undefined,
+    });
+  }, [
+    fetchRiderManagementProblemReports,
+    problemReportsPage,
+    problemReportsSize,
+    problemReportsDate,
+    problemReportsName,
   ]);
 
   const visibleTotals = useMemo(
@@ -357,40 +435,6 @@ const RiderManagementPage = () => {
     setAttendanceProofRider(row);
   }, []);
 
-  const openProblemReports = useCallback(async (row: RiderAttendanceItem) => {
-    setProblemReportModalState({
-      rider: row,
-      reports: [],
-      isLoading: true,
-    });
-    const response = await fetchRiderManagementProblemReports({
-      page: 0,
-      size: 50,
-      attendanceDate: attendanceDate || row.date || undefined,
-      riderId: row.riderId,
-    });
-    const reports = ((response as { data?: { data?: { rows?: RiderProblemReportItem[] } } })?.data?.data?.rows ?? [])
-      .map((report) => ({
-        imageUrl: report.imageUrl,
-        mediaType: report.mediaType,
-        description: report.description,
-        timestamp: report.timestamp,
-        locationLabel: report.locationLabel,
-      }))
-      .sort((firstReport, secondReport) => {
-        const firstDate = new Date(firstReport.timestamp).getTime();
-        const secondDate = new Date(secondReport.timestamp).getTime();
-        if (Number.isNaN(firstDate) || Number.isNaN(secondDate)) return 0;
-        return secondDate - firstDate;
-      });
-
-    setProblemReportModalState({
-      rider: row,
-      reports,
-      isLoading: false,
-    });
-  }, [fetchRiderManagementProblemReports, attendanceDate]);
-
   // ATTENDANCE COLUMNS
   const attendanceColumns: ColumnDef<RiderAttendanceItem>[] = useMemo(
     () => [
@@ -447,20 +491,65 @@ const RiderManagementPage = () => {
                   <FontAwesomeIcon icon={faCircleInfo} />
                   View proof
                 </Link>
-                <Link className={tableActionClassName} to={`/users/${row.original.riderId}`} onClick={(e) => {
-                  e.preventDefault();
-                  openProblemReports(row.original);
-                }}>
-                  <FontAwesomeIcon icon={faCircleInfo} />
-                  View problem reports
-                </Link>
               </menu>
             </CustomPopover>
           );
         },
       },
     ],
-    [openAttendanceProof, openProblemReports],
+    [openAttendanceProof],
+  );
+  const problemReportColumns: ColumnDef<RiderProblemReportItem>[] = useMemo(
+    () => [
+      {
+        header: "Rider",
+        accessorKey: "riderName",
+        cell: ({ row }) => row.original.riderName || "-",
+      },
+      {
+        header: "Time",
+        accessorKey: "timestamp",
+        cell: ({ row }) => formatDate(row.original.timestamp, "DD/MM/YYYY HH:mm"),
+      },
+      {
+        header: "Type",
+        accessorKey: "mediaType",
+        cell: ({ row }) => (row.original.mediaType === 'video' ? 'Video' : 'Photo'),
+      },
+      {
+        header: "Location",
+        accessorKey: "locationLabel",
+        cell: ({ row }) => row.original.locationLabel || "-",
+      },
+      {
+        header: "Description",
+        accessorKey: "description",
+        cell: ({ row }) => row.original.description || "-",
+      },
+      {
+        header: "Actions",
+        id: "problem-actions",
+        cell: ({ row }) => (
+          <CustomPopover
+            trigger={
+              <FontAwesomeIcon icon={faEllipsisH} className={ellipsisHClassName} />
+            }
+          >
+            <menu className="w-full flex flex-col gap-1">
+              <Link className={tableActionClassName} to={`/users/${row.original.riderId}`} onClick={(e) => {
+                e.preventDefault();
+                setProblemVideoPreviewError(false);
+                setSelectedProblemReport(row.original);
+              }}>
+                <FontAwesomeIcon icon={faCircleInfo} />
+                View evidence
+              </Link>
+            </menu>
+          </CustomPopover>
+        ),
+      },
+    ],
+    [],
   );
 
   type ComparisonRowItem = {
@@ -485,20 +574,24 @@ const RiderManagementPage = () => {
       {
         header: leftRider?.riderName || 'Rider A',
         accessorKey: "leftValue",
-        cell: ({ row }) => (
-          <span className={row.original.winner === 'left' ? 'font-semibold text-green-700' : ''}>
-            {formatComparisonValue(row.original.label, row.original.leftValue)}
-          </span>
-        ),
+        cell: ({ row }) => {
+          return (
+            <p className={`text-[11px] ${row.original.winner === 'left' ? 'font-semibold text-green-700' : 'text-red-700'}`}>
+              {formatComparisonValue(row.original.label, row.original.leftValue)}
+            </p>
+          );
+        },
       },
       {
         header: rightRider?.riderName || 'Rider B',
         accessorKey: "rightValue",
-        cell: ({ row }) => (
-          <span className={row.original.winner === 'right' ? 'font-semibold text-green-700' : ''}>
-            {formatComparisonValue(row.original.label, row.original.rightValue)}
-          </span>
-        ),
+        cell: ({ row }) => {
+          return (
+            <p className={`text-[11px] ${row.original.winner === 'right' ? 'font-semibold text-green-700' : ''}`}>
+              {formatComparisonValue(row.original.label, row.original.rightValue)}
+            </p>
+          );
+        },
       },
       {
         header: "Difference",
@@ -690,10 +783,49 @@ const RiderManagementPage = () => {
             page={attendancePage}
             setPage={setAttendancePage}
             size={attendanceSize}
-            isLoading={isAttendanceFetching || isProblemReportsFetching}
+            isLoading={isAttendanceFetching}
             noDataMessage={isAttendanceFetching ? "Loading attendance data..." : "No attendance data found for the selected filters."}
           />
           </div>
+      </section>
+
+      <section className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-4">
+        <header className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold text-slate-900">Problem Reports</h2>
+          <p className="text-xs text-slate-500">
+            View rider-submitted problem evidence separately from attendance logs.
+          </p>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Input
+            label="Report date"
+            type="date"
+            value={problemReportsDate}
+            onChange={(value) =>
+              setProblemReportsDate(resolveDateInputValue(value as Date | { target?: { value?: string } }))
+            }
+          />
+          <Input
+            label="Rider name"
+            placeholder="Type rider name"
+            value={problemReportsName}
+            onChange={(event) => setProblemReportsName(event.target.value)}
+          />
+        </div>
+
+        <div className="overflow-x-auto">
+          <Table
+            columns={problemReportColumns}
+            data={problemReportRows}
+            showPagination
+            page={problemReportsPage}
+            setPage={setProblemReportsPage}
+            size={problemReportsSize}
+            isLoading={isProblemReportsFetching}
+            noDataMessage={isProblemReportsFetching ? "Loading problem reports..." : "No problem reports found for the selected filters."}
+          />
+        </div>
       </section>
 
       <Modal
@@ -723,53 +855,66 @@ const RiderManagementPage = () => {
       </Modal>
 
       <Modal
-        isOpen={Boolean(problemReportModalState)}
-        onClose={() => setProblemReportModalState(null)}
-        heading={`Problem Reports${problemReportModalState?.rider?.riderName ? ` - ${problemReportModalState.rider.riderName}` : ''}`}
-        description={`Attendance date: ${problemReportModalState?.rider?.date || attendanceDate || '-'}`}
+        isOpen={Boolean(selectedProblemReport)}
+        onClose={() => {
+          setProblemVideoPreviewError(false);
+          setSelectedProblemReport(null);
+        }}
+        heading={`Problem Report${selectedProblemReport?.riderName ? ` - ${selectedProblemReport.riderName}` : ''}`}
+        description={`Reported at: ${selectedProblemReport ? formatAttendanceDateTime(selectedProblemReport.timestamp) : '-'}`}
       >
-        {problemReportModalState && (
+        {selectedProblemReport && (
           <div className="flex flex-col gap-4">
-            {problemReportModalState.isLoading && (
-              <p className="text-sm text-slate-500">Loading problem reports...</p>
-            )}
-            {problemReportModalState.reports.map((report, index) => (
-              <article
-                key={`${problemReportModalState.rider.riderId}-problem-report-${index}`}
-                className="border border-slate-200 rounded-lg p-3 bg-slate-50 flex flex-col gap-3"
-              >
-                <div className="flex flex-col gap-1 text-xs text-slate-600">
-                  <p>
-                    <strong>Type:</strong> {report.mediaType === 'video' ? 'Video' : 'Photo'}
-                  </p>
-                  <p>
-                    <strong>Timestamp:</strong> {formatAttendanceDateTime(report.timestamp)}
-                  </p>
-                  <p>
-                    <strong>Location:</strong> {report.locationLabel || '-'}
-                  </p>
-                  <p>
-                    <strong>Description:</strong> {report.description || '-'}
-                  </p>
-                </div>
+            <div className="flex flex-col gap-1 text-xs text-slate-600">
+              <p>
+                <strong>Type:</strong> {selectedProblemReport.mediaType === 'video' ? 'Video' : 'Photo'}
+              </p>
+              <p>
+                <strong>Timestamp:</strong> {formatAttendanceDateTime(selectedProblemReport.timestamp)}
+              </p>
+              <p>
+                <strong>Location:</strong> {selectedProblemReport.locationLabel || '-'}
+              </p>
+              <p>
+                <strong>Description:</strong> {selectedProblemReport.description || '-'}
+              </p>
+            </div>
 
-                {report.mediaType === 'video' ? (
-                  <video
-                    controls
-                    src={report.imageUrl}
-                    className="w-full max-h-72 rounded-lg border border-slate-200 bg-black"
-                  />
-                ) : (
-                  <img
-                    src={report.imageUrl}
-                    alt={`${problemReportModalState.rider.riderName || 'Rider'} problem report proof`}
-                    className="w-full max-h-72 object-contain rounded-lg border border-slate-200 bg-white"
-                  />
-                )}
-              </article>
-            ))}
-            {problemReportModalState.reports.length === 0 && (
-              <p className="text-sm text-slate-500">No problem reports for this date.</p>
+            {selectedProblemIsVideo ? (
+              problemVideoPreviewError ? (
+                <div className="w-full rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  <p className="font-medium">Unable to load video preview.</p>
+                  {selectedProblemMediaUrl && (
+                    <a
+                      href={selectedProblemMediaUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-2 inline-flex text-sm font-medium text-amber-900 underline"
+                    >
+                      Open video in a new tab
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <video
+                  key={selectedProblemReport?.id}
+                  controls
+                  preload="metadata"
+                  className="w-full max-h-72 rounded-lg border border-slate-200 bg-black"
+                  onError={() => setProblemVideoPreviewError(true)}
+                  onLoadedData={() => setProblemVideoPreviewError(false)}
+                >
+                  {selectedProblemVideoSources.map((sourceUrl, sourceIndex) => (
+                    <source key={`problem-report-video-source-${sourceIndex}`} src={sourceUrl} />
+                  ))}
+                </video>
+              )
+            ) : (
+              <img
+                src={selectedProblemMediaUrl}
+                alt={`${selectedProblemReport.riderName || 'Rider'} problem report proof`}
+                className="w-full max-h-72 object-contain rounded-lg border border-slate-200 bg-white"
+              />
             )}
           </div>
         )}
