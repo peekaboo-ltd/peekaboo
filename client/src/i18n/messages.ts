@@ -140,6 +140,48 @@ export const messages: Record<Language, Record<string, string>> = {
     'footer.contactUs': 'Contact Us',
     'footer.copyright': 'Peekaboo Ltd. All rights reserved.',
     'footer.language': 'Language',
+    'footer.legal': 'Legal',
+    'footer.termsAndConditions': 'Terms & conditions',
+    'footer.refundPolicy': 'Refund policy',
+    'footer.cancellationPolicy': 'Cancellation policy',
+    'footer.legalOverview': 'Legal overview',
+
+    // Legal (public pages)
+    'legal.eyebrow': 'Legal',
+    'legal.hub.docTitle': 'Legal',
+    'legal.hub.title': 'Legal information',
+    'legal.hub.description':
+      'Browse Peekaboo’s terms of use, refund policy, and cancellation policy from this page.',
+    'legal.hub.linksHeading': 'Policies',
+    'legal.hub.termsSummary': 'Rules and conditions for using our delivery services.',
+    'legal.hub.refundSummary': 'When and how refunds may apply.',
+    'legal.hub.cancellationSummary': 'How to cancel orders or services and what to expect.',
+    'legal.placeholderParagraph':
+      'This is placeholder text. Replace it with your final policy wording when your legal content is ready.',
+
+    'legal.terms.docTitle': 'Terms & conditions',
+    'legal.terms.title': 'Terms & conditions',
+    'legal.terms.description':
+      'These terms govern your use of Peekaboo’s services. The sections below are drafts for you to replace with your official text.',
+    'legal.terms.section1Title': 'Introduction',
+    'legal.terms.section2Title': 'Accounts and eligibility',
+    'legal.terms.section3Title': 'Liability and disputes',
+
+    'legal.refund.docTitle': 'Refund policy',
+    'legal.refund.title': 'Refund policy',
+    'legal.refund.description':
+      'How refunds are handled for Peekaboo services. Replace the placeholder sections below with your official refund rules.',
+    'legal.refund.section1Title': 'Eligibility for refunds',
+    'legal.refund.section2Title': 'How to request a refund',
+    'legal.refund.section3Title': 'Processing time and method',
+
+    'legal.cancellation.docTitle': 'Cancellation policy',
+    'legal.cancellation.title': 'Cancellation policy',
+    'legal.cancellation.description':
+      'How orders or services may be cancelled. Replace the placeholder sections below with your official cancellation rules.',
+    'legal.cancellation.section1Title': 'When you can cancel',
+    'legal.cancellation.section2Title': 'Fees and charges',
+    'legal.cancellation.section3Title': 'How to cancel',
 
     // Dashboard
     'dashboard.welcome': 'Welcome back, {name}',
@@ -439,6 +481,48 @@ export const messages: Record<Language, Record<string, string>> = {
     'footer.contactUs': 'Contactez-nous',
     'footer.copyright': 'Peekaboo Ltd. Tous droits réservés.',
     'footer.language': 'Langue',
+    'footer.legal': 'Mentions légales',
+    'footer.termsAndConditions': 'Conditions générales',
+    'footer.refundPolicy': 'Politique de remboursement',
+    'footer.cancellationPolicy': 'Politique d’annulation',
+    'footer.legalOverview': 'Aperçu juridique',
+
+    // Legal (public pages)
+    'legal.eyebrow': 'Mentions légales',
+    'legal.hub.docTitle': 'Informations légales',
+    'legal.hub.title': 'Informations légales',
+    'legal.hub.description':
+      'Consultez les conditions générales, la politique de remboursement et la politique d’annulation Peekaboo depuis cette page.',
+    'legal.hub.linksHeading': 'Politiques',
+    'legal.hub.termsSummary': 'Règles et conditions d’utilisation de nos services de livraison.',
+    'legal.hub.refundSummary': 'Quand et comment un remboursement peut s’appliquer.',
+    'legal.hub.cancellationSummary': 'Comment annuler une commande ou un service et à quoi vous attendre.',
+    'legal.placeholderParagraph':
+      'Il s’agit d’un texte provisoire. Remplacez-le par votre politique définitive lorsque le contenu juridique est prêt.',
+
+    'legal.terms.docTitle': 'Conditions générales',
+    'legal.terms.title': 'Conditions générales',
+    'legal.terms.description':
+      'Ces conditions régissent votre utilisation des services Peekaboo. Les sections ci-dessous sont des brouillons à remplacer par votre texte officiel.',
+    'legal.terms.section1Title': 'Introduction',
+    'legal.terms.section2Title': 'Comptes et éligibilité',
+    'legal.terms.section3Title': 'Responsabilité et litiges',
+
+    'legal.refund.docTitle': 'Politique de remboursement',
+    'legal.refund.title': 'Politique de remboursement',
+    'legal.refund.description':
+      'Modalités de remboursement pour les services Peekaboo. Remplacez les sections ci-dessous par vos règles officielles.',
+    'legal.refund.section1Title': 'Éligibilité au remboursement',
+    'legal.refund.section2Title': 'Comment demander un remboursement',
+    'legal.refund.section3Title': 'Délai et modalités de traitement',
+
+    'legal.cancellation.docTitle': 'Politique d’annulation',
+    'legal.cancellation.title': 'Politique d’annulation',
+    'legal.cancellation.description':
+      'Modalités d’annulation des commandes ou services. Remplacez les sections ci-dessous par vos règles officielles.',
+    'legal.cancellation.section1Title': 'Quand vous pouvez annuler',
+    'legal.cancellation.section2Title': 'Frais et charges',
+    'legal.cancellation.section3Title': 'Comment annuler',
 
     // Dashboard
     'dashboard.welcome': 'Bienvenue, {name}',
@@ -738,6 +822,48 @@ export const messages: Record<Language, Record<string, string>> = {
     'footer.contactUs': 'Twandikire',
     'footer.copyright': 'Peekaboo Ltd. Uburenganzira bwose burabitswe.',
     'footer.language': 'Ururimi',
+    'footer.legal': 'Amategeko',
+    'footer.termsAndConditions': 'Amabwiriza n’amasezerano',
+    'footer.refundPolicy': 'Politiki y’kwishyura',
+    'footer.cancellationPolicy': 'Politiki yo guhagarika',
+    'footer.legalOverview': 'Incamake y’amategeko',
+
+    // Legal (public pages)
+    'legal.eyebrow': 'Amategeko',
+    'legal.hub.docTitle': 'Amategeko',
+    'legal.hub.title': 'Amakuru y’amategeko',
+    'legal.hub.description':
+      'Soma amabwiriza yo gukoresha, politiki y’kwishyura, n’politiki yo guhagarika kuri uru rupapuro.',
+    'legal.hub.linksHeading': 'Amategeko',
+    'legal.hub.termsSummary': 'Amabwiriza n’amasezerano yo gukoresha serivisi zacu zo gutwara.',
+    'legal.hub.refundSummary': 'Igihe n’uko kwishyurwa gusubizwa gushobora gukorwa.',
+    'legal.hub.cancellationSummary': 'Uko uhagarika amabwiriza cyangwa serivisi n’ibyo ukwiye gutegereza.',
+    'legal.placeholderParagraph':
+      'Uyu ni urwandiko rw’akarabo. Ruhindure ukoresheje amagambo yawe yemewe iyo amategeko yawe yuzuye yiteguye.',
+
+    'legal.terms.docTitle': 'Amabwiriza n’amasezerano',
+    'legal.terms.title': 'Amabwiriza n’amasezerano',
+    'legal.terms.description':
+      'Aya mabwiriza akurikiza ukoresha serivisi za Peekaboo. Ibi biri mu bice biri hasi ni inyandiko zo mu buryo bw’ibanze uzihindure ukoresheje andi mabwiriza yemewe.',
+    'legal.terms.section1Title': 'Intangiriro',
+    'legal.terms.section2Title': 'Konti no kwemererwa',
+    'legal.terms.section3Title': 'Inshingano n’impaka',
+
+    'legal.refund.docTitle': 'Politiki y’kwishyura',
+    'legal.refund.title': 'Politiki y’kwishyura',
+    'legal.refund.description':
+      'Uko kwishyurwa gusubizwa kuri serivisi za Peekaboo. Hindura ibice biri hasi ukoresheje amategeko yawe yemewe ku kwishyura.',
+    'legal.refund.section1Title': 'Uwo kwishyurwa gusubizwa',
+    'legal.refund.section2Title': 'Uko usaba kwishyurwa gusubizwa',
+    'legal.refund.section3Title': 'Igihe n’uburyo bwo gutunganya',
+
+    'legal.cancellation.docTitle': 'Politiki yo guhagarika',
+    'legal.cancellation.title': 'Politiki yo guhagarika',
+    'legal.cancellation.description':
+      'Uko amabwiriza cyangwa serivisi ashobora guhagarikwa. Hindura ibice biri hasi ukoresheje amategeko yawe yemewe ku guhagarika.',
+    'legal.cancellation.section1Title': 'Igihe ushobora guhagarika',
+    'legal.cancellation.section2Title': 'Amafaranga n’inyongera',
+    'legal.cancellation.section3Title': 'Uko uhagarika',
 
     // Dashboard
     'dashboard.welcome': 'Murakaza neza, {name}',

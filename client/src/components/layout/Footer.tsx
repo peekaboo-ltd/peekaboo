@@ -69,6 +69,16 @@ const Footer = () => {
     []
   );
 
+  const legalLinks = useMemo<QuickLink[]>(
+    () => [
+      { to: '/legal', labelKey: 'footer.legalOverview' },
+      { to: '/legal/terms-and-conditions', labelKey: 'footer.termsAndConditions' },
+      { to: '/legal/refund-policy', labelKey: 'footer.refundPolicy' },
+      { to: '/legal/cancellation-policy', labelKey: 'footer.cancellationPolicy' },
+    ],
+    []
+  );
+
   const contactInfo = useMemo<ContactInfo[]>(
     () => [
       { icon: faLocationDot, text: 'Niboye, Kicukiro, Kigali, Rwanda' },
@@ -124,26 +134,48 @@ const Footer = () => {
             </nav>
           </motion.article>
 
-          <motion.nav variants={itemVariants as unknown as Variants} className="lg:col-span-3" aria-label="Quick links">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-400 mb-5">
-              {t('footer.quickLinks')}
-            </h4>
-            <ul className="space-y-3">
-              {quickLinks.map((link) => (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    className="group inline-block text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
-                  >
-                    <span className="relative text-[13px]">
-                      {t(link.labelKey)}
-                      <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-secondary-600/70 group-hover:w-full transition-all duration-300" />
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.nav>
+          <motion.div variants={itemVariants as unknown as Variants} className="lg:col-span-3">
+            <nav aria-label={t('footer.quickLinks')}>
+              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-400 mb-5">
+                {t('footer.quickLinks')}
+              </h4>
+              <ul className="space-y-3">
+                {quickLinks.map((link) => (
+                  <li key={link.to}>
+                    <Link
+                      to={link.to}
+                      className="group inline-block text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
+                    >
+                      <span className="relative text-[13px]">
+                        {t(link.labelKey)}
+                        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-secondary-600/70 group-hover:w-full transition-all duration-300" />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <nav className="mt-10" aria-label={t('footer.legal')}>
+              <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-400 mb-5">
+                {t('footer.legal')}
+              </h4>
+              <ul className="space-y-3">
+                {legalLinks.map((link) => (
+                  <li key={link.to}>
+                    <Link
+                      to={link.to}
+                      className="group inline-block text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
+                    >
+                      <span className="relative text-[13px]">
+                        {t(link.labelKey)}
+                        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-secondary-600/70 group-hover:w-full transition-all duration-300" />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </motion.div>
 
           <motion.address variants={itemVariants as unknown as Variants} className="not-italic lg:col-span-4">
             <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-400 mb-5">

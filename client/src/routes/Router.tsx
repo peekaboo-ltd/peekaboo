@@ -28,6 +28,12 @@ import { About, OrderFees } from '@/pages/about';
 import { PublicServiceDetailsPage, Services } from '@/pages/services';
 import { ContactUsPage } from '@/pages/contact';
 import {
+  LegalPage,
+  TermsAndConditionsPage,
+  RefundPolicyPage,
+  CancellationPolicyPage,
+} from '@/pages/legal';
+import {
   InviteOrganization,
   OrganizationSettingsPage,
   OrganizationsPage,
@@ -268,6 +274,58 @@ const Router = () => {
               <ContactUsPage />,
             )}
           />
+
+          <Route
+            path="legal"
+            element={withSEO(
+              {
+                title: 'Legal | Peekaboo',
+                description:
+                  'Peekaboo legal hub: terms and conditions, refund policy, and cancellation policy.',
+                keywords: 'peekaboo legal, terms of service, refund policy, cancellation policy',
+                path: '/legal',
+              },
+              <LegalPage />,
+            )}
+          />
+          <Route
+            path="legal/terms-and-conditions"
+            element={withSEO(
+              {
+                title: 'Terms & Conditions | Peekaboo',
+                description:
+                  'Read Peekaboo’s terms and conditions for using our delivery and logistics services.',
+                keywords: 'peekaboo terms, terms of service, delivery platform terms',
+                path: '/legal/terms-and-conditions',
+              },
+              <TermsAndConditionsPage />,
+            )}
+          />
+          <Route
+            path="legal/refund-policy"
+            element={withSEO(
+              {
+                title: 'Refund Policy | Peekaboo',
+                description: 'Peekaboo refund policy for deliveries and related services.',
+                keywords: 'peekaboo refunds, delivery refund policy',
+                path: '/legal/refund-policy',
+              },
+              <RefundPolicyPage />,
+            )}
+          />
+          <Route
+            path="legal/cancellation-policy"
+            element={withSEO(
+              {
+                title: 'Cancellation Policy | Peekaboo',
+                description: 'Peekaboo cancellation policy for orders and services.',
+                keywords: 'peekaboo cancellation, order cancellation policy',
+                path: '/legal/cancellation-policy',
+              },
+              <CancellationPolicyPage />,
+            )}
+          />
+
           <Route
             path="track"
             element={withSEO(
