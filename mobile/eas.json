@@ -8,7 +8,8 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://server.peekaboo.co.rw/api/v1",
-        "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574"
+        "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574",
+        "EXPO_PUBLIC_ONESIGNAL_APP_ID": "276e86c4-5af1-4ad2-ba8a-20908c155564"
       },
       "ios": {
         "simulator": true
@@ -19,7 +20,8 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://server.peekaboo.co.rw/api/v1",
-        "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574"
+        "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574",
+        "EXPO_PUBLIC_ONESIGNAL_APP_ID": "276e86c4-5af1-4ad2-ba8a-20908c155564"
       },
       "ios": {
         "simulator": false
@@ -29,7 +31,8 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://server.peekaboo.co.rw/api/v1",
-        "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574"
+        "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574",
+        "EXPO_PUBLIC_ONESIGNAL_APP_ID": "276e86c4-5af1-4ad2-ba8a-20908c155564"
       },
       "android": {
         "buildType": "apk"
@@ -42,7 +45,8 @@
       "distribution": "store",
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://server.peekaboo.co.rw/api/v1",
-        "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574"
+        "EXPO_PUBLIC_PROJECT_ID": "18dd4900-07a3-4b78-aaad-ee52f242b574",
+        "EXPO_PUBLIC_ONESIGNAL_APP_ID": "276e86c4-5af1-4ad2-ba8a-20908c155564"
       },
       "android": {
         "buildType": "app-bundle"

@@ -9,7 +9,10 @@ export const PushController = {
       const sentCount = await pushService.sendPushNotification(payload);
 
       return res.status(200).json({
-        message: 'Test push notifications queued',
+        message:
+          sentCount > 0
+            ? 'Test push notifications queued'
+            : 'No push sent (see server logs: PUSH_NOTIFICATIONS_DISABLED, missing OneSignal env, or OneSignal API error)',
         data: {
           sentCount,
         },

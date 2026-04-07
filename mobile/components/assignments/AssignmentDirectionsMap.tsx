@@ -1,14 +1,33 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Linking, useWindowDimensions, Platform } from 'react-native';
 import { Button } from '../ui/Button';
 import { formatDistance } from '../../utils/formatters';
 import { colors, typography, spacing } from '../../utils/constants';
 
-// WebView is not supported on web; load only on native to avoid "does not support this platform" error
-const WebView =
-  Platform.OS === 'web'
-    ? null
-    : require('react-native-webview').WebView;
+type WebViewComponentType = React.ComponentType<{
+  source: { uri: string };
+  style?: object;
+  scrollEnabled?: boolean;
+  javaScriptEnabled?: boolean;
+  domStorageEnabled?: boolean;
+}>;
+
+function useNativeWebView(): WebViewComponentType | null {
+  return useMemo(() => {
+    if (Platform.OS === 'web') return null;
+    try {
+      return require('react-native-webview').WebView as WebViewComponentType;
+    } catch (e) {
+      if (__DEV__) {
+        console.warn(
+          '[peekaboo/maps] react-native-webview not linked. Rebuild the dev client, or open directions in Google Maps.',
+          e
+        );
+      }
+      return null;
+    }
+  }, []);
+}
 
 /**
  * Approximate distance in meters between two coordinates (haversine).
@@ -43,7 +62,8 @@ export const AssignmentDirectionsMap: React.FC<AssignmentDirectionsMapProps> = (
   destination,
   onClose,
 }) => {
-  const { width, height } = useWindowDimensions();
+  const WebView = useNativeWebView();
+  const { height } = useWindowDimensions();
   const mapHeight = Math.min(height * 0.5, 360);
 
   const url = `https://www.google.com/maps/dir/${origin.latitude},${origin.longitude}/${destination.latitude},${destination.longitude}`;
@@ -70,7 +90,9 @@ export const AssignmentDirectionsMap: React.FC<AssignmentDirectionsMapProps> = (
         {isWeb || !WebView ? (
           <View style={styles.webFallback}>
             <Text style={styles.webFallbackText}>
-              Map is available in the iOS or Android app. Open the route in Google Maps below.
+              {Platform.OS === 'web'
+                ? 'Map is available in the iOS or Android app. Open the route in Google Maps below.'
+                : 'Embedded map needs a dev build with react-native-webview. Open the route in Google Maps below.'}
             </Text>
             <Button
               title="Open in Google Maps"
