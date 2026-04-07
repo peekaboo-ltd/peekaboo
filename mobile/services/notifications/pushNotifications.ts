@@ -1,29 +1,10 @@
-import * as Notifications from 'expo-notifications';
+import { OneSignal, NotificationClickEvent, NotificationWillDisplayEvent } from 'react-native-onesignal';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { router } from 'expo-router';
-import { pushAPI } from '../api/push';
 
-let currentPushToken: string | null = null;
-
-const getExpoProjectId = (): string | undefined => {
-  const fromEnv = process.env.EXPO_PUBLIC_PROJECT_ID;
-  if (typeof fromEnv === 'string' && fromEnv.length > 0) return fromEnv;
-  const fromConfig = Constants.expoConfig?.extra?.eas?.projectId;
-  if (typeof fromConfig === 'string' && fromConfig.length > 0) return fromConfig;
-  return undefined;
-};
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+let initialized = false;
 
 export interface PushNotificationData {
   type?: 'assignment' | 'order' | 'general';
@@ -32,143 +13,70 @@ export interface PushNotificationData {
   [key: string]: string | undefined;
 }
 
-export const registerForPushNotifications = async (): Promise<string | null> => {
-  if (!Device.isDevice) {
-    console.log('[peekaboo/push] Push notifications only work on physical devices');
-    return null;
-  }
+export const initializeOneSignal = (): void => {
+  if (initialized) return;
 
-  try {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus !== 'granted') {
-      console.log('[peekaboo/push] Notification permission not granted');
-      return null;
-    }
-
-    const projectId = getExpoProjectId();
-    if (!projectId) {
-      console.error(
-        '[peekaboo/push] Expo project id missing: set EXPO_PUBLIC_PROJECT_ID or expo.extra.eas.projectId in app config'
-      );
-      return null;
-    }
-
-    const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId,
-    });
-
-    const token = tokenData.data;
-    if (!token) {
-      console.warn('[peekaboo/push] Expo push token request succeeded without a token');
-      return null;
-    }
-
-    currentPushToken = token;
-
-    if (__DEV__) {
-      console.log(
-        '[peekaboo/push] Expo push token (paste at https://expo.dev/notifications):',
-        token
-      );
-    }
-
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'Default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#1D546D',
-      });
-
-      await Notifications.setNotificationChannelAsync('assignments', {
-        name: 'Assignments',
-        importance: Notifications.AndroidImportance.HIGH,
-        description: 'Notifications for new assignments',
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#1D546D',
-      });
-
-      await Notifications.setNotificationChannelAsync('assignments_urgent', {
-        name: 'Urgent assignments',
-        importance: Notifications.AndroidImportance.MAX,
-        description: 'Urgent assignment notifications',
-        vibrationPattern: [0, 250, 500, 250],
-        lightColor: '#1D546D',
-        sound: 'default',
-      });
-    }
-
-    return token;
-  } catch (error) {
-    console.error('[peekaboo/push] Error obtaining Expo push token:', error);
-    return null;
-  }
-};
-
-export const getCurrentPushToken = (): string | null => currentPushToken;
-
-export const getPushDeviceMetadata = () => ({
-  platform: Platform.OS as 'ios' | 'android',
-  appVersion: Constants.expoConfig?.version,
-  deviceName: Device.deviceName || undefined,
-  osVersion: Device.osVersion || undefined,
-  notificationsEnabled: true,
-});
-
-export const syncPushSubscription = async (): Promise<void> => {
-  try {
-    const expoPushToken = await registerForPushNotifications();
-
-    if (!expoPushToken) {
-      console.log('[peekaboo/push] Skipping backend push subscription sync');
-      return;
-    }
-
-    await pushAPI.registerPushSubscription({
-      expoPushToken,
-      ...getPushDeviceMetadata(),
-    });
-
-    console.log('[peekaboo/push] Push subscription synced with backend');
-  } catch (error) {
-    console.error('[peekaboo/push] Failed to sync push subscription with backend:', error);
-  }
-};
-
-export const disableCurrentPushSubscription = async (): Promise<void> => {
-  const token = getCurrentPushToken();
-
-  if (!token) {
-    console.log('[peekaboo/push] No current push token to disable');
+  const appId = process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID;
+  if (!appId) {
+    console.error(
+      '[peekaboo/push] OneSignal App ID missing: set EXPO_PUBLIC_ONESIGNAL_APP_ID in env'
+    );
     return;
   }
 
-  try {
-    await pushAPI.disablePushSubscription(token);
-    console.log('[peekaboo/push] Push subscription disabled on backend');
-  } catch (error) {
-    console.error('[peekaboo/push] Failed to disable push subscription on backend:', error);
+  OneSignal.initialize(appId);
+  initialized = true;
+
+  if (__DEV__) {
+    console.log('[peekaboo/push] OneSignal initialized with app ID:', appId);
   }
 };
 
-export const addNotificationReceivedListener = (
-  callback: (notification: Notifications.Notification) => void
-): Notifications.Subscription => {
-  return Notifications.addNotificationReceivedListener(callback);
+export const requestNotificationPermission = async (): Promise<boolean> => {
+  if (!Device.isDevice) {
+    console.log('[peekaboo/push] Push notifications only work on physical devices');
+    return false;
+  }
+
+  try {
+    const granted = await OneSignal.Notifications.requestPermission(true);
+
+    if (!granted) {
+      console.log('[peekaboo/push] Notification permission not granted');
+    }
+
+    return granted;
+  } catch (error) {
+    console.error('[peekaboo/push] Error requesting notification permission:', error);
+    return false;
+  }
 };
 
-export const addNotificationResponseListener = (
-  callback?: (response: Notifications.NotificationResponse) => void
-): Notifications.Subscription => {
-  return Notifications.addNotificationResponseReceivedListener((response) => {
-    const data = response.notification.request.content.data as PushNotificationData;
+export const loginOneSignal = (userId: string): void => {
+  if (!initialized) {
+    initializeOneSignal();
+  }
+
+  OneSignal.login(userId);
+
+  if (__DEV__) {
+    console.log('[peekaboo/push] OneSignal login called for user:', userId);
+  }
+};
+
+export const logoutOneSignal = (): void => {
+  OneSignal.logout();
+
+  if (__DEV__) {
+    console.log('[peekaboo/push] OneSignal logout called');
+  }
+};
+
+export const addNotificationClickListener = (
+  callback?: (data: PushNotificationData) => void
+): (() => void) => {
+  const handler = (event: NotificationClickEvent) => {
+    const data = (event.notification.additionalData || {}) as PushNotificationData;
 
     if (data.assignmentId) {
       router.push(`/assignment/${data.assignmentId}`);
@@ -176,42 +84,31 @@ export const addNotificationResponseListener = (
       router.push('/(tabs)/assignments');
     }
 
-    callback?.(response);
-  });
+    callback?.(data);
+  };
+
+  OneSignal.Notifications.addEventListener('click', handler);
+
+  return () => {
+    OneSignal.Notifications.removeEventListener('click', handler);
+  };
 };
 
-export const scheduleLocalNotification = async (
-  title: string,
-  body: string,
-  data?: PushNotificationData,
-  seconds: number = 1
-): Promise<string> => {
-  return await Notifications.scheduleNotificationAsync({
-    content: {
-      title,
-      body,
-      data: data as Record<string, unknown>,
-      sound: true,
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds,
-    },
-  });
-};
+export const addNotificationForegroundListener = (
+  callback?: (data: PushNotificationData) => void
+): (() => void) => {
+  const handler = (event: NotificationWillDisplayEvent) => {
+    const data = (event.notification.additionalData || {}) as PushNotificationData;
 
-export const cancelAllNotifications = async (): Promise<void> => {
-  await Notifications.cancelAllScheduledNotificationsAsync();
-};
+    // Allow the notification to display
+    event.getNotification().display();
 
-export const getBadgeCount = async (): Promise<number> => {
-  return await Notifications.getBadgeCountAsync();
-};
+    callback?.(data);
+  };
 
-export const setBadgeCount = async (count: number): Promise<void> => {
-  await Notifications.setBadgeCountAsync(count);
-};
+  OneSignal.Notifications.addEventListener('foregroundWillDisplay', handler);
 
-export const clearBadgeCount = async (): Promise<void> => {
-  await Notifications.setBadgeCountAsync(0);
+  return () => {
+    OneSignal.Notifications.removeEventListener('foregroundWillDisplay', handler);
+  };
 };

@@ -1,17 +1,18 @@
 import { create } from 'zustand';
 import { User, LoginCredentials } from '../types';
 import { authAPI } from '../services/api/auth';
-import { 
-  saveToken, 
-  saveUserData, 
-  clearAllData, 
-  getToken, 
-  getUserData 
+import {
+  saveToken,
+  saveUserData,
+  clearAllData,
+  getToken,
+  getUserData
 } from '../services/storage/secureStorage';
 import { handleAPIError, getErrorMessage } from '../utils/errorHandler';
 import {
-  disableCurrentPushSubscription,
-  syncPushSubscription,
+  loginOneSignal,
+  logoutOneSignal,
+  requestNotificationPermission,
 } from '../services/notifications/pushNotifications';
 
 interface AuthState {
@@ -20,7 +21,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   login: (credentials: LoginCredentials) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -38,14 +39,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: async (credentials: LoginCredentials): Promise<boolean> => {
     set({ isLoading: true, error: null });
-    
+
     try {
       const response = await authAPI.login(credentials);
-      
+
       // Save to secure storage
       await saveToken(response.token);
       await saveUserData(response.user);
-      
+
       set({
         user: response.user,
         token: response.token,
@@ -54,7 +55,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: null,
       });
 
-      void syncPushSubscription();
+      void requestNotificationPermission();
+      loginOneSignal(response.user.id);
 
       return true;
     } catch (error) {
@@ -70,9 +72,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async (): Promise<void> => {
     set({ isLoading: true });
-    
+
     try {
-      await disableCurrentPushSubscription();
+      logoutOneSignal();
 
       // Try to logout from server (optional - might fail if token expired)
       await authAPI.logout().catch(() => {});
@@ -91,11 +93,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   checkAuth: async (): Promise<boolean> => {
     set({ isLoading: true });
-    
+
     try {
       const token = await getToken();
       const userData = await getUserData();
-      
+
       if (!token) {
         set({
           isAuthenticated: false,
@@ -105,7 +107,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         });
         return false;
       }
-      
+
       // If we have cached user data, use it temporarily
       if (userData) {
         set({
@@ -114,12 +116,12 @@ export const useAuthStore = create<AuthState>((set) => ({
           isAuthenticated: true,
         });
       }
-      
+
       // Verify token with server
       try {
         const user = await authAPI.getProfile();
         await saveUserData(user);
-        
+
         set({
           user: user,
           token: token,
@@ -127,7 +129,8 @@ export const useAuthStore = create<AuthState>((set) => ({
           isLoading: false,
         });
 
-        void syncPushSubscription();
+        void requestNotificationPermission();
+        loginOneSignal(user.id);
 
         return true;
       } catch (error) {

@@ -8,30 +8,6 @@ const router = Router();
 
 router.use(authenticate);
 
-router.post(
-  '/subscriptions',
-  authorize([
-    RoleTypes.RIDER,
-    RoleTypes.STAFF,
-    RoleTypes.ADMIN,
-    RoleTypes.BUSINESS,
-    RoleTypes.CUSTOMER,
-  ]),
-  PushController.registerSubscription
-);
-
-router.delete(
-  '/subscriptions/:token',
-  authorize([
-    RoleTypes.RIDER,
-    RoleTypes.STAFF,
-    RoleTypes.ADMIN,
-    RoleTypes.BUSINESS,
-    RoleTypes.CUSTOMER,
-  ]),
-  PushController.disableSubscription
-);
-
 router.post('/test', authorize([RoleTypes.ADMIN]), PushController.sendTestPush);
 
 export default router;

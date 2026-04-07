@@ -3,7 +3,6 @@ import os from "os";
 import logger from "./helpers/logger.helper";
 import { AppDataSource } from "./data-source";
 import { startBillingCronJobs } from "./cron/billingCron";
-import { startPushReceiptCronJobs } from "./cron/pushReceiptCron";
 import { startBusinessReportCronJobs } from "./cron/businessReportCron";
 
 const numCPUs = os.cpus().length;
@@ -16,7 +15,6 @@ if (cluster.isPrimary) {
     .then(() => {
       logger.info('Primary process database connected — starting cron jobs');
       startBillingCronJobs();
-      startPushReceiptCronJobs();
       startBusinessReportCronJobs();
     })
     .catch((error) => {
