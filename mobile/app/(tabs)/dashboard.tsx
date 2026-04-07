@@ -34,7 +34,7 @@ import { formatCurrency } from '../../utils/formatters';
 import { OrderAssignmentStatus, UserStatus } from '../../types';
 
 type ReportCaptureType = 'image' | 'video';
-type ReportCategory = 'problem' | 'reciept';
+type ReportCategory = 'problem' | 'receipt';
 type ReportSubmissionPreview = {
   category: ReportCategory;
   mediaUri: string;
@@ -208,7 +208,7 @@ export default function DashboardScreen() {
   }, []);
 
   const handleOpenReportProblem = useCallback(() => {
-    Alert.alert('Report Problem / Reciept', 'Capture evidence as photo or video.', [
+    Alert.alert('Report Problem / Receipt', 'Capture evidence as photo or video.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Photo',
@@ -240,7 +240,7 @@ export default function DashboardScreen() {
   const handleConfirmReport = useCallback(() => {
     if (!reportMediaUri) return;
     if (!reportCategory) {
-      Alert.alert('Type required', 'Please choose Problem or Reciept before continuing.');
+      Alert.alert('Type required', 'Please choose Problem or Receipt before continuing.');
       return;
     }
     setIsReportConfirmed(true);
@@ -249,7 +249,7 @@ export default function DashboardScreen() {
   const handleSendReport = useCallback(async () => {
     if (!reportMediaUri) return;
     if (!reportCategory) {
-      Alert.alert('Type required', 'Please choose Problem or Reciept before sending.');
+      Alert.alert('Type required', 'Please choose Problem or Receipt before sending.');
       return;
     }
     if (!reportDescription.trim()) {
@@ -257,7 +257,7 @@ export default function DashboardScreen() {
       return;
     }
 
-    const reportPrefix = reportCategory === 'problem' ? '[Problem]' : '[Reciept]';
+    const reportPrefix = reportCategory === 'problem' ? '[Problem]' : '[Receipt]';
     const descriptionWithCategory = reportPrefix + ' ' + reportDescription.trim();
 
     try {
@@ -793,7 +793,7 @@ export default function DashboardScreen() {
       >
         <View style={styles.proofModalContainer}>
           <View style={styles.proofHeader}>
-            <Text style={styles.reportTitle}>Report Problem / Reciept</Text>
+            <Text style={styles.reportTitle}>Report Problem / Receipt</Text>
             <TouchableOpacity
               onPress={resetReportState}
               style={styles.proofCloseButton}
@@ -856,10 +856,10 @@ export default function DashboardScreen() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setReportCategory('reciept')}
+                onPress={() => setReportCategory('receipt')}
                 style={[
                   styles.reportTypeChip,
-                  reportCategory === 'reciept' && styles.reportTypeChipActive,
+                  reportCategory === 'receipt' && styles.reportTypeChipActive,
                 ]}
                 activeOpacity={0.85}
                 disabled={isSendingReport}
@@ -867,10 +867,10 @@ export default function DashboardScreen() {
                 <Text
                   style={[
                     styles.reportTypeChipText,
-                    reportCategory === 'reciept' && styles.reportTypeChipTextActive,
+                    reportCategory === 'receipt' && styles.reportTypeChipTextActive,
                   ]}
                 >
-                  Reciept
+                  Receipt
                 </Text>
               </TouchableOpacity>
             </View>
@@ -900,7 +900,7 @@ export default function DashboardScreen() {
                 style={styles.reportInput}
                 value={reportDescription}
                 onChangeText={setReportDescription}
-                placeholder={reportCategory === 'reciept' ? 'Describe the reciept...' : 'Describe the problem...'}
+                placeholder={reportCategory === 'receipt' ? 'Describe the receipt...' : 'Describe the problem...'}
                 placeholderTextColor={colors.text.disabled}
                 multiline
                 textAlignVertical="top"
@@ -968,7 +968,7 @@ export default function DashboardScreen() {
           <View style={styles.reportSubmissionSummary}>
             <Text style={styles.reportLabel}>Type</Text>
             <Text style={styles.reportSummaryText}>
-              {reportSubmissionPreview?.category === 'reciept' ? 'Reciept' : 'Problem'}
+              {reportSubmissionPreview?.category === 'receipt' ? 'Receipt' : 'Problem'}
             </Text>
             <Text style={styles.reportLabel}>Description</Text>
             <Text style={styles.reportSummaryText}>

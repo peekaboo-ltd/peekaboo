@@ -460,44 +460,22 @@ export class DashboardService {
     }
     const deliveriesThisMonth = await deliveriesThisMonthQb.getCount();
 
-    const periodRange =
-      options?.period === 'today' || options?.startDate || options?.endDate
-        ? this.getDateRange(options)
-        : undefined;
-
-    const completedTodayQuery = this.orderAssignmentRepository
+    // Completed today (or within provided date range)
+    const completedTodayQb = this.orderAssignmentRepository
       .createQueryBuilder('assignment')
       .where('assignment.assignedToId = :userId', { userId })
       .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED });
 
-    if (periodRange) {
-      completedTodayQuery.andWhere('assignment.updatedAt BETWEEN :start AND :end', {
-        start: periodRange.start,
-        end: periodRange.end,
-      });
+    if (startDate && endDate) {
+      completedTodayQb.andWhere('assignment.updatedAt BETWEEN :startDate AND :endDate', { startDate, endDate });
+    } else {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayEnd = new Date();
+      todayEnd.setHours(23, 59, 59, 999);
+      completedTodayQb.andWhere('assignment.updatedAt BETWEEN :todayStart AND :todayEnd', { todayStart, todayEnd });
     }
-
-    const completedToday = await completedTodayQuery.getCount();
-
-    const earningsQuery = this.orderAssignmentRepository
-      .createQueryBuilder('assignment')
-      .innerJoin('assignment.order', 'order')
-      .select(
-        `COALESCE(SUM(CASE WHEN assignment.status = :status THEN COALESCE(order.finalFee, order.initialFee - COALESCE(order.discount, 0), 0) ELSE 0 END), 0)`,
-        'total'
-      )
-      .where('assignment.assignedToId = :userId', { userId })
-      .setParameter('status', OrderAssignmentStatus.COMPLETED);
-
-    if (periodRange) {
-      earningsQuery.andWhere('assignment.updatedAt BETWEEN :start AND :end', {
-        start: periodRange.start,
-        end: periodRange.end,
-      });
-    }
-
-    const earningsResult = await earningsQuery.getRawOne<{ total: string }>();
-    const totalEarnings = Number(earningsResult?.total || 0);
+    const completedToday = await completedTodayQb.getCount();
 
     const todayDeliveries = completedToday;
     const bonusActive = completedToday > 15;
@@ -517,8 +495,16 @@ export class DashboardService {
     // Assignments by status
     const assignmentsByStatus = await this.getAssignmentsByStatus(userId);
 
+    // Total assignments for this rider
+    const totalAssignments = await this.orderAssignmentRepository.count({
+      where: { assignedToId: userId },
+    });
+
     // Recent activity
-    const recentActivity = await this.getRiderRecentActivity(userId, periodRange);
+    const recentActivity = await this.getRiderRecentActivity(
+      userId,
+      startDate && endDate ? { start: startDate, end: endDate } : undefined,
+    );
 
     // Earnings: sum finalFee from orders linked to completed assignments
     const totalEarningsResult = await this.orderAssignmentRepository
@@ -565,7 +551,6 @@ export class DashboardService {
       bonusActive,
       assignmentsByStatus,
       recentActivity,
-      totalEarnings,
       earningsThisMonth,
       averageEarningPerDelivery,
     };
@@ -1456,7 +1441,7 @@ export class DashboardService {
           .createQueryBuilder('payment')
           .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', payment.createdAt), '${format}')`, 'label')
           .addSelect('COALESCE(SUM(payment.amount), 0)', 'value')
-          .where('payment.createdAt >= :start', { start })
+          .where('payment.createdAt >= :start', { start: effectiveStart })
           // Payment scope contract: order revenue uses ORDER payments where entityId = orders.id.
           .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
           .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL });
@@ -1465,8 +1450,8 @@ export class DashboardService {
           const scopedOrderIds = await this.getScopedOrderIdsForBusinessUser(userId);
           if (!scopedOrderIds.length) {
             return period === '90d'
-              ? this.fillWeeklyTimeSeries([], start, now, true)
-              : this.fillTimeSeries([], start, now, period === '7d' ? 'week' : 'month', true);
+              ? this.fillWeeklyTimeSeries([], effectiveStart, now, true)
+              : this.fillTimeSeries([], effectiveStart, now, period === '7d' ? 'week' : 'month', true);
           }
           qb.andWhere('payment.entityId IN (:...orderIds)', { orderIds: scopedOrderIds });
         }

@@ -87,7 +87,6 @@ export interface RiderMetrics {
   bonusActive: boolean;
   assignmentsByStatus: AssignmentStatusCount[];
   recentActivity: RecentActivity[];
-  totalEarnings: number;
   earningsThisMonth: number;
   averageEarningPerDelivery: number;
 }
