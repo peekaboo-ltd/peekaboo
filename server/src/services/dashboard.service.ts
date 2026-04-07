@@ -7,6 +7,7 @@ import { OrderActivity } from '../entities/orderActivity.entity';
 import { RoleTypes } from '../constants/role.constants';
 import { OrderStatus, OrderAssignmentStatus } from '../constants/order.constants';
 import { TierBreakdown } from '../constants/businessPlan.constants';
+import { PaymentType } from '../constants/payment.constants';
 import { KpayPaymentStatus } from '../types/kpay.types';
 import {
   DashboardMetrics,
@@ -223,6 +224,36 @@ export class DashboardService {
   }
 
   /**
+   * Payment-to-order scoping contract:
+   * - Only payments with type ORDER are considered order revenue.
+   * - payments.entityId is treated as the canonical foreign key to orders.id.
+   * - For business users, scope by organization orders when possible; otherwise
+   *   fallback to user-owned orders (sender/creator).
+   */
+  private async getScopedOrderIdsForBusinessUser(userId: UUID): Promise<UUID[]> {
+    const membership = await this.organizationMembershipRepository.findOne({
+      where: { userId, status: MembershipStatus.ACTIVE },
+    });
+
+    const orderScopeQuery = this.orderRepository
+      .createQueryBuilder('order')
+      .select('order.id', 'id');
+
+    if (membership?.organizationId) {
+      orderScopeQuery.where('order.organizationId = :organizationId', {
+        organizationId: membership.organizationId,
+      });
+    } else {
+      orderScopeQuery.where('(order.senderId = :userId OR order.createdById = :userId)', {
+        userId,
+      });
+    }
+
+    const scopedOrders = await orderScopeQuery.getRawMany<{ id: UUID }>();
+    return scopedOrders.map((order) => order.id);
+  }
+
+  /**
    * Get dashboard metrics based on user roles
    */
   async getDashboardMetrics(userId: UUID, userRoles: RoleTypes[]): Promise<DashboardMetrics> {
@@ -435,6 +466,8 @@ export class DashboardService {
    * Based on orders created by / sent by the business user, plus organization data.
    */
   private async getBusinessMetrics(userId: UUID): Promise<BusinessMetrics> {
+    const scopedOrderIds = await this.getScopedOrderIdsForBusinessUser(userId);
+
     // Total orders by this business (as sender or creator)
     const totalOrders = await this.orderRepository
       .createQueryBuilder('order')
@@ -465,25 +498,37 @@ export class DashboardService {
     const completedPayments = await this.paymentRepository.count({
       where: { createdById: userId, status: KpayPaymentStatus.SUCCESSFUL },
     });
-    const billingAndPaymentsThisMonthResult = await this.paymentRepository
-      .createQueryBuilder('payment')
-      .select('COALESCE(SUM(payment.amount), 0)', 'total')
-      .where('payment.createdById = :userId', { userId })
-      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
-      .andWhere('payment.createdAt >= DATE_TRUNC(\'month\', CURRENT_DATE)')
-      .getRawOne();
-    const billingAndPaymentsThisMonth = parseFloat(
-      billingAndPaymentsThisMonthResult?.total || '0'
-    );
+    // Payment scope contract for revenue metrics: ORDER payments are matched to orders
+    // strictly via payments.entityId IN scoped order IDs.
+    const billingAndPaymentsThisMonth = scopedOrderIds.length
+      ? parseFloat(
+          (
+            await this.paymentRepository
+              .createQueryBuilder('payment')
+              .select('COALESCE(SUM(payment.amount), 0)', 'total')
+              .where('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
+              .andWhere('payment.entityId IN (:...orderIds)', { orderIds: scopedOrderIds })
+              .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+              .andWhere('payment.createdAt >= DATE_TRUNC(\'month\', CURRENT_DATE)')
+              .getRawOne()
+          )?.total || '0'
+        )
+      : 0;
 
     // Average order value (from successful payments / completed orders)
-    const totalPaidResult = await this.paymentRepository
-      .createQueryBuilder('payment')
-      .select('COALESCE(SUM(payment.amount), 0)', 'total')
-      .where('payment.createdById = :userId', { userId })
-      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
-      .getRawOne();
-    const totalPaid = parseFloat(totalPaidResult?.total || '0');
+    const totalPaid = scopedOrderIds.length
+      ? parseFloat(
+          (
+            await this.paymentRepository
+              .createQueryBuilder('payment')
+              .select('COALESCE(SUM(payment.amount), 0)', 'total')
+              .where('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
+              .andWhere('payment.entityId IN (:...orderIds)', { orderIds: scopedOrderIds })
+              .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+              .getRawOne()
+          )?.total || '0'
+        )
+      : 0;
     const averageOrderValue =
       completedOrders > 0 ? Math.round((totalPaid / completedOrders) * 100) / 100 : 0;
 
@@ -963,10 +1008,16 @@ export class DashboardService {
       .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', payment.createdAt), '${format}')`, 'label')
       .addSelect('COALESCE(SUM(payment.amount), 0)', 'value')
       .where('payment.createdAt >= :start', { start })
+      // Payment scope contract: order revenue uses ORDER payments where entityId = orders.id.
+      .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
       .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL });
 
     if (!scopeIsAdmin) {
-      qb.andWhere('payment.createdById = :userId', { userId });
+      const scopedOrderIds = await this.getScopedOrderIdsForBusinessUser(userId);
+      if (!scopedOrderIds.length) {
+        return this.fillTimeSeries([], start, now, normalizedPeriod, true);
+      }
+      qb.andWhere('payment.entityId IN (:...orderIds)', { orderIds: scopedOrderIds });
     }
 
     const rows = await qb
@@ -1066,10 +1117,18 @@ export class DashboardService {
           .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', payment.createdAt), '${format}')`, 'label')
           .addSelect('COALESCE(SUM(payment.amount), 0)', 'value')
           .where('payment.createdAt >= :start', { start })
+          // Payment scope contract: order revenue uses ORDER payments where entityId = orders.id.
+          .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
           .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL });
 
         if (!isAdmin) {
-          qb.andWhere('payment.createdById = :userId', { userId });
+          const scopedOrderIds = await this.getScopedOrderIdsForBusinessUser(userId);
+          if (!scopedOrderIds.length) {
+            return period === '90d'
+              ? this.fillWeeklyTimeSeries([], start, now, true)
+              : this.fillTimeSeries([], start, now, period === '7d' ? 'week' : 'month', true);
+          }
+          qb.andWhere('payment.entityId IN (:...orderIds)', { orderIds: scopedOrderIds });
         }
 
         const rows = await qb
