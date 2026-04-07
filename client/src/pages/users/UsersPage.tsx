@@ -2,7 +2,7 @@ import Table from '@/components/table/Table';
 import { useUsersColumns } from '@/hooks/users/columns.users';
 import { useFetchUsers } from '@/hooks/users/users.hooks';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CreateUserModal from './CreateUserModal';
 import { setCreateUserModal } from '@/states/slices/user.slice';
 import Button from '@/components/inputs/Button';
@@ -16,11 +16,22 @@ import {
 import { useI18n } from '@/i18n/i18n';
 import { RoleTypes } from '@/types/auth.type';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import Input from '@/components/inputs/Input';
+import Select from '@/components/inputs/Select';
+import useDebounce from '@/hooks/common/debounce.hooks';
+
+const ALL_ROLES_VALUE = 'ALL';
+
+const formatRoleLabel = (role: RoleTypes) =>
+  role.charAt(0) + role.slice(1).toLowerCase();
 
 const UsersPage = () => {
   const dispatch = useAppDispatch();
   const { usersList, createUserModal } = useAppSelector((state) => state.user);
   const { user } = useAppSelector((state) => state.auth);
+  const [search, setSearch] = useState('');
+  const [selectedRole, setSelectedRole] = useState<string>(ALL_ROLES_VALUE);
+  const debouncedSearch = useDebounce(search, 350);
   const hasOrganizationMembership =
     (user?.organizationMembership?.length ?? 0) > 0;
   const organizationId = hasOrganizationMembership
@@ -39,18 +50,45 @@ const UsersPage = () => {
     isFetching,
   } = useFetchUsers();
 
+  const roleOptions = useMemo(
+    () => [
+      { label: 'All roles', value: ALL_ROLES_VALUE },
+      ...Object.values(RoleTypes)
+        .filter((role) => role !== RoleTypes.GUEST)
+        .map((role) => ({
+          label: formatRoleLabel(role),
+          value: role,
+        })),
+    ],
+    [],
+  );
+
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch, selectedRole, setPage]);
+
   useEffect(() => {
     if (!createUserModal) {
+      const filters = {
+        page,
+        size,
+        search: debouncedSearch.trim() || undefined,
+        roles:
+          selectedRole !== ALL_ROLES_VALUE ? [selectedRole] : undefined,
+      };
+
       if (hasOrganizationMembership && organizationId) {
-        fetchUsers({ page, size, organizationId });
+        fetchUsers({ ...filters, organizationId });
       } else {
-        fetchUsers({ page, size });
+        fetchUsers(filters);
       }
     }
   }, [
     fetchUsers,
     page,
     size,
+    debouncedSearch,
+    selectedRole,
     createUserModal,
     hasOrganizationMembership,
     organizationId,
@@ -145,6 +183,21 @@ const UsersPage = () => {
               </span>
             </article>
           ))}
+        </section>
+
+        <section className="bg-white border border-slate-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Input
+            label="Search user"
+            placeholder="Search with: Name, email, phone..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <Select
+            label="Role"
+            value={selectedRole}
+            onChange={setSelectedRole}
+            options={roleOptions}
+          />
         </section>
       </header>
       <Table
