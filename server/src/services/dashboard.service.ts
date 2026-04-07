@@ -1154,31 +1154,6 @@ export class DashboardService {
     return result;
   }
 
-  private async getBusinessRecentActivity(organizationId: UUID): Promise<RecentActivity[]> {
-    const recentOrders = await this.orderRepository
-      .createQueryBuilder('order')
-      .leftJoinAndSelect('order.activities', 'activities')
-      .where('order.organizationId = :organizationId', { organizationId })
-      .orderBy('order.createdAt', 'DESC')
-      .take(10)
-      .getMany();
-
-    return recentOrders.map((order) => {
-      const latestActivity = order.activities?.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )[0];
-
-      return {
-        id: order.id,
-        type: 'order',
-        title: `Order ${order.referenceId}`,
-        description: `Order ${latestActivity?.status || order.status}`,
-        status: latestActivity?.status || order.status,
-        timestamp: latestActivity?.createdAt || order.createdAt,
-      };
-    });
-  }
-
   /**
    * Chart data: orders count over time
    */
