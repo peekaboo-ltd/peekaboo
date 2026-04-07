@@ -288,6 +288,20 @@ export interface ProblemReportAdminEmailData {
   submittedAt: Date;
 }
 
+export interface AssignmentRejectedAdminEmailData {
+  orderReference: string;
+  orderId: string;
+  assignmentId: string;
+  riderId: string;
+  riderName: string;
+  riderPhone?: string;
+  rejectedAt: Date;
+  newAssignmentId?: string;
+  reassignedRiderId?: string;
+  reassignedRiderName?: string;
+  reassignedRiderPhone?: string;
+}
+
 // ==================== USER ACCOUNT EMAILS ====================
 
 export interface AccountStatusEmailData {

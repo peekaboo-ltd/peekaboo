@@ -6,6 +6,7 @@ import { Pagination } from '../helpers/pagination.helper';
 import {
   OrderActivityStatus,
   OrderAssignmentStatus,
+  OrderStatus,
   isPaidEquivalentOrderActivityStatus,
 } from '../constants/order.constants';
 import { Order } from '../entities/order.entity';
@@ -54,6 +55,62 @@ export class OrderAssignmentService {
       : undefined;
   }
 
+  private async cancelOpenAssignmentsForOrder(
+    orderId: UUID,
+    options?: { excludeAssignmentId?: UUID; orderReference?: string }
+  ): Promise<void> {
+    const assignments = await this.orderAssignmentRepository.find({
+      where: { orderId },
+    });
+    const orderRef = options?.orderReference ?? '';
+    const open = assignments.filter(
+      (a) =>
+        (a.status === OrderAssignmentStatus.PENDING ||
+          a.status === OrderAssignmentStatus.ACTIVE) &&
+        (!options?.excludeAssignmentId || a.id !== options.excludeAssignmentId)
+    );
+
+    await Promise.all(
+      open.map(async (assignment) => {
+        assignment.status = OrderAssignmentStatus.CANCELLED;
+        await this.orderAssignmentRepository.save(assignment);
+
+        if (assignment.assignedToId) {
+          this.sendAssignmentPush({
+            userId: assignment.assignedToId,
+            assignmentId: assignment.id,
+            orderId: assignment.orderId,
+            title: 'Assignment cancelled',
+            body: `Order #${orderRef} has been reassigned.`,
+          }).catch((error) =>
+            logger.error('Failed to send cancellation push', error)
+          );
+        }
+      })
+    );
+  }
+
+  /** After cancelling open assignments, align order row with paid / deferred payment state. */
+  private async revertOrderToPaidEquivalent(orderId: UUID): Promise<void> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: { activities: true },
+    });
+    if (!order?.activities?.length) {
+      return;
+    }
+
+    const hasPaidEquivalent = order.activities.some(
+      (a) =>
+        a.status === OrderActivityStatus.PAID ||
+        a.status === OrderActivityStatus.PAYMENT_DEFERRED
+    );
+
+    if (hasPaidEquivalent) {
+      await this.orderRepository.update(orderId, { status: OrderStatus.PAID });
+    }
+  }
+
   // CREATE ORDER ASSIGNMENT
   @AuditCreate({
     entityType: AuditLogEntityTypes.ORDER_ASSIGNMENT,
@@ -66,6 +123,7 @@ export class OrderAssignmentService {
       where: { id: orderAssignment?.orderId },
       relations: {
         assignments: true,
+        activities: true,
       },
     });
 
@@ -73,32 +131,10 @@ export class OrderAssignmentService {
       throw new NotFoundError('Order not found');
     }
 
-    if (orderExists?.assignments?.length >= 0) {
-      // CANCEL ALL OTHER ACTIVE ASSIGNMENTS
-      const activeAssignments = orderExists?.assignments?.filter(
-        (assignment) => assignment.status === OrderAssignmentStatus.ACTIVE
-      );
-
-      await Promise.all(
-        activeAssignments.map(async (assignment) => {
-          assignment.status = OrderAssignmentStatus.CANCELLED;
-          await this.orderAssignmentRepository.save(assignment);
-
-          // Notify the cancelled rider
-          if (assignment.assignedToId) {
-            this.sendAssignmentPush({
-              userId: assignment.assignedToId,
-              assignmentId: assignment.id,
-              orderId: assignment.orderId,
-              title: 'Assignment cancelled',
-              body: `Order #${orderExists.referenceId || ''} has been reassigned.`,
-            }).catch((error) =>
-              logger.error('Failed to send cancellation push', error)
-            );
-          }
-        })
-      );
-    }
+    await this.cancelOpenAssignmentsForOrder(orderExists.id, {
+      orderReference: orderExists.referenceId || '',
+    });
+    await this.revertOrderToPaidEquivalent(orderExists.id);
 
     // CHECK IF ASSIGNED TO ID EXISTS
     let assignedToExists = await this.userService.getUserByCondition({
@@ -321,19 +357,6 @@ export class OrderAssignmentService {
       ...orderAssignment,
     });
 
-    if (
-      isPaidEquivalentOrderActivityStatus(
-        this.getLatestActivityStatus(orderAssignmentExists?.order)
-      ) &&
-      orderAssignmentExists?.status === OrderAssignmentStatus.ACTIVE
-    ) {
-      await this.orderActivityService.createOrderActivity({
-        orderId: orderAssignmentExists?.orderId,
-        status: OrderActivityStatus.CONFIRMED,
-        createdById: orderAssignmentExists?.createdById,
-      });
-    }
-
     return updatedOrderAssignment;
   }
 
@@ -356,7 +379,7 @@ export class OrderAssignmentService {
     ) {
       await this.orderActivityService.createOrderActivity({
         orderId: orderAssignment?.orderId,
-        status: OrderActivityStatus.CONFIRMED,
+        status: OrderActivityStatus.ACCEPTED,
         createdById: orderAssignment?.createdById,
       });
     }
@@ -389,10 +412,31 @@ export class OrderAssignmentService {
       status: OrderAssignmentStatus.REJECTED,
     });
 
-    // HANDLE ORDER ASSIGNMENT
     const newOrderAssignment = await this.handleOrderAssignment({
       orderId: updatedOrderAssignment?.orderId,
     });
+
+    const newAssignmentWithRider = await this.getOrderAssignmentById(
+      newOrderAssignment.id
+    );
+
+    this.emailService
+      .sendAssignmentRejectedAdminNotification({
+        orderReference:
+          orderAssignment.order?.referenceId || String(orderAssignment.orderId),
+        orderId: orderAssignment.orderId,
+        assignmentId: orderAssignment.id,
+        riderId: orderAssignment.assignedToId || '',
+        riderName: orderAssignment.assignedTo?.name || 'Unknown rider',
+        riderPhone: orderAssignment.assignedTo?.phoneNumber ?? undefined,
+        rejectedAt: new Date(),
+        newAssignmentId: newAssignmentWithRider.id,
+        reassignedRiderId: newAssignmentWithRider.assignedToId || undefined,
+        reassignedRiderName: newAssignmentWithRider.assignedTo?.name,
+        reassignedRiderPhone:
+          newAssignmentWithRider.assignedTo?.phoneNumber ?? undefined,
+      })
+      .catch(() => {});
 
     return newOrderAssignment;
   }
@@ -460,6 +504,8 @@ export class OrderAssignmentService {
       status: OrderAssignmentStatus.PENDING,
     });
 
+    await this.revertOrderToPaidEquivalent(orderAssignment.orderId);
+
     return this.getOrderAssignmentById(recoveredAssignment.id, scope);
   }
 
@@ -484,32 +530,10 @@ export class OrderAssignmentService {
       throw new NotFoundError('Order not found');
     }
 
-    if (orderExists?.assignments?.length >= 0) {
-      // CANCEL ALL OTHER ACTIVE ASSIGNMENTS
-      const activeAssignments = orderExists?.assignments?.filter(
-        (assignment) => assignment.status === OrderAssignmentStatus.ACTIVE
-      );
-
-      await Promise.all(
-        activeAssignments.map(async (assignment) => {
-          assignment.status = OrderAssignmentStatus.CANCELLED;
-          await this.orderAssignmentRepository.save(assignment);
-
-          // Notify the cancelled rider
-          if (assignment.assignedToId) {
-            this.sendAssignmentPush({
-              userId: assignment.assignedToId,
-              assignmentId: assignment.id,
-              orderId: assignment.orderId,
-              title: 'Assignment cancelled',
-              body: `Order #${orderExists.referenceId || ''} has been reassigned.`,
-            }).catch((error) =>
-              logger.error('Failed to send cancellation push', error)
-            );
-          }
-        })
-      );
-    }
+    await this.cancelOpenAssignmentsForOrder(orderId, {
+      orderReference: orderExists.referenceId || '',
+    });
+    await this.revertOrderToPaidEquivalent(orderId);
 
     // CHECK IF ASSIGNED TO ID EXISTS
     let assignedToExists = await this.userService.getUserByCondition({
@@ -560,14 +584,6 @@ export class OrderAssignmentService {
       orderId,
       assignedToId: assignedToExists?.id,
     });
-
-    if (isPaidEquivalentOrderActivityStatus(this.getLatestActivityStatus(orderExists))) {
-      await this.orderActivityService.createOrderActivity({
-        orderId,
-        status: OrderActivityStatus.ACCEPTED,
-        createdById: orderExists?.createdById,
-      });
-    }
 
     if (assignedToExists?.id) {
       const orderRef = orderExists.referenceId || '';

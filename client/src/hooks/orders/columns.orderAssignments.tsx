@@ -35,7 +35,9 @@ export const useOrderAssignmentsColumns = () => {
             header: 'Assigned To',
             accessorKey: 'assignedTo',
             cell: ({ row }) => {
-                return (<menu className="w-full flex items-center gap-3"><TableUserLabel user={row.original?.assignedTo} label={row.original?.assignedTo?.name} /> {!['ACTIVE'].includes(row.original?.status as unknown as string) && <CustomTooltip label="Reassign">
+                const assignmentStatus = row.original?.status as unknown as string;
+                const canReassign = ['PENDING', 'ACTIVE'].includes(assignmentStatus);
+                return (<menu className="w-full flex items-center gap-3"><TableUserLabel user={row.original?.assignedTo} label={row.original?.assignedTo?.name} /> {canReassign && <CustomTooltip label="Reassign">
                     <FontAwesomeIcon icon={faPenToSquare} onClick={(e) => {
                         e.stopPropagation();
                         dispatch(setReassignOrderAssignmentModal(true));

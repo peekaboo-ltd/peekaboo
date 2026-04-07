@@ -1,15 +1,18 @@
-import Button from '@/components/inputs/Button';
-import Input from '@/components/inputs/Input';
-import Modal from '@/components/Modal';
-import { useCreateOrder } from '@/hooks/orders/orders.hooks';
-import { useAppDispatch, useAppSelector } from '@/states/hooks';
-import { setCreateOrderModal } from '@/states/slices/order.slice';
-import { parseBillingGuardPrompt, type BillingGuardPrompt } from '@/utils/billingGuard.util';
-import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import Button from "@/components/inputs/Button";
+import Input from "@/components/inputs/Input";
+import Modal from "@/components/Modal";
+import { useCreateOrder } from "@/hooks/orders/orders.hooks";
+import { useAppDispatch, useAppSelector } from "@/states/hooks";
+import { setCreateOrderModal } from "@/states/slices/order.slice";
+import {
+  parseBillingGuardPrompt,
+  type BillingGuardPrompt,
+} from "@/utils/billingGuard.util";
+import { validateAndFormatPhoneNumber } from "@/utils/phone.util";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface CreateOrderFormValues {
   recipientPhoneNumber: string;
@@ -21,7 +24,8 @@ const CreateOrder = () => {
   const navigate = useNavigate();
   const { createOrderModal } = useAppSelector((state) => state.order);
   const { user } = useAppSelector((state) => state.auth);
-  const [billingGuardPrompt, setBillingGuardPrompt] = useState<BillingGuardPrompt | null>(null);
+  const [billingGuardPrompt, setBillingGuardPrompt] =
+    useState<BillingGuardPrompt | null>(null);
 
   // REACT HOOK FORM
   const {
@@ -32,7 +36,7 @@ const CreateOrder = () => {
     trigger,
   } = useForm<CreateOrderFormValues>({
     defaultValues: {
-      recipientPhoneNumber: '',
+      recipientPhoneNumber: "",
     },
   });
 
@@ -40,15 +44,15 @@ const CreateOrder = () => {
     return (
       user?.organizationMembership?.[0]?.organization?.phoneNumber ||
       user?.phoneNumber ||
-      ''
+      ""
     );
   }, [user?.organizationMembership, user?.phoneNumber]);
 
   // VALIDATE RWANDAN PHONE NUMBER
   const validateRwandanPhone = (value?: string) => {
     return (
-      validateAndFormatPhoneNumber(value || '')?.isValid ||
-      'Please enter a valid Rwandan phone number'
+      validateAndFormatPhoneNumber(value || "")?.isValid ||
+      "Please enter a valid Rwandan phone number"
     );
   };
 
@@ -68,12 +72,12 @@ const CreateOrder = () => {
     const recipient = validateAndFormatPhoneNumber(data.recipientPhoneNumber);
 
     if (!sender?.isValid || !sender?.formattedNumber) {
-      toast.error('Sender phone number is missing or invalid.');
+      toast.error("Sender phone number is missing or invalid.");
       return;
     }
 
     if (!recipient?.isValid || !recipient?.formattedNumber) {
-      toast.error('Please enter a valid recipient phone number.');
+      toast.error("Please enter a valid recipient phone number.");
       return;
     }
 
@@ -93,7 +97,7 @@ const CreateOrder = () => {
   useEffect(() => {
     if (isSuccess) {
       if (createOrderModal) {
-        toast.success('Order created successfully');
+        toast.success("Order created successfully");
       }
       closeModal();
     }
@@ -114,7 +118,7 @@ const CreateOrder = () => {
 
   const handlePayFirst = useCallback(() => {
     setBillingGuardPrompt(null);
-    navigate('/billing-payments');
+    navigate("/billing-payments");
   }, [navigate]);
 
   return (
@@ -140,7 +144,7 @@ const CreateOrder = () => {
                   errorMessage={errors?.recipientPhoneNumber?.message}
                   onChange={(e) => {
                     field.onChange(e);
-                    trigger('recipientPhoneNumber');
+                    trigger("recipientPhoneNumber");
                   }}
                 />
               )}
@@ -149,7 +153,8 @@ const CreateOrder = () => {
 
           {isError && !billingGuardPrompt && (
             <p className="text-sm text-red-700">
-              {(error as { data?: { message?: string } })?.data?.message || String(error)}
+              {(error as { data?: { message?: string } })?.data?.message ||
+                String(error)}
             </p>
           )}
 
@@ -164,13 +169,16 @@ const CreateOrder = () => {
       <Modal
         isOpen={Boolean(billingGuardPrompt)}
         onClose={closeBillingGuardModal}
-        heading={billingGuardPrompt?.title || 'Billing Action Needed'}
-        description={billingGuardPrompt?.description || ''}
+        heading={billingGuardPrompt?.title || "Billing Action Needed"}
+        description={billingGuardPrompt?.description || ""}
       >
         <section className="flex flex-col gap-4">
           {billingGuardPrompt?.billingStatus ? (
             <p className="text-sm text-slate-600">
-              Billing status: <span className="font-medium text-slate-900">{billingGuardPrompt.billingStatus}</span>
+              Billing status:{" "}
+              <span className="font-medium text-slate-900">
+                {billingGuardPrompt.billingStatus}
+              </span>
             </p>
           ) : null}
           <footer className="flex justify-end gap-3 pt-2 border-t">

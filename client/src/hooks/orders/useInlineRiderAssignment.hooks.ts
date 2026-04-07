@@ -7,6 +7,7 @@ import { UserStatus } from '@/constants/user.constants';
 import { OrderAssignmentStatus } from '@/types/orderAssignment.type';
 import type { Order } from '@/types/order.type';
 import type { User } from '@/types/user.type';
+import { UUID } from '@/types';
 
 export const useInlineRiderAssignment = (order: Order) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,15 +51,17 @@ export const useInlineRiderAssignment = (order: Order) => {
 
   // Handle rider selection
   const handleRiderSelect = useCallback(
-    (riderId: string) => {
-      createOrderAssignment({
-        orderId: order.id,
-        assignedToId: riderId,
-      });
+    (riderId: UUID) => {
+      if (order?.id && riderId) {
+        createOrderAssignment({
+          orderId: order?.id,
+          assignedToId: riderId,
+        });
+      }
       setIsDropdownOpen(false);
       setSearchTerm('');
     },
-    [order.id, createOrderAssignment]
+    [order?.id, createOrderAssignment]
   );
 
   // Refetch orders after successful assignment

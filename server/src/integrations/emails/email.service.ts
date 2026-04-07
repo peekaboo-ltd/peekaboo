@@ -33,6 +33,7 @@ import { NewOrganizationEmail } from './templates/admin/new-organization';
 import { DailySummaryEmail } from './templates/admin/daily-summary';
 import { CriticalAlertEmail } from './templates/admin/critical-alert';
 import { ProblemReportNotificationEmail } from './templates/admin/problem-report-notification';
+import { AssignmentRejectedNotificationEmail } from './templates/admin/assignment-rejected-notification';
 import { AccountStatusEmail } from './templates/user/account-status';
 
 // Types
@@ -68,6 +69,7 @@ import {
   DailySummaryEmailData,
   CriticalAlertEmailData,
   ProblemReportAdminEmailData,
+  AssignmentRejectedAdminEmailData,
   AccountStatusEmailData,
 } from './types/email.types';
 
@@ -464,6 +466,17 @@ export class EmailService {
     await this.sendEmail({
       to: this.adminEmail,
       subject: `[PROBLEM REPORT] ${data.riderName} - ${new Date(data.submittedAt).toLocaleString()}`,
+      html,
+    });
+  }
+
+  async sendAssignmentRejectedAdminNotification(
+    data: AssignmentRejectedAdminEmailData
+  ): Promise<void> {
+    const html = await render(AssignmentRejectedNotificationEmail(data));
+    await this.sendEmail({
+      to: this.adminEmail,
+      subject: `[ASSIGNMENT REJECTED] Order ${data.orderReference} — Peekaboo`,
       html,
     });
   }

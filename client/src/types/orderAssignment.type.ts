@@ -4,7 +4,7 @@ import type { User } from "./user.type";
 
 export const OrderAssignmentStatus = {
   PENDING: 'PENDING',
-  ACCEPTED: 'ACCEPTED',
+  ACTIVE: 'ACTIVE',
   REJECTED: 'REJECTED',
   COMPLETED: 'COMPLETED',
 };

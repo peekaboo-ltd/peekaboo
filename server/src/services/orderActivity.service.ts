@@ -363,11 +363,22 @@ export class OrderActivityService {
       throw new NotFoundError('Order not found');
     }
 
-    await this.assertRiderCanUpdateOrder(order, actorId, isAdmin);
-
     const existingConfirmed = await this.orderActivityRepository.findOne({
       where: { orderId, status: OrderActivityStatus.CONFIRMED },
     });
+
+    if (!existingConfirmed) {
+      const acceptedActivity = await this.orderActivityRepository.findOne({
+        where: { orderId, status: OrderActivityStatus.ACCEPTED },
+      });
+      if (!acceptedActivity) {
+        throw new ValidationError(
+          'The rider must accept the assignment before confirming dispatch.'
+        );
+      }
+    }
+
+    await this.assertRiderCanUpdateOrder(order, actorId, isAdmin);
 
     const existingInTransit = await this.orderActivityRepository.findOne({
       where: { orderId, status: OrderActivityStatus.IN_TRANSIT },

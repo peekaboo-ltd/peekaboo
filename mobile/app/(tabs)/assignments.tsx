@@ -151,9 +151,7 @@ export default function AssignmentsScreen() {
     const canConfirmAndTransit =
       !!item.orderId &&
       item.status === OrderAssignmentStatus.ACTIVE &&
-      latestOrderStatus !== OrderStatus.IN_TRANSIT &&
-      latestOrderStatus !== OrderStatus.DELIVERED &&
-      latestOrderStatus !== OrderStatus.COMPLETED;
+      latestOrderStatus === OrderStatus.ACCEPTED;
 
     return (
       <View>

@@ -570,7 +570,7 @@ export class DashboardService {
     const ordersByStatus = await this.getCustomerOrdersByStatus(userId);
 
     // Active orders
-    const activeStatuses = [OrderStatus.CONFIRMED, OrderStatus.ACCEPTED, OrderStatus.PAID, OrderStatus.ACTIVE, OrderStatus.IN_TRANSIT];
+    const activeStatuses = [OrderStatus.CONFIRMED, OrderStatus.ACCEPTED, OrderStatus.PAID, OrderStatus.IN_TRANSIT];
     const activeOrders = ordersByStatus
       .filter((s) => activeStatuses.includes(s.status))
       .reduce((sum, s) => sum + s.count, 0);
@@ -672,6 +672,7 @@ export class DashboardService {
       ordersByStatus.find((s) => s.status === OrderStatus.PENDING)?.count || 0;
 
     const activeStatuses = [
+      OrderStatus.PAID,
       OrderStatus.CONFIRMED,
       OrderStatus.ACCEPTED,
       OrderStatus.IN_TRANSIT,
@@ -1893,7 +1894,9 @@ export class DashboardService {
       id: assignment.id,
       type: 'assignment' as const,
       title: `Assignment for ${assignment.order.referenceId}`,
-      description: assignment.description || 'Delivery assignment',
+      description:
+        assignment.description ||
+        `Delivery assignment · Order ${assignment.order.status || '—'}`,
       status: assignment.status,
       timestamp: assignment.updatedAt,
     }));

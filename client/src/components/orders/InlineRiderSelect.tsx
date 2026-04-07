@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { OrderAssignmentStatus } from '@/types/orderAssignment.type';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
+import { Link } from 'react-router-dom';
 
 interface InlineRiderSelectProps {
   order: Order;
@@ -106,7 +107,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
       case OrderAssignmentStatus.PENDING:
         bgColor = 'bg-yellow-700 text-white';
         break;
-      case OrderAssignmentStatus.ACCEPTED:
+      case OrderAssignmentStatus.ACTIVE:
         bgColor = 'bg-green-700 text-white';
         break;
       case OrderAssignmentStatus.REJECTED:
@@ -177,10 +178,15 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
           ) : (
             riders.map((rider) => (
               <li key={rider.id} className="list-none">
-                <button
-                  type="button"
+                <Link
+                  to={`/users/${rider?.id}`}
                   className="w-full px-3 py-2 text-left hover:bg-gray-100 border-b border-gray-100 last:border-b-0 cursor-pointer"
-                  onClick={() => handleRiderSelect(rider.id)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (rider?.id) {
+                      handleRiderSelect(rider?.id);
+                    }
+                  }}
                 >
                   <strong className="block text-sm font-medium text-gray-900">
                     {rider?.name || 'Unnamed Rider'}
@@ -188,7 +194,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
                   <span className="block text-xs text-gray-600">
                     {rider?.phoneNumber}
                   </span>
-                </button>
+                </Link>
               </li>
             ))
           )}

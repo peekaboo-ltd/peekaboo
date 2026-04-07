@@ -80,10 +80,7 @@ export default function AssignmentDetailScreen() {
 
   const isActiveAssignment = selectedAssignment?.status === OrderAssignmentStatus.ACTIVE;
   const canConfirmDispatch =
-    isActiveAssignment &&
-    latestOrderStatus !== OrderStatus.IN_TRANSIT &&
-    latestOrderStatus !== OrderStatus.DELIVERED &&
-    latestOrderStatus !== OrderStatus.COMPLETED;
+    isActiveAssignment && latestOrderStatus === OrderStatus.ACCEPTED;
   const canComplete =
     isActiveAssignment &&
     (latestOrderStatus === OrderStatus.IN_TRANSIT ||
