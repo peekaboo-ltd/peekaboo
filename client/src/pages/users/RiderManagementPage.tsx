@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { BriefcaseBusiness, CheckCircle2, CircleX, ClockAlert } from 'lucide-react';
 import Modal from '@/components/Modal';
 import Input from '@/components/inputs/Input';
 import Select from '@/components/inputs/Select';
@@ -29,6 +30,45 @@ const resolveDateInputValue = (value: Date | { target?: { value?: string } }) =>
   return String(value?.target?.value || '');
 };
 
+const formatAttendanceTime = (value?: string) => {
+  if (!value) return '-';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '-';
+  return parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+type AttendanceStatus = 'present' | 'atWork' | 'absent' | 'late';
+
+const getAttendanceStatus = (
+  attendance: RiderManagementItem['dailyAttendance']
+): AttendanceStatus => {
+  const hasCheckIn = Boolean(attendance?.checkInAt);
+  const hasCheckOut = Boolean(attendance?.checkOutAt);
+
+  if (!hasCheckIn && !hasCheckOut) {
+    return 'absent';
+  }
+
+  const checkInDate = attendance?.checkInAt ? new Date(attendance.checkInAt) : null;
+  const isValidCheckIn = checkInDate && !Number.isNaN(checkInDate.getTime());
+
+  if (isValidCheckIn) {
+    const checkInHour = checkInDate.getHours();
+    const checkInMinute = checkInDate.getMinutes();
+    const isLate = checkInHour > 9 || (checkInHour === 9 && checkInMinute > 0);
+
+    if (isLate) {
+      return 'late';
+    }
+  }
+
+  if (hasCheckIn && hasCheckOut) {
+    return 'present';
+  }
+
+  return 'atWork';
+};
+
 const RiderManagementPage = () => {
   useDocumentTitle('Rider Management');
 
@@ -37,9 +77,12 @@ const RiderManagementPage = () => {
   const [timeframe, setTimeframe] = useState<RiderManagementTimeframe>('monthly');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [attendanceDate, setAttendanceDate] = useState(formatDateForInput(new Date()));
+  const [attendanceName, setAttendanceName] = useState('');
   const [sortBy, setSortBy] = useState<SortBy>('deliveries');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [selectedRider, setSelectedRider] = useState<RiderManagementItem | null>(null);
+  const [attendanceProofRider, setAttendanceProofRider] = useState<RiderManagementItem | null>(null);
   const [compareLeftId, setCompareLeftId] = useState('');
   const [compareRightId, setCompareRightId] = useState('');
   const debouncedSearch = useDebounce(search, 350);
@@ -64,7 +107,18 @@ const RiderManagementPage = () => {
 
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearch, status, timeframe, startDate, endDate, sortBy, sortOrder, setPage]);
+  }, [
+    debouncedSearch,
+    status,
+    timeframe,
+    startDate,
+    endDate,
+    attendanceDate,
+    attendanceName,
+    sortBy,
+    sortOrder,
+    setPage,
+  ]);
 
   const normalizedCustomRange = useMemo(() => {
     if (timeframe !== 'custom') {
@@ -112,6 +166,8 @@ const RiderManagementPage = () => {
       timeframe,
       startDate: normalizedCustomRange.startDate,
       endDate: normalizedCustomRange.endDate,
+      attendanceDate: attendanceDate || undefined,
+      name: attendanceName.trim() && attendanceName !== 'ALL' ? attendanceName.trim() : undefined,
       sortBy,
       sortOrder,
     });
@@ -124,6 +180,8 @@ const RiderManagementPage = () => {
     timeframe,
     normalizedCustomRange.startDate,
     normalizedCustomRange.endDate,
+    attendanceDate,
+    attendanceName,
     sortBy,
     sortOrder,
   ]);
@@ -149,6 +207,21 @@ const RiderManagementPage = () => {
       })),
     [rows],
   );
+
+  const attendanceNameOptions = useMemo(() => {
+    const uniqueNames = Array.from(
+      new Set(
+        rows
+          .map((row) => (row.riderName || '').trim())
+          .filter((name) => name.length > 0),
+      ),
+    ).sort((firstName, secondName) => firstName.localeCompare(secondName));
+
+    return [
+      { label: 'All riders', value: 'ALL' },
+      ...uniqueNames.map((name) => ({ label: name, value: name })),
+    ];
+  }, [rows]);
 
   useEffect(() => {
     if (rows.length === 0) {
@@ -253,6 +326,17 @@ const RiderManagementPage = () => {
       gap,
     };
   }, [leftRider, rightRider, comparisonRows]);
+
+  const attendanceRows = useMemo(() => {
+    const normalizedName = attendanceName.trim().toLowerCase();
+
+    return rows.filter((row) => {
+      const riderName = (row.riderName || '').toLowerCase();
+      const matchesName = !normalizedName || normalizedName === 'all' || riderName === normalizedName;
+      const matchesDate = !attendanceDate || row.dailyAttendance?.date === attendanceDate;
+      return matchesName && matchesDate;
+    });
+  }, [rows, attendanceDate, attendanceName]);
 
   return (
     <main className="w-full flex flex-col gap-6">
@@ -395,6 +479,161 @@ const RiderManagementPage = () => {
             <p><strong>Failed Deliveries:</strong> {formatNumbers(selectedRider.failedDeliveries) || '0'}</p>
             <p><strong>Active Days:</strong> {formatNumbers(selectedRider.activeDays) || '0'}</p>
             <p><strong>Active Hours:</strong> {formatNumbers(selectedRider.activeHours) || '0'}</p>
+          </div>
+        )}
+      </Modal>
+
+      <section className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-4">
+        <header className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold text-slate-900">Daily Attendance</h2>
+          <p className="text-xs text-slate-500">
+            View check-in and check-out attendance for each rider by date and name.
+          </p>
+          <p className="text-xs text-slate-500">
+            Shift window: 9:00 AM to 9:00 PM. Check-in after 9:00 AM is marked as late.
+          </p>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Input
+            label="Attendance date"
+            type="date"
+            value={attendanceDate}
+            onChange={(value) =>
+              setAttendanceDate(resolveDateInputValue(value as Date | { target?: { value?: string } }))
+            }
+          />
+          <Select
+            label="Rider name"
+            value={attendanceName || 'ALL'}
+            onChange={(value) => setAttendanceName(value)}
+            options={attendanceNameOptions}
+          />
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="text-left py-2 pr-2">Rider</th>
+                <th className="text-left py-2 px-2">Phone</th>
+                <th className="text-left py-2 px-2">Date</th>
+                <th className="text-left py-2 px-2">Attendance</th>
+                <th className="text-left py-2 px-2">Check-in</th>
+                <th className="text-left py-2 px-2">Check-out</th>
+                <th className="text-left py-2 px-2">Proofs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {attendanceRows.map((row) => (
+                <tr className="border-b border-slate-100" key={`attendance-${row.riderId}`}>
+                  <td className="py-2 pr-2 font-medium">{row.riderName || '-'}</td>
+                  <td className="py-2 px-2">{row.riderPhoneNumber || '-'}</td>
+                  <td className="py-2 px-2">{row.dailyAttendance?.date || attendanceDate || '-'}</td>
+                  <td className="py-2 px-2">
+                    {(() => {
+                      const attendanceStatus = getAttendanceStatus(row.dailyAttendance);
+
+                      if (attendanceStatus === 'present') {
+                        return (
+                          <span className="inline-flex items-center gap-1 text-green-700 text-xs font-medium">
+                            <CheckCircle2 size={14} />
+                            Present
+                          </span>
+                        );
+                      }
+
+                      if (attendanceStatus === 'late') {
+                        return (
+                          <span className="inline-flex items-center gap-1 text-amber-700 text-xs font-medium">
+                            <ClockAlert size={14} />
+                            Late to job
+                          </span>
+                        );
+                      }
+
+                      if (attendanceStatus === 'atWork') {
+                        return (
+                          <span className="inline-flex items-center gap-1 text-blue-700 text-xs font-medium">
+                            <BriefcaseBusiness size={14} />
+                            At work
+                          </span>
+                        );
+                      }
+
+                      return (
+                        <span className="inline-flex items-center gap-1 text-slate-600 text-xs font-medium">
+                          <CircleX size={14} />
+                          Absent
+                        </span>
+                      );
+                    })()}
+                  </td>
+                  <td className="py-2 px-2">
+                    {row.dailyAttendance?.checkInAt ? `✓ ${formatAttendanceTime(row.dailyAttendance?.checkInAt)}` : '-'}
+                  </td>
+                  <td className="py-2 px-2">
+                    {row.dailyAttendance?.checkOutAt ? `✓ ${formatAttendanceTime(row.dailyAttendance?.checkOutAt)}` : '-'}
+                  </td>
+                  <td className="py-2 px-2">
+                    {row.dailyAttendance?.checkInImageUrl || row.dailyAttendance?.checkOutImageUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => setAttendanceProofRider(row)}
+                        className="text-primary underline text-xs"
+                      >
+                        View
+                      </button>
+                    ) : (
+                      <span className="text-slate-400 text-xs">No proofs</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {attendanceRows.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-6 text-center text-slate-500">
+                    No attendance records for the selected filters.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <Modal
+        isOpen={Boolean(attendanceProofRider)}
+        onClose={() => setAttendanceProofRider(null)}
+        heading={`Attendance Proofs${attendanceProofRider?.riderName ? ` - ${attendanceProofRider.riderName}` : ''}`}
+        description={`Attendance date: ${attendanceProofRider?.dailyAttendance?.date || '-'}`}
+      >
+        {attendanceProofRider && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-semibold text-slate-900">Check-in Proof</p>
+              {attendanceProofRider.dailyAttendance?.checkInImageUrl ? (
+                <img
+                  src={attendanceProofRider.dailyAttendance.checkInImageUrl}
+                  alt={`${attendanceProofRider.riderName || 'Rider'} check-in proof`}
+                  className="w-full max-h-72 object-contain rounded-lg border border-slate-200 bg-slate-50"
+                />
+              ) : (
+                <p className="text-sm text-slate-500">No check-in proof.</p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-semibold text-slate-900">Check-out Proof</p>
+              {attendanceProofRider.dailyAttendance?.checkOutImageUrl ? (
+                <img
+                  src={attendanceProofRider.dailyAttendance.checkOutImageUrl}
+                  alt={`${attendanceProofRider.riderName || 'Rider'} check-out proof`}
+                  className="w-full max-h-72 object-contain rounded-lg border border-slate-200 bg-slate-50"
+                />
+              ) : (
+                <p className="text-sm text-slate-500">No check-out proof.</p>
+              )}
+            </div>
           </div>
         )}
       </Modal>

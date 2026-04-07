@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { AppError, CustomError } from "../helpers/errors.helper";
 import logger from "../helpers/logger.helper";
 import { LogsService } from "../services/logs.service";
@@ -14,6 +15,30 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  if (err instanceof multer.MulterError) {
+    const isFileSize = err.code === 'LIMIT_FILE_SIZE';
+    return res.status(isFileSize ? 413 : 400).json({
+      message: isFileSize
+        ? 'Proof image is too large. Please use an image under 8MB.'
+        : err.message,
+    });
+  }
+
+  if (err.name === 'MulterError') {
+    return res.status(400).json({
+      message: err.message || 'Invalid file upload',
+    });
+  }
+
+  if (
+    typeof err.message === 'string' &&
+    err.message.toLowerCase().includes('only jpeg, png and webp images are allowed')
+  ) {
+    return res.status(400).json({
+      message: 'Invalid file type. Please upload JPEG, PNG, or WebP image.',
+    });
+  }
+
   if (err instanceof AppError) {
     logger.debug(err.message);
     logsService.createLog({

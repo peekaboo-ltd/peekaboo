@@ -4,14 +4,19 @@ import fs from 'fs';
 import { Request } from 'express';
 import { UUID } from '../types';
 
-const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'avatars');
+const AVATARS_DIR = path.join(process.cwd(), 'uploads', 'avatars');
+const STATUS_PROOFS_DIR = path.join(process.cwd(), 'uploads', 'status-proofs');
 
-// Ensure directory exists
-try {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-} catch {
-  // ignore
-}
+const ensureDir = (dirPath: string) => {
+  try {
+    fs.mkdirSync(dirPath, { recursive: true });
+  } catch {
+    // ignore
+  }
+};
+
+ensureDir(AVATARS_DIR);
+ensureDir(STATUS_PROOFS_DIR);
 
 const storage = multer.diskStorage({
   destination: (
@@ -19,7 +24,7 @@ const storage = multer.diskStorage({
     _file: unknown,
     cb: (error: Error | null, destination: string) => void
   ) => {
-    cb(null, UPLOADS_DIR);
+    cb(null, AVATARS_DIR);
   },
   filename: (
     req: Request,
@@ -50,3 +55,28 @@ export const uploadAvatar = multer({
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 }).single('avatar');
+
+const statusProofStorage = multer.diskStorage({
+  destination: (
+    _req: Request,
+    _file: unknown,
+    cb: (error: Error | null, destination: string) => void
+  ) => {
+    cb(null, STATUS_PROOFS_DIR);
+  },
+  filename: (
+    req: Request,
+    file: { mimetype: string },
+    cb: (error: Error | null, filename: string) => void
+  ) => {
+    const userId = ((req as Request & { user?: { id?: UUID } }).user?.id || 'user') as string;
+    const ext = file.mimetype === 'image/png' ? '.png' : '.jpg';
+    cb(null, `${userId}-status-proof-${Date.now()}${ext}`);
+  },
+});
+
+export const uploadStatusProof = multer({
+  storage: statusProofStorage,
+  fileFilter,
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
+}).single('proofImage');

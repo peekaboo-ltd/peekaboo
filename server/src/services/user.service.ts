@@ -1,6 +1,6 @@
 import { FindOptionsWhere, Repository, Like, In, ILike, IsNull, Not } from 'typeorm';
 import { AppDataSource } from '../data-source';
-import { User } from '../entities/user.entity';
+import { User, UserStatusProofRecord } from '../entities/user.entity';
 import { UserRole } from '../entities/userRole.entity';
 import { UUID } from '../types';
 import { LogReferenceTypes } from '../constants/logs.constants';
@@ -48,6 +48,14 @@ interface RiderManagementListItem {
   failedDeliveries: number;
   activeDays: number;
   activeHours: number;
+  dailyAttendance: {
+    date: string;
+    isPresent: boolean;
+    checkInAt?: string;
+    checkOutAt?: string;
+    checkInImageUrl?: string;
+    checkOutImageUrl?: string;
+  };
 }
 
 type RiderManagementSortBy =
@@ -508,6 +516,8 @@ export class UserService {
       timeframe = 'monthly',
       startDate,
       endDate,
+      attendanceDate,
+      name,
       sortBy = 'deliveries',
       sortOrder = 'desc',
     } = query;
@@ -539,6 +549,80 @@ export class UserService {
     const timeframeValue = normalizeTextQuery(timeframe)?.toLowerCase() ?? 'monthly';
     const startDateValue = normalizeTextQuery(startDate);
     const endDateValue = normalizeTextQuery(endDate);
+    const attendanceDateValue = normalizeTextQuery(attendanceDate);
+    const nameValue = normalizeTextQuery(name);
+
+    const formatLocalYmd = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const resolveAttendanceDate = (value?: string): Date => {
+      if (!value) return new Date();
+
+      const [yearString, monthString, dayString] = value.split('-');
+      const year = Number(yearString);
+      const month = Number(monthString);
+      const day = Number(dayString);
+
+      if (
+        Number.isInteger(year) &&
+        Number.isInteger(month) &&
+        Number.isInteger(day) &&
+        month >= 1 &&
+        month <= 12 &&
+        day >= 1 &&
+        day <= 31
+      ) {
+        return new Date(year, month - 1, day);
+      }
+
+      const parsedDate = new Date(value);
+      return Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+    };
+
+    const attendanceBaseDate = resolveAttendanceDate(attendanceDateValue);
+    const attendanceStart = new Date(attendanceBaseDate);
+    attendanceStart.setHours(0, 0, 0, 0);
+    const attendanceEnd = new Date(attendanceBaseDate);
+    attendanceEnd.setHours(23, 59, 59, 999);
+
+    const extractDailyAttendance = (
+      proofs: UserStatusProofRecord[] | undefined
+    ): RiderManagementListItem['dailyAttendance'] => {
+      const attendanceItems = Array.isArray(proofs) ? proofs : [];
+      const filtered = attendanceItems
+        .map((record) => ({
+          ...record,
+          parsedTimestamp: new Date(record.timestamp),
+        }))
+        .filter(
+          (record) =>
+            !Number.isNaN(record.parsedTimestamp.getTime()) &&
+            record.parsedTimestamp >= attendanceStart &&
+            record.parsedTimestamp <= attendanceEnd
+        )
+        .sort(
+          (firstRecord, secondRecord) =>
+            firstRecord.parsedTimestamp.getTime() - secondRecord.parsedTimestamp.getTime()
+        );
+
+      const firstCheckIn = filtered.find((record) => record.status === UserStatus.ACTIVE);
+      const latestCheckOut = [...filtered]
+        .reverse()
+        .find((record) => record.status === UserStatus.INACTIVE);
+
+      return {
+        date: attendanceDateValue || formatLocalYmd(attendanceStart),
+        isPresent: Boolean(firstCheckIn),
+        checkInAt: firstCheckIn?.timestamp,
+        checkOutAt: latestCheckOut?.timestamp,
+        checkInImageUrl: firstCheckIn?.imageUrl,
+        checkOutImageUrl: latestCheckOut?.imageUrl,
+      };
+    };
 
     let fromDate: Date | undefined;
     let toDate: Date | undefined;
@@ -592,6 +676,12 @@ export class UserService {
         '(user.name ILIKE :search OR user.email ILIKE :search OR user.phoneNumber ILIKE :search)',
         { search: `%${searchValue}%` }
       );
+    }
+
+    if (nameValue) {
+      ridersQueryBuilder.andWhere('user.name ILIKE :name', {
+        name: `%${nameValue}%`,
+      });
     }
 
     const allowedStatuses = Object.values(UserStatus);
@@ -685,6 +775,7 @@ export class UserService {
         failedDeliveries: Number(stats?.failedDeliveries ?? 0),
         activeDays: Number(stats?.activeDays ?? 0),
         activeHours: Number(stats?.activeHours ?? 0),
+        dailyAttendance: extractDailyAttendance(rider.statusProofs),
       };
     });
 

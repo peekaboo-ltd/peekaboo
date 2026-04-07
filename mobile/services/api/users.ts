@@ -1,5 +1,6 @@
 import apiClient from './client';
-import { User, UserLocation } from '../../types';
+import axios from 'axios';
+import { User, UserLocation, UserStatus } from '../../types';
 
 interface ApiResponse<T> {
   message: string;
@@ -14,6 +15,16 @@ export interface UpdateUserPayload {
   phoneNumber?: string;
   dateOfBirth?: string;
   nationality?: string;
+  status?: UserStatus;
+}
+
+export interface UpdateMyStatusWithProofPayload {
+  status: UserStatus;
+  latitude: number;
+  longitude: number;
+  locationLabel?: string;
+  capturedAt?: string;
+  proofImageUri: string;
 }
 
 export const usersAPI = {
@@ -34,6 +45,58 @@ export const usersAPI = {
       payload
     );
     return response.data.data;
+  },
+
+  updateMyStatusWithProof: async (payload: UpdateMyStatusWithProofPayload): Promise<User> => {
+    const createProofFormData = (): FormData => {
+      const formData: FormData = new FormData();
+
+      formData.append('status', payload.status);
+      formData.append('latitude', String(payload.latitude));
+      formData.append('longitude', String(payload.longitude));
+
+      if (payload.locationLabel) {
+        formData.append('locationLabel', payload.locationLabel);
+      }
+
+      if (payload.capturedAt) {
+        formData.append('capturedAt', payload.capturedAt);
+      }
+
+      // React Native file object typing is not available in DOM lib.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const proofImage: any = {
+        uri: payload.proofImageUri,
+        name: `status-proof-${Date.now()}.jpg`,
+        type: 'image/jpeg',
+      };
+
+      formData.append('proofImage', proofImage);
+      return formData;
+    };
+
+    try {
+      const response = await apiClient.patch<ApiResponse<User>>(
+        `/users/me/status-with-proof`,
+        createProofFormData()
+      );
+
+      return response.data.data;
+    } catch (error) {
+      const canRetry =
+        axios.isAxiosError(error) &&
+        (!error.response || (error.response.status >= 500 && error.response.status < 600));
+
+      if (!canRetry) {
+        throw error;
+      }
+
+      const retryResponse = await apiClient.patch<ApiResponse<User>>(
+        `/users/me/status-with-proof`,
+        createProofFormData()
+      );
+      return retryResponse.data.data;
+    }
   },
 
   uploadAvatar: async (id: string, fileUri: string): Promise<User> => {

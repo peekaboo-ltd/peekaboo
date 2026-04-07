@@ -8,7 +8,10 @@ import { UserStatus } from "../constants/user.constants";
 import { UUID } from "../types";
 import { AuthRequest } from '../types/auth.types';
 import { AuditLogService } from '../services/auditLog.service';
-import { uploadUserAvatarToCloudinary } from '../integrations/cloudinary/cloudinary.service';
+import {
+  uploadUserAvatarToCloudinary,
+  uploadUserStatusProofToCloudinary,
+} from '../integrations/cloudinary/cloudinary.service';
 
 const userService = new UserService();
 const auditLogService = new AuditLogService();
@@ -186,7 +189,16 @@ export const UserController = {
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { name, email, phoneNumber, nationality, dateOfBirth, profilePhotoUrl, defaultLocation } = req.body;
+      const {
+        name,
+        email,
+        phoneNumber,
+        nationality,
+        dateOfBirth,
+        profilePhotoUrl,
+        defaultLocation,
+        status,
+      } = req.body;
       const updateData: Record<string, unknown> = {};
       if (name !== undefined) updateData.name = name;
       if (email !== undefined) updateData.email = email;
@@ -195,6 +207,14 @@ export const UserController = {
       if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
       if (profilePhotoUrl !== undefined) updateData.profilePhotoUrl = profilePhotoUrl;
       if (defaultLocation !== undefined) updateData.defaultLocation = defaultLocation;
+      if (status !== undefined) {
+        if (![UserStatus.ACTIVE, UserStatus.INACTIVE].includes(status as UserStatus)) {
+          return res.status(400).json({
+            message: 'Invalid status provided',
+          });
+        }
+        updateData.status = status;
+      }
 
       const user = await userService.updateUser(id as UUID, updateData);
 
@@ -266,6 +286,132 @@ export const UserController = {
       return res.status(200).json({
         message: "User status updated successfully",
         data: user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // UPDATE CURRENT USER STATUS WITH PROOF IMAGE
+  async updateMyStatusWithProof(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user } = req as AuthRequest;
+      const file = req.file;
+      const { status, latitude, longitude, locationLabel, capturedAt } = req.body as {
+        status?: UserStatus;
+        latitude?: string | number;
+        longitude?: string | number;
+        locationLabel?: string;
+        capturedAt?: string;
+      };
+
+      if (!user?.id) {
+        return res.status(401).json({
+          message: 'User not authenticated',
+        });
+      }
+
+      if (!status || !Object.values(UserStatus).includes(status)) {
+        return res.status(400).json({
+          message: 'Invalid status provided',
+        });
+      }
+
+      if (!file) {
+        return res.status(400).json({
+          message: 'No proof image provided',
+        });
+      }
+
+      const parsedLatitude =
+        typeof latitude === 'string' ? Number(latitude) : latitude;
+      const parsedLongitude =
+        typeof longitude === 'string' ? Number(longitude) : longitude;
+
+      if (
+        typeof parsedLatitude !== 'number' ||
+        typeof parsedLongitude !== 'number' ||
+        Number.isNaN(parsedLatitude) ||
+        Number.isNaN(parsedLongitude) ||
+        parsedLatitude < -90 ||
+        parsedLatitude > 90 ||
+        parsedLongitude < -180 ||
+        parsedLongitude > 180
+      ) {
+        return res.status(400).json({
+          message: 'Invalid location coordinates provided',
+        });
+      }
+
+      const localFilePath = (file as Express.Multer.File & { path?: string }).path;
+      if (!localFilePath) {
+        return res.status(500).json({
+          message: 'Failed to process uploaded proof image',
+        });
+      }
+
+      let proofImageUrl = '';
+      try {
+        proofImageUrl = await uploadUserStatusProofToCloudinary(localFilePath, {
+          userId: user.id,
+          status,
+        });
+      } catch (error) {
+        try {
+          if (fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath);
+          }
+        } catch {
+          // ignore local file delete errors
+        }
+
+        const uploadErrorMessage =
+          error instanceof Error && error.message
+            ? error.message
+            : 'Failed to upload status proof image';
+
+        return res.status(502).json({
+          message: uploadErrorMessage,
+        });
+      }
+
+      const existingUser = await userService.getUserById(user.id as UUID);
+      const currentTimestamp = capturedAt || new Date().toISOString();
+      const existingProofs = Array.isArray(existingUser.statusProofs)
+        ? existingUser.statusProofs
+        : [];
+
+      const updatedUser = await userService.updateUser(user.id as UUID, {
+        status,
+        currentLocation: {
+          latitude: parsedLatitude,
+          longitude: parsedLongitude,
+          collectedAt: currentTimestamp,
+        },
+        statusProofs: [
+          ...existingProofs,
+          {
+            imageUrl: proofImageUrl,
+            status,
+            timestamp: currentTimestamp,
+            locationLabel: locationLabel || undefined,
+            latitude: parsedLatitude,
+            longitude: parsedLongitude,
+          },
+        ],
+      });
+
+      try {
+        if (fs.existsSync(localFilePath)) {
+          fs.unlinkSync(localFilePath);
+        }
+      } catch {
+        // ignore local file delete errors
+      }
+
+      return res.status(200).json({
+        message: 'User status with proof updated successfully',
+        data: updatedUser,
       });
     } catch (error) {
       next(error);

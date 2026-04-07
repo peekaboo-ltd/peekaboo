@@ -139,3 +139,17 @@ dist
 .env
 
 .DS_Store
+
+# Package-lock.json
+package-lock.json
+package-lock.json.gz
+package-lock.json.br
+package-lock.json.brotli
+package-lock.json.br.gz
+package-lock.json.br.br
+package-lock.json.br.br.gz
+package-lock.json.br.br.br
+package-lock.json.br.br.br.gz
+package-lock.json.br.br.br.br
+package-lock.json.br.br.br.br.gz
+package-lock.json.br.br.br.br.br
