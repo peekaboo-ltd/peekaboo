@@ -210,11 +210,17 @@ export default function LoginScreen() {
               },
             ]}
           >
-            <View style={styles.footerCard}>
+            <TouchableOpacity
+              style={styles.footerCard}
+              activeOpacity={0.85}
+              onPress={() => router.push('/(auth)/support')}
+              accessibilityRole="button"
+              accessibilityLabel={t('auth.contactSupport')}
+            >
               <Ionicons name="help-circle-outline" size={18} color={colors.primary} />
               <Text style={styles.footerText}>{t('auth.troubleSigningIn')}</Text>
               <Text style={styles.footerLink}>{t('auth.contactSupport')}</Text>
-            </View>
+            </TouchableOpacity>
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
