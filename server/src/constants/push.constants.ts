@@ -3,6 +3,7 @@ export enum PushPlatform {
   ANDROID = 'android',
 }
 
+/** @deprecated OneSignal handles receipt tracking. Kept for existing DB column compatibility. */
 export enum PushReceiptStatus {
   OK = 'ok',
   ERROR = 'error',

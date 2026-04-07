@@ -7,8 +7,9 @@ import { useAssignmentStore } from '../store/assignmentStore';
 import { colors } from '../utils/constants';
 import { useLocationTracking } from '../hooks';
 import {
-  addNotificationReceivedListener,
-  addNotificationResponseListener,
+  initializeOneSignal,
+  addNotificationClickListener,
+  addNotificationForegroundListener,
 } from '../services/notifications/pushNotifications';
 
 export default function RootLayout() {
@@ -17,6 +18,8 @@ export default function RootLayout() {
   useLocationTracking();
 
   useEffect(() => {
+    initializeOneSignal();
+
     const initialize = async () => {
       await checkAuth();
       setIsInitializing(false);
@@ -25,23 +28,21 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    const receivedSubscription = addNotificationReceivedListener((notification) => {
-      const type = notification.request.content.data?.type;
-      if (type === 'assignment' && isAuthenticated) {
+    const removeClickListener = addNotificationClickListener((data) => {
+      if (data.type === 'assignment' && isAuthenticated) {
         useAssignmentStore.getState().refreshAssignments().catch(() => {});
       }
     });
 
-    const responseSubscription = addNotificationResponseListener((response) => {
-      const type = response.notification.request.content.data?.type;
-      if (type === 'assignment' && isAuthenticated) {
+    const removeForegroundListener = addNotificationForegroundListener((data) => {
+      if (data.type === 'assignment' && isAuthenticated) {
         useAssignmentStore.getState().refreshAssignments().catch(() => {});
       }
     });
 
     return () => {
-      receivedSubscription.remove();
-      responseSubscription.remove();
+      removeClickListener();
+      removeForegroundListener();
     };
   }, [isAuthenticated]);
 
@@ -59,13 +60,13 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen 
-          name="assignment/[id]" 
-          options={{ 
+        <Stack.Screen
+          name="assignment/[id]"
+          options={{
             headerShown: true,
             title: 'Assignment Details',
             headerBackTitle: 'Back',
-          }} 
+          }}
         />
         <Stack.Screen name="+not-found" />
       </Stack>
