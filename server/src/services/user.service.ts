@@ -1,6 +1,6 @@
 import { FindOptionsWhere, Repository, Like, In, ILike, IsNull, Not } from 'typeorm';
 import { AppDataSource } from '../data-source';
-import { User, UserStatusProofRecord } from '../entities/user.entity';
+import { User } from '../entities/user.entity';
 import { UserRole } from '../entities/userRole.entity';
 import { UUID } from '../types';
 import { LogReferenceTypes } from '../constants/logs.constants';
@@ -20,6 +20,8 @@ import { AuditCreate, AuditUpdate, AuditDelete } from '../decorators/auditLog.de
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { OrderAssignment } from '../entities/orderAssignment.entity';
 import { OrderAssignmentStatus } from '../constants/order.constants';
+import { UserStatusProof } from '../entities/userStatusProof.entity';
+import { UserProblemReport } from '../entities/userProblemReport.entity';
 
 
 interface UserTrackingListItem {
@@ -35,7 +37,7 @@ interface UserTrackingListItem {
   }>;
 }
 
-interface RiderManagementListItem {
+interface RiderPerformanceListItem {
   rank: number;
   riderId: UUID;
   riderName?: string;
@@ -48,21 +50,30 @@ interface RiderManagementListItem {
   failedDeliveries: number;
   activeDays: number;
   activeHours: number;
-  dailyAttendance: {
-    date: string;
-    isPresent: boolean;
-    checkInAt?: string;
-    checkOutAt?: string;
-    checkInImageUrl?: string;
-    checkOutImageUrl?: string;
-    problemReports?: Array<{
-      imageUrl: string;
-      mediaType?: 'photo' | 'video';
-      description?: string;
-      timestamp: string;
-      locationLabel?: string;
-    }>;
-  };
+}
+
+interface RiderAttendanceListItem {
+  id: UUID;
+  riderId: UUID;
+  riderName?: string;
+  riderPhoneNumber?: string;
+  date: string;
+  status: UserStatus;
+  timestamp: string;
+  imageUrl: string;
+  locationLabel?: string;
+}
+
+interface RiderProblemReportListItem {
+  id: UUID;
+  riderId: UUID;
+  riderName?: string;
+  riderPhoneNumber?: string;
+  imageUrl: string;
+  mediaType: 'photo' | 'video';
+  description?: string;
+  timestamp: string;
+  locationLabel?: string;
 }
 
 type RiderManagementSortBy =
@@ -77,12 +88,16 @@ type RiderManagementSortBy =
 export class UserService {
   private readonly userRepository: Repository<User>;
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
+  private readonly userStatusProofRepository: Repository<UserStatusProof>;
+  private readonly userProblemReportRepository: Repository<UserProblemReport>;
   private readonly userRoleService: UserRoleService;
   private readonly organizationMembershipService: OrganizationMembershipService;
 
   constructor() {
     this.userRepository = AppDataSource.getRepository(User);
     this.orderAssignmentRepository = AppDataSource.getRepository(OrderAssignment);
+    this.userStatusProofRepository = AppDataSource.getRepository(UserStatusProof);
+    this.userProblemReportRepository = AppDataSource.getRepository(UserProblemReport);
     this.userRoleService = new UserRoleService();
     this.organizationMembershipService = new OrganizationMembershipService();
   }
@@ -514,36 +529,14 @@ export class UserService {
   // GET RIDER MANAGEMENT PERFORMANCE (ADMIN)
   async getRiderManagementPerformance(
     query: Request['query']
-  ): Promise<Pagination<RiderManagementListItem>> {
-    const {
-      page = 0,
-      size = 10,
-      search,
-      status,
-      timeframe = 'monthly',
-      startDate,
-      endDate,
-      attendanceDate,
-      name,
-      sortBy = 'deliveries',
-      sortOrder = 'desc',
-    } = query;
-
+  ): Promise<Pagination<RiderPerformanceListItem>> {
+    const { page = 0, size = 10, search, status, timeframe = 'monthly', startDate, endDate, sortBy = 'deliveries', sortOrder = 'desc' } = query;
     const pageNumber = Number(page) >= 0 ? Number(page) : 0;
     const sizeNumber = Number(size) > 0 ? Number(size) : 10;
     const sortDirection = String(sortOrder).toLowerCase() === 'asc' ? 'asc' : 'desc';
     const normalizedSortBy = String(sortBy) as RiderManagementSortBy;
-    const allowedSortBy: RiderManagementSortBy[] = [
-      'deliveries',
-      'earnings',
-      'canceled',
-      'failed',
-      'activeDays',
-      'activeHours',
-    ];
-    const safeSortBy = allowedSortBy.includes(normalizedSortBy)
-      ? normalizedSortBy
-      : 'deliveries';
+    const allowedSortBy: RiderManagementSortBy[] = ['deliveries', 'earnings', 'canceled', 'failed', 'activeDays', 'activeHours'];
+    const safeSortBy = allowedSortBy.includes(normalizedSortBy) ? normalizedSortBy : 'deliveries';
 
     const normalizeTextQuery = (value: Request['query'][string]): string | undefined => {
       if (typeof value !== 'string') return undefined;
@@ -556,111 +549,18 @@ export class UserService {
     const timeframeValue = normalizeTextQuery(timeframe)?.toLowerCase() ?? 'monthly';
     const startDateValue = normalizeTextQuery(startDate);
     const endDateValue = normalizeTextQuery(endDate);
-    const attendanceDateValue = normalizeTextQuery(attendanceDate);
-    const nameValue = normalizeTextQuery(name);
-
-    const formatLocalYmd = (date: Date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    const resolveAttendanceDate = (value?: string): Date => {
-      if (!value) return new Date();
-
-      const [yearString, monthString, dayString] = value.split('-');
-      const year = Number(yearString);
-      const month = Number(monthString);
-      const day = Number(dayString);
-
-      if (
-        Number.isInteger(year) &&
-        Number.isInteger(month) &&
-        Number.isInteger(day) &&
-        month >= 1 &&
-        month <= 12 &&
-        day >= 1 &&
-        day <= 31
-      ) {
-        return new Date(year, month - 1, day);
-      }
-
-      const parsedDate = new Date(value);
-      return Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
-    };
-
-    const attendanceBaseDate = resolveAttendanceDate(attendanceDateValue);
-    const attendanceStart = new Date(attendanceBaseDate);
-    attendanceStart.setHours(0, 0, 0, 0);
-    const attendanceEnd = new Date(attendanceBaseDate);
-    attendanceEnd.setHours(23, 59, 59, 999);
-
-    const extractDailyAttendance = (
-      proofs: UserStatusProofRecord[] | undefined
-    ): RiderManagementListItem['dailyAttendance'] => {
-      const attendanceItems = Array.isArray(proofs) ? proofs : [];
-      const filtered = attendanceItems
-        .map((record) => ({
-          ...record,
-          parsedTimestamp: new Date(record.timestamp),
-        }))
-        .filter(
-          (record) =>
-            !Number.isNaN(record.parsedTimestamp.getTime()) &&
-            record.parsedTimestamp >= attendanceStart &&
-            record.parsedTimestamp <= attendanceEnd
-        )
-        .sort(
-          (firstRecord, secondRecord) =>
-            firstRecord.parsedTimestamp.getTime() - secondRecord.parsedTimestamp.getTime()
-        );
-
-      const attendanceProofs = filtered.filter(
-        (record) => record.category !== 'PROBLEM_REPORT'
-      );
-      const problemReports = filtered
-        .filter((record) => record.category === 'PROBLEM_REPORT')
-        .map((record) => ({
-          imageUrl: record.imageUrl,
-          mediaType: record.mediaType,
-          description: record.description,
-          timestamp: record.timestamp,
-          locationLabel: record.locationLabel,
-        }));
-
-      const firstCheckIn = attendanceProofs.find((record) => record.status === UserStatus.ACTIVE);
-      const latestCheckOut = [...attendanceProofs]
-        .reverse()
-        .find((record) => record.status === UserStatus.INACTIVE);
-
-      return {
-        date: attendanceDateValue || formatLocalYmd(attendanceStart),
-        isPresent: Boolean(firstCheckIn),
-        checkInAt: firstCheckIn?.timestamp,
-        checkOutAt: latestCheckOut?.timestamp,
-        checkInImageUrl: firstCheckIn?.imageUrl,
-        checkOutImageUrl: latestCheckOut?.imageUrl,
-        problemReports,
-      };
-    };
 
     let fromDate: Date | undefined;
     let toDate: Date | undefined;
-
     const now = new Date();
 
     if (timeframeValue === 'daily') {
       fromDate = new Date(now);
       fromDate.setHours(0, 0, 0, 0);
-    }
-
-    if (timeframeValue === 'weekly') {
+    } else if (timeframeValue === 'weekly') {
       fromDate = new Date(now);
       fromDate.setDate(now.getDate() - 7);
-    }
-
-    if (timeframeValue === 'monthly') {
+    } else if (timeframeValue === 'monthly') {
       fromDate = new Date(now);
       fromDate.setDate(now.getDate() - 30);
     }
@@ -686,36 +586,13 @@ export class UserService {
       toDate = swappedDate;
     }
 
-    const ridersQueryBuilder = this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.userRoles', 'userRole')
-      .leftJoinAndSelect('userRole.role', 'role')
-      .where('role.name = :riderRole', { riderRole: RoleTypes.RIDER });
-
-    if (searchValue) {
-      ridersQueryBuilder.andWhere(
-        '(user.name ILIKE :search OR user.email ILIKE :search OR user.phoneNumber ILIKE :search)',
-        { search: `%${searchValue}%` }
-      );
-    }
-
-    if (nameValue) {
-      ridersQueryBuilder.andWhere('user.name ILIKE :name', {
-        name: `%${nameValue}%`,
-      });
-    }
-
-    const allowedStatuses = Object.values(UserStatus);
-    if (statusValue && allowedStatuses.includes(statusValue as UserStatus)) {
-      ridersQueryBuilder.andWhere('user.status = :status', {
-        status: statusValue as UserStatus,
-      });
-    }
-
-    const riders = await ridersQueryBuilder.getMany();
+    const riders = await this.buildRidersBaseQuery({
+      searchValue,
+      statusValue,
+    }).getMany();
     const riderIds = riders.map((rider) => rider.id);
 
-    const emptyResponse: Pagination<RiderManagementListItem> = {
+    const emptyResponse: Pagination<RiderPerformanceListItem> = {
       rows: [],
       totalCount: 0,
       totalPages: 0,
@@ -723,31 +600,16 @@ export class UserService {
       size: sizeNumber,
       page: pageNumber,
     };
-
-    if (riderIds.length === 0) {
-      return emptyResponse;
-    }
+    if (!riderIds.length) return emptyResponse;
 
     const assignmentStatsQueryBuilder = this.orderAssignmentRepository
       .createQueryBuilder('assignment')
       .leftJoin('assignment.order', 'order')
       .select('assignment.assignedToId', 'riderId')
-      .addSelect(
-        `SUM(CASE WHEN assignment.status = :completedStatus THEN 1 ELSE 0 END)`,
-        'totalDeliveriesCompleted'
-      )
-      .addSelect(
-        `COALESCE(SUM(CASE WHEN assignment.status = :completedStatus THEN COALESCE(order.finalFee, order.initialFee, 0) ELSE 0 END), 0)`,
-        'totalEarnings'
-      )
-      .addSelect(
-        `SUM(CASE WHEN assignment.status = :cancelledStatus THEN 1 ELSE 0 END)`,
-        'canceledDeliveries'
-      )
-      .addSelect(
-        `SUM(CASE WHEN assignment.status = :failedStatus THEN 1 ELSE 0 END)`,
-        'failedDeliveries'
-      )
+      .addSelect(`SUM(CASE WHEN assignment.status = :completedStatus THEN 1 ELSE 0 END)`, 'totalDeliveriesCompleted')
+      .addSelect(`COALESCE(SUM(CASE WHEN assignment.status = :completedStatus THEN COALESCE(order.finalFee, order.initialFee, 0) ELSE 0 END), 0)`, 'totalEarnings')
+      .addSelect(`SUM(CASE WHEN assignment.status = :cancelledStatus THEN 1 ELSE 0 END)`, 'canceledDeliveries')
+      .addSelect(`SUM(CASE WHEN assignment.status = :failedStatus THEN 1 ELSE 0 END)`, 'failedDeliveries')
       .addSelect(`COUNT(DISTINCT DATE_TRUNC('day', assignment.updatedAt))`, 'activeDays')
       .addSelect(`COUNT(DISTINCT DATE_TRUNC('hour', assignment.updatedAt))`, 'activeHours')
       .where('assignment.assignedToId IN (:...riderIds)', { riderIds })
@@ -757,31 +619,21 @@ export class UserService {
         failedStatus: OrderAssignmentStatus.REJECTED,
       });
 
-    if (fromDate) {
-      assignmentStatsQueryBuilder.andWhere('assignment.updatedAt >= :fromDate', { fromDate });
-    }
+    if (fromDate) assignmentStatsQueryBuilder.andWhere('assignment.updatedAt >= :fromDate', { fromDate });
+    if (toDate) assignmentStatsQueryBuilder.andWhere('assignment.updatedAt <= :toDate', { toDate });
 
-    if (toDate) {
-      assignmentStatsQueryBuilder.andWhere('assignment.updatedAt <= :toDate', { toDate });
-    }
+    const assignmentStats = await assignmentStatsQueryBuilder.groupBy('assignment.assignedToId').getRawMany<{
+      riderId: UUID;
+      totalDeliveriesCompleted: string;
+      totalEarnings: string;
+      canceledDeliveries: string;
+      failedDeliveries: string;
+      activeDays: string;
+      activeHours: string;
+    }>();
 
-    const assignmentStats = await assignmentStatsQueryBuilder
-      .groupBy('assignment.assignedToId')
-      .getRawMany<{
-        riderId: UUID;
-        totalDeliveriesCompleted: string;
-        totalEarnings: string;
-        canceledDeliveries: string;
-        failedDeliveries: string;
-        activeDays: string;
-        activeHours: string;
-      }>();
-
-    const statsMap = new Map(
-      assignmentStats.map((stats) => [stats.riderId, stats])
-    );
-
-    const mergedRows: RiderManagementListItem[] = riders.map((rider) => {
+    const statsMap = new Map(assignmentStats.map((stats) => [stats.riderId, stats]));
+    const mergedRows: RiderPerformanceListItem[] = riders.map((rider) => {
       const stats = statsMap.get(rider.id);
       return {
         rank: 0,
@@ -796,67 +648,243 @@ export class UserService {
         failedDeliveries: Number(stats?.failedDeliveries ?? 0),
         activeDays: Number(stats?.activeDays ?? 0),
         activeHours: Number(stats?.activeHours ?? 0),
-        dailyAttendance: extractDailyAttendance(rider.statusProofs),
       };
     });
 
-    const metricValue = (row: RiderManagementListItem): number => {
+    const metricValue = (row: RiderPerformanceListItem): number => {
       switch (safeSortBy) {
-        case 'earnings':
-          return row.totalEarnings;
-        case 'canceled':
-          return row.canceledDeliveries;
-        case 'failed':
-          return row.failedDeliveries;
-        case 'activeDays':
-          return row.activeDays;
-        case 'activeHours':
-          return row.activeHours;
+        case 'earnings': return row.totalEarnings;
+        case 'canceled': return row.canceledDeliveries;
+        case 'failed': return row.failedDeliveries;
+        case 'activeDays': return row.activeDays;
+        case 'activeHours': return row.activeHours;
         case 'deliveries':
-        default:
-          return row.totalDeliveriesCompleted;
+        default: return row.totalDeliveriesCompleted;
       }
     };
 
-    const sortedRows = mergedRows.sort((firstRow, secondRow) => {
-      const firstMetric = metricValue(firstRow);
-      const secondMetric = metricValue(secondRow);
-      const difference =
-        sortDirection === 'asc' ? firstMetric - secondMetric : secondMetric - firstMetric;
-
-      if (difference !== 0) {
-        return difference;
-      }
-
+    const sortedRows = mergedRows.sort((a, b) => {
+      const diff = sortDirection === 'asc' ? metricValue(a) - metricValue(b) : metricValue(b) - metricValue(a);
+      if (diff !== 0) return diff;
       if (safeSortBy !== 'deliveries') {
-        const deliveryDifference =
-          secondRow.totalDeliveriesCompleted - firstRow.totalDeliveriesCompleted;
-        if (deliveryDifference !== 0) {
-          return deliveryDifference;
-        }
+        const deliveriesDiff = b.totalDeliveriesCompleted - a.totalDeliveriesCompleted;
+        if (deliveriesDiff !== 0) return deliveriesDiff;
       }
-
-      return (firstRow.riderName ?? '').localeCompare(secondRow.riderName ?? '');
+      return (a.riderName ?? '').localeCompare(b.riderName ?? '');
     });
 
-    const rankedRows = sortedRows.map((row, index) => ({
-      ...row,
-      rank: index + 1,
-    }));
-
+    const rankedRows = sortedRows.map((row, index) => ({ ...row, rank: index + 1 }));
     const totalCount = rankedRows.length;
     const totalPages = totalCount > 0 ? Math.ceil(totalCount / sizeNumber) : 0;
     const startIndex = pageNumber * sizeNumber;
-    const rows = rankedRows.slice(startIndex, startIndex + sizeNumber);
 
     return {
-      rows,
+      rows: rankedRows.slice(startIndex, startIndex + sizeNumber),
       totalCount,
       totalPages,
       currentPage: pageNumber + 1,
       size: sizeNumber,
       page: pageNumber,
     };
+  }
+
+  async getRiderManagementAttendance(
+    query: Request['query']
+  ): Promise<Pagination<RiderAttendanceListItem>> {
+    const { page = 0, size = 10, attendanceDate, name, riderId } = query;
+    const pageNumber = Number(page) >= 0 ? Number(page) : 0;
+    const sizeNumber = Number(size) > 0 ? Number(size) : 10;
+
+    const attendanceDateValue = typeof attendanceDate === 'string' && attendanceDate.trim() ? attendanceDate.trim() : undefined;
+    const nameValue = typeof name === 'string' && name.trim() ? name.trim() : undefined;
+    const riderIdValue = typeof riderId === 'string' && riderId.trim() ? riderId.trim() : undefined;
+
+    const baseDate = attendanceDateValue ? new Date(attendanceDateValue) : new Date();
+    const safeDate = Number.isNaN(baseDate.getTime()) ? new Date() : baseDate;
+    const attendanceStart = new Date(safeDate);
+    attendanceStart.setHours(0, 0, 0, 0);
+    const attendanceEnd = new Date(safeDate);
+    attendanceEnd.setHours(23, 59, 59, 999);
+    const riders = await this.buildRidersBaseQuery({
+      nameValue,
+      riderIdValue,
+    }).getMany();
+    const riderIds = riders.map((rider) => rider.id);
+    if (!riderIds.length) {
+      return { rows: [], totalCount: 0, totalPages: 0, currentPage: pageNumber + 1, size: sizeNumber, page: pageNumber };
+    }
+
+    const proofs = await this.userStatusProofRepository.createQueryBuilder('proof')
+      .leftJoinAndSelect('proof.user', 'user')
+      .where('proof.userId IN (:...riderIds)', { riderIds })
+      .andWhere('proof.capturedAt >= :attendanceStart', { attendanceStart })
+      .andWhere('proof.capturedAt <= :attendanceEnd', { attendanceEnd })
+      .orderBy('proof.capturedAt', 'DESC')
+      .getMany();
+
+    const rows = proofs.map<RiderAttendanceListItem>((proof) => {
+      const proofDate = proof.capturedAt;
+      const date = `${proofDate.getFullYear()}-${String(proofDate.getMonth() + 1).padStart(2, '0')}-${String(proofDate.getDate()).padStart(2, '0')}`;
+      return {
+        id: proof.id,
+        riderId: proof.userId,
+        riderName: proof.user?.name,
+        riderPhoneNumber: proof.user?.phoneNumber,
+        date,
+        status: proof.status,
+        timestamp: proof.capturedAt.toISOString(),
+        imageUrl: proof.imageUrl,
+        locationLabel: proof.locationLabel,
+      };
+    });
+
+    const totalCount = rows.length;
+    const totalPages = totalCount > 0 ? Math.ceil(totalCount / sizeNumber) : 0;
+    const startIndex = pageNumber * sizeNumber;
+
+    return {
+      rows: rows.slice(startIndex, startIndex + sizeNumber),
+      totalCount,
+      totalPages,
+      currentPage: pageNumber + 1,
+      size: sizeNumber,
+      page: pageNumber,
+    };
+  }
+
+  async getRiderManagementProblemReports(
+    query: Request['query']
+  ): Promise<Pagination<RiderProblemReportListItem>> {
+    const { page = 0, size = 10, attendanceDate, riderId } = query;
+    const pageNumber = Number(page) >= 0 ? Number(page) : 0;
+    const sizeNumber = Number(size) > 0 ? Number(size) : 10;
+
+    const riderIdValue = typeof riderId === 'string' && riderId.trim() ? riderId.trim() : undefined;
+    const attendanceDateValue = typeof attendanceDate === 'string' && attendanceDate.trim() ? attendanceDate.trim() : undefined;
+
+    const reportQuery = this.userProblemReportRepository
+      .createQueryBuilder('report')
+      .leftJoinAndSelect('report.user', 'user')
+      .leftJoinAndSelect('user.userRoles', 'userRole')
+      .leftJoinAndSelect('userRole.role', 'role')
+      .where('role.name = :riderRole', { riderRole: RoleTypes.RIDER });
+
+    if (riderIdValue) {
+      reportQuery.andWhere('report.userId = :riderId', { riderId: riderIdValue });
+    }
+
+    if (attendanceDateValue) {
+      const baseDate = new Date(attendanceDateValue);
+      if (!Number.isNaN(baseDate.getTime())) {
+        const start = new Date(baseDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(baseDate);
+        end.setHours(23, 59, 59, 999);
+        reportQuery.andWhere('report.capturedAt >= :start', { start }).andWhere('report.capturedAt <= :end', { end });
+      }
+    }
+
+    const [reports, totalCount] = await reportQuery
+      .orderBy('report.capturedAt', 'DESC')
+      .skip(pageNumber * sizeNumber)
+      .take(sizeNumber)
+      .getManyAndCount();
+
+    const rows = reports.map<RiderProblemReportListItem>((report) => ({
+      id: report.id,
+      riderId: report.userId,
+      riderName: report.user?.name,
+      riderPhoneNumber: report.user?.phoneNumber,
+      imageUrl: report.imageUrl,
+      mediaType: report.mediaType,
+      description: report.description,
+      timestamp: report.capturedAt.toISOString(),
+      locationLabel: report.locationLabel,
+    }));
+
+    return {
+      rows,
+      totalCount,
+      totalPages: totalCount > 0 ? Math.ceil(totalCount / sizeNumber) : 0,
+      currentPage: pageNumber + 1,
+      size: sizeNumber,
+      page: pageNumber,
+    };
+  }
+
+  async createStatusProof(payload: {
+    userId: UUID;
+    imageUrl: string;
+    status: UserStatus;
+    capturedAt: string;
+    locationLabel?: string;
+    latitude?: number;
+    longitude?: number;
+  }): Promise<UserStatusProof> {
+    return this.userStatusProofRepository.save({
+      userId: payload.userId,
+      imageUrl: payload.imageUrl,
+      status: payload.status,
+      capturedAt: new Date(payload.capturedAt),
+      locationLabel: payload.locationLabel,
+      latitude: payload.latitude,
+      longitude: payload.longitude,
+    });
+  }
+
+  async createProblemReport(payload: {
+    userId: UUID;
+    imageUrl: string;
+    mediaType: 'photo' | 'video';
+    description: string;
+    capturedAt: string;
+    locationLabel?: string;
+    source?: string;
+  }): Promise<UserProblemReport> {
+    return this.userProblemReportRepository.save({
+      userId: payload.userId,
+      imageUrl: payload.imageUrl,
+      mediaType: payload.mediaType,
+      description: payload.description,
+      capturedAt: new Date(payload.capturedAt),
+      locationLabel: payload.locationLabel,
+      source: payload.source,
+    });
+  }
+
+  private buildRidersBaseQuery(filters: {
+    searchValue?: string;
+    statusValue?: string;
+    nameValue?: string;
+    riderIdValue?: string;
+  }) {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.userRoles', 'userRole')
+      .leftJoinAndSelect('userRole.role', 'role')
+      .where('role.name = :riderRole', { riderRole: RoleTypes.RIDER });
+
+    if (filters.searchValue) {
+      queryBuilder.andWhere('(user.name ILIKE :search OR user.email ILIKE :search OR user.phoneNumber ILIKE :search)', {
+        search: `%${filters.searchValue}%`,
+      });
+    }
+    if (filters.nameValue) {
+      queryBuilder.andWhere('user.name ILIKE :name', {
+        name: `%${filters.nameValue}%`,
+      });
+    }
+    if (filters.riderIdValue) {
+      queryBuilder.andWhere('user.id = :riderId', { riderId: filters.riderIdValue });
+    }
+    const allowedStatuses = Object.values(UserStatus);
+    if (filters.statusValue && allowedStatuses.includes(filters.statusValue as UserStatus)) {
+      queryBuilder.andWhere('user.status = :status', {
+        status: filters.statusValue as UserStatus,
+      });
+    }
+
+    return queryBuilder;
   }
 
   // UPDATE USER STATUS

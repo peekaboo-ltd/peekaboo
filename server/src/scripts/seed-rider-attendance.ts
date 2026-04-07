@@ -2,7 +2,7 @@ import 'dotenv/config';
 import path from 'path';
 import fs from 'fs';
 import { AppDataSource } from '../data-source';
-import { User, UserStatusProofRecord } from '../entities/user.entity';
+import { User } from '../entities/user.entity';
 import { Role } from '../entities/role.entity';
 import { UserRole } from '../entities/userRole.entity';
 import { UserStatus } from '../constants/user.constants';
@@ -10,6 +10,7 @@ import { RoleStatus, RoleTypes } from '../constants/role.constants';
 import { hashPassword } from '../helpers/auth.helper';
 import { uploadUserStatusProofToCloudinary } from '../integrations/cloudinary/cloudinary.service';
 import logger from '../helpers/logger.helper';
+import { UserStatusProof } from '../entities/userStatusProof.entity';
 
 type RiderSeed = {
   name: string;
@@ -146,6 +147,7 @@ const uploadProofIfExists = async (
 const main = async () => {
   await AppDataSource.initialize();
   const userRepo = AppDataSource.getRepository(User);
+  const statusProofRepo = AppDataSource.getRepository(UserStatusProof);
 
   for (const [index, riderSeed] of RIDERS.entries()) {
     const user = await ensureRiderUser(riderSeed);
@@ -165,16 +167,21 @@ const main = async () => {
         )
       : undefined;
 
-    const existingProofs = Array.isArray(user.statusProofs) ? user.statusProofs : [];
-    const keptProofs = existingProofs.filter(
-      (proof) => !String(proof.timestamp || '').startsWith(todayDate)
-    );
+    await statusProofRepo
+      .createQueryBuilder()
+      .delete()
+      .from(UserStatusProof)
+      .where('userId = :userId', { userId: user.id })
+      .andWhere('capturedAt >= :startOfDay', { startOfDay: `${todayDate}T00:00:00.000Z` })
+      .andWhere('capturedAt <= :endOfDay', { endOfDay: `${todayDate}T23:59:59.999Z` })
+      .execute();
 
-    const seededProofs: UserStatusProofRecord[] = [
+    const seededProofs: Array<Partial<UserStatusProof>> = [
       {
+        userId: user.id,
         imageUrl: checkInUrl || '',
         status: UserStatus.ACTIVE,
-        timestamp: checkInIso,
+        capturedAt: new Date(checkInIso),
         locationLabel: 'Kigali, Rwanda',
         latitude: -1.9441,
         longitude: 30.0619,
@@ -183,18 +190,20 @@ const main = async () => {
 
     if (riderSeed.hasCheckOut) {
       seededProofs.push({
+        userId: user.id,
         imageUrl: checkOutUrl || '',
         status: UserStatus.INACTIVE,
-        timestamp: checkOutIso,
+        capturedAt: new Date(checkOutIso),
         locationLabel: 'Kigali, Rwanda',
         latitude: -1.9441,
         longitude: 30.0619,
       });
     }
 
+    await statusProofRepo.save(seededProofs);
+
     await userRepo.save({
       ...user,
-      statusProofs: [...keptProofs, ...seededProofs],
       currentLocation: {
         latitude: -1.9441,
         longitude: 30.0619,

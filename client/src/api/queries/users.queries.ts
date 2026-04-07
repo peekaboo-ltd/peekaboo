@@ -60,7 +60,7 @@ export const usersQueriesApiSlice = createApi({
         },
       }),
     }),
-    fetchRiderManagement: builder.query({
+    fetchRiderManagementPerformance: builder.query({
       query: ({
         page,
         size,
@@ -69,8 +69,6 @@ export const usersQueriesApiSlice = createApi({
         timeframe,
         startDate,
         endDate,
-        attendanceDate,
-        name,
         sortBy,
         sortOrder,
       }: {
@@ -81,12 +79,10 @@ export const usersQueriesApiSlice = createApi({
         timeframe?: 'daily' | 'weekly' | 'monthly' | 'custom';
         startDate?: string;
         endDate?: string;
-        attendanceDate?: string;
-        name?: string;
         sortBy?: 'deliveries' | 'earnings' | 'canceled' | 'failed' | 'activeDays' | 'activeHours';
         sortOrder?: 'asc' | 'desc';
       }) => ({
-        url: '/users/rider-management',
+        url: '/users/rider-management/performance',
         params: {
           page,
           size,
@@ -95,10 +91,53 @@ export const usersQueriesApiSlice = createApi({
           timeframe,
           startDate,
           endDate,
-          attendanceDate,
-          name,
           sortBy,
           sortOrder,
+        },
+      }),
+    }),
+    fetchRiderManagementAttendance: builder.query({
+      query: ({
+        page,
+        size,
+        attendanceDate,
+        name,
+        riderId,
+      }: {
+        page: number;
+        size: number;
+        attendanceDate?: string;
+        name?: string;
+        riderId?: string;
+      }) => ({
+        url: '/users/rider-management/attendance',
+        params: {
+          page,
+          size,
+          attendanceDate,
+          name,
+          riderId,
+        },
+      }),
+    }),
+    fetchRiderManagementProblemReports: builder.query({
+      query: ({
+        page,
+        size,
+        attendanceDate,
+        riderId,
+      }: {
+        page: number;
+        size: number;
+        attendanceDate?: string;
+        riderId?: string;
+      }) => ({
+        url: '/users/rider-management/problem-reports',
+        params: {
+          page,
+          size,
+          attendanceDate,
+          riderId,
         },
       }),
     }),
@@ -132,6 +171,8 @@ export const {
   useLazyFetchUsersQuery,
   useLazyFetchUserByIdQuery,
   useLazyFetchUsersTrackingQuery,
-  useLazyFetchRiderManagementQuery,
+  useLazyFetchRiderManagementPerformanceQuery,
+  useLazyFetchRiderManagementAttendanceQuery,
+  useLazyFetchRiderManagementProblemReportsQuery,
   useLazyFetchUserCurrentLocationHistoryQuery,
 } = usersQueriesApiSlice;

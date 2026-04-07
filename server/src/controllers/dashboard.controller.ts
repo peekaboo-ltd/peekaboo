@@ -8,7 +8,6 @@ import { SummaryChartMetric, SummaryChartPeriod } from '../types/dashboard.types
 import { EmailService } from '../integrations/emails/email.service';
 import { UUID } from '../types';
 import { UserService } from '../services/user.service';
-import { UserStatus } from '../constants/user.constants';
 import { uploadProblemReportEvidenceToCloudinary } from '../integrations/cloudinary/cloudinary.service';
 
 const dashboardService = new DashboardService();
@@ -263,25 +262,14 @@ export const DashboardController = {
           mediaType: normalizedMediaType,
         });
 
-        const existingUser = await userService.getUserById(userId as UUID);
-        const existingProofs = Array.isArray(existingUser.statusProofs)
-          ? existingUser.statusProofs
-          : [];
-
-        await userService.updateUser(userId as UUID, {
-          statusProofs: [
-            ...existingProofs,
-            {
-              imageUrl: evidenceUrl,
-              status: existingUser.status || UserStatus.ACTIVE,
-              timestamp: reportTimestamp,
-              locationLabel: locationLabel || undefined,
-              description: description.trim(),
-              mediaType: normalizedMediaType,
-              category: 'PROBLEM_REPORT',
-              source: 'dashboard:report-problem',
-            },
-          ],
+        await userService.createProblemReport({
+          userId: userId as UUID,
+          imageUrl: evidenceUrl,
+          mediaType: normalizedMediaType,
+          description: description.trim(),
+          capturedAt: reportTimestamp,
+          locationLabel: locationLabel || undefined,
+          source: 'dashboard:report-problem',
         });
       } catch (error) {
         const uploadErrorMessage =

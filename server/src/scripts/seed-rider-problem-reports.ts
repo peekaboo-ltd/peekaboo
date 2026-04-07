@@ -2,9 +2,9 @@ import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { AppDataSource } from '../data-source';
-import { User, UserStatusProofRecord } from '../entities/user.entity';
-import { UserStatus } from '../constants/user.constants';
+import { User } from '../entities/user.entity';
 import logger from '../helpers/logger.helper';
+import { UserProblemReport } from '../entities/userProblemReport.entity';
 
 type ProblemReportSeed = {
   mediaType: 'photo' | 'video';
@@ -60,6 +60,7 @@ const resolveMediaReference = (seed: ProblemReportSeed): string => {
 const main = async () => {
   await AppDataSource.initialize();
   const userRepo = AppDataSource.getRepository(User);
+  const problemReportRepo = AppDataSource.getRepository(UserProblemReport);
 
   const rider =
     (await userRepo.findOne({
@@ -75,26 +76,22 @@ const main = async () => {
     );
   }
 
-  const existingProofs = Array.isArray(rider.statusProofs) ? rider.statusProofs : [];
-  const keptProofs = existingProofs.filter(
-    (proof) => !(proof.source === 'seed:rider-problem-reports' && proof.category === 'PROBLEM_REPORT')
-  );
+  await problemReportRepo.delete({
+    userId: rider.id,
+    source: 'seed:rider-problem-reports',
+  });
 
-  const problemReportProofs: UserStatusProofRecord[] = PROBLEM_REPORT_SEEDS.map((seed) => ({
+  const problemReportProofs: Array<Partial<UserProblemReport>> = PROBLEM_REPORT_SEEDS.map((seed) => ({
+    userId: rider.id,
     imageUrl: resolveMediaReference(seed),
-    status: UserStatus.ACTIVE,
-    timestamp: seed.timestamp,
+    capturedAt: new Date(seed.timestamp),
     locationLabel: seed.locationLabel,
     description: seed.description,
     mediaType: seed.mediaType,
-    category: 'PROBLEM_REPORT',
     source: 'seed:rider-problem-reports',
   }));
 
-  await userRepo.save({
-    ...rider,
-    statusProofs: [...keptProofs, ...problemReportProofs],
-  });
+  await problemReportRepo.save(problemReportProofs);
 
   logger.success('[seed:rider-problem-reports] Seeded rider problem reports', {
     rider: rider.name,

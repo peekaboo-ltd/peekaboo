@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import { BriefcaseBusiness, CheckCircle2, CircleX, ClockAlert } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Modal from '@/components/Modal';
 import Input from '@/components/inputs/Input';
 import Select from '@/components/inputs/Select';
@@ -9,9 +8,25 @@ import { UserStatus } from '@/constants/user.constants';
 import useDebounce from '@/hooks/common/debounce.hooks';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useRiderManagementColumns } from '@/hooks/users/columns.riderManagement';
-import { useFetchRiderManagement } from '@/hooks/users/users.hooks';
-import { RiderManagementItem, RiderManagementTimeframe } from '@/types/user.type';
-import { formatCurrency, formatNumbers } from '@/utils/strings.util';
+import {
+  useFetchRiderManagementAttendance,
+  useFetchRiderManagementPerformance,
+  useFetchRiderManagementProblemReports,
+} from '@/hooks/users/users.hooks';
+import {
+  RiderAttendanceItem,
+  RiderPerformanceItem,
+  RiderProblemReportItem,
+  RiderManagementTimeframe,
+} from '@/types/user.type';
+import { formatCurrency, formatDate, formatNumbers } from '@/utils/strings.util';
+import { Link } from 'react-router-dom';
+import { ColumnDef } from '@tanstack/react-table';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import CustomPopover from '@/components/inputs/CustomPopover';
+import { faCircleInfo, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
+import { ellipsisHClassName, tableActionClassName } from '@/constants/inputs.constants';
+import { faCircleCheck, faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 
 type SortBy = 'deliveries' | 'earnings' | 'canceled' | 'failed' | 'activeDays' | 'activeHours';
 type SortOrder = 'asc' | 'desc';
@@ -37,57 +52,11 @@ const resolveDateInputValue = (value: Date | { target?: { value?: string } }) =>
   return String(value?.target?.value || '');
 };
 
-const formatAttendanceTime = (value?: string) => {
-  if (!value) return '-';
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return '-';
-  return parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
-
 const formatAttendanceDateTime = (value?: string) => {
   if (!value) return '-';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return '-';
   return parsed.toLocaleString();
-};
-
-const formatYmdFromTimestamp = (value?: string) => {
-  if (!value) return '';
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return '';
-  return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
-};
-
-type AttendanceStatus = 'present' | 'atWork' | 'absent' | 'late';
-
-const getAttendanceStatus = (
-  attendance: RiderManagementItem['dailyAttendance']
-): AttendanceStatus => {
-  const hasCheckIn = Boolean(attendance?.checkInAt);
-  const hasCheckOut = Boolean(attendance?.checkOutAt);
-
-  if (!hasCheckIn && !hasCheckOut) {
-    return 'absent';
-  }
-
-  const checkInDate = attendance?.checkInAt ? new Date(attendance.checkInAt) : null;
-  const isValidCheckIn = checkInDate && !Number.isNaN(checkInDate.getTime());
-
-  if (isValidCheckIn) {
-    const checkInHour = checkInDate.getHours();
-    const checkInMinute = checkInDate.getMinutes();
-    const isLate = checkInHour > 9 || (checkInHour === 9 && checkInMinute > 0);
-
-    if (isLate) {
-      return 'late';
-    }
-  }
-
-  if (hasCheckIn && hasCheckOut) {
-    return 'present';
-  }
-
-  return 'atWork';
 };
 
 const RiderManagementPage = () => {
@@ -102,32 +71,50 @@ const RiderManagementPage = () => {
   const [attendanceName, setAttendanceName] = useState('');
   const [sortBy, setSortBy] = useState<SortBy>('deliveries');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [selectedRider, setSelectedRider] = useState<RiderManagementItem | null>(null);
-  const [attendanceProofRider, setAttendanceProofRider] = useState<RiderManagementItem | null>(null);
+  const [selectedRider, setSelectedRider] = useState<RiderPerformanceItem | null>(null);
+  const [attendanceProofRider, setAttendanceProofRider] = useState<RiderAttendanceItem | null>(null);
   const [problemReportModalState, setProblemReportModalState] = useState<{
-    rider: RiderManagementItem;
+    rider: RiderAttendanceItem;
     reports: ProblemReportViewItem[];
-    isDemo: boolean;
+    isLoading: boolean;
   } | null>(null);
   const [compareLeftId, setCompareLeftId] = useState('');
   const [compareRightId, setCompareRightId] = useState('');
   const debouncedSearch = useDebounce(search, 350);
 
   const {
-    fetchRiderManagement,
-    data,
-    isFetching,
+    fetchRiderManagementPerformance,
+    data: performanceData,
+    isFetching: isPerformanceFetching,
     page,
     setPage,
     size,
     setSize,
     totalPages,
     totalCount,
-  } = useFetchRiderManagement();
+  } = useFetchRiderManagementPerformance();
 
-  const rows = useMemo(
-    () => (data?.data?.rows ?? []) as RiderManagementItem[],
-    [data],
+  const {
+    fetchRiderManagementAttendance,
+    data: attendanceData,
+    isFetching: isAttendanceFetching,
+    page: attendancePage,
+    setPage: setAttendancePage,
+    size: attendanceSize,
+  } = useFetchRiderManagementAttendance();
+
+  const {
+    fetchRiderManagementProblemReports,
+    isFetching: isProblemReportsFetching,
+  } = useFetchRiderManagementProblemReports();
+
+  const performanceRows = useMemo(
+    () => (performanceData?.data?.rows ?? []) as RiderPerformanceItem[],
+    [performanceData],
+  );
+  const attendanceRows = useMemo(
+    () => (attendanceData?.data?.rows ?? []) as RiderAttendanceItem[],
+    [attendanceData],
   );
   const { riderManagementColumns } = useRiderManagementColumns(setSelectedRider);
 
@@ -139,8 +126,6 @@ const RiderManagementPage = () => {
     timeframe,
     startDate,
     endDate,
-    attendanceDate,
-    attendanceName,
     sortBy,
     sortOrder,
     setPage,
@@ -184,7 +169,7 @@ const RiderManagementPage = () => {
   }, [timeframe, normalizedCustomRange.startDate, normalizedCustomRange.endDate]);
 
   useEffect(() => {
-    fetchRiderManagement({
+    fetchRiderManagementPerformance({
       page,
       size,
       search: debouncedSearch || undefined,
@@ -192,13 +177,11 @@ const RiderManagementPage = () => {
       timeframe,
       startDate: normalizedCustomRange.startDate,
       endDate: normalizedCustomRange.endDate,
-      attendanceDate: attendanceDate || undefined,
-      name: attendanceName.trim() && attendanceName !== 'ALL' ? attendanceName.trim() : undefined,
       sortBy,
       sortOrder,
     });
   }, [
-    fetchRiderManagement,
+    fetchRiderManagementPerformance,
     page,
     size,
     debouncedSearch,
@@ -206,15 +189,32 @@ const RiderManagementPage = () => {
     timeframe,
     normalizedCustomRange.startDate,
     normalizedCustomRange.endDate,
-    attendanceDate,
-    attendanceName,
     sortBy,
     sortOrder,
   ]);
 
+  useEffect(() => {
+    setAttendancePage(0);
+  }, [attendanceDate, attendanceName, setAttendancePage]);
+
+  useEffect(() => {
+    fetchRiderManagementAttendance({
+      page: attendancePage,
+      size: attendanceSize,
+      attendanceDate: attendanceDate || undefined,
+      name: attendanceName.trim() && attendanceName !== 'ALL' ? attendanceName.trim() : undefined,
+    });
+  }, [
+    fetchRiderManagementAttendance,
+    attendancePage,
+    attendanceSize,
+    attendanceDate,
+    attendanceName,
+  ]);
+
   const visibleTotals = useMemo(
     () =>
-      rows.reduce(
+      performanceRows.reduce(
         (acc, row) => {
           acc.deliveries += row.totalDeliveriesCompleted;
           acc.earnings += row.totalEarnings;
@@ -222,22 +222,22 @@ const RiderManagementPage = () => {
         },
         { deliveries: 0, earnings: 0 },
       ),
-    [rows],
+    [performanceRows],
   );
 
   const compareOptions = useMemo(
     () =>
-      rows.map((rider) => ({
+      performanceRows.map((rider) => ({
         label: `${rider.riderName || 'Unknown'} (${rider.riderPhoneNumber || '-'})`,
         value: rider.riderId,
       })),
-    [rows],
+    [performanceRows],
   );
 
   const attendanceNameOptions = useMemo(() => {
     const uniqueNames = Array.from(
       new Set(
-        rows
+        attendanceRows
           .map((row) => (row.riderName || '').trim())
           .filter((name) => name.length > 0),
       ),
@@ -247,26 +247,26 @@ const RiderManagementPage = () => {
       { label: 'All riders', value: 'ALL' },
       ...uniqueNames.map((name) => ({ label: name, value: name })),
     ];
-  }, [rows]);
+  }, [attendanceRows]);
 
   useEffect(() => {
-    if (rows.length === 0) {
+    if (performanceRows.length === 0) {
       setCompareLeftId('');
       setCompareRightId('');
       return;
     }
 
-    if (!compareLeftId || !rows.some((rider) => rider.riderId === compareLeftId)) {
-      setCompareLeftId(rows[0].riderId);
+    if (!compareLeftId || !performanceRows.some((rider) => rider.riderId === compareLeftId)) {
+      setCompareLeftId(performanceRows[0].riderId);
     }
 
-    if (!compareRightId || !rows.some((rider) => rider.riderId === compareRightId)) {
-      setCompareRightId(rows[Math.min(1, rows.length - 1)].riderId);
+    if (!compareRightId || !performanceRows.some((rider) => rider.riderId === compareRightId)) {
+      setCompareRightId(performanceRows[Math.min(1, performanceRows.length - 1)].riderId);
     }
-  }, [rows, compareLeftId, compareRightId]);
+  }, [performanceRows, compareLeftId, compareRightId]);
 
-  const leftRider = rows.find((rider) => rider.riderId === compareLeftId);
-  const rightRider = rows.find((rider) => rider.riderId === compareRightId);
+  const leftRider = performanceRows.find((rider) => rider.riderId === compareLeftId);
+  const rightRider = performanceRows.find((rider) => rider.riderId === compareRightId);
 
   const comparisonRows = useMemo(() => {
     if (!leftRider || !rightRider) return [];
@@ -353,74 +353,164 @@ const RiderManagementPage = () => {
     };
   }, [leftRider, rightRider, comparisonRows]);
 
-  const attendanceRows = useMemo(() => {
-    const normalizedName = attendanceName.trim().toLowerCase();
+  const openAttendanceProof = useCallback((row: RiderAttendanceItem) => {
+    setAttendanceProofRider(row);
+  }, []);
 
-    return rows.filter((row) => {
-      const riderName = (row.riderName || '').toLowerCase();
-      const matchesName = !normalizedName || normalizedName === 'all' || riderName === normalizedName;
-      const matchesDate = !attendanceDate || row.dailyAttendance?.date === attendanceDate;
-      return matchesName && matchesDate;
+  const openProblemReports = useCallback(async (row: RiderAttendanceItem) => {
+    setProblemReportModalState({
+      rider: row,
+      reports: [],
+      isLoading: true,
     });
-  }, [rows, attendanceDate, attendanceName]);
-
-  const demoProblemReports = useMemo<ProblemReportViewItem[]>(
-    () => [
-      {
-        imageUrl:
-          'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=1200&q=80',
-        mediaType: 'photo',
-        description: 'Demo: Front-side collision damage captured after incident.',
-        timestamp: '2026-03-31T09:12:00+09:00',
-        locationLabel: 'Goseong-gun, Gangwon-do, South Korea',
-      },
-      {
-        imageUrl: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
-        mediaType: 'video',
-        description: 'Demo: Short video clip of the accident scene and traffic condition.',
-        timestamp: '2026-03-31T09:47:00+09:00',
-        locationLabel: 'Goseong-gun, Gangwon-do, South Korea',
-      },
-      {
-        imageUrl:
-          'https://images.unsplash.com/photo-1617654112322-7844ebd6d79f?auto=format&fit=crop&w=1200&q=80',
-        mediaType: 'photo',
-        description: 'Demo: Rear wheel and side frame proof after the same event.',
-        timestamp: '2026-03-31T10:05:00+09:00',
-        locationLabel: 'Goseong-gun, Gangwon-do, South Korea',
-      },
-    ],
-    [],
-  );
-
-  const resolveProblemReports = (row: RiderManagementItem) => {
-    const sortByUploadedDate = (reports: ProblemReportViewItem[]) =>
-      [...reports].sort((firstReport, secondReport) => {
+    const response = await fetchRiderManagementProblemReports({
+      page: 0,
+      size: 50,
+      attendanceDate: attendanceDate || row.date || undefined,
+      riderId: row.riderId,
+    });
+    const reports = ((response as { data?: { data?: { rows?: RiderProblemReportItem[] } } })?.data?.data?.rows ?? [])
+      .map((report) => ({
+        imageUrl: report.imageUrl,
+        mediaType: report.mediaType,
+        description: report.description,
+        timestamp: report.timestamp,
+        locationLabel: report.locationLabel,
+      }))
+      .sort((firstReport, secondReport) => {
         const firstDate = new Date(firstReport.timestamp).getTime();
         const secondDate = new Date(secondReport.timestamp).getTime();
         if (Number.isNaN(firstDate) || Number.isNaN(secondDate)) return 0;
         return secondDate - firstDate;
       });
-    const filterBySelectedDate = (reports: ProblemReportViewItem[]) => {
-      const selectedDate = attendanceDate || row.dailyAttendance?.date;
-      if (!selectedDate) return reports;
-      return reports.filter(
-        (report) => formatYmdFromTimestamp(report.timestamp) === selectedDate
-      );
-    };
 
-    const fromDb = row.dailyAttendance?.problemReports || [];
-    if (fromDb.length > 0) {
-      return {
-        reports: sortByUploadedDate(filterBySelectedDate(fromDb as ProblemReportViewItem[])),
-        isDemo: false,
-      };
-    }
-    return {
-      reports: sortByUploadedDate(filterBySelectedDate(demoProblemReports)),
-      isDemo: true,
-    };
+    setProblemReportModalState({
+      rider: row,
+      reports,
+      isLoading: false,
+    });
+  }, [fetchRiderManagementProblemReports, attendanceDate]);
+
+  // ATTENDANCE COLUMNS
+  const attendanceColumns: ColumnDef<RiderAttendanceItem>[] = useMemo(
+    () => [
+      {
+        header: "Rider",
+        accessorKey: "riderName",
+        cell: ({ row }) => row.original.riderName || "-",
+      },
+      {
+        header: "Time",
+        accessorKey: "timestamp",
+        cell: ({ row }) =>
+          formatDate(row.original.timestamp, "DD/MM/YYYY HH:mm"),
+      },
+      {
+        header: "Status",
+        accessorKey: "status",
+        cell: ({ row }) => {
+          let status = {
+            icon: faCircleCheck,
+            iconColor: 'text-green-700',
+            text: 'Check In',
+          }
+          if (row.original.status === UserStatus.INACTIVE) {
+            status = {
+              icon: faCircleXmark,
+              iconColor: 'text-red-700',
+              text: 'Check Out',
+            }
+          }
+          return (
+            <p className={`flex items-center gap-2 text-[11px] ${status.iconColor}`}>
+              <FontAwesomeIcon className='text-[11px]' icon={status.icon} />
+              {status?.text}
+            </p>
+          );
+        },
+      },
+      {
+        header: "Actions",
+        id: "actions",
+        cell: ({ row }) => {
+          return (
+            <CustomPopover
+              trigger={
+                <FontAwesomeIcon icon={faEllipsisH} className={ellipsisHClassName} />
+              }
+            >
+              <menu className="w-full flex flex-col gap-1">
+                <Link className={tableActionClassName} to={`/users/${row.original.riderId}`} onClick={(e) => {
+                  e.preventDefault();
+                  openAttendanceProof(row.original);
+                }}>
+                  <FontAwesomeIcon icon={faCircleInfo} />
+                  View proof
+                </Link>
+                <Link className={tableActionClassName} to={`/users/${row.original.riderId}`} onClick={(e) => {
+                  e.preventDefault();
+                  openProblemReports(row.original);
+                }}>
+                  <FontAwesomeIcon icon={faCircleInfo} />
+                  View problem reports
+                </Link>
+              </menu>
+            </CustomPopover>
+          );
+        },
+      },
+    ],
+    [openAttendanceProof, openProblemReports],
+  );
+
+  type ComparisonRowItem = {
+    label: string;
+    leftValue: number;
+    rightValue: number;
+    higherIsBetter: boolean;
+    winner: 'left' | 'right' | 'tie';
   };
+
+  const formatComparisonValue = useCallback((label: string, value: number) => {
+    return label === 'Total Earnings' ? formatCurrency(value, 'RWF') : formatNumbers(value);
+  }, []);
+
+  // COMPARISON SUMMARY COLUMNS
+  const comparisonSummaryColumns: ColumnDef<ComparisonRowItem>[] = useMemo(
+    () => [
+      {
+        header: "Metric",
+        accessorKey: "label",
+      },
+      {
+        header: leftRider?.riderName || 'Rider A',
+        accessorKey: "leftValue",
+        cell: ({ row }) => (
+          <span className={row.original.winner === 'left' ? 'font-semibold text-green-700' : ''}>
+            {formatComparisonValue(row.original.label, row.original.leftValue)}
+          </span>
+        ),
+      },
+      {
+        header: rightRider?.riderName || 'Rider B',
+        accessorKey: "rightValue",
+        cell: ({ row }) => (
+          <span className={row.original.winner === 'right' ? 'font-semibold text-green-700' : ''}>
+            {formatComparisonValue(row.original.label, row.original.rightValue)}
+          </span>
+        ),
+      },
+      {
+        header: "Difference",
+        id: "difference",
+        cell: ({ row }) => formatComparisonValue(
+          row.original.label,
+          Math.abs(row.original.leftValue - row.original.rightValue),
+        ),
+      },
+    ],
+    [leftRider?.riderName, rightRider?.riderName, formatComparisonValue]
+  );
 
   return (
     <main className="w-full flex flex-col gap-6">
@@ -530,7 +620,7 @@ const RiderManagementPage = () => {
 
       <Table
         columns={riderManagementColumns}
-        data={rows}
+        data={performanceRows}
         showPagination
         page={page}
         setPage={setPage}
@@ -538,7 +628,7 @@ const RiderManagementPage = () => {
         setSize={setSize}
         totalPages={totalPages}
         totalCount={totalCount}
-        isLoading={isFetching}
+        isLoading={isPerformanceFetching}
         noDataMessage="No riders found for the selected filters."
       />
 
@@ -571,10 +661,7 @@ const RiderManagementPage = () => {
         <header className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold text-slate-900">Daily Attendance</h2>
           <p className="text-xs text-slate-500">
-            View check-in and check-out attendance for each rider by date and name.
-          </p>
-          <p className="text-xs text-slate-500">
-            Shift window: 9:00 AM to 9:00 PM. Check-in after 9:00 AM is marked as late.
+            View all raw proof events for riders by date and name.
           </p>
         </header>
 
@@ -596,152 +683,41 @@ const RiderManagementPage = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200">
-                <th className="text-left py-2 pr-2">Rider</th>
-                <th className="text-left py-2 px-2">Phone</th>
-                <th className="text-left py-2 px-2">Date</th>
-                <th className="text-left py-2 px-2">Attendance</th>
-                <th className="text-left py-2 px-2">Check-in</th>
-                <th className="text-left py-2 px-2">Check-out</th>
-                <th className="text-left py-2 px-2">Proofs</th>
-                <th className="text-left py-2 px-2">Problem Reports</th>
-              </tr>
-            </thead>
-            <tbody>
-              {attendanceRows.map((row) => (
-                <tr className="border-b border-slate-100" key={`attendance-${row.riderId}`}>
-                  <td className="py-2 pr-2 font-medium">{row.riderName || '-'}</td>
-                  <td className="py-2 px-2">{row.riderPhoneNumber || '-'}</td>
-                  <td className="py-2 px-2">{row.dailyAttendance?.date || attendanceDate || '-'}</td>
-                  <td className="py-2 px-2">
-                    {(() => {
-                      const attendanceStatus = getAttendanceStatus(row.dailyAttendance);
-
-                      if (attendanceStatus === 'present') {
-                        return (
-                          <span className="inline-flex items-center gap-1 text-green-700 text-xs font-medium">
-                            <CheckCircle2 size={14} />
-                            Present
-                          </span>
-                        );
-                      }
-
-                      if (attendanceStatus === 'late') {
-                        return (
-                          <span className="inline-flex items-center gap-1 text-amber-700 text-xs font-medium">
-                            <ClockAlert size={14} />
-                            Late to job
-                          </span>
-                        );
-                      }
-
-                      if (attendanceStatus === 'atWork') {
-                        return (
-                          <span className="inline-flex items-center gap-1 text-blue-700 text-xs font-medium">
-                            <BriefcaseBusiness size={14} />
-                            At work
-                          </span>
-                        );
-                      }
-
-                      return (
-                        <span className="inline-flex items-center gap-1 text-slate-600 text-xs font-medium">
-                          <CircleX size={14} />
-                          Absent
-                        </span>
-                      );
-                    })()}
-                  </td>
-                  <td className="py-2 px-2">
-                    {row.dailyAttendance?.checkInAt ? `✓ ${formatAttendanceTime(row.dailyAttendance?.checkInAt)}` : '-'}
-                  </td>
-                  <td className="py-2 px-2">
-                    {row.dailyAttendance?.checkOutAt ? `✓ ${formatAttendanceTime(row.dailyAttendance?.checkOutAt)}` : '-'}
-                  </td>
-                  <td className="py-2 px-2">
-                    {row.dailyAttendance?.checkInImageUrl || row.dailyAttendance?.checkOutImageUrl ? (
-                      <button
-                        type="button"
-                        onClick={() => setAttendanceProofRider(row)}
-                        className="text-primary underline text-xs"
-                      >
-                        View
-                      </button>
-                    ) : (
-                      <span className="text-slate-400 text-xs">No proofs</span>
-                    )}
-                  </td>
-                  <td className="py-2 px-2">
-                    {(() => {
-                      const { reports, isDemo } = resolveProblemReports(row);
-                      if (!reports.length) {
-                        return <span className="text-slate-400 text-xs">No reports</span>;
-                      }
-                      return (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setProblemReportModalState({
-                            rider: row,
-                            reports,
-                            isDemo,
-                          })
-                        }
-                        className="text-primary underline text-xs"
-                      >
-                        View
-                      </button>
-                      );
-                    })()}
-                  </td>
-                </tr>
-              ))}
-              {attendanceRows.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="py-6 text-center text-slate-500">
-                    No attendance records for the selected filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+          <Table
+            columns={attendanceColumns}
+            data={attendanceRows}
+            showPagination
+            page={attendancePage}
+            setPage={setAttendancePage}
+            size={attendanceSize}
+            isLoading={isAttendanceFetching || isProblemReportsFetching}
+            noDataMessage={isAttendanceFetching ? "Loading attendance data..." : "No attendance data found for the selected filters."}
+          />
+          </div>
       </section>
 
       <Modal
         isOpen={Boolean(attendanceProofRider)}
         onClose={() => setAttendanceProofRider(null)}
-        heading={`Attendance Proofs${attendanceProofRider?.riderName ? ` - ${attendanceProofRider.riderName}` : ''}`}
-        description={`Attendance date: ${attendanceProofRider?.dailyAttendance?.date || '-'}`}
+        heading={`Attendance Proof${attendanceProofRider?.riderName ? ` - ${attendanceProofRider.riderName}` : ''}`}
+        description={`Attendance date: ${attendanceProofRider?.date || '-'}`}
       >
         {attendanceProofRider && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <p className="text-sm font-semibold text-slate-900">Check-in Proof</p>
-              {attendanceProofRider.dailyAttendance?.checkInImageUrl ? (
-                <img
-                  src={attendanceProofRider.dailyAttendance.checkInImageUrl}
-                  alt={`${attendanceProofRider.riderName || 'Rider'} check-in proof`}
-                  className="w-full max-h-72 object-contain rounded-lg border border-slate-200 bg-slate-50"
-                />
-              ) : (
-                <p className="text-sm text-slate-500">No check-in proof.</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-sm font-semibold text-slate-900">Check-out Proof</p>
-              {attendanceProofRider.dailyAttendance?.checkOutImageUrl ? (
-                <img
-                  src={attendanceProofRider.dailyAttendance.checkOutImageUrl}
-                  alt={`${attendanceProofRider.riderName || 'Rider'} check-out proof`}
-                  className="w-full max-h-72 object-contain rounded-lg border border-slate-200 bg-slate-50"
-                />
-              ) : (
-                <p className="text-sm text-slate-500">No check-out proof.</p>
-              )}
-            </div>
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-slate-600">
+              {attendanceProofRider.status === UserStatus.ACTIVE ? 'Check-in' : 'Check-out'} at{' '}
+              {formatAttendanceDateTime(attendanceProofRider.timestamp)}
+            </p>
+            {attendanceProofRider.locationLabel && (
+              <p className="text-xs text-slate-500">
+                Location: {attendanceProofRider.locationLabel}
+              </p>
+            )}
+            <img
+              src={attendanceProofRider.imageUrl}
+              alt={`${attendanceProofRider.riderName || 'Rider'} attendance proof`}
+              className="w-full max-h-96 object-contain rounded-lg border border-slate-200 bg-slate-50"
+            />
           </div>
         )}
       </Modal>
@@ -750,10 +726,13 @@ const RiderManagementPage = () => {
         isOpen={Boolean(problemReportModalState)}
         onClose={() => setProblemReportModalState(null)}
         heading={`Problem Reports${problemReportModalState?.rider?.riderName ? ` - ${problemReportModalState.rider.riderName}` : ''}`}
-        description={`${problemReportModalState?.isDemo ? 'Demo data preview' : 'Attendance date'}: ${problemReportModalState?.rider?.dailyAttendance?.date || attendanceDate || '-'}`}
+        description={`Attendance date: ${problemReportModalState?.rider?.date || attendanceDate || '-'}`}
       >
         {problemReportModalState && (
           <div className="flex flex-col gap-4">
+            {problemReportModalState.isLoading && (
+              <p className="text-sm text-slate-500">Loading problem reports...</p>
+            )}
             {problemReportModalState.reports.map((report, index) => (
               <article
                 key={`${problemReportModalState.rider.riderId}-problem-report-${index}`}
@@ -913,61 +892,14 @@ const RiderManagementPage = () => {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="text-left py-2 pr-2">Aspect</th>
-                  <th className="text-left py-2 px-2">{leftRider.riderName || 'Rider A'}</th>
-                  <th className="text-left py-2 px-2">{rightRider.riderName || 'Rider B'}</th>
-                  <th className="text-left py-2 px-2">Difference</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-slate-100">
-                  <td className="py-2 pr-2 font-medium">Phone Number</td>
-                  <td className="py-2 px-2">{leftRider.riderPhoneNumber || '-'}</td>
-                  <td className="py-2 px-2">{rightRider.riderPhoneNumber || '-'}</td>
-                  <td className="py-2 px-2 text-slate-500">-</td>
-                </tr>
-                {comparisonRows.map((row) => (
-                  <tr className="border-b border-slate-100" key={row.label}>
-                    <td className="py-2 pr-2 font-medium">{row.label}</td>
-                    <td
-                      className={`py-2 px-2 ${
-                        row.winner === 'left'
-                          ? 'text-green-600 font-semibold'
-                          : row.winner === 'right'
-                            ? 'text-red-600'
-                            : 'text-slate-700'
-                      }`}
-                    >
-                      {row.label === 'Total Earnings'
-                        ? formatCurrency(row.leftValue, 'RWF')
-                        : formatNumbers(row.leftValue)}
-                    </td>
-                    <td
-                      className={`py-2 px-2 ${
-                        row.winner === 'right'
-                          ? 'text-green-600 font-semibold'
-                          : row.winner === 'left'
-                            ? 'text-red-600'
-                            : 'text-slate-700'
-                      }`}
-                    >
-                      {row.label === 'Total Earnings'
-                        ? formatCurrency(row.rightValue, 'RWF')
-                        : formatNumbers(row.rightValue)}
-                    </td>
-                    <td className="py-2 px-2 text-slate-700">
-                      {row.label === 'Total Earnings'
-                        ? formatCurrency(Math.abs(row.leftValue - row.rightValue), 'RWF')
-                        : formatNumbers(Math.abs(row.leftValue - row.rightValue))}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              <Table columns={comparisonSummaryColumns} data={comparisonSummary ? comparisonRows.map((row) => ({
+                label: row.label,
+                leftValue: row.leftValue,
+                rightValue: row.rightValue,
+                higherIsBetter: row.higherIsBetter,
+                winner: row.winner,
+              })) : []}  />
+            </div>
           </div>
         )}
       </section>

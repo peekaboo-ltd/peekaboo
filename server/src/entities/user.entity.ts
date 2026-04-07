@@ -9,19 +9,8 @@ import { OrderAssignment } from './orderAssignment.entity';
 import { OrganizationMembership } from './organizationMembership.entity';
 import { Batch } from './batch.entity';
 import { PushSubscription } from './pushSubscription.entity';
-
-export interface UserStatusProofRecord {
-  imageUrl: string;
-  status: UserStatus;
-  timestamp: string;
-  locationLabel?: string;
-  latitude?: number;
-  longitude?: number;
-  description?: string;
-  mediaType?: 'photo' | 'video';
-  category?: 'STATUS_PROOF' | 'PROBLEM_REPORT';
-  source?: string;
-}
+import { UserStatusProof } from './userStatusProof.entity';
+import { UserProblemReport } from './userProblemReport.entity';
 
 @Entity('users')
 export class User extends AbstractEntity {
@@ -123,10 +112,6 @@ export class User extends AbstractEntity {
     collectedAt?: string;
   };
 
-  // CHECK-IN/CHECK-OUT STATUS PROOF RECORDS
-  @Column({ name: 'status_proofs', type: 'jsonb', nullable: true, default: () => "'[]'::jsonb" })
-  statusProofs?: UserStatusProofRecord[];
-
   /**
    * RELATIONS
    */
@@ -157,4 +142,12 @@ export class User extends AbstractEntity {
   // PUSH SUBSCRIPTIONS
   @OneToMany(() => PushSubscription, (subscription) => subscription.user)
   pushSubscriptions?: PushSubscription[];
+
+  // STATUS PROOFS
+  @OneToMany(() => UserStatusProof, (statusProof) => statusProof.user)
+  statusProofs?: UserStatusProof[];
+
+  // PROBLEM REPORTS
+  @OneToMany(() => UserProblemReport, (problemReport) => problemReport.user)
+  problemReports?: UserProblemReport[];
 }

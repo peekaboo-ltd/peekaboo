@@ -50,13 +50,41 @@ export const UserController = {
   },
 
   // GET RIDER MANAGEMENT PERFORMANCE
-  async getRiderManagement(req: Request, res: Response, next: NextFunction) {
+  async getRiderManagementPerformance(req: Request, res: Response, next: NextFunction) {
     try {
       const riderPerformance = await userService.getRiderManagementPerformance(req.query);
 
       return res.status(200).json({
-        message: 'Rider management fetched successfully',
+        message: 'Rider management performance fetched successfully',
         data: riderPerformance,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET RIDER MANAGEMENT ATTENDANCE
+  async getRiderManagementAttendance(req: Request, res: Response, next: NextFunction) {
+    try {
+      const riderAttendance = await userService.getRiderManagementAttendance(req.query);
+
+      return res.status(200).json({
+        message: 'Rider attendance fetched successfully',
+        data: riderAttendance,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET RIDER MANAGEMENT PROBLEM REPORTS
+  async getRiderManagementProblemReports(req: Request, res: Response, next: NextFunction) {
+    try {
+      const problemReports = await userService.getRiderManagementProblemReports(req.query);
+
+      return res.status(200).json({
+        message: 'Rider problem reports fetched successfully',
+        data: problemReports,
       });
     } catch (error) {
       next(error);
@@ -375,11 +403,7 @@ export const UserController = {
         });
       }
 
-      const existingUser = await userService.getUserById(user.id as UUID);
       const currentTimestamp = capturedAt || new Date().toISOString();
-      const existingProofs = Array.isArray(existingUser.statusProofs)
-        ? existingUser.statusProofs
-        : [];
 
       const updatedUser = await userService.updateUser(user.id as UUID, {
         status,
@@ -388,17 +412,15 @@ export const UserController = {
           longitude: parsedLongitude,
           collectedAt: currentTimestamp,
         },
-        statusProofs: [
-          ...existingProofs,
-          {
-            imageUrl: proofImageUrl,
-            status,
-            timestamp: currentTimestamp,
-            locationLabel: locationLabel || undefined,
-            latitude: parsedLatitude,
-            longitude: parsedLongitude,
-          },
-        ],
+      });
+      await userService.createStatusProof({
+        userId: user.id as UUID,
+        imageUrl: proofImageUrl,
+        status,
+        capturedAt: currentTimestamp,
+        locationLabel: locationLabel || undefined,
+        latitude: parsedLatitude,
+        longitude: parsedLongitude,
       });
 
       try {

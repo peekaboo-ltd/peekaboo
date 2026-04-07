@@ -6,7 +6,9 @@ import {
   useLazyFetchUserCurrentLocationHistoryQuery,
   useLazyFetchUsersQuery,
   useLazyFetchUsersTrackingQuery,
-  useLazyFetchRiderManagementQuery,
+  useLazyFetchRiderManagementPerformanceQuery,
+  useLazyFetchRiderManagementAttendanceQuery,
+  useLazyFetchRiderManagementProblemReportsQuery,
 } from '@/api/queries/users.queries';
 import {
   useCreateUserMutation,
@@ -249,7 +251,7 @@ export const useFetchUsersTracking = () => {
   };
 };
 
-export const useFetchRiderManagement = () => {
+export const useFetchRiderManagementPerformance = () => {
   const {
     page,
     setPage,
@@ -261,8 +263,8 @@ export const useFetchRiderManagement = () => {
     setTotalCount,
   } = usePagination();
 
-  const [fetchRiderManagement, { data, error, isFetching, isSuccess, reset }] =
-    useLazyFetchRiderManagementQuery();
+  const [fetchRiderManagementPerformance, { data, error, isFetching, isSuccess, reset }] =
+    useLazyFetchRiderManagementPerformanceQuery();
 
   useEffect(() => {
     if (isSuccess) {
@@ -272,7 +274,7 @@ export const useFetchRiderManagement = () => {
   }, [data, isSuccess, setTotalPages, setTotalCount]);
 
   return {
-    fetchRiderManagement,
+    fetchRiderManagementPerformance,
     data,
     error,
     isFetching,
@@ -284,6 +286,58 @@ export const useFetchRiderManagement = () => {
     setSize,
     totalPages,
     totalCount,
+  };
+};
+
+export const useFetchRiderManagementAttendance = () => {
+  const {
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    setTotalPages,
+    totalCount,
+    setTotalCount,
+  } = usePagination();
+
+  const [fetchRiderManagementAttendance, { data, error, isFetching, isSuccess, reset }] =
+    useLazyFetchRiderManagementAttendanceQuery();
+
+  useEffect(() => {
+    if (isSuccess) {
+      setTotalPages(data?.data?.totalPages ?? 0);
+      setTotalCount(data?.data?.totalCount ?? 0);
+    }
+  }, [data, isSuccess, setTotalPages, setTotalCount]);
+
+  return {
+    fetchRiderManagementAttendance,
+    data,
+    error,
+    isFetching,
+    isSuccess,
+    reset,
+    page,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    totalCount,
+  };
+};
+
+export const useFetchRiderManagementProblemReports = () => {
+  const [fetchRiderManagementProblemReports, { data, error, isFetching, isSuccess, reset }] =
+    useLazyFetchRiderManagementProblemReportsQuery();
+
+  return {
+    fetchRiderManagementProblemReports,
+    data,
+    error,
+    isFetching,
+    isSuccess,
+    reset,
   };
 };
 

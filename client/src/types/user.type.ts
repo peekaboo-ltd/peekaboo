@@ -32,7 +32,7 @@ export interface User extends BaseDomain {
 
 export type RiderManagementTimeframe = 'daily' | 'weekly' | 'monthly' | 'custom';
 
-export interface RiderManagementItem {
+export interface RiderPerformanceItem {
   rank: number;
   riderId: UUID;
   riderName?: string;
@@ -45,19 +45,28 @@ export interface RiderManagementItem {
   failedDeliveries: number;
   activeDays: number;
   activeHours: number;
-  dailyAttendance?: {
-    date: string;
-    isPresent: boolean;
-    checkInAt?: string;
-    checkOutAt?: string;
-    checkInImageUrl?: string;
-    checkOutImageUrl?: string;
-    problemReports?: Array<{
-      imageUrl: string;
-      mediaType?: 'photo' | 'video';
-      description?: string;
-      timestamp: string;
-      locationLabel?: string;
-    }>;
-  };
+}
+
+export interface RiderAttendanceItem {
+  id: UUID;
+  riderId: UUID;
+  riderName?: string;
+  riderPhoneNumber?: string;
+  date: string;
+  status: UserStatus;
+  timestamp: string;
+  imageUrl: string;
+  locationLabel?: string;
+}
+
+export interface RiderProblemReportItem {
+  id: UUID;
+  riderId: UUID;
+  riderName?: string;
+  riderPhoneNumber?: string;
+  imageUrl: string;
+  mediaType?: 'photo' | 'video';
+  description?: string;
+  timestamp: string;
+  locationLabel?: string;
 }
