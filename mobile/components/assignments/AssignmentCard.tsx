@@ -8,6 +8,7 @@ import { Assignment, OrderAssignmentStatus, OrderStatus } from '../../types';
 import { colors, typography, spacing } from '../../utils/constants';
 import { formatSmartDate, formatCurrency, formatOrderRef } from '../../utils/formatters';
 import { getOrderStatusLabel } from '../../constants/order.constants';
+import { useI18n } from '../../i18n';
 
 interface AssignmentCardProps {
   assignment: Assignment;
@@ -33,18 +34,18 @@ const getStatusBadgeVariant = (status: OrderAssignmentStatus): 'success' | 'warn
   }
 };
 
-const getStatusLabel = (status: OrderAssignmentStatus): string => {
+const getStatusLabel = (status: OrderAssignmentStatus, t: ReturnType<typeof useI18n>['t']): string => {
   switch (status) {
     case OrderAssignmentStatus.PENDING:
-      return 'Pending';
+      return t('assignment.pending');
     case OrderAssignmentStatus.ACTIVE:
-      return 'Active';
+      return t('assignment.active');
     case OrderAssignmentStatus.COMPLETED:
-      return 'Completed';
+      return t('assignment.completed');
     case OrderAssignmentStatus.REJECTED:
-      return 'Rejected';
+      return t('assignment.rejected');
     case OrderAssignmentStatus.CANCELLED:
-      return 'Cancelled';
+      return t('assignment.cancelled');
     default:
       return status;
   }
@@ -66,6 +67,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   onReject,
   isLoading = false,
 }) => {
+  const { t } = useI18n();
   const isPending = assignment.status === OrderAssignmentStatus.PENDING;
   const order = assignment.order;
   const latestOrderStatus = getLatestOrderStatus(assignment);
@@ -76,14 +78,14 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View>
-            <Text style={styles.orderLabel}>Order</Text>
+            <Text style={styles.orderLabel}>{t('assignment.order')}</Text>
             <Text style={styles.orderId}>
               {order?.referenceId ? formatOrderRef(order.referenceId) : `#${assignment.id.slice(0, 8)}`}
             </Text>
           </View>
           <View style={styles.badgeRow}>
             <Badge
-              text={getStatusLabel(assignment.status)}
+              text={getStatusLabel(assignment.status, t)}
               variant={getStatusBadgeVariant(assignment.status)}
               size="small"
             />
@@ -105,14 +107,14 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
             <View style={styles.locationRow}>
               <View style={[styles.locationDot, { backgroundColor: colors.success }]} />
               <Text style={styles.locationText} numberOfLines={1}>
-                Pickup Location
+                {t('assignment.pickupLocation')}
               </Text>
             </View>
             <View style={styles.locationLine} />
             <View style={styles.locationRow}>
               <View style={[styles.locationDot, { backgroundColor: colors.danger }]} />
               <Text style={styles.locationText} numberOfLines={1}>
-                Delivery Location
+                {t('assignment.deliveryLocation')}
               </Text>
             </View>
           </View>
@@ -139,7 +141,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
         <View style={styles.actions}>
           {onReject && (
             <Button
-              title="Reject"
+              title={t('assignment.reject')}
               onPress={onReject}
               variant="outline"
               size="small"
@@ -149,7 +151,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
           )}
           {onAccept && (
             <Button
-              title="Accept"
+              title={t('assignment.accept')}
               onPress={onAccept}
               variant="primary"
               size="small"

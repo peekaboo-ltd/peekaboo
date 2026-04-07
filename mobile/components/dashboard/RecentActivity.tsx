@@ -5,6 +5,7 @@ import { Card } from '../ui/Card';
 import { RecentActivity as RecentActivityType } from '../../types';
 import { colors, typography, spacing } from '../../utils/constants';
 import { formatRelativeTime } from '../../utils/formatters';
+import { useI18n } from '../../i18n';
 
 interface RecentActivityProps {
   activities: RecentActivityType[];
@@ -78,11 +79,12 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
   activities,
   onActivityPress,
 }) => {
+  const { t } = useI18n();
   if (activities.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Ionicons name="time-outline" size={48} color={colors.text.disabled} />
-        <Text style={styles.emptyText}>No recent activity</Text>
+        <Text style={styles.emptyText}>{t('activity.empty')}</Text>
       </View>
     );
   }

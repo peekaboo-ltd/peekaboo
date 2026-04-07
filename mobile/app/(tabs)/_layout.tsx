@@ -3,10 +3,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
 import { colors } from '../../utils/constants';
+import { useI18n } from '../../i18n';
 
 export default function TabLayout() {
   const { isAuthenticated } = useAuthStore();
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
 
   // If user is not authenticated, redirect to login
   if (!isAuthenticated) {
@@ -42,7 +44,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: 'Dashboard',
+          title: t('tab.dashboard'),
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
@@ -52,7 +54,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="assignments"
         options={{
-          title: 'Assignments',
+          title: t('tab.assignments'),
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="list" size={size} color={color} />
@@ -62,7 +64,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: t('tab.profile'),
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />

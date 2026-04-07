@@ -16,10 +16,13 @@ import { useAuthStore } from '../../store/authStore';
 import { usersAPI, UpdateUserPayload } from '../../services/api/users';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher';
+import { useI18n } from '../../i18n';
 import { colors, spacing, typography, borderRadius, shadows } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatters';
 
 export default function ProfileScreen() {
+  const { t } = useI18n();
   const { user, isLoading } = useAuth();
   const setUser = useAuthStore((state) => state.setUser);
   const { stats } = useDashboard();
@@ -51,8 +54,13 @@ export default function ProfileScreen() {
 
   const statusLabel = useMemo(() => {
     if (!user?.status) return '';
-    return user.status.charAt(0) + user.status.slice(1).toLowerCase();
-  }, [user]);
+    switch (user.status) {
+      case 'ACTIVE':
+        return t('assignment.active');
+      default:
+        return user.status.charAt(0) + user.status.slice(1).toLowerCase();
+    }
+  }, [t, user]);
 
   const handlePickImage = async (fromCamera: boolean) => {
     if (!user) return;
@@ -63,10 +71,10 @@ export default function ProfileScreen() {
 
     if (!permissionResult.granted) {
       Alert.alert(
-        'Permission required',
+        t('profile.permissionRequired'),
         fromCamera
-          ? 'Camera permission is required to take a profile photo.'
-          : 'Photo library permission is required to choose a profile photo.'
+          ? t('profile.cameraPermission')
+          : t('profile.libraryPermission')
       );
       return;
     }
@@ -97,7 +105,7 @@ export default function ProfileScreen() {
       const updatedUser = await usersAPI.uploadAvatar(user.id, asset.uri);
       setUser(updatedUser);
     } catch (e) {
-      Alert.alert('Upload failed', 'Failed to update profile photo. Please try again.');
+      Alert.alert(t('profile.uploadFailed'), t('profile.uploadFailedMessage'));
     } finally {
       setIsAvatarLoading(false);
     }
@@ -107,12 +115,12 @@ export default function ProfileScreen() {
     if (!user) return;
 
     Alert.alert(
-      'Remove profile photo',
-      'Are you sure you want to remove your profile photo?',
+      t('profile.removePhotoTitle'),
+      t('profile.removePhotoMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('profile.cancel'), style: 'cancel' },
         {
-          text: 'Remove',
+          text: t('profile.remove'),
           style: 'destructive',
           onPress: async () => {
             setIsAvatarLoading(true);
@@ -121,7 +129,7 @@ export default function ProfileScreen() {
               const updatedUser = await usersAPI.removeAvatar(user.id);
               setUser(updatedUser);
             } catch (e) {
-              Alert.alert('Remove failed', 'Failed to remove profile photo. Please try again.');
+              Alert.alert(t('profile.removeFailed'), t('profile.removeFailedMessage'));
             } finally {
               setIsAvatarLoading(false);
             }
@@ -135,24 +143,24 @@ export default function ProfileScreen() {
     if (!user) return;
 
     Alert.alert(
-      'Profile photo',
-      'Update your profile photo',
+      t('profile.photoTitle'),
+      t('profile.photoMessage'),
       [
         {
-          text: 'Take photo',
+          text: t('profile.takePhoto'),
           onPress: () => handlePickImage(true),
         },
         {
-          text: 'Choose from library',
+          text: t('profile.chooseFromLibrary'),
           onPress: () => handlePickImage(false),
         },
         {
-          text: 'Remove photo',
+          text: t('profile.removePhoto'),
           style: 'destructive',
           onPress: handleRemoveAvatar,
         },
         {
-          text: 'Cancel',
+          text: t('profile.cancel'),
           style: 'cancel',
         },
       ]
@@ -198,9 +206,9 @@ export default function ProfileScreen() {
       const updatedUser = await usersAPI.updateUser(user.id, payload);
       setUser(updatedUser);
       setIsEditing(false);
-      Alert.alert('Profile updated', 'Your profile has been updated successfully.');
+      Alert.alert(t('profile.profileUpdated'), t('profile.profileUpdatedMessage'));
     } catch (e) {
-      setError('Failed to update profile. Please try again.');
+      setError(t('profile.updateFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -210,7 +218,7 @@ export default function ProfileScreen() {
     return (
       <View style={styles.centered}>
         <Text style={styles.centeredText}>
-          {isLoading ? 'Loading your profile...' : 'No user data available.'}
+          {isLoading ? t('profile.loading') : t('profile.noData')}
         </Text>
       </View>
     );
@@ -244,7 +252,7 @@ export default function ProfileScreen() {
           </View>
         </TouchableOpacity>
         <View style={styles.headerTextContainer}>
-          <Text style={styles.name}>{user.name || 'Unnamed rider'}</Text>
+          <Text style={styles.name}>{user.name || t('profile.unnamedRider')}</Text>
           <Text style={styles.subtitle}>{user.phoneNumber}</Text>
           {user.email ? <Text style={styles.subtitle}>{user.email}</Text> : null}
         </View>
@@ -259,37 +267,38 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Profile information</Text>
+        <Text style={styles.sectionTitle}>{t('profile.infoTitle')}</Text>
+        <LanguageSwitcher />
 
         <Input
-          label="Full name"
+          label={t('profile.fullName')}
           value={name}
           onChangeText={setName}
-          placeholder="Enter your full name"
+          placeholder={t('profile.fullNamePlaceholder')}
           editable={isEditing}
         />
 
         <Input
-          label="Email"
+          label={t('profile.email')}
           value={email}
           onChangeText={setEmail}
-          placeholder="Enter your email"
+          placeholder={t('profile.emailPlaceholder')}
           keyboardType="email-address"
           autoCapitalize="none"
           editable={false}
         />
 
         <Input
-          label="Phone number"
+          label={t('profile.phoneNumber')}
           value={phoneNumber}
           onChangeText={setPhoneNumber}
-          placeholder="Enter your phone number"
+          placeholder={t('profile.phonePlaceholder')}
           keyboardType="phone-pad"
           editable={isEditing}
         />
 
         <Input
-          label="Date of birth"
+          label={t('profile.dateOfBirth')}
           value={dateOfBirth}
           onChangeText={setDateOfBirth}
           placeholder="YYYY-MM-DD"
@@ -297,26 +306,26 @@ export default function ProfileScreen() {
         />
 
         <Input
-          label="Nationality"
+          label={t('profile.nationality')}
           value={nationality}
           onChangeText={setNationality}
-          placeholder="Enter your nationality"
+          placeholder={t('profile.nationalityPlaceholder')}
           editable={isEditing}
         />
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today's performance</Text>
+        <Text style={styles.sectionTitle}>{t('profile.performanceTitle')}</Text>
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>Deliveries Today</Text>
+          <Text style={styles.metaLabel}>{t('profile.deliveriesToday')}</Text>
           <Text style={styles.metaValue}>{stats?.completedToday ?? 0}</Text>
         </View>
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>Bonus Activated</Text>
-          <Text style={styles.metaValue}>{stats?.bonusActive ? 'YES' : 'NO'}</Text>
+          <Text style={styles.metaLabel}>{t('dashboard.bonusActivated')}</Text>
+          <Text style={styles.metaValue}>{stats?.bonusActive ? t('common.yes') : t('common.no')}</Text>
         </View>
         <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>Earnings</Text>
+          <Text style={styles.metaLabel}>{t('dashboard.earnings')}</Text>
           <Text style={styles.metaValue}>{stats?.totalEarnings != null ? formatCurrency(stats.totalEarnings) : 'RWF 0'}</Text>
         </View>
       </View>
@@ -329,14 +338,14 @@ export default function ProfileScreen() {
         {isEditing ? (
           <>
             <Button
-              title="Cancel"
+              title={t('common.cancel')}
               variant="outline"
               onPress={handleCancelEdit}
               style={styles.actionButton}
               disabled={isSaving}
             />
             <Button
-              title="Save changes"
+              title={t('profile.saveChanges')}
               onPress={handleSave}
               loading={isSaving}
               disabled={isSaving}
@@ -345,7 +354,7 @@ export default function ProfileScreen() {
           </>
         ) : (
           <Button
-            title="Edit profile"
+            title={t('profile.editProfile')}
             onPress={handleStartEdit}
             style={styles.singleActionButton}
             icon={<Ionicons name="create-outline" size={18} color={colors.text.inverse} />}
@@ -479,4 +488,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-

@@ -29,6 +29,7 @@ export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',
   REFRESH_TOKEN: 'refresh_token',
   USER_DATA: 'user_data',
+  LANGUAGE: 'language',
 } as const;
 
 // Colors - Color Hunt Palette: #061E29 #1D546D #5F9598 #F3F4F4

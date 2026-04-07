@@ -11,8 +11,9 @@ import {
   addNotificationClickListener,
   addNotificationForegroundListener,
 } from '../services/notifications/pushNotifications';
+import { I18nProvider } from '../i18n';
 
-export default function RootLayout() {
+function RootLayoutContent() {
   const { isLoading, isAuthenticated, checkAuth } = useAuthStore();
   const [isInitializing, setIsInitializing] = useState(true);
   useLocationTracking();
@@ -72,6 +73,14 @@ export default function RootLayout() {
       </Stack>
       <StatusBar style="dark" />
     </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <I18nProvider>
+      <RootLayoutContent />
+    </I18nProvider>
   );
 }
 

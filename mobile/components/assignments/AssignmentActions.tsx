@@ -3,6 +3,7 @@ import { View, StyleSheet, Alert } from 'react-native';
 import { Button } from '../ui/Button';
 import { OrderAssignmentStatus } from '../../types';
 import { colors, spacing } from '../../utils/constants';
+import { useI18n } from '../../i18n';
 
 interface AssignmentActionsProps {
   status: OrderAssignmentStatus;
@@ -25,17 +26,18 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
   onComplete,
   isLoading = false,
 }) => {
+  const { t } = useI18n();
   const handleReject = () => {
     Alert.alert(
-      'Reject Assignment',
-      'Are you sure you want to reject this assignment?',
+      t('assignmentActions.rejectTitle'),
+      t('assignmentActions.rejectMessage'),
       [
         {
-          text: 'Cancel',
+          text: t('common.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Reject',
+          text: t('assignment.reject'),
           onPress: onReject,
           style: 'destructive',
         },
@@ -45,15 +47,15 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
 
   const handleConfirmDispatch = () => {
     Alert.alert(
-      'Confirm & Start Transit',
-      'This will mark the order as confirmed and in transit.',
+      t('assignments.confirmTransit'),
+      t('assignments.confirmTransitMessage'),
       [
         {
-          text: 'Cancel',
+          text: t('common.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Confirm & Start Transit',
+          text: t('assignments.confirmTransit'),
           onPress: onConfirmDispatch,
         },
       ]
@@ -62,15 +64,15 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
 
   const handleComplete = () => {
     Alert.alert(
-      'Complete Assignment',
-      'Mark this assignment as completed?',
+      t('assignmentActions.completeTitle'),
+      t('assignmentActions.completeMessage'),
       [
         {
-          text: 'Cancel',
+          text: t('common.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Complete',
+          text: t('assignments.completed'),
           onPress: onComplete,
         },
       ]
@@ -79,15 +81,15 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
 
   const handleRecover = () => {
     Alert.alert(
-      'Recover Assignment',
-      'Recover this assignment if it has not already been assigned to another rider?',
+      t('assignmentActions.recoverTitle'),
+      t('assignmentActions.recoverMessage'),
       [
         {
-          text: 'Cancel',
+          text: t('common.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Recover',
+          text: t('assignmentActions.recover'),
           onPress: onRecover,
         },
       ]
@@ -98,14 +100,14 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
     return (
       <View style={styles.container}>
         <Button
-          title="Reject"
+          title={t('assignment.reject')}
           onPress={handleReject}
           variant="danger"
           disabled={isLoading}
           style={styles.button}
         />
         <Button
-          title="Accept Assignment"
+          title={t('assignment.acceptAssignment')}
           onPress={onAccept}
           variant="primary"
           loading={isLoading}
@@ -120,7 +122,7 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
       <View style={styles.containerColumn}>
         {showConfirmDispatch && onConfirmDispatch && (
           <Button
-            title="Confirm & Start Transit"
+            title={t('assignments.confirmTransit')}
             onPress={handleConfirmDispatch}
             variant="primary"
             loading={isLoading}
@@ -129,7 +131,7 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
         )}
         {onComplete && (
           <Button
-            title="Mark as Completed"
+            title={t('assignmentActions.markCompleted')}
             onPress={handleComplete}
             variant="primary"
             loading={isLoading}
@@ -145,7 +147,7 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
     return (
       <View style={styles.containerColumn}>
         <Button
-          title="Recover Assignment"
+          title={t('assignmentActions.recoverAssignment')}
           onPress={handleRecover}
           variant="primary"
           loading={isLoading}

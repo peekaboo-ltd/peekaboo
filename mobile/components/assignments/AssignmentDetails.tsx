@@ -14,6 +14,7 @@ import {
   formatPhoneNumber,
 } from '../../utils/formatters';
 import { AssignmentDirectionsMap } from './AssignmentDirectionsMap';
+import { useI18n } from '../../i18n';
 
 interface AssignmentDetailsProps {
   assignment: Assignment;
@@ -105,18 +106,18 @@ const getStatusBadgeVariant = (status: OrderAssignmentStatus): 'success' | 'warn
   }
 };
 
-const getStatusLabel = (status: OrderAssignmentStatus): string => {
+const getStatusLabel = (status: OrderAssignmentStatus, t: ReturnType<typeof useI18n>['t']): string => {
   switch (status) {
     case OrderAssignmentStatus.PENDING:
-      return 'Pending';
+      return t('assignment.pending');
     case OrderAssignmentStatus.ACTIVE:
-      return 'Active';
+      return t('assignment.active');
     case OrderAssignmentStatus.COMPLETED:
-      return 'Completed';
+      return t('assignment.completed');
     case OrderAssignmentStatus.REJECTED:
-      return 'Rejected';
+      return t('assignment.rejected');
     case OrderAssignmentStatus.CANCELLED:
-      return 'Cancelled';
+      return t('assignment.cancelled');
     default:
       return status;
   }
@@ -134,6 +135,7 @@ const getLatestOrderStatus = (assignment: Assignment): OrderStatus | undefined =
 export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
   assignment,
 }) => {
+  const { t } = useI18n();
   const order = assignment.order;
   const [directionsVisible, setDirectionsVisible] = useState(false);
   const senderPhone =
@@ -160,47 +162,47 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
     <View style={styles.container}>
       {/* Order Info */}
       <Card style={styles.section} elevation="sm">
-        <Text style={styles.sectionTitle}>Order Information</Text>
+        <Text style={styles.sectionTitle}>{t('assignmentInfo.orderInformation')}</Text>
         <View style={styles.row}>
-          <Text style={styles.label}>Order ID</Text>
+          <Text style={styles.label}>{t('assignmentInfo.orderId')}</Text>
           <Text style={styles.value}>
             {order?.referenceId ? formatOrderRef(order.referenceId) : '-'}
           </Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>Assignment</Text>
+          <Text style={styles.label}>{t('assignmentInfo.assignment')}</Text>
           <Badge
-            text={getStatusLabel(assignment.status)}
+            text={getStatusLabel(assignment.status, t)}
             variant={getStatusBadgeVariant(assignment.status)}
           />
         </View>
         {order && (
           <View style={styles.row}>
-            <Text style={styles.label}>Order status</Text>
+            <Text style={styles.label}>{t('assignmentInfo.orderStatus')}</Text>
             <Text style={styles.value}>
               {getOrderStatusLabel(getLatestOrderStatus(assignment))}
             </Text>
           </View>
         )}
         <View style={styles.row}>
-          <Text style={styles.label}>Created</Text>
+          <Text style={styles.label}>{t('assignmentInfo.created')}</Text>
           <Text style={styles.value}>{formatDateTime(assignment.createdAt)}</Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>Sender Number</Text>
+          <Text style={styles.label}>{t('assignmentInfo.senderNumber')}</Text>
           <Text style={styles.value}>
-            {senderPhone ? formatPhoneNumber(senderPhone) : 'N/A'}
+            {senderPhone ? formatPhoneNumber(senderPhone) : t('assignmentInfo.na')}
           </Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>Receiver Number</Text>
+          <Text style={styles.label}>{t('assignmentInfo.receiverNumber')}</Text>
           <Text style={styles.value}>
-            {recipientPhone ? formatPhoneNumber(recipientPhone) : 'N/A'}
+            {recipientPhone ? formatPhoneNumber(recipientPhone) : t('assignmentInfo.na')}
           </Text>
         </View>
         {assignment.description && (
           <View style={styles.row}>
-            <Text style={styles.label}>Notes</Text>
+            <Text style={styles.label}>{t('assignmentInfo.notes')}</Text>
             <Text style={[styles.value, styles.notes]}>{assignment.description}</Text>
           </View>
         )}
@@ -209,14 +211,14 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
       {/* Customer Info */}
       {order?.recipient && (
         <Card style={styles.section} elevation="sm">
-          <Text style={styles.sectionTitle}>Customer Information</Text>
+          <Text style={styles.sectionTitle}>{t('assignmentInfo.customerInformation')}</Text>
           <View style={styles.row}>
-            <Text style={styles.label}>Name</Text>
-            <Text style={styles.value}>{order.recipient.name || 'N/A'}</Text>
+            <Text style={styles.label}>{t('assignmentInfo.name')}</Text>
+            <Text style={styles.value}>{order.recipient.name || t('assignmentInfo.na')}</Text>
           </View>
           {order.recipient.phoneNumber && (
             <View style={styles.row}>
-              <Text style={styles.label}>Phone</Text>
+              <Text style={styles.label}>{t('assignmentInfo.phone')}</Text>
               <View style={styles.phoneContainer}>
                 <Text style={styles.value}>
                   {formatPhoneNumber(order.recipient.phoneNumber)}
@@ -238,10 +240,10 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
       {/* Location Info */}
       {order && (order.locationFrom || order.locationTo) && (
         <Card style={styles.section} elevation="sm">
-          <Text style={styles.sectionTitle}>Locations</Text>
+          <Text style={styles.sectionTitle}>{t('assignmentInfo.locations')}</Text>
           {order.locationFrom && order.locationTo && (
             <Button
-              title="Show route"
+              title={t('assignmentInfo.showRoute')}
               onPress={() => setDirectionsVisible(true)}
               variant="outline"
               size="small"
@@ -254,14 +256,14 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
             <View style={styles.locationCard}>
               <View style={styles.locationHeader}>
                 <View style={[styles.locationDot, { backgroundColor: colors.success }]} />
-                <Text style={styles.locationLabel}>Pickup Location</Text>
+                <Text style={styles.locationLabel}>{t('assignment.pickupLocation')}</Text>
               </View>
               <LocationAdministrativeLabel
                 latitude={order.locationFrom.latitude}
                 longitude={order.locationFrom.longitude}
               />
               <Button
-                title="Get Directions"
+                title={t('assignmentInfo.getDirections')}
                 onPress={() => openMaps(order.locationFrom!.latitude, order.locationFrom!.longitude)}
                 variant="outline"
                 size="small"
@@ -276,14 +278,14 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
             <View style={[styles.locationCard, { marginTop: spacing.md }]}>
               <View style={styles.locationHeader}>
                 <View style={[styles.locationDot, { backgroundColor: colors.danger }]} />
-                <Text style={styles.locationLabel}>Delivery Location</Text>
+                <Text style={styles.locationLabel}>{t('assignment.deliveryLocation')}</Text>
               </View>
               <LocationAdministrativeLabel
                 latitude={order.locationTo.latitude}
                 longitude={order.locationTo.longitude}
               />
               <Button
-                title="Get Directions"
+                title={t('assignmentInfo.getDirections')}
                 onPress={() => openMaps(order.locationTo!.latitude, order.locationTo!.longitude)}
                 variant="outline"
                 size="small"
@@ -303,7 +305,7 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Route: Pickup to Delivery</Text>
+            <Text style={styles.modalTitle}>{t('assignmentInfo.routeModalTitle')}</Text>
             {order?.locationFrom && order?.locationTo && (
               <AssignmentDirectionsMap
                 origin={order.locationFrom}
@@ -318,21 +320,21 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
       {/* Payment Info */}
       {order && (
         <Card style={styles.section} elevation="sm">
-          <Text style={styles.sectionTitle}>Payment Information</Text>
+          <Text style={styles.sectionTitle}>{t('assignmentInfo.paymentInformation')}</Text>
           <View style={styles.row}>
-            <Text style={styles.label}>Initial Fee</Text>
+            <Text style={styles.label}>{t('assignmentInfo.initialFee')}</Text>
             <Text style={styles.value}>{formatCurrency(order.initialFee)}</Text>
           </View>
           {order.discount > 0 && (
             <View style={styles.row}>
-              <Text style={styles.label}>Discount</Text>
+              <Text style={styles.label}>{t('assignmentInfo.discount')}</Text>
               <Text style={[styles.value, { color: colors.success }]}>
                 -{formatCurrency(order.discount)}
               </Text>
             </View>
           )}
           <View style={[styles.row, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalLabel}>{t('assignmentInfo.total')}</Text>
             <Text style={styles.totalValue}>
               {formatCurrency(order.finalFee || order.initialFee - order.discount)}
             </Text>
