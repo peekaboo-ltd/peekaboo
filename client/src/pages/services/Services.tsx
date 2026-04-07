@@ -38,6 +38,24 @@ const getFirstDisplayTier = (tiers?: PricingTier[]) => {
     })[0];
 };
 
+const getTierRangeLabel = (tier: PricingTier, billingPeriod: BillingPeriod) => {
+  if (tier.label) return tier.label;
+
+  if (tier.isCustom) return 'Custom range';
+
+  const periodUnit = billingPeriod === BillingPeriod.DAILY
+    ? 'day'
+    : billingPeriod === BillingPeriod.WEEKLY
+      ? 'week'
+      : 'month';
+
+  if (tier.maxQuantity == null) {
+    return `${tier.minQuantity}+ deliveries per ${periodUnit}`;
+  }
+
+  return `${tier.minQuantity} – ${tier.maxQuantity} deliveries per ${periodUnit}`;
+};
+
 const getHeadlinePrice = (plan: ApiBusinessPlan) => {
   if (plan.isCustomPricing) {
     return 'Custom monthly pricing';
@@ -67,18 +85,18 @@ const mapPlanToCard = (plan: ApiBusinessPlan): BusinessPlan => ({
     plan.features?.length
       ? plan.features
       : (plan.pricingTiers?.tiers || [])
-          .filter((tier) => tier.label)
           .map((tier) => {
             if (tier.isCustom) {
               return tier.label || 'Custom pricing available';
             }
+            const tierLabel = getTierRangeLabel(tier, plan.billingPeriod);
             if (tier.totalPrice) {
-              return `${tier.label} → ${formatCurrency(tier.totalPrice, plan.currency)}`;
+              return `${tierLabel} → ${formatCurrency(tier.totalPrice, plan.currency)}`;
             }
             if (tier.pricePerUnit) {
-              return `${tier.label} → ${formatCurrency(tier.pricePerUnit, plan.currency)} per delivery`;
+              return `${tierLabel} → ${formatCurrency(tier.pricePerUnit, plan.currency)} per delivery`;
             }
-            return tier.label || '';
+            return tierLabel;
           })
           .filter(Boolean),
   isPopular: Boolean(plan.badge) || plan.isDefault,
