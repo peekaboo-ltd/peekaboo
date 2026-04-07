@@ -67,6 +67,9 @@ export interface AdminMetrics {
   pendingPayments: number;
   completedPayments: number;
   recentActivity: RecentActivity[];
+  totalOrganizations: number;
+  businessOrdersCount: number;
+  businessOrdersPercentage: number;
 }
 
 export interface RiderMetrics {
@@ -79,6 +82,9 @@ export interface RiderMetrics {
   pendingAssignments: number;
   assignmentsByStatus: AssignmentStatusCount[];
   recentActivity: RecentActivity[];
+  totalEarnings: number;
+  earningsThisMonth: number;
+  averageEarningPerDelivery: number;
 }
 
 export interface CustomerMetrics {
@@ -91,6 +97,9 @@ export interface CustomerMetrics {
   deliverySuccessRate: number;
   ordersByStatus: OrderStatusCount[];
   recentActivity: RecentActivity[];
+  totalSpent: number;
+  averageOrderCost: number;
+  spendingThisMonth: number;
 }
 
 export interface BusinessMetrics {

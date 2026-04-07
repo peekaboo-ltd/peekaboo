@@ -27,6 +27,7 @@ import { UserRole } from '../entities/userRole.entity';
 import { OrganizationMembership } from '../entities/organizationMembership.entity';
 import { BillingStatus, MembershipStatus } from '../constants/organization.constants';
 import { OrganizationBilling } from '../entities/organizationBilling.entity';
+import { Organization } from '../entities/organization.entity';
 import { calculateBillingTotal } from '../helpers/pricing.helper';
 import { SelectQueryBuilder } from 'typeorm';
 
@@ -123,6 +124,7 @@ export class DashboardService {
   private orderActivityRepository = AppDataSource.getRepository(OrderActivity);
   private organizationMembershipRepository = AppDataSource.getRepository(OrganizationMembership);
   private organizationBillingRepository = AppDataSource.getRepository(OrganizationBilling);
+  private organizationRepository = AppDataSource.getRepository(Organization);
 
   private async resolveOrganizationId(userId: UUID): Promise<UUID | null> {
     const membership = await this.organizationMembershipRepository.findOne({
@@ -294,7 +296,12 @@ export class DashboardService {
   /**
    * Get dashboard metrics based on user roles
    */
-  async getDashboardMetrics(userId: UUID, userRoles: RoleTypes[]): Promise<DashboardMetrics> {
+  async getDashboardMetrics(
+    userId: UUID,
+    userRoles: RoleTypes[],
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<DashboardMetrics> {
     const primaryRole = this.determinePrimaryRole(userRoles);
 
     let metrics: AdminMetrics | RiderMetrics | CustomerMetrics | BusinessMetrics;
@@ -302,17 +309,17 @@ export class DashboardService {
     switch (primaryRole) {
       case RoleTypes.ADMIN:
       case RoleTypes.STAFF:
-        metrics = await this.getAdminMetrics();
+        metrics = await this.getAdminMetrics(startDate, endDate);
         break;
       case RoleTypes.BUSINESS:
-        metrics = await this.getBusinessMetrics(userId, userRoles);
+        metrics = await this.getBusinessMetrics(userId, userRoles, startDate, endDate);
         break;
       case RoleTypes.RIDER:
-        metrics = await this.getRiderMetrics(userId);
+        metrics = await this.getRiderMetrics(userId, startDate, endDate);
         break;
       case RoleTypes.CUSTOMER:
       default:
-        metrics = await this.getCustomerMetrics(userId);
+        metrics = await this.getCustomerMetrics(userId, startDate, endDate);
         break;
     }
 
@@ -325,21 +332,28 @@ export class DashboardService {
   /**
    * Get admin/staff metrics (system-wide)
    */
-  private async getAdminMetrics(): Promise<AdminMetrics> {
+  private async getAdminMetrics(startDate?: Date, endDate?: Date): Promise<AdminMetrics> {
     // Total orders
-    const totalOrders = await this.orderRepository.count();
+    const totalOrdersQb = this.orderRepository.createQueryBuilder('order');
+    if (startDate && endDate) {
+      totalOrdersQb.where('order.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate });
+    }
+    const totalOrders = await totalOrdersQb.getCount();
 
     // Orders by status (using latest activity)
     const ordersByStatus = await this.getOrdersByStatus();
 
-    // Orders this month
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-    const ordersThisMonth = await this.orderRepository
-      .createQueryBuilder('order')
-      .where('order.createdAt >= :startOfMonth', { startOfMonth })
-      .getCount();
+    // Orders this month (or within date range)
+    const ordersThisMonthQb = this.orderRepository.createQueryBuilder('order');
+    if (startDate && endDate) {
+      ordersThisMonthQb.where('order.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate });
+    } else {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      ordersThisMonthQb.where('order.createdAt >= :startOfMonth', { startOfMonth });
+    }
+    const ordersThisMonth = await ordersThisMonthQb.getCount();
 
     // Revenue calculations
     const { totalRevenue, billingAndPaymentsThisMonth } = await this.getRevenueMetrics();
@@ -374,6 +388,14 @@ export class DashboardService {
     // Recent activity
     const recentActivity = await this.getAdminRecentActivity();
 
+    // Organization metrics
+    const totalOrganizations = await this.organizationRepository.count();
+    const businessOrdersCount = await this.orderRepository.count({
+      where: { isBusinessOrder: true },
+    });
+    const businessOrdersPercentage =
+      totalOrders > 0 ? Math.round((businessOrdersCount / totalOrders) * 100) : 0;
+
     return {
       totalOrders,
       ordersThisMonth,
@@ -388,13 +410,16 @@ export class DashboardService {
       pendingPayments,
       completedPayments,
       recentActivity,
+      totalOrganizations,
+      businessOrdersCount,
+      businessOrdersPercentage,
     };
   }
 
   /**
    * Get rider metrics (user-specific)
    */
-  private async getRiderMetrics(userId: UUID): Promise<RiderMetrics> {
+  private async getRiderMetrics(userId: UUID, startDate?: Date, endDate?: Date): Promise<RiderMetrics> {
     // Active assignments for this rider
     const activeAssignments = await this.orderAssignmentRepository.count({
       where: { assignedToId: userId, status: OrderAssignmentStatus.ACTIVE },
@@ -410,17 +435,20 @@ export class DashboardService {
       where: { assignedToId: userId, status: OrderAssignmentStatus.PENDING },
     });
 
-    // Deliveries this month
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const deliveriesThisMonth = await this.orderAssignmentRepository
+    // Deliveries this month (or within date range)
+    const deliveriesThisMonthQb = this.orderAssignmentRepository
       .createQueryBuilder('assignment')
       .where('assignment.assignedToId = :userId', { userId })
-      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
-      .andWhere('assignment.updatedAt >= :startOfMonth', { startOfMonth })
-      .getCount();
+      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED });
+    if (startDate && endDate) {
+      deliveriesThisMonthQb.andWhere('assignment.updatedAt BETWEEN :startDate AND :endDate', { startDate, endDate });
+    } else {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      deliveriesThisMonthQb.andWhere('assignment.updatedAt >= :startOfMonth', { startOfMonth });
+    }
+    const deliveriesThisMonth = await deliveriesThisMonthQb.getCount();
 
     // Completion rate (completed / (completed + cancelled))
     const cancelledAssignments = await this.orderAssignmentRepository.count({
@@ -440,6 +468,36 @@ export class DashboardService {
     // Recent activity
     const recentActivity = await this.getRiderRecentActivity(userId);
 
+    // Earnings: sum finalFee from orders linked to completed assignments
+    const totalEarningsResult = await this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .innerJoin('assignment.order', 'order')
+      .select('COALESCE(SUM(order.finalFee), 0)', 'total')
+      .where('assignment.assignedToId = :userId', { userId })
+      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
+      .getRawOne();
+    const totalEarnings = parseFloat(totalEarningsResult?.total || '0');
+
+    const earningsThisMonthQb = this.orderAssignmentRepository
+      .createQueryBuilder('assignment')
+      .innerJoin('assignment.order', 'order')
+      .select('COALESCE(SUM(order.finalFee), 0)', 'total')
+      .where('assignment.assignedToId = :userId', { userId })
+      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED });
+    if (startDate && endDate) {
+      earningsThisMonthQb.andWhere('assignment.updatedAt BETWEEN :startDate AND :endDate', { startDate, endDate });
+    } else {
+      const earningsStartOfMonth = new Date();
+      earningsStartOfMonth.setDate(1);
+      earningsStartOfMonth.setHours(0, 0, 0, 0);
+      earningsThisMonthQb.andWhere('assignment.updatedAt >= :earningsStartOfMonth', { earningsStartOfMonth });
+    }
+    const earningsThisMonthResult = await earningsThisMonthQb.getRawOne();
+    const earningsThisMonth = parseFloat(earningsThisMonthResult?.total || '0');
+
+    const averageEarningPerDelivery =
+      completedDeliveries > 0 ? Math.round((totalEarnings / completedDeliveries) * 100) / 100 : 0;
+
     return {
       activeAssignments,
       completedDeliveries,
@@ -450,13 +508,16 @@ export class DashboardService {
       pendingAssignments,
       assignmentsByStatus,
       recentActivity,
+      totalEarnings,
+      earningsThisMonth,
+      averageEarningPerDelivery,
     };
   }
 
   /**
    * Get customer metrics (user-specific)
    */
-  private async getCustomerMetrics(userId: UUID): Promise<CustomerMetrics> {
+  private async getCustomerMetrics(userId: UUID, startDate?: Date, endDate?: Date): Promise<CustomerMetrics> {
     // Total orders by this customer (as sender or creator)
     const totalOrders = await this.orderRepository
       .createQueryBuilder('order')
@@ -478,16 +539,19 @@ export class DashboardService {
     // Pending orders
     const pendingOrders = ordersByStatus.find((s) => s.status === OrderStatus.PENDING)?.count || 0;
 
-    // Orders this month
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const ordersThisMonth = await this.orderRepository
+    // Orders this month (or within date range)
+    const ordersThisMonthQb = this.orderRepository
       .createQueryBuilder('order')
-      .where('order.senderId = :userId OR order.createdById = :userId', { userId })
-      .andWhere('order.createdAt >= :startOfMonth', { startOfMonth })
-      .getCount();
+      .where('order.senderId = :userId OR order.createdById = :userId', { userId });
+    if (startDate && endDate) {
+      ordersThisMonthQb.andWhere('order.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate });
+    } else {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      ordersThisMonthQb.andWhere('order.createdAt >= :startOfMonth', { startOfMonth });
+    }
+    const ordersThisMonth = await ordersThisMonthQb.getCount();
 
     // Cancelled orders
     const cancelledOrders = ordersByStatus.find((s) => s.status === OrderStatus.CANCELLED)?.count || 0;
@@ -501,6 +565,36 @@ export class DashboardService {
     // Recent activity
     const recentActivity = await this.getCustomerRecentActivity(userId);
 
+    // Spending: sum of successful ORDER payments by this customer
+    const totalSpentResult = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .select('COALESCE(SUM(payment.amount), 0)', 'total')
+      .where('payment.createdById = :userId', { userId })
+      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
+      .getRawOne();
+    const totalSpent = parseFloat(totalSpentResult?.total || '0');
+
+    const averageOrderCost =
+      completedOrders > 0 ? Math.round((totalSpent / completedOrders) * 100) / 100 : 0;
+
+    const spendingThisMonthQb = this.paymentRepository
+      .createQueryBuilder('payment')
+      .select('COALESCE(SUM(payment.amount), 0)', 'total')
+      .where('payment.createdById = :userId', { userId })
+      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER });
+    if (startDate && endDate) {
+      spendingThisMonthQb.andWhere('payment.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate });
+    } else {
+      const spendingStartOfMonth = new Date();
+      spendingStartOfMonth.setDate(1);
+      spendingStartOfMonth.setHours(0, 0, 0, 0);
+      spendingThisMonthQb.andWhere('payment.createdAt >= :spendingStartOfMonth', { spendingStartOfMonth });
+    }
+    const spendingThisMonthResult = await spendingThisMonthQb.getRawOne();
+    const spendingThisMonth = parseFloat(spendingThisMonthResult?.total || '0');
+
     return {
       totalOrders,
       activeOrders,
@@ -511,6 +605,9 @@ export class DashboardService {
       deliverySuccessRate,
       ordersByStatus,
       recentActivity,
+      totalSpent,
+      averageOrderCost,
+      spendingThisMonth,
     };
   }
 
@@ -518,7 +615,7 @@ export class DashboardService {
    * Get business metrics (B2B user-specific)
    * Based on orders created by / sent by the business user, plus organization data.
    */
-  private async getBusinessMetrics(userId: UUID): Promise<BusinessMetrics> {
+  private async getBusinessMetrics(userId: UUID, _userRoles?: RoleTypes[], startDate?: Date, endDate?: Date): Promise<BusinessMetrics> {
     const organizationId = await this.resolveOrganizationId(userId);
     const orderScope = this.getBusinessOrderScope('order', userId, organizationId);
 
@@ -545,13 +642,17 @@ export class DashboardService {
     const completedCount = ordersByStatus.find((s) => s.status === OrderStatus.COMPLETED)?.count || 0;
     const completedOrders = deliveredCount + completedCount;
 
+    // Scope payments via order IDs belonging to this business/organization
+    const scopedOrderIds = await this.getScopedOrderIdsForBusinessUser(userId);
+    const hasScopedOrders = scopedOrderIds.length > 0;
+
     // Pending payments
     const pendingPaymentsQb = this.paymentRepository
       .createQueryBuilder('payment')
       .where('payment.status = :status', { status: KpayPaymentStatus.PENDING });
-    if (reportScope.memberUserIds.length) {
-      pendingPaymentsQb.andWhere('payment.createdById IN (:...memberUserIds)', {
-        memberUserIds: reportScope.memberUserIds,
+    if (hasScopedOrders) {
+      pendingPaymentsQb.andWhere('payment.entityId IN (:...scopedOrderIds)', {
+        scopedOrderIds,
       });
     } else {
       pendingPaymentsQb.andWhere('1 = 0');
@@ -561,9 +662,9 @@ export class DashboardService {
     const completedPaymentsQb = this.paymentRepository
       .createQueryBuilder('payment')
       .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL });
-    if (reportScope.memberUserIds.length) {
-      completedPaymentsQb.andWhere('payment.createdById IN (:...memberUserIds)', {
-        memberUserIds: reportScope.memberUserIds,
+    if (hasScopedOrders) {
+      completedPaymentsQb.andWhere('payment.entityId IN (:...scopedOrderIds)', {
+        scopedOrderIds,
       });
     } else {
       completedPaymentsQb.andWhere('1 = 0');
@@ -576,10 +677,10 @@ export class DashboardService {
       .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
       .andWhere('payment.createdAt >= DATE_TRUNC(\'month\', CURRENT_DATE)')
       .andWhere(
-        reportScope.memberUserIds.length
-          ? 'payment.createdById IN (:...memberUserIds)'
+        hasScopedOrders
+          ? 'payment.entityId IN (:...scopedOrderIds)'
           : '1 = 0',
-        { memberUserIds: reportScope.memberUserIds }
+        { scopedOrderIds }
       )
       .getRawOne();
     const billingAndPaymentsThisMonth = parseFloat(
@@ -592,10 +693,10 @@ export class DashboardService {
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
       .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
       .andWhere(
-        reportScope.memberUserIds.length
-          ? 'payment.createdById IN (:...memberUserIds)'
+        hasScopedOrders
+          ? 'payment.entityId IN (:...scopedOrderIds)'
           : '1 = 0',
-        { memberUserIds: reportScope.memberUserIds }
+        { scopedOrderIds }
       )
       .getRawOne();
     const totalPaid = parseFloat(totalPaidResult?.total || '0');
@@ -619,15 +720,20 @@ export class DashboardService {
       currentAmountDue = prioritizedBilling.totalAmount;
     }
 
-    // Orders this week
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const ordersThisWeek = await this.orderRepository
+    // Orders this week (or within date range)
+    const ordersThisWeekQb = this.orderRepository
       .createQueryBuilder('order')
-      .where(orderScope.predicate, orderScope.params)
-      .andWhere('order.createdAt >= :startOfWeek', { startOfWeek })
+      .where(orderScope.predicate, orderScope.params);
+    if (startDate && endDate) {
+      ordersThisWeekQb.andWhere('order.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate });
+    } else {
+      const startOfWeek = new Date();
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      ordersThisWeekQb.andWhere('order.createdAt >= :startOfWeek', { startOfWeek });
+    }
+
+    const ordersThisWeek = await ordersThisWeekQb
       .getCount();
 
     const monthlyOrderVolume = await this.getMonthlyOrderVolume(userId, organizationId);
@@ -662,8 +768,11 @@ export class DashboardService {
     periodStart?: Date,
     periodEnd?: Date
   ): Promise<BusinessReportData> {
-    const organizationId = await this.resolveOrganizationId(userId);
+    const userId = scopeInput.requesterUserId;
+    const organizationId = scopeInput.organizationId ?? await this.resolveOrganizationId(userId);
     const orderScope = this.getBusinessOrderScope('order', userId, organizationId);
+    const scopedOrderIds = await this.getScopedOrderIdsForBusinessUser(userId);
+    const hasScopedOrders = scopedOrderIds.length > 0;
     const now = new Date();
     const start = periodStart ? new Date(periodStart) : new Date(now);
     if (!periodStart) {
@@ -694,20 +803,20 @@ export class DashboardService {
           .createQueryBuilder('payment')
           .where('payment.status = :status', { status: KpayPaymentStatus.PENDING })
           .andWhere(
-            reportScope.memberUserIds.length
-              ? 'payment.createdById IN (:...memberUserIds)'
+            hasScopedOrders
+              ? 'payment.entityId IN (:...scopedOrderIds)'
               : '1 = 0',
-            { memberUserIds: reportScope.memberUserIds }
+            { scopedOrderIds }
           )
           .getCount(),
         this.paymentRepository
           .createQueryBuilder('payment')
           .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
           .andWhere(
-            reportScope.memberUserIds.length
-              ? 'payment.createdById IN (:...memberUserIds)'
+            hasScopedOrders
+              ? 'payment.entityId IN (:...scopedOrderIds)'
               : '1 = 0',
-            { memberUserIds: reportScope.memberUserIds }
+            { scopedOrderIds }
           )
           .getCount(),
       ]);
@@ -717,10 +826,10 @@ export class DashboardService {
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
       .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
       .andWhere(
-        reportScope.memberUserIds.length
-          ? 'payment.createdById IN (:...memberUserIds)'
+        hasScopedOrders
+          ? 'payment.entityId IN (:...scopedOrderIds)'
           : '1 = 0',
-        { memberUserIds: reportScope.memberUserIds }
+        { scopedOrderIds }
       )
       .andWhere('payment.createdAt BETWEEN :start AND :end', { start, end })
       .getRawOne();
@@ -805,8 +914,8 @@ export class DashboardService {
       relations: { organization: true },
     });
 
-    const currentBilling = membership
-      ? await this.getPrioritizedBilling(reportScope.organizationId)
+    const currentBilling = membership?.organizationId
+      ? await this.getPrioritizedBilling(membership.organizationId)
       : { breakdown: [], totalAmount: 0, planName: undefined };
 
     return {
@@ -1205,7 +1314,8 @@ export class DashboardService {
     userId: UUID,
     period: string,
     startDate?: Date,
-    endDate?: Date
+    endDate?: Date,
+    userRoles?: RoleTypes[]
   ): Promise<ChartDataPoint[]> {
     const normalizedPeriod = ['week', 'month', 'year'].includes(period) ? period : 'month';
 
@@ -1236,17 +1346,32 @@ export class DashboardService {
 
     const effectiveStart = startDate ?? start;
 
-    const rows = await this.orderAssignmentRepository
+    const isAdmin = userRoles?.some((r) => r === RoleTypes.ADMIN || r === RoleTypes.STAFF);
+    const isBusiness = userRoles?.some((r) => r === RoleTypes.BUSINESS);
+
+    const qb = this.orderAssignmentRepository
       .createQueryBuilder('assignment')
       .select(`TO_CHAR(DATE_TRUNC('${truncUnit}', assignment.updatedAt), '${format}')`, 'label')
-      .addSelect('COUNT(*)', 'value')
-      .where('assignment.assignedToId = :userId', { userId })
-      .andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
+      .addSelect('COUNT(*)', 'value');
+
+    if (isAdmin) {
+      // Admin sees all deliveries — no user filter
+    } else if (isBusiness) {
+      const organizationId = await this.resolveOrganizationId(userId);
+      qb.innerJoin('assignment.order', 'order');
+      const scope = this.getBusinessOrderScope('order', userId, organizationId);
+      qb.where(scope.predicate, scope.params);
+    } else {
+      qb.where('assignment.assignedToId = :userId', { userId });
+    }
+
+    qb.andWhere('assignment.status = :status', { status: OrderAssignmentStatus.COMPLETED })
       .andWhere('assignment.updatedAt >= :start', { start: effectiveStart })
       .andWhere('assignment.updatedAt <= :end', { end: now })
       .groupBy(`DATE_TRUNC('${truncUnit}', assignment.updatedAt)`)
-      .orderBy(`DATE_TRUNC('${truncUnit}', assignment.updatedAt)`, 'ASC')
-      .getRawMany();
+      .orderBy(`DATE_TRUNC('${truncUnit}', assignment.updatedAt)`, 'ASC');
+
+    const rows = await qb.getRawMany();
 
     return this.fillTimeSeries(rows, effectiveStart, now, normalizedPeriod);
   }

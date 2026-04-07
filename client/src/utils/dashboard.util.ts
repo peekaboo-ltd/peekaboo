@@ -29,6 +29,7 @@ import {
   faCalendarWeek,
   faCreditCard,
   faRocket,
+  faBuilding,
 } from '@fortawesome/free-solid-svg-icons';
 import { capitalizeString, formatCurrency, formatNumbers } from './strings.util';
 
@@ -148,6 +149,26 @@ export const getAdminMetricCards = (
     comparisonLabel: 'Settled payouts snapshot',
     footerText: `${safeFormatNumber(metrics.pendingPayments)} still pending`,
   },
+  {
+    label: 'Organizations',
+    value: safeFormatNumber(metrics.totalOrganizations),
+    colorClass: 'text-indigo-600',
+    accent: 'violet',
+    href: '/organizations',
+    icon: faBuilding,
+    comparisonLabel: 'Registered business accounts',
+    footerText: `${safeFormatNumber(metrics.businessOrdersCount)} business orders`,
+  },
+  {
+    label: 'Business Orders',
+    value: `${safeFormatNumber(metrics.businessOrdersPercentage)}%`,
+    colorClass: 'text-teal-600',
+    accent: 'teal',
+    href: '/orders',
+    icon: faChartLine,
+    comparisonLabel: 'Share of orders from businesses',
+    footerText: `${safeFormatNumber(metrics.businessOrdersCount)} of ${safeFormatNumber(metrics.totalOrders)} total`,
+  },
 ];
 
 export const getRiderMetricCards = (
@@ -229,6 +250,26 @@ export const getRiderMetricCards = (
     comparisonLabel: 'Successful drop-off rate',
     footerText: `${safeFormatNumber(metrics.activeAssignments)} active stops remaining`,
   },
+  {
+    label: 'Total Earnings',
+    value: safeFormatCurrency(metrics.totalEarnings),
+    colorClass: 'text-teal-600',
+    accent: 'teal',
+    href: '/assignments',
+    icon: faDollarSign,
+    comparisonLabel: 'Lifetime delivery earnings',
+    footerText: `${safeFormatCurrency(metrics.earningsThisMonth)} earned this month`,
+  },
+  {
+    label: 'Avg Per Delivery',
+    value: safeFormatCurrency(metrics.averageEarningPerDelivery),
+    colorClass: 'text-indigo-600',
+    accent: 'blue',
+    href: '/assignments',
+    icon: faChartLine,
+    comparisonLabel: 'Average earning per completed delivery',
+    footerText: `${safeFormatNumber(metrics.completedDeliveries)} deliveries completed`,
+  },
 ];
 
 export const getCustomerMetricCards = (
@@ -309,6 +350,26 @@ export const getCustomerMetricCards = (
     icon: faPercent,
     comparisonLabel: 'Completion consistency',
     footerText: `${safeFormatNumber(metrics.completedOrders)} successful deliveries`,
+  },
+  {
+    label: 'Total Spent',
+    value: safeFormatCurrency(metrics.totalSpent),
+    colorClass: 'text-teal-600',
+    accent: 'teal',
+    href: '/orders',
+    icon: faDollarSign,
+    comparisonLabel: 'Lifetime delivery spending',
+    footerText: `${safeFormatCurrency(metrics.spendingThisMonth)} spent this month`,
+  },
+  {
+    label: 'Avg Order Cost',
+    value: safeFormatCurrency(metrics.averageOrderCost),
+    colorClass: 'text-indigo-600',
+    accent: 'blue',
+    href: '/orders',
+    icon: faChartLine,
+    comparisonLabel: 'Average cost per completed order',
+    footerText: `${safeFormatNumber(metrics.completedOrders)} orders completed`,
   },
 ];
 
