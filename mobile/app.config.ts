@@ -34,9 +34,15 @@ export default (): ExpoConfig => {
       image: './assets/images/splash-icon.png',
       resizeMode: 'contain',
       backgroundColor: '#1D546D',
+      dark: {
+        image: './assets/images/splash-icon-dark.png',
+        resizeMode: 'contain',
+        backgroundColor: '#1D546D',
+      },
     },
     ios: {
       supportsTablet: false,
+      icon: './assets/images/icon-ios.png',
       bundleIdentifier: BUNDLE_ID,
       infoPlist: {
         UIBackgroundModes: ['remote-notification'],
@@ -76,6 +82,8 @@ export default (): ExpoConfig => {
         {
           mode: oneSignalMode,
           appGroupName: appGroup,
+          largeIcons: ['./assets/images/icon.png'],
+          smallIcons: ['./assets/images/ic_stat_peekaboo.png'],
         },
       ],
       'expo-dev-client',
