@@ -19,7 +19,7 @@ export const OnboardingInviteEmail = ({
       <Text style={styles.heading}>You're Invited!</Text>
       <Text style={styles.text}>Hi {adminName},</Text>
       <Text style={styles.text}>
-        You've been invited to set up <strong>{organizationName}</strong> on
+        You've been invited to set up {organizationName} on
         Peekaboo. As the organization administrator, you'll be able to manage
         members, orders, and billing.
       </Text>
@@ -40,7 +40,7 @@ export const OnboardingInviteEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },

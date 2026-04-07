@@ -25,10 +25,9 @@ export const EmailButton = ({
         backgroundColor: bgColors[variant],
         color: '#ffffff',
         padding: '12px 24px',
-        borderRadius: '6px',
         textDecoration: 'none',
         fontSize: '14px',
-        fontWeight: 'bold' as const,
+        fontWeight: '500' as const,
         display: 'inline-block',
         textAlign: 'center' as const,
       }}

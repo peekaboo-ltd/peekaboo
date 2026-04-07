@@ -11,6 +11,8 @@ import {
   Modal,
   TouchableOpacity,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -264,6 +266,7 @@ export default function DashboardScreen() {
       setIsSendingReport(true);
       await dashboardAPI.submitProblemReport({
         description: descriptionWithCategory,
+        submissionType: reportCategory === 'receipt' ? 'RECEIPT' : 'PROBLEM',
         capturedAt: new Date().toISOString(),
         mediaType: reportMediaType,
         evidenceUri: reportMediaUri,
@@ -733,6 +736,16 @@ export default function DashboardScreen() {
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
             </Card>
+            <Card style={styles.actionCard} onPress={handleOpenReportProblem}>
+              <View style={styles.actionIconContainer}>
+                <Ionicons name="alert-circle-outline" size={22} color={colors.warning} />
+              </View>
+              <View>
+                <Text style={styles.actionText}>Report Problem</Text>
+                <Text style={styles.actionSubtext}>Capture proof and submit</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
+            </Card>
           </View>
         </Animated.View>
 
@@ -791,132 +804,151 @@ export default function DashboardScreen() {
         transparent={false}
         onRequestClose={resetReportState}
       >
-        <View style={styles.proofModalContainer}>
-          <View style={styles.proofHeader}>
-            <Text style={styles.reportTitle}>Report Problem / Receipt</Text>
-            <TouchableOpacity
-              onPress={resetReportState}
-              style={styles.proofCloseButton}
-              disabled={isSendingReport}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="close" size={20} color={colors.text.primary} />
-            </TouchableOpacity>
-          </View>
+        <KeyboardAvoidingView
+          style={styles.reportModalKeyboardContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
+        >
+          <View style={styles.proofModalContainer}>
+            <View style={styles.proofHeader}>
+              <Text style={styles.reportTitle}>Report Problem / Receipt</Text>
+              <TouchableOpacity
+                onPress={resetReportState}
+                style={styles.proofCloseButton}
+                disabled={isSendingReport}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="close" size={20} color={colors.text.primary} />
+              </TouchableOpacity>
+            </View>
 
-          {reportMediaUri ? (
-            <View style={styles.proofImageWrap}>
-              {reportMediaType === 'image' ? (
-                <Image source={{ uri: reportMediaUri }} style={styles.proofImage} contentFit="cover" />
-              ) : (
-                <View style={styles.videoPreview}>
+            <ScrollView
+              contentContainerStyle={styles.reportModalScrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {reportMediaUri ? (
+                <View style={styles.proofImageWrap}>
+                  {reportMediaType === 'image' ? (
+                    <Image source={{ uri: reportMediaUri }} style={styles.proofImage} contentFit="cover" />
+                  ) : (
+                    <View style={styles.videoPreview}>
+                      <Image
+                        source={require('../../assets/images/peekaboo-watermark.jpeg')}
+                        style={styles.proofWatermark}
+                        contentFit="contain"
+                      />
+                      <Ionicons name="videocam" size={48} color={colors.text.inverse} />
+                      <Text style={styles.videoPreviewText}>Video captured</Text>
+                    </View>
+                  )}
                   <Image
                     source={require('../../assets/images/peekaboo-watermark.jpeg')}
                     style={styles.proofWatermark}
                     contentFit="contain"
                   />
-                  <Ionicons name="videocam" size={48} color={colors.text.inverse} />
-                  <Text style={styles.videoPreviewText}>Video captured</Text>
+                  <View style={styles.proofOverlay}>
+                    <Text style={styles.proofOverlayText}>Timestamp: {reportTimestamp}</Text>
+                    <Text style={styles.proofOverlayText}>Location: {reportLocationLabel || 'Location unavailable'}</Text>
+                    <Text style={styles.proofOverlayText}>
+                      Type: {reportMediaType === 'video' ? 'Video' : 'Photo'}
+                    </Text>
+                  </View>
+                </View>
+              ) : null}
+
+              <View style={styles.reportTypeSection}>
+                <Text style={styles.reportLabel}>Choose type</Text>
+                <View style={styles.reportTypeSelector}>
+                  <TouchableOpacity
+                    onPress={() => setReportCategory('problem')}
+                    style={[
+                      styles.reportTypeChip,
+                      reportCategory === 'problem' && styles.reportTypeChipActive,
+                    ]}
+                    activeOpacity={0.85}
+                    disabled={isSendingReport}
+                  >
+                    <Text
+                      style={[
+                        styles.reportTypeChipText,
+                        reportCategory === 'problem' && styles.reportTypeChipTextActive,
+                      ]}
+                    >
+                      Problem
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setReportCategory('receipt')}
+                    style={[
+                      styles.reportTypeChip,
+                      reportCategory === 'receipt' && styles.reportTypeChipActive,
+                    ]}
+                    activeOpacity={0.85}
+                    disabled={isSendingReport}
+                  >
+                    <Text
+                      style={[
+                        styles.reportTypeChipText,
+                        reportCategory === 'receipt' && styles.reportTypeChipTextActive,
+                      ]}
+                    >
+                      Receipt
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {isReportConfirmed && (
+                <View style={styles.reportForm}>
+                  <Text style={styles.reportLabel}>Description</Text>
+                  <TextInput
+                    style={styles.reportInput}
+                    value={reportDescription}
+                    onChangeText={setReportDescription}
+                    placeholder={reportCategory === 'receipt' ? 'Describe the receipt...' : 'Describe the problem...'}
+                    placeholderTextColor={colors.text.disabled}
+                    multiline
+                    textAlignVertical="top"
+                    editable={!isSendingReport}
+                    returnKeyType="default"
+                    blurOnSubmit={false}
+                  />
                 </View>
               )}
-              <Image
-                source={require('../../assets/images/peekaboo-watermark.jpeg')}
-                style={styles.proofWatermark}
-                contentFit="contain"
-              />
-              <View style={styles.proofOverlay}>
-                <Text style={styles.proofOverlayText}>Timestamp: {reportTimestamp}</Text>
-                <Text style={styles.proofOverlayText}>Location: {reportLocationLabel || 'Location unavailable'}</Text>
-                <Text style={styles.proofOverlayText}>
-                  Type: {reportMediaType === 'video' ? 'Video' : 'Photo'}
-                </Text>
-              </View>
-            </View>
-          ) : null}
+            </ScrollView>
 
-          <View style={styles.reportTypeSection}>
-            <Text style={styles.reportLabel}>Choose type</Text>
-            <View style={styles.reportTypeSelector}>
-              <TouchableOpacity
-                onPress={() => setReportCategory('problem')}
-                style={[
-                  styles.reportTypeChip,
-                  reportCategory === 'problem' && styles.reportTypeChipActive,
-                ]}
-                activeOpacity={0.85}
-                disabled={isSendingReport}
-              >
-                <Text
-                  style={[
-                    styles.reportTypeChipText,
-                    reportCategory === 'problem' && styles.reportTypeChipTextActive,
-                  ]}
-                >
-                  Problem
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setReportCategory('receipt')}
-                style={[
-                  styles.reportTypeChip,
-                  reportCategory === 'receipt' && styles.reportTypeChipActive,
-                ]}
-                activeOpacity={0.85}
-                disabled={isSendingReport}
-              >
-                <Text
-                  style={[
-                    styles.reportTypeChipText,
-                    reportCategory === 'receipt' && styles.reportTypeChipTextActive,
-                  ]}
-                >
-                  Receipt
-                </Text>
-              </TouchableOpacity>
+            <View style={styles.reportFooterActions}>
+              {!isReportConfirmed ? (
+                <>
+                  <Button
+                    title="Retake"
+                    onPress={handleRetakeReport}
+                    variant="outline"
+                    fullWidth
+                    disabled={isSendingReport}
+                  />
+                  <Button
+                    title="Confirm"
+                    onPress={handleConfirmReport}
+                    fullWidth
+                    disabled={!reportMediaUri || !reportCategory || isSendingReport}
+                    icon={<Ionicons name="checkmark" size={16} color={colors.text.inverse} />}
+                  />
+                </>
+              ) : (
+                <Button
+                  title="Send"
+                  onPress={handleSendReport}
+                  fullWidth
+                  loading={isSendingReport}
+                  disabled={isSendingReport}
+                  icon={<Ionicons name="send" size={16} color={colors.text.inverse} />}
+                />
+              )}
             </View>
           </View>
-
-          {!isReportConfirmed ? (
-            <View style={styles.proofActions}>
-              <Button
-                title="Retake"
-                onPress={handleRetakeReport}
-                variant="outline"
-                fullWidth
-                disabled={isSendingReport}
-              />
-              <Button
-                title="Confirm"
-                onPress={handleConfirmReport}
-                fullWidth
-                disabled={!reportMediaUri || !reportCategory || isSendingReport}
-                icon={<Ionicons name="checkmark" size={16} color={colors.text.inverse} />}
-              />
-            </View>
-          ) : (
-            <View style={styles.reportForm}>
-              <Text style={styles.reportLabel}>Description</Text>
-              <TextInput
-                style={styles.reportInput}
-                value={reportDescription}
-                onChangeText={setReportDescription}
-                placeholder={reportCategory === 'receipt' ? 'Describe the receipt...' : 'Describe the problem...'}
-                placeholderTextColor={colors.text.disabled}
-                multiline
-                textAlignVertical="top"
-                editable={!isSendingReport}
-              />
-              <Button
-                title="Send"
-                onPress={handleSendReport}
-                fullWidth
-                loading={isSendingReport}
-                disabled={isSendingReport}
-                icon={<Ionicons name="send" size={16} color={colors.text.inverse} />}
-              />
-            </View>
-          )}
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal
@@ -1461,6 +1493,14 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingTop: spacing.xl,
   },
+  reportModalKeyboardContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  reportModalScrollContent: {
+    flexGrow: 1,
+    paddingBottom: spacing.md,
+  },
   proofHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1582,6 +1622,11 @@ const styles = StyleSheet.create({
   reportForm: {
     gap: spacing.sm,
     marginTop: spacing.md,
+  },
+  reportFooterActions: {
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    paddingBottom: spacing.md,
   },
   reportSubmissionSummary: {
     marginTop: spacing.md,

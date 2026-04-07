@@ -18,8 +18,7 @@ export const MemberAddedEmail = ({
       <Text style={styles.heading}>Welcome to {organizationName}!</Text>
       <Text style={styles.text}>Hi {memberName || 'there'},</Text>
       <Text style={styles.text}>
-        You've been added as a <strong>{role}</strong> to{' '}
-        <strong>{organizationName}</strong> on Peekaboo.
+        You've been added as a {role} to {organizationName} on Peekaboo.
       </Text>
       <Text style={styles.text}>
         You can now create and manage deliveries on behalf of your organization.
@@ -34,7 +33,7 @@ export const MemberAddedEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },

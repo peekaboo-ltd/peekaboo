@@ -18,20 +18,20 @@ export const InquiryNotificationEmail = ({
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Company Name:</strong> {companyName}
+          Company Name: {companyName}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Contact Name:</strong> {contactName}
+          Contact Name: {contactName}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Email:</strong> {contactEmail}
+          Email: {contactEmail}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Phone:</strong> {phoneNumber || 'Not provided'}
+          Phone: {phoneNumber || 'Not provided'}
         </Text>
         {message && (
           <Text style={styles.detailRow}>
-            <strong>Message:</strong> {message}
+            Message: {message}
           </Text>
         )}
       </Section>
@@ -45,7 +45,7 @@ export const InquiryNotificationEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -57,7 +57,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

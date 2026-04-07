@@ -23,22 +23,22 @@ export const PaymentOverdueEmail = ({
       <Text style={styles.heading}>Payment Overdue</Text>
       <Text style={styles.text}>Hi,</Text>
       <Text style={styles.text}>
-        The payment for <strong>{organizationName}</strong> is now{' '}
-        <strong>{daysOverdue} days overdue</strong>. Please process the payment
+        The payment for {organizationName} is now{' '}
+        {daysOverdue} days overdue. Please process the payment
         as soon as possible to avoid service interruption.
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Invoice Number:</strong> {invoiceNumber}
+          Invoice Number: {invoiceNumber}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Amount Due:</strong> {currency} {amount?.toLocaleString()}
+          Amount Due: {currency} {amount?.toLocaleString()}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Due Date:</strong> {formatDate(dueDate)}
+          Due Date: {formatDate(dueDate)}
         </Text>
         <Text style={styles.overdueRow}>
-          <strong>Days Overdue:</strong> {daysOverdue}
+          Days Overdue: {daysOverdue}
         </Text>
       </Section>
       <Text style={styles.text}>
@@ -56,7 +56,7 @@ export const PaymentOverdueEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#c62828',
     margin: '0 0 16px',
   },
@@ -68,7 +68,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#ffebee',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },
@@ -80,7 +79,7 @@ const styles = {
   overdueRow: {
     fontSize: '14px',
     color: '#c62828',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     margin: '4px 0',
   },
   link: {

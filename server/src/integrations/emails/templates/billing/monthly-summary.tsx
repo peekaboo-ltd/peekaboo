@@ -18,18 +18,18 @@ export const MonthlyBillingSummaryEmail = ({
       <Text style={styles.heading}>Monthly Billing Summary</Text>
       <Text style={styles.text}>Hi,</Text>
       <Text style={styles.text}>
-        Here's the billing summary for <strong>{organizationName}</strong> for{' '}
+        Here's the billing summary for {organizationName} for{' '}
         {month} {year}.
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Month:</strong> {month} {year}
+          Month: {month} {year}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Total Orders:</strong> {totalOrders}
+          Total Orders: {totalOrders}
         </Text>
         <Text style={styles.amountRow}>
-          <strong>Total Amount:</strong> {currency}{' '}
+          Total Amount: {currency}{' '}
           {totalAmount?.toLocaleString()}
         </Text>
       </Section>
@@ -43,7 +43,7 @@ export const MonthlyBillingSummaryEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -55,7 +55,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },
@@ -67,7 +66,7 @@ const styles = {
   amountRow: {
     fontSize: '16px',
     color: '#1a1a2e',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     margin: '8px 0 0',
   },
 };

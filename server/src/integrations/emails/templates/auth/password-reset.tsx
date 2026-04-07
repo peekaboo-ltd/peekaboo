@@ -52,7 +52,7 @@ export const PasswordResetEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -64,14 +64,13 @@ const styles = {
   },
   codeContainer: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     textAlign: 'center' as const,
     margin: '24px 0',
   },
   code: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     letterSpacing: '4px',
     color: '#1a1a2e',
   },

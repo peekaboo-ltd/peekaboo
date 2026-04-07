@@ -17,7 +17,7 @@ export const OnboardingCompleteEmail = ({
       <Text style={styles.heading}>Account Activated!</Text>
       <Text style={styles.text}>Hi {adminName},</Text>
       <Text style={styles.text}>
-        Congratulations! Your organization <strong>{organizationName}</strong>{' '}
+        Congratulations! Your organization {organizationName}{' '}
         has been successfully set up on Peekaboo.
       </Text>
       <Text style={styles.text}>Here's what you can do now:</Text>
@@ -35,7 +35,7 @@ export const OnboardingCompleteEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#2e7d32',
     margin: '0 0 16px',
   },

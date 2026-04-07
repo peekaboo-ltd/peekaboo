@@ -25,21 +25,21 @@ export const InvoiceGeneratedEmail = ({
       <Text style={styles.heading}>Invoice Generated</Text>
       <Text style={styles.text}>Hi,</Text>
       <Text style={styles.text}>
-        A new invoice has been generated for <strong>{organizationName}</strong>.
+        A new invoice has been generated for {organizationName}.
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Invoice Number:</strong> {invoiceNumber}
+          Invoice Number: {invoiceNumber}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Billing Period:</strong> {formatDate(periodStart)} -{' '}
+          Billing Period: {formatDate(periodStart)} -{' '}
           {formatDate(periodEnd)}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Total Orders:</strong> {totalOrders}
+          Total Orders: {totalOrders}
         </Text>
         <Text style={styles.amountRow}>
-          <strong>Total Amount:</strong> {currency}{' '}
+          Total Amount: {currency}{' '}
           {totalAmount?.toLocaleString()}
         </Text>
       </Section>
@@ -72,7 +72,7 @@ export const InvoiceGeneratedEmail = ({
                 <td style={styles.tableCellBold}>Total</td>
                 <td style={styles.tableCellRight}>{totalOrders}</td>
                 <td style={styles.tableCell}></td>
-                <td style={{ ...styles.tableCellRight, fontWeight: 'bold' }}>
+                <td style={{ ...styles.tableCellRight, fontWeight: '500' }}>
                   {currency} {totalAmount?.toLocaleString()}
                 </td>
               </tr>
@@ -91,7 +91,7 @@ export const InvoiceGeneratedEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -103,7 +103,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },
@@ -115,7 +114,7 @@ const styles = {
   amountRow: {
     fontSize: '16px',
     color: '#1a1a2e',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     margin: '8px 0 0',
   },
   breakdownBox: {
@@ -123,13 +122,12 @@ const styles = {
   },
   breakdownHeading: {
     fontSize: '16px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 8px',
   },
   table: {
     width: '100%' as const,
-    borderCollapse: 'collapse' as const,
     fontSize: '13px',
   },
   tableHeader: {
@@ -138,23 +136,19 @@ const styles = {
     textAlign: 'left' as const,
     fontSize: '12px',
     color: '#4a5568',
-    borderBottom: '1px solid #e2e8f0',
   },
   tableCell: {
     padding: '8px 12px',
-    borderBottom: '1px solid #e2e8f0',
     color: '#4a5568',
   },
   tableCellRight: {
     padding: '8px 12px',
-    borderBottom: '1px solid #e2e8f0',
     textAlign: 'right' as const,
     color: '#4a5568',
   },
   tableCellBold: {
     padding: '8px 12px',
-    borderBottom: '1px solid #e2e8f0',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
   },
 };

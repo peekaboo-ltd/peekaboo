@@ -74,13 +74,12 @@ const styles = {
   header: {
     backgroundColor: '#1a1a2e',
     padding: '24px',
-    borderRadius: '8px 8px 0 0',
     textAlign: 'center' as const,
   },
   logo: {
     color: '#ffffff',
     fontSize: '28px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     margin: '0',
     letterSpacing: '1px',
   },
@@ -89,13 +88,14 @@ const styles = {
     padding: '32px 24px',
   },
   divider: {
-    borderColor: '#e6ebf1',
+    backgroundColor: '#e6ebf1',
+    color: '#e6ebf1',
+    height: '1px',
     margin: '0',
   },
   footer: {
     backgroundColor: '#ffffff',
     padding: '24px',
-    borderRadius: '0 0 8px 8px',
     textAlign: 'center' as const,
   },
   footerText: {

@@ -18,13 +18,13 @@ export const OrderCreatedRecipientEmail = ({
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Order Reference:</strong> {orderReference}
+          Order Reference: {orderReference}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Sender Phone:</strong> {senderPhone}
+          Sender Phone: {senderPhone}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>OTP:</strong> {trackingId}
+          OTP: {trackingId}
         </Text>
       </Section>
       <Text style={styles.text}>
@@ -38,7 +38,7 @@ export const OrderCreatedRecipientEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -50,7 +50,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

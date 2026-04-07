@@ -22,18 +22,18 @@ export const BillingPaymentReceivedEmail = ({
       <Text style={styles.heading}>Payment Received</Text>
       <Text style={styles.text}>Hi,</Text>
       <Text style={styles.text}>
-        We've received your payment for <strong>{organizationName}</strong>.
+        We've received your payment for {organizationName}.
         Thank you!
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Invoice Number:</strong> {invoiceNumber}
+          Invoice Number: {invoiceNumber}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Amount Paid:</strong> {currency} {amount?.toLocaleString()}
+          Amount Paid: {currency} {amount?.toLocaleString()}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Payment Date:</strong> {formatDate(paymentDate)}
+          Payment Date: {formatDate(paymentDate)}
         </Text>
       </Section>
     </EmailLayout>
@@ -43,7 +43,7 @@ export const BillingPaymentReceivedEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#2e7d32',
     margin: '0 0 16px',
   },
@@ -55,7 +55,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#e8f5e9',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

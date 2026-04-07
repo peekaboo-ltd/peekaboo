@@ -22,7 +22,7 @@ export const AdminCreatedAccountEmail = ({
       <Section style={styles.credentialsBox}>
         <Text style={styles.credentialsTitle}>Your Login Credentials</Text>
         <Text style={styles.credentialItem}>
-          <strong>Temporary Password:</strong>{' '}
+          Temporary Password:{' '}
           <span style={styles.code}>{temporaryPassword}</span>
         </Text>
       </Section>
@@ -62,7 +62,7 @@ export const AdminCreatedAccountEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -74,14 +74,12 @@ const styles = {
   },
   credentialsBox: {
     backgroundColor: '#f7fafc',
-    border: '1px solid #e2e8f0',
-    borderRadius: '8px',
     padding: '16px 20px',
     margin: '16px 0',
   },
   credentialsTitle: {
     fontSize: '14px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 8px',
   },
@@ -94,7 +92,6 @@ const styles = {
   code: {
     backgroundColor: '#edf2f7',
     padding: '2px 6px',
-    borderRadius: '4px',
     fontSize: '14px',
     fontFamily: 'monospace',
     color: '#1a1a2e',
@@ -108,8 +105,6 @@ const styles = {
   },
   warningBox: {
     backgroundColor: '#fffbeb',
-    border: '1px solid #fcd34d',
-    borderRadius: '8px',
     padding: '12px 16px',
     margin: '16px 0',
   },

@@ -26,7 +26,7 @@ export const PasswordChangedEmail = ({ name }: PasswordChangedEmailData) => {
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },

@@ -14,14 +14,14 @@ export const OrderDispatchedEmail = ({
       <Text style={styles.heading}>Order Sent Successfully</Text>
       <Text style={styles.text}>Hi {userName || 'there'},</Text>
       <Text style={styles.text}>
-        Your delivery order <strong>{orderReference}</strong> has been sent successfully.
+        Your delivery order {orderReference} has been sent successfully.
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Order Reference:</strong> {orderReference}
+          Order Reference: {orderReference}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>OTP:</strong> {trackingId}
+          OTP: {trackingId}
         </Text>
       </Section>
       <Text style={styles.text}>
@@ -37,7 +37,7 @@ export const OrderDispatchedEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -49,7 +49,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

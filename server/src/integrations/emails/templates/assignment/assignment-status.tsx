@@ -21,13 +21,13 @@ export const AssignmentStatusEmail = ({
       <Text style={styles.text}>Hi {userName || 'there'},</Text>
       {isAccepted ? (
         <Text style={styles.text}>
-          <strong>{riderName}</strong> has accepted the delivery assignment for
-          order <strong>{orderReference}</strong>. Your delivery is being
+          {riderName} has accepted the delivery assignment for
+          order {orderReference}. Your delivery is being
           processed.
         </Text>
       ) : (
         <Text style={styles.text}>
-          The rider for order <strong>{orderReference}</strong> was unable to
+          The rider for order {orderReference} was unable to
           accept the assignment. A new rider is being assigned automatically.
         </Text>
       )}
@@ -41,7 +41,7 @@ export const AssignmentStatusEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },

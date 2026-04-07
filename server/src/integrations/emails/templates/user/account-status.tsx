@@ -35,7 +35,7 @@ export const AccountStatusEmail = ({
       {reason && (
         <Section style={styles.detailsBox}>
           <Text style={styles.detailRow}>
-            <strong>Reason:</strong> {reason}
+            Reason: {reason}
           </Text>
         </Section>
       )}
@@ -54,7 +54,7 @@ export const AccountStatusEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -70,7 +70,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

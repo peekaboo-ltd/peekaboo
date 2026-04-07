@@ -27,21 +27,21 @@ export const NewOrganizationEmail = ({
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Organization:</strong> {organizationName}
+          Organization: {organizationName}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Admin Name:</strong> {adminName}
+          Admin Name: {adminName}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Email:</strong> {email}
+          Email: {email}
         </Text>
         {phoneNumber && (
           <Text style={styles.detailRow}>
-            <strong>Phone:</strong> {phoneNumber}
+            Phone: {phoneNumber}
           </Text>
         )}
         <Text style={styles.detailRow}>
-          <strong>Registered At:</strong> {formatDate(createdAt)}
+          Registered At: {formatDate(createdAt)}
         </Text>
       </Section>
       <Text style={styles.text}>
@@ -54,7 +54,7 @@ export const NewOrganizationEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -66,7 +66,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

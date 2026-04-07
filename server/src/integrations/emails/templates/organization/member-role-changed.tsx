@@ -15,17 +15,17 @@ export const MemberRoleChangedEmail = ({
       <Text style={styles.heading}>Role Updated</Text>
       <Text style={styles.text}>Hi {memberName || 'there'},</Text>
       <Text style={styles.text}>
-        Your role in <strong>{organizationName}</strong> has been changed:
+        Your role in {organizationName} has been changed:
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Previous Role:</strong> {oldRole}
+          Previous Role: {oldRole}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>New Role:</strong> {newRole}
+          New Role: {newRole}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Changed By:</strong> {changedBy}
+          Changed By: {changedBy}
         </Text>
       </Section>
       <Text style={styles.text}>
@@ -39,7 +39,7 @@ export const MemberRoleChangedEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -51,7 +51,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

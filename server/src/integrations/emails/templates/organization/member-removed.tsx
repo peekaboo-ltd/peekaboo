@@ -14,7 +14,7 @@ export const MemberRemovedEmail = ({
       <Text style={styles.heading}>Membership Update</Text>
       <Text style={styles.text}>Hi {memberName || 'there'},</Text>
       <Text style={styles.text}>
-        You have been removed from <strong>{organizationName}</strong> on
+        You have been removed from {organizationName} on
         Peekaboo. You will no longer be able to create orders or access
         resources on behalf of this organization.
       </Text>
@@ -29,7 +29,7 @@ export const MemberRemovedEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },

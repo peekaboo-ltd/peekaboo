@@ -18,7 +18,7 @@ export const OrderStatusEmail = ({
       <Text style={styles.heading}>Order Update</Text>
       <Text style={styles.text}>Hi {userName || 'there'},</Text>
       <Text style={styles.text}>
-        Your order <strong>{orderReference}</strong> has been updated:
+        Your order {orderReference} has been updated:
       </Text>
       <Section style={styles.statusContainer}>
         <StatusBadge status={status} />
@@ -34,12 +34,12 @@ export const OrderStatusEmail = ({
           <Text style={styles.detailHeading}>Rider Information</Text>
           {trackingInfo.riderName && (
             <Text style={styles.detailRow}>
-              <strong>Name:</strong> {trackingInfo.riderName}
+              Name: {trackingInfo.riderName}
             </Text>
           )}
           {trackingInfo.riderPhone && (
             <Text style={styles.detailRow}>
-              <strong>Phone:</strong> {trackingInfo.riderPhone}
+              Phone: {trackingInfo.riderPhone}
             </Text>
           )}
         </Section>
@@ -51,7 +51,7 @@ export const OrderStatusEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -71,13 +71,12 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },
   detailHeading: {
     fontSize: '14px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 8px',
   },

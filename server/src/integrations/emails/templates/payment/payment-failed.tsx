@@ -19,10 +19,10 @@ export const PaymentFailedEmail = ({
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Order Reference:</strong> {orderReference}
+          Order Reference: {orderReference}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Amount:</strong> {currency} {amount?.toLocaleString()}
+          Amount: {currency} {amount?.toLocaleString()}
         </Text>
       </Section>
       <Text style={styles.text}>
@@ -40,7 +40,7 @@ export const PaymentFailedEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#c62828',
     margin: '0 0 16px',
   },
@@ -52,7 +52,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#ffebee',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

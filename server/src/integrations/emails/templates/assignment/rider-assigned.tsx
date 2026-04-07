@@ -22,26 +22,26 @@ export const RiderAssignedEmail = ({
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Order Reference:</strong> {orderReference}
+          Order Reference: {orderReference}
         </Text>
         {pickupLocation && (
           <Text style={styles.detailRow}>
-            <strong>Pickup:</strong> {pickupLocation}
+            Pickup: {pickupLocation}
           </Text>
         )}
         {dropoffLocation && (
           <Text style={styles.detailRow}>
-            <strong>Dropoff:</strong> {dropoffLocation}
+            Dropoff: {dropoffLocation}
           </Text>
         )}
         {senderPhone && (
           <Text style={styles.detailRow}>
-            <strong>Sender Phone:</strong> {senderPhone}
+            Sender Phone: {senderPhone}
           </Text>
         )}
         {recipientPhone && (
           <Text style={styles.detailRow}>
-            <strong>Recipient Phone:</strong> {recipientPhone}
+            Recipient Phone: {recipientPhone}
           </Text>
         )}
       </Section>
@@ -55,7 +55,7 @@ export const RiderAssignedEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -67,7 +67,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#e3f2fd',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

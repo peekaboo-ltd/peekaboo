@@ -21,7 +21,7 @@ export const OrgStatusChangedEmail = ({
       </Text>
       <Text style={styles.text}>Hi {adminName},</Text>
       <Text style={styles.text}>
-        Your organization <strong>{organizationName}</strong> has been{' '}
+        Your organization {organizationName} has been{' '}
         {isActive ? 'activated' : 'suspended'} on Peekaboo.
       </Text>
       <Section style={styles.statusContainer}>
@@ -30,7 +30,7 @@ export const OrgStatusChangedEmail = ({
       {reason && (
         <Section style={styles.detailsBox}>
           <Text style={styles.detailRow}>
-            <strong>Reason:</strong> {reason}
+            Reason: {reason}
           </Text>
         </Section>
       )}
@@ -51,7 +51,7 @@ export const OrgStatusChangedEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -67,7 +67,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

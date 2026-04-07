@@ -36,9 +36,8 @@ export const StatusBadge = ({ status }: StatusBadgeProps) => {
         backgroundColor: colors.bg,
         color: colors.text,
         padding: '4px 12px',
-        borderRadius: '12px',
         fontSize: '12px',
-        fontWeight: 'bold' as const,
+        fontWeight: '500' as const,
         display: 'inline-block',
         margin: '0',
       }}

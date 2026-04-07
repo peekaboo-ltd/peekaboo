@@ -57,7 +57,7 @@ export const DailySummaryEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 8px',
   },
@@ -72,13 +72,12 @@ const styles = {
   },
   metricBox: {
     backgroundColor: '#f7f7f7',
-    borderRadius: '8px',
     padding: '12px 16px',
     margin: '8px 0',
   },
   metricValue: {
     fontSize: '20px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0',
   },

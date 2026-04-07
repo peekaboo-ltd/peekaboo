@@ -19,13 +19,13 @@ export const PaymentSuccessfulEmail = ({
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Order Reference:</strong> {orderReference}
+          Order Reference: {orderReference}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Amount Paid:</strong> {currency} {amount?.toLocaleString()}
+          Amount Paid: {currency} {amount?.toLocaleString()}
         </Text>
         <Text style={styles.detailRow}>
-          <strong>Transaction ID:</strong> {transactionId}
+          Transaction ID: {transactionId}
         </Text>
       </Section>
       <Text style={styles.successText}>
@@ -39,7 +39,7 @@ export const PaymentSuccessfulEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#2e7d32',
     margin: '0 0 16px',
   },
@@ -51,7 +51,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#e8f5e9',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

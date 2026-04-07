@@ -276,6 +276,18 @@ export interface CriticalAlertEmailData {
   timestamp: Date;
 }
 
+export interface ProblemReportAdminEmailData {
+  riderId: string;
+  riderName: string;
+  riderPhoneNumber?: string;
+  submissionType: 'PROBLEM' | 'RECEIPT';
+  capturedAt: string;
+  locationLabel?: string;
+  description: string;
+  evidenceUrl: string;
+  submittedAt: Date;
+}
+
 // ==================== USER ACCOUNT EMAILS ====================
 
 export interface AccountStatusEmailData {

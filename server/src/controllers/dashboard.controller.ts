@@ -231,11 +231,12 @@ export const DashboardController = {
       }
 
       const file = req.file as (Express.Multer.File & { path?: string }) | undefined;
-      const { description, capturedAt, mediaType, locationLabel } = req.body as {
+      const { description, capturedAt, mediaType, locationLabel, submissionType } = req.body as {
         description?: string;
         capturedAt?: string;
         mediaType?: string;
         locationLabel?: string;
+        submissionType?: string;
         overlayTimestamp?: string;
         overlayLocationLabel?: string;
         overlayAppliedOnClient?: string;
@@ -256,6 +257,15 @@ export const DashboardController = {
 
       const normalizedMediaType =
         mediaType === 'video' || file.mimetype.startsWith('video/') ? 'video' : 'photo';
+      const normalizedSubmissionType = String(submissionType || '').trim().toUpperCase();
+      const inferredSubmissionType = description.trim().startsWith('[Receipt]') ? 'RECEIPT' : 'PROBLEM';
+      const finalSubmissionType =
+        normalizedSubmissionType.length > 0
+          ? normalizedSubmissionType
+          : inferredSubmissionType;
+      if (finalSubmissionType !== 'PROBLEM' && finalSubmissionType !== 'RECEIPT') {
+        return res.status(400).json({ message: 'Invalid submissionType. Use PROBLEM or RECEIPT.' });
+      }
       const reportTimestamp = capturedAt || new Date().toISOString();
       const overlayAppliedOnClient = String(req.body?.overlayAppliedOnClient || '').toLowerCase() === 'true';
       const overlayTimestamp = String(req.body?.overlayTimestamp || '').trim();
@@ -277,6 +287,7 @@ export const DashboardController = {
           userId: userId as UUID,
           imageUrl: evidenceUrl,
           mediaType: normalizedMediaType,
+          submissionType: finalSubmissionType,
           description: description.trim(),
           capturedAt: reportTimestamp,
           locationLabel: locationLabel || undefined,
@@ -285,6 +296,20 @@ export const DashboardController = {
           overlayVersion: 'v1',
           overlaySource: overlayAppliedOnClient ? 'client_and_server' : 'server',
         });
+
+        if (finalSubmissionType === 'PROBLEM') {
+          emailService.sendProblemReportAdminNotification({
+            riderId: String(userId),
+            riderName: authReq.user?.name || 'Unknown rider',
+            riderPhoneNumber: authReq.user?.phoneNumber,
+            submissionType: finalSubmissionType,
+            capturedAt: reportTimestamp,
+            locationLabel: locationLabel || undefined,
+            description: description.trim(),
+            evidenceUrl,
+            submittedAt: new Date(),
+          }).catch(() => {});
+        }
       } catch (error) {
         const uploadErrorMessage =
           error instanceof Error && error.message
@@ -306,6 +331,7 @@ export const DashboardController = {
         data: {
           reportedBy: userId,
           mediaType: normalizedMediaType,
+          submissionType: finalSubmissionType,
           evidenceUrl,
           capturedAt: reportTimestamp,
           description: description.trim(),

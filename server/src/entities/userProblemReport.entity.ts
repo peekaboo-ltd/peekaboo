@@ -18,6 +18,9 @@ export class UserProblemReport extends AbstractEntity {
   @Column({ name: 'media_type', type: 'varchar', length: 16, default: 'photo' })
   mediaType: 'photo' | 'video';
 
+  @Column({ name: 'submission_type', type: 'varchar', length: 16, default: 'PROBLEM' })
+  submissionType: 'PROBLEM' | 'RECEIPT';
+
   @Column({ name: 'description', type: 'text' })
   description: string;
 

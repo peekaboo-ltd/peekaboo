@@ -71,6 +71,7 @@ interface RiderProblemReportListItem {
   riderPhoneNumber?: string;
   imageUrl: string;
   mediaType: 'photo' | 'video';
+  submissionType: 'PROBLEM' | 'RECEIPT';
   description?: string;
   timestamp: string;
   locationLabel?: string;
@@ -801,6 +802,7 @@ export class UserService {
       riderPhoneNumber: report.user?.phoneNumber,
       imageUrl: report.imageUrl,
       mediaType: report.mediaType,
+      submissionType: report.submissionType,
       description: report.description,
       timestamp: report.capturedAt.toISOString(),
       locationLabel: report.locationLabel,
@@ -846,6 +848,7 @@ export class UserService {
     userId: UUID;
     imageUrl: string;
     mediaType: 'photo' | 'video';
+    submissionType: 'PROBLEM' | 'RECEIPT';
     description: string;
     capturedAt: string;
     locationLabel?: string;
@@ -858,6 +861,7 @@ export class UserService {
       userId: payload.userId,
       imageUrl: payload.imageUrl,
       mediaType: payload.mediaType,
+      submissionType: payload.submissionType,
       description: payload.description,
       capturedAt: new Date(payload.capturedAt),
       locationLabel: payload.locationLabel,

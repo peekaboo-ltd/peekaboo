@@ -32,6 +32,7 @@ import { AssignmentStatusEmail } from './templates/assignment/assignment-status'
 import { NewOrganizationEmail } from './templates/admin/new-organization';
 import { DailySummaryEmail } from './templates/admin/daily-summary';
 import { CriticalAlertEmail } from './templates/admin/critical-alert';
+import { ProblemReportNotificationEmail } from './templates/admin/problem-report-notification';
 import { AccountStatusEmail } from './templates/user/account-status';
 
 // Types
@@ -66,6 +67,7 @@ import {
   NewOrganizationAdminEmailData,
   DailySummaryEmailData,
   CriticalAlertEmailData,
+  ProblemReportAdminEmailData,
   AccountStatusEmailData,
 } from './types/email.types';
 
@@ -451,6 +453,17 @@ export class EmailService {
     await this.sendEmail({
       to: this.adminEmail,
       subject: `[CRITICAL] ${data.alertType} - Peekaboo`,
+      html,
+    });
+  }
+
+  async sendProblemReportAdminNotification(
+    data: ProblemReportAdminEmailData
+  ): Promise<void> {
+    const html = await render(ProblemReportNotificationEmail(data));
+    await this.sendEmail({
+      to: this.adminEmail,
+      subject: `[PROBLEM REPORT] ${data.riderName} - ${new Date(data.submittedAt).toLocaleString()}`,
       html,
     });
   }

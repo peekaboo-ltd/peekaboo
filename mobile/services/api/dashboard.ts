@@ -10,6 +10,7 @@ interface ApiResponse<T> {
 
 export interface SubmitProblemReportPayload {
   description: string;
+  submissionType?: 'PROBLEM' | 'RECEIPT';
   capturedAt: string;
   mediaType: 'image' | 'video';
   evidenceUri: string;
@@ -171,6 +172,9 @@ export const dashboardAPI = {
   submitProblemReport: async (payload: SubmitProblemReportPayload): Promise<void> => {
     const formData: FormData = new FormData();
     formData.append('description', payload.description);
+    if (payload.submissionType) {
+      formData.append('submissionType', payload.submissionType);
+    }
     formData.append('capturedAt', payload.capturedAt);
     formData.append('mediaType', payload.mediaType);
     if (payload.locationLabel) {

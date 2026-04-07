@@ -17,15 +17,15 @@ export const AssignmentNotificationEmail = ({
       <Text style={styles.text}>Hi {userName || 'there'},</Text>
       <Text style={styles.text}>
         A rider has been assigned to your order{' '}
-        <strong>{orderReference}</strong>.
+        {orderReference}.
       </Text>
       <Section style={styles.detailsBox}>
         <Text style={styles.detailRow}>
-          <strong>Rider Name:</strong> {riderName}
+          Rider Name: {riderName}
         </Text>
         {riderPhone && (
           <Text style={styles.detailRow}>
-            <strong>Rider Phone:</strong> {riderPhone}
+            Rider Phone: {riderPhone}
           </Text>
         )}
       </Section>
@@ -39,7 +39,7 @@ export const AssignmentNotificationEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#1a1a2e',
     margin: '0 0 16px',
   },
@@ -51,7 +51,6 @@ const styles = {
   },
   detailsBox: {
     backgroundColor: '#e3f2fd',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
   },

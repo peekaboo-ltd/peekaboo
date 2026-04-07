@@ -41,20 +41,18 @@ export const CriticalAlertEmail = ({
 const styles = {
   heading: {
     fontSize: '24px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#c62828',
     margin: '0 0 16px',
   },
   alertBox: {
     backgroundColor: '#ffebee',
-    borderRadius: '8px',
     padding: '16px',
     margin: '16px 0',
-    borderLeft: '4px solid #c62828',
   },
   alertType: {
     fontSize: '14px',
-    fontWeight: 'bold' as const,
+    fontWeight: '500' as const,
     color: '#c62828',
     textTransform: 'uppercase' as const,
     margin: '0 0 8px',
