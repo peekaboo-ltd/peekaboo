@@ -282,6 +282,14 @@ const buildSupportWidgets = (
   ];
 };
 
+
+const formatDateParam = (date?: Date) => {
+  if (!date) return undefined;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate(),
+  ).padStart(2, '0')}`;
+};
+
 const getContextCopy = (role: RoleTypes | undefined) => {
   switch (role) {
     case RoleTypes.ADMIN:
@@ -311,11 +319,25 @@ const getContextCopy = (role: RoleTypes | undefined) => {
 
 const Dashboard = () => {
   const { user } = useAppSelector((state) => state.auth);
-  const { data, isLoading, error } = useGetDashboardMetricsQuery({});
-  useDocumentTitle('Dashboard');
-
   const [range, setRange] = useState<'7d' | '30d' | '90d'>('30d');
   const [metric, setMetric] = useState<string>('ORDERS');
+  const defaultStartDate = useMemo(() => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return thirtyDaysAgo;
+  }, []);
+  const [startDate, setStartDate] = useState<Date | undefined>(defaultStartDate);
+  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
+
+  const dateRangeParams = useMemo(
+    () => ({
+      startDate: formatDateParam(startDate),
+      endDate: formatDateParam(endDate),
+    }),
+    [endDate, startDate],
+  );
+  const { data, isLoading, error } = useGetDashboardMetricsQuery(dateRangeParams);
+  useDocumentTitle('Dashboard');
 
   const dashboardData = data?.data;
   const role = dashboardData?.role as RoleTypes | undefined;
@@ -325,19 +347,19 @@ const Dashboard = () => {
   const isBusiness = role === RoleTypes.BUSINESS;
 
   const { data: ordersChartResp } = useGetOrderChartDataQuery(
-    { period: 'month' },
+    { period: 'month', ...dateRangeParams },
     { skip: !(isAdminOrStaff || isBusiness || role === RoleTypes.CUSTOMER) },
   );
   const { data: revenueChartResp } = useGetRevenueChartDataQuery(
-    { period: 'month' },
+    { period: 'month', ...dateRangeParams },
     { skip: !isAdminOrStaff },
   );
   const { data: deliveriesChartResp } = useGetDeliveryChartDataQuery(
-    { period: 'month' },
+    { period: 'month', ...dateRangeParams },
     { skip: !isRider },
   );
   const { data: summaryChartResp, isFetching: summaryChartFetching } = useGetSummaryChartDataQuery(
-    { metric, period: range },
+    { metric, period: range, ...dateRangeParams },
     { skip: !role },
   );
 
@@ -422,6 +444,10 @@ const Dashboard = () => {
         role={dashboardData?.role}
         actions={quickActions}
         variants={itemVariants}
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
       />
 
       <DashboardMetricsSection
