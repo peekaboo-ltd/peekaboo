@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../../components/ui/Card';
+import { useI18n } from '../../i18n';
 import { colors, spacing, typography } from '../../utils/constants';
 
 const ADDRESS = 'Niboye, Kicukiro, Kigali, Rwanda';
@@ -19,6 +21,10 @@ const openLink = async (url: string) => {
 };
 
 export default function SupportScreen() {
+  const { width } = useWindowDimensions();
+  const isCompact = width < 380;
+  const { t } = useI18n();
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.background}>
@@ -26,14 +32,14 @@ export default function SupportScreen() {
         <View style={styles.glowBottom} />
       </View>
 
-      <View style={styles.content}>
+      <View style={[styles.content, isCompact && styles.contentCompact]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton} activeOpacity={0.85}>
           <Ionicons name="chevron-back" size={18} color={colors.text.primary} />
-          <Text style={styles.backText}>Back</Text>
+          <Text style={styles.backText}>{t('common.back')}</Text>
         </TouchableOpacity>
 
-        <Card style={styles.card} padding="lg" elevation="md">
-          <Text style={styles.title}>Contact Support</Text>
+        <Card style={styles.card} padding={isCompact ? 'md' : 'lg'} elevation="md">
+          <Text style={[styles.title, isCompact && styles.titleCompact]}>{t('support.title')}</Text>
 
           <View style={styles.row}>
             <Ionicons name="location-outline" size={18} color={colors.primary} />
@@ -90,6 +96,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.md,
   },
+  contentCompact: {
+    paddingHorizontal: spacing.md,
+    justifyContent: 'flex-start',
+  },
   backButton: {
     alignSelf: 'flex-start',
     flexDirection: 'row',
@@ -118,6 +128,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text.primary,
     marginBottom: spacing.xs,
+  },
+  titleCompact: {
+    fontSize: typography.h2.fontSize,
   },
   row: {
     flexDirection: 'row',

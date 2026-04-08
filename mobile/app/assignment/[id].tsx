@@ -8,6 +8,7 @@ import {
   Alert,
   Text,
   Keyboard,
+  useWindowDimensions,
 } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { AssignmentDetails } from '../../components/assignments/AssignmentDetails';
@@ -20,6 +21,8 @@ import { colors, spacing, typography } from '../../utils/constants';
 import { useI18n } from '../../i18n';
 
 export default function AssignmentDetailScreen() {
+  const { width } = useWindowDimensions();
+  const isCompact = width < 380;
   const { t } = useI18n();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -253,6 +256,7 @@ export default function AssignmentDetailScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.scrollContent,
+          isCompact && styles.scrollContentCompact,
           keyboardHeight > 0 && { paddingBottom: keyboardHeight },
         ]}
         showsVerticalScrollIndicator={false}
@@ -261,8 +265,10 @@ export default function AssignmentDetailScreen() {
         <AssignmentDetails assignment={selectedAssignment} />
 
         {canComplete && (
-          <View style={styles.trackingCard}>
-            <Text style={styles.trackingLabel}>{t('assignmentDetail.completeVerification')}</Text>
+          <View style={[styles.trackingCard, isCompact && styles.trackingCardCompact]}>
+            <Text style={[styles.trackingLabel, isCompact && styles.trackingLabelCompact]}>
+              {t('assignmentDetail.completeVerification')}
+            </Text>
             <Input
               value={trackingIdInput}
               onChangeText={setTrackingIdInput}
@@ -333,6 +339,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: spacing.md,
   },
+  scrollContentCompact: {
+    paddingBottom: spacing.sm,
+  },
   trackingCard: {
     marginHorizontal: spacing.md,
     marginTop: spacing.sm,
@@ -343,10 +352,17 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors.surface,
   },
+  trackingCardCompact: {
+    marginHorizontal: spacing.sm,
+    marginBottom: spacing.md,
+  },
   trackingLabel: {
     fontSize: typography.body.fontSize,
     fontWeight: '600',
     color: colors.text.primary,
     marginBottom: spacing.sm,
+  },
+  trackingLabelCompact: {
+    fontSize: typography.bodySmall.fontSize,
   },
 });

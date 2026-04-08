@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../ui/Card';
 import { colors, typography, spacing } from '../../utils/constants';
@@ -26,10 +26,14 @@ export const StatCard: React.FC<StatCardProps> = ({
   trend,
   onPress,
 }) => {
+  const { width } = useWindowDimensions();
+  const isCompact = width < 380;
+  const cardStyle = isCompact ? { ...styles.card, ...styles.cardCompact } : styles.card;
+
   return (
-    <Card style={styles.card} elevation="lg" onPress={onPress}>
+    <Card style={cardStyle} elevation="lg" onPress={onPress}>
       <View style={styles.header}>
-        <View style={[styles.iconContainer, { backgroundColor: `${iconColor}12` }]}>
+        <View style={[styles.iconContainer, isCompact && styles.iconContainerCompact, { backgroundColor: `${iconColor}12` }]}>
           <Ionicons name={icon} size={22} color={iconColor} />
         </View>
         {trend && (
@@ -45,7 +49,9 @@ export const StatCard: React.FC<StatCardProps> = ({
           </View>
         )}
       </View>
-      <Text style={styles.value}>{value}</Text>
+      <Text style={[styles.value, isCompact && styles.valueCompact]} numberOfLines={1} adjustsFontSizeToFit>
+        {value}
+      </Text>
       <Text style={styles.title}>{title}</Text>
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
     </Card>
@@ -62,6 +68,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(95, 149, 152, 0.18)',
   },
+  cardCompact: {
+    minWidth: '48%',
+    marginBottom: spacing.sm,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -74,6 +84,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  iconContainerCompact: {
+    width: 36,
+    height: 36,
   },
   trend: {
     flexDirection: 'row',
@@ -98,6 +112,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text.primary,
     marginBottom: 2,
+  },
+  valueCompact: {
+    fontSize: 22,
   },
   title: {
     fontSize: typography.bodySmall.fontSize,

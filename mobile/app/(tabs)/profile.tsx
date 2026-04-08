@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   TouchableOpacity,
+  useWindowDimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -22,6 +23,8 @@ import { colors, spacing, typography, borderRadius, shadows } from '../../utils/
 import { formatCurrency } from '../../utils/formatters';
 
 export default function ProfileScreen() {
+  const { width } = useWindowDimensions();
+  const isCompact = width < 380;
   const { t } = useI18n();
   const { user, isLoading } = useAuth();
   const setUser = useAuthStore((state) => state.setUser);
@@ -227,11 +230,11 @@ export default function ProfileScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.contentContainer}
+      contentContainerStyle={[styles.contentContainer, isCompact && styles.contentContainerCompact]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <View style={styles.headerCard}>
+      <View style={[styles.headerCard, isCompact && styles.headerCardCompact]}>
         <TouchableOpacity
           onPress={handleChangePhoto}
           disabled={isAvatarLoading}
@@ -251,12 +254,12 @@ export default function ProfileScreen() {
             )}
           </View>
         </TouchableOpacity>
-        <View style={styles.headerTextContainer}>
-          <Text style={styles.name}>{user.name || t('profile.unnamedRider')}</Text>
+        <View style={[styles.headerTextContainer, isCompact && styles.headerTextContainerCompact]}>
+          <Text style={[styles.name, isCompact && styles.nameCompact]}>{user.name || t('profile.unnamedRider')}</Text>
           <Text style={styles.subtitle}>{user.phoneNumber}</Text>
           {user.email ? <Text style={styles.subtitle}>{user.email}</Text> : null}
         </View>
-        <View style={styles.statusPill}>
+        <View style={[styles.statusPill, isCompact && styles.statusPillCompact]}>
           <Ionicons
             name={user.status === 'ACTIVE' ? 'checkmark-circle' : 'alert-circle'}
             size={16}
@@ -334,7 +337,7 @@ export default function ProfileScreen() {
         <Text style={styles.errorText}>{error}</Text>
       )}
 
-      <View style={styles.actionsRow}>
+      <View style={[styles.actionsRow, isCompact && styles.actionsRowCompact]}>
         {isEditing ? (
           <>
             <Button
@@ -375,6 +378,10 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
   },
+  contentContainerCompact: {
+    padding: spacing.md,
+    paddingBottom: spacing.xl,
+  },
   centered: {
     flex: 1,
     alignItems: 'center',
@@ -393,6 +400,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.lg,
     ...shadows.md,
+  },
+  headerCardCompact: {
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
   avatarButton: {
     paddingHorizontal: 0,
@@ -420,11 +432,18 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: spacing.md,
   },
+  headerTextContainerCompact: {
+    marginLeft: 0,
+    width: '100%',
+  },
   name: {
     fontSize: typography.h2.fontSize,
     fontWeight: typography.h2.fontWeight,
     color: colors.text.primary,
     marginBottom: spacing.xs,
+  },
+  nameCompact: {
+    fontSize: typography.h3.fontSize,
   },
   subtitle: {
     fontSize: typography.bodySmall.fontSize,
@@ -437,6 +456,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
     backgroundColor: colors.primaryLight,
+  },
+  statusPillCompact: {
+    alignSelf: 'flex-start',
   },
   statusText: {
     marginLeft: spacing.xs,
@@ -481,6 +503,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  actionsRowCompact: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
   },
   actionButton: {
     flex: 1,
