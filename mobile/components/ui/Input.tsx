@@ -9,7 +9,8 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, spacing, borderRadius } from '../../utils/constants';
+import { typography, spacing, borderRadius, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 interface InputProps {
   value: string;
@@ -48,6 +49,8 @@ export const Input: React.FC<InputProps> = ({
   onBlur,
   onFocus,
 }) => {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -117,7 +120,7 @@ export const Input: React.FC<InputProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     marginBottom: spacing.md,
   },

@@ -8,7 +8,8 @@ import {
   TextStyle,
   StyleProp,
 } from 'react-native';
-import { colors, typography, spacing, borderRadius } from '../../utils/constants';
+import { typography, spacing, borderRadius, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 interface ButtonProps {
   title: string;
@@ -35,6 +36,8 @@ export const Button: React.FC<ButtonProps> = ({
   style,
   textStyle,
 }) => {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const isDisabled = disabled || loading;
 
   const getBackgroundColor = (): string => {
@@ -148,7 +151,7 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',

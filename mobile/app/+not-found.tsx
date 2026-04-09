@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Link, Stack } from 'expo-router';
-import { colors, typography, spacing } from '../utils/constants';
+import { typography, spacing, type AppColors } from '../utils/constants';
 import { useI18n } from '../i18n';
+import { useTheme } from '../contexts/theme-context';
 
 export default function NotFoundScreen() {
   const { t } = useI18n();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <>
       <Stack.Screen options={{ title: t('common.notFound') }} />
@@ -22,7 +25,7 @@ export default function NotFoundScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',

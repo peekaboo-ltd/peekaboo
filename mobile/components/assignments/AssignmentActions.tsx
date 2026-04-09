@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { Button } from '../ui/Button';
 import { OrderAssignmentStatus } from '../../types';
-import { colors, spacing } from '../../utils/constants';
+import { spacing, type AppColors } from '../../utils/constants';
 import { useI18n } from '../../i18n';
+import { useTheme } from '../../contexts/theme-context';
 
 interface AssignmentActionsProps {
   status: OrderAssignmentStatus;
@@ -26,6 +27,8 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
   onComplete,
   isLoading = false,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useI18n();
   const handleReject = () => {
     Alert.alert(
@@ -160,7 +163,7 @@ export const AssignmentActions: React.FC<AssignmentActionsProps> = ({
   return null;
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     padding: spacing.md,

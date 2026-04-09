@@ -225,3 +225,36 @@ export const getLanguagePreference = async (): Promise<string | null> => {
     return null;
   }
 };
+
+/**
+ * Save theme preference
+ */
+export const saveThemePreference = async (theme: 'light' | 'dark'): Promise<void> => {
+  try {
+    if (isWeb) {
+      await webStorage.setItem(STORAGE_KEYS.THEME, theme);
+    } else {
+      await SecureStore.setItemAsync(STORAGE_KEYS.THEME, theme);
+    }
+  } catch (error) {
+    console.error('Error saving theme preference:', error);
+  }
+};
+
+/**
+ * Get saved theme preference
+ */
+export const getThemePreference = async (): Promise<'light' | 'dark' | null> => {
+  try {
+    const value = isWeb
+      ? await webStorage.getItem(STORAGE_KEYS.THEME)
+      : await SecureStore.getItemAsync(STORAGE_KEYS.THEME);
+    if (value === 'light' || value === 'dark') {
+      return value;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting theme preference:', error);
+    return null;
+  }
+};

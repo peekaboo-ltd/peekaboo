@@ -148,7 +148,7 @@ export const formatOrderRef = (referenceId: string): string => {
  */
 export const getStatusColor = (status: string): string => {
   const statusColors: Record<string, string> = {
-    PENDING: '#F59E0B', // Keep warning color
+    PENDING: '#FCBF49', // Peekaboo yellow
     ACTIVE: '#1D546D', // Dark teal - primary color
     COMPLETED: '#10B981', // Keep success color
     CANCELLED: '#EF4444', // Keep danger color

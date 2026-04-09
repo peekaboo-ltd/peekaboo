@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../ui/Card';
 import { RecentActivity as RecentActivityType } from '../../types';
-import { colors, typography, spacing } from '../../utils/constants';
+import { typography, spacing, type AppColors } from '../../utils/constants';
 import { formatRelativeTime } from '../../utils/formatters';
 import { useI18n } from '../../i18n';
+import { useTheme } from '../../contexts/theme-context';
 
 interface RecentActivityProps {
   activities: RecentActivityType[];
@@ -27,7 +28,7 @@ const getActivityIcon = (type: RecentActivityType['type']): keyof typeof Ionicon
   }
 };
 
-const getActivityColor = (type: RecentActivityType['type']): string => {
+const getActivityColor = (type: RecentActivityType['type'], colors: AppColors): string => {
   switch (type) {
     case 'assignment_accepted':
       return colors.primary;
@@ -44,11 +45,13 @@ const getActivityColor = (type: RecentActivityType['type']): string => {
 interface ActivityItemProps {
   activity: RecentActivityType;
   onPress?: () => void;
+  colors: AppColors;
+  styles: ReturnType<typeof createStyles>;
 }
 
-const ActivityItem: React.FC<ActivityItemProps> = ({ activity, onPress }) => {
+const ActivityItem: React.FC<ActivityItemProps> = ({ activity, onPress, colors, styles }) => {
   const icon = getActivityIcon(activity.type);
-  const iconColor = getActivityColor(activity.type);
+  const iconColor = getActivityColor(activity.type, colors);
 
   return (
     <Card 
@@ -79,6 +82,8 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
   activities,
   onActivityPress,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useI18n();
   if (activities.length === 0) {
     return (
@@ -96,6 +101,8 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
       renderItem={({ item }) => (
         <ActivityItem 
           activity={item} 
+          colors={colors}
+          styles={styles}
           onPress={() => onActivityPress?.(item)} 
         />
       )}
@@ -105,7 +112,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   activityCard: {
     marginBottom: 0,
     backgroundColor: colors.surface,

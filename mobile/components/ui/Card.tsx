@@ -5,7 +5,8 @@ import {
   StyleSheet,
   ViewStyle,
 } from 'react-native';
-import { colors, spacing, borderRadius, shadows } from '../../utils/constants';
+import { spacing, borderRadius, shadows, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 interface CardProps {
   children: React.ReactNode;
@@ -24,6 +25,8 @@ export const Card: React.FC<CardProps> = ({
   padding = 'md',
   variant = 'default',
 }) => {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const getElevationStyle = (): ViewStyle => {
     if (variant === 'outlined' || elevation === 'none') return {} as ViewStyle;
     return (shadows[elevation] || shadows.sm) as ViewStyle;
@@ -75,7 +78,7 @@ export const Card: React.FC<CardProps> = ({
   return <View style={cardStyle}>{children}</View>;
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   card: {
     backgroundColor: colors.background,
     borderRadius: borderRadius.lg,

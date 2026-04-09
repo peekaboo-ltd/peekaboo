@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { OrderAssignmentStatus } from '../../types';
 import { useI18n } from '../../i18n';
-import { colors, typography, spacing, borderRadius } from '../../utils/constants';
+import { typography, spacing, borderRadius, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 type FilterOption = OrderAssignmentStatus | 'ALL';
 
@@ -15,6 +16,8 @@ export const AssignmentFilters: React.FC<AssignmentFiltersProps> = ({
   activeFilter,
   onFilterChange,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useI18n();
   const filters: { key: FilterOption; label: string }[] = [
     { key: 'ALL', label: t('assignments.filterAll') },
@@ -58,7 +61,7 @@ export const AssignmentFilters: React.FC<AssignmentFiltersProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     backgroundColor: colors.background,
     paddingVertical: spacing.sm,

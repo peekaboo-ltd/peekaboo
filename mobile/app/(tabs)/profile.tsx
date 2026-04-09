@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   TouchableOpacity,
+  Switch,
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -18,11 +19,13 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher';
 import { useI18n } from '../../i18n';
-import { colors, spacing, typography, borderRadius, shadows } from '../../utils/constants';
+import { spacing, typography, borderRadius, shadows, type AppColors } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatters';
+import { useTheme } from '../../contexts/theme-context';
 
 export default function ProfileScreen() {
   const { t } = useI18n();
+  const { mode, setMode, colors: themeColors } = useTheme();
   const { user, isLoading } = useAuth();
   const setUser = useAuthStore((state) => state.setUser);
   const { stats } = useDashboard();
@@ -37,6 +40,8 @@ export default function ProfileScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAvatarLoading, setIsAvatarLoading] = useState(false);
+  const styles = useMemo(() => createStyles(themeColors), [themeColors]);
+  const colors = themeColors;
 
   const initials = useMemo(() => {
     if (user?.name) {
@@ -269,6 +274,20 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('profile.infoTitle')}</Text>
         <LanguageSwitcher />
+        <View style={[styles.themeRow, { borderColor: themeColors.border }]}>
+          <View>
+            <Text style={[styles.themeTitle, { color: themeColors.text.primary }]}>Theme</Text>
+            <Text style={[styles.themeSubtitle, { color: themeColors.text.secondary }]}>
+              {mode === 'dark' ? 'Dark mode' : 'Light mode'}
+            </Text>
+          </View>
+          <Switch
+            value={mode === 'dark'}
+            onValueChange={(enabled) => setMode(enabled ? 'dark' : 'light')}
+            trackColor={{ false: 'rgba(95, 149, 152, 0.2)', true: themeColors.primaryLight }}
+            thumbColor={themeColors.text.inverse}
+          />
+        </View>
 
         <Input
           label={t('profile.fullName')}
@@ -366,7 +385,7 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -487,5 +506,21 @@ const styles = StyleSheet.create({
   },
   singleActionButton: {
     flex: 1,
+  },
+  themeRow: {
+    marginBottom: spacing.md,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  themeTitle: {
+    fontSize: typography.body.fontSize,
+    fontWeight: '600',
+  },
+  themeSubtitle: {
+    marginTop: spacing.xs,
+    fontSize: typography.caption.fontSize,
   },
 });

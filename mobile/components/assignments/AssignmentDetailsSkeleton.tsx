@@ -1,9 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, View, StyleSheet } from 'react-native';
 import { Card } from '../ui/Card';
-import { colors, spacing } from '../../utils/constants';
+import { spacing, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 export const AssignmentDetailsSkeleton: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const pulse = useRef(new Animated.Value(0.6)).current;
 
   useEffect(() => {
@@ -42,7 +45,7 @@ export const AssignmentDetailsSkeleton: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   section: {
     marginBottom: spacing.md,
     backgroundColor: colors.surface,

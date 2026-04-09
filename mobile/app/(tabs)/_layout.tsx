@@ -2,13 +2,14 @@ import { Tabs, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
-import { colors } from '../../utils/constants';
 import { useI18n } from '../../i18n';
+import { useTheme } from '../../contexts/theme-context';
 
 export default function TabLayout() {
   const { isAuthenticated } = useAuthStore();
   const insets = useSafeAreaInsets();
   const { t } = useI18n();
+  const { colors } = useTheme();
 
   // If user is not authenticated, redirect to login
   if (!isAuthenticated) {
@@ -46,6 +47,7 @@ export default function TabLayout() {
         options={{
           title: t('tab.dashboard'),
           headerShown: false,
+          tabBarActiveTintColor: colors.primary,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
@@ -56,8 +58,8 @@ export default function TabLayout() {
         options={{
           title: t('tab.assignments'),
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="list" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name="list" size={size} color={focused ? colors.warning : color} />
           ),
         }}
       />

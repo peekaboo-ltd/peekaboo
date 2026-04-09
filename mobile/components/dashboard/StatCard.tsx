@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Svg, { Circle } from 'react-native-svg';
 import { Card } from '../ui/Card';
-import { colors, typography, spacing } from '../../utils/constants';
+import { typography, spacing, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 interface StatCardProps {
   title: string;
@@ -14,6 +16,7 @@ interface StatCardProps {
     value: number;
     isPositive: boolean;
   };
+  progress?: number;
   onPress?: () => void;
 }
 
@@ -21,16 +24,34 @@ export const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   icon,
-  iconColor = colors.primary,
+  iconColor,
   subtitle,
   trend,
+  progress,
   onPress,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const ringColor = iconColor ?? colors.warning;
+  const ringSize = 112;
+  const ringStroke = 4;
+  const ringRadius = (ringSize - ringStroke) / 2;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+
+  const numericValue = typeof value === 'number' ? value : Number(String(value).replace(/[^\d.-]/g, ''));
+  const defaultProgress = Number.isFinite(numericValue)
+    ? Math.max(0.14, Math.min(1, Math.abs(numericValue) / 100))
+    : 0.82;
+  const ringProgress = typeof progress === 'number'
+    ? Math.max(0.14, Math.min(1, progress))
+    : defaultProgress;
+  const strokeDasharray = `${ringCircumference * ringProgress} ${ringCircumference}`;
+
   return (
     <Card style={styles.card} elevation="lg" onPress={onPress}>
-      <View style={styles.header}>
-        <View style={[styles.iconContainer, { backgroundColor: `${iconColor}12` }]}>
-          <Ionicons name={icon} size={22} color={iconColor} />
+      <View style={styles.topRow}>
+        <View style={[styles.iconContainer, { backgroundColor: `${ringColor}14` }]}>
+          <Ionicons name={icon} size={14} color={ringColor} />
         </View>
         {trend && (
           <View style={[styles.trend, trend.isPositive ? styles.trendPositive : styles.trendNegative]}>
@@ -45,33 +66,63 @@ export const StatCard: React.FC<StatCardProps> = ({
           </View>
         )}
       </View>
-      <Text style={styles.value}>{value}</Text>
+      <View style={styles.ringWrap}>
+        <Svg width={ringSize} height={ringSize}>
+          <Circle
+            cx={ringSize / 2}
+            cy={ringSize / 2}
+            r={ringRadius}
+            stroke={`${ringColor}22`}
+            strokeWidth={ringStroke}
+            fill="none"
+          />
+          <Circle
+            cx={ringSize / 2}
+            cy={ringSize / 2}
+            r={ringRadius}
+            stroke={ringColor}
+            strokeWidth={ringStroke}
+            fill="none"
+            strokeDasharray={strokeDasharray}
+            strokeLinecap="round"
+            rotation={-90}
+            origin={`${ringSize / 2}, ${ringSize / 2}`}
+          />
+        </Svg>
+        <View style={styles.ringCenter}>
+          <Text style={[styles.value, { color: ringColor }]}>{value}</Text>
+        </View>
+      </View>
       <Text style={styles.title}>{title}</Text>
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
     </Card>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   card: {
     flex: 1,
     minWidth: '45%',
     marginBottom: spacing.md,
-    marginHorizontal: spacing.xs, // Add horizontal spacing between cards
+    marginHorizontal: spacing.xs,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: 'rgba(95, 149, 152, 0.18)',
+    alignItems: 'center',
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
   },
-  header: {
+  topRow: {
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -93,22 +144,34 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 2,
   },
+  ringWrap: {
+    width: 112,
+    height: 112,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  ringCenter: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   value: {
-    fontSize: 26,
+    fontSize: 34,
     fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: 2,
   },
   title: {
     fontSize: typography.bodySmall.fontSize,
     color: colors.text.secondary,
-    fontWeight: '500',
+    fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 1.4,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: typography.caption.fontSize,
     color: colors.text.disabled,
-    marginTop: 2,
+    marginTop: spacing.xs,
+    textAlign: 'center',
   },
 });

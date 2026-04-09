@@ -1,13 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Card } from '../ui/Card';
-import { colors, spacing } from '../../utils/constants';
+import { spacing, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 interface AssignmentSkeletonCardProps {
   compact?: boolean;
 }
 
 export const AssignmentSkeletonCard: React.FC<AssignmentSkeletonCardProps> = ({ compact = false }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const pulse = useRef(new Animated.Value(0.6)).current;
 
   useEffect(() => {
@@ -57,7 +60,7 @@ export const AssignmentSkeletonCard: React.FC<AssignmentSkeletonCardProps> = ({ 
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.surface,

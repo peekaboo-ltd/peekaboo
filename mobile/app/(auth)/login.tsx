@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
@@ -18,10 +18,13 @@ import { Input } from '../../components/ui/Input';
 import { LanguageSwitcher } from '../../components/ui/LanguageSwitcher';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n';
-import { colors, spacing, typography } from '../../utils/constants';
+import { spacing, typography, type AppColors } from '../../utils/constants';
 import { getPasswordError, getUsernameError } from '../../utils/validators';
+import { useTheme } from '../../contexts/theme-context';
 
 export default function LoginScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [usernameError, setUsernameError] = useState<string | null>(null);
@@ -228,7 +231,7 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Linking, Platform, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Assignment, OrderAssignmentStatus, OrderStatus } from '../../types';
-import { colors, typography, spacing } from '../../utils/constants';
+import { typography, spacing, type AppColors } from '../../utils/constants';
 import { getOrderStatusLabel } from '../../constants/order.constants';
 import { 
   formatDateTime, 
@@ -15,6 +15,7 @@ import {
 } from '../../utils/formatters';
 import { AssignmentDirectionsMap } from './AssignmentDirectionsMap';
 import { useI18n } from '../../i18n';
+import { useTheme } from '../../contexts/theme-context';
 
 interface AssignmentDetailsProps {
   assignment: Assignment;
@@ -35,6 +36,8 @@ const LocationAdministrativeLabel: React.FC<{ latitude: number; longitude: numbe
   latitude,
   longitude,
 }) => {
+  const { colors, isDark } = useTheme();
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const [locationLabel, setLocationLabel] = useState(
     formatCoordinateFallback(latitude, longitude),
   );
@@ -135,6 +138,8 @@ const getLatestOrderStatus = (assignment: Assignment): OrderStatus | undefined =
 export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
   assignment,
 }) => {
+  const { colors, isDark } = useTheme();
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const { t } = useI18n();
   const order = assignment.order;
   const [directionsVisible, setDirectionsVisible] = useState(false);
@@ -345,7 +350,7 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors, isDark: boolean) => StyleSheet.create({
   container: {
     padding: spacing.md,
   },
@@ -400,11 +405,11 @@ const styles = StyleSheet.create({
     padding: spacing.xs,
   },
   locationCard: {
-    backgroundColor: 'rgba(95, 149, 152, 0.08)',
+    backgroundColor: isDark ? 'rgba(12, 32, 44, 0.92)' : 'rgba(95, 149, 152, 0.08)',
     borderRadius: 14,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(95, 149, 152, 0.16)',
+    borderColor: isDark ? 'rgba(95, 149, 152, 0.35)' : 'rgba(95, 149, 152, 0.16)',
   },
   locationHeader: {
     flexDirection: 'row',

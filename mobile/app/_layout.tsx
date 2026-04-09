@@ -4,7 +4,6 @@ import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import { useAssignmentStore } from '../store/assignmentStore';
-import { colors } from '../utils/constants';
 import { useLocationTracking } from '../hooks';
 import {
   initializeOneSignal,
@@ -12,10 +11,12 @@ import {
   addNotificationForegroundListener,
 } from '../services/notifications/pushNotifications';
 import { I18nProvider } from '../i18n';
+import { ThemeProvider, useTheme } from '../contexts/theme-context';
 
 function RootLayoutContent() {
   const { isLoading, isAuthenticated, checkAuth } = useAuthStore();
   const [isInitializing, setIsInitializing] = useState(true);
+  const { colors: themeColors, isDark } = useTheme();
   useLocationTracking();
 
   useEffect(() => {
@@ -49,9 +50,9 @@ function RootLayoutContent() {
 
   if (isInitializing || isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <StatusBar style="dark" />
+      <View style={[styles.loadingContainer, { backgroundColor: themeColors.background }]}>
+        <ActivityIndicator size="large" color={themeColors.primary} />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
       </View>
     );
   }
@@ -67,11 +68,22 @@ function RootLayoutContent() {
             headerShown: true,
             title: 'Assignment Details',
             headerBackTitle: 'Back',
+            headerStyle: {
+              backgroundColor: themeColors.background,
+            },
+            headerTintColor: themeColors.text.primary,
+            headerTitleStyle: {
+              color: themeColors.text.primary,
+            },
+            contentStyle: {
+              backgroundColor: themeColors.background,
+            },
+            statusBarStyle: isDark ? 'light' : 'dark',
           }}
         />
         <Stack.Screen name="+not-found" />
       </Stack>
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
     </>
   );
 }
@@ -79,7 +91,9 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <I18nProvider>
-      <RootLayoutContent />
+      <ThemeProvider>
+        <RootLayoutContent />
+      </ThemeProvider>
     </I18nProvider>
   );
 }
@@ -89,6 +103,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
   },
 });

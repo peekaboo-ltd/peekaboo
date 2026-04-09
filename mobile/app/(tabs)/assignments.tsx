@@ -18,9 +18,11 @@ import { useAssignments } from '../../hooks/useAssignments';
 import { Assignment, OrderAssignmentStatus, OrderStatus } from '../../types';
 import { useAssignmentStore } from '../../store/assignmentStore';
 import { useI18n } from '../../i18n';
-import { colors, typography, spacing } from '../../utils/constants';
+import { typography, spacing, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 export default function AssignmentsScreen() {
+  const { colors } = useTheme();
   const { t } = useI18n();
   const params = useLocalSearchParams<{ filter?: string }>();
   const {
@@ -38,6 +40,7 @@ export default function AssignmentsScreen() {
   } = useAssignments();
   const { confirmOrderDispatch } = useAssignmentStore();
   const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null);
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   useEffect(() => {
     if (params.filter) {
@@ -297,7 +300,7 @@ export default function AssignmentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

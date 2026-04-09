@@ -36,18 +36,19 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refresh_token',
   USER_DATA: 'user_data',
   LANGUAGE: 'language',
+  THEME: 'theme',
 } as const;
 
 // Colors - Color Hunt Palette: #061E29 #1D546D #5F9598 #F3F4F4
 // Reference: https://colorhunt.co/palette/061e291d546d5f9598f3f4f4
-export const colors = {
+export const lightColors = {
   primary: '#1D546D', // Dark teal - main brand color
   primaryLight: '#5F9598', // Lighter muted teal
   primaryDark: '#061E29', // Very dark blue
   success: '#10B981', // Keep for success states
   successLight: '#34D399',
-  warning: '#F59E0B', // Keep for warning states
-  warningLight: '#FBBF24',
+  warning: '#FCBF49', // Peekaboo brand yellow
+  warningLight: '#FCD77F',
   danger: '#EF4444', // Keep for error states
   dangerLight: '#F87171',
   background: '#F3F4F4', // Very light gray
@@ -62,6 +63,53 @@ export const colors = {
   border: '#5F9598', // Muted teal for borders (can use with opacity)
   borderDark: '#1D546D', // Darker teal for stronger borders
 } as const;
+
+export const darkColors = {
+  primary: '#5F9598',
+  primaryLight: '#7FAFB1',
+  primaryDark: '#0B1A23',
+  success: '#34D399',
+  successLight: '#6EE7B7',
+  warning: '#FCBF49',
+  warningLight: '#FCD77F',
+  danger: '#F87171',
+  dangerLight: '#FCA5A5',
+  background: '#06131B',
+  surface: '#0C202C',
+  surfaceHover: '#123243',
+  text: {
+    primary: '#F3F4F4',
+    secondary: '#B8D3D5',
+    disabled: '#7FAFB1',
+    inverse: '#061E29',
+  },
+  border: '#2F5E66',
+  borderDark: '#5F9598',
+} as const;
+
+export const colors = lightColors;
+export type AppColors = {
+  primary: string;
+  primaryLight: string;
+  primaryDark: string;
+  success: string;
+  successLight: string;
+  warning: string;
+  warningLight: string;
+  danger: string;
+  dangerLight: string;
+  background: string;
+  surface: string;
+  surfaceHover: string;
+  text: {
+    primary: string;
+    secondary: string;
+    disabled: string;
+    inverse: string;
+  };
+  border: string;
+  borderDark: string;
+};
 
 // Typography
 export const typography = {

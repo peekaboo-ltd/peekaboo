@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Linking, useWindowDimensions, Platform } from 'react-native';
 import { Button } from '../ui/Button';
 import { formatDistance } from '../../utils/formatters';
-import { colors, typography, spacing } from '../../utils/constants';
+import { typography, spacing, type AppColors } from '../../utils/constants';
 import { useI18n } from '../../i18n';
+import { useTheme } from '../../contexts/theme-context';
 
 type WebViewComponentType = React.ComponentType<{
   source: { uri: string };
@@ -63,6 +64,8 @@ export const AssignmentDirectionsMap: React.FC<AssignmentDirectionsMapProps> = (
   destination,
   onClose,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useI18n();
   const WebView = useNativeWebView();
   const { height } = useWindowDimensions();
@@ -134,7 +137,7 @@ export const AssignmentDirectionsMap: React.FC<AssignmentDirectionsMapProps> = (
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     padding: spacing.md,
   },

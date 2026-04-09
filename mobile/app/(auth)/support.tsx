@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import React, { useMemo } from 'react';
 import { Linking, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Card } from '../../components/ui/Card';
-import { colors, spacing, typography } from '../../utils/constants';
+import { spacing, typography, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 const ADDRESS = 'Niboye, Kicukiro, Kigali, Rwanda';
 const PHONE_LABEL = '(+250) 794 892 784';
@@ -19,6 +21,9 @@ const openLink = async (url: string) => {
 };
 
 export default function SupportScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.background}>
@@ -57,7 +62,7 @@ export default function SupportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

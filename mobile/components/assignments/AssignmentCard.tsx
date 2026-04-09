@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Assignment, OrderAssignmentStatus, OrderStatus } from '../../types';
-import { colors, typography, spacing } from '../../utils/constants';
+import { typography, spacing, type AppColors } from '../../utils/constants';
 import { formatSmartDate, formatCurrency, formatOrderRef } from '../../utils/formatters';
 import { getOrderStatusLabel } from '../../constants/order.constants';
 import { useI18n } from '../../i18n';
+import { useTheme } from '../../contexts/theme-context';
 
 interface AssignmentCardProps {
   assignment: Assignment;
@@ -67,6 +68,8 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   onReject,
   isLoading = false,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useI18n();
   const isPending = assignment.status === OrderAssignmentStatus.PENDING;
   const order = assignment.order;
@@ -165,7 +168,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.surface,

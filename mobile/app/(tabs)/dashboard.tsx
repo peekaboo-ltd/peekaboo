@@ -31,9 +31,9 @@ import { useAuthStore } from '../../store/authStore';
 import { useI18n } from '../../i18n';
 import { usersAPI } from '../../services/api/users';
 import { dashboardAPI } from '../../services/api/dashboard';
-import { colors, typography, spacing } from '../../utils/constants';
-import { formatCurrency } from '../../utils/formatters';
+import { typography, spacing, type AppColors } from '../../utils/constants';
 import { OrderAssignmentStatus, UserStatus } from '../../types';
+import { useTheme } from '../../contexts/theme-context';
 
 type ReportCaptureType = 'image' | 'video';
 type ReportCategory = 'problem' | 'receipt';
@@ -71,6 +71,7 @@ const formatAddressLabel = (address?: Location.LocationGeocodedAddress | null) =
 };
 
 export default function DashboardScreen() {
+  const { colors, isDark } = useTheme();
   const { user, logout } = useAuthStore();
   const { t } = useI18n();
   const { setUser } = useAuthStore();
@@ -110,8 +111,10 @@ export default function DashboardScreen() {
   const [isReportConfirmed, setIsReportConfirmed] = useState(false);
   const [isSendingReport, setIsSendingReport] = useState(false);
   const [reportSubmissionPreview, setReportSubmissionPreview] = useState<ReportSubmissionPreview | null>(null);
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const displayStatus = pendingAvailabilityStatus ?? user?.status ?? UserStatus.INACTIVE;
   const isShiftActive = displayStatus === UserStatus.ACTIVE;
+  const activityCount = recentActivity?.length ?? 0;
   const locationCollectedText = useMemo(() => {
     const collectedAt = user?.currentLocation?.collectedAt;
 
@@ -607,9 +610,9 @@ export default function DashboardScreen() {
           <Text style={styles.heroTitle}>{t('dashboard.stayTop')}</Text>
           <View style={styles.heroStatsRow}>
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatLabel}>{t('dashboard.earnings')}</Text>
+              <Text style={styles.heroStatLabel}>{t('dashboard.recentActivity')}</Text>
               <Text style={styles.heroStatValue}>
-                {formatCurrency(stats?.totalEarnings ?? 0)}
+                {activityCount}
               </Text>
             </View>
             <View style={styles.heroDivider} />
@@ -694,10 +697,10 @@ export default function DashboardScreen() {
               onPress={() => navigateToAssignments(OrderAssignmentStatus.COMPLETED)}
             />
             <StatCard
-              title={t('dashboard.earnings')}
-              value={formatCurrency(stats?.totalEarnings ?? 0)}
-              icon="cash"
-              iconColor={colors.success}
+              title="Izigikorwa"
+              value={activityCount}
+              icon="list"
+              iconColor="#7C3AED"
               onPress={() => navigateToAssignments('ALL')}
             />
           </View>
@@ -712,8 +715,8 @@ export default function DashboardScreen() {
               <Text style={styles.earningsValue}>{stats?.bonusActive ? t('common.yes') : t('common.no')}</Text>
             </View>
             <View style={styles.earningsRow}>
-              <Text style={styles.earningsLabel}>{t('dashboard.earnings')}</Text>
-              <Text style={styles.earningsValue}>{formatCurrency(stats?.totalEarnings ?? 0)}</Text>
+              <Text style={styles.earningsLabel}>{t('dashboard.recentActivity')}</Text>
+              <Text style={styles.earningsValue}>{activityCount}</Text>
             </View>
           </View>
 
@@ -1086,7 +1089,7 @@ export default function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -1166,9 +1169,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(16, 185, 129, 0.25)',
   },
   statusPillInactive: {
-    backgroundColor: 'rgba(245, 158, 11, 0.14)',
+    backgroundColor: 'rgba(252, 191, 73, 0.18)',
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
+    borderColor: 'rgba(252, 191, 73, 0.42)',
   },
   statusText: {
     fontSize: typography.caption.fontSize,
@@ -1289,7 +1292,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    backgroundColor: 'rgba(252, 191, 73, 0.18)',
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: 999,
@@ -1331,10 +1334,10 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
   },
   alertCard: {
-    backgroundColor: 'rgba(255, 251, 235, 0.9)',
+    backgroundColor: isDark ? 'rgba(40, 31, 10, 0.86)' : 'rgba(252, 191, 73, 0.14)',
     marginTop: spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.35)',
+    borderColor: isDark ? 'rgba(252, 191, 73, 0.48)' : 'rgba(252, 191, 73, 0.38)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -1462,8 +1465,8 @@ const styles = StyleSheet.create({
   locationDisclaimerCard: {
     marginTop: spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(95, 149, 152, 0.2)',
-    backgroundColor: 'rgba(243, 244, 244, 0.85)',
+    borderColor: isDark ? 'rgba(95, 149, 152, 0.35)' : 'rgba(95, 149, 152, 0.2)',
+    backgroundColor: isDark ? 'rgba(12, 32, 44, 0.92)' : 'rgba(243, 244, 244, 0.85)',
   },
   locationDisclaimerContent: {
     flexDirection: 'row',

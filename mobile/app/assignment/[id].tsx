@@ -16,10 +16,13 @@ import { AssignmentActions } from '../../components/assignments/AssignmentAction
 import { Input } from '../../components/ui/Input';
 import { useAssignmentStore } from '../../store/assignmentStore';
 import { OrderAssignmentStatus, OrderStatus } from '../../types';
-import { colors, spacing, typography } from '../../utils/constants';
+import { spacing, typography, type AppColors } from '../../utils/constants';
 import { useI18n } from '../../i18n';
+import { useTheme } from '../../contexts/theme-context';
 
 export default function AssignmentDetailScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useI18n();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -288,7 +291,7 @@ export default function AssignmentDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

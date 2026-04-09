@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useI18n } from '../../i18n';
-import { borderRadius, colors, spacing, typography } from '../../utils/constants';
+import { borderRadius, spacing, typography, type AppColors } from '../../utils/constants';
+import { useTheme } from '../../contexts/theme-context';
 
 interface LanguageSwitcherProps {
   compact?: boolean;
 }
 
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ compact = false }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { language, setLanguage, t } = useI18n();
 
   return (
@@ -33,7 +36,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ compact = fa
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) => StyleSheet.create({
   container: {
     alignItems: 'flex-start',
     gap: spacing.xs,
