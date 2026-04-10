@@ -4,12 +4,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,6 +27,8 @@ import { useTheme } from '../../contexts/theme-context';
 export default function LoginScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { width: screenWidth } = useWindowDimensions();
+  const logoWidth = Math.min(Math.max(screenWidth * 0.2, 90), 130);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [usernameError, setUsernameError] = useState<string | null>(null);
@@ -123,7 +127,11 @@ export default function LoginScreen() {
               <LanguageSwitcher compact />
             </View>
             <View style={styles.logoContainer}>
-              <Ionicons name="bicycle" size={40} color={colors.text.inverse} />
+              <Image
+                source={require('../../assets/images/peekaboo-black-yellow.jpeg')}
+                style={[styles.logoImage, { width: logoWidth, height: logoWidth / 1.35 }]}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.title}>{t('auth.title')}</Text>
             <Text style={styles.subtitle}>
@@ -302,18 +310,14 @@ const createStyles = (colors: AppColors) => StyleSheet.create({
     marginBottom: spacing.sm,
   },
   logoContainer: {
-    width: 76,
-    height: 76,
-    borderRadius: 24,
-    backgroundColor: colors.primaryDark,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
-    shadowColor: colors.primaryDark,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 6,
+  },
+  logoImage: {
+    backgroundColor: '#000000',
+    borderRadius: 12,
   },
   title: {
     fontSize: 30,
