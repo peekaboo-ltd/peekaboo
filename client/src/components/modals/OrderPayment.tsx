@@ -10,6 +10,7 @@ import Button from '../inputs/Button';
 import { useCreatePayment, useCreatePublicPayment } from '@/hooks/payments/payment.hooks';
 
 type PayerType = 'sender' | 'recipient' | 'other';
+type UrubutoChannelName = 'MOMO' | 'AIRTEL_MONEY' | 'CARD';
 
 const OrderPayment = () => {
 
@@ -24,6 +25,7 @@ const OrderPayment = () => {
   const [phoneError, setPhoneError] = useState<string>('');
   const [fallbackPhone, setFallbackPhone] = useState<string>('');
   const [fallbackPhoneError, setFallbackPhoneError] = useState<string>('');
+  const [channelName, setChannelName] = useState<UrubutoChannelName>('MOMO');
 
   // CLOSE MODAL
   const closeModal = useCallback(() => {
@@ -34,12 +36,12 @@ const OrderPayment = () => {
     setPhoneError('');
     setFallbackPhone('');
     setFallbackPhoneError('');
+    setChannelName('MOMO');
   }, [dispatch]);
 
-  const { createPayment: createAuthPaymentMutation, isSuccess: authPaymentSuccess, isLoading: authPaymentLoading } = useCreatePayment();
-  const { createPublicPayment: createPublicPaymentMutation, isSuccess: publicPaymentSuccess, isLoading: publicPaymentLoading } = useCreatePublicPayment();
+  const { createPayment: createAuthPaymentMutation, isLoading: authPaymentLoading } = useCreatePayment();
+  const { createPublicPayment: createPublicPaymentMutation, isLoading: publicPaymentLoading } = useCreatePublicPayment();
 
-  const isSuccess = isPublic ? publicPaymentSuccess : authPaymentSuccess;
   const isLoading = isPublic ? publicPaymentLoading : authPaymentLoading;
   const createPaymentMutation = isPublic ? createPublicPaymentMutation : createAuthPaymentMutation;
 
@@ -102,7 +104,7 @@ const OrderPayment = () => {
   }, [payerType, selectedOrder, customPhone]);
 
   // CREATE PAYMENT
-  const createPayment = useCallback(() => {
+  const createPayment = useCallback(async () => {
     const payerInfo = getPayerInfo();
 
     // Validate phone for 'other' option
@@ -116,7 +118,7 @@ const OrderPayment = () => {
     });
     if (fallbackPhone.trim() && !fallbackContactPhone) return;
 
-    createPaymentMutation({
+    const payload = {
       entityId: selectedOrder?.id,
       ...(isPublic && { orderId: selectedOrder?.id }),
       amount: selectedOrder?.finalFee || selectedOrder?.initialFee || 0,
@@ -126,18 +128,36 @@ const OrderPayment = () => {
       customerEmail: payerInfo.email,
       customerName: payerInfo.name,
       customerPhone: payerInfo.phone || '250794892784',
-      ...(fallbackContactPhone && { metadata: { fallbackContactPhone } }),
-    })
-  }, [createPaymentMutation, selectedOrder, getPayerInfo, payerType, fallbackPhone]);
+      channelName,
+      method: channelName,
+      metadata: {
+        channelName,
+        ...(fallbackContactPhone ? { fallbackContactPhone } : {}),
+      },
+    };
 
-  useEffect(() => {
-    if (isSuccess) {
+    try {
+      const response = await (createPaymentMutation(payload)).unwrap();
+      const paymentUrl =
+        response?.paymentUrl ||
+        response?.data?.paymentUrl ||
+        response?.data?.metadata?.cardProcessingUrl;
       const orderId = selectedOrder?.id;
-      closeModal();
-      // Navigate to payment success page
-      navigate(`/p/orders/${orderId}/payment-success`);
+
+      if (channelName === 'CARD' && paymentUrl) {
+        closeModal();
+        window.location.href = paymentUrl;
+        return;
+      }
+
+      if (orderId) {
+        closeModal();
+        navigate(`/p/orders/${orderId}/payment-success`);
+      }
+    } catch (error) {
+      console.error('Payment creation failed:', error);
     }
-  }, [isSuccess, closeModal, navigate, selectedOrder?.id]);
+  }, [createPaymentMutation, selectedOrder, getPayerInfo, payerType, fallbackPhone, channelName, isPublic, closeModal, navigate]);
 
   // RESET PHONE ERROR WHEN CHANGING PAYER TYPE
   useEffect(() => {
@@ -203,6 +223,45 @@ const OrderPayment = () => {
           </label>
         </fieldset>
 
+        <fieldset className='flex flex-col gap-3'>
+          <legend className='text-sm font-medium'>Payment method</legend>
+          <label className='flex items-center gap-2 cursor-pointer'>
+            <input
+              type='radio'
+              name='channelName'
+              value='MOMO'
+              checked={channelName === 'MOMO'}
+              onChange={(e) => setChannelName(e.target.value as UrubutoChannelName)}
+              className='w-4 h-4 cursor-pointer'
+            />
+            <span className='text-sm'>MTN Mobile Money</span>
+          </label>
+
+          <label className='flex items-center gap-2 cursor-pointer'>
+            <input
+              type='radio'
+              name='channelName'
+              value='AIRTEL_MONEY'
+              checked={channelName === 'AIRTEL_MONEY'}
+              onChange={(e) => setChannelName(e.target.value as UrubutoChannelName)}
+              className='w-4 h-4 cursor-pointer'
+            />
+            <span className='text-sm'>Airtel Money</span>
+          </label>
+
+          <label className='flex items-center gap-2 cursor-pointer'>
+            <input
+              type='radio'
+              name='channelName'
+              value='CARD'
+              checked={channelName === 'CARD'}
+              onChange={(e) => setChannelName(e.target.value as UrubutoChannelName)}
+              className='w-4 h-4 cursor-pointer'
+            />
+            <span className='text-sm'>Card</span>
+          </label>
+        </fieldset>
+
         {/* CUSTOM PHONE INPUT */}
         {payerType === 'other' && (
           <fieldset className='flex flex-col gap-2'>
@@ -246,7 +305,7 @@ const OrderPayment = () => {
 
         <Button primary onClick={(e) => {
           e.preventDefault();
-          createPayment();
+          void createPayment();
         }} isLoading={isLoading}>
           Pay {formatCurrency(selectedOrder?.finalFee ?? selectedOrder?.initialFee ?? 0)}
         </Button>

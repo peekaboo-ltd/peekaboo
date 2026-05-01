@@ -34,7 +34,11 @@ export const PaymentController = {
           success: true,
           message: 'Payment created successfully',
           data: result,
-          paymentUrl: result.externalReferenceId,
+          paymentUrl:
+            result.paymentUrl ||
+            result.metadata?.paymentUrl ||
+            result.metadata?.cardProcessingUrl ||
+            result.externalReferenceId,
         });
       }
     } catch (error: any) {
@@ -79,7 +83,11 @@ export const PaymentController = {
           success: true,
           message: 'Payment created successfully',
           data: result,
-          paymentUrl: result.externalReferenceId,
+          paymentUrl:
+            result.paymentUrl ||
+            result.metadata?.paymentUrl ||
+            result.metadata?.cardProcessingUrl ||
+            result.externalReferenceId,
         });
       }
     } catch (error: any) {

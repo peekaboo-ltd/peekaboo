@@ -4,6 +4,7 @@ import { UUID } from '../types';
 import { PaymentType } from '../constants/payment.constants';
 import { User } from './user.entity';
 import { KpayCurrency, KpayPaymentMethod, KpayPaymentStatus } from '../types/kpay.types';
+import { PaymentProvider } from '../types/urubuto.types';
 
 @Entity('payments')
 export class Payment extends AbstractEntity {
@@ -46,6 +47,15 @@ export class Payment extends AbstractEntity {
   @Column({ name: 'external_reference_id', type: 'varchar', nullable: true })
   externalReferenceId?: string;
 
+  // PAYMENT PROVIDER
+  @Column({
+    name: 'provider',
+    type: 'varchar',
+    nullable: false,
+    default: PaymentProvider.URUBUTO,
+  })
+  provider: PaymentProvider;
+
   // CREATED BY ID
   @Column({ name: 'created_by_id', type: 'uuid', nullable: true })
   createdById?: UUID;
@@ -75,7 +85,9 @@ export class Payment extends AbstractEntity {
     nullable: true,
     default: KpayPaymentMethod.MOBILE_MONEY,
   })
-  method: KpayPaymentMethod;
+  method: string;
+
+  paymentUrl?: string;
 
   // METADATA
   @Column({ name: 'metadata', type: 'jsonb', nullable: true })

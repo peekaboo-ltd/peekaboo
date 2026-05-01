@@ -8,7 +8,15 @@ import { AppDataSource } from '../data-source';
 import { Payment } from '../entities/payment.entity';
 import { CreatePaymentDto } from '../types/payment.types';
 import { KpayService } from '../integrations/kpay/kpay.service';
-import { KpayPaymentStatus } from '../types/kpay.types';
+import { KpayPaymentMethod, KpayPaymentStatus } from '../types/kpay.types';
+import { UrubutoService } from '../integrations/urubuto/urubuto.service';
+import {
+  PaymentProvider,
+  UrubutoChannelName,
+  UrubutoPaymentWebhookPayload,
+  UrubutoPayerValidationRequest,
+  UrubutoTransactionStatus,
+} from '../types/urubuto.types';
 import { Request } from 'express';
 import {
   getPagination,
@@ -31,6 +39,7 @@ import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
   private readonly kpayService: KpayService;
+  private readonly urubutoService: UrubutoService;
   private readonly orderActivityService: OrderActivityService;
   private readonly orderAssignmentService: OrderAssignmentService;
   private readonly emailService: EmailService;
@@ -38,6 +47,7 @@ export class PaymentService {
   constructor() {
     this.paymentRepository = AppDataSource.getRepository(Payment);
     this.kpayService = new KpayService();
+    this.urubutoService = new UrubutoService();
     this.orderActivityService = new OrderActivityService();
     this.orderAssignmentService = new OrderAssignmentService();
     this.emailService = new EmailService();
@@ -48,6 +58,15 @@ export class PaymentService {
     entityType: AuditLogEntityTypes.PAYMENT,
   })
   async createPayment(payment: CreatePaymentDto): Promise<Payment> {
+    const provider = this.resolvePaymentProvider(payment.provider);
+    const requestedMethod =
+      payment.channelName ||
+      payment.method ||
+      payment.metadata?.channelName ||
+      (provider === PaymentProvider.URUBUTO
+        ? UrubutoChannelName.MOMO
+        : KpayPaymentMethod.MOBILE_MONEY);
+
     const newPayment: Payment = await this.paymentRepository.save({
       entityId: payment.entityId,
       amount: Number(payment.amount),
@@ -57,11 +76,18 @@ export class PaymentService {
       customerEmail: payment?.customerEmail,
       customerName: payment?.customerName,
       customerPhone: payment?.customerPhone,
+      currency: payment.currency,
+      type: payment.type,
+      description: payment.description || '',
+      createdById: payment.createdById,
+      provider,
+      method: requestedMethod,
+      metadata: payment.metadata || {},
     });
 
-    let result;
+    let result: any;
 
-    if (newPayment) {
+    if (newPayment && provider === PaymentProvider.KPAY) {
       result = await this.kpayService.initiatePayment({
         amount: payment.amount,
         currency: payment.currency,
@@ -71,17 +97,55 @@ export class PaymentService {
         refId: newPayment?.id as UUID,
         description: payment.description,
       });
+    } else if (newPayment) {
+      const order = await AppDataSource.getRepository(Order).findOne({
+        where: { id: payment.entityId },
+      });
+      const payerCode = order?.referenceId || payment.entityId;
+
+      result = await this.urubutoService.initiatePayment({
+        amount: payment.amount,
+        currency: payment.currency,
+        customerEmail: payment?.customerEmail,
+        customerName: payment?.customerName,
+        customerPhone: payment?.customerPhone,
+        refId: newPayment?.id as UUID,
+        payerCode,
+        channelName: requestedMethod,
+        redirectUrl: this.getPaymentRedirectUrl(payment.entityId),
+      });
     }
 
     if (result && result.success && result.data?.transactionId) {
       newPayment.externalReferenceId = result.data?.transactionId;
       newPayment.status = result.data?.status as KpayPaymentStatus;
+      newPayment.metadata = {
+        ...(newPayment.metadata || {}),
+        ...(result.data?.metadata || {}),
+        ...(result.data?.paymentUrl
+          ? { paymentUrl: result.data.paymentUrl }
+          : {}),
+        providerMessage: result.data?.message,
+      };
+      newPayment.paymentUrl = result.data?.paymentUrl;
       await this.paymentRepository.update(newPayment?.id, newPayment);
-      this.updatePaymentStatus(
-        newPayment?.id as UUID,
-        result.data?.status as KpayPaymentStatus,
-      );
+      if (result.data?.status === KpayPaymentStatus.SUCCESSFUL) {
+        await this.updatePaymentStatus(
+          newPayment?.id as UUID,
+          result.data?.status as KpayPaymentStatus,
+        );
+      }
       return newPayment;
+    }
+
+    if (result && !result.success) {
+      newPayment.metadata = {
+        ...(newPayment.metadata || {}),
+        initiationError: result.error,
+      };
+      await this.paymentRepository.update(newPayment.id, {
+        metadata: newPayment.metadata,
+      });
     }
 
     // Send payment initiated email (non-blocking)
@@ -163,16 +227,10 @@ export class PaymentService {
   async updatePaymentStatus(
     paymentId: UUID,
     status: KpayPaymentStatus,
+    metadata?: Record<string, any>,
   ): Promise<Payment> {
     const payment = await this.paymentRepository.findOne({
       where: { id: paymentId },
-    });
-
-    // ORDER
-    const order: Order | null = await AppDataSource.getRepository(
-      Order,
-    ).findOne({
-      where: { id: payment?.entityId },
     });
 
     if (!payment) {
@@ -182,11 +240,27 @@ export class PaymentService {
       });
     }
 
+    // ORDER
+    const order: Order | null = await AppDataSource.getRepository(
+      Order,
+    ).findOne({
+      where: { id: payment?.entityId },
+    });
+
+    const previousStatus = payment.status;
+
     payment.status = status as KpayPaymentStatus;
+    payment.metadata = {
+      ...(payment.metadata || {}),
+      ...(metadata || {}),
+    };
     await this.paymentRepository.update(payment?.id as UUID, payment);
 
     let orderActivity: OrderActivity | undefined;
-    if (status === KpayPaymentStatus.SUCCESSFUL) {
+    if (
+      status === KpayPaymentStatus.SUCCESSFUL &&
+      previousStatus !== KpayPaymentStatus.SUCCESSFUL
+    ) {
       orderActivity = await this.orderActivityService.createOrderActivity({
         orderId: payment?.entityId,
         status: OrderActivityStatus.PAID,
@@ -198,7 +272,11 @@ export class PaymentService {
       });
     }
 
-    if (status === KpayPaymentStatus?.FAILED && payment?.customerEmail) {
+    if (
+      status === KpayPaymentStatus?.FAILED &&
+      previousStatus !== KpayPaymentStatus.FAILED &&
+      payment?.customerEmail
+    ) {
       // Send payment failed email (non-blocking)
       this.emailService
         .sendPaymentFailedEmail({
@@ -212,6 +290,175 @@ export class PaymentService {
     }
 
     return payment;
+  }
+
+  async validateUrubutoPayer(request: UrubutoPayerValidationRequest): Promise<{
+    merchant_code: string;
+    payer_code: string;
+    payer_names: string;
+    amount: number;
+    currency: string;
+    payer_must_pay_total_amount: string;
+    comment: string;
+  }> {
+    if (
+      !request.merchant_code ||
+      request.merchant_code !== this.urubutoService.getMerchantCode()
+    ) {
+      throw new NotFoundError('merchant not found');
+    }
+
+    if (!request.payer_code) {
+      throw new NotFoundError('no data found for the given payer code');
+    }
+
+    const order = await AppDataSource.getRepository(Order).findOne({
+      where: { referenceId: request.payer_code },
+      relations: {
+        sender: true,
+        recipient: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundError('no data found for the given payer code');
+    }
+
+    return {
+      merchant_code: request.merchant_code,
+      payer_code: request.payer_code,
+      payer_names:
+        order.sender?.name ||
+        order.recipient?.name ||
+        order.externalReferenceId ||
+        order.referenceId,
+      amount: Number(order.finalFee || order.initialFee || 0),
+      currency: 'RWF',
+      payer_must_pay_total_amount: 'YES',
+      comment: order.notes || order.description || 'Peekaboo order payment',
+    };
+  }
+
+  async processUrubutoPaymentWebhook(
+    payload: UrubutoPaymentWebhookPayload,
+    source: 'callback' | 'notification' | 'reversal',
+  ): Promise<Payment> {
+    const payment = await this.findUrubutoPayment(payload);
+
+    if (!payment) {
+      throw new NotFoundError('Payment not found');
+    }
+
+    const inferredStatus =
+      source === 'reversal'
+        ? UrubutoTransactionStatus.CANCELED
+        : payload.transaction_status ||
+          (payload.slip_number
+            ? UrubutoTransactionStatus.VALID
+            : UrubutoTransactionStatus.PENDING_SETTLEMENT);
+
+    const status = this.urubutoService.mapStatusToInternal(inferredStatus);
+    const externalReference =
+      payload.internal_transaction_id ||
+      payload.transaction_id ||
+      payment.externalReferenceId;
+
+    payment.externalReferenceId = externalReference;
+    await this.paymentRepository.update(payment.id, {
+      externalReferenceId: externalReference,
+    });
+
+    return this.updatePaymentStatus(payment.id as UUID, status, {
+      [`urubuto${this.capitalize(source)}Payload`]: payload,
+      urubutoLastStatus: inferredStatus,
+      urubutoLastWebhookSource: source,
+      urubutoLastWebhookAt: new Date().toISOString(),
+      ...(payload.slip_number ? { slipNumber: payload.slip_number } : {}),
+      ...(payload.initial_slip_number
+        ? { initialSlipNumber: payload.initial_slip_number }
+        : {}),
+    });
+  }
+
+  private resolvePaymentProvider(provider?: PaymentProvider): PaymentProvider {
+    if (provider === PaymentProvider.KPAY) return PaymentProvider.KPAY;
+
+    const configuredProvider = process.env.PAYMENT_PROVIDER_DEFAULT;
+    if (configuredProvider === PaymentProvider.KPAY) return PaymentProvider.KPAY;
+
+    return PaymentProvider.URUBUTO;
+  }
+
+  private getPaymentRedirectUrl(orderId: UUID): string {
+    const frontendUrl = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+    if (frontendUrl) {
+      return `${frontendUrl}/p/orders/${orderId}/payment-success`;
+    }
+
+    return `https://peekaboo.co.rw/p/orders/${orderId}/payment-success`;
+  }
+
+  private async findUrubutoPayment(
+    payload: UrubutoPaymentWebhookPayload,
+  ): Promise<Payment | null> {
+    const transactionId =
+      payload.transaction_id || payload.internal_transaction_id || '';
+
+    if (this.isUuid(transactionId)) {
+      const paymentById = await this.paymentRepository.findOne({
+        where: { id: transactionId as UUID },
+      });
+
+      if (paymentById) return paymentById;
+    }
+
+    const queryBuilder = this.paymentRepository
+      .createQueryBuilder('payment')
+      .where('payment.provider = :provider', {
+        provider: PaymentProvider.URUBUTO,
+      });
+
+    const clauses: string[] = [];
+    const params: Record<string, string> = {};
+
+    if (transactionId) {
+      clauses.push('payment.externalReferenceId = :transactionId');
+      clauses.push(
+        "payment.metadata ->> 'urubutoInternalTransactionRef' = :transactionId",
+      );
+      params.transactionId = transactionId;
+    }
+
+    if (payload.payer_code) {
+      clauses.push("payment.metadata ->> 'payerCode' = :payerCode");
+      params.payerCode = payload.payer_code;
+
+      const order = await AppDataSource.getRepository(Order).findOne({
+        where: { referenceId: payload.payer_code },
+      });
+
+      if (order) {
+        clauses.push('payment.entityId = :entityId');
+        params.entityId = order.id;
+      }
+    }
+
+    if (!clauses.length) return null;
+
+    return queryBuilder
+      .andWhere(`(${clauses.join(' OR ')})`, params)
+      .orderBy('payment.createdAt', 'DESC')
+      .getOne();
+  }
+
+  private isUuid(value: string): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value,
+    );
+  }
+
+  private capitalize(value: string): string {
+    return value.charAt(0).toUpperCase() + value.slice(1);
   }
 
   // ADMIN: FETCH PAYMENTS WITH COMPREHENSIVE FILTERS

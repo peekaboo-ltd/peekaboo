@@ -10,6 +10,11 @@ export enum KpayPaymentStatus {
   FAILED = '02',
 }
 
+export enum PaymentProvider {
+  URUBUTO = 'URUBUTO',
+  KPAY = 'KPAY',
+}
+
 // Payment Entity (matches backend Payment entity)
 export interface Payment {
   // Base entity fields (from AbstractEntity)
@@ -29,6 +34,8 @@ export interface Payment {
   status: KpayPaymentStatus;
   description: string;
   method: string;
+  provider: PaymentProvider;
+  paymentUrl?: string;
 
   // Customer fields
   customerEmail?: string;

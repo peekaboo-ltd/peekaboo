@@ -1,6 +1,7 @@
 import { UUID } from ".";
 import { PaymentType } from "../constants/payment.constants";
 import { KpayCurrency, KpayPaymentStatus } from "./kpay.types";
+import { PaymentProvider, UrubutoChannelName } from "./urubuto.types";
 
 // Payment creation DTO
 export interface CreatePaymentDto {
@@ -12,6 +13,10 @@ export interface CreatePaymentDto {
   customerEmail: string;
   customerName: string;
   customerPhone?: string;
+  createdById?: UUID;
+  provider?: PaymentProvider;
+  method?: string;
+  channelName?: UrubutoChannelName;
   metadata?: Record<string, any>;
 }
 
@@ -26,6 +31,7 @@ export interface PaymentResponseDto {
   status: KpayPaymentStatus;
   description?: string;
   method: string;
+  provider: PaymentProvider;
   paymentUrl?: string;
   expiresAt?: Date;
   paidAt?: Date;
