@@ -25,7 +25,7 @@ import {
 } from '../helpers/pagination.helper';
 import { UUID } from '../types';
 import { PaymentType } from '../constants/payment.constants';
-import { NotFoundError } from '../helpers/errors.helper';
+import { NotFoundError, ValidationError } from '../helpers/errors.helper';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import { OrderActivityService } from './orderActivity.service';
 import { OrderActivityStatus } from '../constants/order.constants';
@@ -35,6 +35,7 @@ import { EmailService } from '../integrations/emails/email.service';
 import { Order } from '../entities/order.entity';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
+import { formatPhoneNumber } from '../helpers/phone.helper';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
@@ -66,6 +67,16 @@ export class PaymentService {
       (provider === PaymentProvider.URUBUTO
         ? UrubutoChannelName.MOMO
         : KpayPaymentMethod.MOBILE_MONEY);
+    const customerPhone = this.normalizePaymentPhone(payment.customerPhone);
+    const requiresPhone =
+      provider === PaymentProvider.KPAY ||
+      requestedMethod === UrubutoChannelName.MOMO ||
+      requestedMethod === UrubutoChannelName.AIRTEL_MONEY ||
+      requestedMethod === KpayPaymentMethod.MOBILE_MONEY;
+
+    if (requiresPhone && !customerPhone) {
+      throw new ValidationError('A valid payer phone number is required');
+    }
 
     const newPayment: Payment = await this.paymentRepository.save({
       entityId: payment.entityId,
@@ -75,7 +86,7 @@ export class PaymentService {
       status: KpayPaymentStatus.PENDING,
       customerEmail: payment?.customerEmail,
       customerName: payment?.customerName,
-      customerPhone: payment?.customerPhone,
+      customerPhone,
       currency: payment.currency,
       type: payment.type,
       description: payment.description || '',
@@ -93,7 +104,7 @@ export class PaymentService {
         currency: payment.currency,
         customerEmail: payment?.customerEmail,
         customerName: payment?.customerName,
-        customerPhone: payment?.customerPhone,
+        customerPhone,
         refId: newPayment?.id as UUID,
         description: payment.description,
       });
@@ -108,7 +119,7 @@ export class PaymentService {
         currency: payment.currency,
         customerEmail: payment?.customerEmail,
         customerName: payment?.customerName,
-        customerPhone: payment?.customerPhone,
+        customerPhone,
         refId: newPayment?.id as UUID,
         payerCode,
         channelName: requestedMethod,
@@ -128,7 +139,12 @@ export class PaymentService {
         providerMessage: result.data?.message,
       };
       newPayment.paymentUrl = result.data?.paymentUrl;
-      await this.paymentRepository.update(newPayment?.id, newPayment);
+      await this.paymentRepository.update(newPayment.id, {
+        externalReferenceId: newPayment.externalReferenceId,
+        status: newPayment.status,
+        metadata: newPayment.metadata,
+        method: newPayment.method,
+      });
       if (result.data?.status === KpayPaymentStatus.SUCCESSFUL) {
         await this.updatePaymentStatus(
           newPayment?.id as UUID,
@@ -256,20 +272,30 @@ export class PaymentService {
     };
     await this.paymentRepository.update(payment?.id as UUID, payment);
 
-    let orderActivity: OrderActivity | undefined;
     if (
       status === KpayPaymentStatus.SUCCESSFUL &&
       previousStatus !== KpayPaymentStatus.SUCCESSFUL
     ) {
-      orderActivity = await this.orderActivityService.createOrderActivity({
-        orderId: payment?.entityId,
-        status: OrderActivityStatus.PAID,
-        notes: payment?.externalReferenceId ?? undefined,
-        createdById: payment?.createdById ?? undefined,
+      const existingPaidActivity = await AppDataSource.getRepository(
+        OrderActivity,
+      ).findOne({
+        where: {
+          orderId: payment.entityId,
+          status: OrderActivityStatus.PAID,
+        },
       });
-      await this.orderAssignmentService.handleOrderAssignment({
-        orderId: payment?.entityId as UUID,
-      });
+
+      if (!existingPaidActivity) {
+        await this.orderActivityService.createOrderActivity({
+          orderId: payment?.entityId,
+          status: OrderActivityStatus.PAID,
+          notes: payment?.externalReferenceId ?? undefined,
+          createdById: payment?.createdById ?? undefined,
+        });
+        await this.orderAssignmentService.handleOrderAssignment({
+          orderId: payment?.entityId as UUID,
+        });
+      }
     }
 
     if (
@@ -387,6 +413,13 @@ export class PaymentService {
     if (configuredProvider === PaymentProvider.KPAY) return PaymentProvider.KPAY;
 
     return PaymentProvider.URUBUTO;
+  }
+
+  private normalizePaymentPhone(phone?: string): string | undefined {
+    const formattedPhone = formatPhoneNumber(phone);
+    if (!formattedPhone) return undefined;
+
+    return formattedPhone.replace(/^\+/, '');
   }
 
   private getPaymentRedirectUrl(orderId: UUID): string {

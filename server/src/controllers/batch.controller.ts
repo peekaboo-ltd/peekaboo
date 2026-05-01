@@ -82,10 +82,14 @@ export const BatchController = {
         throw new UnauthorizedError('User not authenticated');
       }
 
-      // Admins/Staff can view any batch; others only their own
-      const batch = isAdminOrStaff(user)
-        ? await batchService.getBatchById(id as UUID)
-        : await batchService.getBatchOrders(id as UUID, user.id as UUID, isAdminOrStaff(user));
+      // Admins/Staff can view any batch; others only their own. Use the
+      // orders-specific loader for both paths so preview receives sender and
+      // recipient relation data consistently.
+      const batch = await batchService.getBatchOrders(
+        id as UUID,
+        user.id as UUID,
+        isAdminOrStaff(user),
+      );
 
       return res.status(200).json({
         message: 'Batch orders fetched successfully',

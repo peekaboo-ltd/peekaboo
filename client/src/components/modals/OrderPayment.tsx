@@ -8,6 +8,7 @@ import { formatCurrency, formatPhone } from '@/utils/strings.util';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import Button from '../inputs/Button';
 import { useCreatePayment, useCreatePublicPayment } from '@/hooks/payments/payment.hooks';
+import { toast } from 'sonner';
 
 type PayerType = 'sender' | 'recipient' | 'other';
 type UrubutoChannelName = 'MOMO' | 'AIRTEL_MONEY' | 'CARD';
@@ -46,7 +47,7 @@ const OrderPayment = () => {
   const createPaymentMutation = isPublic ? createPublicPaymentMutation : createAuthPaymentMutation;
 
   // Validate phone using shared util; returns 250XXXXXXXXX for API or null
-  const validatePhone = (
+  const validatePhone = useCallback((
     phone: string,
     options?: { setError: (s: string) => void; optional?: boolean },
   ): string | null => {
@@ -64,11 +65,11 @@ const OrderPayment = () => {
     if (!result.isValid || !result.formattedNumber) return null;
     // Convert 0XXXXXXXXX to 250XXXXXXXXX for API
     return '250' + result.formattedNumber.slice(1);
-  };
+  }, []);
 
   // GET PAYER INFORMATION
   const getPayerInfo = useCallback((): {
-    phone: string | null;
+    phone?: string;
     email: string;
     name: string;
   } => {
@@ -78,7 +79,7 @@ const OrderPayment = () => {
           ? formatPhone(selectedOrder.sender.phoneNumber, 'RW')
           : selectedOrder?.senderPhoneNumber
             ? formatPhone(selectedOrder.senderPhoneNumber, 'RW')
-            : '250794892784',
+            : undefined,
         email: selectedOrder?.sender?.email || 'info@peekaboo.co.rw',
         name: selectedOrder?.sender?.name || selectedOrder?.senderName || 'Sender',
       };
@@ -88,15 +89,13 @@ const OrderPayment = () => {
           ? formatPhone(selectedOrder.recipient.phoneNumber, 'RW')
           : selectedOrder?.recipientPhoneNumber
             ? formatPhone(selectedOrder.recipientPhoneNumber, 'RW')
-            : '250794892784',
+            : undefined,
         email: selectedOrder?.recipient?.email || 'info@peekaboo.co.rw',
         name: selectedOrder?.recipient?.name || selectedOrder?.recipientName || 'Recipient',
       };
     } else {
-      // For 'other', validate and format the custom phone
-      const formattedPhone = validatePhone(customPhone);
       return {
-        phone: formattedPhone,
+        phone: customPhone,
         email: 'info@peekaboo.co.rw',
         name: 'Custom Payer',
       };
@@ -106,9 +105,11 @@ const OrderPayment = () => {
   // CREATE PAYMENT
   const createPayment = useCallback(async () => {
     const payerInfo = getPayerInfo();
+    const payerPhone = validatePhone(payerInfo.phone || '', {
+      setError: setPhoneError,
+    });
 
-    // Validate phone for 'other' option
-    if (payerType === 'other' && !payerInfo.phone) {
+    if (!payerPhone) {
       return;
     }
 
@@ -127,7 +128,7 @@ const OrderPayment = () => {
       description: selectedOrder?.notes,
       customerEmail: payerInfo.email,
       customerName: payerInfo.name,
-      customerPhone: payerInfo.phone || '250794892784',
+      customerPhone: payerPhone,
       channelName,
       method: channelName,
       metadata: {
@@ -142,7 +143,16 @@ const OrderPayment = () => {
         response?.paymentUrl ||
         response?.data?.paymentUrl ||
         response?.data?.metadata?.cardProcessingUrl;
+      const initiationError = response?.data?.metadata?.initiationError;
       const orderId = selectedOrder?.id;
+
+      if (initiationError) {
+        toast.error(
+          initiationError?.message ||
+            'Payment could not be initiated. Please try again.',
+        );
+        return;
+      }
 
       if (channelName === 'CARD' && paymentUrl) {
         closeModal();
@@ -156,8 +166,9 @@ const OrderPayment = () => {
       }
     } catch (error) {
       console.error('Payment creation failed:', error);
+      toast.error('Payment could not be initiated. Please try again.');
     }
-  }, [createPaymentMutation, selectedOrder, getPayerInfo, payerType, fallbackPhone, channelName, isPublic, closeModal, navigate]);
+  }, [createPaymentMutation, selectedOrder, getPayerInfo, validatePhone, fallbackPhone, channelName, isPublic, closeModal, navigate]);
 
   // RESET PHONE ERROR WHEN CHANGING PAYER TYPE
   useEffect(() => {
@@ -222,6 +233,9 @@ const OrderPayment = () => {
             <span className='text-sm'>Other</span>
           </label>
         </fieldset>
+        {phoneError && payerType !== 'other' && (
+          <p className='text-sm text-black'>{phoneError}</p>
+        )}
 
         <fieldset className='flex flex-col gap-3'>
           <legend className='text-sm font-medium'>Payment method</legend>

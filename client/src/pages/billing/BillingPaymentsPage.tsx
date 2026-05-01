@@ -1518,8 +1518,12 @@ const BillingPaymentsPage = () => {
                     threshold is met.
                   </li>
                   <li>
-                    Partial progress inside a package tier is billed at the
-                    fallback rate.
+                    Partial progress inside a package tier appears as a
+                    fallback row at the configured fallback rate.
+                  </li>
+                  <li>
+                    Deliveries beyond the final package threshold appear as
+                    overflow rows at the configured overflow rate.
                   </li>
                   <li>
                     Early payment estimates are based on deliveries so far and
@@ -1825,9 +1829,9 @@ const BillingPaymentsPage = () => {
           </div>
 
           <div className="rounded border border-amber-200 bg-amber-50 p-3 text-[13px] text-amber-900">
-            Early payment settles the amount estimated so far. If more
-            deliveries are added before the billing period closes, the next
-            billing record can still change.
+            Early payment settles the server estimate shown above. Package,
+            fallback, and overflow rows can still change if more deliveries are
+            added before the billing period closes.
           </div>
 
           {!canBusinessPay ? (

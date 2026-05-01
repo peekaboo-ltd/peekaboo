@@ -147,6 +147,19 @@ export class BatchService {
     ) || [];
 
     const validationErrors: Array<{ orderId: UUID; referenceId: string; field: string; message: string }> = [];
+    const hasDeliveryLocation = (order: Order) => {
+      const latitude = Number(order.locationTo?.latitude);
+      const longitude = Number(order.locationTo?.longitude);
+
+      return (
+        Number.isFinite(latitude) &&
+        Number.isFinite(longitude) &&
+        latitude >= -90 &&
+        latitude <= 90 &&
+        longitude >= -180 &&
+        longitude <= 180
+      );
+    };
 
     for (const order of draftOrders) {
       const recipientPhone = order.recipient?.phoneNumber || '';
@@ -157,6 +170,15 @@ export class BatchService {
           referenceId: order.referenceId,
           field: 'recipientPhoneNumber',
           message: phoneResult.error || 'Invalid recipient phone number',
+        });
+      }
+
+      if (!hasDeliveryLocation(order)) {
+        validationErrors.push({
+          orderId: order.id,
+          referenceId: order.referenceId,
+          field: 'deliveryLocation',
+          message: 'Delivery location is required',
         });
       }
     }

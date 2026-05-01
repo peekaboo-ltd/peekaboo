@@ -1,11 +1,13 @@
 import 'dotenv/config';
 import { AppDataSource } from '../data-source';
 import { BusinessPlan } from '../entities/businessPlan.entity';
+import { OrganizationBilling } from '../entities/organizationBilling.entity';
 import {
   BusinessPlanStatus,
   PricingConfig,
 } from '../constants/businessPlan.constants';
-import { BillingPeriod } from '../constants/organization.constants';
+import { BillingPeriod, BillingStatus } from '../constants/organization.constants';
+import { calculateBillingTotal } from '../helpers/pricing.helper';
 import logger from '../helpers/logger.helper';
 
 interface BusinessPlanSeed {
@@ -128,6 +130,7 @@ const businessPlans: BusinessPlanSeed[] = [
       '6 – 10 deliveries per day → 16,000 RWF package',
       '11 – 20 deliveries per day → 30,000 RWF package',
       'Extra deliveries → 1,600 RWF each',
+      'Partial package usage → 1,600 RWF each',
     ],
     pricingTiers: {
       tiers: [
@@ -151,6 +154,7 @@ const businessPlans: BusinessPlanSeed[] = [
         },
       ],
       overflowRate: 1600,
+      fallbackRate: 1600,
     },
     isCustomPricing: false,
     isDefault: false,
@@ -191,6 +195,7 @@ async function main() {
   await AppDataSource.initialize();
 
   const planRepo = AppDataSource.getRepository(BusinessPlan);
+  const billingRepo = AppDataSource.getRepository(OrganizationBilling);
 
   let created = 0;
   let updated = 0;
@@ -239,6 +244,50 @@ async function main() {
       `[seed:business-plans] Created plan "${planData.name}".`,
     );
     created++;
+  }
+
+  const dailyPowerPack = await planRepo.findOne({
+    where: { slug: 'daily-power-pack' },
+  });
+  let repairedBillingSnapshots = 0;
+
+  if (dailyPowerPack?.pricingTiers?.fallbackRate) {
+    const pendingDailyBillings = await billingRepo.find({
+      where: {
+        businessPlanId: dailyPowerPack.id,
+        status: BillingStatus.PENDING,
+      },
+    });
+
+    for (const billing of pendingDailyBillings) {
+      if (
+        !billing.pricingSnapshot?.tiers?.length ||
+        billing.pricingSnapshot.fallbackRate
+      ) {
+        continue;
+      }
+
+      billing.pricingSnapshot = {
+        ...billing.pricingSnapshot,
+        fallbackRate: dailyPowerPack.pricingTiers.fallbackRate,
+      };
+
+      const { breakdown, total } = calculateBillingTotal(
+        billing.pricingSnapshot,
+        billing.totalOrders,
+      );
+      billing.totalAmount = total;
+      billing.tierBreakdown = breakdown;
+
+      await billingRepo.save(billing);
+      repairedBillingSnapshots++;
+    }
+  }
+
+  if (repairedBillingSnapshots > 0) {
+    logger.success(
+      `[seed:business-plans] Repaired ${repairedBillingSnapshots} pending Daily Power Pack billing snapshot(s).`,
+    );
   }
 
   logger.success(

@@ -33,18 +33,60 @@ interface InlinePhoneEditorProps {
   isSaving: boolean;
 }
 
+const getRecipientPhone = (order: Order) =>
+  order.recipient?.phoneNumber || order.recipientPhoneNumber || "";
+
+const hasValidDeliveryLocation = (order: Order) => {
+  const latitude = Number(order.locationTo?.latitude);
+  const longitude = Number(order.locationTo?.longitude);
+
+  return (
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180
+  );
+};
+
+const getDraftOrderValidation = (order: Order) => {
+  const issues: string[] = [];
+  const phoneResult = validateAndFormatPhoneNumber(getRecipientPhone(order));
+
+  if (!phoneResult.isValid) {
+    issues.push(phoneResult.error || "Invalid recipient phone number");
+  }
+
+  if (!hasValidDeliveryLocation(order)) {
+    issues.push("Delivery location is required");
+  }
+
+  return {
+    orderId: order.id,
+    isValid: issues.length === 0,
+    issues,
+  };
+};
+
 const InlinePhoneEditor = ({
   order,
   onSave,
   isSaving,
 }: InlinePhoneEditorProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [value, setValue] = useState(order.recipient?.phoneNumber || "");
+  const [value, setValue] = useState(getRecipientPhone(order));
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const currentPhone = order.recipient?.phoneNumber || "";
+  const currentPhone = getRecipientPhone(order);
   const phoneResult = validateAndFormatPhoneNumber(currentPhone);
   const isValid = phoneResult.isValid;
+
+  useEffect(() => {
+    if (!isEditing) {
+      setValue(currentPhone);
+    }
+  }, [currentPhone, isEditing]);
 
   useEffect(() => {
     if (isEditing) {
@@ -130,9 +172,7 @@ const InlineLocationEditor = ({
     width: number;
   } | null>(null);
 
-  const hasLocation = !!(
-    order.locationTo?.latitude && order.locationTo?.longitude
-  );
+  const hasLocation = hasValidDeliveryLocation(order);
   const locationDisplay = hasLocation
     ? order.notes ||
       `${order.locationTo!.latitude?.toFixed(4)}, ${order.locationTo!.longitude?.toFixed(4)}`
@@ -364,11 +404,7 @@ const BatchPreviewPage = () => {
   const orders = batch?.orders || [];
   const draftOrders = orders.filter((o) => o.status === OrderStatus.DRAFT);
 
-  const orderValidation = draftOrders.map((order) => {
-    const phone = order.recipient?.phoneNumber || "";
-    const phoneResult = validateAndFormatPhoneNumber(phone);
-    return { orderId: order.id, isValid: phoneResult.isValid };
-  });
+  const orderValidation = draftOrders.map(getDraftOrderValidation);
 
   const invalidCount = orderValidation.filter((v) => !v.isValid).length;
   const canComplete = invalidCount === 0 && draftOrders.length > 0;
@@ -401,7 +437,15 @@ const BatchPreviewPage = () => {
           id: orderId,
           order: { recipient: { phoneNumber: phone } as unknown as User },
         }).unwrap();
-        updateOrderInBatchState(response?.data);
+        updateOrderInBatchState({
+          ...response?.data,
+          id: orderId,
+          recipientPhoneNumber: response?.data?.recipientPhoneNumber || phone,
+          recipient: {
+            ...(response?.data?.recipient || {}),
+            phoneNumber: response?.data?.recipient?.phoneNumber || phone,
+          } as User,
+        } as Order);
         toast.success("Phone number updated");
       } catch {
         toast.error("Failed to update phone number");
@@ -412,18 +456,26 @@ const BatchPreviewPage = () => {
 
   const handleUpdateLocation = useCallback(
     async (orderId: UUID, location: PlaceSearchResult) => {
+      const locationTo = {
+        latitude: location.coordinates.latitude,
+        longitude: location.coordinates.longitude,
+      };
+      const notes = location.formattedAddress || location.name;
+
       try {
         const response = await updateOrder({
           id: orderId,
           order: {
-            locationTo: {
-              latitude: location.coordinates.latitude,
-              longitude: location.coordinates.longitude,
-            },
-            notes: location.formattedAddress || location.name,
+            locationTo,
+            notes,
           },
         }).unwrap();
-        updateOrderInBatchState(response?.data);
+        updateOrderInBatchState({
+          ...response?.data,
+          id: orderId,
+          locationTo: response?.data?.locationTo || locationTo,
+          notes: response?.data?.notes || notes,
+        } as Order);
         toast.success("Delivery location updated");
       } catch {
         toast.error("Failed to update location");
@@ -583,17 +635,19 @@ const BatchPreviewPage = () => {
         id: "previewStatus",
         header: "Status",
         cell: ({ row }) => {
-          const phoneResult = validateAndFormatPhoneNumber(
-            row.original.recipient?.phoneNumber || "",
-          );
-          const isPhoneValid = phoneResult.isValid;
           const isDraftOrder = row.original.status === OrderStatus.DRAFT;
+          const validation = getDraftOrderValidation(row.original);
           return isDraftOrder ? (
             <Badge
-              variant={isPhoneValid ? "secondary" : "destructive"}
+              variant={validation.isValid ? "secondary" : "destructive"}
               className="text-[10px]"
+              title={validation.issues.join("; ")}
             >
-              {isPhoneValid ? "Valid" : "Fix phone"}
+              {validation.isValid
+                ? "Valid"
+                : validation.issues.length === 1
+                  ? validation.issues[0]
+                  : `${validation.issues.length} fixes`}
             </Badge>
           ) : (
             <Badge variant="default" className="text-[10px]">
@@ -607,11 +661,8 @@ const BatchPreviewPage = () => {
   );
 
   const rowHighlightClassName = useCallback((row: Order) => {
-    const phoneResult = validateAndFormatPhoneNumber(
-      row.recipient?.phoneNumber || "",
-    );
     const isDraftOrder = row.status === OrderStatus.DRAFT;
-    return !phoneResult.isValid && isDraftOrder ? "bg-red-50/40" : "";
+    return !getDraftOrderValidation(row).isValid && isDraftOrder ? "bg-red-50/40" : "";
   }, []);
 
   if (isFetching) {

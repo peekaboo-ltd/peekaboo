@@ -91,6 +91,7 @@ export default function DashboardScreen() {
   const [isAvailabilityUpdating, setIsAvailabilityUpdating] = useState(false);
   const [proofImageUri, setProofImageUri] = useState<string | null>(null);
   const [proofTimestamp, setProofTimestamp] = useState<string>('');
+  const [proofCapturedAt, setProofCapturedAt] = useState<string>('');
   const [proofLocationLabel, setProofLocationLabel] = useState<string>('');
   const [proofCoordinates, setProofCoordinates] = useState<{
     latitude: number;
@@ -292,6 +293,7 @@ export default function DashboardScreen() {
   const resetProofState = useCallback(() => {
     setProofImageUri(null);
     setProofTimestamp('');
+    setProofCapturedAt('');
     setProofLocationLabel('');
     setProofCoordinates(null);
     setPendingAvailabilityStatus(null);
@@ -310,13 +312,17 @@ export default function DashboardScreen() {
         latitude: proofCoordinates.latitude,
         longitude: proofCoordinates.longitude,
         locationLabel: proofLocationLabel,
-        capturedAt: new Date().toISOString(),
+        capturedAt: proofCapturedAt || new Date().toISOString(),
         proofImageUri,
+        overlayTimestamp: proofTimestamp,
+        overlayLocationLabel: proofLocationLabel,
+        overlayAppliedOnClient: false,
       });
       setUser({
         ...updatedUser,
         status: requestedStatus,
       });
+      refresh();
       resetProofState();
     } catch (error) {
       const apiError =
@@ -334,8 +340,11 @@ export default function DashboardScreen() {
   }, [
     pendingAvailabilityStatus,
     proofCoordinates,
+    proofCapturedAt,
     proofImageUri,
     proofLocationLabel,
+    proofTimestamp,
+    refresh,
     resetProofState,
     setUser,
     user,
@@ -348,8 +357,10 @@ export default function DashboardScreen() {
     });
 
     if (!result.canceled && result.assets?.[0]?.uri) {
+      const capturedAt = new Date();
       setProofImageUri(result.assets[0].uri);
-      setProofTimestamp(new Date().toLocaleString());
+      setProofCapturedAt(capturedAt.toISOString());
+      setProofTimestamp(capturedAt.toLocaleString());
     }
   }, []);
 
@@ -430,7 +441,8 @@ export default function DashboardScreen() {
         longitude: position.coords.longitude,
       }).catch(() => []);
 
-      const timestamp = new Date().toLocaleString();
+      const capturedAt = new Date();
+      const timestamp = capturedAt.toLocaleString();
       const locationLabel = formatAddressLabel(reverseGeocode[0]);
 
       const result = await ImagePicker.launchCameraAsync({
@@ -441,6 +453,7 @@ export default function DashboardScreen() {
       if (!result.canceled && result.assets?.[0]?.uri) {
         setProofImageUri(result.assets[0].uri);
         setProofTimestamp(timestamp);
+        setProofCapturedAt(capturedAt.toISOString());
         setProofLocationLabel(locationLabel);
         setProofCoordinates({
           latitude: position.coords.latitude,

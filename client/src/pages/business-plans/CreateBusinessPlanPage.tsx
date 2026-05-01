@@ -19,6 +19,7 @@ interface FormValues extends Omit<CreateBusinessPlanPayload, 'features' | 'prici
   features: { value: string }[];
   pricingTiers: PricingTier[];
   overflowRate: number | '';
+  fallbackRate: number | '';
 }
 
 const CreateBusinessPlanPage = () => {
@@ -45,6 +46,7 @@ const CreateBusinessPlanPage = () => {
       features: [],
       pricingTiers: [],
       overflowRate: '',
+      fallbackRate: '',
     },
   });
 
@@ -79,6 +81,7 @@ const CreateBusinessPlanPage = () => {
             ? {
                 tiers: data.pricingTiers,
                 overflowRate: data.overflowRate ? Number(data.overflowRate) : undefined,
+                fallbackRate: data.fallbackRate ? Number(data.fallbackRate) : undefined,
               }
             : undefined,
       };
@@ -445,7 +448,7 @@ const CreateBusinessPlanPage = () => {
               </div>
 
               {tierFields.length > 0 && (
-                <div className="mt-3">
+                <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
                   <Controller
                     name="overflowRate"
                     control={control}
@@ -454,6 +457,26 @@ const CreateBusinessPlanPage = () => {
                         {...field}
                         label="Overflow Rate (per extra delivery)"
                         placeholder="1500"
+                        type="number"
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === ''
+                              ? ''
+                              : Number(e.target.value)
+                          )
+                        }
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="fallbackRate"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="Fallback Rate (partial package delivery)"
+                        placeholder="1600"
                         type="number"
                         value={field.value ?? ''}
                         onChange={(e) =>

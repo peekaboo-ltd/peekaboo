@@ -207,6 +207,10 @@ const PublicServiceDetailsPage = () => {
   const pricingRows = getPricingRows(plan);
   const headlinePrice = getHeadlinePrice(plan);
   const overflowRate = plan.pricingTiers?.overflowRate;
+  const fallbackRate = plan.pricingTiers?.fallbackRate;
+  const hasPackageTiers = plan.pricingTiers?.tiers?.some(
+    (tier) => !tier.isCustom && tier.totalPrice,
+  );
   const featureList =
     plan.features?.length
       ? plan.features
@@ -355,7 +359,7 @@ const PublicServiceDetailsPage = () => {
             <PublicSectionCard
               eyebrow="Pricing structure"
               title="Tier details"
-              description="A breakdown of volume bands and any overflow charges."
+              description="A breakdown of volume bands, fallback rates, and overflow charges."
               className="rounded-[24px] border-primary-200"
             >
               <div className="space-y-3">
@@ -384,6 +388,17 @@ const PublicServiceDetailsPage = () => {
                     </p>
                     <p className="mt-2 text-sm text-primary-900">
                       Additional deliveries are billed at {formatCurrency(overflowRate, plan.currency)} each.
+                    </p>
+                  </article>
+                ) : null}
+
+                {hasPackageTiers && fallbackRate ? (
+                  <article className="rounded-[18px] border border-dashed border-secondary-200 bg-secondary-50/60 p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary-700">
+                      Fallback rate
+                    </p>
+                    <p className="mt-2 text-sm text-secondary-900">
+                      Partial package progress is billed at {formatCurrency(fallbackRate, plan.currency)} per delivery until the package threshold is met.
                     </p>
                   </article>
                 ) : null}
