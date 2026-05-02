@@ -18,6 +18,7 @@ import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import ImportBatch from './ImportBatch';
 
 const BatchesPage = () => {
   const navigate = useNavigate();
@@ -158,6 +159,7 @@ const BatchesPage = () => {
           noDataMessage="No batches match the selected filters."
         />
       </section>
+      <ImportBatch />
     </main>
   );
 };
