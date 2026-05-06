@@ -18,4 +18,6 @@ export enum ConversationStep {
   LOCATION_FROM = "LOCATION_FROM",
   PENDING_LOCATION_TO = "PENDING_LOCATION_TO",
   LOCATION_TO = "LOCATION_TO",
+  /** After WhatsApp Flow pickup via shared GPS — waiting for drop-off address in chat */
+  AWAITING_PUBLIC_DROP_OFF_TEXT = "AWAITING_PUBLIC_DROP_OFF_TEXT",
 }
