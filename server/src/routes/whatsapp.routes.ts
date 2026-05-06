@@ -7,4 +7,6 @@ router.get("/webhook", WhatsappController.getWebhook);
 
 router.post("/webhook", WhatsappController.postWebhook);
 
+router.post("/flows", WhatsappController.postFlowWebhook);
+
 export default router;

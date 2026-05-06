@@ -1,0 +1,133 @@
+{
+    "version": "7.0",
+    "screens": [
+        {
+            "id": "RECIPIENT",
+            "title": "Recipient Details",
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "recipient_form",
+                        "children": [
+                            {
+                                "type": "TextInput",
+                                "label": "Recipient's Phone Number",
+                                "name": "recipient_phone",
+                                "input-type": "phone",
+                                "required": true,
+                                "helper-text": "Enter the recipient's Rwandan phone number"
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Next",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "PICKUP"
+                                    },
+                                    "payload": {
+                                        "recipient_phone": "${form.recipient_phone}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "PICKUP",
+            "title": "Pickup Location",
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "pickup_form",
+                        "children": [
+                            {
+                                "type": "TextInput",
+                                "label": "Pickup Address",
+                                "name": "pickup_address",
+                                "input-type": "text",
+                                "required": true,
+                                "helper-text": "Where should the rider pick up the package?"
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Next",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "DROPOFF"
+                                    },
+                                    "payload": {
+                                        "recipient_phone": "${data.recipient_phone}",
+                                        "pickup_address": "${form.pickup_address}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "DROPOFF",
+            "title": "Drop-off Location",
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "dropoff_form",
+                        "children": [
+                            {
+                                "type": "TextInput",
+                                "label": "Drop-off Address",
+                                "name": "dropoff_address",
+                                "input-type": "text",
+                                "required": true,
+                                "helper-text": "Where should the package be delivered?"
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Place Order",
+                                "on-click-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "recipient_phone": "${data.recipient_phone}",
+                                        "pickup_address": "${data.pickup_address}",
+                                        "dropoff_address": "${form.dropoff_address}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "SUCCESS",
+            "title": "Order Created!",
+            "terminal": true,
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "TextHeading",
+                        "text": "Your order has been placed!"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Check your WhatsApp for a payment link. Complete payment to dispatch your rider."
+                    }
+                ]
+            }
+        }
+    ]
+}

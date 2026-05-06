@@ -86,6 +86,29 @@ export class ConversationService {
     return conversations;
   }
 
+
+  async getOrCreateActiveWhatsappConversation(
+    recipientId: UUID
+  ): Promise<Conversation> {
+    const recipientConversations = await this.getConversationsByRecipientId(
+      recipientId,
+      ConversationStatus.ACTIVE
+    );
+
+    if (recipientConversations?.length) {
+      return recipientConversations[0];
+    }
+
+    return this.createConversation({ recipientId });
+  }
+
+  async expireConversation(id: UUID): Promise<Conversation> {
+    return this.updateConversation(id, {
+      status: ConversationStatus.EXPIRED,
+    });
+  }
+
+
   // UPDATE CONVERSATION
   async updateConversation(
     id: UUID,

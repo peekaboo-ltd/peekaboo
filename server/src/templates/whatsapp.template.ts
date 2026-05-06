@@ -122,3 +122,13 @@ export const pendingLocationFromTemplate = (name?: string) => {
 export const pendingLocationToTemplate = (name?: string) => {
   return `Please share your current location with us so that the rider can reach you easily. You may refer to this link to learn more: https://faq.whatsapp.com/453914586839706`;
 }
+export const flowCTABodyText = (name?: string): string =>
+  name
+    ? `Hi ${name}! Ready to send a package? Tap below to get started.`
+    : `Welcome to Peekaboo! Tap below to place a delivery order.`;
+
+export const paymentCTABodyText = (referenceId: string, amount: number): string =>
+  `Your order ${referenceId} has been created. Please complete payment of ${amount.toLocaleString()} RWF to dispatch your rider.`;
+
+export const sessionExpiredTemplate = (): string =>
+  "Your session has expired. Please send us a message to start a new order.";

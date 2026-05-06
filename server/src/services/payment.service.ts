@@ -33,9 +33,11 @@ import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrderAssignmentService } from './orderAssignment.service';
 import { EmailService } from '../integrations/emails/email.service';
 import { Order } from '../entities/order.entity';
+import { Conversation } from '../entities/conversation.entity';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { formatPhoneNumber } from '../helpers/phone.helper';
+import { ConversationStatus } from '../constants/conversation.constants';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
@@ -53,6 +55,7 @@ export class PaymentService {
     this.orderAssignmentService = new OrderAssignmentService();
     this.emailService = new EmailService();
   }
+
 
   // CREATE PAYMENT
   @AuditCreate({
@@ -264,13 +267,27 @@ export class PaymentService {
     });
 
     const previousStatus = payment.status;
+    const existingMetadata = payment.metadata || {};
+    const paidAfterWhatsappSessionExpired =
+      status === KpayPaymentStatus.SUCCESSFUL &&
+      (await this.isWhatsappSessionExpired(existingMetadata));
 
     payment.status = status as KpayPaymentStatus;
     payment.metadata = {
-      ...(payment.metadata || {}),
+      ...existingMetadata,
       ...(metadata || {}),
+      ...(paidAfterWhatsappSessionExpired
+        ? { paidAfterWhatsappSessionExpired: true }
+        : {}),
     };
     await this.paymentRepository.update(payment?.id as UUID, payment);
+
+    if (paidAfterWhatsappSessionExpired && existingMetadata.conversationId) {
+      await AppDataSource.getRepository(Conversation).update(
+        { id: existingMetadata.conversationId as UUID },
+        { status: ConversationStatus.ACTIVE },
+      );
+    }
 
     if (
       status === KpayPaymentStatus.SUCCESSFUL &&
@@ -404,6 +421,27 @@ export class PaymentService {
         ? { initialSlipNumber: payload.initial_slip_number }
         : {}),
     });
+  }
+
+
+  private async isWhatsappSessionExpired(
+    metadata: Record<string, any>,
+  ): Promise<boolean> {
+    if (metadata.localSessionExpiredAt) return true;
+
+    if (metadata.paymentSessionExpiresAt) {
+      return new Date(metadata.paymentSessionExpiresAt).getTime() <= Date.now();
+    }
+
+    if (metadata.conversationId) {
+      const conversation = await AppDataSource.getRepository(Conversation).findOne({
+        where: { id: metadata.conversationId as UUID },
+      });
+
+      return conversation?.status === ConversationStatus.EXPIRED;
+    }
+
+    return false;
   }
 
   private resolvePaymentProvider(provider?: PaymentProvider): PaymentProvider {
