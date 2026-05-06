@@ -250,9 +250,17 @@ export class OrderService {
   async createPublicOrder({
     senderPhoneNumber,
     recipientPhoneNumber,
+    conversationId,
+    description,
+    notes,
+    initialFee = 1500,
   }: {
     senderPhoneNumber: string;
     recipientPhoneNumber: string;
+    conversationId?: UUID;
+    description?: string;
+    notes?: string;
+    initialFee?: number;
   }): Promise<{ order: Order }> {
     const referenceId = await this.generateUniqueOrderReferenceId();
     const trackingId = await this.generateUniqueTrackingId();
@@ -284,7 +292,11 @@ export class OrderService {
       senderId: sender?.id,
       recipientId: recipient?.id,
       createdById: sender?.id,
-      initialFee: 1500,
+      initialFee,
+      finalFee: initialFee,
+      conversationId,
+      description,
+      notes,
       trackingId,
     });
 

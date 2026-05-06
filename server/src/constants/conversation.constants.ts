@@ -1,6 +1,7 @@
 export enum ConversationStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
+  PAYMENT_EXPIRED = "PAYMENT_EXPIRED",
 }
 
 export enum ConversationStep {

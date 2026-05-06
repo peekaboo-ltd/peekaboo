@@ -33,9 +33,12 @@ import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrderAssignmentService } from './orderAssignment.service';
 import { EmailService } from '../integrations/emails/email.service';
 import { Order } from '../entities/order.entity';
+import { Conversation } from '../entities/conversation.entity';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { formatPhoneNumber } from '../helpers/phone.helper';
+import { ConversationStatus } from '../constants/conversation.constants';
+import { sendMessage } from '../helpers/whatsapp.helper';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
@@ -52,6 +55,79 @@ export class PaymentService {
     this.orderActivityService = new OrderActivityService();
     this.orderAssignmentService = new OrderAssignmentService();
     this.emailService = new EmailService();
+  }
+
+
+  async expireStaleWhatsappPaymentSessions(now: Date = new Date()): Promise<number> {
+    const expiredPayments = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .where("payment.status = :status", { status: KpayPaymentStatus.PENDING })
+      .andWhere("payment.metadata ->> 'source' = :source", {
+        source: 'whatsapp_flow',
+      })
+      .andWhere("payment.metadata ->> 'paymentSessionExpiresAt' IS NOT NULL")
+      .andWhere(
+        "CAST(payment.metadata ->> 'paymentSessionExpiresAt' AS timestamptz) <= :now",
+        { now: now.toISOString() },
+      )
+      .andWhere("payment.metadata ->> 'localSessionExpiredAt' IS NULL")
+      .getMany();
+
+    for (const payment of expiredPayments) {
+      const metadata = payment.metadata || {};
+      const conversationId = metadata.conversationId as UUID | undefined;
+
+      await this.paymentRepository.update(payment.id, {
+        metadata: {
+          ...metadata,
+          localSessionExpiredAt: now.toISOString(),
+        },
+      });
+
+      if (conversationId) {
+        await AppDataSource.getRepository(Conversation).update(
+          { id: conversationId },
+          { status: ConversationStatus.PAYMENT_EXPIRED },
+        );
+      }
+
+      const existingCancelledActivity = await AppDataSource.getRepository(
+        OrderActivity,
+      ).findOne({
+        where: {
+          orderId: payment.entityId,
+          status: OrderActivityStatus.CANCELLED,
+        },
+      });
+
+      if (!existingCancelledActivity) {
+        await this.orderActivityService.createOrderActivity({
+          orderId: payment.entityId,
+          status: OrderActivityStatus.CANCELLED,
+          notes: 'WhatsApp payment session expired after 5 hours without payment.',
+          createdById: payment.createdById,
+        });
+      }
+
+      if (this.isWithinWhatsappCustomerServiceWindow(metadata, now)) {
+        const order = await AppDataSource.getRepository(Order).findOne({
+          where: { id: payment.entityId },
+          relations: { sender: true },
+        });
+        const phoneNumber = order?.sender?.phoneNumber || payment.customerPhone;
+
+        if (phoneNumber) {
+          await sendMessage({
+            phoneNumber,
+            type: 'text',
+            message:
+              'Your Peekaboo payment link expired after 5 hours. Reply here to start a new order and receive a fresh secure payment link.',
+          }).catch(() => {});
+        }
+      }
+    }
+
+    return expiredPayments.length;
   }
 
   // CREATE PAYMENT
@@ -264,13 +340,27 @@ export class PaymentService {
     });
 
     const previousStatus = payment.status;
+    const existingMetadata = payment.metadata || {};
+    const paidAfterWhatsappSessionExpired =
+      status === KpayPaymentStatus.SUCCESSFUL &&
+      this.isWhatsappSessionLocallyExpired(existingMetadata);
 
     payment.status = status as KpayPaymentStatus;
     payment.metadata = {
-      ...(payment.metadata || {}),
+      ...existingMetadata,
       ...(metadata || {}),
+      ...(paidAfterWhatsappSessionExpired
+        ? { paidAfterWhatsappSessionExpired: true }
+        : {}),
     };
     await this.paymentRepository.update(payment?.id as UUID, payment);
+
+    if (paidAfterWhatsappSessionExpired && existingMetadata.conversationId) {
+      await AppDataSource.getRepository(Conversation).update(
+        { id: existingMetadata.conversationId as UUID },
+        { status: ConversationStatus.ACTIVE },
+      );
+    }
 
     if (
       status === KpayPaymentStatus.SUCCESSFUL &&
@@ -404,6 +494,27 @@ export class PaymentService {
         ? { initialSlipNumber: payload.initial_slip_number }
         : {}),
     });
+  }
+
+
+  private isWhatsappSessionLocallyExpired(metadata: Record<string, any>): boolean {
+    if (metadata.localSessionExpiredAt) return true;
+
+    if (!metadata.paymentSessionExpiresAt) return false;
+
+    return new Date(metadata.paymentSessionExpiresAt).getTime() <= Date.now();
+  }
+
+  private isWithinWhatsappCustomerServiceWindow(
+    metadata: Record<string, any>,
+    now: Date,
+  ): boolean {
+    if (!metadata.whatsappCustomerServiceWindowExpiresAt) return true;
+
+    return (
+      new Date(metadata.whatsappCustomerServiceWindowExpiresAt).getTime() >
+      now.getTime()
+    );
   }
 
   private resolvePaymentProvider(provider?: PaymentProvider): PaymentProvider {

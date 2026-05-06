@@ -4,6 +4,7 @@ import logger from "./helpers/logger.helper";
 import { AppDataSource } from "./data-source";
 import { startBillingCronJobs } from "./cron/billingCron";
 import { startBusinessReportCronJobs } from "./cron/businessReportCron";
+import { startWhatsappPaymentSessionCronJobs } from "./cron/whatsappPaymentSessionCron";
 
 const numCPUs = os.cpus().length;
 
@@ -16,6 +17,7 @@ if (cluster.isPrimary) {
       logger.info('Primary process database connected — starting cron jobs');
       startBillingCronJobs();
       startBusinessReportCronJobs();
+      startWhatsappPaymentSessionCronJobs();
     })
     .catch((error) => {
       logger.error('Primary process database connection failed, cron jobs will not start', error);

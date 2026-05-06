@@ -1,9 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import logger from "../helpers/logger.helper";
 import { WhatsappService } from "../services/whatsapp.service";
+import { WhatsappFlowService } from "../services/whatsappFlow.service";
+import {
+  decryptWhatsAppFlowRequest,
+  encryptWhatsAppFlowResponse,
+  WhatsAppFlowDecryptionResult,
+} from "../helpers/whatsappFlowCrypto.helper";
 
 // INITIALIZE SERVICE
 const whatsappService = new WhatsappService();
+const whatsappFlowService = new WhatsappFlowService();
 
 export const WhatsappController = {
   // GET WEBHOOK
@@ -42,6 +49,51 @@ export const WhatsappController = {
       return res.status(200).send({ message: "Message received" });
     } catch (err) {
       logger.error(err);
+      next(err);
+    }
+  },
+
+  async postOrderCreateFlow(req: Request, res: Response, next: NextFunction) {
+    let flowCrypto:
+      | WhatsAppFlowDecryptionResult<Record<string, any>>
+      | undefined;
+
+    try {
+      flowCrypto = decryptWhatsAppFlowRequest(req.body);
+
+      const response = await whatsappFlowService.handleOrderCreateFlowSubmission(
+        flowCrypto.decryptedBody,
+      );
+
+      const encryptedResponse = encryptWhatsAppFlowResponse(
+        response,
+        flowCrypto.aesKeyBuffer,
+        flowCrypto.initialVectorBuffer,
+      );
+
+      return res.status(200).send(encryptedResponse);
+    } catch (err) {
+      logger.error(err);
+
+      if (flowCrypto) {
+        const encryptedErrorResponse = encryptWhatsAppFlowResponse(
+          {
+            version: flowCrypto.decryptedBody.version || '3.0',
+            screen: flowCrypto.decryptedBody.screen || 'CONFIRM',
+            data: {
+              error_message:
+                err instanceof Error
+                  ? err.message
+                  : 'Unable to process WhatsApp Flow request',
+            },
+          },
+          flowCrypto.aesKeyBuffer,
+          flowCrypto.initialVectorBuffer,
+        );
+
+        return res.status(200).send(encryptedErrorResponse);
+      }
+
       next(err);
     }
   },

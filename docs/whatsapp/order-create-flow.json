@@ -1,0 +1,311 @@
+{
+    "version": "7.3",
+    "data_api_version": "3.0",
+    "routing_model": {
+        "RECIPIENT": [
+            "PICKUP"
+        ],
+        "PICKUP": [
+            "DROPOFF"
+        ],
+        "DROPOFF": [
+            "CONFIRM"
+        ],
+        "CONFIRM": []
+    },
+    "screens": [
+        {
+            "id": "RECIPIENT",
+            "title": "Send a package",
+            "data": {
+                "sender_phone": {
+                    "type": "string",
+                    "__example__": "250788123456"
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "recipient_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Who should receive the package?"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Enter the recipient phone number. We will use it to notify them and connect the delivery to the correct person."
+                            },
+                            {
+                                "type": "TextInput",
+                                "name": "recipient_phone",
+                                "label": "Recipient phone number",
+                                "input-type": "phone",
+                                "required": true,
+                                "helper-text": "Use Rwanda format, for example 0788123456 or 250788123456."
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continue",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "PICKUP"
+                                    },
+                                    "payload": {
+                                        "sender_phone": "${data.sender_phone}",
+                                        "recipient_phone": "${form.recipient_phone}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "PICKUP",
+            "title": "Pickup details",
+            "data": {
+                "sender_phone": {
+                    "type": "string",
+                    "__example__": "250788123456"
+                },
+                "recipient_phone": {
+                    "type": "string",
+                    "__example__": "250788654321"
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "pickup_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Where should the rider pick it up?"
+                            },
+                            {
+                                "type": "TextInput",
+                                "name": "pickup_address",
+                                "label": "Pickup location",
+                                "required": true,
+                                "helper-text": "Include neighborhood, building, landmark, or Google Maps pin text."
+                            },
+                            {
+                                "type": "TextInput",
+                                "name": "pickup_contact_name",
+                                "label": "Pickup contact name",
+                                "required": false
+                            },
+                            {
+                                "type": "TextInput",
+                                "name": "pickup_contact_phone",
+                                "label": "Pickup contact phone",
+                                "input-type": "phone",
+                                "required": false,
+                                "helper-text": "Leave blank if this is the same as your WhatsApp number."
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continue",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "DROPOFF"
+                                    },
+                                    "payload": {
+                                        "sender_phone": "${data.sender_phone}",
+                                        "recipient_phone": "${data.recipient_phone}",
+                                        "pickup_address": "${form.pickup_address}",
+                                        "pickup_contact_name": "${form.pickup_contact_name}",
+                                        "pickup_contact_phone": "${form.pickup_contact_phone}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "DROPOFF",
+            "title": "Drop-off details",
+            "data": {
+                "sender_phone": {
+                    "type": "string",
+                    "__example__": "250788123456"
+                },
+                "recipient_phone": {
+                    "type": "string",
+                    "__example__": "250788654321"
+                },
+                "pickup_address": {
+                    "type": "string",
+                    "__example__": "Kacyiru, KG 7 Ave, near Kigali Heights"
+                },
+                "pickup_contact_name": {
+                    "type": "string",
+                    "__example__": "Aline"
+                },
+                "pickup_contact_phone": {
+                    "type": "string",
+                    "__example__": "250788123456"
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "dropoff_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Where should the rider deliver it?"
+                            },
+                            {
+                                "type": "TextInput",
+                                "name": "dropoff_address",
+                                "label": "Drop-off location",
+                                "required": true,
+                                "helper-text": "Include neighborhood, building, landmark, or Google Maps pin text."
+                            },
+                            {
+                                "type": "TextArea",
+                                "name": "delivery_notes",
+                                "label": "Delivery notes",
+                                "required": false,
+                                "helper-text": "Optional package details, timing notes, or rider instructions."
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Review order",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "CONFIRM"
+                                    },
+                                    "payload": {
+                                        "sender_phone": "${data.sender_phone}",
+                                        "recipient_phone": "${data.recipient_phone}",
+                                        "pickup_address": "${data.pickup_address}",
+                                        "pickup_contact_name": "${data.pickup_contact_name}",
+                                        "pickup_contact_phone": "${data.pickup_contact_phone}",
+                                        "dropoff_address": "${form.dropoff_address}",
+                                        "delivery_notes": "${form.delivery_notes}",
+                                        "quoted_fee": 1500,
+                                        "currency": "RWF",
+                                        "payment_session_ttl_minutes": 300
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "CONFIRM",
+            "title": "Confirm order",
+            "terminal": true,
+            "success": true,
+            "data": {
+                "sender_phone": {
+                    "type": "string",
+                    "__example__": "250788123456"
+                },
+                "recipient_phone": {
+                    "type": "string",
+                    "__example__": "250788654321"
+                },
+                "pickup_address": {
+                    "type": "string",
+                    "__example__": "Kacyiru, KG 7 Ave, near Kigali Heights"
+                },
+                "pickup_contact_name": {
+                    "type": "string",
+                    "__example__": "Aline"
+                },
+                "pickup_contact_phone": {
+                    "type": "string",
+                    "__example__": "250788123456"
+                },
+                "dropoff_address": {
+                    "type": "string",
+                    "__example__": "Remera, KG 11 Ave, blue gate"
+                },
+                "delivery_notes": {
+                    "type": "string",
+                    "__example__": "Small envelope. Call when outside."
+                },
+                "quoted_fee": {
+                    "type": "number",
+                    "__example__": 1500
+                },
+                "currency": {
+                    "type": "string",
+                    "__example__": "RWF"
+                },
+                "payment_session_ttl_minutes": {
+                    "type": "number",
+                    "__example__": 300
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "confirm_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Confirm and create your order"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Fee: 1,500 RWF. After you submit, Peekaboo will create the order and send you a secure payment link in WhatsApp. Please pay within 5 hours to keep this chat active."
+                            },
+                            {
+                                "type": "OptIn",
+                                "name": "confirm_details",
+                                "label": "I confirm the pickup, drop-off, and recipient details are correct.",
+                                "required": true
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Create order",
+                                "on-click-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "action": "create_order_payment_session",
+                                        "source": "whatsapp_flow",
+                                        "sender_phone": "${data.sender_phone}",
+                                        "recipient_phone": "${data.recipient_phone}",
+                                        "pickup_address": "${data.pickup_address}",
+                                        "pickup_contact_name": "${data.pickup_contact_name}",
+                                        "pickup_contact_phone": "${data.pickup_contact_phone}",
+                                        "dropoff_address": "${data.dropoff_address}",
+                                        "delivery_notes": "${data.delivery_notes}",
+                                        "quoted_fee": "${data.quoted_fee}",
+                                        "currency": "${data.currency}",
+                                        "payment_session_ttl_minutes": "${data.payment_session_ttl_minutes}",
+                                        "confirmed": "${form.confirm_details}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

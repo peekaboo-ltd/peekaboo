@@ -1,9 +1,5 @@
-import {
-  ConversationStatus,
-  ConversationStep,
-} from "../constants/conversation.constants";
+import { ConversationStep } from "../constants/conversation.constants";
 import { RoleTypes } from "../constants/role.constants";
-import { Conversation } from "../entities/conversation.entity";
 import {
   orderTypeSelectedTemplate,
   pendingLocationFromTemplate,
@@ -15,18 +11,10 @@ import {
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";
 import { UserService } from "./user.service";
-import axios from "axios";
 import { OrderService } from "./order.service";
-import { OrderStatus, OrderType } from "../constants/order.constants";
+import { OrderType } from "../constants/order.constants";
 import { formatPhoneNumber } from "../helpers/string.helper";
-import { sendMessage } from "../helpers/whatsapp.helper";
-
-const {
-  WHATSAPP_BUSINESS_API_URL,
-  WHATSAPP_BUSINESS_API_VERSION,
-  WHATSAPP_BUSINESS_PHONE_NUMBER_ID,
-  WHATSAPP_BUSINESS_ACCESS_TOKEN,
-} = process.env;
+import { sendFlowMessage, sendMessage } from "../helpers/whatsapp.helper";
 
 export class WhatsappService {
   private readonly conversationService: ConversationService;
@@ -94,23 +82,10 @@ export class WhatsappService {
         [RoleTypes.CUSTOMER]
       );
 
-      // GET CONVERSATIONS BY RECIPIENT ID
-      const recipientConversations =
-        await this.conversationService.getConversationsByRecipientId(
-          conversationRecipientExists?.id,
-          ConversationStatus.ACTIVE
+      const conversation =
+        await this.conversationService.getOrCreateActiveWhatsappConversation(
+          conversationRecipientExists?.id
         );
-
-      let conversation: Conversation;
-
-      // IF NO CONVERSATION EXISTS, CREATE ONE
-      if (!recipientConversations || recipientConversations?.length === 0) {
-        conversation = await this.conversationService.createConversation({
-          recipientId: conversationRecipientExists?.id,
-        });
-      } else {
-        conversation = recipientConversations?.[0];
-      }
 
       // CREATE MESSAGE
       await this.messageService.createMessage({
@@ -146,13 +121,27 @@ export class WhatsappService {
          * 1. INITIATION
          */
         case ConversationStep.INITIATION:
-          // SEND MESSAGE
-          await sendMessage({
-            phoneNumber: wa_id,
-            message: pendingOrderTypeTemplate(
-              conversationRecipientExists?.name
-            ),
-          });
+          if (process.env.WHATSAPP_ORDER_FLOW_ID) {
+            await sendFlowMessage({
+              phoneNumber: wa_id,
+              flowId: process.env.WHATSAPP_ORDER_FLOW_ID,
+              flowToken: conversation.id,
+              flowCta: "Send a package",
+              bodyText:
+                "Welcome to Peekaboo. Tap below to create your delivery order and receive a secure payment link.",
+              initialData: {
+                sender_phone: wa_id,
+              },
+            });
+          } else {
+            // SEND MESSAGE
+            await sendMessage({
+              phoneNumber: wa_id,
+              message: pendingOrderTypeTemplate(
+                conversationRecipientExists?.name
+              ),
+            });
+          }
 
           // UPDATE CONVERSATION
           await this.conversationService.updateConversation(conversation?.id, {
