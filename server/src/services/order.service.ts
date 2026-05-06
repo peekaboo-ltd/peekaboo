@@ -254,6 +254,10 @@ export class OrderService {
     description,
     notes,
     initialFee = 1500,
+    locationFrom,
+    pickupProvider,
+    pickupProviderPlaceId,
+    orderSource,
   }: {
     senderPhoneNumber: string;
     recipientPhoneNumber: string;
@@ -261,6 +265,10 @@ export class OrderService {
     description?: string;
     notes?: string;
     initialFee?: number;
+    locationFrom?: { latitude: number; longitude: number };
+    pickupProvider?: string | null;
+    pickupProviderPlaceId?: string | null;
+    orderSource?: string | null;
   }): Promise<{ order: Order }> {
     const referenceId = await this.generateUniqueOrderReferenceId();
     const trackingId = await this.generateUniqueTrackingId();
@@ -298,6 +306,10 @@ export class OrderService {
       description,
       notes,
       trackingId,
+      locationFrom,
+      pickupProvider,
+      pickupProviderPlaceId,
+      orderSource,
     });
 
     // CREATE ORDER STATUS

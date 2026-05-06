@@ -87,7 +87,7 @@ export const WhatsappController = {
       const decoded = jwt.verify(
         decryptedBody.flow_token || "",
         flowTokenSecret,
-      ) as JwtPayload & { phone?: string };
+      ) as JwtPayload & { phone?: string; conversationId?: string };
       const senderPhone = decoded.phone;
 
       if (!senderPhone) {
@@ -98,6 +98,7 @@ export const WhatsappController = {
         const encryptedResponse = await whatsappService.handleFlowSubmission(
           decryptedBody,
           senderPhone,
+          decoded.conversationId,
           aesKeyBuffer,
           initialVectorBuffer,
         );

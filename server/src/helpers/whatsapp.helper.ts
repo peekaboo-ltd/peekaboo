@@ -138,6 +138,22 @@ export const sendCtaUrlMessage = async ({
   });
 };
 
+export const sendLocationRequestMessage = async ({
+  phoneNumber,
+  bodyText,
+}: {
+  phoneNumber: string;
+  bodyText: string;
+}) => {
+  const message = {
+    type: "location_request_message",
+    body: { text: bodyText },
+    action: { name: "send_location" },
+  };
+
+  return sendMessage({ phoneNumber, message, type: "interactive" });
+};
+
 export const sendUtilityTemplate = async ({
   phoneNumber,
   templateName,

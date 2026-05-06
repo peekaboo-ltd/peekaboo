@@ -132,6 +132,21 @@ export class Order extends AbstractEntity {
   @Column({ name: 'batch_id', type: 'uuid', nullable: true })
   batchId?: UUID;
 
+  // WhatsApp / maps pickup metadata (B2C flow)
+  @Column({ name: 'pickup_provider', type: 'varchar', length: 32, nullable: true })
+  pickupProvider?: string | null;
+
+  @Column({
+    name: 'pickup_provider_place_id',
+    type: 'varchar',
+    length: 512,
+    nullable: true,
+  })
+  pickupProviderPlaceId?: string | null;
+
+  @Column({ name: 'order_source', type: 'varchar', length: 64, nullable: true })
+  orderSource?: string | null;
+
   /**
    * RELATIONS
    */
