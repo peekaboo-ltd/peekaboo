@@ -15,7 +15,7 @@ import { encryptFlowResponse } from "../helpers/whatsapp.flows.helper";
 import {
   flowCTABodyText,
   paymentCTABodyText,
-} from "../templates/whatsapp.template";
+} from "../templates/whatsapp/whatsapp.template";
 import { ConversationService } from "./conversation.service";
 import { MessageService } from "./message.service";
 import { OrderService } from "./order.service";

@@ -14,7 +14,7 @@ import { Order } from '../entities/order.entity';
 import { OrderActivity } from '../entities/orderActivity.entity';
 import { sendMessage } from '../helpers/whatsapp.helper';
 import logger from '../helpers/logger.helper';
-import { sessionExpiredTemplate } from '../templates/whatsapp.template';
+import { sessionExpiredTemplate } from '../templates/whatsapp/whatsapp.template';
 
 export async function expireStaleWhatsappSessions(): Promise<void> {
   const conversationRepository = AppDataSource.getRepository(Conversation);

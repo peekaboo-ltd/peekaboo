@@ -1,4 +1,4 @@
-import { UUID } from "../types";
+import { UUID } from "../../types";
 
 // PENDING ORDER TYPE TEMPLATE
 export const pendingOrderTypeTemplate = (name?: string) => {
