@@ -13,6 +13,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -48,7 +49,7 @@ type ReportSubmissionPreview = {
 
 const formatAddressLabel = (address?: Location.LocationGeocodedAddress | null) => {
   if (!address) {
-    return 'Address unavailable';
+    return '';
   }
 
   const parts = [
@@ -64,13 +65,16 @@ const formatAddressLabel = (address?: Location.LocationGeocodedAddress | null) =
     .map((part) => String(part).trim());
 
   if (parts.length === 0) {
-    return 'Address unavailable';
+    return '';
   }
 
   return Array.from(new Set(parts)).join(', ');
 };
 
 export default function DashboardScreen() {
+  const { width, height } = useWindowDimensions();
+  const isCompact = width < 380;
+  const isShort = height < 740;
   const { user, logout } = useAuthStore();
   const { t } = useI18n();
   const { setUser } = useAuthStore();
@@ -168,13 +172,13 @@ export default function DashboardScreen() {
   const launchReportCamera = useCallback(async (captureType: ReportCaptureType) => {
     const locationPermission = await Location.requestForegroundPermissionsAsync();
     if (!locationPermission.granted) {
-      Alert.alert('Location permission required', 'Please allow location access to continue.');
+      Alert.alert(t('dashboard.permissionLocationTitle'), t('dashboard.permissionLocationMessage'));
       return;
     }
 
     const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
     if (!cameraPermission.granted) {
-      Alert.alert('Camera permission required', 'Please allow camera access to continue.');
+      Alert.alert(t('dashboard.permissionCameraTitle'), t('dashboard.permissionCameraMessage'));
       return;
     }
 
@@ -208,59 +212,62 @@ export default function DashboardScreen() {
     setReportCategory(null);
     setIsReportConfirmed(false);
     setIsReportModalVisible(true);
-  }, []);
+  }, [t]);
 
   const handleOpenReportProblem = useCallback(() => {
-    Alert.alert('Report Problem / Receipt', 'Capture evidence as photo or video.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('dashboard.reportOpenTitle'), t('dashboard.reportOpenMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Photo',
+        text: t('dashboard.mediaPhoto'),
         onPress: () => {
           void launchReportCamera('image');
         },
       },
       {
-        text: 'Video',
+        text: t('dashboard.mediaVideo'),
         onPress: () => {
           void launchReportCamera('video');
         },
       },
     ]);
-  }, [launchReportCamera]);
+  }, [launchReportCamera, t]);
 
   const handleRetakeReport = useCallback(() => {
-    Alert.alert('Retake evidence?', 'This will replace your current capture.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('dashboard.reportRetakeTitle'), t('dashboard.reportRetakeMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Retake',
+        text: t('dashboard.reportRetake'),
         onPress: () => {
           void launchReportCamera(reportMediaType);
         },
       },
     ]);
-  }, [launchReportCamera, reportMediaType]);
+  }, [launchReportCamera, reportMediaType, t]);
 
   const handleConfirmReport = useCallback(() => {
     if (!reportMediaUri) return;
     if (!reportCategory) {
-      Alert.alert('Type required', 'Please choose Problem or Receipt before continuing.');
+      Alert.alert(t('dashboard.reportTypeRequiredTitle'), t('dashboard.reportTypeRequiredMessageContinue'));
       return;
     }
     setIsReportConfirmed(true);
-  }, [reportCategory, reportMediaUri]);
+  }, [reportCategory, reportMediaUri, t]);
 
   const handleSendReport = useCallback(async () => {
     if (!reportMediaUri) return;
     if (!reportCategory) {
-      Alert.alert('Type required', 'Please choose Problem or Receipt before sending.');
+      Alert.alert(t('dashboard.reportTypeRequiredTitle'), t('dashboard.reportTypeRequiredMessageSend'));
       return;
     }
     if (!reportDescription.trim()) {
-      Alert.alert('Description required', 'Please add a short description before sending.');
+      Alert.alert(t('dashboard.reportDescriptionRequiredTitle'), t('dashboard.reportDescriptionRequiredMessage'));
       return;
     }
 
-    const reportPrefix = reportCategory === 'problem' ? '[Problem]' : '[Receipt]';
+    const reportPrefix =
+      reportCategory === 'problem'
+        ? `[${t('dashboard.reportProblem')}]`
+        : `[${t('dashboard.reportReceipt')}]`;
     const descriptionWithCategory = reportPrefix + ' ' + reportDescription.trim();
 
     try {
@@ -280,15 +287,15 @@ export default function DashboardScreen() {
         mediaType: reportMediaType,
         description: descriptionWithCategory,
         timestamp: reportTimestamp || new Date().toLocaleString(),
-        locationLabel: reportLocationLabel || 'Location unavailable',
+        locationLabel: reportLocationLabel || t('dashboard.reportLocationUnavailable'),
       });
       resetReportState();
     } catch {
-      Alert.alert('Send failed', 'Unable to send your report right now. Please try again.');
+      Alert.alert(t('dashboard.reportSendFailedTitle'), t('dashboard.reportSendFailedMessage'));
     } finally {
       setIsSendingReport(false);
     }
-  }, [reportCategory, reportDescription, reportLocationLabel, reportMediaType, reportMediaUri, reportTimestamp, resetReportState]);
+  }, [reportCategory, reportDescription, reportLocationLabel, reportMediaType, reportMediaUri, reportTimestamp, resetReportState, t]);
 
   const resetProofState = useCallback(() => {
     setProofImageUri(null);
@@ -331,8 +338,8 @@ export default function DashboardScreen() {
           : null;
 
       Alert.alert(
-        'Update failed',
-        apiError || 'Failed to send check proof. Please try again.'
+        t('dashboard.updateFailedTitle'),
+        apiError || t('dashboard.checkProofFailed')
       );
     } finally {
       setIsSubmittingProof(false);
@@ -347,6 +354,7 @@ export default function DashboardScreen() {
     refresh,
     resetProofState,
     setUser,
+    t,
     user,
   ]);
 
@@ -365,16 +373,16 @@ export default function DashboardScreen() {
   }, []);
 
   const handleRetakePhoto = useCallback(() => {
-    Alert.alert('Retake photo?', 'This will replace the current image.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('dashboard.proofRetakeTitle'), t('dashboard.proofRetakeMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'OK',
+        text: t('common.ok'),
         onPress: () => {
           void handleRetakePhotoConfirmed();
         },
       },
     ]);
-  }, [handleRetakePhotoConfirmed]);
+  }, [handleRetakePhotoConfirmed, t]);
 
   const handleSaveProof = useCallback(async () => {
     if (!proofImageUri) return;
@@ -385,8 +393,8 @@ export default function DashboardScreen() {
 
       if (!permission.granted) {
         Alert.alert(
-          'Permission required',
-          'Please allow photo library access to save images on your phone.'
+          t('dashboard.permissionRequiredTitle'),
+          t('dashboard.photoLibraryPermissionMessage')
         );
         return;
       }
@@ -401,17 +409,17 @@ export default function DashboardScreen() {
         await MediaLibrary.createAlbumAsync(albumName, asset, true);
       }
 
-      Alert.alert('Saved', `Photo saved to your gallery in "${albumName}".`);
+      Alert.alert(t('dashboard.savedTitle'), t('dashboard.savedMessage', { albumName }));
     } catch (error) {
       const errorMessage =
         error instanceof Error && error.message
           ? error.message
-          : 'Could not save the photo. Please try again.';
-      Alert.alert('Save failed', errorMessage);
+          : t('dashboard.saveFailedMessage');
+      Alert.alert(t('dashboard.saveFailedTitle'), errorMessage);
     } finally {
       setIsSavingProof(false);
     }
-  }, [proofImageUri]);
+  }, [proofImageUri, t]);
 
   const handleAvailabilityToggle = async (value: boolean) => {
     if (!user || isAvailabilityUpdating) return;
@@ -422,13 +430,13 @@ export default function DashboardScreen() {
     try {
       const locationPermission = await Location.requestForegroundPermissionsAsync();
       if (!locationPermission.granted) {
-        Alert.alert('Location permission required', 'Please allow location access to continue.');
+        Alert.alert(t('dashboard.permissionLocationTitle'), t('dashboard.permissionLocationMessage'));
         return;
       }
 
       const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
       if (!cameraPermission.granted) {
-        Alert.alert('Camera permission required', 'Please allow camera access to continue.');
+        Alert.alert(t('dashboard.permissionCameraTitle'), t('dashboard.permissionCameraMessage'));
         return;
       }
 
@@ -463,15 +471,15 @@ export default function DashboardScreen() {
         setIsProofModalVisible(true);
       }
     } catch {
-      Alert.alert('Update failed', 'Failed to update availability. Please try again.');
+      Alert.alert(t('dashboard.updateFailedTitle'), t('dashboard.updateFailedMessage'));
     } finally {
       setIsAvailabilityUpdating(false);
     }
   };
 
   const proofActionLabel = pendingAvailabilityStatus === UserStatus.ACTIVE
-    ? 'Send Check-in'
-    : 'Send Check-out';
+    ? t('dashboard.proofSendCheckIn')
+    : t('dashboard.proofSendCheckOut');
 
   useEffect(() => {
     Animated.stagger(140, [
@@ -509,6 +517,7 @@ export default function DashboardScreen() {
       <Animated.View
         style={[
           styles.header,
+          isCompact && styles.headerCompact,
           {
             opacity: headerAnim,
             transform: [
@@ -522,18 +531,18 @@ export default function DashboardScreen() {
           },
         ]}
       >
-        <View style={styles.headerSurface}>
+        <View style={[styles.headerSurface, isCompact && styles.headerSurfaceCompact]}>
           <View style={styles.headerLeft}>
             <View style={styles.kickerRow}>
               <View style={styles.kickerDot} />
               <Text style={styles.kicker}>{t('dashboard.kicker')}</Text>
             </View>
             <Text style={styles.greeting}>{t('dashboard.welcomeBack')}</Text>
-            <Text style={styles.userName}>{user?.name || t('dashboard.defaultRider')}</Text>
+            <Text style={[styles.userName, isCompact && styles.userNameCompact]}>{user?.name || t('dashboard.defaultRider')}</Text>
             <Text style={styles.subline}>{t('dashboard.readyRoutes')}</Text>
           </View>
-          <View style={styles.headerRight}>
-              <View style={styles.shiftControlRow}>
+          <View style={[styles.headerRight, isCompact && styles.headerRightCompact]}>
+              <View style={[styles.shiftControlRow, isCompact && styles.shiftControlRowCompact]}>
               <View
                 style={[
                   styles.statusPill,
@@ -545,8 +554,8 @@ export default function DashboardScreen() {
                   size={14}
                   color={isShiftActive ? colors.success : colors.warning}
                 />
-                <Text style={styles.statusText}>
-                  {isShiftActive ? 'Shift Active' : 'Shift Inactive'}
+                <Text style={[styles.statusText, isCompact && styles.statusTextCompact]}>
+                  {isShiftActive ? t('dashboard.shiftActive') : t('dashboard.shiftInactive')}
                 </Text>
               </View>
               <Switch
@@ -577,6 +586,8 @@ export default function DashboardScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.scrollContent,
+          isCompact && styles.scrollContentCompact,
+          isShort && styles.scrollContentShort,
           { paddingBottom: spacing.xxl + 60 + insets.bottom }
         ]}
         showsVerticalScrollIndicator={false}
@@ -591,6 +602,7 @@ export default function DashboardScreen() {
         <Animated.View
           style={[
             styles.heroCard,
+            isCompact && styles.heroCardCompact,
             {
               opacity: heroAnim,
               transform: [
@@ -605,7 +617,7 @@ export default function DashboardScreen() {
           ]}
         >
           <View style={styles.heroHighlight} />
-          <View style={styles.heroHeader}>
+          <View style={[styles.heroHeader, isCompact && styles.heroHeaderCompact]}>
             <View>
               <Text style={styles.heroKicker}>{t('dashboard.todaysFocus')}</Text>
               <Text style={styles.heroSubtitle}>{t('dashboard.keepMomentum')}</Text>
@@ -617,15 +629,15 @@ export default function DashboardScreen() {
               </Text>
             </View>
           </View>
-          <Text style={styles.heroTitle}>{t('dashboard.stayTop')}</Text>
-          <View style={styles.heroStatsRow}>
+          <Text style={[styles.heroTitle, isCompact && styles.heroTitleCompact]}>{t('dashboard.stayTop')}</Text>
+          <View style={[styles.heroStatsRow, isCompact && styles.heroStatsRowCompact]}>
             <View style={styles.heroStat}>
               <Text style={styles.heroStatLabel}>{t('dashboard.earnings')}</Text>
               <Text style={styles.heroStatValue}>
                 {formatCurrency(stats?.totalEarnings ?? 0)}
               </Text>
             </View>
-            <View style={styles.heroDivider} />
+            <View style={[styles.heroDivider, isCompact && styles.heroDividerCompact]} />
             <View style={styles.heroStat}>
               <Text style={styles.heroStatLabel}>{t('dashboard.completed')}</Text>
               <Text style={styles.heroStatValue}>
@@ -677,7 +689,7 @@ export default function DashboardScreen() {
             },
           ]}
         >
-          <View style={styles.sectionHeader}>
+          <View style={[styles.sectionHeader, isCompact && styles.sectionHeaderCompact]}>
             <View>
               <Text style={styles.sectionKicker}>{t('dashboard.overview')}</Text>
               <Text style={styles.sectionTitle}>{t('dashboard.snapshot')}</Text>
@@ -738,26 +750,30 @@ export default function DashboardScreen() {
             </View>
             <Text style={styles.sectionHint}>{t('dashboard.stayOnTrack')}</Text>
           </View>
-          <View style={styles.quickActions}>
+          <View style={[styles.quickActions, isCompact && styles.quickActionsCompact]}>
             <Card style={styles.actionCard} onPress={handleViewAssignments}>
-              <View style={styles.actionIconContainer}>
+              <View style={[styles.actionIconContainer, styles.actionIconContainerPrimary]}>
                 <Ionicons name="list" size={22} color={colors.primary} />
               </View>
-              <View>
+              <View style={styles.actionBody}>
                 <Text style={styles.actionText}>{t('dashboard.viewAssignments')}</Text>
                 <Text style={styles.actionSubtext}>{t('dashboard.acceptAndStart')}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
+              <View style={styles.actionChevronWrap}>
+                <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} />
+              </View>
             </Card>
             <Card style={styles.actionCard} onPress={handleOpenReportProblem}>
-              <View style={styles.actionIconContainer}>
+              <View style={[styles.actionIconContainer, styles.actionIconContainerWarning]}>
                 <Ionicons name="alert-circle-outline" size={22} color={colors.warning} />
               </View>
-              <View>
-                <Text style={styles.actionText}>Report Problem</Text>
-                <Text style={styles.actionSubtext}>Capture proof and submit</Text>
+              <View style={styles.actionBody}>
+                <Text style={styles.actionText}>{t('dashboard.reportActionTitle')}</Text>
+                <Text style={styles.actionSubtext}>{t('dashboard.reportActionSubtitle')}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
+              <View style={styles.actionChevronWrap}>
+                <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} />
+              </View>
             </Card>
           </View>
         </Animated.View>
@@ -779,7 +795,7 @@ export default function DashboardScreen() {
             },
           ]}
         >
-          <View style={styles.sectionHeader}>
+          <View style={[styles.sectionHeader, isCompact && styles.sectionHeaderCompact]}>
             <View>
               <Text style={styles.sectionKicker}>{t('dashboard.timeline')}</Text>
               <Text style={styles.sectionTitle}>{t('dashboard.recentActivity')}</Text>
@@ -822,9 +838,9 @@ export default function DashboardScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
         >
-          <View style={styles.proofModalContainer}>
-            <View style={styles.proofHeader}>
-              <Text style={styles.reportTitle}>Report Problem / Receipt</Text>
+          <View style={[styles.proofModalContainer, isCompact && styles.proofModalContainerCompact]}>
+          <View style={styles.proofHeader}>
+              <Text style={styles.reportTitle}>{t('dashboard.reportModalTitle')}</Text>
               <TouchableOpacity
                 onPress={resetReportState}
                 style={styles.proofCloseButton}
@@ -852,7 +868,7 @@ export default function DashboardScreen() {
                         contentFit="contain"
                       />
                       <Ionicons name="videocam" size={48} color={colors.text.inverse} />
-                      <Text style={styles.videoPreviewText}>Video captured</Text>
+                      <Text style={styles.videoPreviewText}>{t('dashboard.reportVideoCaptured')}</Text>
                     </View>
                   )}
                   <Image
@@ -861,18 +877,20 @@ export default function DashboardScreen() {
                     contentFit="contain"
                   />
                   <View style={styles.proofOverlay}>
-                    <Text style={styles.proofOverlayText}>Timestamp: {reportTimestamp}</Text>
-                    <Text style={styles.proofOverlayText}>Location: {reportLocationLabel || 'Location unavailable'}</Text>
+                    <Text style={styles.proofOverlayText}>{t('dashboard.reportTimestamp')}: {reportTimestamp}</Text>
                     <Text style={styles.proofOverlayText}>
-                      Type: {reportMediaType === 'video' ? 'Video' : 'Photo'}
+                      {t('dashboard.reportLocation')}: {reportLocationLabel || t('dashboard.reportLocationUnavailable')}
+                    </Text>
+                    <Text style={styles.proofOverlayText}>
+                      {t('dashboard.reportType')}: {reportMediaType === 'video' ? t('dashboard.mediaVideo') : t('dashboard.mediaPhoto')}
                     </Text>
                   </View>
                 </View>
               ) : null}
 
               <View style={styles.reportTypeSection}>
-                <Text style={styles.reportLabel}>Choose type</Text>
-                <View style={styles.reportTypeSelector}>
+                <Text style={styles.reportLabel}>{t('dashboard.reportChooseType')}</Text>
+                <View style={[styles.reportTypeSelector, isCompact && styles.reportTypeSelectorCompact]}>
                   <TouchableOpacity
                     onPress={() => setReportCategory('problem')}
                     style={[
@@ -888,7 +906,7 @@ export default function DashboardScreen() {
                         reportCategory === 'problem' && styles.reportTypeChipTextActive,
                       ]}
                     >
-                      Problem
+                      {t('dashboard.reportProblem')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -906,7 +924,7 @@ export default function DashboardScreen() {
                         reportCategory === 'receipt' && styles.reportTypeChipTextActive,
                       ]}
                     >
-                      Receipt
+                      {t('dashboard.reportReceipt')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -914,12 +932,16 @@ export default function DashboardScreen() {
 
               {isReportConfirmed && (
                 <View style={styles.reportForm}>
-                  <Text style={styles.reportLabel}>Description</Text>
+                  <Text style={styles.reportLabel}>{t('dashboard.reportDescription')}</Text>
                   <TextInput
                     style={styles.reportInput}
                     value={reportDescription}
                     onChangeText={setReportDescription}
-                    placeholder={reportCategory === 'receipt' ? 'Describe the receipt...' : 'Describe the problem...'}
+                    placeholder={
+                      reportCategory === 'receipt'
+                        ? t('dashboard.reportDescribeReceipt')
+                        : t('dashboard.reportDescribeProblem')
+                    }
                     placeholderTextColor={colors.text.disabled}
                     multiline
                     textAlignVertical="top"
@@ -935,14 +957,14 @@ export default function DashboardScreen() {
               {!isReportConfirmed ? (
                 <>
                   <Button
-                    title="Retake"
+                    title={t('dashboard.reportRetake')}
                     onPress={handleRetakeReport}
                     variant="outline"
                     fullWidth
                     disabled={isSendingReport}
                   />
                   <Button
-                    title="Confirm"
+                    title={t('dashboard.reportConfirm')}
                     onPress={handleConfirmReport}
                     fullWidth
                     disabled={!reportMediaUri || !reportCategory || isSendingReport}
@@ -951,7 +973,7 @@ export default function DashboardScreen() {
                 </>
               ) : (
                 <Button
-                  title="Send"
+                  title={t('dashboard.reportSend')}
                   onPress={handleSendReport}
                   fullWidth
                   loading={isSendingReport}
@@ -972,7 +994,7 @@ export default function DashboardScreen() {
       >
         <View style={styles.proofModalContainer}>
           <View style={styles.proofHeader}>
-            <Text style={styles.reportTitle}>Report Submitted</Text>
+            <Text style={styles.reportTitle}>{t('dashboard.reportSubmitted')}</Text>
             <TouchableOpacity
               onPress={() => setReportSubmissionPreview(null)}
               style={styles.proofCloseButton}
@@ -991,9 +1013,9 @@ export default function DashboardScreen() {
                 contentFit="contain"
               />
               <View style={styles.proofOverlay}>
-                <Text style={styles.proofOverlayText}>Timestamp: {reportSubmissionPreview.timestamp}</Text>
-                <Text style={styles.proofOverlayText}>Location: {reportSubmissionPreview.locationLabel}</Text>
-                <Text style={styles.proofOverlayText}>Type: Photo</Text>
+                <Text style={styles.proofOverlayText}>{t('dashboard.reportTimestamp')}: {reportSubmissionPreview.timestamp}</Text>
+                <Text style={styles.proofOverlayText}>{t('dashboard.reportLocation')}: {reportSubmissionPreview.locationLabel}</Text>
+                <Text style={styles.proofOverlayText}>{t('dashboard.reportType')}: {t('dashboard.mediaPhoto')}</Text>
               </View>
             </View>
           ) : (
@@ -1004,23 +1026,23 @@ export default function DashboardScreen() {
                 contentFit="contain"
               />
               <Ionicons name="videocam" size={56} color={colors.text.inverse} />
-              <Text style={styles.videoPreviewText}>Video evidence submitted</Text>
-              <Text style={styles.videoMetaText}>Timestamp: {reportSubmissionPreview?.timestamp}</Text>
-              <Text style={styles.videoMetaText}>Location: {reportSubmissionPreview?.locationLabel}</Text>
+              <Text style={styles.videoPreviewText}>{t('dashboard.reportVideoEvidenceSubmitted')}</Text>
+              <Text style={styles.videoMetaText}>{t('dashboard.reportTimestamp')}: {reportSubmissionPreview?.timestamp}</Text>
+              <Text style={styles.videoMetaText}>{t('dashboard.reportLocation')}: {reportSubmissionPreview?.locationLabel}</Text>
             </View>
           )}
 
           <View style={styles.reportSubmissionSummary}>
-            <Text style={styles.reportLabel}>Type</Text>
+            <Text style={styles.reportLabel}>{t('dashboard.reportType')}</Text>
             <Text style={styles.reportSummaryText}>
-              {reportSubmissionPreview?.category === 'receipt' ? 'Receipt' : 'Problem'}
+              {reportSubmissionPreview?.category === 'receipt' ? t('dashboard.reportReceipt') : t('dashboard.reportProblem')}
             </Text>
-            <Text style={styles.reportLabel}>Description</Text>
+            <Text style={styles.reportLabel}>{t('dashboard.reportDescription')}</Text>
             <Text style={styles.reportSummaryText}>
-              {reportSubmissionPreview?.description || 'No description provided.'}
+              {reportSubmissionPreview?.description || t('dashboard.reportNoDescription')}
             </Text>
             <Button
-              title="Done"
+              title={t('dashboard.reportDone')}
               onPress={() => setReportSubmissionPreview(null)}
               fullWidth
               icon={<Ionicons name="checkmark-circle-outline" size={16} color={colors.text.inverse} />}
@@ -1061,22 +1083,22 @@ export default function DashboardScreen() {
                 contentFit="contain"
               />
               <View style={styles.proofOverlay}>
-                <Text style={styles.proofOverlayText}>Timestamp: {proofTimestamp}</Text>
-                <Text style={styles.proofOverlayText}>Location: {proofLocationLabel}</Text>
+                <Text style={styles.proofOverlayText}>{t('dashboard.reportTimestamp')}: {proofTimestamp}</Text>
+                <Text style={styles.proofOverlayText}>{t('dashboard.reportLocation')}: {proofLocationLabel}</Text>
               </View>
             </View>
           ) : null}
 
           <View style={styles.proofActions}>
             <Button
-              title="Retake"
+              title={t('dashboard.reportRetake')}
               onPress={handleRetakePhoto}
               variant="outline"
               fullWidth
               disabled={isSubmittingProof || isSavingProof}
             />
             <Button
-              title="Save"
+              title={t('dashboard.proofSave')}
               onPress={handleSaveProof}
               variant="secondary"
               fullWidth
@@ -1109,34 +1131,37 @@ const styles = StyleSheet.create({
   },
   glowTop: {
     position: 'absolute',
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: 'rgba(95, 149, 152, 0.15)',
-    top: -160,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: 'rgba(95, 149, 152, 0.08)',
+    top: -140,
     right: -120,
   },
   glowMid: {
     position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'rgba(29, 84, 109, 0.12)',
-    top: 180,
-    left: -120,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(29, 84, 109, 0.08)',
+    top: 220,
+    left: -110,
   },
   glowBottom: {
     position: 'absolute',
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    bottom: -120,
-    right: -80,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    bottom: -90,
+    right: -70,
   },
   header: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
+  },
+  headerCompact: {
+    paddingHorizontal: spacing.sm,
   },
   headerSurface: {
     flexDirection: 'row',
@@ -1148,10 +1173,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(95, 149, 152, 0.2)',
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
     elevation: 4,
+  },
+  headerSurfaceCompact: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    padding: spacing.md,
   },
   headerLeft: {
     flex: 1,
@@ -1160,10 +1191,18 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: spacing.sm,
   },
+  headerRightCompact: {
+    alignSelf: 'stretch',
+    alignItems: 'flex-start',
+  },
   shiftControlRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
+  },
+  shiftControlRowCompact: {
+    width: '100%',
+    justifyContent: 'space-between',
   },
   statusPill: {
     flexDirection: 'row',
@@ -1189,6 +1228,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
+  },
+  statusTextCompact: {
+    fontSize: 10,
+    letterSpacing: 0.4,
   },
   kickerRow: {
     flexDirection: 'row',
@@ -1217,6 +1260,9 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     color: colors.text.primary,
+  },
+  userNameCompact: {
+    fontSize: typography.h3.fontSize,
   },
   subline: {
     marginTop: spacing.xs,
@@ -1257,6 +1303,13 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.md,
   },
+  scrollContentCompact: {
+    paddingHorizontal: spacing.sm,
+    paddingTop: spacing.sm,
+  },
+  scrollContentShort: {
+    paddingBottom: spacing.md,
+  },
   heroCard: {
     backgroundColor: colors.surface,
     borderRadius: 20,
@@ -1265,11 +1318,15 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(95, 149, 152, 0.2)',
     marginTop: spacing.lg,
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
     elevation: 4,
     overflow: 'hidden',
+  },
+  heroCardCompact: {
+    padding: spacing.md,
+    marginTop: spacing.md,
   },
   heroHighlight: {
     position: 'absolute',
@@ -1278,13 +1335,17 @@ const styles = StyleSheet.create({
     width: 220,
     height: 220,
     borderRadius: 110,
-    backgroundColor: 'rgba(29, 84, 109, 0.08)',
+    backgroundColor: 'rgba(29, 84, 109, 0.05)',
   },
   heroHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: spacing.sm,
+  },
+  heroHeaderCompact: {
+    alignItems: 'flex-start',
+    gap: spacing.sm,
   },
   heroKicker: {
     fontSize: typography.caption.fontSize,
@@ -1317,10 +1378,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text.primary,
   },
+  heroTitleCompact: {
+    fontSize: typography.body.fontSize,
+  },
   heroStatsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: spacing.md,
+  },
+  heroStatsRowCompact: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
   },
   heroStat: {
     flex: 1,
@@ -1342,6 +1411,12 @@ const styles = StyleSheet.create({
     height: 44,
     backgroundColor: 'rgba(95, 149, 152, 0.2)',
     marginHorizontal: spacing.md,
+  },
+  heroDividerCompact: {
+    width: '100%',
+    height: 1,
+    marginHorizontal: 0,
+    marginVertical: spacing.xs,
   },
   alertCard: {
     backgroundColor: 'rgba(255, 251, 235, 0.9)',
@@ -1387,10 +1462,13 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
     marginBottom: spacing.md,
+  },
+  sectionHeaderCompact: {
+    alignItems: 'flex-start',
+    gap: spacing.xs,
   },
   sectionKicker: {
     fontSize: typography.caption.fontSize,
@@ -1402,9 +1480,10 @@ const styles = StyleSheet.create({
   sectionHint: {
     fontSize: typography.caption.fontSize,
     color: colors.text.disabled,
+    marginTop: 2,
   },
   section: {
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -1436,41 +1515,69 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   quickActions: {
-    flexDirection: 'row',
-    gap: spacing.md,
+    flexDirection: 'column',
+    gap: spacing.sm,
     marginBottom: spacing.lg,
   },
+  quickActionsCompact: {
+    flexDirection: 'column',
+  },
   actionCard: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: spacing.sm,
+    minHeight: 88,
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: 'rgba(95, 149, 152, 0.2)',
+    borderColor: 'rgba(95, 149, 152, 0.14)',
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 18,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
   },
   actionIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: `${colors.primary}15`,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+    overflow: 'visible',
+    borderWidth: 1,
+    borderColor: 'rgba(29, 84, 109, 0.1)',
+  },
+  actionIconContainerPrimary: {
+    backgroundColor: 'rgba(29, 84, 109, 0.1)',
+  },
+  actionIconContainerWarning: {
+    backgroundColor: 'rgba(245, 158, 11, 0.13)',
+  },
+  actionBody: {
+    flex: 1,
+    minWidth: 0,
+  },
+  actionChevronWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    backgroundColor: 'rgba(95, 149, 152, 0.14)',
   },
   actionText: {
-    fontSize: typography.bodySmall.fontSize,
+    fontSize: typography.body.fontSize,
     fontWeight: '600',
     color: colors.text.primary,
+    lineHeight: 20,
   },
   actionSubtext: {
-    marginTop: 2,
-    fontSize: typography.caption.fontSize,
+    marginTop: 3,
+    fontSize: typography.bodySmall.fontSize,
     color: colors.text.secondary,
+    lineHeight: 18,
   },
   locationDisclaimerCard: {
     marginTop: spacing.md,
@@ -1505,6 +1612,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     padding: spacing.lg,
     paddingTop: spacing.xl,
+  },
+  proofModalContainerCompact: {
+    padding: spacing.md,
+    paddingTop: spacing.lg,
   },
   reportModalKeyboardContainer: {
     flex: 1,
@@ -1610,6 +1721,9 @@ const styles = StyleSheet.create({
   reportTypeSelector: {
     flexDirection: 'row',
     gap: spacing.sm,
+  },
+  reportTypeSelectorCompact: {
+    flexDirection: 'column',
   },
   reportTypeChip: {
     flex: 1,

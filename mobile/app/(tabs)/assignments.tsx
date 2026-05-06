@@ -6,6 +6,7 @@ import {
   FlatList,
   RefreshControl,
   Alert,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -21,6 +22,8 @@ import { useI18n } from '../../i18n';
 import { colors, typography, spacing } from '../../utils/constants';
 
 export default function AssignmentsScreen() {
+  const { width } = useWindowDimensions();
+  const isCompact = width < 380;
   const { t } = useI18n();
   const params = useLocalSearchParams<{ filter?: string }>();
   const {
@@ -225,8 +228,8 @@ export default function AssignmentsScreen() {
         <View style={styles.glowBottom} />
       </View>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerSurface}>
+      <View style={[styles.header, isCompact && styles.headerCompact]}>
+        <View style={[styles.headerSurface, isCompact && styles.headerSurfaceCompact]}>
           <View>
             <View style={styles.kickerRow}>
               <View style={styles.kickerDot} />
@@ -235,17 +238,17 @@ export default function AssignmentsScreen() {
             <Text style={styles.title}>{t('assignments.queueTitle')}</Text>
             <Text style={styles.subtitle}>{t('assignments.totalAssignments', { count: assignments.length })}</Text>
           </View>
-          <View style={styles.summaryPill}>
+          <View style={[styles.summaryPill, isCompact && styles.summaryPillCompact]}>
             <Text style={styles.summaryLabel}>{t('assignments.active')}</Text>
             <Text style={styles.summaryValue}>{summary.active}</Text>
           </View>
         </View>
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryCard}>
+        <View style={[styles.summaryRow, isCompact && styles.summaryRowCompact]}>
+          <View style={[styles.summaryCard, isCompact && styles.summaryCardCompact]}>
             <Text style={styles.summaryLabel}>{t('assignments.pending')}</Text>
             <Text style={styles.summaryValue}>{summary.pending}</Text>
           </View>
-          <View style={styles.summaryCard}>
+          <View style={[styles.summaryCard, isCompact && styles.summaryCardCompact]}>
             <Text style={styles.summaryLabel}>{t('assignments.completed')}</Text>
             <Text style={styles.summaryValue}>{summary.completed}</Text>
           </View>
@@ -278,7 +281,7 @@ export default function AssignmentsScreen() {
           data={sortedAssignments}
           renderItem={renderAssignment}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, isCompact && styles.listContentCompact]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -328,6 +331,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     gap: spacing.md,
   },
+  headerCompact: {
+    paddingHorizontal: spacing.sm,
+  },
   headerSurface: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -342,6 +348,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 24,
     elevation: 3,
+  },
+  headerSurfaceCompact: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    padding: spacing.md,
   },
   kickerRow: {
     flexDirection: 'row',
@@ -376,6 +388,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
   },
+  summaryRowCompact: {
+    gap: spacing.sm,
+  },
   summaryCard: {
     flex: 1,
     backgroundColor: colors.surface,
@@ -385,6 +400,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
   },
+  summaryCardCompact: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
   summaryPill: {
     alignItems: 'center',
     backgroundColor: 'rgba(16, 185, 129, 0.12)',
@@ -393,6 +412,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderWidth: 1,
     borderColor: 'rgba(16, 185, 129, 0.25)',
+  },
+  summaryPillCompact: {
+    alignSelf: 'stretch',
+    alignItems: 'flex-start',
   },
   summaryLabel: {
     fontSize: typography.caption.fontSize,
@@ -427,6 +450,10 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: spacing.xxl,
     flexGrow: 1,
+  },
+  listContentCompact: {
+    paddingHorizontal: spacing.sm,
+    paddingBottom: spacing.xl,
   },
   emptyContainer: {
     flex: 1,

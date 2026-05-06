@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +23,9 @@ import { colors, spacing, typography } from '../../utils/constants';
 import { getPasswordError, getUsernameError } from '../../utils/validators';
 
 export default function LoginScreen() {
+  const { width, height } = useWindowDimensions();
+  const isCompact = width < 380;
+  const isShort = height < 740;
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [usernameError, setUsernameError] = useState<string | null>(null);
@@ -91,7 +95,11 @@ export default function LoginScreen() {
         style={styles.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            isCompact && styles.scrollContentCompact,
+            isShort && styles.scrollContentShort,
+          ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -99,6 +107,8 @@ export default function LoginScreen() {
           <Animated.View
             style={[
               styles.header,
+              isCompact && styles.headerCompact,
+              isShort && styles.headerShort,
               {
                 opacity: headerAnim,
                 transform: [
@@ -123,7 +133,7 @@ export default function LoginScreen() {
               <Ionicons name="bicycle" size={40} color={colors.text.inverse} />
             </View>
             <Text style={styles.title}>{t('auth.title')}</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.subtitle, isCompact && styles.subtitleCompact]}>
               {t('auth.subtitle')}
             </Text>
           </Animated.View>
@@ -132,6 +142,7 @@ export default function LoginScreen() {
           <Animated.View
             style={[
               styles.formCard,
+              isCompact && styles.formCardCompact,
               {
                 opacity: formAnim,
                 transform: [
@@ -211,7 +222,7 @@ export default function LoginScreen() {
             ]}
           >
             <TouchableOpacity
-              style={styles.footerCard}
+              style={[styles.footerCard, isCompact && styles.footerCardCompact]}
               activeOpacity={0.85}
               onPress={() => router.push('/(auth)/support')}
               accessibilityRole="button"
@@ -271,10 +282,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xl,
   },
+  scrollContentCompact: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.lg,
+  },
+  scrollContentShort: {
+    paddingVertical: spacing.md,
+  },
   header: {
     alignItems: 'center',
     marginTop: spacing.xxl,
     marginBottom: spacing.lg,
+  },
+  headerCompact: {
+    marginTop: spacing.xl,
+  },
+  headerShort: {
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
   },
   kickerRow: {
     flexDirection: 'row',
@@ -326,6 +351,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 260,
   },
+  subtitleCompact: {
+    maxWidth: '100%',
+    fontSize: typography.bodySmall.fontSize,
+  },
   formCard: {
     backgroundColor: colors.surface,
     borderRadius: 20,
@@ -338,6 +367,10 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 5,
     marginBottom: spacing.xl,
+  },
+  formCardCompact: {
+    padding: spacing.md,
+    marginBottom: spacing.lg,
   },
   formHeader: {
     marginBottom: spacing.md,
@@ -383,6 +416,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderWidth: 1,
     borderColor: 'rgba(29, 84, 109, 0.15)',
+  },
+  footerCardCompact: {
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   footerText: {
     fontSize: typography.bodySmall.fontSize,
