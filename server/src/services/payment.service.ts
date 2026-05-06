@@ -38,7 +38,6 @@ import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { formatPhoneNumber } from '../helpers/phone.helper';
 import { ConversationStatus } from '../constants/conversation.constants';
-import { sendMessage } from '../helpers/whatsapp.helper';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
@@ -57,78 +56,6 @@ export class PaymentService {
     this.emailService = new EmailService();
   }
 
-
-  async expireStaleWhatsappPaymentSessions(now: Date = new Date()): Promise<number> {
-    const expiredPayments = await this.paymentRepository
-      .createQueryBuilder('payment')
-      .where("payment.status = :status", { status: KpayPaymentStatus.PENDING })
-      .andWhere("payment.metadata ->> 'source' = :source", {
-        source: 'whatsapp_flow',
-      })
-      .andWhere("payment.metadata ->> 'paymentSessionExpiresAt' IS NOT NULL")
-      .andWhere(
-        "CAST(payment.metadata ->> 'paymentSessionExpiresAt' AS timestamptz) <= :now",
-        { now: now.toISOString() },
-      )
-      .andWhere("payment.metadata ->> 'localSessionExpiredAt' IS NULL")
-      .getMany();
-
-    for (const payment of expiredPayments) {
-      const metadata = payment.metadata || {};
-      const conversationId = metadata.conversationId as UUID | undefined;
-
-      await this.paymentRepository.update(payment.id, {
-        metadata: {
-          ...metadata,
-          localSessionExpiredAt: now.toISOString(),
-        },
-      });
-
-      if (conversationId) {
-        await AppDataSource.getRepository(Conversation).update(
-          { id: conversationId },
-          { status: ConversationStatus.PAYMENT_EXPIRED },
-        );
-      }
-
-      const existingCancelledActivity = await AppDataSource.getRepository(
-        OrderActivity,
-      ).findOne({
-        where: {
-          orderId: payment.entityId,
-          status: OrderActivityStatus.CANCELLED,
-        },
-      });
-
-      if (!existingCancelledActivity) {
-        await this.orderActivityService.createOrderActivity({
-          orderId: payment.entityId,
-          status: OrderActivityStatus.CANCELLED,
-          notes: 'WhatsApp payment session expired after 5 hours without payment.',
-          createdById: payment.createdById,
-        });
-      }
-
-      if (this.isWithinWhatsappCustomerServiceWindow(metadata, now)) {
-        const order = await AppDataSource.getRepository(Order).findOne({
-          where: { id: payment.entityId },
-          relations: { sender: true },
-        });
-        const phoneNumber = order?.sender?.phoneNumber || payment.customerPhone;
-
-        if (phoneNumber) {
-          await sendMessage({
-            phoneNumber,
-            type: 'text',
-            message:
-              'Your Peekaboo payment link expired after 5 hours. Reply here to start a new order and receive a fresh secure payment link.',
-          }).catch(() => {});
-        }
-      }
-    }
-
-    return expiredPayments.length;
-  }
 
   // CREATE PAYMENT
   @AuditCreate({
@@ -343,7 +270,7 @@ export class PaymentService {
     const existingMetadata = payment.metadata || {};
     const paidAfterWhatsappSessionExpired =
       status === KpayPaymentStatus.SUCCESSFUL &&
-      this.isWhatsappSessionLocallyExpired(existingMetadata);
+      (await this.isWhatsappSessionExpired(existingMetadata));
 
     payment.status = status as KpayPaymentStatus;
     payment.metadata = {
@@ -497,24 +424,24 @@ export class PaymentService {
   }
 
 
-  private isWhatsappSessionLocallyExpired(metadata: Record<string, any>): boolean {
+  private async isWhatsappSessionExpired(
+    metadata: Record<string, any>,
+  ): Promise<boolean> {
     if (metadata.localSessionExpiredAt) return true;
 
-    if (!metadata.paymentSessionExpiresAt) return false;
+    if (metadata.paymentSessionExpiresAt) {
+      return new Date(metadata.paymentSessionExpiresAt).getTime() <= Date.now();
+    }
 
-    return new Date(metadata.paymentSessionExpiresAt).getTime() <= Date.now();
-  }
+    if (metadata.conversationId) {
+      const conversation = await AppDataSource.getRepository(Conversation).findOne({
+        where: { id: metadata.conversationId as UUID },
+      });
 
-  private isWithinWhatsappCustomerServiceWindow(
-    metadata: Record<string, any>,
-    now: Date,
-  ): boolean {
-    if (!metadata.whatsappCustomerServiceWindowExpiresAt) return true;
+      return conversation?.status === ConversationStatus.EXPIRED;
+    }
 
-    return (
-      new Date(metadata.whatsappCustomerServiceWindowExpiresAt).getTime() >
-      now.getTime()
-    );
+    return false;
   }
 
   private resolvePaymentProvider(provider?: PaymentProvider): PaymentProvider {

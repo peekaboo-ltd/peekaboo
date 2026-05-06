@@ -1,13 +1,13 @@
 import crypto from 'crypto';
-import { ValidationError } from '../helpers/errors.helper';
+import { ValidationError } from './errors.helper';
 
-export interface WhatsAppFlowEncryptedRequest {
+export interface FlowEncryptedRequest {
   encrypted_aes_key: string;
   encrypted_flow_data: string;
   initial_vector: string;
 }
 
-export interface WhatsAppFlowDecryptedRequest<TData = Record<string, any>> {
+export interface FlowDecryptedRequest<TData = Record<string, any>> {
   version?: string;
   action?: string;
   screen?: string;
@@ -15,10 +15,10 @@ export interface WhatsAppFlowDecryptedRequest<TData = Record<string, any>> {
   data?: TData;
 }
 
-export interface WhatsAppFlowDecryptionResult<TData = Record<string, any>> {
+export interface DecryptedFlowRequest<TData = Record<string, any>> {
   aesKeyBuffer: Buffer;
   initialVectorBuffer: Buffer;
-  decryptedBody: WhatsAppFlowDecryptedRequest<TData>;
+  decryptedBody: FlowDecryptedRequest<TData>;
 }
 
 const getPrivateKey = (): string => {
@@ -31,9 +31,9 @@ const getPrivateKey = (): string => {
   return privateKey.replace(/\\n/g, '\n');
 };
 
-export const decryptWhatsAppFlowRequest = <TData = Record<string, any>>(
-  body: WhatsAppFlowEncryptedRequest,
-): WhatsAppFlowDecryptionResult<TData> => {
+export const decryptFlowRequest = <TData = Record<string, any>>(
+  body: FlowEncryptedRequest,
+): DecryptedFlowRequest<TData> => {
   if (!body?.encrypted_aes_key || !body?.encrypted_flow_data || !body?.initial_vector) {
     throw new ValidationError('Invalid encrypted WhatsApp Flow payload');
   }
@@ -73,7 +73,7 @@ export const decryptWhatsAppFlowRequest = <TData = Record<string, any>>(
   };
 };
 
-export const encryptWhatsAppFlowResponse = (
+export const encryptFlowResponse = (
   response: Record<string, any>,
   aesKeyBuffer: Buffer,
   initialVectorBuffer: Buffer,

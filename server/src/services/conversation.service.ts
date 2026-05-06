@@ -6,9 +6,6 @@ import { UUID } from "../types";
 import { NotFoundError, ValidationError } from "../helpers/errors.helper";
 import { LogReferenceTypes } from "../constants/logs.constants";
 import { ConversationStatus } from "../constants/conversation.constants";
-import { Payment } from "../entities/payment.entity";
-import { Order } from "../entities/order.entity";
-import { KpayPaymentStatus } from "../types/kpay.types";
 import { UserService } from "./user.service";
 import { validateCreateConversation } from "../validations/conversation.validations";
 export class ConversationService {
@@ -107,33 +104,10 @@ export class ConversationService {
 
   async expireConversation(id: UUID): Promise<Conversation> {
     return this.updateConversation(id, {
-      status: ConversationStatus.PAYMENT_EXPIRED,
+      status: ConversationStatus.EXPIRED,
     });
   }
 
-  async getExpiredPaymentPendingConversations(
-    cutoffDate: Date
-  ): Promise<Conversation[]> {
-    return this.conversationRepository
-      .createQueryBuilder("conversation")
-      .innerJoin(Order, "orderEntity", "orderEntity.conversation_id = conversation.id")
-      .innerJoin(Payment, "payment", "payment.entity_id = orderEntity.id")
-      .where("conversation.status = :conversationStatus", {
-        conversationStatus: ConversationStatus.ACTIVE,
-      })
-      .andWhere("payment.status = :paymentStatus", {
-        paymentStatus: KpayPaymentStatus.PENDING,
-      })
-      .andWhere("payment.metadata ->> 'source' = :source", {
-        source: "whatsapp_flow",
-      })
-      .andWhere("payment.metadata ->> 'paymentSessionExpiresAt' IS NOT NULL")
-      .andWhere(
-        "CAST(payment.metadata ->> 'paymentSessionExpiresAt' AS timestamptz) <= :cutoffDate",
-        { cutoffDate: cutoffDate.toISOString() }
-      )
-      .getMany();
-  }
 
   // UPDATE CONVERSATION
   async updateConversation(

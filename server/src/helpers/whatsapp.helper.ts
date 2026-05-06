@@ -65,43 +65,58 @@ export const sendFlowMessage = async ({
   phoneNumber,
   flowId,
   flowToken,
-  flowCta = "Send a package",
   bodyText,
-  initialData = {},
-  screen = "RECIPIENT",
 }: {
   phoneNumber: string;
   flowId: string;
   flowToken: string;
-  flowCta?: string;
   bodyText: string;
-  initialData?: Record<string, any>;
-  screen?: string;
 }) => {
-  return sendMessage({
-    phoneNumber,
-    type: "interactive",
-    message: {
-      type: "flow",
-      body: {
-        text: bodyText,
-      },
-      action: {
-        name: "flow",
-        parameters: {
-          flow_message_version: "3",
-          flow_token: flowToken,
-          flow_id: flowId,
-          flow_cta: flowCta,
-          flow_action: "navigate",
-          flow_action_payload: {
-            screen,
-            data: initialData,
-          },
-        },
+  const message = {
+    type: "flow",
+    header: { type: "text", text: "Peekaboo Delivery" },
+    body: { text: bodyText },
+    footer: { text: "Tap to place your order" },
+    action: {
+      name: "flow",
+      parameters: {
+        flow_message_version: "3",
+        flow_token: flowToken,
+        flow_id: flowId,
+        flow_cta: "Place Order",
+        flow_action: "navigate",
+        flow_action_payload: { screen: "RECIPIENT" },
       },
     },
-  });
+  };
+
+  return sendMessage({ phoneNumber, message, type: "interactive" });
+};
+
+export const sendCtaUrlButton = async ({
+  phoneNumber,
+  displayText,
+  url,
+  bodyText,
+  footerText,
+}: {
+  phoneNumber: string;
+  displayText: string;
+  url: string;
+  bodyText: string;
+  footerText?: string;
+}) => {
+  const message = {
+    type: "cta_url",
+    body: { text: bodyText },
+    ...(footerText ? { footer: { text: footerText } } : {}),
+    action: {
+      name: "cta_url",
+      parameters: { display_text: displayText, url },
+    },
+  };
+
+  return sendMessage({ phoneNumber, message, type: "interactive" });
 };
 
 export const sendCtaUrlMessage = async ({
@@ -115,22 +130,11 @@ export const sendCtaUrlMessage = async ({
   buttonText: string;
   url: string;
 }) => {
-  return sendMessage({
+  return sendCtaUrlButton({
     phoneNumber,
-    type: "interactive",
-    message: {
-      type: "cta_url",
-      body: {
-        text: bodyText,
-      },
-      action: {
-        name: "cta_url",
-        parameters: {
-          display_text: buttonText,
-          url,
-        },
-      },
-    },
+    bodyText,
+    displayText: buttonText,
+    url,
   });
 };
 
