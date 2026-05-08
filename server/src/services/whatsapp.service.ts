@@ -224,7 +224,7 @@ export class WhatsappService {
   async handleFlowSubmission(
     decryptedBody: Record<string, any>,
     senderPhone: string,
-    flowConversationId: string | undefined,
+    flowConversationId: UUID | undefined,
     aesKeyBuffer: Buffer,
     ivBuffer: Buffer,
   ): Promise<string> {
@@ -551,7 +551,7 @@ export class WhatsappService {
 
   private async finalizePublicWhatsappDeliveryOrder(params: {
     senderPhone: string;
-    conversationId?: string;
+    conversationId?: UUID;
     recipientPhoneFormatted: string;
     pickupNotes: string;
     dropoffDescription: string;

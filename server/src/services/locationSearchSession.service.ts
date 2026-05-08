@@ -4,6 +4,7 @@ import { LocationSearchSession } from "../entities/locationSearchSession.entity"
 import { LocationSuggestion } from "../locations/locationSearch.types";
 import { parseCompositePlaceId } from "../locations/parseCompositePlaceId";
 import { resolveLocationPlace } from "../locations/locationSearch.facade";
+import { UUID } from "../types";
 
 const defaultTtlMinutes = () =>
   Math.min(
@@ -49,7 +50,9 @@ export class LocationSearchSessionService {
     sessionId: string;
     compositePlaceId: string;
   }): Promise<LocationSuggestion | null> {
-    const session = await this.repo.findOne({ where: { id: params.sessionId } });
+    const session = await this.repo.findOne({
+      where: { id: params.sessionId as UUID },
+    });
     if (!session || session.expiresAt.getTime() < Date.now()) {
       return null;
     }

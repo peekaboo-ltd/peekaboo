@@ -7,6 +7,7 @@ import {
   encryptFlowResponse,
 } from "../helpers/whatsapp.flows.helper";
 import { WhatsappService } from "../services/whatsapp.service";
+import { UUID } from "../types";
 
 const whatsappService = new WhatsappService();
 
@@ -87,7 +88,7 @@ export const WhatsappController = {
       const decoded = jwt.verify(
         decryptedBody.flow_token || "",
         flowTokenSecret,
-      ) as JwtPayload & { phone?: string; conversationId?: string };
+      ) as JwtPayload & { phone?: string; conversationId?: UUID };
       const senderPhone = decoded.phone;
 
       if (!senderPhone) {
