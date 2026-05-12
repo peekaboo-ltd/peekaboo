@@ -201,3 +201,80 @@ html {
   background: var(--peekaboo-yellow);
   color: var(--peekaboo-black);
 }
+
+@layer base {
+  a,
+  button,
+  [role='button'],
+  summary {
+    transition:
+      color 200ms ease,
+      background-color 200ms ease,
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      transform 200ms ease,
+      opacity 200ms ease;
+  }
+
+  a:hover,
+  button:not(:disabled):hover,
+  [role='button']:not([aria-disabled='true']):hover {
+    cursor: pointer;
+  }
+
+  button:not(:disabled):active,
+  [role='button']:not([aria-disabled='true']):active {
+    transform: translateY(1px);
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--peekaboo-yellow) 80%, transparent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  img,
+  svg {
+    transition: transform 250ms ease, opacity 200ms ease;
+  }
+}
+
+@utility hover-lift {
+  transition: transform 250ms ease, box-shadow 250ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 36px -18px rgba(10, 10, 10, 0.28);
+  }
+}
+
+@utility hover-glow {
+  transition: box-shadow 250ms ease, border-color 250ms ease;
+
+  &:hover {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--peekaboo-yellow) 30%, transparent);
+    border-color: color-mix(in oklab, var(--peekaboo-yellow) 55%, var(--border));
+  }
+}
+
+@utility link-underline {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 1.5px;
+    background: currentColor;
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 250ms ease;
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    transform: scaleX(1);
+  }
+}

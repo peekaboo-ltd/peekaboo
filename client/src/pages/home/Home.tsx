@@ -1,27 +1,8 @@
 import { useRef } from 'react';
-import {
-  Bike,
-  Building2,
-  ChartNoAxesCombined,
-  Clock3,
-  CreditCard,
-  FileText,
-  Headphones,
-  MapPinned,
-  MessageSquare,
-  PackageCheck,
-  PackagePlus,
-  ScanLine,
-  ShieldCheck,
-  Truck,
-  Upload,
-  type LucideIcon,
-} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
-import { useI18n } from '@/i18n/i18n';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import type { HeroCopy, HowItWorksStep } from './home.types';
+import { useHomeContent } from './useHomeContent';
 import HeroSection from './components/HeroSection';
 import FeaturesSection from './components/FeaturesSection';
 import ServicesSection from './components/ServicesSection';
@@ -30,10 +11,12 @@ import WhyPeekabooSection from './components/WhyPeekabooSection';
 import BusinessSolutionsSection from './components/BusinessSolutionsSection';
 
 const Home = () => {
-  const { data: landingStats } = useGetLandingStatsQuery();
-  const { t } = useI18n();
-  const formRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
+  const formRef = useRef<HTMLFormElement>(null);
+  const { data: landingStats } = useGetLandingStatsQuery();
+  const { heroCopy, quickActions, howItWorks, whyItems, businessFeatures } =
+    useHomeContent();
+
   useDocumentTitle('Home');
 
   const scrollToForm = () => {
@@ -44,147 +27,15 @@ const Home = () => {
     navigate('/contact');
   };
 
-  const heroCopy: HeroCopy = {
-    personalTabLabel: t('home.hero.tab.personal'),
-    businessTabLabel: t('home.hero.tab.business'),
-    personalTitle1: 'Send anything,',
-    personalTitle2: 'anywhere',
-    personalSubtitle:
-      'Peekaboo connects senders to verified riders for same-day delivery across the city and beyond. Book in under a minute, track every step, pay when it arrives.',
-    businessTitle1: 'Move every order,',
-    businessTitle2: 'smarter',
-    businessSubtitle:
-      'Bulk drops, live delivery analytics, weekly invoices, and dedicated support for Kigali teams that need logistics without the extra operations layer.',
-    tryQuickDeliveryLabel: t('home.hero.tryQuickDelivery'),
-    quickStartLabel: t('home.hero.quickStart'),
-    formTitle: 'Book a rider',
-    formSubtitle: "Share both phone numbers and we'll match a rider.",
-    senderLabel: 'Pickup phone',
-    senderPlaceholder: '+250 780 412 884',
-    recipientLabel: 'Recipient phone',
-    recipientPlaceholder: '+250 788 902 117',
-    continueLabel: 'Book delivery',
-    haveOrderLabel: t('home.hero.haveOrder'),
-    trackHereLabel: t('home.hero.trackHere'),
-    verifiedRidersLabel: t('home.hero.verifiedRiders'),
-    realtimeTrackingLabel: t('home.hero.realtimeTracking'),
-    customersLabel: 'people sent today',
-    trustDailyLabel: '★★★★★ 4.9 across 1,200+ reviews',
-    growingCommunityLabel: 'Growing in Kigali',
-    businessAccountCta: t('home.b2b.cta.contact'),
+  const handleTrackNavigation = () => {
+    navigate('/track');
   };
 
-  const quickActions: {
-    icon: LucideIcon;
-    title: string;
-    description: string;
-  }[] = [
-    {
-      icon: PackagePlus,
-      title: 'Send a package',
-      description: 'Book a rider in under a minute',
-    },
-    {
-      icon: MapPinned,
-      title: 'Track delivery',
-      description: 'Live updates from pickup to drop',
-    },
-    {
-      icon: Building2,
-      title: 'Business deliveries',
-      description: 'Bulk sends, billing, dashboards',
-    },
-    {
-      icon: Bike,
-      title: 'Become a rider',
-      description: 'Earn flexibly across Kigali',
-    },
-  ];
-
-  const howItWorks: HowItWorksStep[] = [
-    {
-      step: '01',
-      title: 'Tell us where',
-      description:
-        'Drop two phone numbers and the pickup area. We match a verified rider in seconds.',
-      icon: PackagePlus,
-    },
-    {
-      step: '02',
-      title: 'Hand off the package',
-      description:
-        'Your rider arrives with ID, scans the parcel, and confirms drop details with you.',
-      icon: Bike,
-    },
-    {
-      step: '03',
-      title: 'Track until it lands',
-      description:
-        'Live map. SMS to recipient. Photo proof on delivery. Pay cash, MoMo, or card.',
-      icon: PackageCheck,
-    },
-  ];
-
-  const whyItems = [
-    {
-      icon: ShieldCheck,
-      title: 'Verified riders',
-      description: 'Background-checked, insured, and rated after every drop.',
-    },
-    {
-      icon: Clock3,
-      title: 'Predictable ETAs',
-      description:
-        "Live route times that account for Kigali's traffic, not just distance.",
-    },
-    {
-      icon: ScanLine,
-      title: 'Tamper-evident handoffs',
-      description:
-        'Sealed sleeves, photo proof, and signature capture for sensitive items.',
-    },
-    {
-      icon: CreditCard,
-      title: 'Pay how you want',
-      description: 'Cash on delivery, MoMo, card, or post-paid invoices for businesses.',
-    },
-    {
-      icon: MessageSquare,
-      title: 'Real human support',
-      description: 'WhatsApp, phone, or web chat answered by a Kigali team in under 90s.',
-    },
-    {
-      icon: Truck,
-      title: 'Beyond Kigali',
-      description: 'Province network covering Musanze, Huye, Rubavu, Nyagatare and more.',
-    },
-  ];
-
-  const businessFeatures: {
-    icon: LucideIcon;
-    title: string;
-    description: string;
-  }[] = [
-    {
-      icon: Upload,
-      title: 'Bulk uploads',
-      description: 'CSV in, hundreds of drops out. Schedule by hour or by route.',
-    },
-    {
-      icon: ChartNoAxesCombined,
-      title: 'Live analytics',
-      description: 'Watch on-time, cost-per-drop, and rider performance in real time.',
-    },
-    {
-      icon: FileText,
-      title: 'Post-paid invoicing',
-      description: 'Weekly statements, cost centres, MoMo or wire payment.',
-    },
-    {
-      icon: Headphones,
-      title: 'Dedicated support',
-      description: 'An ops lead on WhatsApp, plus uptime support for engineering teams.',
-    },
+  const quickActionHandlers = [
+    scrollToForm,
+    handleTrackNavigation,
+    handleContactNavigation,
+    handleContactNavigation,
   ];
 
   return (
@@ -199,18 +50,9 @@ const Home = () => {
 
       <FeaturesSection
         actions={quickActions.map((action, index) => ({
-          icon: action.icon,
-          title: action.title,
-          description: action.description,
+          ...action,
           accent: index === 0,
-          onClick:
-            index === 0
-              ? scrollToForm
-              : index === 1
-                ? () => navigate('/track')
-                : index === 2
-                  ? handleContactNavigation
-                  : handleContactNavigation,
+          onClick: quickActionHandlers[index],
         }))}
       />
 
@@ -218,20 +60,10 @@ const Home = () => {
 
       <HowItWorksSection steps={howItWorks} onScrollToForm={scrollToForm} />
 
-      <WhyPeekabooSection
-        items={whyItems.map((item) => ({
-          icon: item.icon,
-          title: item.title,
-          description: item.description,
-        }))}
-      />
+      <WhyPeekabooSection items={whyItems} />
 
       <BusinessSolutionsSection
-        features={businessFeatures.map((feature) => ({
-          icon: feature.icon,
-          title: feature.title,
-          description: feature.description,
-        }))}
+        features={businessFeatures}
         onContactClick={handleContactNavigation}
       />
     </main>

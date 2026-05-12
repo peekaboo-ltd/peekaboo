@@ -274,9 +274,6 @@ export class OrderService {
     pickupProviderPlaceId?: string | null;
     orderSource?: string | null;
   }): Promise<{ order: Order }> {
-    const referenceId = await this.generateUniqueOrderReferenceId();
-    const trackingId = await this.generateUniqueTrackingId();
-
     let sender = await this.userRepository.findOne({
       where: { phoneNumber: senderPhoneNumber },
     });
@@ -299,7 +296,7 @@ export class OrderService {
     }
 
     const orderPayload: Partial<Order> = {
-      referenceId,
+      referenceId: await this.generateUniqueOrderReferenceId(),
       senderId: sender?.id,
       recipientId: recipient?.id,
       createdById: sender?.id,
@@ -308,7 +305,7 @@ export class OrderService {
       conversationId,
       description,
       notes,
-      trackingId,
+      trackingId: await this.generateUniqueTrackingId(),
       ...(locationFrom !== undefined ? { locationFrom } : {}),
       ...(locationTo !== undefined ? { locationTo } : {}),
       pickupProvider,
@@ -319,70 +316,7 @@ export class OrderService {
     // CREATE ORDER
     const createdOrder = await this.orderRepository.save(orderPayload);
 
-    // CREATE ORDER STATUS
-    await this.orderActivityService.createOrderActivity({
-      orderId: createdOrder.id,
-      status: OrderActivityStatus.CREATED,
-      createdById: createdOrder?.createdById,
-    });
-
-    if (sender?.email) {
-      this.emailService
-        .sendOrderCreatedSenderEmail({
-          senderName: sender.name || '',
-          senderEmail: sender.email,
-          senderPhone: sender?.phoneNumber || '',
-          recipientPhone: recipient?.phoneNumber || '',
-          orderReference: createdOrder.referenceId || '',
-          trackingId: createdOrder.trackingId || '',
-          fee: Number(createdOrder.initialFee || 0),
-          currency: 'RWF',
-        })
-        .catch(() => { });
-    }
-
-    if (recipient?.email) {
-      this.emailService
-        .sendOrderCreatedRecipientEmail({
-          recipientName: recipient.name || '',
-          recipientEmail: recipient.email,
-          senderPhone: sender?.phoneNumber || '',
-          recipientPhone: recipient?.phoneNumber || '',
-          orderReference: createdOrder.referenceId || '',
-          trackingId: createdOrder.trackingId || '',
-        })
-        .catch(() => { });
-    }
-
-    const senderSMSPhone = formatPhoneNumber(sender?.phoneNumber);
-    if (senderSMSPhone) {
-      this.smsService
-        .send({
-          to: senderSMSPhone,
-          text: buildPublicOrderSenderSMS({
-            orderReference: createdOrder.referenceId || '',
-            trackingId: createdOrder.trackingId || '',
-          }),
-        })
-        .catch(() => { });
-    }
-
-    const recipientSMSPhone = formatPhoneNumber(recipient?.phoneNumber);
-    if (recipientSMSPhone) {
-      this.smsService
-        .send({
-          to: recipientSMSPhone,
-          text: buildPublicOrderRecipientSMS({
-            orderReference: createdOrder.referenceId || '',
-            trackingId: createdOrder.trackingId || '',
-          }),
-        })
-        .catch(() => { });
-    }
-
-    return {
-      order: createdOrder,
-    };
+    return { order: createdOrder };
   }
 
   private async generateUniqueOrderReferenceId(): Promise<string> {
