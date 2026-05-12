@@ -9,32 +9,50 @@ interface HeroTrustIndicatorsProps {
   growingCommunityLabel: string;
 }
 
+const AVATARS = [
+  { initials: 'JM', className: 'bg-[#ffc400] text-[#0a0a0a]' },
+  { initials: 'AK', className: 'bg-[#0a0a0a] text-white' },
+  { initials: 'MP', className: 'bg-[#fff4be] text-[#0a0a0a]' },
+  { initials: 'CN', className: 'bg-[#3a3a3a] text-white' },
+  { initials: '+8', className: 'bg-[#ffc400] text-[#0a0a0a]' },
+];
+
 const HeroTrustIndicators = ({
   landingStats,
   customersLabel,
   trustDailyLabel,
   growingCommunityLabel,
-}: HeroTrustIndicatorsProps) => (
-  <motion.figure className="flex items-center gap-5 pt-4" variants={itemVariants}>
-    <figcaption className="flex -space-x-2.5" aria-label="Customer avatars">
-      {['JM', 'AK', 'MP', 'CN'].map((initials) => (
-        <span
-          key={initials}
-          className="w-9 h-9 rounded-full bg-primary-100 border-2 border-[#FAFAF7] flex items-center justify-center text-[11px] font-medium text-primary-700"
-        >
-          {initials}
+}: HeroTrustIndicatorsProps) => {
+  const count =
+    typeof landingStats?.activeCustomers === 'number'
+      ? landingStats.activeCustomers.toLocaleString()
+      : '2,840';
+
+  return (
+    <motion.figure
+      className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center"
+      variants={itemVariants}
+    >
+      <figcaption className="flex" aria-label="Recent sender initials">
+        {AVATARS.map((avatar, index) => (
+          <span
+            key={avatar.initials}
+            className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0a0a0a] text-[11px] font-bold ${
+              index === 0 ? '' : '-ml-2.5'
+            } ${avatar.className}`}
+          >
+            {avatar.initials}
+          </span>
+        ))}
+      </figcaption>
+      <address className="not-italic text-[13px] leading-relaxed text-white/70">
+        <span className="block font-semibold text-white">
+          {count} {customersLabel}
         </span>
-      ))}
-    </figcaption>
-    <address className="not-italic flex flex-col gap-0.5">
-      <span className="text-[13px] font-semibold text-primary-900">
-        {typeof landingStats?.activeCustomers === 'number'
-          ? `${landingStats.activeCustomers.toLocaleString()}+ ${customersLabel}`
-          : growingCommunityLabel}
-      </span>
-      <span className="text-[11px] text-primary-500 font-normal">{trustDailyLabel}</span>
-    </address>
-  </motion.figure>
-);
+        <span>{trustDailyLabel || growingCommunityLabel}</span>
+      </address>
+    </motion.figure>
+  );
+};
 
 export default HeroTrustIndicators;

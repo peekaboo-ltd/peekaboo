@@ -4,11 +4,49 @@ import { UUID } from '../types';
 import { Order } from '../entities/order.entity';
 import { UserService } from '../services/user.service';
 import { AuthRequest } from '../types/auth.types';
-import { ForbiddenError, UnauthorizedError } from '../helpers/errors.helper';
+import {
+  ForbiddenError,
+  UnauthorizedError,
+  ValidationError,
+} from '../helpers/errors.helper';
 import { RoleTypes } from '../constants/role.constants';
 
 const orderService = new OrderService();
 const userService = new UserService();
+
+type OrderLocation = NonNullable<Order['locationFrom']>;
+
+const hasOwn = (value: Record<string, unknown>, key: string) =>
+  Object.prototype.hasOwnProperty.call(value, key);
+
+const normalizeOrderLocation = (
+  value: unknown,
+  fieldName: 'locationFrom' | 'locationTo'
+): OrderLocation | undefined => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw new ValidationError(`${fieldName} must be an object with latitude and longitude`);
+  }
+
+  const location = value as Record<string, unknown>;
+  const { latitude, longitude } = location;
+
+  if (
+    typeof latitude !== 'number' ||
+    typeof longitude !== 'number' ||
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude)
+  ) {
+    throw new ValidationError(
+      `${fieldName} must include numeric latitude and longitude`
+    );
+  }
+
+  return { latitude, longitude };
+};
 
 export const OrderController = {
   // ACCEPT ORDER
@@ -47,6 +85,7 @@ export const OrderController = {
         senderPhoneNumber: senderPhoneFromBody,
         recipientPhoneNumber: recipientPhoneFromBody,
       } = req.body;
+      const requestBody = req.body as Record<string, unknown>;
       const { user } = req as AuthRequest;
 
       if (!user?.id) {
@@ -57,10 +96,27 @@ export const OrderController = {
         senderPhoneNumber?: string;
         recipientPhoneNumber?: string;
       };
+      const {
+        senderPhoneNumber: _senderPhoneNumber,
+        recipientPhoneNumber: _recipientPhoneNumber,
+        locationFrom: locationFromFromOrder,
+        locationTo: locationToFromOrder,
+        ...persistableOrderInput
+      } = orderInput;
 
       const senderPhoneNumber = senderPhoneFromBody ?? orderInput.senderPhoneNumber;
       const recipientPhoneNumber =
         recipientPhoneFromBody ?? orderInput.recipientPhoneNumber;
+      const locationFrom = normalizeOrderLocation(
+        hasOwn(requestBody, 'locationFrom')
+          ? requestBody.locationFrom
+          : locationFromFromOrder,
+        'locationFrom'
+      );
+      const locationTo = normalizeOrderLocation(
+        hasOwn(requestBody, 'locationTo') ? requestBody.locationTo : locationToFromOrder,
+        'locationTo'
+      );
 
       let senderId = orderInput.senderId;
       let recipientId = orderInput.recipientId;
@@ -80,15 +136,14 @@ export const OrderController = {
       }
 
       const order: Partial<Order> = {
-        ...orderInput,
+        ...persistableOrderInput,
         senderId,
         recipientId,
         createdById: user.id,
         initialFee: orderInput.initialFee ?? 1500,
+        ...(locationFrom !== undefined ? { locationFrom } : {}),
+        ...(locationTo !== undefined ? { locationTo } : {}),
       };
-
-      delete (order as Partial<Order> & { senderPhoneNumber?: string }).senderPhoneNumber;
-      delete (order as Partial<Order> & { recipientPhoneNumber?: string }).recipientPhoneNumber;
 
       // CREATE ORDER
       const createdOrder = await orderService.createOrder(order);
@@ -126,11 +181,36 @@ export const OrderController = {
   // CREATE PUBLIC ORDER
   async createPublicOrder(req: Request, res: Response, next: NextFunction) {
     try {
-      const { senderPhoneNumber, recipientPhoneNumber } = req.body;
+      const {
+        order: rawOrder,
+        senderPhoneNumber: senderPhoneFromBody,
+        recipientPhoneNumber: recipientPhoneFromBody,
+      } = req.body;
+      const requestBody = req.body as Record<string, unknown>;
+      const orderInput = (rawOrder ?? {}) as Partial<Order> & {
+        senderPhoneNumber?: string;
+        recipientPhoneNumber?: string;
+      };
+
+      const senderPhoneNumber = senderPhoneFromBody ?? orderInput.senderPhoneNumber;
+      const recipientPhoneNumber =
+        recipientPhoneFromBody ?? orderInput.recipientPhoneNumber;
+      const locationFrom = normalizeOrderLocation(
+        hasOwn(requestBody, 'locationFrom')
+          ? requestBody.locationFrom
+          : orderInput.locationFrom,
+        'locationFrom'
+      );
+      const locationTo = normalizeOrderLocation(
+        hasOwn(requestBody, 'locationTo') ? requestBody.locationTo : orderInput.locationTo,
+        'locationTo'
+      );
 
       const result = await orderService.createPublicOrder({
         senderPhoneNumber,
         recipientPhoneNumber,
+        ...(locationFrom !== undefined ? { locationFrom } : {}),
+        ...(locationTo !== undefined ? { locationTo } : {}),
       });
 
       return res.status(201).json({

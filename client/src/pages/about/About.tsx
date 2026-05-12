@@ -1,13 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faHandshake,
-  faShieldHalved,
-  faRocket,
-  faBolt,
-} from '@fortawesome/free-solid-svg-icons';
+  Bolt,
+  Handshake,
+  Lightbulb,
+  Rocket,
+  ShieldCheck,
+  Target,
+} from 'lucide-react';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import {
+  containerVariants,
+  fadeInUp,
+  itemVariants,
+  scaleIn,
+  slideInLeft,
+  slideInRight,
+} from '../home/home.animations';
 
 type Stats = {
   deliveriesToday: number;
@@ -15,7 +25,42 @@ type Stats = {
   businessPartners: number;
 };
 
-const useInView = (options?: IntersectionObserverInit) => {
+const milestones = [
+  { year: '2022', label: 'Founded in Kigali with a small team of riders' },
+  { year: '2023', label: 'Launched B2B logistics for local businesses' },
+  { year: '2024', label: 'Expanded to full city-wide coverage' },
+  { year: '2025', label: 'Serving hundreds of businesses and individuals daily' },
+];
+
+const coreValues = [
+  {
+    icon: Rocket,
+    title: 'Speed',
+    description: 'Every delivery is optimised for the fastest possible route and pickup.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Trust',
+    description: 'Verified riders, proof of delivery, and transparent tracking at every step.',
+  },
+  {
+    icon: Handshake,
+    title: 'Partnership',
+    description: 'We grow with the businesses and people we serve across Kigali.',
+  },
+  {
+    icon: Bolt,
+    title: 'Simplicity',
+    description: 'A clean, straightforward experience from order to drop-off.',
+  },
+];
+
+const Statistics = () => {
+  const [stats, setStats] = useState<Stats>({
+    deliveriesToday: 0,
+    activeRiders: 0,
+    businessPartners: 0,
+  });
   const ref = useRef<HTMLElement | null>(null);
   const [inView, setInView] = useState(false);
 
@@ -30,55 +75,12 @@ const useInView = (options?: IntersectionObserverInit) => {
           observer.disconnect();
         }
       },
-      { threshold: 0.2, ...options },
+      { threshold: 0.2 },
     );
 
     observer.observe(element);
-
     return () => observer.disconnect();
-  }, [options]);
-
-  return { ref, inView };
-};
-
-const milestones = [
-  { year: '2022', label: 'Founded in Kigali with a small team of riders' },
-  { year: '2023', label: 'Launched B2B logistics for local businesses' },
-  { year: '2024', label: 'Expanded to full city-wide coverage' },
-  { year: '2025', label: 'Serving hundreds of businesses and individuals daily' },
-];
-
-const coreValues = [
-  {
-    icon: faRocket,
-    title: 'Speed',
-    description: 'Every delivery is optimised for the fastest possible route and pickup.',
-  },
-  {
-    icon: faShieldHalved,
-    title: 'Trust',
-    description: 'Verified riders, proof of delivery, and transparent tracking at every step.',
-  },
-  {
-    icon: faHandshake,
-    title: 'Partnership',
-    description: 'We grow with the businesses and people we serve across Kigali.',
-  },
-  {
-    icon: faBolt,
-    title: 'Simplicity',
-    description: 'A clean, straightforward experience from order to drop-off.',
-  },
-];
-
-const Statistics = () => {
-  const [stats, setStats] = useState<Stats>({
-    deliveriesToday: 0,
-    activeRiders: 0,
-    businessPartners: 0,
-  });
-
-  const { ref, inView } = useInView();
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -155,38 +157,44 @@ const Statistics = () => {
 
   return (
     <section
-      ref={ref as React.RefObject<HTMLElement>}
-      className="bg-primary-900 py-20 md:py-24"
+      ref={ref}
+      className="relative w-full overflow-hidden bg-[#0a0a0a] py-14 lg:py-20"
     >
+      <figure
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_300px_at_30%_40%,rgba(255,196,0,0.08),transparent_60%),radial-gradient(500px_300px_at_80%_60%,rgba(255,255,255,0.03),transparent_60%)]"
+        aria-hidden="true"
+      />
       <article
-        className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-3 gap-10 text-center transition-all duration-700 ${
+        className={`relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 transition-all duration-700 ${
           inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
         }`}
       >
-        <figure className="space-y-2">
-          <figcaption className="text-[11px] font-medium tracking-[0.16em] uppercase text-primary-400">
-            Deliveries today
-          </figcaption>
-          <p className="text-4xl font-semibold text-white tabular-nums">
-            {stats.deliveriesToday.toLocaleString()}
-          </p>
-        </figure>
-        <figure className="space-y-2">
-          <figcaption className="text-[11px] font-medium tracking-[0.16em] uppercase text-primary-400">
-            Active riders
-          </figcaption>
-          <p className="text-4xl font-semibold text-white tabular-nums">
-            {stats.activeRiders.toLocaleString()}
-          </p>
-        </figure>
-        <figure className="space-y-2">
-          <figcaption className="text-[11px] font-medium tracking-[0.16em] uppercase text-primary-400">
-            Businesses served
-          </figcaption>
-          <p className="text-4xl font-semibold text-white tabular-nums">
-            {stats.businessPartners.toLocaleString()}
-          </p>
-        </figure>
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          <figure className="space-y-2 text-center">
+            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400]">
+              Deliveries today
+            </figcaption>
+            <p className="text-[40px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white tabular-nums">
+              {stats.deliveriesToday.toLocaleString()}
+            </p>
+          </figure>
+          <figure className="space-y-2 text-center">
+            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400]">
+              Active riders
+            </figcaption>
+            <p className="text-[40px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white tabular-nums">
+              {stats.activeRiders.toLocaleString()}
+            </p>
+          </figure>
+          <figure className="space-y-2 text-center">
+            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400]">
+              Businesses served
+            </figcaption>
+            <p className="text-[40px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white tabular-nums">
+              {stats.businessPartners.toLocaleString()}
+            </p>
+          </figure>
+        </div>
       </article>
     </section>
   );
@@ -196,47 +204,72 @@ const About = () => {
   useDocumentTitle('About');
 
   return (
-    <main className="min-h-screen bg-[#FAFAF7]">
-      <section className="relative overflow-hidden bg-primary-950 py-28 md:py-36">
+    <main className="min-h-screen bg-[#f7f6f1]">
+      <motion.section
+        className="relative w-full overflow-hidden bg-[#0a0a0a] py-20 text-white lg:py-28"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
         <figure
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(123,143,86,0.15),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(37,52,63,0.3),transparent_35%)]"
+          className="pointer-events-none absolute -right-32 -top-40 h-[520px] w-[520px] rounded-full bg-[radial-gradient(closest-side,rgba(255,196,0,0.15),transparent_70%)]"
           aria-hidden="true"
         />
-        <article className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-secondary-400 font-semibold mb-4">
+        <figure
+          className="pointer-events-none absolute -bottom-32 -left-24 h-[400px] w-[400px] rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.04),transparent_70%)]"
+          aria-hidden="true"
+        />
+        <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
+          <motion.p
+            variants={itemVariants}
+            className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400] mb-4"
+          >
             About Peekaboo
-          </p>
-          <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-white leading-tight mb-6">
+          </motion.p>
+          <motion.h1
+            variants={itemVariants}
+            className="text-[32px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white sm:text-[42px] lg:text-[52px] mb-5"
+          >
             We move what matters
-            <br className="hidden sm:block" />
-            <span className="text-secondary-300"> across Kigali.</span>
-          </h1>
-          <p className="text-[13px] text-primary-300 max-w-2xl mx-auto leading-relaxed">
+            <br />
+            <span className="text-[#ffc400]">across Kigali.</span>
+          </motion.h1>
+          <motion.p
+            variants={itemVariants}
+            className="mx-auto max-w-[560px] text-[13px] leading-relaxed text-white/70"
+          >
             Peekaboo connects individuals, small businesses, and growing brands with a
             trusted network of professional riders — so every parcel arrives quickly,
             safely, and with a smile.
-          </p>
+          </motion.p>
         </article>
-      </section>
+      </motion.section>
 
-      <section className="bg-[#FAFAF7] py-24 md:py-32">
-        <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            <article>
-              <p className="text-[11px] uppercase tracking-[0.16em] text-secondary-600 font-semibold mb-4">
+      <motion.section
+        className="w-full bg-[#f7f6f1] py-14 lg:py-20"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        variants={containerVariants}
+      >
+        <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+            <motion.article variants={slideInLeft}>
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76] mb-4">
                 Our Story
               </p>
-              <h2 className="text-3xl font-bold text-primary-900 mb-6">
-                Built from the streets of Kigali.
+              <h2 className="text-[24px] font-extrabold leading-[1.02] tracking-[-0.025em] text-[#0a0a0a] sm:text-[30px] mb-6">
+                Built from the streets of{' '}
+                <span className="text-[#6b6f76]">Kigali.</span>
               </h2>
-              <section className="space-y-4 text-primary-600 text-[13px] leading-relaxed">
+              <div className="space-y-4 text-[13px] leading-relaxed text-[#6b6f76]">
                 <p>
                   Peekaboo started with a simple observation: sending a package across
                   Kigali shouldn't be complicated. What began as a small team of riders
                   and a shared phone has grown into a technology-driven delivery platform
                   trusted by thousands.
                 </p>
-                <blockquote className="border-l-2 border-secondary-500 pl-5 italic text-primary-700 my-6 text-[13px]">
+                <blockquote className="border-l-2 border-[#ffc400] pl-5 italic text-[#1f1f1f] my-6 text-[13px]">
                   "We believe every delivery is a promise — and we take promises seriously."
                 </blockquote>
                 <p>
@@ -245,108 +278,162 @@ const About = () => {
                   We serve both individuals running personal errands and businesses
                   managing daily logistics.
                 </p>
-              </section>
-            </article>
+              </div>
+            </motion.article>
 
-            <aside className="flex items-start justify-center lg:justify-end">
+            <motion.aside
+              variants={slideInRight}
+              className="flex items-start justify-center lg:justify-end"
+            >
               <nav className="relative pl-8" aria-label="Company milestones">
-                <hr className="absolute left-0 top-0 bottom-0 w-px h-full bg-primary-200 border-0" />
+                <hr className="absolute left-0 top-0 bottom-0 w-px h-full bg-[#ececea] border-0" />
                 <ol className="space-y-10">
                   {milestones.map((m) => (
                     <li key={m.year} className="relative">
-                      <mark className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-secondary-500 ring-4 ring-[#FAFAF7] bg-clip-padding" />
-                      <time className="text-[11px] uppercase tracking-[0.14em] font-semibold text-secondary-600 mb-1 block">
+                      <mark className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-[#ffc400] ring-4 ring-[#f7f6f1] bg-clip-padding" />
+                      <time className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6b6f76] mb-1 block">
                         {m.year}
                       </time>
-                      <p className="text-primary-600 text-[13px] leading-relaxed">
+                      <p className="text-[13px] leading-relaxed text-[#0a0a0a]">
                         {m.label}
                       </p>
                     </li>
                   ))}
                 </ol>
               </nav>
-            </aside>
-          </section>
+            </motion.aside>
+          </div>
         </article>
-      </section>
+      </motion.section>
 
-      <section className="bg-primary-900 py-24 md:py-32">
-        <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-primary-400 font-medium mb-10 text-center">
+      <motion.section
+        className="relative w-full overflow-hidden bg-[#0a0a0a] py-14 lg:py-20"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        variants={containerVariants}
+      >
+        <figure
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_350px_at_70%_30%,rgba(255,196,0,0.08),transparent_60%)]"
+          aria-hidden="true"
+        />
+        <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
+          <motion.p
+            variants={fadeInUp}
+            className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400] mb-10 text-center"
+          >
             What drives us
-          </p>
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <article className="bg-primary-800/50 rounded-xl p-8">
-              <h3 className="text-[11px] uppercase tracking-[0.14em] text-primary-400 font-medium mb-4">
+          </motion.p>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <motion.article
+              variants={scaleIn}
+              className="rounded-[18px] border border-white/10 bg-white/[0.03] p-6 lg:p-8"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#ffc400] text-[#0a0a0a] mb-4">
+                <Target className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#ffc400] mb-3">
                 Mission
               </h3>
-              <p className="text-xl text-white italic leading-relaxed">
+              <p className="text-[18px] font-bold leading-[1.2] tracking-[-0.01em] text-white italic sm:text-[20px]">
                 To make sending and receiving parcels across Kigali simple,
                 transparent, and stress-free — for every person and every business.
               </p>
-            </article>
-            <article className="bg-primary-800/50 rounded-xl p-8">
-              <h3 className="text-[11px] uppercase tracking-[0.14em] text-primary-400 font-medium mb-4">
+            </motion.article>
+            <motion.article
+              variants={scaleIn}
+              className="rounded-[18px] border border-white/10 bg-white/[0.03] p-6 lg:p-8"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#ffc400] text-[#0a0a0a] mb-4">
+                <Lightbulb className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#ffc400] mb-3">
                 Vision
               </h3>
-              <p className="text-xl text-white italic leading-relaxed">
+              <p className="text-[18px] font-bold leading-[1.2] tracking-[-0.01em] text-white italic sm:text-[20px]">
                 To be Rwanda's most trusted last-mile delivery partner,
                 connecting communities and businesses through reliable logistics.
               </p>
-            </article>
-          </section>
+            </motion.article>
+          </div>
         </article>
-      </section>
+      </motion.section>
 
-      <section className="bg-white py-24 md:py-32">
-        <article className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-14">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-secondary-600 font-semibold mb-4">
+      <motion.section
+        className="w-full bg-white py-14 lg:py-20"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        variants={containerVariants}
+      >
+        <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
+          <motion.header variants={fadeInUp} className="mb-10 text-center">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76] mb-4">
               Core Values
             </p>
-            <h2 className="text-3xl font-bold text-primary-900">
-              What we stand for.
+            <h2 className="text-[24px] font-extrabold leading-[1.02] tracking-[-0.025em] text-[#0a0a0a] sm:text-[30px]">
+              What we stand{' '}
+              <span className="text-[#6b6f76]">for.</span>
             </h2>
-          </header>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {coreValues.map((v) => (
-              <li key={v.title}>
-                <article className="group p-6 rounded-xl border border-primary-100 hover:border-secondary-300 transition-all duration-300 hover:shadow-sm">
-                  <FontAwesomeIcon
-                    icon={v.icon}
-                    className="text-secondary-600 text-lg mb-4"
-                  />
-                  <h3 className="font-semibold text-primary-900 mb-2 text-[13px]">
-                    {v.title}
-                  </h3>
-                  <p className="text-primary-500 text-[13px] leading-relaxed">
-                    {v.description}
-                  </p>
-                </article>
-              </li>
+          </motion.header>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {coreValues.map((v, index) => (
+              <motion.article
+                key={v.title}
+                variants={itemVariants}
+                className="group rounded-[18px] border border-[#ececea] bg-white p-5 transition duration-200 hover:-translate-y-px hover:border-[#d9d8d4]"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a] mb-4">
+                  <v.icon className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <h3 className="text-[14px] font-bold tracking-[-0.01em] text-[#0a0a0a] mb-1">
+                  {v.title}
+                </h3>
+                <p className="text-[12px] leading-relaxed text-[#6b6f76]">
+                  {v.description}
+                </p>
+              </motion.article>
             ))}
-          </ul>
+          </div>
         </article>
-      </section>
+      </motion.section>
 
       <Statistics />
 
-      <section className="bg-primary-900 py-16">
-        <article className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold text-white mb-3">
-            Ready to get started?
-          </h2>
-          <p className="text-primary-300 mb-8 max-w-lg mx-auto text-[13px]">
-            Join thousands of satisfied customers using Peekaboo for their delivery needs.
-          </p>
-          <Link
-            to="/"
-            className="inline-block bg-secondary-500 text-white px-8 py-2.5 rounded-md text-[13px] font-medium hover:bg-secondary-600 transition-colors duration-200"
+      <motion.section
+        className="relative w-full overflow-hidden bg-[#0a0a0a] py-14 lg:py-20"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+        variants={containerVariants}
+      >
+        <figure
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(500px_250px_at_50%_50%,rgba(255,196,0,0.06),transparent_60%)]"
+          aria-hidden="true"
+        />
+        <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
+          <motion.h2
+            variants={fadeInUp}
+            className="text-[24px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white sm:text-[30px] mb-3"
           >
-            Get Started
-          </Link>
+            Ready to get started?
+          </motion.h2>
+          <motion.p
+            variants={fadeInUp}
+            className="mx-auto mb-8 max-w-[460px] text-[13px] leading-relaxed text-white/70"
+          >
+            Join thousands of satisfied customers using Peekaboo for their delivery needs.
+          </motion.p>
+          <motion.nav variants={scaleIn}>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-full bg-[#ffc400] px-6 py-2.5 text-[13px] font-semibold text-[#0a0a0a] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] transition hover:bg-[#e6ad00]"
+            >
+              Get Started
+            </Link>
+          </motion.nav>
         </article>
-      </section>
+      </motion.section>
     </main>
   );
 };

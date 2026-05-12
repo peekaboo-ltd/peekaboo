@@ -1,32 +1,33 @@
 import { useRef } from 'react';
 import {
-  faBicycle,
-  faBuilding,
-  faChartLine,
-  faHandshake,
-  faRocket,
-  faCheck,
-  faShieldHalved,
-  faClock,
-  faMapLocationDot,
-  faBoxesStacked,
-} from '@fortawesome/free-solid-svg-icons';
+  Bike,
+  Building2,
+  ChartNoAxesCombined,
+  Clock3,
+  CreditCard,
+  FileText,
+  Headphones,
+  MapPinned,
+  MessageSquare,
+  PackageCheck,
+  PackagePlus,
+  ScanLine,
+  ShieldCheck,
+  Truck,
+  Upload,
+  type LucideIcon,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
 import { useI18n } from '@/i18n/i18n';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import type {
-  BusinessFeatureItem,
-  FeatureItem,
-  HeroCopy,
-  HowItWorksStep,
-} from './home.types';
+import type { HeroCopy, HowItWorksStep } from './home.types';
 import HeroSection from './components/HeroSection';
 import FeaturesSection from './components/FeaturesSection';
-import BusinessSolutionsSection from './components/BusinessSolutionsSection';
+import ServicesSection from './components/ServicesSection';
 import HowItWorksSection from './components/HowItWorksSection';
-import TrustedBySection from './components/TrustedBySection';
-import FinalCtaSection from './components/FinalCtaSection';
+import WhyPeekabooSection from './components/WhyPeekabooSection';
+import BusinessSolutionsSection from './components/BusinessSolutionsSection';
 
 const Home = () => {
   const { data: landingStats } = useGetLandingStatsQuery();
@@ -38,6 +39,7 @@ const Home = () => {
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
+
   const handleContactNavigation = () => {
     navigate('/contact');
   };
@@ -45,112 +47,148 @@ const Home = () => {
   const heroCopy: HeroCopy = {
     personalTabLabel: t('home.hero.tab.personal'),
     businessTabLabel: t('home.hero.tab.business'),
-    personalTitle1: t('home.hero.title1'),
-    personalTitle2: t('home.hero.title2'),
-    personalSubtitle: t('home.hero.subtitle'),
-    businessTitle1: t('home.b2b.title1'),
-    businessTitle2: t('home.b2b.title2'),
-    businessSubtitle: t('home.b2b.subtitle'),
+    personalTitle1: 'Send anything,',
+    personalTitle2: 'anywhere',
+    personalSubtitle:
+      'Peekaboo connects senders to verified riders for same-day delivery across the city and beyond. Book in under a minute, track every step, pay when it arrives.',
+    businessTitle1: 'Move every order,',
+    businessTitle2: 'smarter',
+    businessSubtitle:
+      'Bulk drops, live delivery analytics, weekly invoices, and dedicated support for Kigali teams that need logistics without the extra operations layer.',
     tryQuickDeliveryLabel: t('home.hero.tryQuickDelivery'),
     quickStartLabel: t('home.hero.quickStart'),
-    formTitle: t('home.form.title'),
-    formSubtitle: t('home.form.subtitle'),
-    senderLabel: t('home.form.senderLabel'),
-    senderPlaceholder: t('home.form.senderPlaceholder'),
-    recipientLabel: t('home.form.recipientLabel'),
-    recipientPlaceholder: t('home.form.recipientPlaceholder'),
-    continueLabel: t('home.form.continue'),
+    formTitle: 'Book a rider',
+    formSubtitle: "Share both phone numbers and we'll match a rider.",
+    senderLabel: 'Pickup phone',
+    senderPlaceholder: '+250 780 412 884',
+    recipientLabel: 'Recipient phone',
+    recipientPlaceholder: '+250 788 902 117',
+    continueLabel: 'Book delivery',
     haveOrderLabel: t('home.hero.haveOrder'),
     trackHereLabel: t('home.hero.trackHere'),
     verifiedRidersLabel: t('home.hero.verifiedRiders'),
     realtimeTrackingLabel: t('home.hero.realtimeTracking'),
-    customersLabel: 'customers',
-    trustDailyLabel: 'Trusted daily',
+    customersLabel: 'people sent today',
+    trustDailyLabel: '★★★★★ 4.9 across 1,200+ reviews',
     growingCommunityLabel: 'Growing in Kigali',
     businessAccountCta: t('home.b2b.cta.contact'),
   };
 
-  const features: FeatureItem[] = [
+  const quickActions: {
+    icon: LucideIcon;
+    title: string;
+    description: string;
+  }[] = [
     {
-      icon: faBicycle,
-      title: t('home.features.fastDelivery.title'),
-      description: t('home.features.fastDelivery.desc'),
+      icon: PackagePlus,
+      title: 'Send a package',
+      description: 'Book a rider in under a minute',
     },
     {
-      icon: faShieldHalved,
-      title: t('home.features.secure.title'),
-      description: t('home.features.secure.desc'),
+      icon: MapPinned,
+      title: 'Track delivery',
+      description: 'Live updates from pickup to drop',
     },
     {
-      icon: faClock,
-      title: t('home.features.tracking.title'),
-      description: t('home.features.tracking.desc'),
+      icon: Building2,
+      title: 'Business deliveries',
+      description: 'Bulk sends, billing, dashboards',
     },
     {
-      icon: faMapLocationDot,
-      title: t('home.features.coverage.title'),
-      description: t('home.features.coverage.desc'),
-    },
-  ];
-
-  const businessFeatures: BusinessFeatureItem[] = [
-    {
-      icon: faChartLine,
-      title: t('home.b2b.analytics.title'),
-      description: t('home.b2b.analytics.desc'),
-    },
-    {
-      icon: faBoxesStacked,
-      title: t('home.b2b.bulk.title'),
-      description: t('home.b2b.bulk.desc'),
-    },
-    {
-      icon: faHandshake,
-      title: t('home.b2b.support.title'),
-      description: t('home.b2b.support.desc'),
-    },
-    {
-      icon: faBuilding,
-      title: t('home.b2b.plans.title'),
-      description: t('home.b2b.plans.desc'),
+      icon: Bike,
+      title: 'Become a rider',
+      description: 'Earn flexibly across Kigali',
     },
   ];
 
   const howItWorks: HowItWorksStep[] = [
     {
       step: '01',
-      title: t('home.howItWorks.step1.title'),
-      description: t('home.howItWorks.step1.desc'),
-      icon: faRocket,
+      title: 'Tell us where',
+      description:
+        'Drop two phone numbers and the pickup area. We match a verified rider in seconds.',
+      icon: PackagePlus,
     },
     {
       step: '02',
-      title: t('home.howItWorks.step2.title'),
-      description: t('home.howItWorks.step2.desc'),
-      icon: faBicycle,
+      title: 'Hand off the package',
+      description:
+        'Your rider arrives with ID, scans the parcel, and confirms drop details with you.',
+      icon: Bike,
     },
     {
       step: '03',
-      title: t('home.howItWorks.step3.title'),
-      description: t('home.howItWorks.step3.desc'),
-      icon: faCheck,
+      title: 'Track until it lands',
+      description:
+        'Live map. SMS to recipient. Photo proof on delivery. Pay cash, MoMo, or card.',
+      icon: PackageCheck,
     },
   ];
 
-  const trustedIndustries = [
-    t('onboarding.organization.industryOptionEcommerce'),
-    t('onboarding.organization.industryOptionRetail'),
-    t('onboarding.organization.industryOptionRestaurants'),
-    t('onboarding.organization.industryOptionPharmacy'),
+  const whyItems = [
+    {
+      icon: ShieldCheck,
+      title: 'Verified riders',
+      description: 'Background-checked, insured, and rated after every drop.',
+    },
+    {
+      icon: Clock3,
+      title: 'Predictable ETAs',
+      description:
+        "Live route times that account for Kigali's traffic, not just distance.",
+    },
+    {
+      icon: ScanLine,
+      title: 'Tamper-evident handoffs',
+      description:
+        'Sealed sleeves, photo proof, and signature capture for sensitive items.',
+    },
+    {
+      icon: CreditCard,
+      title: 'Pay how you want',
+      description: 'Cash on delivery, MoMo, card, or post-paid invoices for businesses.',
+    },
+    {
+      icon: MessageSquare,
+      title: 'Real human support',
+      description: 'WhatsApp, phone, or web chat answered by a Kigali team in under 90s.',
+    },
+    {
+      icon: Truck,
+      title: 'Beyond Kigali',
+      description: 'Province network covering Musanze, Huye, Rubavu, Nyagatare and more.',
+    },
   ];
 
-  const trustedByLabel =
-    typeof landingStats?.activeCustomers === 'number'
-      ? t('home.hero.badgeWithCount', { count: landingStats.activeCustomers })
-      : t('home.hero.badgeLoading');
+  const businessFeatures: {
+    icon: LucideIcon;
+    title: string;
+    description: string;
+  }[] = [
+    {
+      icon: Upload,
+      title: 'Bulk uploads',
+      description: 'CSV in, hundreds of drops out. Schedule by hour or by route.',
+    },
+    {
+      icon: ChartNoAxesCombined,
+      title: 'Live analytics',
+      description: 'Watch on-time, cost-per-drop, and rider performance in real time.',
+    },
+    {
+      icon: FileText,
+      title: 'Post-paid invoicing',
+      description: 'Weekly statements, cost centres, MoMo or wire payment.',
+    },
+    {
+      icon: Headphones,
+      title: 'Dedicated support',
+      description: 'An ops lead on WhatsApp, plus uptime support for engineering teams.',
+    },
+  ];
 
   return (
-    <main className="relative min-h-screen w-full bg-[#FAFAF7] overflow-x-hidden mt-0 max-lg:mt-16">
+    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#f7f6f1]">
       <HeroSection
         formRef={formRef}
         onScrollToForm={scrollToForm}
@@ -160,36 +198,41 @@ const Home = () => {
       />
 
       <FeaturesSection
-        badgeLabel="Client friendly"
-        title={t('home.features.title')}
-        subtitle={t('home.features.subtitle')}
-        features={features}
+        actions={quickActions.map((action, index) => ({
+          icon: action.icon,
+          title: action.title,
+          description: action.description,
+          accent: index === 0,
+          onClick:
+            index === 0
+              ? scrollToForm
+              : index === 1
+                ? () => navigate('/track')
+                : index === 2
+                  ? handleContactNavigation
+                  : handleContactNavigation,
+        }))}
       />
 
-      <TrustedBySection label={trustedByLabel} industries={trustedIndustries} />
+      <ServicesSection />
+
+      <HowItWorksSection steps={howItWorks} onScrollToForm={scrollToForm} />
+
+      <WhyPeekabooSection
+        items={whyItems.map((item) => ({
+          icon: item.icon,
+          title: item.title,
+          description: item.description,
+        }))}
+      />
 
       <BusinessSolutionsSection
-        badgeLabel={t('home.b2b.badge')}
-        title1={t('home.b2b.title1')}
-        title2={t('home.b2b.title2')}
-        subtitle={t('home.b2b.subtitle')}
-        features={businessFeatures}
-        primaryCtaLabel={t('home.b2b.cta.contact')}
+        features={businessFeatures.map((feature) => ({
+          icon: feature.icon,
+          title: feature.title,
+          description: feature.description,
+        }))}
         onContactClick={handleContactNavigation}
-      />
-
-      <HowItWorksSection
-        badgeLabel="Simple steps"
-        title={t('home.howItWorks.title')}
-        subtitle={t('home.howItWorks.subtitle')}
-        steps={howItWorks}
-      />
-
-      <FinalCtaSection
-        title={t('home.cta.title')}
-        subtitle={t('home.cta.subtitle')}
-        buttonLabel={t('home.cta.button')}
-        onScrollToForm={scrollToForm}
       />
     </main>
   );

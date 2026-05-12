@@ -5,29 +5,29 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary-50: #F2F5F6;
-  --color-primary-100: #E0E6E9;
-  --color-primary-200: #C1CDD3;
-  --color-primary-300: #96AAB4;
-  --color-primary-400: #6B8694;
-  --color-primary-500: #4E6A78;
-  --color-primary-600: #3D5564;
-  --color-primary-700: #334753;
-  --color-primary-800: #2C3C46;
-  --color-primary-900: #25343F;
-  --color-primary-950: #172129;
+  --color-primary-50:  #f5f5f5;
+  --color-primary-100: #e5e5e5;
+  --color-primary-200: #c9c9c9;
+  --color-primary-300: #a3a3a3;
+  --color-primary-400: #737373;
+  --color-primary-500: #525252;
+  --color-primary-600: #404040;
+  --color-primary-700: #2a2a2a;
+  --color-primary-800: #1a1a1a;
+  --color-primary-900: #0a0a0a;
+  --color-primary-950: #050505;
 
-  --color-secondary-50: #F5F7F0;
-  --color-secondary-100: #E8EDDC;
-  --color-secondary-200: #D2DCBC;
-  --color-secondary-300: #B3C594;
-  --color-secondary-400: #96AD6F;
-  --color-secondary-500: #040F16;
-  --color-secondary-600: #5F7042;
-  --color-secondary-700: #4B5735;
-  --color-secondary-800: #3E472D;
-  --color-secondary-900: #353D28;
-  --color-secondary-950: #1B2013;
+  --color-secondary-50:  #fffdf0;
+  --color-secondary-100: #fff4be;
+  --color-secondary-200: #ffe96e;
+  --color-secondary-300: #ffd900;
+  --color-secondary-400: #ffc400;
+  --color-secondary-500: #e6ad00;
+  --color-secondary-600: #b38600;
+  --color-secondary-700: #7a5c00;
+  --color-secondary-800: #4a3800;
+  --color-secondary-900: #2a2000;
+  --color-secondary-950: #1a1300;
 }
 
 * {
@@ -88,10 +88,20 @@ h2 {
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #25343F;
+  --primary: #0a0a0a;
   --primary-foreground: #ffffff;
-  --secondary: #040F16;
-  --secondary-foreground: #ffffff;
+  --secondary: #ffc400;
+  --secondary-foreground: #0a0a0a;
+
+  /* Peekaboo brand tokens */
+  --peekaboo-yellow: #ffc400;
+  --peekaboo-yellow-dark: #e6ad00;
+  --peekaboo-black: #050505;
+  --peekaboo-dark: #0a0a0a;
+  --peekaboo-gray: #f5f5f5;
+  --peekaboo-text: #1f1f1f;
+  --peekaboo-muted: #6b7280;
+
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -122,10 +132,10 @@ h2 {
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #25343F;
+  --primary: #0a0a0a;
   --primary-foreground: #ffffff;
-  --secondary: #040F16;
-  --secondary-foreground: #ffffff;
+  --secondary: #ffc400;
+  --secondary-foreground: #0a0a0a;
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
@@ -188,6 +198,6 @@ html {
 
 /* Selection color */
 ::selection {
-  background: rgba(123, 143, 86, 0.3);
-  color: #25343F;
+  background: var(--peekaboo-yellow);
+  color: var(--peekaboo-black);
 }

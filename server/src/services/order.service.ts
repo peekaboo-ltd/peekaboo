@@ -58,6 +58,8 @@ import { Payment } from '../entities/payment.entity';
 import { PaymentType } from '../constants/payment.constants';
 import { KpayPaymentStatus } from '../types/kpay.types';
 
+type OrderLocation = NonNullable<Order['locationFrom']>;
+
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
   private readonly orderAssignmentService: OrderAssignmentService;
@@ -255,6 +257,7 @@ export class OrderService {
     notes,
     initialFee = 1500,
     locationFrom,
+    locationTo,
     pickupProvider,
     pickupProviderPlaceId,
     orderSource,
@@ -265,7 +268,8 @@ export class OrderService {
     description?: string;
     notes?: string;
     initialFee?: number;
-    locationFrom?: { latitude: number; longitude: number };
+    locationFrom?: OrderLocation;
+    locationTo?: OrderLocation;
     pickupProvider?: string | null;
     pickupProviderPlaceId?: string | null;
     orderSource?: string | null;
@@ -294,8 +298,7 @@ export class OrderService {
       });
     }
 
-    // CREATE ORDER
-    const createdOrder = await this.orderRepository.save({
+    const orderPayload: Partial<Order> = {
       referenceId,
       senderId: sender?.id,
       recipientId: recipient?.id,
@@ -306,11 +309,15 @@ export class OrderService {
       description,
       notes,
       trackingId,
-      locationFrom,
+      ...(locationFrom !== undefined ? { locationFrom } : {}),
+      ...(locationTo !== undefined ? { locationTo } : {}),
       pickupProvider,
       pickupProviderPlaceId,
       orderSource,
-    });
+    };
+
+    // CREATE ORDER
+    const createdOrder = await this.orderRepository.save(orderPayload);
 
     // CREATE ORDER STATUS
     await this.orderActivityService.createOrderActivity({

@@ -1,43 +1,24 @@
-import { motion } from 'framer-motion';
-import { containerVariants, fadeInUp } from '../home.animations';
-
 interface TrustedBySectionProps {
   label: string;
   industries: string[];
 }
 
 const TrustedBySection = ({ label, industries }: TrustedBySectionProps) => (
-  <section className="w-full py-12 border-y border-primary-100">
-    <article className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-16">
-      <motion.figure
-        className="flex flex-col md:flex-row items-center justify-between gap-8 rounded-2xl border border-primary-100 bg-white/95 px-6 py-5 shadow-sm"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={containerVariants}
-      >
-        <motion.figcaption
-          className="text-sm text-primary-500 font-medium uppercase tracking-wider"
-          variants={fadeInUp}
-        >
-          {label}
-        </motion.figcaption>
-        <ul className="flex flex-wrap items-center justify-center gap-8 lg:gap-12">
-          {industries.map((industry, index) => (
-            <motion.li
-              key={industry}
-              className="text-primary-400 font-normal text-sm uppercase tracking-wide hover:text-primary-900 transition-colors cursor-default"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.08, duration: 0.5 }}
-              whileHover={{ scale: 1.08 }}
-            >
-              {industry}
-            </motion.li>
-          ))}
-        </ul>
-      </motion.figure>
+  <section className="w-full border-b border-[#ececea] bg-white">
+    <article className="mx-auto flex max-w-[1280px] flex-col gap-3 px-5 py-4 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10">
+      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76]">
+        {label}
+      </p>
+      <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        {industries.map((industry) => (
+          <li
+            key={industry}
+            className="text-[11px] font-bold uppercase tracking-[0.04em] text-[#3a3a3a]/70 sm:text-[12px]"
+          >
+            {industry}
+          </li>
+        ))}
+      </ul>
     </article>
   </section>
 );

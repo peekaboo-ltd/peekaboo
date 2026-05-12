@@ -1,10 +1,13 @@
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import type { LucideIcon } from 'lucide-react';
 
 export type CustomerTab = 'personal' | 'business';
 
 export interface HomeFormValues {
   senderPhoneNumber: string;
   recipientPhoneNumber: string;
+  locationFrom?: string;
+  locationTo?: string;
 }
 
 export interface HeroCopy {
@@ -36,13 +39,13 @@ export interface HeroCopy {
 }
 
 export interface FeatureItem {
-  icon: IconDefinition;
+  icon: IconDefinition | LucideIcon;
   title: string;
   description: string;
 }
 
 export interface BusinessFeatureItem {
-  icon: IconDefinition;
+  icon: IconDefinition | LucideIcon;
   title: string;
   description: string;
 }
@@ -62,7 +65,7 @@ export interface HowItWorksStep {
   step: string;
   title: string;
   description: string;
-  icon: IconDefinition;
+  icon: IconDefinition | LucideIcon;
 }
 
 export type TestimonialType = 'business' | 'personal';

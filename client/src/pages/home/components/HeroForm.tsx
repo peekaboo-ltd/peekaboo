@@ -1,16 +1,19 @@
-import type { BaseSyntheticEvent, RefObject } from 'react';
-import { Controller, type Control, type FieldErrors } from 'react-hook-form';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useState, type BaseSyntheticEvent, type RefObject } from 'react';
 import {
-  faArrowRight,
-  faClock,
-  faShieldHalved,
-} from '@fortawesome/free-solid-svg-icons';
+  Controller,
+  useWatch,
+  type Control,
+  type FieldErrors,
+} from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import Input from '@/components/inputs/Input';
-import Button from '@/components/inputs/Button';
 import type { HomeFormValues } from '../home.types';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import PlaceSearch from '@/components/inputs/PlaceSearch';
+import Button from '@/components/inputs/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight, faCheckCircle, faClock, faCreditCard, faShield } from '@fortawesome/free-solid-svg-icons';
+import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
+import Input from '@/components/inputs/Input';
 
 interface HeroFormCopy {
   formTitle: string;
@@ -52,23 +55,26 @@ const HeroForm = ({
   copy,
   errors,
 }: HeroFormProps) => {
+  const senderPhoneNumber = useWatch({ control, name: 'senderPhoneNumber' });
+
+  const [confirmedLocations, setConfirmedLocations] = useState<{
+    from: boolean;
+    to: boolean;
+  }>({ from: false, to: false });
+
   const validateRecipientPhone = (value: string | undefined) => {
     const baseValidation = validateRwandanPhone(value);
     if (baseValidation !== true) {
       return baseValidation;
     }
 
-    const senderValue = control?._formValues?.senderPhoneNumber as
-      | string
-      | undefined;
-
-    if (!senderValue) {
+    if (!senderPhoneNumber) {
       return true;
     }
 
     const normalizedSender =
-      validateAndFormatPhoneNumber(senderValue).formattedNumber ||
-      senderValue.trim();
+      validateAndFormatPhoneNumber(senderPhoneNumber).formattedNumber ||
+      senderPhoneNumber.trim();
     const normalizedRecipient =
       validateAndFormatPhoneNumber(value || '').formattedNumber ||
       (value || '').trim();
@@ -85,95 +91,184 @@ const HeroForm = ({
   };
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="relative isolate">
-      <article className="relative overflow-hidden rounded-2xl bg-white border border-primary-100 p-7 sm:p-8 shadow-[0_20px_50px_rgba(37,52,63,0.08)] transition-shadow duration-300 hover:shadow-[0_28px_70px_rgba(37,52,63,0.12)]">
-        <figure
-          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-secondary-50/70 via-transparent to-primary-50/40"
-          aria-hidden="true"
-        />
+    <form ref={formRef} onSubmit={onSubmit} className="relative isolate w-full">
+      <article className="relative rounded-[12px] bg-white p-7 text-[#0a0a0a] ring-1 ring-[#ececea] shadow-[0_18px_50px_-26px_rgba(10,10,10,0.35)] sm:p-9">
         <header className="mb-6">
-          <h2 className="text-lg font-semibold text-primary-900">
-            {copy?.formTitle}
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9e9d98]">
+            New order
+          </p>
+          <h2 className="mt-2 text-[18px] font-bold leading-tight tracking-[-0.015em] text-[#0a0a0a] sm:text-[20px]">
+            {copy.formTitle}
           </h2>
-          <p className="text-primary-500 text-[11px] mt-0.5">
-            {copy?.formSubtitle}
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-[#6b6f76]">
+            {copy.formSubtitle}
           </p>
         </header>
 
-        <fieldset className="space-y-4 mb-6">
+        <fieldset className="grid gap-3.5">
           <Controller
             name="senderPhoneNumber"
             control={control}
             rules={{ validate: validateRwandanPhone }}
             render={({ field }) => (
-              <Input
-                {...field}
-                label={copy.senderLabel}
-                required
-                placeholder={copy.senderPlaceholder}
-                className={
-                  errors.senderPhoneNumber
-                    ? 'border-red-300 focus:border-red-400 focus:ring-red-400/20'
-                    : ''
-                }
-                errorMessage={errors.senderPhoneNumber?.message}
-              />
+              <label className='w-full flex flex-col gap-1'>
+                  <Input
+                    value={field.value}
+                    onChange={field.onChange}
+                    label={copy.senderLabel}
+                    required
+                    type="tel"
+                    placeholder={copy.senderPlaceholder}
+                    errorMessage={errors.senderPhoneNumber?.message}
+                  />
+              </label>
             )}
           />
+
           <Controller
             name="recipientPhoneNumber"
             control={control}
             rules={{ validate: validateRecipientPhone }}
             render={({ field }) => (
-              <Input
-                {...field}
-                label={copy.recipientLabel}
-                required
-                placeholder={copy.recipientPlaceholder}
-                className={
-                  errors.recipientPhoneNumber
-                    ? 'border-red-300 focus:border-red-400 focus:ring-red-400/20'
-                    : ''
-                }
-                errorMessage={errors.recipientPhoneNumber?.message}
-              />
+              <label className='w-full flex flex-col gap-1'>
+                  <Input
+                    value={field.value}
+                    onChange={field.onChange}
+                    label={copy.recipientLabel}
+                    required
+                    type="tel"
+                    placeholder={copy.recipientPlaceholder}
+                    errorMessage={errors.recipientPhoneNumber?.message}
+                  />
+              </label>
             )}
           />
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Controller
+              name="locationFrom"
+              control={control}
+              render={({ field }) => (
+                <label className="w-full flex flex-col gap-1">
+                  <p className="text-[13px]">
+                    Pickup location <span className="text-red-600">*</span>
+                  </p>
+                  {confirmedLocations.from && field.value ? (
+                    <ul className="flex items-center gap-2 rounded-md bg-green-700/10 px-3 py-2">
+                      <FontAwesomeIcon icon={faCheckCircle} className="text-green-700 text-[13px]" aria-hidden="true" />
+                      <span className="flex-1 text-[13px] text-[#0a0a0a] truncate">
+                        {field.value}
+                      </span>
+                        <FontAwesomeIcon onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setConfirmedLocations((prev) => ({ ...prev, from: false }));
+                        }} icon={faPenToSquare} className="text-[11px] cursor-pointer" aria-hidden="true" />
+                    </ul>
+                  ) : (
+                    <PlaceSearch
+                      value={field.value}
+                      onChange={field.onChange}
+                      onLocationSelect={(result) => {
+                        field.onChange(result.formattedAddress);
+                        setConfirmedLocations((prev) => ({ ...prev, from: true }));
+                      }}
+                      placeholder="Pickup location"
+                      country="rw"
+                    />
+                  )}
+                </label>
+              )}
+            />
+
+            <Controller
+              name="locationTo"
+              control={control}
+              render={({ field }) => (
+                <label className="w-full flex flex-col gap-1">
+                  <p className="text-[13px]">
+                    Drop-off location <span className="text-red-600">*</span>
+                  </p>
+                  {confirmedLocations.to && field.value ? (
+                    <ul className="flex items-center gap-2 rounded-md bg-green-700/10 px-3 py-2">
+                      <FontAwesomeIcon icon={faCheckCircle} className="text-green-700 text-[13px]" aria-hidden="true" />
+                      <span className="flex-1 text-[13px] text-[#0a0a0a] truncate">
+                        {field.value}
+                      </span>
+                      <FontAwesomeIcon onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setConfirmedLocations((prev) => ({ ...prev, to: false }));
+                      }} icon={faPenToSquare} className="text-[11px] cursor-pointer" aria-hidden="true" />
+                    </ul>
+                  ) : (
+                    <PlaceSearch
+                      value={field.value}
+                      onChange={field.onChange}
+                      onLocationSelect={(result) => {
+                        field.onChange(result.formattedAddress);
+                        setConfirmedLocations((prev) => ({ ...prev, to: true }));
+                      }}
+                      placeholder="Drop-off location"
+                      country="rw"
+                    />
+                  )}
+                </label>
+              )}
+            />
+          </div>
         </fieldset>
 
-        <footer className="space-y-3">
-          <Button
-            className="w-full bg-secondary-600 hover:bg-secondary-700 border-secondary-600 hover:border-secondary-700 text-white py-2.5 rounded-md text-[13px] font-medium shadow-sm"
-            isLoading={isLoading}
-            type="submit"
-            primary
-          >
-            {copy.continueLabel}
-            <FontAwesomeIcon icon={faArrowRight} className="ml-1.5 text-[11px]" />
-          </Button>
-
-          <nav className="flex items-center justify-center gap-2 pt-1">
-            <span className="text-primary-400 text-[11px]">
-              {copy.haveOrderLabel}
+        <section className="mt-6 flex items-baseline justify-between gap-4 border-t border-[#ececea] pt-4">
+          <div className="flex items-baseline gap-3">
+            <p className="text-[12px]">
+              Estimate
+            </p>
+            <span className="text-[14px] font-medium tracking-[-0.02em] text-[#0a0a0a]">
+              RWF 2,400
             </span>
-            <Link
-              to="/track"
-              className="text-primary-900 hover:text-secondary-700 text-[11px] font-medium transition-colors"
-            >
-              {copy.trackHereLabel} &rarr;
-            </Link>
-          </nav>
-        </footer>
+          </div>
+          <p className="text-right text-[11px] leading-tight text-[#6b6f76]">
+            <span className="font-semibold text-[#0a0a0a]">~24 min</span> to drop
+            <span className="mx-1.5 text-[#d9d8d4]" aria-hidden="true">
+              ·
+            </span>
+            3 riders nearby
+          </p>
+        </section>
 
-        <aside className="mt-5 pt-4 border-t border-primary-50 flex items-center justify-center gap-4 text-[11px] text-primary-400">
-          <span className="flex items-center gap-1.5">
-            <FontAwesomeIcon icon={faShieldHalved} className="text-primary-300" />
-            {copy?.verifiedRidersLabel}
+        <Button
+          submit
+          isLoading={isLoading}
+          disabled={isLoading}
+          className="mt-5 h-10 w-full rounded-md border-[#ffc400] bg-[#ffc400] text-[13px] font-semibold text-[#0a0a0a] hover:border-[#e6ad00] hover:bg-[#e6ad00]"
+        >
+          {isLoading ? 'Booking...' : copy.continueLabel}
+          <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" aria-hidden="true" />
+        </Button>
+
+        <nav className="mt-4 flex items-center justify-center gap-1.5 text-[12px]">
+          <span className="text-[12px] text-[#6b6f76]">{copy.haveOrderLabel}</span>
+          <Link
+            to="/track"
+            className="font-medium text-[12px] underline text-[#0a0a0a] underline-offset-2 hover:underline"
+          >
+            {copy.trackHereLabel}
+          </Link>
+        </nav>
+
+        <aside className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#9e9d98]">
+          <span className="flex items-center gap-1 text-[8px]">
+            <FontAwesomeIcon icon={faShield} className="text-[10px]" aria-hidden="true" />
+            {copy.verifiedRidersLabel}
           </span>
-          <span className="w-0.5 h-0.5 rounded-full bg-primary-300" aria-hidden="true" />
-          <span className="flex items-center gap-1.5">
-            <FontAwesomeIcon icon={faClock} className="text-primary-300" />
-            {copy?.realtimeTrackingLabel}
+          <span className="flex items-center gap-1.5 text-[8px]">
+            <FontAwesomeIcon icon={faClock} className="text-[10px]" aria-hidden="true" />
+            {copy.realtimeTrackingLabel}
+          </span>
+          <span className="flex items-center gap-1.5 text-[8px]">
+            <FontAwesomeIcon icon={faCreditCard} className="text-[10px]" aria-hidden="true" />
+            3+ payment methods
           </span>
         </aside>
       </article>

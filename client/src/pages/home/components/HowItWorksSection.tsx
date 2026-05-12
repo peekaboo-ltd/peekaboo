@@ -1,76 +1,190 @@
-import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useRef, useState } from 'react';
+import {
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
+import type { ComponentType, SVGProps } from 'react';
 import type { HowItWorksStep } from '../home.types';
-import { containerVariants, fadeInUp } from '../home.animations';
+import Button from '@/components/inputs/Button';
 
 interface HowItWorksSectionProps {
-  badgeLabel: string;
-  title: string;
-  subtitle: string;
   steps: HowItWorksStep[];
+  onScrollToForm: () => void;
 }
 
-const HowItWorksSection = ({ badgeLabel, title, subtitle, steps }: HowItWorksSectionProps) => (
-  <section className="w-full py-20 lg:py-28 bg-[#FAFAF7]">
-    <motion.article
-      className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-100px' }}
-      variants={containerVariants}
+type StepIcon = ComponentType<SVGProps<SVGSVGElement> & { 'aria-hidden'?: boolean }>;
+
+const NODE_TOPS = ['16%', '50%', '84%'];
+
+const useIsDesktop = (query = '(min-width: 1024px)') => {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+    const mql = window.matchMedia(query);
+    const update = () => setMatches(mql.matches);
+    update();
+    mql.addEventListener('change', update);
+    return () => mql.removeEventListener('change', update);
+  }, [query]);
+
+  return matches;
+};
+
+const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) => {
+  const stageRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
+  const isDesktop = useIsDesktop();
+  const railEnabled = isDesktop && !reducedMotion;
+
+  const { scrollYProgress } = useScroll({
+    target: stageRef,
+    offset: ['start 65%', 'end 35%'],
+  });
+
+  const fillHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  useMotionValueEvent(scrollYProgress, 'change', (value) => {
+    if (!railEnabled) {
+      return;
+    }
+    const next = value < 0.34 ? 0 : value < 0.67 ? 1 : 2;
+    setActiveIndex((current) => (current === next ? current : next));
+  });
+
+  return (
+    <section
+      id="how-it-works"
+      className="relative w-full bg-[#f7f6f1] py-14 lg:min-h-[280vh] lg:py-0"
     >
-      <motion.header className="text-center mb-16" variants={fadeInUp}>
-        <span className="inline-block text-[11px] uppercase tracking-[0.14em] font-semibold text-secondary-600 mb-4">
-          {badgeLabel}
-        </span>
-        <h2 className="text-3xl sm:text-4xl font-bold text-primary-900 leading-tight mb-4">
-          {title}
-        </h2>
-        <p className="text-[13px] text-primary-500 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
-      </motion.header>
+      <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-10">
+        <header className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-center lg:self-start lg:py-24">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76]">
+            How it works
+          </p>
+          <h2 className="mt-4 text-[28px] font-extrabold leading-[1] tracking-[-0.03em] text-[#0a0a0a] sm:text-[36px] lg:text-[48px]">
+            Three taps.
+            <br />
+            <span className="text-[#6b6f76]">One delivery.</span>
+          </h2>
+          <p className="mt-5 max-w-[360px] text-[13px] leading-relaxed text-[#6b6f76] lg:text-[14px]">
+            Designed for senders who do not have time to think about logistics.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center gap-4">
+            <Button
+              type="button"
+              onClick={onScrollToForm}
+              className="h-auto min-h-0 rounded-full border-[#0a0a0a] bg-[#0a0a0a] !py-2.5 !px-5 font-semibold text-white hover:border-[#1c1c1c] hover:bg-[#1c1c1c]"
+            >
+              See it in action
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Button>
+            <span
+              aria-hidden="true"
+              className="hidden items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9e9d98] lg:inline-flex"
+            >
+              <span className="h-px w-6 bg-[#c8c7c2]" />0{activeIndex + 1} / 03
+            </span>
+          </div>
+        </header>
 
-      <motion.ol
-        className="relative grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12"
-        variants={containerVariants}
-      >
-        <motion.hr
-          className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-secondary-200/70 border-0 origin-left"
-          aria-hidden="true"
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
-        />
-
-        {steps.map((step, index) => (
-          <motion.li
-            key={step.title}
-            className="relative text-center"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.15, duration: 0.5 }}
+        <div ref={stageRef} className="relative">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-0 top-0 hidden h-full w-px bg-[#e6e5e0] lg:block"
           >
-            <figure className="relative inline-flex flex-col items-center mb-5">
-              <span className="text-4xl sm:text-5xl font-bold text-secondary-400 tracking-tight mb-3">
-                {step.step}
-              </span>
-              <figcaption className="w-12 h-12 rounded-xl bg-secondary-50 border border-secondary-200 flex items-center justify-center shadow-sm">
-                <FontAwesomeIcon icon={step.icon} className="text-lg text-secondary-600" />
-              </figcaption>
-            </figure>
+            <motion.div
+              style={{ height: reducedMotion ? '100%' : fillHeight }}
+              className="absolute left-0 top-0 w-px origin-top bg-[#e6ad00]"
+            />
+            {steps.map((step, index) => {
+              const isActive = index === activeIndex;
+              return (
+                <span
+                  key={`node-${step.step}`}
+                  style={{ top: NODE_TOPS[index] }}
+                  className={`absolute -left-[5px] flex h-[11px] w-[11px] -translate-y-1/2 items-center justify-center rounded-full border transition-colors duration-300 ${
+                    isActive
+                      ? 'border-[#0a0a0a] bg-[#0a0a0a]'
+                      : 'border-[#c8c7c2] bg-[#f7f6f1]'
+                  }`}
+                />
+              );
+            })}
+          </div>
 
-            <h3 className="text-[13px] font-semibold text-primary-900 mb-2">
-              {step.title}
-            </h3>
-            <p className="text-primary-500 max-w-xs mx-auto text-[13px] leading-relaxed">
-              {step.description}
-            </p>
-          </motion.li>
-        ))}
-      </motion.ol>
-    </motion.article>
-  </section>
-);
+          <ol className="relative flex flex-col gap-12 lg:gap-0 lg:pl-16">
+            {steps.map((step, index) => {
+              const Icon = step.icon as StepIcon;
+              const isActive = !railEnabled || index === activeIndex;
+              const sceneOpacity = railEnabled ? (isActive ? 1 : 0.32) : 1;
+
+              return (
+                <motion.li
+                  key={step.step}
+                  animate={{ opacity: sceneOpacity }}
+                  transition={{ duration: 0.45, ease: 'easeOut' }}
+                  className="lg:flex lg:min-h-[90vh] lg:items-center"
+                >
+                  <Button
+                    type="button"
+                    styled={false}
+                    onClick={onScrollToForm}
+                    className="group flex h-auto min-h-0 w-full flex-col items-start gap-6 rounded-[22px] !p-0 text-left hover:opacity-100"
+                  >
+                    <div className="flex w-full items-end justify-between gap-6">
+                      <span
+                        aria-hidden="true"
+                        className={`block font-black leading-[0.82] tracking-[-0.06em] text-[clamp(96px,26vw,160px)] lg:text-[clamp(140px,16vw,220px)] ${
+                          isActive
+                            ? 'text-[#0a0a0a]'
+                            : 'text-[#0a0a0a] lg:text-transparent lg:[-webkit-text-stroke:1.25px_#c8c7c2]'
+                        } transition-colors duration-500`}
+                      >
+                        {step.step}
+                      </span>
+                      <span
+                        className={`hidden h-14 w-14 shrink-0 items-center justify-center rounded-[18px] border bg-white sm:flex lg:h-16 lg:w-16 ${
+                          isActive
+                            ? 'border-transparent shadow-[0_0_0_2px_rgba(255,196,0,0.55),0_18px_40px_-22px_rgba(10,10,10,0.45)]'
+                            : 'border-[#ececea]'
+                        } transition-shadow duration-500`}
+                      >
+                        <Icon
+                          className="h-5 w-5 text-[#0a0a0a] lg:h-6 lg:w-6"
+                          aria-hidden={true}
+                        />
+                      </span>
+                    </div>
+                    <div className="max-w-[480px]">
+                      <span className="block text-[22px] font-extrabold leading-tight tracking-[-0.025em] text-[#0a0a0a] sm:text-[28px] lg:text-[36px]">
+                        {step.title}
+                      </span>
+                      <span className="mt-3 block text-[13px] leading-relaxed text-[#6b6f76] lg:text-[15px]">
+                        {step.description}
+                      </span>
+                      <span className="mt-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#0a0a0a] transition-[gap] duration-200 group-hover:gap-3">
+                        <span className="h-px w-6 bg-[#0a0a0a]" />
+                        Step {index + 1}
+                        <ArrowRight className="h-3 w-3" aria-hidden={true} />
+                      </span>
+                    </div>
+                  </Button>
+                </motion.li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 export default HowItWorksSection;

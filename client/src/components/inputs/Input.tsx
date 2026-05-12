@@ -577,7 +577,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 placeholder:text-slate-600
                 text-[13px] text-slate-900
                 flex items-center w-full
-                rounded-lg border-[1.5px]
+                rounded-md border-[1.5px]
                 border-slate-300 border-opacity-10
                 outline-none focus:outline-none
                 focus:border-[1.6px] focus:border-primary

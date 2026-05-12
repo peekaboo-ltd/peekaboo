@@ -85,7 +85,7 @@ export class PendingOrderSessionService {
     return this.repo.save(session);
   }
 
-  async markCompleted(sessionId: string): Promise<void> {
+  async markCompleted(sessionId: UUID): Promise<void> {
     await this.repo.update(
       { id: sessionId },
       { status: PendingOrderSessionStatus.COMPLETED },

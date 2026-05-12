@@ -1,6 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight, faBuilding } from '@fortawesome/free-solid-svg-icons';
+import { ArrowRight, PackagePlus, Route } from 'lucide-react';
+import Button from '@/components/inputs/Button';
 
 interface HeroBusinessCtaProps {
   isActive: boolean;
@@ -17,31 +16,33 @@ const HeroBusinessCta = ({
   onScrollToForm,
   onContactClick,
 }: HeroBusinessCtaProps) => (
-  <AnimatePresence mode="wait">
-    {isActive && (
-      <motion.nav
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -16 }}
-        className="flex flex-wrap gap-3 pt-2 max-lg:items-center max-lg:justify-center"
-      >
-        <button
-          onClick={onContactClick}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-900 text-white rounded-md text-[13px] font-medium hover:bg-primary-800 transition-colors cursor-pointer"
-        >
-          <FontAwesomeIcon icon={faBuilding} className="text-[11px]" />
+  <nav className="flex flex-wrap gap-3 pt-1">
+    <Button
+      type="button"
+      onClick={onScrollToForm}
+      className="rounded-full bg-[#ffc400] border-[#ffc400] text-[#0a0a0a] hover:bg-[#e6ad00] hover:border-[#e6ad00] font-semibold shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)]"
+    >
+      <PackagePlus className="h-3.5 w-3.5" aria-hidden="true" />
+      {isActive ? tryQuickDeliveryLabel : 'Book delivery'}
+    </Button>
+    <Button
+      type="button"
+      onClick={isActive ? onContactClick : undefined}
+      className="rounded-full border-white/25 text-white hover:bg-white/[0.06] hover:border-white/25"
+    >
+      {isActive ? (
+        <>
           {accountLabel}
-        </button>
-        <button
-          onClick={onScrollToForm}
-          className="inline-flex items-center gap-2 px-2 py-2.5 text-primary-500 hover:text-primary-900 text-[13px] font-normal transition-colors cursor-pointer"
-        >
-          {tryQuickDeliveryLabel}
-          <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" />
-        </button>
-      </motion.nav>
-    )}
-  </AnimatePresence>
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </>
+      ) : (
+        <>
+          <Route className="h-3.5 w-3.5" aria-hidden="true" />
+          Track package
+        </>
+      )}
+    </Button>
+  </nav>
 );
 
 export default HeroBusinessCta;

@@ -23,23 +23,24 @@ const HeroHeadline = ({
   <AnimatePresence mode="wait">
     <motion.hgroup
       key={activeTab}
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -16 }}
-      transition={{ duration: 0.35 }}
+      exit={{ opacity: 0, y: -14 }}
+      transition={{ duration: 0.28, ease: 'easeOut' }}
       className="space-y-4"
     >
-      <p className="inline-flex w-fit rounded-full border border-secondary-300 bg-secondary-50 px-4 py-1 text-[11px] uppercase tracking-[0.18em] text-secondary-700 font-medium">
-        Fast. Reliable. Local.
+      <p className="inline-flex w-fit items-center gap-2 rounded-full bg-[#ffc400]/15 px-3 py-1.5 text-[11px] font-normal tracking-[0.06em] text-[#ffc400]">
+        Fast · Reliable · Local
       </p>
-      <h1 className="text-4xl sm:text-5xl lg:text-[3.6rem] font-bold tracking-[-0.02em] leading-[1.05] text-primary-900">
+      <h1 className="max-w-[580px] text-[32px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white sm:text-[42px] lg:text-[52px]">
         {activeTab === 'personal' ? personalTitle1 : businessTitle1}
         <br />
-        <span className="text-secondary-600">
+        <span className="text-[#ffc400] text-[32px] sm:text-[42px] lg:text-[52px]">
           {activeTab === 'personal' ? personalTitle2 : businessTitle2}
-        </span>
+        </span>{' '}
+        in Kigali.
       </h1>
-      <p className="text-[13px] text-primary-600 leading-relaxed max-w-lg">
+      <p className="max-w-[480px] text-[13px] leading-[1.65] text-white/70">
         {activeTab === 'personal' ? personalSubtitle : businessSubtitle}
       </p>
     </motion.hgroup>
