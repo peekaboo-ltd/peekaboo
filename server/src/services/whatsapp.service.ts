@@ -570,14 +570,14 @@ export class WhatsappService {
 
     const effectiveConversationId = params.conversationId ?? conversation.id;
 
-    const amount = Number(
+    const initialAmount = Number(
       process.env.WHATSAPP_ORDER_INITIAL_FEE || DEFAULT_ORDER_FEE,
     );
 
     const { order } = await this.orderService.createPublicOrder({
       senderPhoneNumber: params.senderPhone,
       recipientPhoneNumber: params.recipientPhoneFormatted,
-      initialFee: amount,
+      initialFee: initialAmount,
       conversationId: effectiveConversationId,
       notes: params.pickupNotes,
       description: params.dropoffDescription,
@@ -587,9 +587,11 @@ export class WhatsappService {
       orderSource: "whatsapp_flow",
     });
 
+    const chargedAmount = Number(order.finalFee ?? order.initialFee ?? initialAmount);
+
     const payment = await this.paymentService.createPayment({
       entityId: order.id,
-      amount,
+      amount: chargedAmount,
       currency: KpayCurrency.RWF,
       type: PaymentType.ORDER,
       customerPhone: params.senderPhone,
@@ -609,9 +611,9 @@ export class WhatsappService {
     if (paymentUrl) {
       sendCtaUrlButton({
         phoneNumber: params.senderPhone,
-        displayText: `Pay ${amount.toLocaleString()} RWF`,
+        displayText: `Pay ${chargedAmount.toLocaleString()} RWF`,
         url: paymentUrl,
-        bodyText: paymentCTABodyText(order.referenceId, amount),
+        bodyText: paymentCTABodyText(order.referenceId, chargedAmount),
         footerText: "Payment link expires in 5 hours",
       }).catch(() => {});
     } else {
