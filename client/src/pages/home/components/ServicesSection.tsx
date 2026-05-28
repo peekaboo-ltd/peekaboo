@@ -50,10 +50,10 @@ const toneClasses = {
     arrow: 'bg-[#0a0a0a] text-white',
   },
   white: {
-    card: 'border-[#ececea] bg-white text-[#0a0a0a] hover:border-[#d9d8d4]',
+    card: 'home-card-interactive border-[#ececea] bg-white text-[#0a0a0a]',
     chip: 'bg-[#fff4be] text-[#6b4d00]',
     body: 'text-[#6b6f76]',
-    arrow: 'bg-[#f7f6f1] text-[#0a0a0a]',
+    arrow: 'bg-[var(--peekaboo-warm)] text-[#0a0a0a]',
   },
 } as const;
 
@@ -81,12 +81,9 @@ const ServicesSection = () => (
         {services.map((service) => {
           const tone = toneClasses[service.tone as keyof typeof toneClasses];
           return (
-            <li
-              key={service.title}
-              className={service.featured ? 'lg:row-span-2' : undefined}
-            >
+            <li key={service.title} className={service.featured ? 'lg:row-span-2' : undefined}>
               <article
-                className={`flex h-full min-h-[180px] flex-col justify-between rounded-[18px] border p-5 transition hover:-translate-y-px ${tone.card} ${
+                className={`flex h-full min-h-[178px] flex-col justify-between rounded-[12px] border p-5 ${tone.card} ${
                   service.featured ? 'lg:min-h-[300px]' : ''
                 }`}
               >

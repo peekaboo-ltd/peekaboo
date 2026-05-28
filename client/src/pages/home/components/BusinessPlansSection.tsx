@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import type { BusinessPlan } from '../home.types';
-import { containerVariants, fadeInUp, scaleIn } from '../home.animations';
+import { containerVariants, fadeInUp } from '../home.animations';
 
 interface BusinessPlansSectionProps {
   badgeLabel: string;
@@ -75,16 +75,15 @@ const BusinessPlansSection = ({
             {plans.map((plan) => (
               <motion.li
                 key={plan.name}
-                variants={scaleIn}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className={`relative transition-all duration-300 ${
+                variants={fadeInUp}
+                className={`relative ${
                   plan.isPopular ? 'md:-mt-4' : ''
-                } hover:z-10`}
+                }`}
               >
                 <article
-                className={`group h-full rounded-2xl border p-6 flex flex-col gap-6 transition-all duration-300 hover:shadow-2xl hover:shadow-primary-900/10 hover:-translate-y-1 ${
+                className={`home-card-interactive flex h-full flex-col gap-6 rounded-2xl border p-6 ${
                   plan.isPopular
-                    ? 'border-secondary-300 shadow-xl shadow-secondary-500/10 bg-secondary-50/40'
+                    ? 'border-secondary-300 bg-secondary-50/40'
                     : 'border-primary-100 bg-white'
                 }`}
                 >

@@ -66,19 +66,10 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#0a0a0a] text-white">
-      <figure
-        className="pointer-events-none absolute -right-32 -top-40 h-[520px] w-[520px] rounded-full bg-[radial-gradient(closest-side,rgba(255,196,0,0.18),transparent_70%)]"
-        aria-hidden="true"
-      />
-      <figure
-        className="pointer-events-none absolute -bottom-32 -left-24 h-[400px] w-[400px] rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.05),transparent_70%)]"
-        aria-hidden="true"
-      />
-
-      <article className="relative mx-auto max-w-[1280px] px-5 pb-12 pt-20 sm:px-8 lg:px-10 lg:pb-16 lg:pt-24">
+    <section className="relative w-full overflow-hidden border-b border-[#e6e5e0] bg-[#080808] text-white">
+      <article className="relative mx-auto max-w-[1280px] px-5 pb-12 pt-18 sm:px-8 lg:px-10 lg:pb-14 lg:pt-22">
         <motion.section
-          className="grid min-h-[calc(100vh-8rem)] items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10"
+          className="grid min-h-[calc(100vh-7rem)] items-center gap-9 lg:grid-cols-[1.06fr_0.94fr] lg:gap-12"
           variants={containerVariants}
           initial="hidden"
           animate="visible"

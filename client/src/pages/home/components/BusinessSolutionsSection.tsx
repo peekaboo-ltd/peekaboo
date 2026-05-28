@@ -74,14 +74,14 @@ const BusinessSolutionsSection = ({
           const Icon = feature.icon;
           return (
             <li key={feature.title}>
-              <article className="h-full rounded-[18px] bg-[#0a0a0a] p-5 text-white">
-                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#ffc400]/20 text-[#ffc400]">
+              <article className="h-full rounded-[12px] border border-black/10 bg-white/80 p-5 text-[#0a0a0a]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#0a0a0a] text-[#ffc400]">
                   <Icon className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <h3 className="mt-4 text-[14px] font-bold tracking-[-0.01em]">
                   {feature.title}
                 </h3>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-white/60">
+                <p className="mt-1.5 text-[13px] leading-relaxed text-black/65">
                   {feature.description}
                 </p>
               </article>

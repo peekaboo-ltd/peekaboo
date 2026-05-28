@@ -50,7 +50,7 @@ const WhyPeekabooSection = ({ items }: WhyPeekabooSectionProps) => (
           const Icon = item.icon;
           return (
             <li key={item.title} className="border-t border-[#ececea] px-1 py-5 sm:px-5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#fff4be] text-[#0a0a0a]">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a]">
                 <Icon className="h-4 w-4" aria-hidden="true" />
               </span>
               <h3 className="mt-3 text-[14px] font-bold tracking-[-0.01em] text-[#0a0a0a]">

@@ -9,7 +9,7 @@ import {
   faStore,
 } from '@fortawesome/free-solid-svg-icons';
 import type { Testimonial } from '../home.types';
-import { containerVariants, fadeInUp, scaleIn } from '../home.animations';
+import { containerVariants, fadeInUp } from '../home.animations';
 
 interface TestimonialsSectionProps {
   badgeLabel: string;
@@ -56,11 +56,9 @@ const TestimonialsSection = ({
           <p className="text-lg text-primary-600 max-w-2xl mx-auto font-normal">{subtitle}</p>
         </motion.header>
 
-        <motion.figure className="relative max-w-4xl mx-auto" variants={scaleIn}>
+        <motion.figure className="relative max-w-4xl mx-auto" variants={fadeInUp}>
           <motion.blockquote
             className="rounded-2xl p-8 sm:p-12 lg:p-14 border border-primary-100 bg-white/95 shadow-[0_20px_60px_rgba(37,52,63,0.08)]"
-            whileHover={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)' }}
-            transition={{ duration: 0.3 }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0 }}
@@ -89,14 +87,13 @@ const TestimonialsSection = ({
                 </p>
 
                 <figcaption className="flex items-center gap-4">
-                  <motion.mark
+                  <mark
                     className="w-14 h-14 bg-primary-600 rounded-full flex items-center justify-center"
-                    whileHover={{ scale: 1.1, rotate: 10 }}
                   >
                     <span className="text-xl font-medium text-white">
                       {testimonials[activeTestimonial].name.charAt(0)}
                     </span>
-                  </motion.mark>
+                  </mark>
                   <cite className="not-italic">
                     <strong className="block text-lg font-semibold text-primary-900">
                       {testimonials[activeTestimonial].name}
@@ -122,15 +119,13 @@ const TestimonialsSection = ({
                 <motion.button
                   key={index}
                   onClick={() => setActiveTestimonial(index)}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                  className={`h-2 rounded-full transition-[background-color,width] duration-300 cursor-pointer ${
                     index === activeTestimonial
                       ? 'bg-primary-600 w-8'
                       : 'bg-primary-200 hover:bg-primary-300 w-2'
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                   aria-current={index === activeTestimonial ? 'true' : undefined}
-                  whileHover={{ scale: 1.3 }}
-                  whileTap={{ scale: 0.9 }}
                 />
               ))}
             </nav>
@@ -143,10 +138,8 @@ const TestimonialsSection = ({
                   (prev) => (prev - 1 + testimonials.length) % testimonials.length
                 )
               }
-              className="pointer-events-auto -translate-x-4 lg:-translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-primary-400 hover:text-primary-900 transition-all cursor-pointer border border-primary-100"
+              className="pointer-events-auto -translate-x-4 lg:-translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-primary-400 hover:text-primary-900 transition-colors cursor-pointer border border-primary-100"
               aria-label="Previous testimonial"
-              whileHover={{ scale: 1.15, x: -4 }}
-              whileTap={{ scale: 0.95 }}
             >
               <FontAwesomeIcon icon={faChevronLeft} />
             </motion.button>
@@ -156,10 +149,8 @@ const TestimonialsSection = ({
                   (prev) => (prev + 1) % testimonials.length
                 )
               }
-              className="pointer-events-auto translate-x-4 lg:translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-primary-400 hover:text-primary-900 transition-all cursor-pointer border border-primary-100"
+              className="pointer-events-auto translate-x-4 lg:translate-x-14 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center text-primary-400 hover:text-primary-900 transition-colors cursor-pointer border border-primary-100"
               aria-label="Next testimonial"
-              whileHover={{ scale: 1.15, x: 4 }}
-              whileTap={{ scale: 0.95 }}
             >
               <FontAwesomeIcon icon={faChevronRight} />
             </motion.button>

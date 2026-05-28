@@ -20,7 +20,7 @@ const Home = () => {
   useDocumentTitle('Home');
 
   const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleContactNavigation = () => {
@@ -39,7 +39,7 @@ const Home = () => {
   ];
 
   return (
-    <main className="relative min-h-screen w-full overflow-x-hidden bg-[#f7f6f1]">
+    <main className="home-page relative min-h-screen w-full overflow-x-hidden bg-[var(--peekaboo-warm)]">
       <HeroSection
         formRef={formRef}
         onScrollToForm={scrollToForm}

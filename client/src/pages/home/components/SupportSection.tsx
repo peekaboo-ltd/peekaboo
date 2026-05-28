@@ -47,7 +47,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                   type="button"
                   styled={false}
                   onClick={onContactClick}
-                  className="flex w-full items-center gap-3 rounded-[18px] border border-[#ececea] bg-white p-3.5 text-left transition hover:-translate-y-px hover:border-[#d9d8d4]"
+                  className="home-card-interactive flex w-full items-center gap-3 rounded-[18px] border border-[#ececea] bg-white p-3.5 text-left"
                 >
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a]">
                     <Icon className="h-4 w-4" aria-hidden="true" />
@@ -92,7 +92,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
               <Button
                 type="button"
                 styled={false}
-                className="flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#ececea] bg-white px-4 py-3 text-left text-[13px] font-medium text-[#0a0a0a] transition hover:-translate-y-px hover:border-[#d9d8d4]"
+                className="home-card-interactive flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#ececea] bg-white px-4 py-3 text-left text-[13px] font-medium text-[#0a0a0a]"
               >
                 {link}
                 <ArrowRight className="h-3 w-3 shrink-0 text-[#6b6f76]" aria-hidden="true" />

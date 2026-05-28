@@ -91,9 +91,9 @@ const HeroForm = ({
   };
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="relative isolate w-full">
-      <article className="relative rounded-[12px] bg-white p-7 text-[#0a0a0a] ring-1 ring-[#ececea] shadow-[0_18px_50px_-26px_rgba(10,10,10,0.35)] sm:p-9">
-        <header className="mb-6">
+    <form ref={formRef} onSubmit={onSubmit} className="home-scroll-target relative isolate w-full">
+      <article className="relative rounded-[10px] border border-[#ececea] bg-white p-6 text-[#0a0a0a] shadow-[0_18px_42px_-34px_rgba(10,10,10,0.42)] sm:p-8">
+        <header className="mb-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9e9d98]">
             New order
           </p>
@@ -105,7 +105,7 @@ const HeroForm = ({
           </p>
         </header>
 
-        <fieldset className="grid gap-3.5">
+        <fieldset className="grid gap-3">
           <Controller
             name="senderPhoneNumber"
             control={control}
@@ -150,11 +150,11 @@ const HeroForm = ({
               control={control}
               render={({ field }) => (
                 <label className="w-full flex flex-col gap-1">
-                  <p className="text-[13px]">
+                  <p className="text-[12.5px] font-medium text-[#0a0a0a]">
                     Pickup location <span className="text-red-600">*</span>
                   </p>
                   {confirmedLocations.from && field.value ? (
-                    <ul className="flex items-center gap-2 rounded-md bg-green-700/10 px-3 py-2">
+                    <ul className="flex items-center gap-2 rounded-md border border-green-700/15 bg-green-700/5 px-3 py-2">
                       <FontAwesomeIcon icon={faCheckCircle} className="text-green-700 text-[13px]" aria-hidden="true" />
                       <span className="flex-1 text-[13px] text-[#0a0a0a] truncate">
                         {field.value}
@@ -186,11 +186,11 @@ const HeroForm = ({
               control={control}
               render={({ field }) => (
                 <label className="w-full flex flex-col gap-1">
-                  <p className="text-[13px]">
+                  <p className="text-[12.5px] font-medium text-[#0a0a0a]">
                     Drop-off location <span className="text-red-600">*</span>
                   </p>
                   {confirmedLocations.to && field.value ? (
-                    <ul className="flex items-center gap-2 rounded-md bg-green-700/10 px-3 py-2">
+                    <ul className="flex items-center gap-2 rounded-md border border-green-700/15 bg-green-700/5 px-3 py-2">
                       <FontAwesomeIcon icon={faCheckCircle} className="text-green-700 text-[13px]" aria-hidden="true" />
                       <span className="flex-1 text-[13px] text-[#0a0a0a] truncate">
                         {field.value}
@@ -219,7 +219,7 @@ const HeroForm = ({
           </div>
         </fieldset>
 
-        <section className="mt-6 flex items-baseline justify-between gap-4 border-t border-[#ececea] pt-4">
+        <section className="mt-5 flex items-baseline justify-between gap-4 border-t border-[#ececea] pt-4">
           <div className="flex items-baseline gap-3">
             <p className="text-[12px]">
               Estimate
@@ -241,7 +241,7 @@ const HeroForm = ({
           submit
           isLoading={isLoading}
           disabled={isLoading}
-          className="mt-5 h-10 w-full rounded-md border-[#ffc400] bg-[#ffc400] text-[13px] font-semibold text-[#0a0a0a] hover:border-[#e6ad00] hover:bg-[#e6ad00]"
+          className="mt-5 h-10 w-full rounded-md border-[#ffc400] bg-[#ffc400] text-[13px] font-semibold text-[#0a0a0a] shadow-none hover:border-[#e6ad00] hover:bg-[#e6ad00]"
         >
           {isLoading ? 'Booking...' : copy.continueLabel}
           <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" aria-hidden="true" />

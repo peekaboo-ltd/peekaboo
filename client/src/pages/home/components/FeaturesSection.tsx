@@ -15,7 +15,7 @@ interface FeaturesSectionProps {
 }
 
 const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
-  <section className="w-full bg-[#f7f6f1] py-8 lg:py-10">
+  <section className="w-full bg-[var(--peekaboo-warm)] py-8 lg:py-10">
     <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {actions.map((action) => {
@@ -26,14 +26,14 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
                 type="button"
                 styled={false}
                 onClick={action.onClick}
-                className={`group flex h-full min-h-[160px] w-full flex-col items-start rounded-[18px] border p-5 text-left transition duration-200 hover:-translate-y-px ${
+                className={`flex h-full min-h-[150px] w-full flex-col items-start rounded-[12px] border p-5 text-left ${
                   action.accent
-                    ? 'border-transparent bg-[#0a0a0a] text-white'
-                    : 'border-[#ececea] bg-white text-[#0a0a0a] hover:border-[#d9d8d4]'
+                    ? 'border-[#0a0a0a] bg-[#0a0a0a] text-white hover:border-[#ffc400]/70'
+                    : 'home-card-interactive border-[#ececea] bg-white text-[#0a0a0a]'
                 }`}
               >
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+                  className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${
                     action.accent ? 'bg-[#ffc400] text-[#0a0a0a]' : 'bg-[#fff4be] text-[#0a0a0a]'
                   }`}
                 >
@@ -55,7 +55,7 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
                   }`}
                 >
                   Open
-                  <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
+                  <ArrowRight className="h-3 w-3" />
                 </span>
               </Button>
             </li>
