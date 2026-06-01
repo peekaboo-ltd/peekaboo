@@ -49,18 +49,19 @@ graph TD
 
 ## 🚀 Deployment
 
-Use [scripts/deploy.sh](scripts/deploy.sh) to deploy the backend and web client together on an Ubuntu/Debian server with PM2.
+Use [scripts/deploy.sh](scripts/deploy.sh) to deploy the backend and web client together with PM2. The script supports Ubuntu/Debian Linux and macOS on both Apple Silicon and Intel chips.
 
 ### Server Assumptions
 
 Before running the script, make sure:
 
 - The repository has been cloned onto the server.
-- The server is running Ubuntu/Debian.
+- The machine is running Ubuntu/Debian, or macOS on Apple Silicon (`arm64`) or Intel (`x86_64`).
 - PostgreSQL is already installed, reachable, and configured for the values in `server/.env`.
 - `server/.env` exists and contains the production backend configuration.
 - `client/.env` exists and contains the Vite build-time client configuration, such as `VITE_API_BASE_URL`.
-- The deploy user can run `sudo` if Node.js, PM2, or base packages need to be installed.
+- On Linux, the deploy user can run `sudo` if Node.js, PM2, or base packages need to be installed.
+- On macOS, run the script as a normal admin user, not as root. The script uses Homebrew and checks for Xcode Command Line Tools.
 
 The script installs OS and Node tooling only. It does not configure nginx, SSL certificates, firewall rules, database provisioning, DNS, or secrets management.
 
@@ -75,8 +76,9 @@ chmod +x scripts/deploy.sh
 
 By default, the script:
 
-- Installs `curl`, `git`, `build-essential`, and `ca-certificates` with `apt-get`.
-- Installs Node.js 20 from NodeSource if `node` or `npm` is missing.
+- On Ubuntu/Debian, installs `curl`, `git`, `build-essential`, and `ca-certificates` with `apt-get`.
+- On macOS, verifies Xcode Command Line Tools, installs or loads Homebrew from `/opt/homebrew` on Apple Silicon or `/usr/local` on Intel, and installs `git` if missing.
+- Installs Node.js 20 from NodeSource on Linux or `node@20` from Homebrew on macOS if `node` or `npm` is missing.
 - Installs PM2 globally if it is missing.
 - Installs dependencies in `server/` and `client/` using `npm ci` when a lockfile exists.
 - Builds the server and client.

@@ -21,6 +21,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SERVER_DIR="$REPO_ROOT/server"
 CLIENT_DIR="$REPO_ROOT/client"
+PLATFORM=""
+CPU_ARCH=""
 
 log() {
   printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
@@ -42,7 +44,49 @@ require_dir() {
   [ -d "$1" ] || fail "Required directory not found: $1"
 }
 
-setup_sudo() {
+detect_platform() {
+  CPU_ARCH="$(uname -m)"
+
+  case "$(uname -s)" in
+    Linux)
+      PLATFORM="linux"
+      [ -r /etc/os-release ] || fail "Cannot detect Linux distribution. This script supports Ubuntu/Debian and macOS."
+
+      # The Linux bootstrap path uses apt-get and NodeSource Debian packages, so
+      # keep the script explicit instead of guessing on unsupported distributions.
+      # shellcheck disable=SC1091
+      . /etc/os-release
+
+      case "${ID:-}" in
+        ubuntu | debian) ;;
+        *)
+          case " ${ID_LIKE:-} " in
+            *" debian "*) ;;
+            *) fail "Unsupported Linux distribution '${ID:-unknown}'. Use Ubuntu/Debian or macOS." ;;
+          esac
+          ;;
+      esac
+      ;;
+    Darwin)
+      PLATFORM="macos"
+      case "$CPU_ARCH" in
+        arm64 | x86_64) ;;
+        *) fail "Unsupported macOS CPU architecture '$CPU_ARCH'. Expected arm64 or x86_64." ;;
+      esac
+      ;;
+    *)
+      fail "Unsupported OS '$(uname -s)'. Use Ubuntu/Debian or macOS."
+      ;;
+  esac
+}
+
+setup_privileges() {
+  if [ "$PLATFORM" = "macos" ]; then
+    # Homebrew does not support running as root. Use a normal admin user.
+    [ "${EUID:-$(id -u)}" -ne 0 ] || fail "Do not run this script as root on macOS."
+    return
+  fi
+
   if [ "${EUID:-$(id -u)}" -eq 0 ]; then
     return
   fi
@@ -50,8 +94,8 @@ setup_sudo() {
   command -v sudo >/dev/null 2>&1 || fail "sudo is required when not running as root."
 }
 
-# Run package-manager commands as root, while keeping normal build commands as
-# the current deploy user so node_modules and dist files stay owned by that user.
+# On Linux, package-manager commands need root. Normal build commands still run
+# as the deploy user so node_modules and dist files stay owned by that user.
 run_as_root() {
   if [ "${EUID:-$(id -u)}" -eq 0 ]; then
     "$@"
@@ -60,7 +104,7 @@ run_as_root() {
   fi
 }
 
-# NodeSource provides a Bash installer that must run as root and needs env
+# NodeSource provides a Linux Bash installer that must run as root and needs env
 # propagation when sudo is involved.
 run_bash_as_root_with_env() {
   if [ "${EUID:-$(id -u)}" -eq 0 ]; then
@@ -70,41 +114,101 @@ run_bash_as_root_with_env() {
   fi
 }
 
-ensure_ubuntu_or_debian() {
-  [ -r /etc/os-release ] || fail "Cannot detect OS. This script supports Ubuntu/Debian."
+load_homebrew_path() {
+  local brew_bin
 
-  # The bootstrap path uses apt-get and NodeSource Debian packages, so keep the
-  # script explicit instead of guessing on unsupported distributions.
-  # shellcheck disable=SC1091
-  . /etc/os-release
+  if command -v brew >/dev/null 2>&1; then
+    eval "$(brew shellenv)"
+    return
+  fi
 
-  case "${ID:-}" in
-    ubuntu | debian) ;;
-    *)
-      case " ${ID_LIKE:-} " in
-        *" debian "*) ;;
-        *) fail "Unsupported OS '${ID:-unknown}'. This script supports Ubuntu/Debian." ;;
-      esac
-      ;;
+  # Apple Silicon Homebrew installs to /opt/homebrew; Intel installs to /usr/local.
+  for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    if [ -x "$brew_bin" ]; then
+      eval "$("$brew_bin" shellenv)"
+      return
+    fi
+  done
+}
+
+ensure_xcode_command_line_tools() {
+  if xcode-select -p >/dev/null 2>&1; then
+    return
+  fi
+
+  log "Xcode Command Line Tools are required for native npm modules"
+  xcode-select --install >/dev/null 2>&1 || true
+  fail "Finish installing Xcode Command Line Tools, then rerun this script."
+}
+
+ensure_homebrew() {
+  load_homebrew_path
+  if command -v brew >/dev/null 2>&1; then
+    log "Homebrew already installed: $(brew --version | head -n 1)"
+    return
+  fi
+
+  log "Installing Homebrew for macOS $CPU_ARCH"
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  load_homebrew_path
+  command -v brew >/dev/null 2>&1 || fail "Homebrew installed, but brew is not available on PATH."
+}
+
+ensure_npm_global_path() {
+  local npm_bin
+
+  command -v npm >/dev/null 2>&1 || return
+  npm_bin="$(npm prefix -g)/bin"
+  case ":$PATH:" in
+    *":$npm_bin:"*) ;;
+    *) export PATH="$npm_bin:$PATH" ;;
   esac
 }
 
 install_base_packages() {
-  # build-essential is needed for native npm dependencies such as bcrypt.
-  log "Installing base packages"
-  run_as_root apt-get update
-  run_as_root apt-get install -y curl git build-essential ca-certificates
+  case "$PLATFORM" in
+    linux)
+      # build-essential is needed for native npm dependencies such as bcrypt.
+      log "Installing base packages"
+      run_as_root apt-get update
+      run_as_root apt-get install -y curl git build-essential ca-certificates
+      ;;
+    macos)
+      # Xcode Command Line Tools provide compilers for native npm dependencies.
+      log "Checking macOS build tools"
+      ensure_xcode_command_line_tools
+      ensure_homebrew
+
+      if ! command -v git >/dev/null 2>&1; then
+        log "Installing git with Homebrew"
+        brew install git
+      fi
+      ;;
+  esac
 }
 
 install_node() {
   if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
     log "Node and npm already installed: node $(node --version), npm $(npm --version)"
+    ensure_npm_global_path
     return
   fi
 
-  log "Installing Node.js ${NODE_MAJOR}.x from NodeSource"
-  curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | run_bash_as_root_with_env -
-  run_as_root apt-get install -y nodejs
+  case "$PLATFORM" in
+    linux)
+      log "Installing Node.js ${NODE_MAJOR}.x from NodeSource"
+      curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | run_bash_as_root_with_env -
+      run_as_root apt-get install -y nodejs
+      ;;
+    macos)
+      ensure_homebrew
+      log "Installing Node.js ${NODE_MAJOR}.x with Homebrew"
+      brew install "node@${NODE_MAJOR}"
+      export PATH="$(brew --prefix "node@${NODE_MAJOR}")/bin:$PATH"
+      ;;
+  esac
+
+  ensure_npm_global_path
 }
 
 install_pm2() {
@@ -114,7 +218,12 @@ install_pm2() {
   fi
 
   log "Installing PM2 globally"
-  run_as_root npm install -g pm2
+  if [ "$PLATFORM" = "macos" ]; then
+    npm install -g pm2
+  else
+    run_as_root npm install -g pm2
+  fi
+  ensure_npm_global_path
 }
 
 maybe_pull_latest() {
@@ -227,8 +336,10 @@ start_or_restart_client() {
 main() {
   require_dir "$SERVER_DIR"
   require_dir "$CLIENT_DIR"
-  setup_sudo
-  ensure_ubuntu_or_debian
+  detect_platform
+  setup_privileges
+
+  log "Deploying on $PLATFORM ($CPU_ARCH)"
 
   # This script prepares Node/PM2 only. It assumes PostgreSQL and the app .env
   # files already exist and does not create secrets, firewall rules, SSL, or nginx.
