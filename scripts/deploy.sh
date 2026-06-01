@@ -2,15 +2,21 @@
 
 set -Eeuo pipefail
 
+# Runtime knobs for operators. Override any of these inline when running the
+# script, for example: GIT_PULL=true CLIENT_PORT=4174 ./scripts/deploy.sh
 NODE_MAJOR="${NODE_MAJOR:-20}"
 NODE_ENV="${NODE_ENV:-production}"
 PORT="${PORT:-8080}"
 CLIENT_PORT="${CLIENT_PORT:-4173}"
 SERVER_PM2_NAME="${SERVER_PM2_NAME:-peekaboo-server}"
 CLIENT_PM2_NAME="${CLIENT_PM2_NAME:-peekaboo-client}"
+
+# GIT_PULL=true updates the checked-out branch before building. SEQUENTIAL=true
+# builds the server and client one at a time for smaller servers.
 GIT_PULL="${GIT_PULL:-false}"
 SEQUENTIAL="${SEQUENTIAL:-false}"
 
+# Resolve paths from this file so the script works from any current directory.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SERVER_DIR="$REPO_ROOT/server"
@@ -44,6 +50,8 @@ setup_sudo() {
   command -v sudo >/dev/null 2>&1 || fail "sudo is required when not running as root."
 }
 
+# Run package-manager commands as root, while keeping normal build commands as
+# the current deploy user so node_modules and dist files stay owned by that user.
 run_as_root() {
   if [ "${EUID:-$(id -u)}" -eq 0 ]; then
     "$@"
@@ -52,6 +60,8 @@ run_as_root() {
   fi
 }
 
+# NodeSource provides a Bash installer that must run as root and needs env
+# propagation when sudo is involved.
 run_bash_as_root_with_env() {
   if [ "${EUID:-$(id -u)}" -eq 0 ]; then
     bash "$@"
@@ -63,6 +73,8 @@ run_bash_as_root_with_env() {
 ensure_ubuntu_or_debian() {
   [ -r /etc/os-release ] || fail "Cannot detect OS. This script supports Ubuntu/Debian."
 
+  # The bootstrap path uses apt-get and NodeSource Debian packages, so keep the
+  # script explicit instead of guessing on unsupported distributions.
   # shellcheck disable=SC1091
   . /etc/os-release
 
@@ -78,6 +90,7 @@ ensure_ubuntu_or_debian() {
 }
 
 install_base_packages() {
+  # build-essential is needed for native npm dependencies such as bcrypt.
   log "Installing base packages"
   run_as_root apt-get update
   run_as_root apt-get install -y curl git build-essential ca-certificates
@@ -105,6 +118,8 @@ install_pm2() {
 }
 
 maybe_pull_latest() {
+  # Keep code updates opt-in so a colleague can deploy an already uploaded
+  # release directory without requiring git remotes or credentials.
   if ! as_bool "$GIT_PULL"; then
     log "Skipping git update because GIT_PULL is not true"
     return
@@ -153,6 +168,8 @@ build_apps() {
     return
   fi
 
+  # Parallel builds deploy both apps faster. Use SEQUENTIAL=true if the server
+  # is memory constrained.
   log "Building server and client in parallel"
   build_server &
   local server_pid=$!
@@ -172,6 +189,8 @@ pm2_exists() {
 start_or_restart_server() {
   log "Starting or restarting PM2 process: $SERVER_PM2_NAME"
 
+  # Do not use PM2 cluster mode here. server/src/server.ts already forks worker
+  # processes with Node cluster and starts cron jobs only in the primary process.
   if pm2_exists "$SERVER_PM2_NAME"; then
     (
       cd "$SERVER_DIR"
@@ -189,6 +208,8 @@ start_or_restart_server() {
 start_or_restart_client() {
   log "Starting or restarting PM2 process: $CLIENT_PM2_NAME"
 
+  # The client is a Vite build served by Vite preview because this deployment
+  # target intentionally keeps nginx/static hosting outside the script.
   if pm2_exists "$CLIENT_PM2_NAME"; then
     (
       cd "$CLIENT_DIR"
@@ -209,6 +230,8 @@ main() {
   setup_sudo
   ensure_ubuntu_or_debian
 
+  # This script prepares Node/PM2 only. It assumes PostgreSQL and the app .env
+  # files already exist and does not create secrets, firewall rules, SSL, or nginx.
   install_base_packages
   install_node
   install_pm2
