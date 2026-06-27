@@ -15,7 +15,7 @@ const HeroTabs = ({
   businessLabel,
 }: HeroTabsProps) => (
   <nav
-    className="inline-flex w-fit items-center rounded-full border border-white/10 bg-white/[0.06] p-1 text-[12px] font-normal"
+    className="inline-flex w-fit items-center rounded-full border border-[#ececea] bg-white p-1 text-[12px] font-normal shadow-[0_1px_2px_rgba(10,10,10,0.04)]"
     role="tablist"
     aria-label="Delivery audience"
   >
@@ -27,7 +27,7 @@ const HeroTabs = ({
       className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-1.5 transition ${
         activeTab === 'personal'
           ? 'bg-[#ffc400] text-[#0a0a0a]'
-          : 'text-white/65 hover:bg-white/[0.06] hover:text-white'
+          : 'text-[#6b6f76] hover:bg-[#f7f6f1] hover:text-[#0a0a0a]'
       }`}
     >
       <UserRound className="h-3.5 w-3.5" aria-hidden="true" />
@@ -41,7 +41,7 @@ const HeroTabs = ({
       className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-1.5 transition ${
         activeTab === 'business'
           ? 'bg-[#ffc400] text-[#0a0a0a]'
-          : 'text-white/65 hover:bg-white/[0.06] hover:text-white'
+          : 'text-[#6b6f76] hover:bg-[#f7f6f1] hover:text-[#0a0a0a]'
       }`}
     >
       <Building2 className="h-3.5 w-3.5" aria-hidden="true" />

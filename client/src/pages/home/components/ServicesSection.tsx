@@ -1,5 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
-import ImageSlot from './ImageSlot';
+import RoutePreviewMap from './RoutePreviewMap';
 
 const services = [
   {
@@ -126,11 +126,7 @@ const ServicesSection = () => (
                         city-wide drop-off
                       </p>
                     </div>
-                    <ImageSlot
-                      label="map · live route"
-                      dark
-                      className="h-[72px] w-full sm:w-[160px]"
-                    />
+                    <RoutePreviewMap dark className="h-[72px] w-full sm:w-[160px]" />
                   </footer>
                 )}
               </article>

@@ -143,3 +143,9 @@ dist
 
 # Server uploads (profile photos)
 server/uploads/
+
+# IDE
+.idea/
+.vscode/
+.cursor/
+.cursorrules

@@ -3,111 +3,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import BusinessPlansSection from '@/pages/home/components/BusinessPlansSection';
-import type { BusinessPlan } from '@/pages/home/home.types';
+import { mapApiPlanToCard } from '@/pages/home/home.utils';
 import { containerVariants, fadeInUp } from '@/pages/home/home.animations';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import Button from '@/components/inputs/Button';
 import { useFetchPublicBusinessPlansQuery } from '@/api/queries/businessPlan.queries';
-import type { BusinessPlan as ApiBusinessPlan, PricingTier } from '@/types/businessPlan.type';
-import { BillingPeriod } from '@/types/businessPlan.type';
-
-const formatCurrency = (value: number, currency = 'RWF') =>
-  `${Number(value).toLocaleString()} ${currency}`;
-
-const getBillingPeriodSuffix = (billingPeriod: BillingPeriod) => {
-  switch (billingPeriod) {
-    case BillingPeriod.DAILY:
-      return 'day';
-    case BillingPeriod.WEEKLY:
-      return 'week';
-    case BillingPeriod.MONTHLY:
-    default:
-      return 'delivery';
-  }
-};
-
-const getFirstDisplayTier = (tiers?: PricingTier[]) => {
-  if (!tiers?.length) return undefined;
-
-  return [...tiers]
-    .filter((tier) => !tier.isCustom && (tier.totalPrice || tier.pricePerUnit))
-    .sort((a, b) => {
-      const aValue = a.totalPrice ?? a.pricePerUnit ?? Number.MAX_SAFE_INTEGER;
-      const bValue = b.totalPrice ?? b.pricePerUnit ?? Number.MAX_SAFE_INTEGER;
-      return aValue - bValue;
-    })[0];
-};
-
-const getTierRangeLabel = (tier: PricingTier, billingPeriod: BillingPeriod) => {
-  if (tier.label) return tier.label;
-
-  if (tier.isCustom) return 'Custom range';
-
-  const periodUnit = billingPeriod === BillingPeriod.DAILY
-    ? 'day'
-    : billingPeriod === BillingPeriod.WEEKLY
-      ? 'week'
-      : 'month';
-
-  if (tier.maxQuantity == null) {
-    return `${tier.minQuantity}+ deliveries per ${periodUnit}`;
-  }
-
-  return `${tier.minQuantity} – ${tier.maxQuantity} deliveries per ${periodUnit}`;
-};
-
-const getHeadlinePrice = (plan: ApiBusinessPlan) => {
-  if (plan.isCustomPricing) {
-    return 'Custom monthly pricing';
-  }
-
-  const firstTier = getFirstDisplayTier(plan.pricingTiers?.tiers);
-  if (firstTier?.totalPrice) {
-    return `From ${formatCurrency(firstTier.totalPrice, plan.currency)} / ${getBillingPeriodSuffix(plan.billingPeriod)}`;
-  }
-
-  if (firstTier?.pricePerUnit) {
-    return `From ${formatCurrency(firstTier.pricePerUnit, plan.currency)} / delivery`;
-  }
-
-  if (plan.pricePerOrder) {
-    return `From ${formatCurrency(Number(plan.pricePerOrder), plan.currency)} / delivery`;
-  }
-
-  return 'Contact us for pricing';
-};
-
-const mapPlanToCard = (plan: ApiBusinessPlan): BusinessPlan => ({
-  name: plan.name,
-  description: plan.description || 'Flexible pricing for growing teams.',
-  price: getHeadlinePrice(plan),
-  features:
-    plan.features?.length
-      ? plan.features
-      : (plan.pricingTiers?.tiers || [])
-          .map((tier) => {
-            if (tier.isCustom) {
-              return tier.label || 'Custom pricing available';
-            }
-            const tierLabel = getTierRangeLabel(tier, plan.billingPeriod);
-            if (tier.totalPrice) {
-              return `${tierLabel} → ${formatCurrency(tier.totalPrice, plan.currency)}`;
-            }
-            if (tier.pricePerUnit) {
-              return `${tierLabel} → ${formatCurrency(tier.pricePerUnit, plan.currency)} per delivery`;
-            }
-            return tierLabel;
-          })
-          .filter(Boolean),
-  isPopular: Boolean(plan.badge) || plan.isDefault,
-  detailsTo: `/services/${plan.slug}`,
-});
 
 const Services = () => {
   useDocumentTitle('Services');
   const { data, isFetching } = useFetchPublicBusinessPlansQuery(undefined);
 
-  const businessPlans = (data?.data || []).map(mapPlanToCard);
+  const businessPlans = (data?.data || []).map(mapApiPlanToCard);
 
   return (
     <main className="relative min-h-screen w-full bg-[#FAFAF7] overflow-x-hidden mt-0 max-lg:mt-16">

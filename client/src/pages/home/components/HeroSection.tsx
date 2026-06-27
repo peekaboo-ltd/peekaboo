@@ -14,13 +14,16 @@ import HeroTrustIndicators from './HeroTrustIndicators';
 import HeroBusinessCta from './HeroBusinessCta';
 import HeroForm from './HeroForm';
 import HeroScrollIndicator from './HeroScrollIndicator';
+import HeroBusinessStats from './HeroBusinessStats';
 
 interface HeroSectionProps {
   formRef: RefObject<HTMLFormElement | null>;
   onScrollToForm: () => void;
   landingStats?: LandingStats;
   heroCopy: HeroCopy;
+  businessStats: { value: string; label: string }[];
   onContactClick?: () => void;
+  onTrackClick?: () => void;
 }
 
 const HeroSection = ({
@@ -28,7 +31,9 @@ const HeroSection = ({
   onScrollToForm,
   landingStats,
   heroCopy,
+  businessStats,
   onContactClick,
+  onTrackClick,
 }: HeroSectionProps) => {
   const [activeTab, setActiveTab] = useState<CustomerTab>('personal');
   const {
@@ -66,7 +71,7 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative w-full overflow-hidden border-b border-[#e6e5e0] bg-[#080808] text-white">
+    <section className="relative w-full overflow-hidden border-b border-[#ececea] bg-[var(--peekaboo-warm)] text-[#0a0a0a]">
       <article className="relative mx-auto max-w-[1280px] px-5 pb-12 pt-18 sm:px-8 lg:px-10 lg:pb-14 lg:pt-22">
         <motion.section
           className="grid min-h-[calc(100vh-7rem)] items-center gap-9 lg:grid-cols-[1.06fr_0.94fr] lg:gap-12"
@@ -98,7 +103,10 @@ const HeroSection = ({
               tryQuickDeliveryLabel={heroCopy.tryQuickDeliveryLabel}
               onScrollToForm={onScrollToForm}
               onContactClick={onContactClick}
+              onTrackClick={onTrackClick}
             />
+
+            <HeroBusinessStats isActive={activeTab === 'business'} stats={businessStats} />
 
             <HeroTrustIndicators
               landingStats={landingStats}
@@ -134,7 +142,7 @@ const HeroSection = ({
         </motion.section>
       </article>
 
-      <aside className="relative z-10 border-t border-white/[0.05]" />
+      <aside className="relative z-10 border-t border-[#ececea]" />
 
       <HeroScrollIndicator />
     </section>

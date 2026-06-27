@@ -6,10 +6,12 @@ import {
   CreditCard,
   FileText,
   Headphones,
+  Mail,
   MapPinned,
   MessageSquare,
   PackageCheck,
   PackagePlus,
+  Phone,
   ScanLine,
   ShieldCheck,
   Truck,
@@ -17,12 +19,21 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useI18n } from '@/i18n/i18n';
-import type { HeroCopy, HowItWorksStep } from './home.types';
+import type { HeroBusinessStat, HeroCopy, HowItWorksStep, Testimonial } from './home.types';
 
 interface IconCard {
   icon: LucideIcon;
   title: string;
   description: string;
+}
+
+interface SupportContact {
+  icon: LucideIcon;
+  title: string;
+  subtitle: string;
+  badge: string;
+  href?: string;
+  external?: boolean;
 }
 
 interface HomeContent {
@@ -31,6 +42,11 @@ interface HomeContent {
   howItWorks: HowItWorksStep[];
   whyItems: IconCard[];
   businessFeatures: IconCard[];
+  businessStats: HeroBusinessStat[];
+  testimonials: Testimonial[];
+  trustedByLabel: string;
+  trustedByIndustries: string[];
+  supportContacts: SupportContact[];
 }
 
 export const useHomeContent = (): HomeContent => {
@@ -171,5 +187,75 @@ export const useHomeContent = (): HomeContent => {
     },
   ];
 
-  return { heroCopy, quickActions, howItWorks, whyItems, businessFeatures };
+  const businessStats: HeroBusinessStat[] = [
+    { value: '184K', label: t('home.b2b.stats.packages') },
+    { value: '320+', label: t('home.b2b.stats.partners') },
+    { value: '99.2%', label: t('home.b2b.stats.success') },
+  ];
+
+  const testimonials: Testimonial[] = [
+    {
+      name: t('home.testimonials.t1.name'),
+      role: t('home.testimonials.t1.role'),
+      content: t('home.testimonials.t1.content'),
+      type: 'business',
+    },
+    {
+      name: t('home.testimonials.t2.name'),
+      role: t('home.testimonials.t2.role'),
+      content: t('home.testimonials.t2.content'),
+      type: 'business',
+    },
+    {
+      name: t('home.testimonials.t3.name'),
+      role: t('home.testimonials.t3.role'),
+      content: t('home.testimonials.t3.content'),
+      type: 'personal',
+    },
+  ];
+
+  const supportContacts: SupportContact[] = [
+    {
+      icon: MessageSquare,
+      title: 'WhatsApp',
+      subtitle: '+250 794 892 784',
+      badge: '~90s',
+      href: 'https://wa.me/250794892784?text=Hello%2C%20I%20need%20help%20with%20Peekaboo',
+      external: true,
+    },
+    {
+      icon: Phone,
+      title: 'Phone',
+      subtitle: '+250 794 892 784',
+      badge: 'Live',
+      href: 'tel:+250794892784',
+    },
+    {
+      icon: Mail,
+      title: 'Email',
+      subtitle: 'info@peekaboo.co.rw',
+      badge: '8 min',
+      href: 'mailto:info@peekaboo.co.rw',
+    },
+  ];
+
+  return {
+    heroCopy,
+    quickActions,
+    howItWorks,
+    whyItems,
+    businessFeatures,
+    businessStats,
+    testimonials,
+    trustedByLabel: t('home.b2b.trustedBy'),
+    trustedByIndustries: [
+      'E-commerce',
+      'Restaurants',
+      'Pharmacies',
+      'Banks',
+      'Retail',
+      'Logistics',
+    ],
+    supportContacts,
+  };
 };

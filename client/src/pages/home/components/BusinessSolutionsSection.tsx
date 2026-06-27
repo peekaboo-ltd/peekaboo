@@ -11,11 +11,13 @@ interface BusinessFeature {
 interface BusinessSolutionsSectionProps {
   features: BusinessFeature[];
   onContactClick?: () => void;
+  onSeePlans?: () => void;
 }
 
 const BusinessSolutionsSection = ({
   features,
   onContactClick,
+  onSeePlans,
 }: BusinessSolutionsSectionProps) => (
   <section id="business" className="w-full bg-[#ffc400] py-10 text-[#0a0a0a] lg:py-14">
     <article className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:px-10">
@@ -46,6 +48,7 @@ const BusinessSolutionsSection = ({
           </Button>
           <Button
             type="button"
+            onClick={onSeePlans}
             className="rounded-full bg-black/[0.06] border-transparent text-[#0a0a0a] hover:bg-black/10 hover:border-transparent"
           >
             See plans

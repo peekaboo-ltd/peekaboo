@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { ArrowRight, Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Button from '@/components/inputs/Button';
 
 interface SupportContact {
@@ -7,6 +8,8 @@ interface SupportContact {
   title: string;
   subtitle: string;
   badge: string;
+  href?: string;
+  external?: boolean;
 }
 
 interface SupportSectionProps {
@@ -15,16 +18,16 @@ interface SupportSectionProps {
 }
 
 const helpLinks = [
-  'How do I track an order?',
-  'What does delivery cost?',
-  'Where do you currently deliver?',
-  'How do I become a rider?',
-  'Can I schedule recurring drops?',
-  'How do business invoices work?',
+  { label: 'How do I track an order?', to: '/track' },
+  { label: 'What does delivery cost?', to: '/services' },
+  { label: 'Where do you currently deliver?', to: '#coverage' },
+  { label: 'How do I become a rider?', to: '/contact' },
+  { label: 'Can I schedule recurring drops?', to: '/contact' },
+  { label: 'How do business invoices work?', to: '/services' },
 ];
 
 const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
-  <section id="support" className="w-full bg-[#f7f6f1] py-10 lg:py-14">
+  <section id="support" className="w-full border-t border-[#ececea] bg-[var(--peekaboo-warm)] py-10 lg:py-14">
     <article className="mx-auto grid max-w-[1280px] grid-cols-1 gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.4fr] lg:gap-12 lg:px-10">
       <header>
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76]">
@@ -41,6 +44,40 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
         <ul className="mt-5 grid gap-2">
           {contacts.map((contact) => {
             const Icon = contact.icon;
+            const content = (
+              <>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a]">
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[13px] font-bold text-[#0a0a0a]">
+                    {contact.title}
+                  </span>
+                  <span className="mt-0.5 block truncate text-[12px] text-[#6b6f76]">
+                    {contact.subtitle}
+                  </span>
+                </span>
+                <span className="rounded-full border border-[#ececea] bg-[#f7f6f1] px-2 py-0.5 text-[11px] font-bold text-[#1f1f1f]">
+                  {contact.badge}
+                </span>
+              </>
+            );
+
+            if (contact.href) {
+              return (
+                <li key={contact.title}>
+                  <a
+                    href={contact.href}
+                    target={contact.external ? '_blank' : undefined}
+                    rel={contact.external ? 'noopener noreferrer' : undefined}
+                    className="home-card-interactive flex w-full items-center gap-3 rounded-[18px] border border-[#ececea] bg-white p-3.5 text-left"
+                  >
+                    {content}
+                  </a>
+                </li>
+              );
+            }
+
             return (
               <li key={contact.title}>
                 <Button
@@ -49,20 +86,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                   onClick={onContactClick}
                   className="home-card-interactive flex w-full items-center gap-3 rounded-[18px] border border-[#ececea] bg-white p-3.5 text-left"
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a]">
-                    <Icon className="h-4 w-4" aria-hidden="true" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[13px] font-bold text-[#0a0a0a]">
-                      {contact.title}
-                    </span>
-                    <span className="mt-0.5 block truncate text-[12px] text-[#6b6f76]">
-                      {contact.subtitle}
-                    </span>
-                  </span>
-                  <span className="rounded-full border border-[#ececea] bg-[#f7f6f1] px-2 py-0.5 text-[11px] font-bold text-[#1f1f1f]">
-                    {contact.badge}
-                  </span>
+                  {content}
                 </Button>
               </li>
             );
@@ -75,28 +99,31 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
           <Search className="h-4 w-4 shrink-0 text-[#6b6f76]" aria-hidden="true" />
           <input
             type="search"
-            placeholder="Search the help centre — billing, tracking, coverage..."
+            placeholder="Search help topics — billing, tracking, coverage..."
             className="min-w-0 flex-1 bg-transparent text-[13px] text-[#0a0a0a] outline-none placeholder:text-[#9aa0a6]"
           />
-          <Button
-            type="button"
-            className="hidden rounded-full bg-[#ffc400] border-[#ffc400] text-[#0a0a0a] hover:bg-[#e6ad00] hover:border-[#e6ad00] font-semibold sm:inline-flex"
-          >
-            Search
-          </Button>
         </label>
 
         <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {helpLinks.map((link) => (
-            <li key={link}>
-              <Button
-                type="button"
-                styled={false}
-                className="home-card-interactive flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#ececea] bg-white px-4 py-3 text-left text-[13px] font-medium text-[#0a0a0a]"
-              >
-                {link}
-                <ArrowRight className="h-3 w-3 shrink-0 text-[#6b6f76]" aria-hidden="true" />
-              </Button>
+            <li key={link.label}>
+              {link.to.startsWith('#') ? (
+                <a
+                  href={link.to}
+                  className="home-card-interactive flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#ececea] bg-white px-4 py-3 text-left text-[13px] font-medium text-[#0a0a0a]"
+                >
+                  {link.label}
+                  <ArrowRight className="h-3 w-3 shrink-0 text-[#6b6f76]" aria-hidden="true" />
+                </a>
+              ) : (
+                <Link
+                  to={link.to}
+                  className="home-card-interactive flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#ececea] bg-white px-4 py-3 text-left text-[13px] font-medium text-[#0a0a0a]"
+                >
+                  {link.label}
+                  <ArrowRight className="h-3 w-3 shrink-0 text-[#6b6f76]" aria-hidden="true" />
+                </Link>
+              )}
             </li>
           ))}
         </ul>

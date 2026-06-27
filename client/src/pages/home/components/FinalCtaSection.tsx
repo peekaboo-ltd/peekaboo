@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { containerVariants, fadeInUp } from '../home.animations';
+import { ArrowRight } from 'lucide-react';
+import { containerVariants, itemVariants } from '../home.animations';
 import Button from '@/components/inputs/Button';
 
 interface FinalCtaSectionProps {
@@ -17,39 +16,36 @@ const FinalCtaSection = ({
   buttonLabel,
   onScrollToForm,
 }: FinalCtaSectionProps) => (
-  <section className="w-full py-20 lg:py-28 bg-primary-900 relative overflow-hidden">
+  <section className="relative w-full overflow-hidden border-t border-[#ececea] bg-[#0a0a0a] py-10 text-white lg:py-14">
     <figure
-      className="pointer-events-none absolute -top-56 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-secondary-300/18 blur-3xl"
-      aria-hidden="true"
-    />
-    <figure
-      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-secondary-400/10 via-transparent to-primary-950/0"
+      className="pointer-events-none absolute inset-0 bg-[radial-gradient(640px_320px_at_50%_0%,rgba(255,196,0,0.14),transparent_70%)]"
       aria-hidden="true"
     />
     <motion.article
-      className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+      className="relative mx-auto max-w-[720px] px-5 text-center sm:px-8 lg:px-10"
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: '-100px' }}
+      viewport={{ once: true, margin: '-80px' }}
       variants={containerVariants}
     >
-      <motion.header variants={fadeInUp}>
-        <span className="inline-block text-[11px] uppercase tracking-[0.14em] font-medium text-primary-400 mb-6">
+      <motion.header variants={itemVariants}>
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400]">
           Get started
-        </span>
-        <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
+        </p>
+        <h2 className="mt-3 text-[28px] font-extrabold leading-[1.05] tracking-[-0.025em] sm:text-[36px]">
           {title}
         </h2>
-        <p className="text-[13px] text-primary-300 max-w-xl mx-auto mb-8 leading-relaxed">
+        <p className="mx-auto mt-4 max-w-[480px] text-[13px] leading-relaxed text-white/70">
           {subtitle}
         </p>
 
         <Button
+          type="button"
           onClick={onScrollToForm}
-          className="bg-secondary-500 text-white border-secondary-500 hover:bg-secondary-600 hover:border-secondary-600 hover:text-white px-8"
+          className="mt-6 rounded-full bg-[#ffc400] border-[#ffc400] px-6 text-[#0a0a0a] hover:bg-[#e6ad00] hover:border-[#e6ad00] font-semibold"
         >
           {buttonLabel}
-          <FontAwesomeIcon icon={faArrowRight} className="text-[11px] ml-1" />
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
         </Button>
       </motion.header>
     </motion.article>

@@ -18,10 +18,14 @@ const HeroBusinessStats = ({ isActive, stats }: HeroBusinessStatsProps) => (
         {stats.map((stat) => (
           <li
             key={stat.label}
-            className="text-center p-3 bg-white/95 rounded-lg border border-slate-200 shadow-sm"
+            className="rounded-[10px] border border-[#ececea] bg-white p-3 text-center shadow-[0_1px_2px_rgba(10,10,10,0.04)]"
           >
-            <data className="block text-xl font-bold text-slate-900">{stat.value}</data>
-            <span className="text-xs text-slate-500">{stat.label}</span>
+            <data className="block text-[18px] font-extrabold tracking-[-0.02em] text-[#0a0a0a]">
+              {stat.value}
+            </data>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#6b6f76]">
+              {stat.label}
+            </span>
           </li>
         ))}
       </motion.ul>

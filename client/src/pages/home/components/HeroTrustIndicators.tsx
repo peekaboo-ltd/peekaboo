@@ -37,7 +37,7 @@ const HeroTrustIndicators = ({
         {AVATARS.map((avatar, index) => (
           <span
             key={avatar.initials}
-            className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#0a0a0a] text-[11px] font-bold ${
+            className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-[var(--peekaboo-warm)] text-[11px] font-bold ${
               index === 0 ? '' : '-ml-2.5'
             } ${avatar.className}`}
           >
@@ -45,8 +45,8 @@ const HeroTrustIndicators = ({
           </span>
         ))}
       </figcaption>
-      <address className="not-italic text-[13px] leading-relaxed text-white/70">
-        <span className="block font-semibold text-white">
+      <address className="not-italic text-[13px] leading-relaxed text-[#6b6f76]">
+        <span className="block font-semibold text-[#0a0a0a]">
           {count} {customersLabel}
         </span>
         <span>{trustDailyLabel || growingCommunityLabel}</span>

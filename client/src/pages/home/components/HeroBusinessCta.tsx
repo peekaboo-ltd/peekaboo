@@ -7,6 +7,7 @@ interface HeroBusinessCtaProps {
   tryQuickDeliveryLabel: string;
   onScrollToForm: () => void;
   onContactClick?: () => void;
+  onTrackClick?: () => void;
 }
 
 const HeroBusinessCta = ({
@@ -15,6 +16,7 @@ const HeroBusinessCta = ({
   tryQuickDeliveryLabel,
   onScrollToForm,
   onContactClick,
+  onTrackClick,
 }: HeroBusinessCtaProps) => (
   <nav className="flex flex-wrap gap-3 pt-1">
     <Button
@@ -27,8 +29,8 @@ const HeroBusinessCta = ({
     </Button>
     <Button
       type="button"
-      onClick={isActive ? onContactClick : undefined}
-      className="rounded-full border-white/25 text-white hover:bg-white/[0.06] hover:border-white/25"
+      onClick={isActive ? onContactClick : onTrackClick}
+      className="rounded-full border-[#ececea] bg-white text-[#0a0a0a] hover:bg-[#f7f6f1] hover:border-[#d9d8d4]"
     >
       {isActive ? (
         <>

@@ -29,18 +29,18 @@ const HeroHeadline = ({
       transition={{ duration: 0.22, ease: 'easeOut' }}
       className="space-y-4"
     >
-      <p className="inline-flex w-fit items-center gap-2 rounded-full border border-[#ffc400]/25 bg-[#ffc400]/10 px-3 py-1.5 text-[11px] font-normal tracking-[0.06em] text-[#ffc400]">
+      <p className="inline-flex w-fit items-center gap-2 rounded-full border border-[#ffc400]/35 bg-[#fff4be] px-3 py-1.5 text-[11px] font-semibold tracking-[0.06em] text-[#6b4d00]">
         Fast · Reliable · Local
       </p>
-      <h1 className="max-w-[600px] text-[32px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white sm:text-[42px] lg:text-[52px]">
+      <h1 className="max-w-[600px] text-[32px] font-extrabold leading-[1.02] tracking-[-0.025em] text-[#0a0a0a] sm:text-[42px] lg:text-[52px]">
         {activeTab === 'personal' ? personalTitle1 : businessTitle1}
         <br />
-        <span className="text-[#ffc400] text-[32px] sm:text-[42px] lg:text-[52px]">
+        <span className="text-[#e6ad00] text-[32px] sm:text-[42px] lg:text-[52px]">
           {activeTab === 'personal' ? personalTitle2 : businessTitle2}
         </span>{' '}
         in Kigali.
       </h1>
-      <p className="max-w-[500px] text-[13px] leading-[1.7] text-white/68">
+      <p className="max-w-[500px] text-[13px] leading-[1.7] text-[#6b6f76]">
         {activeTab === 'personal' ? personalSubtitle : businessSubtitle}
       </p>
     </motion.hgroup>
