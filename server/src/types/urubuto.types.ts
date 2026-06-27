@@ -34,6 +34,7 @@ export interface UrubutoConfig {
   webhookUsername: string;
   webhookPassword: string;
   webhookJwtSecret: string;
+  checkoutBaseUrl: string;
 }
 
 export interface UrubutoInitiatePaymentRequest {
@@ -121,6 +122,46 @@ export interface UrubutoPaymentResult {
     message?: string;
     metadata: Record<string, any>;
   };
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+export interface UrubutoVerifyTransactionStatusRequest {
+  merchant_code: string;
+  transaction_id: string;
+}
+
+export interface UrubutoVerifyTransactionStatusData {
+  payment_channel?: UrubutoPaymentChannel | string;
+  payment_channel_name?: string;
+  transaction_status?: UrubutoTransactionStatus | string;
+  internal_transaction_id?: string;
+  transaction_id?: string;
+  merchant_code?: string;
+  service_code?: string;
+  payer_code?: string;
+  amount?: number;
+  payer_names?: string;
+  phone_number?: string;
+  currency?: KpayCurrency | string;
+  payment_date_time?: string;
+  payer_email?: string;
+}
+
+export interface UrubutoVerifyTransactionStatusApiResponse {
+  timestamp?: string;
+  status: number;
+  message?: string;
+  data?: UrubutoVerifyTransactionStatusData;
+}
+
+export interface UrubutoVerifyTransactionStatusResult {
+  success: boolean;
+  timestamp?: string;
+  message?: string;
+  data?: UrubutoVerifyTransactionStatusData;
   error?: {
     code: string;
     message: string;

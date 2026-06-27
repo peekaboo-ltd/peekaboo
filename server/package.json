@@ -11,7 +11,8 @@
     "seed:roles": "ts-node ./src/scripts/seed-roles.ts",
     "seed:business-plans": "ts-node ./src/scripts/seed-business-plans.ts",
     "seed:rider-attendance": "ts-node ./src/scripts/seed-rider-attendance.ts",
-    "seed:rider-problem-reports": "ts-node ./src/scripts/seed-rider-problem-reports.ts"
+    "seed:rider-problem-reports": "ts-node ./src/scripts/seed-rider-problem-reports.ts",
+    "urubuto:smoke-test": "ts-node ./src/scripts/urubuto-smoke-test.ts"
   },
   "keywords": [
     "peekaboo"

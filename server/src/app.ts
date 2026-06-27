@@ -9,6 +9,21 @@ import routes from './routes';
 import logger from './helpers/logger.helper';
 import { configureGoogleAuth } from './config/passport.config';
 import { auditContextMiddleware } from './middlewares/auditContext.middleware';
+import {
+  buildUrubutoConfig,
+  validateUrubutoStartupConfig,
+} from './integrations/urubuto/urubuto.config';
+
+const urubutoConfigIssues = validateUrubutoStartupConfig(buildUrubutoConfig());
+if (urubutoConfigIssues.length) {
+  urubutoConfigIssues.forEach((issue) => logger.warning(`[UrubutoPay] ${issue}`));
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      `UrubutoPay configuration invalid: ${urubutoConfigIssues.join('; ')}`,
+    );
+  }
+}
 
 // CREATE EXPRESS APP
 const app: Application = express();

@@ -112,10 +112,7 @@ export class PaymentService {
         description: payment.description,
       });
     } else if (newPayment) {
-      const order = await AppDataSource.getRepository(Order).findOne({
-        where: { id: payment.entityId },
-      });
-      const payerCode = order?.referenceId || payment.entityId;
+      const payerCode = await this.resolveUrubutoPayerCode(payment.entityId);
 
       result = await this.urubutoService.initiatePayment({
         amount: payment.amount,
@@ -158,13 +155,20 @@ export class PaymentService {
     }
 
     if (result && !result.success) {
+      newPayment.status = KpayPaymentStatus.FAILED;
       newPayment.metadata = {
         ...(newPayment.metadata || {}),
         initiationError: result.error,
       };
       await this.paymentRepository.update(newPayment.id, {
+        status: newPayment.status,
         metadata: newPayment.metadata,
       });
+
+      throw new ValidationError(
+        result.error?.message ||
+          'UrubutoPay payment could not be initiated. Please try again.',
+      );
     }
 
     // Send payment initiated email (non-blocking)
@@ -442,6 +446,35 @@ export class PaymentService {
     }
 
     return false;
+  }
+
+  async verifyUrubutoTransactionStatus(transactionId: string) {
+    return this.urubutoService.verifyTransactionStatus(transactionId);
+  }
+
+  private async resolveUrubutoPayerCode(entityId: UUID): Promise<string> {
+    const order = await AppDataSource.getRepository(Order).findOne({
+      where: { id: entityId },
+    });
+
+    if (!order) {
+      throw new NotFoundError('Order not found for UrubutoPay payment', {
+        referenceId: entityId,
+        referenceType: LogReferenceTypes.ORDER,
+      });
+    }
+
+    if (!order.referenceId) {
+      throw new ValidationError(
+        'Order is missing a reference ID required for UrubutoPay payment',
+        {
+          referenceId: entityId,
+          referenceType: LogReferenceTypes.ORDER,
+        },
+      );
+    }
+
+    return order.referenceId;
   }
 
   private resolvePaymentProvider(provider?: PaymentProvider): PaymentProvider {

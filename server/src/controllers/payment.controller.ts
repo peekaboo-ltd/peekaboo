@@ -37,6 +37,7 @@ export const PaymentController = {
           paymentUrl:
             result.paymentUrl ||
             result.metadata?.paymentUrl ||
+            result.metadata?.hostedCheckoutUrl ||
             result.metadata?.cardProcessingUrl ||
             result.externalReferenceId,
         });
@@ -86,6 +87,7 @@ export const PaymentController = {
           paymentUrl:
             result.paymentUrl ||
             result.metadata?.paymentUrl ||
+            result.metadata?.hostedCheckoutUrl ||
             result.metadata?.cardProcessingUrl ||
             result.externalReferenceId,
         });

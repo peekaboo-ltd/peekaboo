@@ -10,26 +10,51 @@ import {
   UrubutoInitiatePaymentResponse,
   UrubutoPaymentResult,
   UrubutoTransactionStatus,
+  UrubutoVerifyTransactionStatusApiResponse,
+  UrubutoVerifyTransactionStatusResult,
   UrubutoWebhookAuthRequest,
 } from '../../types/urubuto.types';
+import { buildUrubutoConfig } from './urubuto.config';
+import logger from '../../helpers/logger.helper';
+
+export function mapUrubutoInitiateErrorMessage(rawMessage?: string): string {
+  const message = rawMessage || 'UrubutoPay payment initiation failed.';
+  const lower = message.toLowerCase();
+
+  if (
+    lower.includes('merchant') &&
+    (lower.includes('invalid') ||
+      lower.includes('not found') ||
+      lower.includes('no active'))
+  ) {
+    return `${message} Verify URUBUTO_MERCHANT_CODE matches your active UrubutoPay merchant account and environment (staging vs production).`;
+  }
+
+  if (
+    lower.includes('payer code') ||
+    lower.includes('payer_code') ||
+    (lower.includes('invalid') && lower.includes('payer'))
+  ) {
+    return `${message} Ensure the order reference ID is used as payer_code and the payer validation webhook is registered and reachable.`;
+  }
+
+  if (lower.includes('service')) {
+    return `${message} Verify URUBUTO_SERVICE_CODE is registered and linked to your merchant in UrubutoPay.`;
+  }
+
+  if (lower.includes('redirection url')) {
+    return `${message} CARD payments require a valid redirection_url.`;
+  }
+
+  return message;
+}
 
 export class UrubutoService {
   private readonly client: AxiosInstance;
   private readonly config: UrubutoConfig;
 
-  constructor() {
-    this.config = {
-      baseUrl: process.env.URUBUTO_BASE_URL || 'https://staging.urubutopay.rw',
-      apiKey: process.env.URUBUTO_API_KEY || '',
-      merchantCode: process.env.URUBUTO_MERCHANT_CODE || '',
-      serviceCode: process.env.URUBUTO_SERVICE_CODE || '',
-      webhookUsername: process.env.URUBUTO_WEBHOOK_USERNAME || '',
-      webhookPassword: process.env.URUBUTO_WEBHOOK_PASSWORD || '',
-      webhookJwtSecret:
-        process.env.URUBUTO_WEBHOOK_JWT_SECRET ||
-        process.env.JWT_SECRET ||
-        'peekaboo',
-    };
+  constructor(config: UrubutoConfig = buildUrubutoConfig()) {
+    this.config = config;
 
     this.client = axios.create({
       baseURL: this.config.baseUrl,
@@ -41,12 +66,23 @@ export class UrubutoService {
     });
   }
 
+  public getConfig(): Readonly<UrubutoConfig> {
+    return this.config;
+  }
+
   public getMerchantCode(): string {
     return this.config.merchantCode;
   }
 
   public getServiceCode(): string {
     return this.config.serviceCode;
+  }
+
+  public getHostedCheckoutUrl(payerCode: string): string {
+    const merchantCode = encodeURIComponent(this.config.merchantCode);
+    const encodedPayerCode = encodeURIComponent(payerCode);
+
+    return `${this.config.checkoutBaseUrl}/pay-now/initiate/?mhcd=${merchantCode}&pycd=${encodedPayerCode}`;
   }
 
   public timestamp(): string {
@@ -124,6 +160,70 @@ export class UrubutoService {
     return UrubutoChannelName.MOMO;
   }
 
+  async verifyTransactionStatus(
+    transactionId: string,
+  ): Promise<UrubutoVerifyTransactionStatusResult> {
+    if (
+      !this.config.apiKey ||
+      !this.config.merchantCode ||
+      !transactionId
+    ) {
+      return {
+        success: false,
+        error: {
+          code: 'CONFIGURATION_ERROR',
+          message: 'UrubutoPay configuration or transaction ID is incomplete.',
+        },
+      };
+    }
+
+    try {
+      const response =
+        await this.client.post<UrubutoVerifyTransactionStatusApiResponse>(
+          '/api/v2/payment/transaction/status',
+          {
+            merchant_code: this.config.merchantCode,
+            transaction_id: transactionId,
+          },
+        );
+
+      const isSuccess =
+        response.data.status === 200 || response.status === 200;
+
+      return {
+        success: isSuccess,
+        data: response.data.data,
+        message: response.data.message,
+        timestamp: response.data.timestamp,
+        error: isSuccess
+          ? undefined
+          : {
+              code: String(response.data.status || response.status),
+              message:
+                response.data.message ||
+                'UrubutoPay transaction status lookup failed.',
+            },
+      };
+    } catch (error: any) {
+      logger.error('UrubutoPay transaction status error', {
+        transactionId,
+        merchantCode: this.config.merchantCode,
+        response: error.response?.data,
+        message: error.message,
+      });
+
+      return {
+        success: false,
+        error: {
+          code: error.response?.status?.toString() || 'URUBUTO_ERROR',
+          message: mapUrubutoInitiateErrorMessage(
+            error.response?.data?.message || error.message,
+          ),
+        },
+      };
+    }
+  }
+
   async initiatePayment(request: {
     amount: number;
     currency: KpayCurrency;
@@ -135,6 +235,17 @@ export class UrubutoService {
     channelName?: string;
     redirectUrl?: string;
   }): Promise<UrubutoPaymentResult> {
+    const channelName = this.normalizeChannelName(request.channelName);
+
+    const logContext = {
+      merchant_code: this.config.merchantCode,
+      service_code: this.config.serviceCode,
+      payer_code: request.payerCode,
+      channel_name: channelName,
+      amount: request.amount,
+      transaction_id: request.refId,
+    };
+
     try {
       if (
         !this.config.apiKey ||
@@ -145,12 +256,12 @@ export class UrubutoService {
           success: false,
           error: {
             code: 'CONFIGURATION_ERROR',
-            message: 'UrubutoPay configuration is incomplete.',
+            message:
+              'UrubutoPay configuration is incomplete. Check URUBUTO_API_KEY, URUBUTO_MERCHANT_CODE, and URUBUTO_SERVICE_CODE.',
           },
         };
       }
 
-      const channelName = this.normalizeChannelName(request.channelName);
       const payload: UrubutoInitiatePaymentRequest = {
         amount: request.amount,
         channel_name: channelName,
@@ -175,12 +286,37 @@ export class UrubutoService {
       const status = this.mapStatusToInternal(data?.transaction_status);
       const urubutoReference =
         data?.internal_transaction_ref_number || request.refId;
+      const cardProcessingUrl = response.data.card_processing_url;
+      const hostedCheckoutUrl =
+        channelName !== UrubutoChannelName.CARD
+          ? this.getHostedCheckoutUrl(request.payerCode)
+          : undefined;
+      const paymentUrl = cardProcessingUrl || hostedCheckoutUrl;
+      const apiSuccess =
+        response.data.status === 200 || response.status === 200;
+
+      if (!apiSuccess) {
+        const message = mapUrubutoInitiateErrorMessage(response.data.message);
+        logger.error('UrubutoPay payment initiation rejected', {
+          ...logContext,
+          urubutoStatus: response.data.status,
+          message: response.data.message,
+        });
+
+        return {
+          success: false,
+          error: {
+            code: String(response.data.status || response.status),
+            message,
+          },
+        };
+      }
 
       return {
-        success: response.data.status === 200 || response.status === 200,
+        success: true,
         data: {
           transactionId: urubutoReference,
-          paymentUrl: response.data.card_processing_url,
+          paymentUrl,
           reference: data?.external_transaction_ref_number || request.refId,
           amount: request.amount,
           currency: data?.currency || request.currency || KpayCurrency.RWF,
@@ -190,29 +326,35 @@ export class UrubutoService {
             provider: 'URUBUTO',
             payerCode: request.payerCode,
             serviceCode: this.config.serviceCode,
+            merchantCode: this.config.merchantCode,
             channelName,
             urubutoInternalTransactionRef:
               data?.internal_transaction_ref_number,
-            cardProcessingUrl: response.data.card_processing_url,
+            cardProcessingUrl,
+            hostedCheckoutUrl,
             urlValidity: response.data.url_validity,
             initiationResponse: response.data,
           },
         },
       };
     } catch (error: any) {
-      console.error(
-        'UrubutoPay payment initiation error:',
-        error.response?.data || error.message,
-      );
+      const rawMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'UrubutoPay payment initiation failed.';
+
+      logger.error('UrubutoPay payment initiation error', {
+        ...logContext,
+        httpStatus: error.response?.status,
+        urubutoResponse: error.response?.data,
+        message: rawMessage,
+      });
 
       return {
         success: false,
         error: {
           code: error.response?.status?.toString() || 'URUBUTO_ERROR',
-          message:
-            error.response?.data?.message ||
-            error.message ||
-            'UrubutoPay payment initiation failed.',
+          message: mapUrubutoInitiateErrorMessage(rawMessage),
         },
       };
     }
