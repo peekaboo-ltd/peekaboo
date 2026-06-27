@@ -5,46 +5,46 @@ const services = [
   {
     title: 'Same-day in Kigali',
     blurb:
-      'Door-to-door across all 30 sectors, picked up within 15 minutes and dropped before sundown.',
+      'Door-to-door across all 30 sectors of Kigali, picked up fast and dropped the same day.',
     tone: 'black',
+    tag: 'Featured',
     featured: true,
   },
   {
     title: 'Business & e-commerce',
     blurb: 'API + dashboard, batch uploads, weekly invoices.',
     tone: 'yellow',
-  },
-  {
-    title: 'Province delivery',
-    blurb: 'Next-day to Musanze, Huye, Rubavu, Nyagatare.',
-    tone: 'white',
+    tag: 'Business',
   },
   {
     title: 'Document delivery',
     blurb: 'Signed paperwork, contracts, ID cards. Tamper-evident sleeves.',
     tone: 'white',
+    tag: 'Service',
   },
   {
     title: 'Food & small parcels',
     blurb: 'Insulated bags, careful handling, restaurant integrations.',
     tone: 'white',
+    tag: 'Service',
   },
   {
     title: 'Scheduled bulk runs',
     blurb: 'Plan your week. We dispatch riders to your door at fixed slots.',
     tone: 'white',
+    tag: 'Service',
   },
 ];
 
 const toneClasses = {
   black: {
     card: 'border-transparent bg-[#0a0a0a] text-white',
-    chip: 'bg-[#ffc400] text-[#0a0a0a]',
+    chip: 'bg-[#edb100] text-[#0a0a0a]',
     body: 'text-white/65',
     arrow: 'bg-white/[0.06] text-white',
   },
   yellow: {
-    card: 'border-transparent bg-[#ffc400] text-[#0a0a0a]',
+    card: 'border-transparent bg-[#edb100] text-[#0a0a0a]',
     chip: 'bg-[#0a0a0a] text-white',
     body: 'text-black/60',
     arrow: 'bg-[#0a0a0a] text-white',
@@ -58,7 +58,7 @@ const toneClasses = {
 } as const;
 
 const ServicesSection = () => (
-  <section id="services" className="w-full border-t border-[#ececea] bg-white py-10 lg:py-14">
+  <section id="services" className="w-full border-t border-[#ececea] bg-white py-12 lg:py-16">
     <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
       <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <hgroup className="max-w-[660px]">
@@ -92,11 +92,7 @@ const ServicesSection = () => (
                     <span
                       className={`inline-flex h-[22px] items-center rounded-full px-2.5 text-[11px] font-bold ${tone.chip}`}
                     >
-                      {service.tone === 'yellow'
-                        ? '01'
-                        : service.featured
-                          ? 'Featured'
-                          : 'Service'}
+                      {service.tag}
                     </span>
                     <span
                       className={`flex h-8 w-8 items-center justify-center rounded-full ${tone.arrow}`}
@@ -119,11 +115,11 @@ const ServicesSection = () => (
                 {service.featured && (
                   <footer className="mt-6 flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <p className="text-[24px] font-extrabold tracking-[-0.02em]">
-                        Avg 26 min
+                      <p className="text-[15px] font-bold tracking-[-0.01em]">
+                        Live tracking, end to end
                       </p>
                       <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/60">
-                        city-wide drop-off
+                        pickup to drop-off
                       </p>
                     </div>
                     <RoutePreviewMap dark className="h-[72px] w-full sm:w-[160px]" />

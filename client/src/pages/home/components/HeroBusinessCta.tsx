@@ -22,7 +22,7 @@ const HeroBusinessCta = ({
     <Button
       type="button"
       onClick={onScrollToForm}
-      className="rounded-full bg-[#ffc400] border-[#ffc400] text-[#0a0a0a] hover:bg-[#e6ad00] hover:border-[#e6ad00] font-semibold shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)]"
+      className="rounded-full bg-[#edb100] border-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00] hover:border-[#d49e00] font-semibold shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)]"
     >
       <PackagePlus className="h-3.5 w-3.5" aria-hidden="true" />
       {isActive ? tryQuickDeliveryLabel : 'Book delivery'}

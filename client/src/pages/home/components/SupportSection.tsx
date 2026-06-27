@@ -27,7 +27,7 @@ const helpLinks = [
 ];
 
 const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
-  <section id="support" className="w-full border-t border-[#ececea] bg-[var(--peekaboo-warm)] py-10 lg:py-14">
+  <section id="support" className="w-full border-t border-[#ececea] bg-[var(--peekaboo-warm)] py-12 lg:py-16">
     <article className="mx-auto grid max-w-[1280px] grid-cols-1 gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.4fr] lg:gap-12 lg:px-10">
       <header>
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76]">
@@ -138,7 +138,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
           <Button
             type="button"
             onClick={onContactClick}
-            className="shrink-0 rounded-full bg-[#ffc400] border-[#ffc400] text-[#0a0a0a] hover:bg-[#e6ad00] hover:border-[#e6ad00] font-semibold"
+            className="shrink-0 rounded-full bg-[#edb100] border-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00] hover:border-[#d49e00] font-semibold"
           >
             Contact support
           </Button>

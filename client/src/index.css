@@ -90,12 +90,12 @@ h2 {
   --popover-foreground: oklch(0.145 0 0);
   --primary: #0a0a0a;
   --primary-foreground: #ffffff;
-  --secondary: #ffc400;
+  --secondary: #edb100;
   --secondary-foreground: #0a0a0a;
 
   /* Peekaboo brand tokens */
-  --peekaboo-yellow: #ffc400;
-  --peekaboo-yellow-dark: #e6ad00;
+  --peekaboo-yellow: #edb100;
+  --peekaboo-yellow-dark: #d49e00;
   --peekaboo-black: #050505;
   --peekaboo-dark: #0a0a0a;
   --peekaboo-gray: #f5f5f5;

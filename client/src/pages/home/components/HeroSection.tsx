@@ -14,14 +14,12 @@ import HeroTrustIndicators from './HeroTrustIndicators';
 import HeroBusinessCta from './HeroBusinessCta';
 import HeroForm from './HeroForm';
 import HeroScrollIndicator from './HeroScrollIndicator';
-import HeroBusinessStats from './HeroBusinessStats';
 
 interface HeroSectionProps {
   formRef: RefObject<HTMLFormElement | null>;
   onScrollToForm: () => void;
   landingStats?: LandingStats;
   heroCopy: HeroCopy;
-  businessStats: { value: string; label: string }[];
   onContactClick?: () => void;
   onTrackClick?: () => void;
 }
@@ -31,7 +29,6 @@ const HeroSection = ({
   onScrollToForm,
   landingStats,
   heroCopy,
-  businessStats,
   onContactClick,
   onTrackClick,
 }: HeroSectionProps) => {
@@ -106,13 +103,11 @@ const HeroSection = ({
               onTrackClick={onTrackClick}
             />
 
-            <HeroBusinessStats isActive={activeTab === 'business'} stats={businessStats} />
-
             <HeroTrustIndicators
               landingStats={landingStats}
-              customersLabel={heroCopy.customersLabel}
-              trustDailyLabel={heroCopy.trustDailyLabel}
-              growingCommunityLabel={heroCopy.growingCommunityLabel}
+              activeCustomersLabel={heroCopy.activeCustomersLabel}
+              completedOrdersLabel={heroCopy.completedOrdersLabel}
+              fallbackLabel={heroCopy.growingCommunityLabel}
             />
           </motion.header>
 

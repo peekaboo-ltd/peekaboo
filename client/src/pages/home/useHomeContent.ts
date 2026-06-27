@@ -12,14 +12,14 @@ import {
   PackageCheck,
   PackagePlus,
   Phone,
+  Route,
   ScanLine,
   ShieldCheck,
-  Truck,
   Upload,
   type LucideIcon,
 } from 'lucide-react';
 import { useI18n } from '@/i18n/i18n';
-import type { HeroBusinessStat, HeroCopy, HowItWorksStep, Testimonial } from './home.types';
+import type { HeroCopy, HowItWorksStep, Testimonial } from './home.types';
 
 interface IconCard {
   icon: LucideIcon;
@@ -42,7 +42,6 @@ interface HomeContent {
   howItWorks: HowItWorksStep[];
   whyItems: IconCard[];
   businessFeatures: IconCard[];
-  businessStats: HeroBusinessStat[];
   testimonials: Testimonial[];
   trustedByLabel: string;
   trustedByIndustries: string[];
@@ -58,7 +57,7 @@ export const useHomeContent = (): HomeContent => {
     personalTitle1: 'Send anything,',
     personalTitle2: 'anywhere',
     personalSubtitle:
-      'Peekaboo connects senders to verified riders for same-day delivery across the city and beyond. Book in under a minute, track every step, pay when it arrives.',
+      'Peekaboo connects senders to verified riders for same-day delivery across Kigali. Book in under a minute, track every step, pay when it arrives.',
     businessTitle1: 'Move every order,',
     businessTitle2: 'smarter',
     businessSubtitle:
@@ -76,9 +75,9 @@ export const useHomeContent = (): HomeContent => {
     trackHereLabel: t('home.hero.trackHere'),
     verifiedRidersLabel: t('home.hero.verifiedRiders'),
     realtimeTrackingLabel: t('home.hero.realtimeTracking'),
-    customersLabel: 'people sent today',
-    trustDailyLabel: '★★★★★ 4.9 across 1,200+ reviews',
-    growingCommunityLabel: 'Growing in Kigali',
+    activeCustomersLabel: t('home.stats.activeCustomers').toLowerCase(),
+    completedOrdersLabel: t('home.stats.customersWithOrders').toLowerCase(),
+    growingCommunityLabel: 'Trusted by senders across Kigali',
     businessAccountCta: t('home.b2b.cta.contact'),
   };
 
@@ -158,9 +157,9 @@ export const useHomeContent = (): HomeContent => {
       description: 'WhatsApp, phone, or web chat answered by a Kigali team in under 90s.',
     },
     {
-      icon: Truck,
-      title: 'Beyond Kigali',
-      description: 'Province network covering Musanze, Huye, Rubavu, Nyagatare and more.',
+      icon: Route,
+      title: 'Smart routing',
+      description: 'Riders are matched and routed across Kigali to keep every drop on time.',
     },
   ];
 
@@ -185,12 +184,6 @@ export const useHomeContent = (): HomeContent => {
       title: 'Dedicated support',
       description: 'An ops lead on WhatsApp, plus uptime support for engineering teams.',
     },
-  ];
-
-  const businessStats: HeroBusinessStat[] = [
-    { value: '184K', label: t('home.b2b.stats.packages') },
-    { value: '320+', label: t('home.b2b.stats.partners') },
-    { value: '99.2%', label: t('home.b2b.stats.success') },
   ];
 
   const testimonials: Testimonial[] = [
@@ -245,7 +238,6 @@ export const useHomeContent = (): HomeContent => {
     howItWorks,
     whyItems,
     businessFeatures,
-    businessStats,
     testimonials,
     trustedByLabel: t('home.b2b.trustedBy'),
     trustedByIndustries: [

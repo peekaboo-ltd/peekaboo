@@ -62,14 +62,14 @@ const RoutePreviewMap = ({ className = '', dark = false }: RoutePreviewMapProps)
     <path
       d="M 24 48 C 48 44, 72 28, 108 22 C 124 20, 136 26, 140 34"
       fill="none"
-      stroke="#ffc400"
+      stroke="#edb100"
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeDasharray="4 3"
     />
 
     {/* Pickup */}
-    <circle cx="24" cy="48" r="5" fill={dark ? '#0a0a0a' : '#fff'} stroke="#ffc400" strokeWidth="2" />
+    <circle cx="24" cy="48" r="5" fill={dark ? '#0a0a0a' : '#fff'} stroke="#edb100" strokeWidth="2" />
     <text
       x="24"
       y="62"
@@ -83,7 +83,7 @@ const RoutePreviewMap = ({ className = '', dark = false }: RoutePreviewMapProps)
     </text>
 
     {/* Drop-off */}
-    <circle cx="140" cy="34" r="5" fill="#ffc400" stroke={dark ? '#0a0a0a' : '#fff'} strokeWidth="1.5" />
+    <circle cx="140" cy="34" r="5" fill="#edb100" stroke={dark ? '#0a0a0a' : '#fff'} strokeWidth="1.5" />
     <text
       x="140"
       y="62"

@@ -26,7 +26,7 @@ const HeroTabs = ({
       aria-selected={activeTab === 'personal'}
       className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-1.5 transition ${
         activeTab === 'personal'
-          ? 'bg-[#ffc400] text-[#0a0a0a]'
+          ? 'bg-[#edb100] text-[#0a0a0a]'
           : 'text-[#6b6f76] hover:bg-[#f7f6f1] hover:text-[#0a0a0a]'
       }`}
     >
@@ -40,7 +40,7 @@ const HeroTabs = ({
       aria-selected={activeTab === 'business'}
       className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-1.5 transition ${
         activeTab === 'business'
-          ? 'bg-[#ffc400] text-[#0a0a0a]'
+          ? 'bg-[#edb100] text-[#0a0a0a]'
           : 'text-[#6b6f76] hover:bg-[#f7f6f1] hover:text-[#0a0a0a]'
       }`}
     >

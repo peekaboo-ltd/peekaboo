@@ -34,7 +34,7 @@ const TestimonialsSection = ({
   const current = testimonials[activeTestimonial];
 
   return (
-    <section className="w-full border-t border-[#ececea] bg-[var(--peekaboo-warm)] py-10 lg:py-14">
+    <section className="w-full border-t border-[#ececea] bg-[var(--peekaboo-warm)] py-12 lg:py-16">
       <motion.article
         className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10"
         initial="hidden"
@@ -73,7 +73,7 @@ const TestimonialsSection = ({
                 </p>
 
                 <figcaption className="mt-6 flex items-center gap-4">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0a0a0a] text-[15px] font-bold text-[#ffc400]">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0a0a0a] text-[15px] font-bold text-[#edb100]">
                     {current.name.charAt(0)}
                   </span>
                   <cite className="not-italic">
@@ -104,7 +104,7 @@ const TestimonialsSection = ({
                   onClick={() => setActiveTestimonial(index)}
                   className={`h-2 rounded-full transition-[width,background-color] duration-300 ${
                     index === activeTestimonial
-                      ? 'w-8 bg-[#ffc400]'
+                      ? 'w-8 bg-[#edb100]'
                       : 'w-2 bg-[#ececea] hover:bg-[#d9d8d4]'
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}

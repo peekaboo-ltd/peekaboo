@@ -171,7 +171,7 @@ const Statistics = () => {
       >
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400]">
+            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100]">
               Deliveries today
             </figcaption>
             <p className="text-[40px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white tabular-nums">
@@ -179,7 +179,7 @@ const Statistics = () => {
             </p>
           </figure>
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400]">
+            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100]">
               Active riders
             </figcaption>
             <p className="text-[40px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white tabular-nums">
@@ -187,7 +187,7 @@ const Statistics = () => {
             </p>
           </figure>
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400]">
+            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100]">
               Businesses served
             </figcaption>
             <p className="text-[40px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white tabular-nums">
@@ -222,7 +222,7 @@ const About = () => {
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
           <motion.p
             variants={itemVariants}
-            className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400] mb-4"
+            className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100] mb-4"
           >
             About Peekaboo
           </motion.p>
@@ -232,7 +232,7 @@ const About = () => {
           >
             We move what matters
             <br />
-            <span className="text-[#ffc400]">across Kigali.</span>
+            <span className="text-[#edb100]">across Kigali.</span>
           </motion.h1>
           <motion.p
             variants={itemVariants}
@@ -269,7 +269,7 @@ const About = () => {
                   and a shared phone has grown into a technology-driven delivery platform
                   trusted by thousands.
                 </p>
-                <blockquote className="border-l-2 border-[#ffc400] pl-5 italic text-[#1f1f1f] my-6 text-[13px]">
+                <blockquote className="border-l-2 border-[#edb100] pl-5 italic text-[#1f1f1f] my-6 text-[13px]">
                   "We believe every delivery is a promise — and we take promises seriously."
                 </blockquote>
                 <p>
@@ -290,7 +290,7 @@ const About = () => {
                 <ol className="space-y-10">
                   {milestones.map((m) => (
                     <li key={m.year} className="relative">
-                      <mark className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-[#ffc400] ring-4 ring-[#f7f6f1] bg-clip-padding" />
+                      <mark className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-[#edb100] ring-4 ring-[#f7f6f1] bg-clip-padding" />
                       <time className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6b6f76] mb-1 block">
                         {m.year}
                       </time>
@@ -320,7 +320,7 @@ const About = () => {
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
           <motion.p
             variants={fadeInUp}
-            className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffc400] mb-10 text-center"
+            className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100] mb-10 text-center"
           >
             What drives us
           </motion.p>
@@ -329,10 +329,10 @@ const About = () => {
               variants={scaleIn}
               className="rounded-[18px] border border-white/10 bg-white/[0.03] p-6 lg:p-8"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#ffc400] text-[#0a0a0a] mb-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
                 <Target className="h-4 w-4" aria-hidden="true" />
               </span>
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#ffc400] mb-3">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#edb100] mb-3">
                 Mission
               </h3>
               <p className="text-[18px] font-bold leading-[1.2] tracking-[-0.01em] text-white italic sm:text-[20px]">
@@ -344,10 +344,10 @@ const About = () => {
               variants={scaleIn}
               className="rounded-[18px] border border-white/10 bg-white/[0.03] p-6 lg:p-8"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#ffc400] text-[#0a0a0a] mb-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
                 <Lightbulb className="h-4 w-4" aria-hidden="true" />
               </span>
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#ffc400] mb-3">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#edb100] mb-3">
                 Vision
               </h3>
               <p className="text-[18px] font-bold leading-[1.2] tracking-[-0.01em] text-white italic sm:text-[20px]">
@@ -427,7 +427,7 @@ const About = () => {
           <motion.nav variants={scaleIn}>
             <Link
               to="/"
-              className="inline-flex items-center gap-2 rounded-full bg-[#ffc400] px-6 py-2.5 text-[13px] font-semibold text-[#0a0a0a] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] transition hover:bg-[#e6ad00]"
+              className="inline-flex items-center gap-2 rounded-full bg-[#edb100] px-6 py-2.5 text-[13px] font-semibold text-[#0a0a0a] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] transition hover:bg-[#d49e00]"
             >
               Get Started
             </Link>

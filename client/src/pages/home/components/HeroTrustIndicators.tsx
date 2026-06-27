@@ -4,36 +4,41 @@ import { itemVariants } from '../home.animations';
 
 interface HeroTrustIndicatorsProps {
   landingStats?: LandingStats;
-  customersLabel: string;
-  trustDailyLabel: string;
-  growingCommunityLabel: string;
+  activeCustomersLabel: string;
+  completedOrdersLabel: string;
+  fallbackLabel: string;
 }
 
 const AVATARS = [
-  { initials: 'JM', className: 'bg-[#ffc400] text-[#0a0a0a]' },
+  { initials: 'JM', className: 'bg-[#edb100] text-[#0a0a0a]' },
   { initials: 'AK', className: 'bg-[#0a0a0a] text-white' },
   { initials: 'MP', className: 'bg-[#fff4be] text-[#0a0a0a]' },
   { initials: 'CN', className: 'bg-[#3a3a3a] text-white' },
-  { initials: '+8', className: 'bg-[#ffc400] text-[#0a0a0a]' },
 ];
 
 const HeroTrustIndicators = ({
   landingStats,
-  customersLabel,
-  trustDailyLabel,
-  growingCommunityLabel,
+  activeCustomersLabel,
+  completedOrdersLabel,
+  fallbackLabel,
 }: HeroTrustIndicatorsProps) => {
-  const count =
+  const activeCustomers =
     typeof landingStats?.activeCustomers === 'number'
-      ? landingStats.activeCustomers.toLocaleString()
-      : '2,840';
+      ? landingStats.activeCustomers
+      : undefined;
+  const completedOrders =
+    typeof landingStats?.customersWithOrders === 'number'
+      ? landingStats.customersWithOrders
+      : undefined;
+
+  const hasStats = activeCustomers !== undefined || completedOrders !== undefined;
 
   return (
     <motion.figure
       className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center"
       variants={itemVariants}
     >
-      <figcaption className="flex" aria-label="Recent sender initials">
+      <figcaption className="flex" aria-label="Peekaboo senders">
         {AVATARS.map((avatar, index) => (
           <span
             key={avatar.initials}
@@ -46,10 +51,22 @@ const HeroTrustIndicators = ({
         ))}
       </figcaption>
       <address className="not-italic text-[13px] leading-relaxed text-[#6b6f76]">
-        <span className="block font-semibold text-[#0a0a0a]">
-          {count} {customersLabel}
-        </span>
-        <span>{trustDailyLabel || growingCommunityLabel}</span>
+        {hasStats ? (
+          <>
+            {activeCustomers !== undefined && (
+              <span className="block font-semibold text-[#0a0a0a]">
+                {activeCustomers.toLocaleString()} {activeCustomersLabel}
+              </span>
+            )}
+            {completedOrders !== undefined && (
+              <span>
+                {completedOrders.toLocaleString()} {completedOrdersLabel}
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="block font-semibold text-[#0a0a0a]">{fallbackLabel}</span>
+        )}
       </address>
     </motion.figure>
   );

@@ -104,7 +104,7 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
           >
             <motion.div
               style={{ height: reducedMotion ? '100%' : fillHeight }}
-              className="absolute left-0 top-0 w-px origin-top bg-[#e6ad00]"
+              className="absolute left-0 top-0 w-px origin-top bg-[#d49e00]"
             />
             {steps.map((step, index) => {
               const isActive = index === activeIndex;
@@ -150,7 +150,7 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
                       <span
                         className={`hidden h-14 w-14 shrink-0 items-center justify-center rounded-[18px] border bg-white sm:flex lg:h-16 lg:w-16 ${
                           isActive
-                            ? 'border-[#ffc400] shadow-[0_0_0_2px_rgba(255,196,0,0.2)]'
+                            ? 'border-[#edb100] shadow-[0_0_0_2px_rgba(255,196,0,0.2)]'
                             : 'border-[#ececea]'
                         } transition-shadow duration-500`}
                       >

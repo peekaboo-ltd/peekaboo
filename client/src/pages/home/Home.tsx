@@ -12,7 +12,6 @@ import FeaturesSection from './components/FeaturesSection';
 import ServicesSection from './components/ServicesSection';
 import HowItWorksSection from './components/HowItWorksSection';
 import WhyPeekabooSection from './components/WhyPeekabooSection';
-import CoverageSection from './components/CoverageSection';
 import TestimonialsSection from './components/TestimonialsSection';
 import BusinessSolutionsSection from './components/BusinessSolutionsSection';
 import BusinessPlansSection from './components/BusinessPlansSection';
@@ -32,7 +31,6 @@ const Home = () => {
     howItWorks,
     whyItems,
     businessFeatures,
-    businessStats,
     testimonials,
     trustedByLabel,
     trustedByIndustries,
@@ -74,13 +72,12 @@ const Home = () => {
   ];
 
   return (
-    <main className="home-page relative min-h-screen w-full overflow-x-hidden bg-[var(--peekaboo-warm)]">
+    <main className="home-page relative min-h-screen w-full overflow-x-clip bg-[var(--peekaboo-warm)]">
       <HeroSection
         formRef={formRef}
         onScrollToForm={scrollToForm}
         landingStats={landingStats}
         heroCopy={heroCopy}
-        businessStats={businessStats}
         onContactClick={handleContactNavigation}
         onTrackClick={handleTrackNavigation}
       />
@@ -99,9 +96,12 @@ const Home = () => {
 
       <HowItWorksSection steps={howItWorks} onScrollToForm={scrollToForm} />
 
-      <WhyPeekabooSection items={whyItems} />
-
-      <CoverageSection />
+      <WhyPeekabooSection
+        items={whyItems}
+        landingStats={landingStats}
+        activeCustomersLabel={t('home.stats.activeCustomers')}
+        completedOrdersLabel={t('home.stats.customersWithOrders')}
+      />
 
       <TestimonialsSection
         badgeLabel={t('home.testimonials.title')}

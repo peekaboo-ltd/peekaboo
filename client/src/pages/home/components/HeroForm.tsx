@@ -219,29 +219,15 @@ const HeroForm = ({
           </div>
         </fieldset>
 
-        <section className="mt-5 flex items-baseline justify-between gap-4 border-t border-[#ececea] pt-4">
-          <div className="flex items-baseline gap-3">
-            <p className="text-[12px]">
-              Estimate
-            </p>
-            <span className="text-[14px] font-medium tracking-[-0.02em] text-[#0a0a0a]">
-              RWF 2,400
-            </span>
-          </div>
-          <p className="text-right text-[11px] leading-tight text-[#6b6f76]">
-            <span className="font-semibold text-[#0a0a0a]">~24 min</span> to drop
-            <span className="mx-1.5 text-[#d9d8d4]" aria-hidden="true">
-              ·
-            </span>
-            3 riders nearby
-          </p>
-        </section>
+        <p className="mt-5 border-t border-[#ececea] pt-4 text-[12px] leading-relaxed text-[#6b6f76]">
+          We confirm the price and ETA as soon as a rider is matched.
+        </p>
 
         <Button
           submit
           isLoading={isLoading}
           disabled={isLoading}
-          className="mt-5 h-10 w-full rounded-md border-[#ffc400] bg-[#ffc400] text-[13px] font-semibold text-[#0a0a0a] shadow-none hover:border-[#e6ad00] hover:bg-[#e6ad00]"
+          className="mt-5 h-10 w-full rounded-md border-[#edb100] bg-[#edb100] text-[13px] font-semibold text-[#0a0a0a] shadow-none hover:border-[#d49e00] hover:bg-[#d49e00]"
         >
           {isLoading ? 'Booking...' : copy.continueLabel}
           <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" aria-hidden="true" />

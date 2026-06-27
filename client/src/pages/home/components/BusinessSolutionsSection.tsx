@@ -19,7 +19,7 @@ const BusinessSolutionsSection = ({
   onContactClick,
   onSeePlans,
 }: BusinessSolutionsSectionProps) => (
-  <section id="business" className="w-full bg-[#ffc400] py-10 text-[#0a0a0a] lg:py-14">
+  <section id="business" className="w-full border-t border-[#ececea] bg-[#edb100] py-12 text-[#0a0a0a] lg:py-16">
     <article className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:px-10">
       <header>
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-black/60">
@@ -54,22 +54,6 @@ const BusinessSolutionsSection = ({
             See plans
           </Button>
         </nav>
-        <dl className="mt-7 grid grid-cols-1 gap-4 text-black/60 sm:grid-cols-3">
-          {[
-            ['184K', 'Volume Q1'],
-            ['RWF 1,840', 'Avg cost / drop'],
-            ['99.96%', 'API uptime'],
-          ].map(([value, label]) => (
-            <div key={label}>
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em]">
-                {label}
-              </dt>
-              <dd className="mt-1 text-[18px] font-extrabold tracking-[-0.02em] text-[#0a0a0a]">
-                {value}
-              </dd>
-            </div>
-          ))}
-        </dl>
       </header>
 
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -78,7 +62,7 @@ const BusinessSolutionsSection = ({
           return (
             <li key={feature.title}>
               <article className="h-full rounded-[12px] border border-black/10 bg-white/80 p-5 text-[#0a0a0a]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#0a0a0a] text-[#ffc400]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#0a0a0a] text-[#edb100]">
                   <Icon className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <h3 className="mt-4 text-[14px] font-bold tracking-[-0.01em]">

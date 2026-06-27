@@ -32,8 +32,8 @@ export interface HeroCopy {
   trackHereLabel: string;
   verifiedRidersLabel: string;
   realtimeTrackingLabel: string;
-  customersLabel: string;
-  trustDailyLabel: string;
+  activeCustomersLabel: string;
+  completedOrdersLabel: string;
   growingCommunityLabel: string;
   businessAccountCta: string;
 }
@@ -54,11 +54,6 @@ export interface BusinessHighlightStat {
   value: string;
   label: string;
   icon: IconDefinition;
-}
-
-export interface HeroBusinessStat {
-  value: string;
-  label: string;
 }
 
 export interface HowItWorksStep {

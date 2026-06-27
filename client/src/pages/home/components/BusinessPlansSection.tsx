@@ -30,7 +30,7 @@ const BusinessPlansSection = ({
   const hasPlans = !isLoading && plans.length > 0;
 
   return (
-    <section id="business-plans" className="w-full border-t border-[#ececea] bg-white py-10 lg:py-14">
+    <section id="business-plans" className="w-full border-t border-[#ececea] bg-white py-12 lg:py-16">
       <motion.article
         className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10"
         initial="hidden"
@@ -71,7 +71,7 @@ const BusinessPlansSection = ({
                 <article
                   className={`home-card-interactive flex h-full flex-col rounded-[12px] border p-5 ${
                     plan.isPopular
-                      ? 'border-[#ffc400] bg-[#fffdf5] shadow-[0_0_0_1px_rgba(255,196,0,0.25)]'
+                      ? 'border-[#edb100] bg-[#fffdf5] shadow-[0_0_0_1px_rgba(255,196,0,0.25)]'
                       : 'border-[#ececea] bg-[var(--peekaboo-warm)]'
                   }`}
                 >
@@ -85,7 +85,7 @@ const BusinessPlansSection = ({
                       </p>
                     </hgroup>
                     {plan.isPopular ? (
-                      <span className="rounded-full bg-[#ffc400] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#0a0a0a]">
+                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#0a0a0a]">
                         {popularLabel}
                       </span>
                     ) : null}
@@ -107,7 +107,7 @@ const BusinessPlansSection = ({
                         className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#6b6f76]"
                       >
                         <Check
-                          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#e6ad00]"
+                          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d49e00]"
                           aria-hidden="true"
                         />
                         <span>{feature}</span>
@@ -121,7 +121,7 @@ const BusinessPlansSection = ({
                       className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-semibold transition ${
                         plan.isPopular
                           ? 'bg-[#0a0a0a] text-white hover:bg-[#1c1c1c]'
-                          : 'bg-[#ffc400] text-[#0a0a0a] hover:bg-[#e6ad00]'
+                          : 'bg-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00]'
                       }`}
                     >
                       {ctaLabel}
