@@ -29,8 +29,14 @@ const HeroHeadline = ({
       transition={{ duration: 0.22, ease: 'easeOut' }}
       className="space-y-4"
     >
-      <p className="inline-flex w-fit items-center gap-2 rounded-full border border-[#edb100]/35 bg-[#fff4be] px-3 py-1.5 text-[11px] font-semibold tracking-[0.06em] text-[#6b4d00]">
-        Fast · Reliable · Local
+      <p className="inline-flex w-fit items-center gap-2 text-[10px] font-light uppercase tracking-[0.05em] text-[#6b4d00]">
+        <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#d49e00] opacity-60" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#d49e00]" />
+        </span>
+        {activeTab === 'personal'
+          ? 'Same-day delivery in Kigali'
+          : 'Delivery built for Kigali teams'}
       </p>
       <h1 className="max-w-[600px] text-[32px] font-extrabold leading-[1.02] tracking-[-0.025em] text-[#0a0a0a] sm:text-[42px] lg:text-[52px]">
         {activeTab === 'personal' ? personalTitle1 : businessTitle1}
