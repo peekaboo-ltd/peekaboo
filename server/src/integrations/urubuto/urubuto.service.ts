@@ -17,6 +17,17 @@ import {
 import { buildUrubutoConfig } from './urubuto.config';
 import logger from '../../helpers/logger.helper';
 
+export function isValidUrubutoRedirectUrl(redirectUrl?: string): boolean {
+  if (!redirectUrl) return false;
+
+  try {
+    const parsedUrl = new URL(redirectUrl);
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export function mapUrubutoInitiateErrorMessage(rawMessage?: string): string {
   const message = rawMessage || 'UrubutoPay payment initiation failed.';
   const lower = message.toLowerCase();
@@ -262,6 +273,19 @@ export class UrubutoService {
         };
       }
 
+      if (
+        channelName === UrubutoChannelName.CARD &&
+        !isValidUrubutoRedirectUrl(request.redirectUrl)
+      ) {
+        return {
+          success: false,
+          error: {
+            code: 'INVALID_REDIRECTION_URL',
+            message: 'CARD payments require a valid redirection_url.',
+          },
+        };
+      }
+
       const payload: UrubutoInitiatePaymentRequest = {
         amount: request.amount,
         channel_name: channelName,
@@ -272,7 +296,7 @@ export class UrubutoService {
         service_code: this.config.serviceCode,
         transaction_id: request.refId,
         payer_email: request.customerEmail,
-        ...(channelName === UrubutoChannelName.CARD && request.redirectUrl
+        ...(channelName === UrubutoChannelName.CARD
           ? { redirection_url: request.redirectUrl }
           : {}),
       };
@@ -338,13 +362,14 @@ export class UrubutoService {
         },
       };
     } catch (error: any) {
+      const isTimeout =
+        error.code === 'ETIMEDOUT' ||
+        error.code === 'ECONNABORTED' ||
+        error.message?.toLowerCase().includes('timeout');
       const rawMessage =
         error.response?.data?.message ||
         error.message ||
         'UrubutoPay payment initiation failed.';
-      const isTimeout =
-        error.code === 'ECONNABORTED' ||
-        rawMessage.toLowerCase().includes('timeout');
 
       logger.error('UrubutoPay payment initiation error', {
         ...logContext,
