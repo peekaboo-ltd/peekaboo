@@ -155,6 +155,57 @@ export class PaymentService {
     }
 
     if (result && !result.success) {
+      const isUrubutoTimeout =
+        provider === PaymentProvider.URUBUTO &&
+        result.error?.code === 'URUBUTO_TIMEOUT';
+
+      if (isUrubutoTimeout) {
+        const timeoutMetadata = result.error?.metadata || {};
+        const transactionId =
+          timeoutMetadata.transactionId ||
+          timeoutMetadata.localPaymentId ||
+          newPayment.id;
+        const verification =
+          await this.verifyUrubutoTransactionStatus(transactionId as string);
+        const verifiedStatus = verification.data?.transaction_status
+          ? this.urubutoService.mapStatusToInternal(
+              verification.data.transaction_status,
+            )
+          : undefined;
+        const verifiedTransactionId =
+          verification.data?.internal_transaction_id ||
+          verification.data?.transaction_id ||
+          transactionId;
+
+        newPayment.status = verifiedStatus || KpayPaymentStatus.PENDING;
+        newPayment.externalReferenceId = verifiedTransactionId;
+        newPayment.metadata = {
+          ...(newPayment.metadata || {}),
+          initiationError: result.error,
+          urubutoTimeoutReconciliation: {
+            checkedAt: new Date().toISOString(),
+            transactionId,
+            verification,
+          },
+        };
+
+        await this.paymentRepository.update(newPayment.id, {
+          externalReferenceId: newPayment.externalReferenceId,
+          status: newPayment.status,
+          metadata: newPayment.metadata,
+        });
+
+        if (newPayment.status === KpayPaymentStatus.SUCCESSFUL) {
+          await this.updatePaymentStatus(
+            newPayment.id as UUID,
+            newPayment.status,
+            newPayment.metadata,
+          );
+        }
+
+        return newPayment;
+      }
+
       newPayment.status = KpayPaymentStatus.FAILED;
       newPayment.metadata = {
         ...(newPayment.metadata || {}),
