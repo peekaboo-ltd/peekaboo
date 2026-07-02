@@ -225,11 +225,21 @@ export class PaymentService {
       newPayment.metadata = {
         ...(newPayment.metadata || {}),
         initiationError: result.error,
+        ...(isUrubutoTimeout
+          ? {
+              pendingReconciliation: true,
+              reconciliationReason: 'URUBUTO_INITIATION_TIMEOUT',
+            }
+          : {}),
       };
       await this.paymentRepository.update(newPayment.id, {
         status: newPayment.status,
         metadata: newPayment.metadata,
       });
+
+      if (isUrubutoTimeout) {
+        return newPayment;
+      }
 
       throw new ValidationError(
         result.error?.message ||
