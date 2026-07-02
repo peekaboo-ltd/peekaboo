@@ -342,19 +342,37 @@ export class UrubutoService {
         error.response?.data?.message ||
         error.message ||
         'UrubutoPay payment initiation failed.';
+      const isTimeout =
+        error.code === 'ECONNABORTED' ||
+        rawMessage.toLowerCase().includes('timeout');
 
       logger.error('UrubutoPay payment initiation error', {
         ...logContext,
         httpStatus: error.response?.status,
         urubutoResponse: error.response?.data,
+        errorCode: error.code,
         message: rawMessage,
       });
 
       return {
         success: false,
         error: {
-          code: error.response?.status?.toString() || 'URUBUTO_ERROR',
-          message: mapUrubutoInitiateErrorMessage(rawMessage),
+          code: isTimeout
+            ? 'URUBUTO_TIMEOUT'
+            : error.response?.status?.toString() || 'URUBUTO_ERROR',
+          message: isTimeout
+            ? 'UrubutoPay payment initiation timed out. The transaction status should be reconciled before marking the payment failed.'
+            : mapUrubutoInitiateErrorMessage(rawMessage),
+          metadata: {
+            localPaymentId: request.refId,
+            transactionId: request.refId,
+            channelName,
+            payerCode: request.payerCode,
+            merchantCode: this.config.merchantCode,
+            serviceCode: this.config.serviceCode,
+            rawMessage,
+            ...(error.code ? { axiosCode: error.code } : {}),
+          },
         },
       };
     }

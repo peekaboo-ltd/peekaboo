@@ -125,6 +125,7 @@ export interface UrubutoPaymentResult {
   error?: {
     code: string;
     message: string;
+    metadata?: Record<string, any>;
   };
 }
 
