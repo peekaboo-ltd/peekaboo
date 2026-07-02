@@ -6,6 +6,7 @@ import {
   UrubutoPaymentWebhookPayload,
   UrubutoWebhookAuthRequest,
 } from '../types/urubuto.types';
+import logger from '../helpers/logger.helper';
 
 const paymentService = new PaymentService();
 const urubutoService = new UrubutoService();
@@ -84,7 +85,15 @@ export const WebhookController = {
     try {
       if (!assertUrubutoToken(req, res)) return;
 
+      logger.info('UrubutoPay payer validation request', {
+        request: req.body,
+      });
+
       const data = await paymentService.validateUrubutoPayer(req.body);
+
+      logger.info('UrubutoPay payer validation response', {
+        response: data,
+      });
 
       return res.status(200).json({
         status: 200,
@@ -106,10 +115,18 @@ export const WebhookController = {
     try {
       if (!assertUrubutoToken(req, res)) return;
 
+      logger.info('UrubutoPay payment callback request', {
+        request: req.body,
+      });
+
       const payment = await paymentService.processUrubutoPaymentWebhook(
         req.body as UrubutoPaymentWebhookPayload,
         'callback',
       );
+
+      logger.info('UrubutoPay payment callback response', {
+        response: payment,
+      });
 
       return res.status(200).json({
         status: 200,
@@ -134,10 +151,18 @@ export const WebhookController = {
     try {
       if (!assertUrubutoToken(req, res)) return;
 
+      logger.info('UrubutoPay payment notification request', {
+        request: req.body,
+      });
+
       const payment = await paymentService.processUrubutoPaymentWebhook(
         req.body as UrubutoPaymentWebhookPayload,
         'notification',
       );
+
+      logger.info('UrubutoPay payment notification response', {
+        response: payment,
+      });
 
       return res.status(200).json({
         status: 200,
@@ -162,10 +187,18 @@ export const WebhookController = {
     try {
       if (!assertUrubutoToken(req, res)) return;
 
+      logger.info('UrubutoPay payment reversal request', {
+        request: req.body,
+      });
+
       const payment = await paymentService.processUrubutoPaymentWebhook(
         req.body as UrubutoPaymentWebhookPayload,
         'reversal',
       );
+
+      logger.info('UrubutoPay payment reversal response', {
+        response: payment,
+      });
 
       return res.status(200).json({
         status: 200,
