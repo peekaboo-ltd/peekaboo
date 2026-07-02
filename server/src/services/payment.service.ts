@@ -38,6 +38,7 @@ import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { formatPhoneNumber } from '../helpers/phone.helper';
 import { ConversationStatus } from '../constants/conversation.constants';
+import logger from '../helpers/logger.helper';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
@@ -79,6 +80,20 @@ export class PaymentService {
 
     if (requiresPhone && !customerPhone) {
       throw new ValidationError('A valid payer phone number is required');
+    }
+
+    let redirectUrl: string | undefined;
+
+    if (requestedMethod === UrubutoChannelName.CARD) {
+      redirectUrl = this.getPaymentRedirectUrl(payment.entityId);
+      this.validateCardPaymentRedirectUrl(redirectUrl);
+
+      logger.debug('Resolved CARD payment redirect URL', {
+        entityId: payment.entityId,
+        provider,
+        channelName: requestedMethod,
+        redirectUrl,
+      });
     }
 
     const newPayment: Payment = await this.paymentRepository.save({
@@ -123,7 +138,7 @@ export class PaymentService {
         refId: newPayment?.id as UUID,
         payerCode,
         channelName: requestedMethod,
-        redirectUrl: this.getPaymentRedirectUrl(payment.entityId),
+        redirectUrl: redirectUrl || this.getPaymentRedirectUrl(payment.entityId),
       });
     }
 
@@ -500,6 +515,38 @@ export class PaymentService {
     }
 
     return `https://peekaboo.co.rw/p/orders/${orderId}/payment-success`;
+  }
+
+  private validateCardPaymentRedirectUrl(redirectUrl: string): void {
+    let parsedUrl: URL;
+
+    try {
+      parsedUrl = new URL(redirectUrl);
+    } catch {
+      throw new ValidationError(
+        'CARD payments require a valid absolute HTTPS FRONTEND_URL',
+      );
+    }
+
+    if (
+      !this.isLocalRedirectHost(parsedUrl.hostname) &&
+      parsedUrl.protocol !== 'https:'
+    ) {
+      throw new ValidationError(
+        'CARD payments require a valid absolute HTTPS FRONTEND_URL',
+      );
+    }
+  }
+
+  private isLocalRedirectHost(hostname: string): boolean {
+    const normalizedHostname = hostname.toLowerCase();
+
+    return (
+      normalizedHostname === 'localhost' ||
+      normalizedHostname === '127.0.0.1' ||
+      normalizedHostname === '::1' ||
+      normalizedHostname.endsWith('.localhost')
+    );
   }
 
   private async findUrubutoPayment(
