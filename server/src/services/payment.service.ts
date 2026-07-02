@@ -560,9 +560,12 @@ export class PaymentService {
   }
 
   private getPaymentRedirectUrl(orderId: UUID): string {
-    const frontendUrl = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
-    if (frontendUrl) {
-      return `${frontendUrl}/p/orders/${orderId}/payment-success`;
+    const baseUrl =
+      this.normalizeBaseUrl(process.env.URUBUTO_CARD_REDIRECT_BASE_URL) ||
+      this.normalizeBaseUrl(process.env.FRONTEND_URL);
+
+    if (baseUrl) {
+      return `${baseUrl}/p/orders/${orderId}/payment-success`;
     }
 
     return `https://peekaboo.co.rw/p/orders/${orderId}/payment-success`;
@@ -598,6 +601,10 @@ export class PaymentService {
       normalizedHostname === '::1' ||
       normalizedHostname.endsWith('.localhost')
     );
+  }
+
+  private normalizeBaseUrl(url?: string): string {
+    return (url || '').trim().replace(/\/+$/, '');
   }
 
   private async findUrubutoPayment(
