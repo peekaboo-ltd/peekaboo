@@ -42,7 +42,7 @@ const HeroTrustIndicators = ({
         {AVATARS.map((avatar, index) => (
           <span
             key={avatar.initials}
-            className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-[var(--peekaboo-warm)] text-[11px] font-bold ${
+            className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-[var(--peekaboo-warm)] text-[11px] font-semibold ${
               index === 0 ? '' : '-ml-2.5'
             } ${avatar.className}`}
           >
@@ -50,11 +50,11 @@ const HeroTrustIndicators = ({
           </span>
         ))}
       </figcaption>
-      <address className="not-italic text-[13px] leading-relaxed text-[#6b6f76]">
+      <address className="not-italic text-[13px] font-normal leading-relaxed text-muted-foreground">
         {hasStats ? (
           <>
             {activeCustomers !== undefined && (
-              <span className="block font-semibold text-[#0a0a0a]">
+              <span className="block font-medium text-foreground">
                 {activeCustomers.toLocaleString()} {activeCustomersLabel}
               </span>
             )}
@@ -65,7 +65,7 @@ const HeroTrustIndicators = ({
             )}
           </>
         ) : (
-          <span className="block font-semibold text-[#0a0a0a]">{fallbackLabel}</span>
+          <span className="block font-medium text-foreground">{fallbackLabel}</span>
         )}
       </address>
     </motion.figure>

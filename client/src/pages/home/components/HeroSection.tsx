@@ -8,6 +8,7 @@ import { useAppSelector } from '@/states/hooks';
 import type { LandingStats } from '@/types/landing.type';
 import type { CustomerTab, HeroCopy, HomeFormValues } from '../home.types';
 import { containerVariants, itemVariants } from '../home.animations';
+import HeroScene from '@/components/three/HeroScene';
 import HeroTabs from './HeroTabs';
 import HeroHeadline from './HeroHeadline';
 import HeroTrustIndicators from './HeroTrustIndicators';
@@ -68,8 +69,15 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative w-full overflow-hidden border-b border-[#ececea] bg-[var(--peekaboo-warm)] text-[#0a0a0a]">
-      <article className="relative mx-auto max-w-[1280px] px-5 pb-12 pt-18 sm:px-8 lg:px-10 lg:pb-14 lg:pt-22">
+    <section className="relative isolate w-full overflow-hidden bg-[var(--peekaboo-warm)] text-foreground">
+      {/* Subtle brand-aligned delivery scene, matching the auth backdrop */}
+      <div className="pointer-events-none absolute inset-0">
+        <HeroScene />
+      </div>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--secondary)_12%,transparent)_1px,transparent_1px)] [background-size:44px_44px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--peekaboo-warm)_36%,transparent)_0%,color-mix(in_oklab,var(--peekaboo-warm)_64%,transparent)_52%,color-mix(in_oklab,var(--peekaboo-warm)_92%,transparent)_100%)]" />
+
+      <article className="relative z-10 mx-auto max-w-[1280px] px-5 pb-12 pt-18 sm:px-8 lg:px-10 lg:pb-14 lg:pt-22">
         <motion.section
           className="grid min-h-[calc(100vh-7rem)] items-center gap-9 lg:grid-cols-[1.06fr_0.94fr] lg:gap-12"
           variants={containerVariants}
@@ -137,7 +145,7 @@ const HeroSection = ({
         </motion.section>
       </article>
 
-      <aside className="relative z-10 border-t border-[#ececea]" />
+      <aside className="relative z-10 border-t border-border" />
 
       <HeroScrollIndicator />
     </section>

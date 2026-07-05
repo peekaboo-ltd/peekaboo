@@ -9,7 +9,7 @@ const HeroScrollIndicator = () => (
     aria-label="Scroll down"
   >
     <motion.span
-      className="flex h-9 w-5 justify-center rounded-full border border-[#0a0a0a]/15 pt-2"
+      className="flex h-9 w-5 justify-center rounded-full border border-border pt-2"
       animate={{ y: [0, 4, 0] }}
       transition={{ duration: 1.5, repeat: Infinity }}
     >

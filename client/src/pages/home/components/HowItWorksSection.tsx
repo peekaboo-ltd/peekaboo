@@ -66,15 +66,15 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
     >
       <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-10">
         <header className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-center lg:self-start lg:py-24">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             How it works
           </p>
-          <h2 className="mt-4 text-[28px] font-extrabold leading-[1] tracking-[-0.03em] text-[#0a0a0a] sm:text-[36px] lg:text-[48px]">
+          <h2 className="mt-4 text-[28px] font-semibold leading-[1.02] tracking-[-0.02em] text-foreground sm:text-[36px] lg:text-[48px]">
             Three taps.
             <br />
-            <span className="text-[#6b6f76]">One delivery.</span>
+            <span className="text-muted-foreground">One delivery.</span>
           </h2>
-          <p className="mt-5 max-w-[360px] text-[13px] leading-relaxed text-[#6b6f76] lg:text-[14px]">
+          <p className="mt-5 max-w-[360px] text-[13px] font-normal leading-relaxed text-muted-foreground lg:text-[14px]">
             Designed for senders who do not have time to think about logistics.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-4">
@@ -82,14 +82,14 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
               type="button"
               primary
               onClick={onScrollToForm}
-              className="h-auto min-h-0 rounded-full !py-2.5 !px-5 font-semibold"
+              className="h-auto min-h-0 rounded-md !py-2.5 !px-5 font-medium"
             >
               See it in action
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
             <span
               aria-hidden="true"
-              className="hidden items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#9e9d98] lg:inline-flex"
+              className="hidden items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground lg:inline-flex"
             >
               <span className="h-px w-6 bg-[#c8c7c2]" />0{activeIndex + 1} / 03
             </span>
@@ -136,39 +136,39 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
                   transition={{ duration: 0.45, ease: 'easeOut' }}
                   className="lg:flex lg:min-h-[64vh] lg:items-center"
                 >
-                  <article className="flex h-auto min-h-0 w-full flex-col items-start gap-6 rounded-[12px] text-left">
+                  <article className="flex h-auto min-h-0 w-full flex-col items-start gap-6 rounded-md text-left">
                     <div className="flex w-full items-end justify-between gap-6">
                       <span
                         aria-hidden="true"
-                        className={`block font-black leading-[0.82] tracking-[-0.06em] text-[clamp(96px,26vw,160px)] lg:text-[clamp(140px,16vw,220px)] ${
+                        className={`block font-semibold leading-[0.82] tracking-[-0.04em] text-[clamp(96px,26vw,160px)] lg:text-[clamp(140px,16vw,220px)] ${
                           isActive
-                            ? 'text-[#0a0a0a]'
-                            : 'text-[#0a0a0a] lg:text-transparent lg:[-webkit-text-stroke:1.25px_#c8c7c2]'
+                            ? 'text-foreground'
+                            : 'text-foreground lg:text-transparent lg:[-webkit-text-stroke:1.25px_#c8c7c2]'
                         } transition-colors duration-500`}
                       >
                         {step.step}
                       </span>
                       <span
-                        className={`hidden h-14 w-14 shrink-0 items-center justify-center rounded-[18px] border bg-white sm:flex lg:h-16 lg:w-16 ${
+                        className={`hidden h-14 w-14 shrink-0 items-center justify-center rounded-md border bg-card sm:flex lg:h-16 lg:w-16 ${
                           isActive
                             ? 'border-[#edb100] shadow-[0_0_0_2px_rgba(255,196,0,0.2)]'
-                            : 'border-[#ececea]'
+                            : 'border-border'
                         } transition-shadow duration-500`}
                       >
                         <Icon
-                          className="h-5 w-5 text-[#0a0a0a] lg:h-6 lg:w-6"
+                          className="h-5 w-5 text-foreground lg:h-6 lg:w-6"
                           aria-hidden={true}
                         />
                       </span>
                     </div>
                     <div className="max-w-[480px]">
-                      <span className="block text-[22px] font-extrabold leading-tight tracking-[-0.025em] text-[#0a0a0a] sm:text-[28px] lg:text-[36px]">
+                      <span className="block text-[22px] font-semibold leading-tight tracking-[-0.015em] text-foreground sm:text-[28px] lg:text-[36px]">
                         {step.title}
                       </span>
-                      <span className="mt-3 block text-[13px] leading-relaxed text-[#6b6f76] lg:text-[15px]">
+                      <span className="mt-3 block text-[13px] font-normal leading-relaxed text-muted-foreground lg:text-[15px]">
                         {step.description}
                       </span>
-                      <span className="mt-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#0a0a0a]">
+                      <span className="mt-6 inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.16em] text-foreground">
                         <span className="h-px w-6 bg-[#0a0a0a]" />
                         Step {index + 1}
                       </span>

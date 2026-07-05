@@ -30,7 +30,7 @@ const BusinessPlansSection = ({
   const hasPlans = !isLoading && plans.length > 0;
 
   return (
-    <section id="business-plans" className="w-full border-t border-[#ececea] bg-white py-12 lg:py-16">
+    <section id="business-plans" className="w-full border-t border-border bg-card py-12 lg:py-16">
       <motion.article
         className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10"
         initial="hidden"
@@ -39,13 +39,13 @@ const BusinessPlansSection = ({
         variants={containerVariants}
       >
         <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             {badgeLabel}
           </p>
-          <h2 className="mt-3 text-[24px] font-extrabold leading-[1.02] tracking-[-0.025em] text-[#0a0a0a] sm:text-[34px]">
+          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] tracking-[-0.01em] text-foreground sm:text-[34px]">
             {title}
           </h2>
-          <p className="mt-3 text-[13px] leading-relaxed text-[#6b6f76]">{subtitle}</p>
+          <p className="mt-3 text-[13px] font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
         </motion.header>
 
         {isLoading ? (
@@ -53,7 +53,7 @@ const BusinessPlansSection = ({
             {Array.from({ length: 3 }).map((_, index) => (
               <li
                 key={index}
-                className="h-[420px] animate-pulse rounded-[12px] border border-[#ececea] bg-[var(--peekaboo-warm)]"
+                className="h-[420px] animate-pulse rounded-md border border-border bg-[var(--peekaboo-warm)]"
               />
             ))}
           </ul>
@@ -69,33 +69,33 @@ const BusinessPlansSection = ({
                 className={plan.isPopular ? 'lg:-mt-2' : undefined}
               >
                 <article
-                  className={`home-card-interactive group relative flex h-full flex-col rounded-[12px] border p-5 transition-all duration-300 ${
+                  className={`home-card-interactive group relative flex h-full flex-col rounded-md border p-5 transition-all duration-300 ${
                     plan.isPopular
                       ? 'border-[#edb100] bg-[#fffdf5] shadow-[0_0_0_1px_rgba(255,196,0,0.25)] hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]'
-                      : 'border-[#ececea] bg-[var(--peekaboo-warm)] hover:border-[#d49e00] hover:shadow-[0_8px_24px_-12px_rgba(10,10,10,0.1)]'
+                      : 'border-border bg-[var(--peekaboo-warm)]'
                   }`}
                 >
                   <header className="flex items-start justify-between gap-4">
                     <hgroup>
-                      <h3 className="text-[16px] font-bold tracking-[-0.01em] text-[#0a0a0a]">
+                      <h3 className="text-[16px] font-medium tracking-[-0.01em] text-foreground">
                         {plan.name}
                       </h3>
-                      <p className="mt-1.5 text-[12px] leading-relaxed text-[#6b6f76]">
+                      <p className="mt-1.5 text-[12px] font-normal leading-relaxed text-muted-foreground">
                         {plan.description}
                       </p>
                     </hgroup>
                     {plan.isPopular ? (
-                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#0a0a0a]">
+                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#0a0a0a]">
                         {popularLabel}
                       </span>
                     ) : null}
                   </header>
 
-                  <section className="mt-5 border-t border-[#ececea] pt-4">
-                    <p className="text-[22px] font-extrabold tracking-[-0.02em] text-[#0a0a0a]">
+                  <section className="mt-5 border-t border-border pt-4">
+                    <p className="text-[22px] font-semibold tracking-[-0.01em] text-foreground">
                       {plan.price}
                     </p>
-                    <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6b6f76]">
+                    <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                       {perMonthLabel}
                     </p>
                   </section>
@@ -104,7 +104,7 @@ const BusinessPlansSection = ({
                     {plan.features.map((feature) => (
                       <li
                         key={feature}
-                        className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#6b6f76]"
+                        className="flex items-start gap-2 text-[12.5px] font-normal leading-relaxed text-muted-foreground"
                       >
                         <Check
                           className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d49e00] transition-transform duration-300 group-hover:scale-110"
@@ -118,7 +118,7 @@ const BusinessPlansSection = ({
                   <div className="mt-6 flex flex-col gap-2">
                     <Link
                       to="/contact"
-                      className={`group/link inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-semibold transition-all duration-300 ${
+                      className={`group/link inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-medium transition-all duration-300 ${
                         plan.isPopular
                           ? 'bg-[#0a0a0a] text-white hover:bg-[#1c1c1c] hover:shadow-[0_4px_12px_-2px_rgba(10,10,10,0.3)]'
                           : 'bg-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00] hover:shadow-[0_4px_12px_-2px_rgba(237,177,0,0.3)]'
@@ -131,7 +131,7 @@ const BusinessPlansSection = ({
                     {plan.detailsTo ? (
                       <Link
                         to={plan.detailsTo}
-                        className="inline-flex items-center justify-center rounded-md border border-[#ececea] bg-white px-4 py-2 text-[12px] font-semibold text-[#0a0a0a] transition-all duration-300 hover:bg-[#f7f6f1] hover:border-[#d9d8d4]"
+                        className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-[12px] font-medium text-foreground transition-all duration-300 hover:bg-accent hover:border-border"
                       >
                         {detailsCtaLabel}
                       </Link>
@@ -142,7 +142,7 @@ const BusinessPlansSection = ({
             ))}
           </motion.ul>
         ) : (
-          <p className="rounded-[12px] border border-[#ececea] bg-[var(--peekaboo-warm)] px-5 py-8 text-[13px] text-[#6b6f76]">
+          <p className="rounded-md border border-border bg-[var(--peekaboo-warm)] px-5 py-8 text-[13px] font-normal text-muted-foreground">
             Business plans are being updated. Contact our team for current pricing.
           </p>
         )}

@@ -16,7 +16,7 @@ const FinalCtaSection = ({
   buttonLabel,
   onScrollToForm,
 }: FinalCtaSectionProps) => (
-  <section className="relative w-full border-t border-[#ececea] bg-[#0a0a0a] py-12 text-white lg:py-16">
+  <section className="relative w-full border-t border-border bg-[#0a0a0a] py-12 text-white lg:py-16">
     <motion.article
       className="relative mx-auto max-w-[720px] px-5 text-center sm:px-8 lg:px-10"
       initial="hidden"
@@ -25,13 +25,13 @@ const FinalCtaSection = ({
       variants={containerVariants}
     >
       <motion.header variants={itemVariants}>
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100]">
+        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#edb100]">
           Get started
         </p>
-        <h2 className="mt-3 text-[28px] font-extrabold leading-[1.05] tracking-[-0.025em] sm:text-[36px]">
+        <h2 className="mt-3 text-[28px] font-semibold leading-[1.05] tracking-[-0.01em] sm:text-[36px]">
           {title}
         </h2>
-        <p className="mx-auto mt-4 max-w-[480px] text-[13px] leading-relaxed text-white/70">
+        <p className="mx-auto mt-4 max-w-[480px] text-[13px] font-normal leading-relaxed text-white/70">
           {subtitle}
         </p>
 
@@ -39,7 +39,7 @@ const FinalCtaSection = ({
           type="button"
           primary
           onClick={onScrollToForm}
-          className="mt-6 rounded-full px-6 font-semibold"
+          className="mt-6 rounded-md px-6 font-medium"
         >
           {buttonLabel}
           <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

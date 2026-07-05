@@ -23,7 +23,7 @@ const HeroBusinessCta = ({
       type="button"
       primary
       onClick={onScrollToForm}
-      className="rounded-full font-semibold"
+      className="rounded-md font-medium"
     >
       <PackagePlus className="h-3.5 w-3.5" aria-hidden="true" />
       {isActive ? tryQuickDeliveryLabel : 'Book delivery'}
@@ -31,7 +31,7 @@ const HeroBusinessCta = ({
     <Button
       type="button"
       onClick={isActive ? onContactClick : onTrackClick}
-      className="rounded-full border-[#ececea] bg-white text-[#0a0a0a] hover:!bg-white hover:!border-[#d9d8d4] hover:!shadow-[0_2px_8px_-2px_rgba(10,10,10,0.15)] hover:!text-[#0a0a0a] transition-all duration-300"
+      className="rounded-md border-border bg-card text-foreground hover:!bg-accent hover:!border-border hover:!shadow-[0_2px_8px_-4px_rgba(10,10,10,0.12)] hover:!text-foreground transition-all duration-300"
     >
       {isActive ? (
         <>

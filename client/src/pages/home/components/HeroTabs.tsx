@@ -15,7 +15,7 @@ const HeroTabs = ({
   businessLabel,
 }: HeroTabsProps) => (
   <nav
-    className="inline-flex w-fit items-center rounded-full border border-[#ececea] bg-white p-1 text-[12px] font-normal shadow-[0_1px_2px_rgba(10,10,10,0.04)]"
+    className="inline-flex w-fit items-center rounded-full border border-border bg-card p-1 text-[12px] font-normal shadow-[0_1px_2px_rgba(10,10,10,0.04)]"
     role="tablist"
     aria-label="Delivery audience"
   >
@@ -27,7 +27,7 @@ const HeroTabs = ({
       className={`group relative inline-flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-1.5 transition-all duration-300 ${
         activeTab === 'personal'
           ? 'bg-[#edb100] text-[#0a0a0a] shadow-[0_2px_8px_-2px_rgba(237,177,0,0.4)]'
-          : 'text-[#6b6f76] group-hover:text-[#0a0a0a]'
+          : 'text-muted-foreground group-hover:text-foreground'
       }`}
     >
       <span className="absolute inset-0 rounded-full" />
@@ -42,7 +42,7 @@ const HeroTabs = ({
       className={`group relative inline-flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-1.5 transition-all duration-300 ${
         activeTab === 'business'
           ? 'bg-[#edb100] text-[#0a0a0a] shadow-[0_2px_8px_-2px_rgba(237,177,0,0.4)]'
-          : 'text-[#6b6f76] group-hover:text-[#0a0a0a]'
+          : 'text-muted-foreground group-hover:text-foreground'
       }`}
     >
       <span className="absolute inset-0 rounded-full" />

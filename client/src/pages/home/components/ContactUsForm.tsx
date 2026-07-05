@@ -67,15 +67,15 @@ const ContactUsForm = ({
           <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
             <FontAwesomeIcon icon={faCheck} className="text-green-600 text-2xl" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900">
+          <h3 className="text-xl font-medium text-foreground">
             {t('contact.successTitle')}
           </h3>
-          <p className="text-slate-600 text-sm max-w-sm">
+          <p className="text-muted-foreground text-sm max-w-sm">
             {t('contact.successMessage')}
           </p>
           <Button
             primary
-            className="mt-2 rounded-full font-semibold"
+            className="mt-2 rounded-md font-medium"
             onClick={handleSuccessAction}
           >
             {successActionLabel ?? t('contact.close')}
@@ -85,14 +85,14 @@ const ContactUsForm = ({
         <>
           {!hideIntro ? (
             <div className="flex items-center gap-3 mb-1">
-              <span className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center border border-primary-100">
-                <FontAwesomeIcon icon={faBuilding} className="text-primary-600" />
+              <span className="w-10 h-10 rounded-md bg-accent flex items-center justify-center border border-border">
+                <FontAwesomeIcon icon={faBuilding} className="text-foreground" />
               </span>
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-medium text-foreground">
                   {t('contact.title')}
                 </h2>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   {t('contact.subtitle')}
                 </p>
               </div>
@@ -171,14 +171,14 @@ const ContactUsForm = ({
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-slate-700">
+                  <label className="text-sm font-medium text-foreground">
                     {t('contact.messageLabel')}
                   </label>
                   <textarea
                     {...field}
                     rows={3}
                     placeholder={t('contact.messagePlaceholder')}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary resize-none"
                   />
                 </div>
               )}
@@ -187,7 +187,7 @@ const ContactUsForm = ({
             <Button
               type="submit"
               primary
-              className="w-full mt-1 rounded-full font-semibold"
+              className="w-full mt-1 rounded-md font-medium"
               isLoading={isLoading}
               disabled={isLoading}
             >
