@@ -9,6 +9,12 @@ import { localStorageUtil } from '@/utils/localStorage.util';
 import { useLoginMutation, useCompleteAccountMutation } from '@/api/mutations/auth.mutations';
 import { useLazyCheckAccountQuery } from '@/api/queries/auth.queries';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import {
+  AuthCard,
+  AuthPageShell,
+  authInputClassName,
+  authPrimaryButtonClassName,
+} from './AuthPageShell';
 
 const CompleteAccount = () => {
   useDocumentTitle('Complete Your Account');
@@ -26,10 +32,7 @@ const CompleteAccount = () => {
   const [checkAccount, { data: accountStatus, isLoading: isChecking }] =
     useLazyCheckAccountQuery();
 
-  // Login form state
   const [password, setPassword] = useState('');
-
-  // Setup form state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -52,7 +55,12 @@ const CompleteAccount = () => {
     }
     try {
       const response = await login({ username: userEmail, password }).unwrap();
-      const { token, user } = response?.data;
+      let token = '';
+      let user = {};
+      if (response?.data) {
+        token = response?.data?.token;
+        user = response?.data?.user;
+      }
       localStorageUtil.setItem('token', token);
       localStorageUtil.setItem('user', user);
       dispatch(setToken(token));
@@ -61,7 +69,7 @@ const CompleteAccount = () => {
       navigate(nextPath, { replace: true });
     } catch (error) {
       toast.error(
-        (error as { data?: { message?: string } })?.data?.message ||
+        (error as { data: { message?: string } })?.data?.message ||
           'Incorrect password. Please try again.'
       );
     }
@@ -83,7 +91,12 @@ const CompleteAccount = () => {
         email,
         password: newPassword,
       }).unwrap();
-      const { token, user } = response?.data;
+      let token = '';
+      let user = {};
+      if (response?.data) {
+        token = response?.data?.token;
+        user = response?.data?.user;
+      }
       localStorageUtil.setItem('token', token);
       localStorageUtil.setItem('user', user);
       dispatch(setToken(token));
@@ -93,7 +106,7 @@ const CompleteAccount = () => {
       navigate(nextPath, { replace: true });
     } catch (error) {
       toast.error(
-        (error as { data?: { message?: string } })?.data?.message ||
+        (error as { data: { message?: string } })?.data?.message ||
           'Unable to complete account setup. Please try again.'
       );
     }
@@ -101,121 +114,125 @@ const CompleteAccount = () => {
 
   if (isChecking || !accountStatus) {
     return (
-      <main className="min-h-[60vh] flex items-center justify-center bg-gray-50">
-        <span className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </main>
+      <AuthPageShell>
+        <AuthCard title="Checking your account" subtitle="We are preparing your setup.">
+          <div className="flex justify-center py-4">
+            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+          </div>
+        </AuthCard>
+      </AuthPageShell>
     );
   }
 
   const isExistingUser =
-    accountStatus?.data?.hasEmail && accountStatus?.data?.hasPassword;
+    accountStatus?.hasEmail && accountStatus?.hasPassword;
 
   return (
-    <main className="min-h-[60vh] flex items-center justify-center bg-gray-50 px-4 py-12">
-      <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <AuthPageShell>
+      <AuthCard
+        title={isExistingUser ? 'Welcome back' : 'Complete your account'}
+        subtitle={
+          isExistingUser
+            ? 'Enter your password to continue.'
+            : 'Set up your account details to access the dashboard.'
+        }
+      >
         {isExistingUser ? (
-          <>
-            <header className="text-center space-y-2">
-              <h1 className="text-2xl font-semibold text-slate-900">
-                Welcome Back
-              </h1>
-              <p className="text-sm text-slate-600">
-                You already have an account. Enter your password to continue.
-              </p>
-            </header>
-            <form className="mt-6 flex flex-col gap-4" onSubmit={handleLogin}>
-              <Input
-                label="Email address"
-                type="email"
-                value={authUser?.email || ''}
-                readOnly
-              />
-              <Input
-                label="Password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <Button
-                type="submit"
-                primary
-                className="w-full"
-                isLoading={isLoginLoading}
-              >
-                Sign in and continue
-              </Button>
-            </form>
-          </>
+          <form className="flex flex-col gap-4" onSubmit={handleLogin}>
+            <Input
+              label="Email address"
+              type="email"
+              value={authUser?.email || ''}
+              readOnly
+              className={authInputClassName}
+            />
+            <Input
+              label="Password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              showPasswordToggle
+              className={authInputClassName}
+            />
+            <Button
+              type="submit"
+              primary
+              className={authPrimaryButtonClassName}
+              isLoading={isLoginLoading}
+            >
+              Sign in and continue
+            </Button>
+          </form>
         ) : (
-          <>
-            <header className="text-center space-y-2">
-              <h1 className="text-2xl font-semibold text-slate-900">
-                Complete Your Account
-              </h1>
-              <p className="text-sm text-slate-600">
-                Set up your account details to access the dashboard.
-              </p>
-            </header>
-            <form className="mt-6 flex flex-col gap-4" onSubmit={handleSetup}>
-              <Input
-                label="Phone number"
-                type="tel"
-                value={authUser?.phoneNumber || ''}
-                readOnly
-              />
-              <Input
-                label="Full name"
-                type="text"
-                placeholder="Your full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <Input
-                label="Email address"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <Input
-                label="Password"
-                type="password"
-                placeholder="Minimum 8 characters"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-              <Input
-                label="Confirm password"
-                type="password"
-                placeholder="Re-enter your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-              <Button
-                type="submit"
-                primary
-                className="w-full"
-                isLoading={isCompleteLoading}
-              >
-                Create account and continue
-              </Button>
-            </form>
-          </>
+          <form className="flex flex-col gap-4" onSubmit={handleSetup}>
+            <Input
+              label="Phone number"
+              type="tel"
+              value={authUser?.phoneNumber || ''}
+              readOnly
+              className={authInputClassName}
+            />
+            <Input
+              label="Full name"
+              type="text"
+              placeholder="Your full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className={authInputClassName}
+            />
+            <Input
+              label="Email address"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className={authInputClassName}
+            />
+            <Input
+              label="Password"
+              type="password"
+              placeholder="Minimum 8 characters"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              showPasswordToggle
+              className={authInputClassName}
+            />
+            <Input
+              label="Confirm password"
+              type="password"
+              placeholder="Re-enter your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              showPasswordToggle
+              className={authInputClassName}
+            />
+            <Button
+              type="submit"
+              primary
+              className={authPrimaryButtonClassName}
+              isLoading={isCompleteLoading}
+            >
+              Create account and continue
+            </Button>
+          </form>
         )}
 
-        <div className="mt-4 text-center text-sm text-slate-600">
-          <Link to="/auth/login" className="font-medium text-primary hover:underline">
+        <div className="mt-7 border-t border-border pt-6 text-center text-sm font-normal text-foreground">
+          <Link
+            to="/auth/login"
+            className="font-normal text-primary hover:text-secondary-600 underline underline-offset-2"
+          >
             Sign in with a different account
           </Link>
         </div>
-      </section>
-    </main>
+      </AuthCard>
+    </AuthPageShell>
   );
 };
 

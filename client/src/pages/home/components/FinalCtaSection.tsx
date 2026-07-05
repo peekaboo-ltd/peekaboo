@@ -37,8 +37,9 @@ const FinalCtaSection = ({
 
         <Button
           type="button"
+          primary
           onClick={onScrollToForm}
-          className="mt-6 rounded-full bg-[#edb100] border-[#edb100] px-6 text-[#0a0a0a] hover:bg-[#d49e00] hover:border-[#d49e00] font-semibold"
+          className="mt-6 rounded-full px-6 font-semibold"
         >
           {buttonLabel}
           <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

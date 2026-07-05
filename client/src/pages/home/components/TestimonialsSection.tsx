@@ -102,10 +102,10 @@ const TestimonialsSection = ({
                   key={index}
                   type="button"
                   onClick={() => setActiveTestimonial(index)}
-                  className={`h-2 rounded-full transition-[width,background-color] duration-300 ${
+                  className={`group relative h-2 rounded-full transition-all duration-300 ${
                     index === activeTestimonial
-                      ? 'w-8 bg-[#edb100]'
-                      : 'w-2 bg-[#ececea] hover:bg-[#d9d8d4]'
+                      ? 'w-8 bg-[#edb100] shadow-[0_0_8px_rgba(237,177,0,0.4)]'
+                      : 'w-2 bg-[#ececea] hover:bg-[#d9d8d4] hover:w-4'
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                   aria-current={index === activeTestimonial ? 'true' : undefined}
@@ -123,20 +123,20 @@ const TestimonialsSection = ({
                     (prev) => (prev - 1 + testimonials.length) % testimonials.length
                   )
                 }
-                className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-[#ececea] bg-white text-[#6b6f76] shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition hover:text-[#0a0a0a]"
+                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-[#ececea] bg-white text-[#6b6f76] shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition-all duration-300 hover:border-[#d49e00] hover:text-[#0a0a0a] hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]"
                 aria-label="Previous testimonial"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
               </button>
               <button
                 type="button"
                 onClick={() =>
                   setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
                 }
-                className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-[#ececea] bg-white text-[#6b6f76] shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition hover:text-[#0a0a0a]"
+                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-[#ececea] bg-white text-[#6b6f76] shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition-all duration-300 hover:border-[#d49e00] hover:text-[#0a0a0a] hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]"
                 aria-label="Next testimonial"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
               </button>
             </nav>
           )}

@@ -13,14 +13,15 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
   // NAVIGATION
   const { pathname } = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const isAuthPage = pathname.startsWith('/auth/');
 
   return (
-    <main className="min-h-screen bg-gray-50 relative flex flex-col">
-      {isAuthenticated ? <AuthenticatedNavbar /> : <PublicNavbar />}
-      <section className={`flex-1 ${pathname === '/' ? 'pt-0' : 'pt-22'}`}>
+    <main className="min-h-screen bg-background relative flex flex-col">
+      {!isAuthPage && (isAuthenticated ? <AuthenticatedNavbar /> : <PublicNavbar />)}
+      <section className={`flex-1 ${pathname === '/' || isAuthPage ? 'pt-0' : 'pt-22'}`}>
         {children || <Outlet />}
       </section>
-      <Footer />
+      {!isAuthPage && <Footer />}
     </main>
   );
 };

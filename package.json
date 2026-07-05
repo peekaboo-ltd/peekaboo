@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "react-native-webview": "^13.16.1",
-    "run": "^1.5.0",
-    "so": "^1.0.1",
-    "was": "^1.0.31"
-  }
-}

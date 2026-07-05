@@ -69,10 +69,10 @@ const BusinessPlansSection = ({
                 className={plan.isPopular ? 'lg:-mt-2' : undefined}
               >
                 <article
-                  className={`home-card-interactive flex h-full flex-col rounded-[12px] border p-5 ${
+                  className={`home-card-interactive group relative flex h-full flex-col rounded-[12px] border p-5 transition-all duration-300 ${
                     plan.isPopular
-                      ? 'border-[#edb100] bg-[#fffdf5] shadow-[0_0_0_1px_rgba(255,196,0,0.25)]'
-                      : 'border-[#ececea] bg-[var(--peekaboo-warm)]'
+                      ? 'border-[#edb100] bg-[#fffdf5] shadow-[0_0_0_1px_rgba(255,196,0,0.25)] hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]'
+                      : 'border-[#ececea] bg-[var(--peekaboo-warm)] hover:border-[#d49e00] hover:shadow-[0_8px_24px_-12px_rgba(10,10,10,0.1)]'
                   }`}
                 >
                   <header className="flex items-start justify-between gap-4">
@@ -107,7 +107,7 @@ const BusinessPlansSection = ({
                         className="flex items-start gap-2 text-[12.5px] leading-relaxed text-[#6b6f76]"
                       >
                         <Check
-                          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d49e00]"
+                          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d49e00] transition-transform duration-300 group-hover:scale-110"
                           aria-hidden="true"
                         />
                         <span>{feature}</span>
@@ -118,20 +118,20 @@ const BusinessPlansSection = ({
                   <div className="mt-6 flex flex-col gap-2">
                     <Link
                       to="/contact"
-                      className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-semibold transition ${
+                      className={`group/link inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-semibold transition-all duration-300 ${
                         plan.isPopular
-                          ? 'bg-[#0a0a0a] text-white hover:bg-[#1c1c1c]'
-                          : 'bg-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00]'
+                          ? 'bg-[#0a0a0a] text-white hover:bg-[#1c1c1c] hover:shadow-[0_4px_12px_-2px_rgba(10,10,10,0.3)]'
+                          : 'bg-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00] hover:shadow-[0_4px_12px_-2px_rgba(237,177,0,0.3)]'
                       }`}
                     >
                       {ctaLabel}
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" aria-hidden="true" />
                     </Link>
 
                     {plan.detailsTo ? (
                       <Link
                         to={plan.detailsTo}
-                        className="inline-flex items-center justify-center rounded-md border border-[#ececea] bg-white px-4 py-2 text-[12px] font-semibold text-[#0a0a0a] transition hover:bg-[#f7f6f1]"
+                        className="inline-flex items-center justify-center rounded-md border border-[#ececea] bg-white px-4 py-2 text-[12px] font-semibold text-[#0a0a0a] transition-all duration-300 hover:bg-[#f7f6f1] hover:border-[#d9d8d4]"
                       >
                         {detailsCtaLabel}
                       </Link>

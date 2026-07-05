@@ -69,9 +69,9 @@ const WhyPeekabooSection = ({
           {items.map((item) => {
             const Icon = item.icon;
             return (
-              <li key={item.title} className="border-t border-[#ececea] px-1 py-5 sm:px-5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a]">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
+              <li key={item.title} className="group border-t border-[#ececea] px-1 py-5 transition-all duration-300 hover:bg-[#f7f6f1] sm:px-5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110">
+                  <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>
                 <h3 className="mt-3 text-[14px] font-bold tracking-[-0.01em] text-[#0a0a0a]">
                   {item.title}

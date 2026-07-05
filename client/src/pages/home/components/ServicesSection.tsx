@@ -38,22 +38,22 @@ const services = [
 
 const toneClasses = {
   black: {
-    card: 'border-transparent bg-[#0a0a0a] text-white',
+    card: 'group border-transparent bg-[#0a0a0a] text-white transition-all duration-300 hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]',
     chip: 'bg-[#edb100] text-[#0a0a0a]',
     body: 'text-white/65',
-    arrow: 'bg-white/[0.06] text-white',
+    arrow: 'bg-white/[0.06] text-white transition-all duration-300 group-hover:bg-white/10 group-hover:scale-110',
   },
   yellow: {
-    card: 'border-transparent bg-[#edb100] text-[#0a0a0a]',
+    card: 'group border-transparent bg-[#edb100] text-[#0a0a0a] transition-all duration-300 hover:shadow-[0_8px_24px_-12px_rgba(10,10,10,0.2)]',
     chip: 'bg-[#0a0a0a] text-white',
     body: 'text-black/60',
-    arrow: 'bg-[#0a0a0a] text-white',
+    arrow: 'bg-[#0a0a0a] text-white transition-all duration-300 group-hover:bg-black/80 group-hover:scale-110',
   },
   white: {
-    card: 'home-card-interactive border-[#ececea] bg-white text-[#0a0a0a]',
+    card: 'home-card-interactive group border-[#ececea] bg-white text-[#0a0a0a] transition-all duration-300 hover:border-[#d49e00] hover:shadow-[0_8px_24px_-12px_rgba(10,10,10,0.1)]',
     chip: 'bg-[#fff4be] text-[#6b4d00]',
     body: 'text-[#6b6f76]',
-    arrow: 'bg-[var(--peekaboo-warm)] text-[#0a0a0a]',
+    arrow: 'bg-[var(--peekaboo-warm)] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110',
   },
 } as const;
 
@@ -97,7 +97,7 @@ const ServicesSection = () => (
                     <span
                       className={`flex h-8 w-8 items-center justify-center rounded-full ${tone.arrow}`}
                     >
-                      <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-45" aria-hidden="true" />
                     </span>
                   </div>
                   <h3

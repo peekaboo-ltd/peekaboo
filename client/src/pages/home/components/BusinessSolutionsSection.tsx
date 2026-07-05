@@ -49,9 +49,10 @@ const BusinessSolutionsSection = ({
           <Button
             type="button"
             onClick={onSeePlans}
-            className="rounded-full bg-black/[0.06] border-transparent text-[#0a0a0a] hover:bg-black/10 hover:border-transparent"
+            className="rounded-full bg-black/[0.06] border-transparent text-[#0a0a0a] transition-all duration-300 hover:bg-black/10 hover:border-transparent hover:shadow-[0_2px_8px_-2px_rgba(10,10,10,0.15)]"
           >
             See plans
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
           </Button>
         </nav>
       </header>
@@ -61,9 +62,9 @@ const BusinessSolutionsSection = ({
           const Icon = feature.icon;
           return (
             <li key={feature.title}>
-              <article className="h-full rounded-[12px] border border-black/10 bg-white/80 p-5 text-[#0a0a0a]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#0a0a0a] text-[#edb100]">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
+              <article className="group h-full rounded-[12px] border border-black/10 bg-white/80 p-5 text-[#0a0a0a] transition-all duration-300 hover:border-black/20 hover:bg-white hover:shadow-[0_8px_24px_-12px_rgba(10,10,10,0.1)]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#0a0a0a] text-[#edb100] transition-all duration-300 group-hover:scale-110 group-hover:bg-[#edb100] group-hover:text-[#0a0a0a]">
+                  <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>
                 <h3 className="mt-4 text-[14px] font-bold tracking-[-0.01em]">
                   {feature.title}

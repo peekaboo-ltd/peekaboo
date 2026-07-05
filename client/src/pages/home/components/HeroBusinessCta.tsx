@@ -21,8 +21,9 @@ const HeroBusinessCta = ({
   <nav className="flex flex-wrap gap-3 pt-1">
     <Button
       type="button"
+      primary
       onClick={onScrollToForm}
-      className="rounded-full bg-[#edb100] border-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00] hover:border-[#d49e00] font-semibold shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)]"
+      className="rounded-full font-semibold"
     >
       <PackagePlus className="h-3.5 w-3.5" aria-hidden="true" />
       {isActive ? tryQuickDeliveryLabel : 'Book delivery'}
@@ -30,16 +31,16 @@ const HeroBusinessCta = ({
     <Button
       type="button"
       onClick={isActive ? onContactClick : onTrackClick}
-      className="rounded-full border-[#ececea] bg-white text-[#0a0a0a] hover:bg-[#f7f6f1] hover:border-[#d9d8d4]"
+      className="rounded-full border-[#ececea] bg-white text-[#0a0a0a] hover:!bg-white hover:!border-[#d9d8d4] hover:!shadow-[0_2px_8px_-2px_rgba(10,10,10,0.15)] hover:!text-[#0a0a0a] transition-all duration-300"
     >
       {isActive ? (
         <>
           {accountLabel}
-          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
         </>
       ) : (
         <>
-          <Route className="h-3.5 w-3.5" aria-hidden="true" />
+          <Route className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
           Track package
         </>
       )}

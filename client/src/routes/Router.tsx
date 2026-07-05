@@ -6,7 +6,7 @@ import PublicOrderTracking from '@/pages/public/orders/PublicOrderTracking';
 import PublicOrderPaymentSuccess from '@/pages/public/orders/PublicOrderPaymentSuccess';
 import PublicLayout from '@/containers/navigation/PublicLayout';
 import { NotFoundPage, UnauthorizedPage } from '../pages/common';
-import { Login } from '@/pages/auth';
+import { Login, RegisterPage } from '@/pages/auth';
 import AuthCallback from '@/pages/auth/AuthCallback';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
 import ResetPassword from '@/pages/auth/ResetPassword';
@@ -106,7 +106,19 @@ const Router = () => {
                 <Login />,
               )}
             />
-            <Route path="register" element={<Navigate to="/auth/login" replace />} />
+            <Route
+              path="register"
+              element={withSEO(
+                {
+                  title: 'Create Account | Peekaboo',
+                  description:
+                    'Create a Peekaboo account to place deliveries, track orders, and manage logistics operations.',
+                  keywords: 'peekaboo signup, delivery account, logistics platform signup',
+                  path: '/auth/register',
+                },
+                <RegisterPage />,
+              )}
+            />
             <Route
               path="callback"
               element={withSEO(

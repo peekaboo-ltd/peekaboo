@@ -1,10 +1,17 @@
-import Button from '@/components/inputs/Button';
-import Input from '@/components/inputs/Input';
-import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import { useForgotPasswordMutation } from '@/api/mutations/auth.mutations';
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import Button from '@/components/inputs/Button';
+import Input from '@/components/inputs/Input';
+import { useForgotPasswordMutation } from '@/api/mutations/auth.mutations';
+import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import {
+  AuthCard,
+  AuthNotice,
+  AuthPageShell,
+  authInputClassName,
+  authPrimaryButtonClassName,
+} from './AuthPageShell';
 
 const ForgotPassword = () => {
   useDocumentTitle('Forgot Password');
@@ -27,43 +34,47 @@ const ForgotPassword = () => {
   };
 
   return (
-    <main className="min-h-[60vh] flex items-center justify-center bg-gray-50 px-4 py-12">
-      <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <header className="text-center space-y-2">
-          <h1 className="text-2xl font-semibold text-slate-900">Reset your password</h1>
-          <p className="text-sm text-slate-600">
-            Enter your email or phone number and we&apos;ll send instructions to reset your
-            password.
-          </p>
-        </header>
-
+    <AuthPageShell>
+      <AuthCard
+        title="Reset your password"
+        subtitle="Enter your email or phone number and we will send reset instructions."
+      >
         {isSubmitted ? (
-          <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-            If your account exists, a reset email has been sent. Please check your inbox.
-          </div>
+          <AuthNotice tone="success">
+            If your account exists, reset instructions have been sent. Please check your inbox.
+          </AuthNotice>
         ) : (
-          <form className="mt-6 flex flex-col gap-4" onSubmit={onSubmit}>
+          <form className="flex flex-col gap-4" onSubmit={onSubmit}>
             <Input
-              label="Email or phone number"
+              label="Email or phone"
               placeholder="name@example.com or 078XXXXXXX"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
+              className={authInputClassName}
             />
-            <Button type="submit" primary className="w-full" isLoading={isLoading}>
+            <Button
+              type="submit"
+              primary
+              className={authPrimaryButtonClassName}
+              isLoading={isLoading}
+            >
               Send reset instructions
             </Button>
           </form>
         )}
 
-        <div className="mt-4 text-center text-sm text-slate-600">
-          Remembered your password?{' '}
-          <Link to="/auth/login" className="font-medium text-primary hover:underline">
+        <div className="mt-7 border-t border-border pt-6 text-center text-sm font-normal text-foreground">
+          <span>Remembered your password? </span>
+          <Link
+            to="/auth/login"
+            className="font-normal text-primary hover:text-secondary-600"
+          >
             Back to sign in
           </Link>
         </div>
-      </section>
-    </main>
+      </AuthCard>
+    </AuthPageShell>
   );
 };
 

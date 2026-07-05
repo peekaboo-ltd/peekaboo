@@ -80,8 +80,9 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
           <div className="mt-7 flex flex-wrap items-center gap-4">
             <Button
               type="button"
+              primary
               onClick={onScrollToForm}
-              className="h-auto min-h-0 rounded-full border-[#0a0a0a] bg-[#0a0a0a] !py-2.5 !px-5 font-semibold text-white hover:border-[#1c1c1c] hover:bg-[#1c1c1c]"
+              className="h-auto min-h-0 rounded-full !py-2.5 !px-5 font-semibold"
             >
               See it in action
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

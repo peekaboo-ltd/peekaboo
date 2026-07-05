@@ -46,8 +46,8 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
             const Icon = contact.icon;
             const content = (
               <>
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a]">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110">
+                  <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13px] font-bold text-[#0a0a0a]">
@@ -57,7 +57,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                     {contact.subtitle}
                   </span>
                 </span>
-                <span className="rounded-full border border-[#ececea] bg-[#f7f6f1] px-2 py-0.5 text-[11px] font-bold text-[#1f1f1f]">
+                <span className="rounded-full border border-[#ececea] bg-[#f7f6f1] px-2 py-0.5 text-[11px] font-bold text-[#1f1f1f] transition-all duration-300 group-hover:border-[#d49e00] group-hover:bg-[#fff4be]">
                   {contact.badge}
                 </span>
               </>
@@ -70,7 +70,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                     href={contact.href}
                     target={contact.external ? '_blank' : undefined}
                     rel={contact.external ? 'noopener noreferrer' : undefined}
-                    className="home-card-interactive flex w-full items-center gap-3 rounded-[18px] border border-[#ececea] bg-white p-3.5 text-left"
+                    className="group home-card-interactive flex w-full items-center gap-3 rounded-[18px] border border-[#ececea] bg-white p-3.5 text-left transition-all duration-300 hover:border-[#d49e00] hover:shadow-[0_4px_12px_-4px_rgba(10,10,10,0.1)]"
                   >
                     {content}
                   </a>
@@ -84,7 +84,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                   type="button"
                   styled={false}
                   onClick={onContactClick}
-                  className="home-card-interactive flex w-full items-center gap-3 rounded-[18px] border border-[#ececea] bg-white p-3.5 text-left"
+                  className="group home-card-interactive flex w-full items-center gap-3 rounded-[18px] border border-[#ececea] bg-white p-3.5 text-left transition-all duration-300 hover:border-[#d49e00] hover:shadow-[0_4px_12px_-4px_rgba(10,10,10,0.1)]"
                 >
                   {content}
                 </Button>
@@ -110,18 +110,18 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
               {link.to.startsWith('#') ? (
                 <a
                   href={link.to}
-                  className="home-card-interactive flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#ececea] bg-white px-4 py-3 text-left text-[13px] font-medium text-[#0a0a0a]"
+                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#ececea] bg-white px-4 py-3 text-left text-[13px] font-medium text-[#0a0a0a] transition-all duration-300 hover:border-[#d49e00] hover:shadow-[0_4px_12px_-4px_rgba(10,10,10,0.1)]"
                 >
                   {link.label}
-                  <ArrowRight className="h-3 w-3 shrink-0 text-[#6b6f76]" aria-hidden="true" />
+                  <ArrowRight className="h-3 w-3 shrink-0 text-[#6b6f76] transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
                 </a>
               ) : (
                 <Link
                   to={link.to}
-                  className="home-card-interactive flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#ececea] bg-white px-4 py-3 text-left text-[13px] font-medium text-[#0a0a0a]"
+                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-[18px] border border-[#ececea] bg-white px-4 py-3 text-left text-[13px] font-medium text-[#0a0a0a] transition-all duration-300 hover:border-[#d49e00] hover:shadow-[0_4px_12px_-4px_rgba(10,10,10,0.1)]"
                 >
                   {link.label}
-                  <ArrowRight className="h-3 w-3 shrink-0 text-[#6b6f76]" aria-hidden="true" />
+                  <ArrowRight className="h-3 w-3 shrink-0 text-[#6b6f76] transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
                 </Link>
               )}
             </li>
@@ -137,10 +137,12 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
           </hgroup>
           <Button
             type="button"
+            primary
             onClick={onContactClick}
-            className="shrink-0 rounded-full bg-[#edb100] border-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00] hover:border-[#d49e00] font-semibold"
+            className="shrink-0 rounded-full font-semibold"
           >
             Contact support
+            <ArrowRight className="ml-2 h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         </section>
       </aside>

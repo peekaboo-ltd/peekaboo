@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import Button from '@/components/inputs/Button';
+import Input from '@/components/inputs/Input';
 import { useAppDispatch } from '@/states/hooks';
 import {
   setToken,
@@ -7,13 +11,16 @@ import {
   setIsAuthenticated,
 } from '@/states/slices/auth.slice';
 import { localStorageUtil } from '@/utils/localStorage.util';
-import { toast } from 'sonner';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
-import Button from '@/components/inputs/Button';
-import Input from '@/components/inputs/Input';
-import { Controller, useForm } from 'react-hook-form';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import {
+  AuthCard,
+  AuthPageShell,
+  authInputClassName,
+  authPrimaryButtonClassName,
+  authSecondaryButtonClassName,
+} from './AuthPageShell';
 
 interface AddPhoneFormData {
   phoneNumber: string;
@@ -58,14 +65,12 @@ const AuthCallback = () => {
 
       setTokenState(tokenParam);
 
-      // Check if user needs to add phone number
       if (needsPhoneParam === 'true') {
         setNeedsPhone(true);
         setIsLoading(false);
         return;
       }
 
-      // User has phone number, proceed with authentication
       await completeAuthentication(tokenParam);
     };
 
@@ -74,7 +79,6 @@ const AuthCallback = () => {
 
   const completeAuthentication = async (authToken: string) => {
     try {
-      // Fetch user data with the token
       const response = await fetch(`${ENVIRONMENTS.API_URL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -88,11 +92,9 @@ const AuthCallback = () => {
       const result = await response.json();
       const userData = result.data;
 
-      // Store token and user data
       localStorageUtil.setItem('token', authToken);
       localStorageUtil.setItem('user', userData);
 
-      // Update Redux state
       dispatch(setToken(authToken));
       dispatch(setUser(userData));
       dispatch(setIsAuthenticated(true));
@@ -107,7 +109,6 @@ const AuthCallback = () => {
   };
 
   const handlePhoneSubmit = handleSubmit(async (data) => {
-    // Validate phone number
     const validation = validateAndFormatPhoneNumber(data.phoneNumber);
     if (!validation.isValid) {
       setPhoneError(validation.error);
@@ -140,7 +141,6 @@ const AuthCallback = () => {
         throw new Error(errorData.message || 'Failed to add phone number');
       }
 
-      // Phone number added successfully, complete authentication
       await completeAuthentication(token);
     } catch (error) {
       console.error('Error adding phone number:', error);
@@ -159,36 +159,30 @@ const AuthCallback = () => {
       return;
     }
 
-    // Allow user to skip adding phone for now
     await completeAuthentication(token);
   };
 
   if (isLoading) {
     return (
-      <main className="h-full flex items-center justify-center bg-gray-50">
-        <article className="text-center">
-          <figure className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></figure>
-          <p className="mt-4 text-gray-600">Completing sign in...</p>
-        </article>
-      </main>
+      <AuthPageShell>
+        <AuthCard title="Completing sign in" subtitle="We are securing your session.">
+          <div className="flex justify-center py-4">
+            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+          </div>
+        </AuthCard>
+      </AuthPageShell>
     );
   }
 
   if (needsPhone) {
     return (
-      <main className="h-full flex items-center justify-center bg-gray-50 py-6 px-4 sm:py-12 sm:px-6 lg:px-8">
-        <article className="flex flex-col gap-6 py-8 w-full sm:min-w-[30vw] max-w-[500px] shadow-2xl rounded-lg p-6 bg-white">
-          <header className="flex flex-col gap-2">
-            <h1 className="text-center text-lg sm:text-xl font-extrabold text-gray-900">
-              Add Your Phone Number
-            </h1>
-            <p className="text-center text-sm text-gray-600">
-              Please add your phone number to complete your profile.
-            </p>
-          </header>
-
-          <form className="flex flex-col gap-6" onSubmit={handlePhoneSubmit}>
-            <fieldset className="w-full grid grid-cols-1 gap-4">
+      <AuthPageShell>
+        <AuthCard
+          title="Add your phone number"
+          subtitle="Add a phone number to complete your Peekaboo profile."
+        >
+          <form className="flex flex-col gap-4" onSubmit={handlePhoneSubmit}>
+            <div>
               <Controller
                 name="phoneNumber"
                 control={control}
@@ -196,29 +190,39 @@ const AuthCallback = () => {
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Phone Number"
+                    label="Phone number"
                     placeholder="078XXXXXXX"
                     required
+                    className={authInputClassName}
                     errorMessage={phoneError || errors?.phoneNumber?.message}
                   />
                 )}
               />
-              <aside className="text-xs text-gray-500 -mt-2">
+              <p className="mt-1 text-xs font-normal text-muted-foreground">
                 Valid prefixes: 078, 072, 073, 079, 077
-              </aside>
-            </fieldset>
+              </p>
+            </div>
 
             <nav className="flex flex-col gap-3">
-              <Button type="submit" primary isLoading={isSubmitting}>
-                Add Phone Number
+              <Button
+                type="submit"
+                primary
+                isLoading={isSubmitting}
+                className={authPrimaryButtonClassName}
+              >
+                Add phone number
               </Button>
-              <Button type="button" onClick={handleSkipPhone}>
-                Skip for Now
+              <Button
+                type="button"
+                onClick={handleSkipPhone}
+                className={authSecondaryButtonClassName}
+              >
+                Skip for now
               </Button>
             </nav>
           </form>
-        </article>
-      </main>
+        </AuthCard>
+      </AuthPageShell>
     );
   }
 

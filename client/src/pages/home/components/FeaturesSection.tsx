@@ -26,20 +26,20 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
                 type="button"
                 styled={false}
                 onClick={action.onClick}
-                className={`group flex h-full min-h-[150px] w-full flex-col items-start rounded-[12px] border p-5 text-left transition-[background-color,border-color,box-shadow,transform] duration-200 ${
+                className={`group relative flex h-full min-h-[150px] w-full flex-col items-start rounded-[12px] border p-5 text-left transition-all duration-300 ${
                   action.accent
-                    ? 'border-[#0a0a0a] bg-[#0a0a0a] text-white hover:-translate-y-0.5 hover:border-[#edb100] hover:bg-[#141414] hover:shadow-[0_18px_36px_-24px_rgba(10,10,10,0.55)]'
-                    : 'border-[#ececea] bg-white text-[#0a0a0a] hover:-translate-y-0.5 hover:border-[#d49e00] hover:shadow-[0_18px_36px_-26px_rgba(10,10,10,0.32)]'
+                    ? 'border-[#0a0a0a] bg-[#0a0a0a] text-white hover:border-[#edb100] hover:bg-[#1a1a1a] hover:shadow-[0_12px_32px_-8px_rgba(237,177,0,0.35)]'
+                    : 'border-[#ececea] bg-white text-[#0a0a0a] hover:border-[#d49e00] hover:bg-[#fafaf8] hover:shadow-[0_12px_32px_-8px_rgba(10,10,10,0.12)]'
                 }`}
               >
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-[10px] transition-colors duration-200 ${
+                  className={`flex h-9 w-9 items-center justify-center rounded-[10px] transition-all duration-300 ${
                     action.accent
                       ? 'bg-[#edb100] text-[#0a0a0a]'
                       : 'bg-[#fff4be] text-[#0a0a0a] group-hover:bg-[#edb100]'
                   }`}
                 >
-                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>
                 <span className="mt-4 block text-[14px] font-bold tracking-[-0.01em]">
                   {action.title}
@@ -52,12 +52,12 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
                   {action.description}
                 </span>
                 <span
-                  className={`mt-auto inline-flex items-center gap-1.5 pt-4 text-[12px] font-semibold ${
+                  className={`mt-auto inline-flex items-center gap-1.5 pt-4 text-[12px] font-semibold transition-opacity duration-300 ${
                     action.accent ? 'text-[#edb100]' : 'text-[#0a0a0a]'
                   }`}
                 >
                   Open
-                  <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
               </Button>
             </li>

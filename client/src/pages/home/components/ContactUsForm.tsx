@@ -75,7 +75,7 @@ const ContactUsForm = ({
           </p>
           <Button
             primary
-            className="mt-2"
+            className="mt-2 rounded-full font-semibold"
             onClick={handleSuccessAction}
           >
             {successActionLabel ?? t('contact.close')}
@@ -187,7 +187,7 @@ const ContactUsForm = ({
             <Button
               type="submit"
               primary
-              className="w-full mt-1"
+              className="w-full mt-1 rounded-full font-semibold"
               isLoading={isLoading}
               disabled={isLoading}
             >

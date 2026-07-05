@@ -225,9 +225,10 @@ const HeroForm = ({
 
         <Button
           submit
+          primary
           isLoading={isLoading}
           disabled={isLoading}
-          className="mt-5 h-10 w-full rounded-md border-[#edb100] bg-[#edb100] text-[13px] font-semibold text-[#0a0a0a] shadow-none hover:border-[#d49e00] hover:bg-[#d49e00]"
+          className="mt-5 h-10 w-full rounded-md text-[13px] font-semibold"
         >
           {isLoading ? 'Booking...' : copy.continueLabel}
           <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" aria-hidden="true" />
