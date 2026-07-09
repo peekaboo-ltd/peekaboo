@@ -221,7 +221,7 @@ export class UrubutoService {
         );
 
         logger.info('UrubutoPay transaction status response', {
-          response,
+          data: response?.data,
           config: this.config,
         });
 
