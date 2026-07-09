@@ -5,11 +5,13 @@ import { ChangeEvent, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { cleanPhoneNumber, validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import { validateDeliveryLocation } from '@/utils/location.util';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
 import { Badge } from '@/components/ui/badge';
 import { useImportBulkOrders } from '@/hooks/orders/orders.hooks';
 import { parseBillingGuardPrompt, type BillingGuardPrompt } from '@/utils/billingGuard.util';
+import { parseApiError, getErrorSummary } from '@/utils/errorHandler.util';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -122,6 +124,15 @@ function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewSta
       });
     }
 
+    // Warn if delivery location is missing (optional but recommended)
+    if (!deliveryLocation.trim()) {
+      validationErrors.push({
+        rowNumber,
+        field: 'deliveryLocation',
+        message: 'Delivery location is recommended for better order processing',
+      });
+    }
+
     if (productReferenceNo.length > MAX_TEXT_LENGTH) {
       validationErrors.push({
         rowNumber,
@@ -192,6 +203,19 @@ const ImportBatch = () => {
       {},
     );
   }, [preview.errors]);
+
+  const errorSummary = useMemo(() => {
+    const summary = new Map<string, number>();
+    preview.errors.forEach((err) => {
+      const count = summary.get(err.field) || 0;
+      summary.set(err.field, count + 1);
+    });
+    return summary;
+  }, [preview.errors]);
+
+  const missingLocationCount = useMemo(() => {
+    return preview.rows.filter((row) => !row.deliveryLocation?.trim()).length;
+  }, [preview.rows]);
 
   const hasBlockingErrors = useMemo(() => {
     if (preview.rows.length === 0) return true;
@@ -323,14 +347,23 @@ const ImportBatch = () => {
         return;
       }
 
+      const parsed = parseApiError(submissionError);
+      
+      // Check for backend validation errors
       const backendErrors = (submissionError as {
         data?: { data?: { errors?: ImportRowValidationError[] } };
       })?.data?.data?.errors as ImportRowValidationError[] | undefined;
 
       if (backendErrors?.length) {
         setPreview((previous) => ({ ...previous, errors: backendErrors }));
+        const summary = getErrorSummary(submissionError);
+        toast.error(
+          `Import failed: ${summary.totalErrors} error(s) in ${summary.affectedRows} row(s). Please fix and retry.`,
+          { duration: 5000 }
+        );
+      } else {
+        toast.error(parsed.message || 'Bulk import failed. Please try again.');
       }
-      toast.error('Bulk import failed. Fix highlighted errors and retry.');
     }
   }, [closeModal, dispatch, getValues, hasBlockingErrors, importBulkOrders, navigate, preview?.rows]);
 
@@ -391,16 +424,55 @@ const ImportBatch = () => {
             animate={{ opacity: 1, y: 0 }}
             className="rounded-xl border border-red-200 bg-red-50 p-4 sticky top-0 z-20"
           >
-            <h4 className="text-sm font-semibold text-red-800">
-              Validation Issues ({preview.errors.length})
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h4 className="text-sm font-semibold text-red-800">
+                  {preview.errors.length} Validation Issue{preview.errors.length !== 1 ? 's' : ''} Found
+                </h4>
+                <p className="text-xs text-red-700 mt-1">
+                  Affecting {Object.keys(errorsByRow).length} row{Object.keys(errorsByRow).length !== 1 ? 's' : ''}
+                </p>
+                
+                {/* Error Summary by Type */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {Array.from(errorSummary.entries()).map(([field, count]) => (
+                    <Badge key={field} variant="destructive" className="text-[10px]">
+                      {field}: {count}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Scrollable Error List */}
+            <details className="mt-3">
+              <summary className="text-xs font-medium text-red-800 cursor-pointer hover:text-red-900">
+                View all errors
+              </summary>
+              <ul className="mt-2 space-y-1 text-xs text-red-700 max-h-48 overflow-y-auto">
+                {preview.errors.map((item, idx) => (
+                  <li key={`${item.rowNumber}-${item.field}-${idx}`}>
+                    Row {item.rowNumber} · {item.field}: {item.message}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </motion.article>
+        )}
+
+        {/* Missing Location Warning */}
+        {missingLocationCount > 0 && preview.errors.length === 0 && (
+          <motion.article
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border border-amber-200 bg-amber-50 p-4"
+          >
+            <h4 className="text-sm font-semibold text-amber-800">
+              ⚠️ {missingLocationCount} order{missingLocationCount !== 1 ? 's' : ''} missing delivery location
             </h4>
-            <ul className="mt-2 space-y-1 text-xs text-red-700 max-h-36 overflow-y-auto">
-              {preview.errors.map((item, idx) => (
-                <li key={`${item.rowNumber}-${item.field}-${idx}`}>
-                  Row {item.rowNumber} · {item.field}: {item.message}
-                </li>
-              ))}
-            </ul>
+            <p className="text-xs text-amber-700 mt-1">
+              Delivery locations are optional but recommended for better order processing. You can add them in the preview page after import.
+            </p>
           </motion.article>
         )}
 

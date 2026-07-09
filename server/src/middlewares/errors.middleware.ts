@@ -49,9 +49,13 @@ const errorHandler = (
       referenceType: err?.data?.referenceType,
     });
 
+    // Check if data contains validation errors array
+    const hasErrors = err?.data && 'errors' in err.data && Array.isArray((err.data as any).errors);
+    
     return res.status(err.statusCode).json({
       message: err.message,
-      data: err?.data,
+      ...(hasErrors ? { errors: (err.data as any).errors } : {}),
+      ...(err?.data && !hasErrors ? { data: err.data } : {}),
     });
   }
 

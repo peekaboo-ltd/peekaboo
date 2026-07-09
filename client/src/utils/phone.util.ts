@@ -4,7 +4,7 @@
  */
 
 // Valid Rwandan phone number prefixes
-const VALID_PREFIXES = ['078', '072', '073', '079'] as const;
+const VALID_PREFIXES = ['078', '072', '073', '079', '077'] as const;
 
 export interface PhoneValidationResult {
   isValid: boolean;

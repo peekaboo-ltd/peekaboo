@@ -10,6 +10,7 @@ import { LogReferenceTypes } from '../constants/logs.constants';
 import { BatchStatus } from '../constants/batch.constants';
 import { OrderActivityStatus, OrderStatus } from '../constants/order.constants';
 import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
+import { validateDeliveryLocation } from '../helpers/location.helper';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 
@@ -57,7 +58,10 @@ export class BatchService {
       where: { id },
       relations: {
         createdBy: true,
-        orders: true,
+        orders: {
+          recipient: true,
+          sender: true,
+        },
       },
     });
 
@@ -147,19 +151,6 @@ export class BatchService {
     ) || [];
 
     const validationErrors: Array<{ orderId: UUID; referenceId: string; field: string; message: string }> = [];
-    const hasDeliveryLocation = (order: Order) => {
-      const latitude = Number(order.locationTo?.latitude);
-      const longitude = Number(order.locationTo?.longitude);
-
-      return (
-        Number.isFinite(latitude) &&
-        Number.isFinite(longitude) &&
-        latitude >= -90 &&
-        latitude <= 90 &&
-        longitude >= -180 &&
-        longitude <= 180
-      );
-    };
 
     for (const order of draftOrders) {
       const recipientPhone = order.recipient?.phoneNumber || '';
@@ -173,12 +164,13 @@ export class BatchService {
         });
       }
 
-      if (!hasDeliveryLocation(order)) {
+      const locationResult = validateDeliveryLocation(order.locationTo);
+      if (!locationResult.isValid) {
         validationErrors.push({
           orderId: order.id,
           referenceId: order.referenceId,
           field: 'deliveryLocation',
-          message: 'Delivery location is required',
+          message: locationResult.error || 'Delivery location is required',
         });
       }
     }
