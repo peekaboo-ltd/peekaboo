@@ -1,3 +1,7 @@
+import {
+  DEVELOPMENT_PAYMENT_AMOUNT_RWF,
+  ENVIRONMENTS,
+} from '@/constants/environments.constants';
 import type { Order } from '@/types/order.type';
 import { formatCurrency, formatDate, formatPhone } from '@/utils/strings.util';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
@@ -34,6 +38,13 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         <dt className="text-xs sm:text-sm font-medium text-gray-500">Fee</dt>
         <dd className="text-xs sm:text-sm font-normal text-black">
           {order?.finalFee ? `${formatCurrency(order.finalFee)}` : 'TBD'}
+          {ENVIRONMENTS.isDevelopmentPricing && order?.finalFee ? (
+            <p className="mt-1 text-[11px] font-normal leading-snug text-amber-700">
+              Development environment: catalog fee shown. You will only be
+              charged {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at
+              checkout.
+            </p>
+          ) : null}
         </dd>
       </dl>
       <dl className="space-y-2 sm:space-y-2">

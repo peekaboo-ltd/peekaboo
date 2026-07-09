@@ -9,6 +9,10 @@ import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import Button from '../inputs/Button';
 import { useCreatePayment, useCreatePublicPayment } from '@/hooks/payments/payment.hooks';
 import { toast } from 'sonner';
+import {
+  DEVELOPMENT_PAYMENT_AMOUNT_RWF,
+  ENVIRONMENTS,
+} from '@/constants/environments.constants';
 
 type PayerType = 'sender' | 'recipient' | 'other';
 type UrubutoChannelName = 'MOMO' | 'AIRTEL_MONEY' | 'CARD';
@@ -316,6 +320,17 @@ const OrderPayment = () => {
             <p className='text-sm text-black'>{fallbackPhoneError}</p>
           )}
         </fieldset>
+
+        {ENVIRONMENTS.isDevelopmentPricing ? (
+          <p className="text-xs font-normal leading-snug text-amber-700">
+            Catalog fee is{' '}
+            {formatCurrency(
+              selectedOrder?.finalFee ?? selectedOrder?.initialFee ?? 0,
+            )}
+            . In this development environment you will only be charged{' '}
+            {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)}.
+          </p>
+        ) : null}
 
         <Button primary onClick={(e) => {
           e.preventDefault();

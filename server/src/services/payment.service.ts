@@ -39,6 +39,10 @@ import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import { formatPhoneNumber } from '../helpers/phone.helper';
 import { ConversationStatus } from '../constants/conversation.constants';
 import logger from '../helpers/logger.helper';
+import {
+  DEVELOPMENT_PAYMENT_AMOUNT_RWF,
+  resolveChargeableAmount,
+} from '../helpers/developmentPricing.helper';
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
@@ -96,9 +100,34 @@ export class PaymentService {
       });
     }
 
+    const {
+      chargeAmount,
+      isDevelopmentPricing,
+      catalogAmount,
+    } = resolveChargeableAmount(Number(payment.amount));
+
+    const paymentMetadata: Record<string, any> = {
+      ...(payment.metadata || {}),
+      ...(isDevelopmentPricing
+        ? {
+            developmentPricing: true,
+            catalogAmount,
+            chargedAmount: DEVELOPMENT_PAYMENT_AMOUNT_RWF,
+          }
+        : {}),
+    };
+
+    if (isDevelopmentPricing) {
+      logger.info('Development pricing applied to payment', {
+        entityId: payment.entityId,
+        catalogAmount,
+        chargeAmount,
+      });
+    }
+
     const newPayment: Payment = await this.paymentRepository.save({
       entityId: payment.entityId,
-      amount: Number(payment.amount),
+      amount: chargeAmount,
       externalReferenceId: undefined,
       internalReferenceId: payment?.entityId,
       status: KpayPaymentStatus.PENDING,
@@ -111,14 +140,14 @@ export class PaymentService {
       createdById: payment.createdById,
       provider,
       method: requestedMethod,
-      metadata: payment.metadata || {},
+      metadata: paymentMetadata,
     });
 
     let result: any;
 
     if (newPayment && provider === PaymentProvider.KPAY) {
       result = await this.kpayService.initiatePayment({
-        amount: payment.amount,
+        amount: chargeAmount,
         currency: payment.currency,
         customerEmail: payment?.customerEmail,
         customerName: payment?.customerName,
@@ -130,7 +159,7 @@ export class PaymentService {
       const payerCode = await this.resolveUrubutoPayerCode(payment.entityId);
 
       result = await this.urubutoService.initiatePayment({
-        amount: payment.amount,
+        amount: chargeAmount,
         currency: payment.currency,
         customerEmail: payment?.customerEmail,
         customerName: payment?.customerName,
@@ -254,7 +283,7 @@ export class PaymentService {
           customerName: payment.customerName || '',
           customerEmail: payment.customerEmail,
           orderReference: payment.entityId as string,
-          amount: payment.amount,
+          amount: chargeAmount,
           currency: payment.currency || 'RWF',
         })
         .catch(() => {});
@@ -447,6 +476,9 @@ export class PaymentService {
       throw new NotFoundError('no data found for the given payer code');
     }
 
+    const catalogAmount = Number(order.finalFee || order.initialFee || 0);
+    const { chargeAmount } = resolveChargeableAmount(catalogAmount);
+
     return {
       merchant_code: request.merchant_code,
       payer_code: request.payer_code,
@@ -455,7 +487,7 @@ export class PaymentService {
         order.recipient?.name ||
         order.externalReferenceId ||
         order.referenceId,
-      amount: Number(order.finalFee || order.initialFee || 0),
+      amount: chargeAmount,
       currency: 'RWF',
       payer_must_pay_total_amount: 'YES',
       comment: order.notes || order.description || 'Peekaboo order payment',

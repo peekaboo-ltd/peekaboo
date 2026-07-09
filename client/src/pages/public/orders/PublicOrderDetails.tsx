@@ -17,7 +17,10 @@ import { getCurrentLocation } from '@/utils/locations.util';
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { APIProvider } from '@vis.gl/react-google-maps';
-import { ENVIRONMENTS } from '@/constants/environments.constants';
+import {
+  DEVELOPMENT_PAYMENT_AMOUNT_RWF,
+  ENVIRONMENTS,
+} from '@/constants/environments.constants';
 import RouteCalculator from '@/containers/locations/RouteCalculator';
 import AdministrativeLocation from '@/containers/locations/AdministrativeLocation';
 import Button from '@/components/inputs/Button';
@@ -419,6 +422,14 @@ const PublicOrderDetails = () => {
                             {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
                           </p>
                           <p className="mt-1 text-xs text-slate-500">including VAT</p>
+                          {ENVIRONMENTS.isDevelopmentPricing ? (
+                            <p className="mt-2 text-xs font-normal leading-snug text-amber-700">
+                              Development environment: catalog fee shown. You
+                              will only be charged{' '}
+                              {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at
+                              checkout.
+                            </p>
+                          ) : null}
                         </>
                       ) : (
                         <div className="mt-2 space-y-3">
@@ -442,6 +453,13 @@ const PublicOrderDetails = () => {
                         </Button>
                       </span>
                     </p>
+                    {ENVIRONMENTS.isDevelopmentPricing ? (
+                      <p className="mt-2 text-sm font-normal text-amber-700">
+                        Environment pricing: checkout charges{' '}
+                        {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} only
+                        while this environment is in development.
+                      </p>
+                    ) : null}
                   </div>
                 </>
               )}
