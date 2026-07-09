@@ -14,7 +14,11 @@ import {
   UrubutoVerifyTransactionStatusResult,
   UrubutoWebhookAuthRequest,
 } from '../../types/urubuto.types';
-import { buildUrubutoConfig } from './urubuto.config';
+import {
+  buildUrubutoConfig,
+  describeUrubutoEnvironment,
+  urubutoCredentialFingerprint,
+} from './urubuto.config';
 import logger from '../../helpers/logger.helper';
 
 export function isValidUrubutoRedirectUrl(redirectUrl?: string): boolean {
@@ -58,6 +62,11 @@ export function mapUrubutoInitiateErrorMessage(rawMessage?: string): string {
   }
 
   return message;
+}
+
+function isUrubutoServiceCodeError(rawMessage?: string): boolean {
+  const lower = (rawMessage || '').toLowerCase();
+  return lower.includes('service code') || lower.includes('service_code');
 }
 
 export class UrubutoService {
@@ -272,10 +281,19 @@ export class UrubutoService {
     redirectUrl?: string;
   }): Promise<UrubutoPaymentResult> {
     const channelName = this.normalizeChannelName(request.channelName);
+    const apiEnvironment = describeUrubutoEnvironment(this.config.baseUrl);
+    const merchantCodeFingerprint = urubutoCredentialFingerprint(
+      this.config.merchantCode,
+    );
+    const serviceCodeFingerprint = urubutoCredentialFingerprint(
+      this.config.serviceCode,
+    );
 
     const logContext = {
-      merchant_code: this.config.merchantCode,
-      service_code: this.config.serviceCode,
+      api_environment: apiEnvironment,
+      merchant_code_fingerprint: merchantCodeFingerprint,
+      service_code_fingerprint: serviceCodeFingerprint,
+      service_code_source: 'URUBUTO_SERVICE_CODE',
       payer_code: request.payerCode,
       channel_name: channelName,
       amount: request.amount,
@@ -333,7 +351,11 @@ export class UrubutoService {
 
       logger.info('UrubutoPay payment initiation payload', {
         ...logContext,
-        payload,
+        payload: {
+          ...payload,
+          merchant_code: merchantCodeFingerprint,
+          service_code: serviceCodeFingerprint,
+        },
       });
 
       const response = await this.client.post<UrubutoInitiatePaymentResponse>(
@@ -367,6 +389,7 @@ export class UrubutoService {
 
       if (!apiSuccess) {
         const message = mapUrubutoInitiateErrorMessage(response.data.message);
+        const serviceCodeError = isUrubutoServiceCodeError(response.data.message);
         logger.error('UrubutoPay payment initiation rejected', {
           ...logContext,
           urubutoStatus: response.data.status,
@@ -378,6 +401,13 @@ export class UrubutoService {
           error: {
             code: String(response.data.status || response.status),
             message,
+            metadata: {
+              apiEnvironment,
+              serviceCodeSource: 'URUBUTO_SERVICE_CODE',
+              merchantCodeFingerprint,
+              serviceCodeFingerprint,
+              serviceCodeError,
+            },
           },
         };
       }
@@ -416,6 +446,7 @@ export class UrubutoService {
         error.response?.data?.message ||
         error.message ||
         'UrubutoPay payment initiation failed.';
+      const serviceCodeError = isUrubutoServiceCodeError(rawMessage);
 
       logger.error('UrubutoPay payment initiation error', {
         ...logContext,
@@ -439,8 +470,11 @@ export class UrubutoService {
             transactionId: request.refId,
             channelName,
             payerCode: request.payerCode,
-            merchantCode: this.config.merchantCode,
-            serviceCode: this.config.serviceCode,
+            apiEnvironment,
+            serviceCodeSource: 'URUBUTO_SERVICE_CODE',
+            merchantCodeFingerprint,
+            serviceCodeFingerprint,
+            serviceCodeError,
             rawMessage,
             ...(error.code ? { axiosCode: error.code } : {}),
           },

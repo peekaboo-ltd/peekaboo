@@ -60,6 +60,8 @@ test('CARD payment with a valid redirect URL sends redirection_url', async () =>
     assert.equal(result.success, true);
     assert.equal(postedPayload.redirection_url, 'https://peekaboo.test/payment/success');
     assert.equal(postedPayload.channel_name, UrubutoChannelName.CARD);
+    assert.equal(postedPayload.service_code, config.serviceCode);
+    assert.equal(postedPayload.merchant_code, config.merchantCode);
   } finally {
     restore();
   }
@@ -124,6 +126,7 @@ test('MOMO payment does not require redirection_url', async () => {
 
     assert.equal(result.success, true);
     assert.equal(postedPayload.channel_name, UrubutoChannelName.MOMO);
+    assert.equal(postedPayload.service_code, config.serviceCode);
     assert.equal('redirection_url' in postedPayload, false);
   } finally {
     restore();
@@ -150,8 +153,41 @@ test('Axios timeout from /api/v2/payment/initiate returns a distinct timeout res
     });
 
     assert.equal(result.success, false);
-    assert.equal(result.error?.code, 'TIMEOUT_ERROR');
+    assert.equal(result.error?.code, 'URUBUTO_TIMEOUT');
     assert.match(result.error?.message || '', /timed out/i);
+  } finally {
+    restore();
+  }
+});
+
+test('service code errors include actionable metadata and guidance', async () => {
+  const restore = mockAxiosPost(async () => {
+    const error: any = new Error('Request failed with status code 400');
+    error.response = {
+      status: 400,
+      data: {
+        status: 400,
+        message: 'service code not found',
+      },
+    };
+    throw error;
+  });
+
+  try {
+    const result = await new UrubutoService(config).initiatePayment({
+      amount: 1000,
+      currency: KpayCurrency.RWF,
+      customerName: 'Momo Payer',
+      customerPhone: '250788000000',
+      refId: '11111111-1111-4111-8111-111111111115',
+      payerCode: 'ORDER-5',
+      channelName: UrubutoChannelName.MOMO,
+    });
+
+    assert.equal(result.success, false);
+    assert.match(result.error?.message || '', /URUBUTO_SERVICE_CODE/i);
+    assert.equal(result.error?.metadata?.serviceCodeSource, 'URUBUTO_SERVICE_CODE');
+    assert.equal(result.error?.metadata?.serviceCodeError, true);
   } finally {
     restore();
   }

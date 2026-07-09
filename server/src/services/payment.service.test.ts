@@ -38,8 +38,15 @@ test('PaymentService.createPayment keeps Urubuto timeout payments pending for re
       initiatePayment: async () => ({
         success: false,
         error: {
-          code: 'TIMEOUT_ERROR',
+          code: 'URUBUTO_TIMEOUT',
           message: 'UrubutoPay payment initiation timed out.',
+        },
+      }),
+      verifyTransactionStatus: async () => ({
+        success: false,
+        error: {
+          code: 'URUBUTO_ERROR',
+          message: 'status check failed',
         },
       }),
     };
@@ -57,10 +64,16 @@ test('PaymentService.createPayment keeps Urubuto timeout payments pending for re
     });
 
     assert.equal(payment.status, KpayPaymentStatus.PENDING);
-    assert.equal(payment.metadata.pendingReconciliation, true);
-    assert.equal(payment.metadata.reconciliationReason, 'URUBUTO_INITIATION_TIMEOUT');
+    assert.equal(
+      Boolean(payment.metadata.urubutoTimeoutReconciliation?.checkedAt),
+      true,
+    );
+    assert.equal(
+      payment.metadata.urubutoTimeoutReconciliation?.transactionId,
+      paymentId,
+    );
     assert.equal(repository.updates.at(-1).patch.status, KpayPaymentStatus.PENDING);
-    assert.equal(repository.updates.at(-1).patch.metadata.initiationError.code, 'TIMEOUT_ERROR');
+    assert.equal(repository.updates.at(-1).patch.metadata.initiationError.code, 'URUBUTO_TIMEOUT');
   } finally {
     (AppDataSource.getRepository as any) = originalGetRepository;
     if (originalResendApiKey === undefined) {

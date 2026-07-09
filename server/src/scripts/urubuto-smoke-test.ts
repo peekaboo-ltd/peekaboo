@@ -5,6 +5,8 @@ import { AppDataSource } from '../data-source';
 import { Order } from '../entities/order.entity';
 import {
   buildUrubutoConfig,
+  describeUrubutoEnvironment,
+  urubutoCredentialFingerprint,
   validateUrubutoStartupConfig,
 } from '../integrations/urubuto/urubuto.config';
 import { UrubutoService } from '../integrations/urubuto/urubuto.service';
@@ -16,18 +18,32 @@ async function main() {
   const payerCodeArg = process.argv[2];
   const config = buildUrubutoConfig();
   const issues = validateUrubutoStartupConfig(config);
+  const apiEnvironment = describeUrubutoEnvironment(config.baseUrl);
+  const checkoutEnvironment = describeUrubutoEnvironment(config.checkoutBaseUrl);
 
   logger.info('UrubutoPay smoke test starting');
   logger.info('Configuration snapshot', {
     baseUrl: config.baseUrl,
     checkoutBaseUrl: config.checkoutBaseUrl,
-    merchantCode: config.merchantCode,
-    serviceCode: config.serviceCode,
+    apiEnvironment,
+    checkoutEnvironment,
+    merchantCode: urubutoCredentialFingerprint(config.merchantCode),
+    serviceCode: urubutoCredentialFingerprint(config.serviceCode),
+    serviceCodeSource: 'URUBUTO_SERVICE_CODE',
     hasApiKey: Boolean(config.apiKey),
     hasWebhookCredentials: Boolean(
       config.webhookUsername && config.webhookPassword,
     ),
   });
+
+  if (config.merchantCode && config.serviceCode) {
+    logger.info('Credential pairing preflight', {
+      merchantCodeFingerprint: urubutoCredentialFingerprint(config.merchantCode),
+      serviceCodeFingerprint: urubutoCredentialFingerprint(config.serviceCode),
+      guidance:
+        'URUBUTO_SERVICE_CODE must be the service explicitly linked to URUBUTO_MERCHANT_CODE in the same UrubutoPay environment.',
+    });
+  }
 
   if (issues.length) {
     logger.warning('Configuration issues detected:');
