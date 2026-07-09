@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -103,6 +103,15 @@ h2 {
   --peekaboo-line: #ececea;
   --peekaboo-text: #1f1f1f;
   --peekaboo-muted: #6b7280;
+  --ops-ink: #14181d;
+  --ops-paper: #f4f6f3;
+  --ops-line: #cbd3db;
+  --ops-signal: #e0a100;
+  --ops-route: #2d5b8a;
+  --ops-alert: #c84c4c;
+  --font-display: 'Space Grotesk';
+  --font-ui: 'Google Sans';
+  --font-data: 'IBM Plex Mono';
 
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
@@ -159,6 +168,8 @@ h2 {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --ops-paper: #171c22;
+  --ops-line: #2a323b;
 }
 
 @layer base {
@@ -301,6 +312,21 @@ html {
     transform-origin: left;
     transform: scaleX(0);
     transition: transform 250ms ease;
+  }
+
+  @utility font-display {
+    font-family: var(--font-display), 'Google Sans', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  @utility font-ui {
+    font-family: var(--font-ui), sans-serif;
+  }
+
+  @utility font-data {
+    font-family: var(--font-data), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
   }
 
   &:hover::after,

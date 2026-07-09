@@ -45,6 +45,7 @@ import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
 import DashboardActivityPanel from './components/DashboardActivityPanel';
 import DashboardContextPanel from './components/DashboardContextPanel';
+import DashboardDispatchStrip, { type DispatchStripItem } from './components/DashboardDispatchStrip';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { formatCurrency, formatNumbers } from '@/utils/strings.util';
 
@@ -325,6 +326,22 @@ const getContextCopy = (role: RoleTypes | undefined) => {
   }
 };
 
+const getDispatchStatus = (label: string): DispatchStripItem['status'] => {
+  const normalized = label.toLowerCase();
+  if (
+    normalized.includes('cancel') ||
+    normalized.includes('outage') ||
+    normalized.includes('failed') ||
+    normalized.includes('reject')
+  ) {
+    return 'down';
+  }
+  if (normalized.includes('pending') || normalized.includes('hold') || normalized.includes('review')) {
+    return 'watch';
+  }
+  return 'up';
+};
+
 const Dashboard = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [range, setRange] = useState<'7d' | '30d' | '90d'>('30d');
@@ -428,6 +445,15 @@ const Dashboard = () => {
 
   const spotlightCards = useMemo(() => metricCards.slice(4, 8), [metricCards]);
   const contextCopy = useMemo(() => getContextCopy(role), [role]);
+  const dispatchStripItems = useMemo<DispatchStripItem[]>(
+    () =>
+      statusBreakdown.slice(0, 4).map((item) => ({
+        label: item.label,
+        value: formatNumbers(item.value),
+        status: getDispatchStatus(item.label),
+      })),
+    [statusBreakdown],
+  );
 
   useEffect(() => {
     if (!role) return;
@@ -457,6 +483,8 @@ const Dashboard = () => {
         onStartDateChange={setStartDate}
         onEndDateChange={setEndDate}
       />
+
+      <DashboardDispatchStrip items={dispatchStripItems} variants={itemVariants} />
 
       <DashboardMetricsSection
         cards={metricCards}

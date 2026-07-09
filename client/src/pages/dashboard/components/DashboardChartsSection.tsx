@@ -43,7 +43,7 @@ const DashboardChartsSection = ({
             className="rounded-lg p-0"
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="text-[2rem] font-bold leading-none tracking-[-0.04em] text-slate-950">
+              <p className="font-display text-[2rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--ops-ink)]">
                 {widget.value}
               </p>
               {widget.chartType !== 'status' && widget.data && widget.data.length > 0 && (
@@ -88,7 +88,7 @@ const DashboardChartsSection = ({
                       </div>
                       <div className="h-2 rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-primary"
+                          className="h-full rounded-full bg-[color:var(--ops-route)]"
                           style={{ width: `${Math.max(width, 8)}%` }}
                         />
                       </div>

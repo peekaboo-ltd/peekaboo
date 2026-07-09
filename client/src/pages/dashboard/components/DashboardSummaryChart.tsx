@@ -20,7 +20,7 @@ import type { DashboardStatusBreakdownItem } from '@/types/dashboard.type';
 import { capitalizeString, formatCurrency, formatNumbers } from '@/utils/strings.util';
 import { RoleTypes } from '@/types/auth.type';
 
-const chartStroke = 'hsl(var(--primary))';
+const chartStroke = 'var(--ops-route)';
 
 const getMetricOptionsForRole = (role?: RoleTypes): string[] => {
   switch (role) {
@@ -96,21 +96,21 @@ const DashboardSummaryChart = ({
   return (
     <motion.section
       aria-label="Summary chart"
-      className="overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+      className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-white p-5 shadow-[0_1px_0_rgba(20,24,29,0.05)] sm:p-6"
       variants={containerVariants}
     >
       <motion.div variants={itemVariants}>
         <header className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
-            <p className="text-xs font-normal uppercase tracking-[0.22em] text-slate-500">
+            <p className="font-data text-[11px] font-medium uppercase tracking-[0.18em] text-slate-500">
               Primary insight
             </p>
             {data.length > 0 ? (
-              <p className="mt-2 text-[2.25rem] font-bold leading-none tracking-[-0.04em] text-slate-950 sm:text-[3rem]">
+              <p className="font-display mt-2 text-[2.25rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--ops-ink)] sm:text-[3rem]">
                 {formattedTotal}
               </p>
             ) : (
-              <p className="mt-2 text-[2.25rem] font-bold leading-none tracking-[-0.04em] text-slate-300 sm:text-[3rem]">
+              <p className="font-display mt-2 text-[2.25rem] font-semibold leading-none tracking-[-0.04em] text-slate-300 sm:text-[3rem]">
                 —
               </p>
             )}
@@ -125,7 +125,7 @@ const DashboardSummaryChart = ({
                 {data.length} data points
               </span>
               {peakPoint && (
-                <span className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-normal text-emerald-700">
+                <span className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
                   Peak {formatLabel(peakPoint.name)}
                 </span>
               )}
@@ -174,16 +174,10 @@ const DashboardSummaryChart = ({
           )}
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ left: -12, right: 8, top: 20, bottom: 6 }}>
-              <defs>
-                <linearGradient id="summaryGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.18} />
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.01} />
-                </linearGradient>
-              </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="#e2e8f0"
+                stroke="#D4DCE3"
                 strokeOpacity={0.9}
               />
               <XAxis
@@ -217,7 +211,7 @@ const DashboardSummaryChart = ({
                 dataKey="value"
                 stroke={chartStroke}
                 strokeWidth={2.8}
-                fill="url(#summaryGradient)"
+                fill="transparent"
                 dot={false}
                 activeDot={{ r: 5, fill: chartStroke, stroke: '#fff', strokeWidth: 2 }}
               />
@@ -230,12 +224,12 @@ const DashboardSummaryChart = ({
             {breakdown.slice(0, 3).map((item) => (
               <article
                 key={item.label}
-                className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3"
+                className="rounded-md border border-[color:var(--ops-line)] bg-[color:var(--ops-paper)] px-4 py-3"
               >
-                <p className="text-[11px] font-normal uppercase tracking-[0.18em] text-slate-500">
+                <p className="font-data text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
                   {item.label}
                 </p>
-                <p className="mt-2 text-2xl font-bold tracking-[-0.03em] text-slate-950">
+                <p className="font-display mt-2 text-2xl font-semibold tracking-[-0.03em] text-[color:var(--ops-ink)]">
                   {formatNumbers(item.value)}
                 </p>
               </article>

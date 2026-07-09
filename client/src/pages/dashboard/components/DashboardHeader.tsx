@@ -42,24 +42,29 @@ const DashboardHeader = ({
 
   return (
     <motion.header className="w-full" variants={variants}>
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0">
-            <h1 className="mt-4 text-[2rem] font-bold tracking-[-0.04em] text-slate-950 sm:text-[2.35rem]">
-              Dashboard
-            </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[15px]">
-              {userName ? `${t('dashboard.welcome', { name: userName })}. ` : ''}
-              {description}
-            </p>
+      <div className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-white shadow-[0_1px_0_rgba(20,24,29,0.05)]">
+        <div className="border-b border-[color:var(--ops-line)] px-5 py-4 sm:px-6">
+          <p className="font-data text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
+            Command center
+          </p>
+          <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div className="min-w-0">
+              <h1 className="font-display text-[2rem] font-semibold tracking-[-0.04em] text-[color:var(--ops-ink)] sm:text-[2.3rem]">
+                Dashboard
+              </h1>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[15px]">
+                {userName ? `${t('dashboard.welcome', { name: userName })}. ` : ''}
+                {description}
+              </p>
+            </div>
 
             {actions.length > 0 && (
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 xl:max-w-[28rem] xl:justify-end">
                 {actions.slice(0, 3).map((action) => (
                   <Link
                     key={action.label}
                     to={action.to}
-                    className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-normal text-slate-700 transition-colors duration-200 hover:border-slate-300 hover:bg-slate-50"
+                    className="inline-flex items-center gap-2 rounded-md border border-[color:var(--ops-line)] bg-[color:var(--ops-paper)] px-4 py-2 text-sm font-medium text-[color:var(--ops-ink)] transition-colors duration-200 hover:bg-white"
                   >
                     <FontAwesomeIcon icon={action.icon} className="text-xs text-slate-500" />
                     {action.label}
@@ -68,34 +73,40 @@ const DashboardHeader = ({
               </div>
             )}
           </div>
+        </div>
 
-          <div className="grid gap-3 sm:min-w-[20rem]">
-            <div className="grid gap-2 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-              <div className="w-full">
-                <DatePicker
-                  value={startDate}
-                  onChange={(e) => onStartDateChange?.(e as Date | undefined)}
-                  placeholder="Start date"
-                  toDate={endDate}
-                />
-              </div>
-              <span className="hidden text-center text-sm text-slate-400 sm:block">—</span>
-              <div className="w-full">
-                <DatePicker
-                  value={endDate}
-                  onChange={(e) => onEndDateChange?.(e as Date | undefined)}
-                  placeholder="End date"
-                  fromDate={startDate}
-                />
-              </div>
+        <div className="grid gap-3 px-5 py-4 sm:px-6 xl:grid-cols-[1fr_auto] xl:items-end">
+          <div className="grid gap-2 sm:grid-cols-[1fr_auto_1fr] sm:items-center xl:min-w-[24rem]">
+            <div className="w-full">
+              <DatePicker
+                value={startDate}
+                onChange={(e) => onStartDateChange?.(e as Date | undefined)}
+                placeholder="Start date"
+                toDate={endDate}
+              />
             </div>
+            <span className="font-data hidden text-center text-[11px] uppercase tracking-[0.1em] text-slate-400 sm:block">
+              to
+            </span>
+            <div className="w-full">
+              <DatePicker
+                value={endDate}
+                onChange={(e) => onEndDateChange?.(e as Date | undefined)}
+                placeholder="End date"
+                fromDate={startDate}
+              />
+            </div>
+          </div>
 
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <Button variant="outline" size="sm" className="h-10 gap-2 rounded-md px-4">
-                <FontAwesomeIcon icon={faFileLines} className="text-xs" />
-                Export
-              </Button>
-            </div>
+          <div className="flex flex-wrap items-center justify-start gap-2 xl:justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-10 gap-2 rounded-md border-[color:var(--ops-line)] px-4"
+            >
+              <FontAwesomeIcon icon={faFileLines} className="text-xs" />
+              Export
+            </Button>
           </div>
         </div>
       </div>

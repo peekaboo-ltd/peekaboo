@@ -40,8 +40,8 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
         className="rounded-lg"
       >
         {rows.length > 0 ? (
-          <div className="overflow-hidden rounded-md border border-slate-200 bg-white">
-            <div className="hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-slate-200 px-5 py-3 text-[11px] font-normal uppercase tracking-[0.18em] text-slate-500 sm:grid">
+          <div className="overflow-hidden rounded-md border border-[color:var(--ops-line)] bg-white">
+            <div className="font-data hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--ops-line)] px-5 py-3 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500 sm:grid">
               <span>Activity</span>
               <span>Status</span>
               <span>Updated</span>
@@ -50,7 +50,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
               {rows.map((item) => (
                 <li
                   key={item.id}
-                  className="grid gap-3 border-b border-slate-200 px-5 py-4 last:border-b-0 sm:grid-cols-[1.2fr_1fr_auto] sm:items-center"
+                  className="grid gap-3 border-b border-[color:var(--ops-line)] px-5 py-4 last:border-b-0 sm:grid-cols-[1.2fr_1fr_auto] sm:items-center"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-normal text-slate-900">
@@ -80,7 +80,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
             </ul>
           </div>
         ) : (
-          <div className="rounded-md border border-dashed border-slate-200 bg-white px-5 py-12 text-center">
+          <div className="rounded-md border border-dashed border-[color:var(--ops-line)] bg-white px-5 py-12 text-center">
             <p className="text-base font-normal text-slate-900">No recent activity yet</p>
             <p className="mt-2 text-sm text-slate-500">
               As new orders or assignments land, they will appear here.

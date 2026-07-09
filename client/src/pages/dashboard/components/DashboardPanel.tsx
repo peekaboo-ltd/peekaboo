@@ -19,22 +19,24 @@ const DashboardPanel = ({
   return (
     <div
       className={cn(
-        'rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6',
+        'rounded-xl border border-[color:var(--ops-line)] bg-white p-0 shadow-[0_1px_0_rgba(20,24,29,0.05)]',
         className,
       )}
     >
-      <header className="mb-4">
+      <header className="border-b border-[color:var(--ops-line)] px-4 py-4 sm:px-6">
         {eyebrow && (
-          <p className="mb-1 text-xs font-normal uppercase tracking-widest text-slate-500">
+          <p className="font-data mb-1 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
             {eyebrow}
           </p>
         )}
-        <h2 className="text-base font-bold text-slate-900">{title}</h2>
+        <h2 className="font-display text-lg font-semibold text-[color:var(--ops-ink)]">
+          {title}
+        </h2>
         {description && (
-          <p className="mt-0.5 text-sm text-slate-500">{description}</p>
+          <p className="mt-0.5 max-w-[56ch] text-sm text-slate-600">{description}</p>
         )}
       </header>
-      {children}
+      <div className="px-4 py-4 sm:px-6 sm:py-5">{children}</div>
     </div>
   );
 };

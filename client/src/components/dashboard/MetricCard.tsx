@@ -18,7 +18,6 @@ const accentMap = {
     iconBg: 'bg-slate-50',
     iconRing: 'ring-slate-200',
     spark: 'hsl(var(--primary))',
-    glow: 'from-slate-50 via-white to-white',
     footer: 'text-slate-700',
   },
   teal: {
@@ -26,7 +25,6 @@ const accentMap = {
     iconBg: 'bg-slate-50',
     iconRing: 'ring-slate-200',
     spark: '#0891b2',
-    glow: 'from-slate-50 via-white to-white',
     footer: 'text-slate-700',
   },
   amber: {
@@ -34,7 +32,6 @@ const accentMap = {
     iconBg: 'bg-amber-50',
     iconRing: 'ring-amber-100',
     spark: '#d97706',
-    glow: 'from-amber-50 via-white to-white',
     footer: 'text-amber-700',
   },
   emerald: {
@@ -42,7 +39,6 @@ const accentMap = {
     iconBg: 'bg-emerald-50',
     iconRing: 'ring-emerald-100',
     spark: '#059669',
-    glow: 'from-emerald-50 via-white to-white',
     footer: 'text-emerald-700',
   },
   violet: {
@@ -50,7 +46,6 @@ const accentMap = {
     iconBg: 'bg-slate-50',
     iconRing: 'ring-slate-200',
     spark: 'hsl(var(--primary))',
-    glow: 'from-slate-50 via-white to-white',
     footer: 'text-slate-700',
   },
   rose: {
@@ -58,7 +53,6 @@ const accentMap = {
     iconBg: 'bg-rose-50',
     iconRing: 'ring-rose-100',
     spark: '#e11d48',
-    glow: 'from-rose-50 via-white to-white',
     footer: 'text-rose-700',
   },
   slate: {
@@ -66,7 +60,6 @@ const accentMap = {
     iconBg: 'bg-slate-100',
     iconRing: 'ring-slate-200',
     spark: '#475569',
-    glow: 'from-slate-100 via-white to-white',
     footer: 'text-slate-700',
   },
 } as const;
@@ -130,10 +123,10 @@ const MetricCard = ({
   const cardContent = (
     <Card
       className={cn(
-        'group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300',
+        'group relative overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-white shadow-[0_1px_0_rgba(20,24,29,0.05)] transition-all duration-300',
         destination
-          ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md'
-          : 'hover:shadow-md',
+          ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_10px_22px_-18px_rgba(20,24,29,0.5)]'
+          : 'hover:shadow-[0_10px_22px_-18px_rgba(20,24,29,0.5)]',
       )}
     >
       <CardContent className="relative p-5 sm:p-6">
@@ -156,11 +149,11 @@ const MetricCard = ({
               </span>
             )}
             <span className="min-w-0">
-              <span className="block truncate text-sm font-normal text-slate-600">
+              <span className="font-data block truncate text-[11px] font-medium uppercase tracking-[0.14em] text-slate-600">
                 {label}
               </span>
               {(comparisonLabel || note) && (
-                <span className="mt-0.5 block truncate text-[11px] font-normal uppercase tracking-[0.05em] text-slate-500">
+                <span className="mt-0.5 block truncate text-xs text-slate-500">
                   {comparisonLabel || note}
                 </span>
               )}
@@ -168,7 +161,7 @@ const MetricCard = ({
           </span>
           {trend && (
             <span
-              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-normal ${trend.isPositive
+              className={`font-data shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${trend.isPositive
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-rose-50 text-rose-700'
                 }`}
@@ -182,12 +175,12 @@ const MetricCard = ({
         <section className="flex items-end justify-between gap-4">
           <div className="min-w-0 flex-1">
             <p
-              className="truncate text-[2rem] font-bold leading-none tracking-[-0.03em] text-slate-950 sm:text-[2.3rem]"
+              className="font-display truncate text-[2rem] font-semibold leading-none tracking-[-0.03em] text-[color:var(--ops-ink)] sm:text-[2.3rem]"
               aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
             >
               {value}
             </p>
-            <p className="mt-3 max-w-[16rem] text-sm leading-6 text-slate-500">
+            <p className="mt-3 max-w-[16rem] text-sm leading-6 text-slate-600">
               {footerText || note || comparisonLabel || 'Performance snapshot'}
             </p>
           </div>
@@ -209,7 +202,7 @@ const MetricCard = ({
           </div>
         </section>
 
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-200/70 pt-4 sm:hidden">
+        <div className="mt-5 flex items-center justify-between gap-3 border-t border-[color:var(--ops-line)] pt-4 sm:hidden">
           <span className={cn('text-xs font-medium', accentMap[accent].footer)}>
             {footerText || comparisonLabel || 'Live dashboard signal'}
           </span>
