@@ -82,7 +82,7 @@ export class UrubutoService {
         'Content-Type': 'application/json',
         Authorization: this.config.apiKey,
       },
-      timeout: 30000,
+      timeout: 300000,
     });
   }
 
