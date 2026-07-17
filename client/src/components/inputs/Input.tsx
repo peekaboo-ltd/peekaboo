@@ -570,11 +570,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               autoCorrect={autoCorrect}
               spellCheck={spellCheck}
               className={`
-                py-[7px] px-4 
+                py-[7px] px-4
                 font-normal
                 placeholder:!font-light
-                placeholder:text-[13px] 
-                placeholder:text-slate-600
+                placeholder:italic
+                placeholder:text-[13px]
+                placeholder:text-slate-400
                 text-[13px] text-slate-900
                 flex items-center w-full
                 rounded-md border-[1.5px]

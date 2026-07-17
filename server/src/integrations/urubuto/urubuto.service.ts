@@ -90,6 +90,19 @@ export class UrubutoService {
     return this.config;
   }
 
+  private safeConfigSnapshot(): Record<string, string> {
+    return {
+      baseUrl: this.config.baseUrl,
+      checkoutBaseUrl: this.config.checkoutBaseUrl,
+      merchantCode: this.config.merchantCode,
+      serviceCode: this.config.serviceCode,
+      apiKeyFingerprint: urubutoCredentialFingerprint(this.config.apiKey),
+      webhookJwtSecretFingerprint: urubutoCredentialFingerprint(
+        this.config.webhookJwtSecret,
+      ),
+    };
+  }
+
   public getMerchantCode(): string {
     return this.config.merchantCode;
   }
@@ -123,8 +136,10 @@ export class UrubutoService {
       request.password !== this.config.webhookPassword
     ) {
       logger.error('UrubutoPay webhook authentication failed', {
-        request,
-        config: this.config,
+        usernameProvided: request.user_name,
+        usernameMatches: request.user_name === this.config.webhookUsername,
+        credentialsConfigured: hasCredentials,
+        config: this.safeConfigSnapshot(),
       });
 
       return { success: false, token: undefined };
@@ -150,15 +165,13 @@ export class UrubutoService {
       const payload = jwt.verify(token, this.config.webhookJwtSecret) as {
         sub?: string;
       };
-      logger.info('UrubutoPay webhook token verified', {
-        payload,
-        config: this.config,
+      logger.debug('UrubutoPay webhook token verified', {
+        sub: payload.sub,
       });
       return payload.sub === 'urubuto-webhooks';
-    } catch {
+    } catch (error: any) {
       logger.error('UrubutoPay webhook token verification failed', {
-        token,
-        config: this.config,
+        reason: error?.message,
       });
       return false;
     }
@@ -220,15 +233,17 @@ export class UrubutoService {
           },
         );
 
-        logger.info('UrubutoPay transaction status response', {
-          data: response?.data,
-          config: this.config,
-        });
+      logger.debug('UrubutoPay transaction status raw response', {
+        transactionId,
+        httpStatus: response.status,
+        data: response?.data,
+      });
 
       const isSuccess =
         response.data.status === 200 || response.status === 200;
 
       logger.info('UrubutoPay transaction status result', {
+        transactionId,
         isSuccess,
         data: response.data.data,
         message: response.data.message,
@@ -253,6 +268,7 @@ export class UrubutoService {
       logger.error('UrubutoPay transaction status error', {
         transactionId,
         merchantCode: this.config.merchantCode,
+        httpStatus: error.response?.status,
         response: error.response?.data,
         message: error.message,
       });
@@ -363,9 +379,12 @@ export class UrubutoService {
         payload,
       );
 
-      logger.info('UrubutoPay payment initiation response', {
-        response,
-        config: this.config,
+      logger.debug('UrubutoPay payment initiation response received', {
+        ...logContext,
+        httpStatus: response.status,
+        urubutoStatus: response.data?.status,
+        data: response.data?.data,
+        message: response.data?.message,
       });
 
       const data = response.data.data;
@@ -373,14 +392,13 @@ export class UrubutoService {
       const urubutoReference =
         data?.internal_transaction_ref_number || request.refId;
       const cardProcessingUrl = response.data.card_processing_url;
-      logger.info('UrubutoPay payment initiation card processing url', {
-        cardProcessingUrl,
-      });
       const hostedCheckoutUrl =
         channelName !== UrubutoChannelName.CARD
           ? this.getHostedCheckoutUrl(request.payerCode)
           : undefined;
-      logger.info('UrubutoPay payment initiation hosted checkout url', {
+      logger.debug('UrubutoPay payment initiation resolved checkout URLs', {
+        transaction_id: request.refId,
+        cardProcessingUrl,
         hostedCheckoutUrl,
       });
       const paymentUrl = cardProcessingUrl || hostedCheckoutUrl;

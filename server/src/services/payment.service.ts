@@ -171,6 +171,16 @@ export class PaymentService {
       });
     }
 
+    logger.debug('Payment initiation result', {
+      entityId: payment.entityId,
+      provider,
+      channelName: requestedMethod,
+      success: result?.success,
+      status: result?.data?.status,
+      errorCode: result?.error?.code,
+      errorMessage: result?.error?.message,
+    });
+
     if (result && result.success && result.data?.transactionId) {
       newPayment.externalReferenceId = result.data?.transactionId;
       newPayment.status = result.data?.status as KpayPaymentStatus;
@@ -286,7 +296,13 @@ export class PaymentService {
           amount: chargeAmount,
           currency: payment.currency || 'RWF',
         })
-        .catch(() => {});
+        .catch((error: any) => {
+          logger.error('Failed to send payment initiated email', {
+            entityId: payment.entityId,
+            customerEmail: payment.customerEmail,
+            message: error?.message,
+          });
+        });
     }
 
     return newPayment;
@@ -438,7 +454,13 @@ export class PaymentService {
           amount: Number(payment?.amount),
           currency: 'RWF',
         })
-        .catch(() => {});
+        .catch((error: any) => {
+          logger.error('Failed to send payment failed email', {
+            paymentId: payment?.id,
+            customerEmail: payment?.customerEmail,
+            message: error?.message,
+          });
+        });
     }
 
     return payment;
@@ -499,6 +521,13 @@ export class PaymentService {
     source: 'callback' | 'notification' | 'reversal',
   ): Promise<Payment> {
     const payment = await this.findUrubutoPayment(payload);
+
+    logger.debug('UrubutoPay webhook payment lookup', {
+      source,
+      transactionId: payload.transaction_id || payload.internal_transaction_id,
+      payerCode: payload.payer_code,
+      matchedPaymentId: payment?.id,
+    });
 
     if (!payment) {
       throw new NotFoundError('Payment not found');

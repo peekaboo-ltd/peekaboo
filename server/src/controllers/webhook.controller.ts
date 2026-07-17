@@ -102,6 +102,12 @@ export const WebhookController = {
         data,
       });
     } catch (error: any) {
+      logger.error('UrubutoPay payer validation failed', {
+        payerCode: req.body?.payer_code,
+        statusCode: error.statusCode,
+        message: error.message,
+      });
+
       return res.status(error.statusCode || 404).json({
         status: error.statusCode || 404,
         message: error.message || 'no data found for the given payer code',
