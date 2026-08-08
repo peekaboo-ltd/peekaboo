@@ -2,6 +2,20 @@
 
 React 19 + Vite + TypeScript + Tailwind CSS web application (admin dashboard, public marketing site, and public order-tracking pages). Full feature/setup docs live in [client/README.md](../client/README.md); this file maps the directory layout.
 
+> **Configuration:** client env vars (`VITE_API_BASE_URL`, `VITE_GOOGLE_MAPS_API_KEY`, `VITE_INACTIVITY_TIMEOUT`, `VITE_NODE_ENVIRONMENT`) are documented in [environment-variables.md](environment-variables.md). Create `client/.env` manually — there is no committed `.env.example`.
+
+## Data flow
+
+```
+Page (pages/*) ──► Hook (hooks/*) ──► api layer (api/queries + api/mutations, TanStack Query)
+                                          └──► axios ──► server /api/v1
+State (states/* Redux Toolkit slices)
+UI (components/* — ui primitives + feature components, tables via TanStack Table)
+```
+
+- Pages are thin: they render components and use hooks; business data comes through TanStack Query hooks in `api/` + feature hooks in `hooks/`.
+- Server state is cached/invalidated via `api/queries` and `api/mutations`; local UI state (sidebar, onboarding) lives in Redux slices.
+
 ## Entry points
 
 | File | Responsibility |
@@ -99,11 +113,18 @@ Small shared utilities (e.g. `utils.ts` — `cn()` class-merge helper).
 
 ## Environment
 
-`client/.env`:
+`client/.env` (read at build time by Vite; only `VITE_`-prefixed vars are exposed to the browser):
+
 ```env
 VITE_API_BASE_URL=http://localhost:8080/api/v1
 VITE_GOOGLE_MAPS_API_KEY=...
+VITE_INACTIVITY_TIMEOUT=5            # minutes before session-expired modal
+VITE_NODE_ENVIRONMENT=development    # optional override; drives dev pricing UI disclaimer
 ```
+
+Every variable is documented in [environment-variables.md](environment-variables.md).
+
+**Development pricing:** when `VITE_NODE_ENVIRONMENT` (or Vite `MODE`) equals `development`, the UI shows catalog fees with a disclaimer that checkout charges 10 RWF (`isDevelopmentPricing`). The server is the source of truth via `NODE_ENV` — keep both in agreement locally.
 
 ## Key commands (from `client/`)
 
@@ -113,6 +134,13 @@ npm run build      # type-check + production build
 npm run lint       # ESLint
 npm run preview    # serve production build
 ```
+
+## Build & deployment
+
+- `npm run build` runs Vite and emits `dist/`; the dev server defaults to http://localhost:5173.
+- The `build` script also runs `npm i` first — for CI, prefer `npm ci && npx vite build`.
+- Deployed with the server under PM2 via `vite preview --host 0.0.0.0 --port $CLIENT_PORT` (see `scripts/deploy.sh`).
+- `vercel.json` rewrites all routes to `index.html` for SPA fallback (used if the client is hosted on Vercel).
 
 ## Conventions
 

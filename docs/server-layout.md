@@ -2,13 +2,32 @@
 
 Node.js + Express 5 + TypeScript + TypeORM backend. Full feature/setup docs live in [server/README.md](../server/README.md); this file maps the directory layout.
 
+> **Configuration:** every server environment variable (database, WhatsApp, payments, email/SMS, maps, OneSignal, Cloudinary, seeds) is documented with defaults and code references in [environment-variables.md](environment-variables.md). Configure `server/.env` from `server/.env.example`.
+
 ## Entry points
 
 | File | Responsibility |
 | --- | --- |
 | `src/server.ts` | Process entry. Reads `PORT`, boots the Node cluster, starts the HTTP server. |
-| `src/app.ts` | Express app factory: JSON/urlencoded/cors middleware, Passport (Google OAuth), audit-context middleware, mounts routes at `/api/v1`, serves `/api/v1/uploads` statically, attaches the error handler, initializes the database. |
+| `src/app.ts` | Express app factory: JSON/urlencoded/cors middleware, Passport (Google OAuth), audit-context middleware, mounts routes at `/api/v1`, serves `/api/v1/uploads` statically, attaches the error handler, initializes the database. Also runs UrubutoPay startup config validation (warns in dev, throws in production on invalid config). |
 | `src/data-source.ts` | TypeORM `DataSource`: database config, entity/subscriber registration. |
+
+## Request lifecycle
+
+```
+HTTP request
+  → app.ts middleware: express.json (50mb) → urlencoded → cors → passport → auditContext (AsyncLocalStorage)
+  → routes/index.ts (mounted at /api/v1)
+  → <feature>.routes.ts → route middlewares (auth.middleware JWT, authorize.middleware RBAC)
+  → <feature>.controller.ts  (joi validation, req/res mapping)
+  → <feature>.service.ts     (business logic + integrations)
+  → entities / subscribers   → PostgreSQL
+  → errors.middleware.ts     → JSON error response
+```
+
+- **Authentication:** `auth.middleware.ts` verifies the `Authorization: Bearer <JWT>` token using `JWT_SECRET`.
+- **Authorization (RBAC):** `authorize.middleware.ts` restricts routes to specific roles.
+- **Audit context:** `auditContext.middleware.ts` stores the acting user in AsyncLocalStorage so audit-log decorators can attribute changes without extra parameters.
 
 ## Layering (per feature)
 
@@ -120,22 +139,69 @@ Standalone seed/test scripts (run via `npm run seed:*` / `npm run urubuto:smoke-
 ### `src/assets/`
 Static assets, e.g. `watermarks/` used for problem-report video watermarking.
 
+## Order status lifecycle
+
+```
+CREATED → PENDING → CONFIRMED → ACCEPTED → PAID → ACTIVE → IN_TRANSIT → DELIVERED → COMPLETED
+   │         │          │         │
+   └─────────┴──────────┴─────────┴──── CANCELLED   (refund on cancellation after payment)
+```
+
+- **CREATED** — order initiated via WhatsApp or the API; a unique reference ID (`P` + 6 chars) and initial fee are set.
+- **PENDING** — initial review / awaiting confirmation.
+- **CONFIRMED** — confirmed by admin/staff.
+- **ACCEPTED** — rider accepts the assignment.
+- **PAID** — payment verified by the gateway webhook (see payments below).
+- **ACTIVE / IN_TRANSIT / DELIVERED** — rider progression.
+- **COMPLETED** — customer confirms delivery.
+- **CANCELLED** — cancellable from CREATED..PAID; post-payment cancellations trigger refunds.
+
+Status transitions are managed in `order.service.ts` and `orderActivity.service.ts` (which also notifies via WhatsApp/email). The source of truth for constants is `constants/order.constants.ts`.
+
+## Payments (provider selection)
+
+- `PAYMENT_PROVIDER_DEFAULT` (default `URUBUTO`) selects the gateway used by `payment.service.ts`.
+- **UrubutoPay** (primary): configured via `URUBUTO_*` vars. Supports CARD redirects (`URUBUTO_CARD_REDIRECT_BASE_URL`) and server-to-server webhooks (auth, validation, callback, notification, reversal). Startup validation in `integrations/urubuto/urubuto.config.ts` fails fast on misconfiguration in production.
+- **Kpay** (secondary): configured via `KPAY_*` vars (`integrations/kpay/kpay.service.ts`). Supports Mobile Money, Cards, SPENN, SmartCash.
+- Payment flows support payer selection (Sender / Recipient / custom phone) and Rwanda phone formatting (250XXXXXXXXX).
+- In development (`NODE_ENV=development`), charges are forced to 10 RWF (see `helpers/developmentPricing.helper.ts`).
+
+## Webhook endpoints
+
+Mounted under `/api/v1/webhooks` (`routes/webhook.routes.ts`):
+
+| Endpoint | Provider | Purpose |
+| --- | --- | --- |
+| `/webhooks/whatsapp` | WhatsApp | Inbound customer messages + flow data-exchange events (verify via `WHATSAPP_BUSINESS_VERIFY_TOKEN`). |
+| `/webhooks/kpay` | Kpay | Payment notifications (URL set by `KPAY_WEBHOOK_URL`). |
+| `/webhooks/urubuto/{auth,validation,callback,notification,reversal}` | UrubutoPay | Payment lifecycle; constructed from `PUBLIC_API_BASE_URL`. |
+
+## Cron jobs (`src/cron/`)
+
+| Job | Responsibility |
+| --- | --- |
+| `billingCron.ts` | Organization billing — invoice/payment-overdue processing. |
+| `businessReportCron.ts` | Scheduled business reports for B2B clients. |
+| `whatsappSessionCron.ts` | Cleans up expired WhatsApp/pending-order/location-search sessions. |
+
 ## Environment & config
 
-- `server/.env.example` documents every variable. Required groups: database, JWT, WhatsApp, Kpay, UrubutoPay, Google OAuth, Resend, Pindo, Google Maps/Mapbox, OneSignal, Cloudinary.
-- `server/.env` is gitignored — never commit it.
-- `NODE_ENV=development` enables reduced pricing (charges 10 RWF) for local testing.
+- Full, exhaustive reference for **every** server variable: [environment-variables.md](environment-variables.md).
+- `server/.env.example` documents the variables; `server/.env` is gitignored — never commit it.
+- Required groups: database (`DB_*`), JWT, WhatsApp (`WHATSAPP_BUSINESS_*` / `WHATSAPP_FLOW_*`), payment gateway, Google OAuth, Resend, Pindo, Maps, OneSignal, Cloudinary.
+- `NODE_ENV=development` enables reduced pricing (charges 10 RWF) for local testing and relaxes UrubutoPay startup validation.
 
 ## Key commands (from `server/`)
 
 ```bash
-npm run dev                        # nodemon + ts-node
+npm run dev                        # nodemon + ts-node (TypeORM synchronize:true syncs schema)
 npm run build                      # tsc → dist/
-npm run typeorm:run-migrations     # run DB migrations (see README)
 npm run seed:admin                 # create local admin account
 npm run seed:roles                 # seed roles
 npm run test                       # node --test over src/**/*.test.ts
 ```
+
+> **Schema:** `data-source.ts` uses `synchronize: true`, so tables are created/updated automatically when the app boots. There is no migrations folder and no `typeorm:run-migrations` npm script (the command referenced in `server/README.md` is not defined in `package.json`).
 
 ## Tests
 

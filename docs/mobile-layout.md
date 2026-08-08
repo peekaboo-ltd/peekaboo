@@ -2,6 +2,8 @@
 
 React Native app for delivery riders (Expo SDK 54, Expo Router file-based routing, Zustand state, OneSignal push). Full feature/setup docs live in [mobile/README.md](../mobile/README.md); this file maps the directory layout.
 
+> **Configuration:** mobile env vars (`EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_ONESIGNAL_APP_ID`, `EXPO_PUBLIC_PROJECT_ID`, `EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES`) are documented in [environment-variables.md](environment-variables.md).
+
 ## Entry points
 
 | File | Responsibility |
@@ -97,7 +99,32 @@ EXPO_PUBLIC_ONESIGNAL_APP_ID=...
 EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES=5
 ```
 
-> For physical devices, use a LAN IP (not `localhost`) in `EXPO_PUBLIC_API_BASE_URL`. EAS cloud builds need `EXPO_PUBLIC_*` values provided in `eas.json` env or EAS secrets — local `.env` files are not used.
+> For physical devices, use a LAN IP (not `localhost`) in `EXPO_PUBLIC_API_BASE_URL`. EAS cloud builds need `EXPO_PUBLIC_*` values provided in `eas.json` env or EAS secrets — local `.env` files are not used. Every variable is documented in [environment-variables.md](environment-variables.md).
+
+### Local development on a physical device (LAN)
+
+1. Find your machine's LAN IP: `ipconfig getifaddr en0` (macOS Wi-Fi).
+2. Set `EXPO_PUBLIC_API_BASE_URL=http://<LAN_IP>:8080/api/v1` (never `localhost` — that points at the phone itself).
+3. Start the backend bound to `0.0.0.0` so it's reachable on the network.
+4. Run `npx expo start --lan`; teammates scan the QR code with Expo Go.
+
+### EAS build profiles (`eas.json`)
+
+| Profile | Distribution | `EXPO_PUBLIC_API_BASE_URL` | Use case |
+| --- | --- | --- | --- |
+| `development` | internal, dev client | LAN IP (e.g. `http://192.168.1.64:8080/api/v1`) | Local testing on simulator/device |
+| `development-device` | internal, dev client | LAN IP | Local testing on a physical device |
+| `preview` | internal (APK/IPA) | `https://server.peekaboo.co.rw/api/v1` | Test builds for the team |
+| `production` | store (app-bundle) | `https://server.peekaboo.co.rw/api/v1` | App Store / Play Store releases |
+
+`app.config.ts` derives the OneSignal APNs environment (`development` vs `production`) from `EAS_BUILD_PROFILE` so entitlements match the profile.
+
+### Push notifications (OneSignal)
+
+- Set `EXPO_PUBLIC_ONESIGNAL_APP_ID` locally and per EAS profile. It **must match** the server's `ONESIGNAL_APP_ID`.
+- Push registration only works on a **physical device** with a dev-client build and requires notification permission.
+- After a rider logs in, verify the subscription under OneSignal Audience → Subscriptions (External ID = API user UUID).
+- If push isn't needed locally, set `PUSH_NOTIFICATIONS_DISABLED=true` on the server (assignment flows still work).
 
 ## Key commands (from `mobile/`)
 
