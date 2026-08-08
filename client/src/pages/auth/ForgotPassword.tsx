@@ -47,7 +47,7 @@ const ForgotPassword = () => {
           <form className="flex flex-col gap-4" onSubmit={onSubmit}>
             <Input
               label="Email or phone"
-              placeholder="name@example.com or 078XXXXXXX"
+              placeholder="name@example.com or 7XXXXXXXX"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required

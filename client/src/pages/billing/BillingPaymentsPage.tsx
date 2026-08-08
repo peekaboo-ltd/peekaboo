@@ -30,6 +30,7 @@ import { formatCurrency, formatDate } from "@/utils/strings.util";
 import { localStorageUtil } from "@/utils/localStorage.util";
 import { ENVIRONMENTS } from "@/constants/environments.constants";
 import Button from "@/components/inputs/Button";
+import TelInput from "@/components/inputs/TelInput";
 import Modal from "@/components/Modal";
 import {
   InternalPage,
@@ -53,6 +54,7 @@ import Select from "@/components/inputs/Select";
 import { Link } from "react-router-dom";
 import { tableActionClassName } from "@/constants/inputs.constants";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons";
+import { validateAndFormatPhoneNumber } from "@/utils/phone.util";
 
 interface OrganizationRow {
   id: UUID;
@@ -582,6 +584,14 @@ const BillingPaymentsPage = () => {
     [selectedHistoryBilling?.orders],
   );
 
+  const editableBusinessPhoneValidation = useMemo(
+    () =>
+      editableBusinessNumber.trim()
+        ? validateAndFormatPhoneNumber(editableBusinessNumber)
+        : null,
+    [editableBusinessNumber],
+  );
+
   const businessPayDisabledReason = useMemo(() => {
     if (!myCurrentDue) return "No unpaid billing available right now.";
     if (myBillingEstimateLoading)
@@ -591,12 +601,16 @@ const BillingPaymentsPage = () => {
     }
     if (currentEstimateAmount <= 0)
       return "No amount is due for this billing record right now.";
+    if (editableBusinessPhoneValidation?.isValid === false) {
+      return editableBusinessPhoneValidation.error || "Enter a valid Rwandan phone number.";
+    }
     return "";
   }, [
     currentEstimateAmount,
     myBillingEstimateError,
     myBillingEstimateLoading,
     myCurrentDue,
+    editableBusinessPhoneValidation,
   ]);
 
   const canBusinessPay = useMemo(
@@ -628,8 +642,8 @@ const BillingPaymentsPage = () => {
       await markMyBillingAsPaid({
         billingId,
         amountPaid: currentEstimateAmount,
-        notes: editableBusinessNumber
-          ? `Business payment contact: ${editableBusinessNumber}`
+        notes: editableBusinessPhoneValidation?.e164
+          ? `Business payment contact: ${editableBusinessPhoneValidation.e164}`
           : undefined,
       }).unwrap();
       toast.success(
@@ -1816,15 +1830,13 @@ const BillingPaymentsPage = () => {
             <p className="text-[13px] text-slate-600">{currentEstimate.note}</p>
           ) : null}
 
-          <div className="space-y-2">
-            <label className="text-[13px] font-normal text-[12px] text-slate-700">
-              Business Number (editable)
-            </label>
-            <input
-              className="w-full rounded border border-slate-300 px-3 py-2 text-[13px]"
+          <div>
+            <TelInput
               value={editableBusinessNumber}
-              onChange={(e) => setEditableBusinessNumber(e.target.value)}
+              onChange={setEditableBusinessNumber}
+              label="Business Number (editable)"
               placeholder="Enter business phone number"
+              errorMessage={editableBusinessPhoneValidation?.error}
             />
           </div>
 

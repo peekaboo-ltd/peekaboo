@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import Button from '@/components/inputs/Button';
 import { useInviteOrganizationMutation } from '@/api/mutations/organization.mutations';
 import type { InviteOrganizationPayload } from '@/types/organization.type';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useNavigate } from 'react-router-dom';
+import { validateRwandanPhoneNumber } from '@/utils/phone.util';
 
 const InviteOrganization = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -105,12 +107,15 @@ const InviteOrganization = () => {
               <Controller
                 name="phoneNumber"
                 control={control}
-                rules={{ required: 'Organization phone number is required.' }}
+                rules={{
+                  required: 'Organization phone number is required.',
+                  validate: (value) => validateRwandanPhoneNumber(value),
+                }}
                 render={({ field }) => (
-                  <Input
+                  <TelInput
                     {...field}
                     label="Phone number"
-                    placeholder="+1 (555) 555-1234"
+                    placeholder="0788 123 456"
                     required
                     errorMessage={errors?.phoneNumber?.message}
                   />

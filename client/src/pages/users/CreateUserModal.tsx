@@ -4,10 +4,11 @@ import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setCreateUserModal } from '@/states/slices/user.slice';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import { useCreateUser } from '@/hooks/users/users.hooks';
 import { RoleTypes } from '@/types/auth.type';
 import { Controller, useForm } from 'react-hook-form';
-import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import { validateRwandanPhoneNumber } from '@/utils/phone.util';
 import { MembershipStatus } from '@/types/organization.type';
 
 interface CreateUserFormData {
@@ -57,7 +58,6 @@ const CreateUserModal = () => {
     handleSubmit,
     reset,
     formState: { errors },
-    trigger,
   } = useForm<CreateUserFormData>({
     defaultValues: {
       name: '',
@@ -67,14 +67,6 @@ const CreateUserModal = () => {
       roles: [],
     },
   });
-
-  const validateRwandanPhone = (value: string | undefined) => {
-    if (!value || !value.trim()) {
-      return 'Phone number is required';
-    }
-    const result = validateAndFormatPhoneNumber(value);
-    return result.isValid ? true : (result.error ?? 'Invalid phone number');
-  };
 
   const closeModal = useCallback(() => {
     dispatch(setCreateUserModal(false));
@@ -138,29 +130,16 @@ const CreateUserModal = () => {
             control={control}
             rules={{
               required: 'Phone number is required',
-              validate: validateRwandanPhone,
+              validate: (value) => validateRwandanPhoneNumber(value),
             }}
             render={({ field }) => (
-              <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-700">
-                  Phone Number *
-                </span>
-                <Input
-                  {...field}
-                  onChange={(e) => {
-                    e.preventDefault();
-                    field.onChange(e);
-                    trigger('phoneNumber');
-                  }}
-                  placeholder="Enter phone number (e.g., 0788123456)"
-                  className={errors.phoneNumber ? 'border-destructive' : ''}
-                />
-                {errors.phoneNumber && (
-                  <span className="text-xs text-destructive">
-                    {errors.phoneNumber.message}
-                  </span>
-                )}
-              </label>
+              <TelInput
+                {...field}
+                label="Phone Number"
+                required
+                placeholder="0788 123 456"
+                errorMessage={errors.phoneNumber?.message}
+              />
             )}
           />
 

@@ -1,5 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { formatPhoneForProvider } from "./phone.helper";
+import { ValidationError } from "./errors.helper";
 
 // LOAD ENVIRONMENT VARIABLES
 dotenv.config();
@@ -38,11 +40,16 @@ export const sendMessage = async ({
   type?: "text" | "interactive";
 }) => {
   try {
+    const providerPhone = formatPhoneForProvider(phoneNumber);
+    if (!providerPhone) {
+      throw new ValidationError("Enter a valid Rwandan phone number");
+    }
+
     const payload = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
       type,
-      to: phoneNumber,
+      to: providerPhone,
       ...(type === "text"
         ? {
             text: {

@@ -3,6 +3,8 @@ import { AppDataSource } from "../data-source";
 import { PendingOrderSession } from "../entities/pendingOrderSession.entity";
 import { PendingOrderSessionStatus } from "../constants/pendingOrderSession.constants";
 import { UUID } from "../types";
+import { normalizePhoneNumber } from "../helpers/phone.helper";
+import { ValidationError } from "../helpers/errors.helper";
 
 const defaultTtlMinutes = () =>
   Math.min(
@@ -24,14 +26,20 @@ export class PendingOrderSessionService {
     recipientPhone: string;
     pickupMethod: string;
   }): Promise<PendingOrderSession> {
+    const waPhone = normalizePhoneNumber(params.waPhone);
+    const recipientPhone = normalizePhoneNumber(params.recipientPhone);
+    if (!waPhone || !recipientPhone) {
+      throw new ValidationError("Pending order session contains an invalid phone number");
+    }
+
     const expiresAt = new Date(
       Date.now() + defaultTtlMinutes() * 60 * 1000,
     );
     return this.repo.save({
-      waPhone: params.waPhone,
+      waPhone,
       flowToken: params.flowToken ?? null,
       conversationId: params.conversationId ?? null,
-      recipientPhone: params.recipientPhone,
+      recipientPhone,
       pickupMethod: params.pickupMethod,
       status: PendingOrderSessionStatus.AWAITING_PICKUP_LOCATION,
       pickupLatitude: null,
@@ -44,9 +52,11 @@ export class PendingOrderSessionService {
   }
 
   async findActiveAwaitingPickup(waPhone: string): Promise<PendingOrderSession | null> {
+    const normalizedPhone = normalizePhoneNumber(waPhone);
+    if (!normalizedPhone) return null;
     return this.repo.findOne({
       where: {
-        waPhone,
+        waPhone: normalizedPhone,
         status: PendingOrderSessionStatus.AWAITING_PICKUP_LOCATION,
         expiresAt: MoreThan(new Date()),
       },
@@ -55,9 +65,11 @@ export class PendingOrderSessionService {
   }
 
   async findActiveAwaitingDropOff(waPhone: string): Promise<PendingOrderSession | null> {
+    const normalizedPhone = normalizePhoneNumber(waPhone);
+    if (!normalizedPhone) return null;
     return this.repo.findOne({
       where: {
-        waPhone,
+        waPhone: normalizedPhone,
         status: PendingOrderSessionStatus.AWAITING_DROP_OFF_ADDRESS,
         expiresAt: MoreThan(new Date()),
       },

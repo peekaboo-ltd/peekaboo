@@ -20,6 +20,22 @@ import jwt from 'jsonwebtoken';
 import { EmailService } from '../integrations/emails/email.service';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
+import { validateAndFormatPhoneNumber } from '../helpers/phone.helper';
+
+const normalizeOptionalOrganizationPhone = (
+  phoneNumber: string | null | undefined,
+): string | undefined => {
+  if (!phoneNumber?.trim()) return undefined;
+
+  const validation = validateAndFormatPhoneNumber(phoneNumber);
+  if (!validation.isValid || !validation.e164) {
+    throw new ValidationError(
+      validation.error || 'Enter a valid Rwandan phone number',
+    );
+  }
+
+  return validation.e164;
+};
 
 export class OrganizationService {
   private readonly organizationRepository: Repository<Organization>;
@@ -53,6 +69,9 @@ export class OrganizationService {
       password?: string;
     };
   }): Promise<{ organization: Organization; adminUserId: UUID }> {
+    const organizationPhone = normalizeOptionalOrganizationPhone(
+      data.organization.phoneNumber,
+    );
     // Check TIN uniqueness if provided
     if (data.organization.tin) {
       const existingOrg = await this.organizationRepository.findOne({
@@ -99,7 +118,7 @@ export class OrganizationService {
       name: data.organization.name,
       description: data.organization.description,
       email: data.organization.email,
-      phoneNumber: data.organization.phoneNumber,
+      phoneNumber: organizationPhone,
       address: data.organization.address,
       tin: data.organization.tin,
       businessPlanId: data.organization.businessPlanId,
@@ -125,7 +144,7 @@ export class OrganizationService {
         organizationName: organization.name,
         adminName: adminUser.name || '',
         email: data.organization.email || adminUser.email || '',
-        phoneNumber: data.organization.phoneNumber,
+        phoneNumber: organizationPhone,
         createdAt: new Date(),
       })
       .catch(() => {});
@@ -169,6 +188,13 @@ export class OrganizationService {
     data: Partial<Organization>
   ): Promise<Organization> {
     const organization = await this.getOrganizationById(id);
+
+    if (data.phoneNumber !== undefined) {
+      data = {
+        ...data,
+        phoneNumber: normalizeOptionalOrganizationPhone(data.phoneNumber),
+      };
+    }
 
     // Check TIN uniqueness if updating
     if (data.tin && data.tin !== organization.tin) {
@@ -403,7 +429,10 @@ export class OrganizationService {
     phoneNumber?: string;
     message?: string;
   }): Promise<void> {
-    await this.emailService.sendOrganizationInquiryNotification(data);
+    await this.emailService.sendOrganizationInquiryNotification({
+      ...data,
+      phoneNumber: normalizeOptionalOrganizationPhone(data.phoneNumber),
+    });
   }
 
   // ADMIN: INVITE ORGANIZATION (manual onboarding)
@@ -419,6 +448,10 @@ export class OrganizationService {
     phoneNumber?: string;
     address?: string;
   }, createdById: UUID): Promise<{ organization: Organization; inviteToken: string }> {
+    const normalizedPhone = normalizeOptionalOrganizationPhone(data.phoneNumber);
+    if (!normalizedPhone) {
+      throw new ValidationError('Organization phone number is required');
+    }
     // Check if an org with this email already exists
     const existingOrg = await this.organizationRepository.findOne({
       where: { email: data.email },
@@ -445,7 +478,7 @@ export class OrganizationService {
         {
           name: data.adminName,
           email: data.adminEmail,
-          phoneNumber: data?.phoneNumber,
+          phoneNumber: normalizedPhone,
         },
         [RoleTypes.BUSINESS]
       );
@@ -455,7 +488,7 @@ export class OrganizationService {
     const organization = await this.organizationRepository.save({
       name: data.name,
       email: data.email,
-      phoneNumber: data?.phoneNumber,
+      phoneNumber: normalizedPhone,
       address: data.address,
       createdById,
       status: OrganizationStatus.PENDING,
@@ -550,6 +583,9 @@ export class OrganizationService {
     };
   }): Promise<{ organization: Organization; adminUserId: UUID }> {
     const { organizationId, adminUserId } = await this.validateOnboardingToken(data.token);
+    const organizationPhone = normalizeOptionalOrganizationPhone(
+      data.organizationDetails?.phoneNumber,
+    );
 
     // Update admin user with password and phone
     const passwordHash = await hashPassword(data.password);
@@ -574,8 +610,8 @@ export class OrganizationService {
     if (data.organizationDetails?.description) {
       orgUpdate.description = data.organizationDetails.description;
     }
-    if (data.organizationDetails?.phoneNumber) {
-      orgUpdate.phoneNumber = data.organizationDetails.phoneNumber;
+    if (organizationPhone) {
+      orgUpdate.phoneNumber = organizationPhone;
     }
 
     const organization = await this.organizationRepository.save({

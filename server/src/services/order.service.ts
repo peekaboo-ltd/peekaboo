@@ -274,6 +274,22 @@ export class OrderService {
     pickupProviderPlaceId?: string | null;
     orderSource?: string | null;
   }): Promise<{ order: Order }> {
+    const senderValidation = validateAndFormatPhoneNumber(senderPhoneNumber);
+    const recipientValidation = validateAndFormatPhoneNumber(recipientPhoneNumber);
+    if (!senderValidation.isValid || !senderValidation.e164) {
+      throw new ValidationError(
+        senderValidation.error || 'Invalid sender phone number',
+      );
+    }
+    if (!recipientValidation.isValid || !recipientValidation.e164) {
+      throw new ValidationError(
+        recipientValidation.error || 'Invalid recipient phone number',
+      );
+    }
+
+    senderPhoneNumber = senderValidation.e164;
+    recipientPhoneNumber = recipientValidation.e164;
+
     let sender = await this.userRepository.findOne({
       where: { phoneNumber: senderPhoneNumber },
     });
@@ -393,7 +409,7 @@ export class OrderService {
       const normalizedRecipient = validateAndFormatPhoneNumber(
         row?.recipientPhoneNumber,
       );
-      if (!normalizedRecipient.isValid || !normalizedRecipient.formattedNumber) {
+      if (!normalizedRecipient.isValid || !normalizedRecipient.e164) {
         rowErrors.push({
           rowNumber: row.rowNumber,
           field: 'recipientPhoneNumber',
@@ -443,13 +459,13 @@ export class OrderService {
     const senderCandidate = organizationPhone || currentUser.phoneNumber || '';
     const senderValidation = validateAndFormatPhoneNumber(senderCandidate);
 
-    if (!senderValidation.isValid || !senderValidation.formattedNumber) {
+    if (!senderValidation.isValid || !senderValidation.e164) {
       throw new ValidationError(
         'Unable to determine a valid sender phone number for import. Update your user or organization phone number first.',
       );
     }
 
-    const senderPhoneNumber = senderValidation.formattedNumber;
+    const senderPhoneNumber = senderValidation.e164;
 
     const result = await AppDataSource.transaction(async (manager) => {
       const orderRepository = manager.getRepository(Order);
@@ -487,7 +503,7 @@ export class OrderService {
           rowNumber: rawRow.rowNumber,
           recipientPhoneNumber:
             validateAndFormatPhoneNumber(rawRow.recipientPhoneNumber)
-              .formattedNumber || '',
+              .e164 || '',
           deliveryLocation: rawRow.deliveryLocation?.trim() || undefined,
           productReferenceNo: rawRow.productReferenceNo?.trim() || undefined,
           productName: rawRow.productName?.trim() || undefined,

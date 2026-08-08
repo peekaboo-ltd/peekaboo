@@ -6,9 +6,46 @@ import { KpayCurrency, KpayPaymentStatus } from '../types/kpay.types';
 import { PaymentProvider, UrubutoChannelName } from '../types/urubuto.types';
 import { PaymentType } from '../constants/payment.constants';
 import { DEVELOPMENT_PAYMENT_AMOUNT_RWF } from '../helpers/developmentPricing.helper';
+import { ValidationError } from '../helpers/errors.helper';
 
 const paymentId = '22222222-2222-4222-8222-222222222222';
 const orderId = '33333333-3333-4333-8333-333333333333';
+
+test('PaymentService rejects a valid Rwanda fixed line at a mobile-money boundary', async () => {
+  const originalGetRepository = AppDataSource.getRepository;
+  const originalResendApiKey = process.env.RESEND_API_KEY;
+  process.env.RESEND_API_KEY = 're_test';
+  (AppDataSource.getRepository as any) = () => createRepositoryMock();
+
+  try {
+    const service = new PaymentService();
+    await assert.rejects(
+      service.createPayment({
+        entityId: orderId,
+        amount: 2500,
+        currency: KpayCurrency.RWF,
+        type: PaymentType.ORDER,
+        customerEmail: '',
+        customerName: '',
+        customerPhone: '0250 500 500',
+        provider: PaymentProvider.URUBUTO,
+        channelName: UrubutoChannelName.MOMO,
+      }),
+      (error: unknown) => {
+        assert.ok(error instanceof ValidationError);
+        assert.match(error.message, /mobile number/i);
+        return true;
+      },
+    );
+  } finally {
+    (AppDataSource.getRepository as any) = originalGetRepository;
+    if (originalResendApiKey === undefined) {
+      delete process.env.RESEND_API_KEY;
+    } else {
+      process.env.RESEND_API_KEY = originalResendApiKey;
+    }
+  }
+});
 
 function createRepositoryMock(orderOverrides: Record<string, any> = {}) {
   const saves: any[] = [];

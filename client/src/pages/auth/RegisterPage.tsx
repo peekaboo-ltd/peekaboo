@@ -1,12 +1,15 @@
-import { useState, useCallback } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import Button from '@/components/inputs/Button';
 import { useRegister } from '@/hooks/auth/auth.hooks';
 import { useAppSelector } from '@/states/hooks';
 import { localStorageUtil } from '@/utils/localStorage.util';
-import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import {
+  validateAndFormatPhoneNumber,
+  validateRwandanPhoneNumber,
+} from '@/utils/phone.util';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import {
@@ -27,7 +30,6 @@ interface RegisterFormData {
 export const RegisterPage = () => {
   const location = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [phoneError, setPhoneError] = useState<string | undefined>();
   useDocumentTitle('Create Account');
 
   const {
@@ -44,10 +46,12 @@ export const RegisterPage = () => {
   const onRegisterSubmit = handleSubmit((data) => {
     const phoneValidation = validateAndFormatPhoneNumber(data.phoneNumber);
     if (!phoneValidation.isValid) {
-      setPhoneError(phoneValidation.error);
+      setRegisterError('phoneNumber', {
+        type: 'validate',
+        message: phoneValidation.error,
+      });
       return;
     }
-    setPhoneError(undefined);
 
     if (data.password !== data.confirmPassword) {
       setRegisterError('confirmPassword', {
@@ -66,25 +70,12 @@ export const RegisterPage = () => {
     }
 
     register({
-      phoneNumber: phoneValidation.formattedNumber,
+      phoneNumber: phoneValidation.e164,
       password: data.password,
       name: data.name,
       email: data.email,
     });
   });
-
-  const handlePhoneChange = useCallback(
-    (value: string, onChange: (value: string) => void) => {
-      onChange(value);
-      if (value) {
-        const validation = validateAndFormatPhoneNumber(value);
-        setPhoneError(validation.isValid ? undefined : validation.error);
-      } else {
-        setPhoneError(undefined);
-      }
-    },
-    [],
-  );
 
   const handleGoogleSignIn = () => {
     window.location.href = `${ENVIRONMENTS.API_URL}/auth/google`;
@@ -119,24 +110,21 @@ export const RegisterPage = () => {
             <Controller
               name="phoneNumber"
               control={control}
-              rules={{ required: 'Phone number is required' }}
+              rules={{
+                required: 'Phone number is required',
+                validate: (value) => validateRwandanPhoneNumber(value),
+              }}
               render={({ field }) => (
-                <Input
+                <TelInput
                   {...field}
                   label="Phone number"
-                  placeholder="078XXXXXXX"
+                  placeholder="7XXXXXXXX"
                   required
-                  onChange={(e) =>
-                    handlePhoneChange(e.target.value, field.onChange)
-                  }
                   className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
-                  errorMessage={phoneError || errors?.phoneNumber?.message}
+                  errorMessage={errors?.phoneNumber?.message}
                 />
               )}
             />
-            <p className="mt-1 text-xs font-normal text-muted-foreground">
-              Valid prefixes: 078, 072, 073, 079, 077
-            </p>
           </div>
 
           <Controller

@@ -4,6 +4,7 @@ import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-cr
 import 'react-image-crop/dist/ReactCrop.css';
 import Modal from '@/components/Modal';
 import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import Button from '@/components/inputs/Button';
 import { useUpdateUserMutation } from '@/api/mutations/users.mutations';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
@@ -25,6 +26,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getProfilePhotoUrl } from '@/utils/profilePhoto.util';
 import { localStorageUtil } from '@/utils/localStorage.util';
+import { validateRwandanPhoneNumber } from '@/utils/phone.util';
 
 interface UpdateUserProfileFormData {
   name: string;
@@ -278,7 +280,7 @@ const UpdateUserProfileModal = () => {
         if (res?.data) updatedUser = res.data;
       }
 
-      const res = await updateUser({
+      await updateUser({
         id: selectedUser.id,
         name: formData.name?.trim() || undefined,
         email: formData.email?.trim() || undefined,
@@ -426,13 +428,15 @@ const UpdateUserProfileModal = () => {
             <Controller
               name="phoneNumber"
               control={control}
-              rules={{ required: 'Phone number is required' }}
+              rules={{
+                required: 'Phone number is required',
+                validate: (value) => validateRwandanPhoneNumber(value),
+              }}
               render={({ field }) => (
-                <Input
+                <TelInput
                   {...field}
                   label="Phone Number"
                   placeholder="Enter your phone"
-                  className={errors.phoneNumber ? 'border-destructive' : ''}
                   errorMessage={errors.phoneNumber?.message}
                 />
               )}

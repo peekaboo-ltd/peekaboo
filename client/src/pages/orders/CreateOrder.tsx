@@ -1,5 +1,5 @@
 import Button from "@/components/inputs/Button";
-import Input from "@/components/inputs/Input";
+import TelInput from "@/components/inputs/TelInput";
 import Modal from "@/components/Modal";
 import { useCreateOrder } from "@/hooks/orders/orders.hooks";
 import { useAppDispatch, useAppSelector } from "@/states/hooks";
@@ -8,7 +8,10 @@ import {
   parseBillingGuardPrompt,
   type BillingGuardPrompt,
 } from "@/utils/billingGuard.util";
-import { validateAndFormatPhoneNumber } from "@/utils/phone.util";
+import {
+  validateAndFormatPhoneNumber,
+  validateRwandanPhoneNumber,
+} from "@/utils/phone.util";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +36,6 @@ const CreateOrder = () => {
     handleSubmit,
     reset,
     formState: { errors },
-    trigger,
   } = useForm<CreateOrderFormValues>({
     defaultValues: {
       recipientPhoneNumber: "",
@@ -47,14 +49,6 @@ const CreateOrder = () => {
       ""
     );
   }, [user?.organizationMembership, user?.phoneNumber]);
-
-  // VALIDATE RWANDAN PHONE NUMBER
-  const validateRwandanPhone = (value?: string) => {
-    return (
-      validateAndFormatPhoneNumber(value || "")?.isValid ||
-      "Please enter a valid Rwandan phone number"
-    );
-  };
 
   // CREATE ORDER
   const {
@@ -71,19 +65,19 @@ const CreateOrder = () => {
     const sender = validateAndFormatPhoneNumber(senderPhoneNumber);
     const recipient = validateAndFormatPhoneNumber(data.recipientPhoneNumber);
 
-    if (!sender?.isValid || !sender?.formattedNumber) {
+    if (!sender?.isValid || !sender?.e164) {
       toast.error("Sender phone number is missing or invalid.");
       return;
     }
 
-    if (!recipient?.isValid || !recipient?.formattedNumber) {
+    if (!recipient?.isValid || !recipient?.e164) {
       toast.error("Please enter a valid recipient phone number.");
       return;
     }
 
     createOrder({
-      senderPhoneNumber: sender.formattedNumber,
-      recipientPhoneNumber: recipient.formattedNumber,
+      senderPhoneNumber: sender.e164,
+      recipientPhoneNumber: recipient.e164,
     });
   });
 
@@ -134,18 +128,14 @@ const CreateOrder = () => {
             <Controller
               name="recipientPhoneNumber"
               control={control}
-              rules={{ validate: validateRwandanPhone }}
+              rules={{ validate: (value) => validateRwandanPhoneNumber(value) }}
               render={({ field }) => (
-                <Input
+                <TelInput
                   {...field}
                   label="Recipient Phone Number"
                   required
                   placeholder="0788123456"
                   errorMessage={errors?.recipientPhoneNumber?.message}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    trigger("recipientPhoneNumber");
-                  }}
                 />
               )}
             />

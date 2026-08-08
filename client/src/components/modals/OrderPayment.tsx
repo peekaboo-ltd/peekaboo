@@ -7,6 +7,7 @@ import { PaymentType } from '@/types/payment.types';
 import { formatCurrency, formatPhone } from '@/utils/strings.util';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import Button from '../inputs/Button';
+import TelInput from '../inputs/TelInput';
 import { useCreatePayment, useCreatePublicPayment } from '@/hooks/payments/payment.hooks';
 import { toast } from 'sonner';
 import {
@@ -50,10 +51,14 @@ const OrderPayment = () => {
   const isLoading = isPublic ? publicPaymentLoading : authPaymentLoading;
   const createPaymentMutation = isPublic ? createPublicPaymentMutation : createAuthPaymentMutation;
 
-  // Validate phone using shared util; returns 250XXXXXXXXX for API or null
+  // Validate phone using shared util; returns canonical E.164 for the API.
   const validatePhone = useCallback((
     phone: string,
-    options?: { setError: (s: string) => void; optional?: boolean },
+    options?: {
+      setError: (s: string) => void;
+      optional?: boolean;
+      mobileOnly?: boolean;
+    },
   ): string | null => {
     const setError = options?.setError ?? setPhoneError;
     const optional = options?.optional ?? false;
@@ -66,9 +71,13 @@ const OrderPayment = () => {
     const result = validateAndFormatPhoneNumber(phone);
     setError(result.error ?? '');
 
-    if (!result.isValid || !result.formattedNumber) return null;
-    // Convert 0XXXXXXXXX to 250XXXXXXXXX for API
-    return '250' + result.formattedNumber.slice(1);
+    if (!result.isValid || !result.e164) return null;
+    if (options?.mobileOnly && result.type !== 'MOBILE') {
+      setError('Enter a Rwandan mobile number for mobile money');
+      return null;
+    }
+
+    return result.e164;
   }, []);
 
   // GET PAYER INFORMATION
@@ -111,6 +120,7 @@ const OrderPayment = () => {
     const payerInfo = getPayerInfo();
     const payerPhone = validatePhone(payerInfo.phone || '', {
       setError: setPhoneError,
+      mobileOnly: channelName !== 'CARD',
     });
 
     if (!payerPhone) {
@@ -282,43 +292,29 @@ const OrderPayment = () => {
 
         {/* CUSTOM PHONE INPUT */}
         {payerType === 'other' && (
-          <fieldset className='flex flex-col gap-2'>
-            <label htmlFor='customPhone' className='text-sm font-medium'>
-              Phone Number
-            </label>
-            <input
+          <fieldset>
+            <TelInput
               id='customPhone'
-              type='tel'
               value={customPhone}
-              onChange={(e) => setCustomPhone(e.target.value)}
-              placeholder='788123456 or 250788123456'
-              className='px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
+              onChange={setCustomPhone}
+              label="Phone Number"
+              required
+              placeholder='0788 123 456'
+              errorMessage={phoneError}
             />
-            {phoneError && (
-              <p className='text-sm text-black'>{phoneError}</p>
-            )}
-            <p className='text-xs text-gray-500'>
-              Enter a Rwandan phone number (e.g., 788123456 or 250788123456)
-            </p>
           </fieldset>
         )}
 
         {/* FALLBACK CONTACT — who to call if sender and recipient aren't answering */}
-        <fieldset className='flex flex-col gap-2'>
-          <label htmlFor='fallbackPhone' className='text-sm font-medium'>
-            Number to call if sender and recipient aren't answering <span className='text-gray-500 font-normal'>(optional)</span>
-          </label>
-          <input
+        <fieldset>
+          <TelInput
             id='fallbackPhone'
-            type='tel'
             value={fallbackPhone}
-            onChange={(e) => setFallbackPhone(e.target.value)}
-            placeholder='788123456 or 250788123456'
-            className='px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
+            onChange={setFallbackPhone}
+            label="Fallback contact number (optional)"
+            placeholder='0788 123 456'
+            errorMessage={fallbackPhoneError}
           />
-          {fallbackPhoneError && (
-            <p className='text-sm text-black'>{fallbackPhoneError}</p>
-          )}
         </fieldset>
 
         {ENVIRONMENTS.isDevelopmentPricing ? (

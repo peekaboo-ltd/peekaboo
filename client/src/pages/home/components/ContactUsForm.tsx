@@ -4,10 +4,12 @@ import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding, faCheck, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import Button from '@/components/inputs/Button';
 import { useSubmitContactInquiryMutation } from '@/api/mutations/organization.mutations';
 import { useI18n } from '@/i18n/i18n';
 import type { ContactInquiryPayload } from '@/types/organization.type';
+import { validateRwandanPhoneNumber } from '@/utils/phone.util';
 
 interface ContactUsFormProps {
   className?: string;
@@ -156,11 +158,15 @@ const ContactUsForm = ({
               <Controller
                 name="phoneNumber"
                 control={control}
+                rules={{
+                  validate: (value) => validateRwandanPhoneNumber(value, false),
+                }}
                 render={({ field }) => (
-                  <Input
+                  <TelInput
                     {...field}
                     label={t('contact.phoneLabel')}
                     placeholder={t('contact.phonePlaceholder')}
+                    errorMessage={errors.phoneNumber?.message}
                   />
                 )}
               />

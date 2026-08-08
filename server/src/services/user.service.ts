@@ -4,7 +4,7 @@ import { User } from '../entities/user.entity';
 import { UserRole } from '../entities/userRole.entity';
 import { UUID } from '../types';
 import { LogReferenceTypes } from '../constants/logs.constants';
-import { NotFoundError, ValidationError } from '../helpers/errors.helper';
+import { ConflictError, NotFoundError, ValidationError } from '../helpers/errors.helper';
 import { UserRoleService } from './userRole.service';
 import { RoleTypes } from '../constants/role.constants';
 import { getPagingData } from '../helpers/pagination.helper';
@@ -22,6 +22,7 @@ import { OrderAssignment } from '../entities/orderAssignment.entity';
 import { OrderAssignmentStatus } from '../constants/order.constants';
 import { UserStatusProof } from '../entities/userStatusProof.entity';
 import { UserProblemReport } from '../entities/userProblemReport.entity';
+import { normalizePhoneNumber } from '../helpers/phone.helper';
 
 
 interface UserTrackingListItem {
@@ -131,8 +132,20 @@ export class UserService {
     condition: FindOptionsWhere<User> | FindOptionsWhere<User>[],
     includePassword: boolean = false
   ): Promise<User | null> {
+    const normalizeCondition = (
+      value: FindOptionsWhere<User>,
+    ): FindOptionsWhere<User> => {
+      if (typeof value.phoneNumber !== 'string') return value;
+      const normalizedPhone = normalizePhoneNumber(value.phoneNumber);
+      return normalizedPhone ? { ...value, phoneNumber: normalizedPhone } : value;
+    };
+
+    const normalizedCondition = Array.isArray(condition)
+      ? condition.map(normalizeCondition)
+      : normalizeCondition(condition);
+
     const user = await this.userRepository.findOne({
-      where: condition,
+      where: normalizedCondition,
       relations: {
         userRoles: {
           role: true,
@@ -177,6 +190,12 @@ export class UserService {
     if (!user?.phoneNumber) {
       throw new ValidationError('Phone number is required');
     }
+
+    const normalizedPhone = normalizePhoneNumber(user.phoneNumber);
+    if (!normalizedPhone) {
+      throw new ValidationError('Enter a valid Rwandan phone number');
+    }
+    user = { ...user, phoneNumber: normalizedPhone };
 
     // CHECK IF USER EXISTS
     const existingUser = await this.userRepository.findOne({
@@ -238,6 +257,22 @@ export class UserService {
   })
   async updateUser(id: UUID, user: Partial<User>): Promise<User> {
     const userExists = await this.getUserById(id);
+
+    if (user.phoneNumber !== undefined) {
+      const normalizedPhone = normalizePhoneNumber(user.phoneNumber);
+      if (!normalizedPhone) {
+        throw new ValidationError('Enter a valid Rwandan phone number');
+      }
+
+      const phoneOwner = await this.userRepository.findOne({
+        where: { phoneNumber: normalizedPhone },
+      });
+      if (phoneOwner && phoneOwner.id !== id) {
+        throw new ConflictError('Phone number already in use');
+      }
+
+      user = { ...user, phoneNumber: normalizedPhone };
+    }
 
     return this.userRepository.save({
       ...userExists,

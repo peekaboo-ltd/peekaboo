@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
-import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import { useAppDispatch } from '@/states/hooks';
 import {
   setToken,
@@ -12,7 +12,10 @@ import {
 } from '@/states/slices/auth.slice';
 import { localStorageUtil } from '@/utils/localStorage.util';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
-import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import {
+  validateAndFormatPhoneNumber,
+  validateRwandanPhoneNumber,
+} from '@/utils/phone.util';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
   AuthCard,
@@ -33,7 +36,6 @@ const AuthCallback = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [needsPhone, setNeedsPhone] = useState(false);
   const [token, setTokenState] = useState<string | null>(null);
-  const [phoneError, setPhoneError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   useDocumentTitle(
     isLoading ? 'Signing In' : needsPhone ? 'Add Phone Number' : 'Authenticating',
@@ -42,6 +44,7 @@ const AuthCallback = () => {
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<AddPhoneFormData>();
 
@@ -111,10 +114,12 @@ const AuthCallback = () => {
   const handlePhoneSubmit = handleSubmit(async (data) => {
     const validation = validateAndFormatPhoneNumber(data.phoneNumber);
     if (!validation.isValid) {
-      setPhoneError(validation.error);
+      setError('phoneNumber', {
+        type: 'validate',
+        message: validation.error,
+      });
       return;
     }
-    setPhoneError(undefined);
 
     if (!token) {
       toast.error('Authentication session expired. Please try again.');
@@ -132,7 +137,7 @@ const AuthCallback = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          phoneNumber: validation.formattedNumber,
+          phoneNumber: validation.e164,
         }),
       });
 
@@ -186,21 +191,21 @@ const AuthCallback = () => {
               <Controller
                 name="phoneNumber"
                 control={control}
-                rules={{ required: 'Phone number is required' }}
+                rules={{
+                  required: 'Phone number is required',
+                  validate: (value) => validateRwandanPhoneNumber(value),
+                }}
                 render={({ field }) => (
-                  <Input
+                  <TelInput
                     {...field}
                     label="Phone number"
-                    placeholder="078XXXXXXX"
+                    placeholder="7XXXXXXXX"
                     required
                     className={authInputClassName}
-                    errorMessage={phoneError || errors?.phoneNumber?.message}
+                    errorMessage={errors?.phoneNumber?.message}
                   />
                 )}
               />
-              <p className="mt-1 text-xs font-normal text-muted-foreground">
-                Valid prefixes: 078, 072, 073, 079, 077
-              </p>
             </div>
 
             <nav className="flex flex-col gap-3">

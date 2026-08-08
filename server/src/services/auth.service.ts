@@ -46,7 +46,7 @@ export class AuthService {
     let normalizedPhone: string | undefined;
     const phoneValidation = validateAndFormatPhoneNumber(username);
     if (phoneValidation.isValid) {
-      normalizedPhone = phoneValidation.formattedNumber;
+      normalizedPhone = phoneValidation.e164;
     }
 
     // Search by email OR original username OR normalized phone number
@@ -152,7 +152,7 @@ export class AuthService {
       throw new ValidationError(phoneValidation.error || 'Invalid phone number');
     }
 
-    const formattedPhoneNumber = phoneValidation.formattedNumber!;
+    const formattedPhoneNumber = phoneValidation.e164!;
 
     // Check for existing user by phone number
     const existingUserByPhone = await this.userRepository.findOne({
@@ -360,7 +360,7 @@ export class AuthService {
       throw new ValidationError(phoneValidation.error || 'Invalid phone number');
     }
 
-    const formattedPhoneNumber = phoneValidation.formattedNumber!;
+    const formattedPhoneNumber = phoneValidation.e164!;
 
     // Check if phone number already exists
     const existingUser = await this.userRepository.findOne({
@@ -401,7 +401,7 @@ export class AuthService {
     let normalizedPhone: string | undefined;
     const phoneValidation = validateAndFormatPhoneNumber(trimmedIdentifier);
     if (phoneValidation.isValid) {
-      normalizedPhone = phoneValidation.formattedNumber;
+      normalizedPhone = phoneValidation.e164;
     }
 
     const whereConditions: Array<{ email?: string; phoneNumber?: string }> = [

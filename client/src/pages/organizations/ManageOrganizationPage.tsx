@@ -11,6 +11,7 @@ import {
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import Select from '@/components/inputs/Select';
 import { Badge } from '@/components/ui/badge';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
@@ -30,6 +31,7 @@ import { useFetchBusinessPlans } from '@/hooks/business-plan/businessPlan.hooks'
 import { BusinessPlan } from '@/types/businessPlan.type';
 import { UUID } from '@/types';
 import OrganizationMembers from '@/containers/organizations/OrganizationMembers';
+import { validateRwandanPhoneNumber } from '@/utils/phone.util';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -262,8 +264,11 @@ const ManageOrganizationPage = () => {
               <Controller
                 name="phoneNumber"
                 control={control}
+                rules={{
+                  validate: (value) => validateRwandanPhoneNumber(value, false),
+                }}
                 render={({ field }) => (
-                  <Input
+                  <TelInput
                     {...field}
                     label="Phone Number"
                     placeholder="+250 7XX XXX XXX"

@@ -1,157 +1,114 @@
-/**
- * Phone Number Validation Helper
- * Validates and formats Rwandan phone numbers
- */
+import {
+  isPossiblePhoneNumber,
+  isValidPhoneNumber as isValidPhoneNumberValue,
+  parsePhoneNumber,
+  type CountryCode,
+  type PhoneNumberType,
+} from 'libphonenumber-js/max';
+import { COUNTRIES } from '../constants/countries.constants';
 
-// Valid Rwandan phone number prefixes
-const VALID_PREFIXES = ['078', '072', '073', '079', '077'] as const;
+export const SUPPORTED_PHONE_COUNTRY = 'RW' as const satisfies CountryCode;
+
+const rwandaCountry = COUNTRIES.find(
+  (country) => country.code === SUPPORTED_PHONE_COUNTRY,
+);
+
+if (!rwandaCountry) {
+  throw new Error('Rwanda is missing from COUNTRIES');
+}
+
+export const RWANDA_COUNTRY = rwandaCountry;
 
 export interface PhoneValidationResult {
   isValid: boolean;
-  formattedNumber?: string;
+  e164?: string;
+  national?: string;
+  international?: string;
+  country?: CountryCode;
+  type?: PhoneNumberType;
   error?: string;
 }
 
-function normalizeRwandaPhoneNumber(
-  input: string | null | undefined
-): string | null {
-  if (!input) {
-    return null;
-  }
+const requiredError = 'Phone number is required.';
+const invalidError = 'Enter a valid Rwandan phone number.';
+const incompleteError = 'Enter a complete Rwandan phone number.';
+const foreignCountryError = `Only Rwanda (${RWANDA_COUNTRY.dial_code}) numbers are supported.`;
 
-  let normalizedNumber = input.replace(/\s/g, '');
-  const hasLeadingPlus = normalizedNumber.startsWith('+');
-  const numberWithoutPlus = hasLeadingPlus
-    ? normalizedNumber.slice(1)
-    : normalizedNumber;
-
-  if (!/^\d+$/.test(numberWithoutPlus)) {
-    return null;
-  }
-
-  if (normalizedNumber.startsWith('+2500')) {
-    normalizedNumber = normalizedNumber.slice(4);
-  } else if (normalizedNumber.startsWith('+250')) {
-    normalizedNumber = '0' + normalizedNumber.slice(4);
-  } else if (normalizedNumber.startsWith('2500')) {
-    normalizedNumber = normalizedNumber.slice(3);
-  } else if (normalizedNumber.startsWith('250')) {
-    normalizedNumber = '0' + normalizedNumber.slice(3);
-  }
-
-  if (normalizedNumber.length !== 10) {
-    return null;
-  }
-
-  const prefix = normalizedNumber.slice(0, 3);
-  if (!VALID_PREFIXES.includes(prefix as (typeof VALID_PREFIXES)[number])) {
-    return null;
-  }
-
-  if (!normalizedNumber.startsWith('0')) {
-    return null;
-  }
-
-  return normalizedNumber;
-}
-
-/**
- * Validates and formats a phone number to local format (0XXXXXXXXX)
- *
- * Accepts formats:
- * - 0788478652 (local format - already correct)
- * - 250788478652 (with country code)
- * - +250788478652 (with + and country code)
- * - +2500788478652 (with + and country code including leading 0)
- *
- * @param input - The phone number to validate and format
- * @returns PhoneValidationResult with isValid, formattedNumber, and error
- */
 export function validateAndFormatPhoneNumber(
-  input: string | null | undefined
+  input: string | null | undefined,
 ): PhoneValidationResult {
-  // Handle null/undefined
-  if (!input) {
-    return {
-      isValid: false,
-      error: 'Phone number is required',
-    };
+  const value = input?.trim();
+
+  if (!value) {
+    return { isValid: false, error: requiredError };
   }
 
-  // Check for non-numeric characters (except leading +)
-  const normalizedInput = input.replace(/\s/g, '');
-  const hasLeadingPlus = normalizedInput.startsWith('+');
-  const numberWithoutPlus = hasLeadingPlus
-    ? normalizedInput.slice(1)
-    : normalizedInput;
+  try {
+    const phoneNumber = parsePhoneNumber(value, SUPPORTED_PHONE_COUNTRY);
 
-  if (!/^\d+$/.test(numberWithoutPlus)) {
+    if (phoneNumber.country !== SUPPORTED_PHONE_COUNTRY) {
+      return {
+        isValid: false,
+        country: phoneNumber.country,
+        error: foreignCountryError,
+      };
+    }
+
+    if (!isPossiblePhoneNumber(phoneNumber.number)) {
+      return {
+        isValid: false,
+        country: phoneNumber.country,
+        error: incompleteError,
+      };
+    }
+
+    if (!isValidPhoneNumberValue(phoneNumber.number)) {
+      return {
+        isValid: false,
+        country: phoneNumber.country,
+        error: invalidError,
+      };
+    }
+
+    return {
+      isValid: true,
+      e164: phoneNumber.number,
+      national: phoneNumber.formatNational(),
+      international: phoneNumber.formatInternational(),
+      country: phoneNumber.country,
+      type: phoneNumber.getType(),
+    };
+  } catch {
     return {
       isValid: false,
-      error: 'Phone number must contain only digits',
+      error: value.startsWith('+') && !value.startsWith(RWANDA_COUNTRY.dial_code)
+        ? foreignCountryError
+        : incompleteError,
     };
   }
-
-  const normalizedNumber = normalizeRwandaPhoneNumber(input);
-
-  if (!normalizedNumber) {
-    return {
-      isValid: false,
-      error: `Invalid phone number. Must be a valid Rwandan mobile number starting with ${VALID_PREFIXES.join(', ')}`,
-    };
-  }
-
-  return {
-    isValid: true,
-    formattedNumber: normalizedNumber,
-  };
 }
 
-/**
- * Quick validation check without formatting
- * @param phoneNumber - The phone number to validate
- * @returns boolean indicating if the phone number is valid
- */
+export function normalizePhoneNumber(
+  input: string | null | undefined,
+): string | null {
+  return validateAndFormatPhoneNumber(input).e164 ?? null;
+}
+
 export function isValidPhoneNumber(
-  phoneNumber: string | null | undefined
+  input: string | null | undefined,
 ): boolean {
-  return validateAndFormatPhoneNumber(phoneNumber).isValid;
+  return validateAndFormatPhoneNumber(input).isValid;
 }
 
 export function formatPhoneNumber(
-  input: string | null | undefined
+  input: string | null | undefined,
 ): string | null {
-  const normalizedNumber = normalizeRwandaPhoneNumber(input);
-
-  if (!normalizedNumber) {
-    return null;
-  }
-
-  return `+250${normalizedNumber.slice(-9)}`;
+  return normalizePhoneNumber(input);
 }
 
-/**
- * Gets the carrier name based on phone number prefix
- * @param phoneNumber - A validated phone number
- * @returns The carrier name or undefined if unknown
- */
-export function getCarrierFromPrefix(
-  phoneNumber: string
-): string | undefined {
-  const validation = validateAndFormatPhoneNumber(phoneNumber);
-  if (!validation.isValid || !validation.formattedNumber) {
-    return undefined;
-  }
-
-  const prefix = validation.formattedNumber.slice(0, 3);
-
-  const carrierMap: Record<string, string> = {
-    '078': 'MTN',
-    '079': 'MTN',
-    '072': 'Airtel',
-    '073': 'Airtel',
-    '077': 'Tigo',
-  };
-
-  return carrierMap[prefix];
+export function formatPhoneForProvider(
+  input: string | null | undefined,
+): string | null {
+  const e164 = normalizePhoneNumber(input);
+  return e164 ? e164.slice(1) : null;
 }

@@ -573,7 +573,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 py-[7px] px-4
                 font-normal
                 placeholder:!font-light
-                placeholder:italic
                 placeholder:text-[13px]
                 placeholder:text-slate-400
                 text-[13px] text-slate-900

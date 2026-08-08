@@ -36,7 +36,9 @@ import { Order } from '../entities/order.entity';
 import { Conversation } from '../entities/conversation.entity';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
-import { formatPhoneNumber } from '../helpers/phone.helper';
+import {
+  validateAndFormatPhoneNumber,
+} from '../helpers/phone.helper';
 import { ConversationStatus } from '../constants/conversation.constants';
 import logger from '../helpers/logger.helper';
 import {
@@ -75,7 +77,10 @@ export class PaymentService {
       (provider === PaymentProvider.URUBUTO
         ? UrubutoChannelName.MOMO
         : KpayPaymentMethod.MOBILE_MONEY);
-    const customerPhone = this.normalizePaymentPhone(payment.customerPhone);
+    const phoneValidation = payment.customerPhone
+      ? validateAndFormatPhoneNumber(payment.customerPhone)
+      : undefined;
+    const customerPhone = phoneValidation?.e164;
     const requiresPhone =
       provider === PaymentProvider.KPAY ||
       requestedMethod === UrubutoChannelName.MOMO ||
@@ -84,6 +89,16 @@ export class PaymentService {
 
     if (requiresPhone && !customerPhone) {
       throw new ValidationError('A valid payer phone number is required');
+    }
+
+    const requiresMobile =
+      requestedMethod === UrubutoChannelName.MOMO ||
+      requestedMethod === UrubutoChannelName.AIRTEL_MONEY ||
+      requestedMethod === KpayPaymentMethod.MOBILE_MONEY;
+    if (requiresMobile && phoneValidation?.type !== 'MOBILE') {
+      throw new ValidationError(
+        'A valid Rwandan mobile number is required for mobile money',
+      );
     }
 
     let redirectUrl: string | undefined;
@@ -621,13 +636,6 @@ export class PaymentService {
     if (configuredProvider === PaymentProvider.KPAY) return PaymentProvider.KPAY;
 
     return PaymentProvider.URUBUTO;
-  }
-
-  private normalizePaymentPhone(phone?: string): string | undefined {
-    const formattedPhone = formatPhoneNumber(phone);
-    if (!formattedPhone) return undefined;
-
-    return formattedPhone.replace(/^\+/, '');
   }
 
   private getPaymentRedirectUrl(orderId: UUID): string {

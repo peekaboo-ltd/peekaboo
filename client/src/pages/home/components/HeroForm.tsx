@@ -13,7 +13,7 @@ import Button from '@/components/inputs/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight, faCheckCircle, faClock, faCreditCard, faShield } from '@fortawesome/free-solid-svg-icons';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
-import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 
 interface HeroFormCopy {
   formTitle: string;
@@ -73,10 +73,10 @@ const HeroForm = ({
     }
 
     const normalizedSender =
-      validateAndFormatPhoneNumber(senderPhoneNumber).formattedNumber ||
+      validateAndFormatPhoneNumber(senderPhoneNumber).e164 ||
       senderPhoneNumber.trim();
     const normalizedRecipient =
-      validateAndFormatPhoneNumber(value || '').formattedNumber ||
+      validateAndFormatPhoneNumber(value || '').e164 ||
       (value || '').trim();
 
     if (
@@ -111,17 +111,13 @@ const HeroForm = ({
             control={control}
             rules={{ validate: validateRwandanPhone }}
             render={({ field }) => (
-              <label className='w-full flex flex-col gap-1'>
-                  <Input
-                    value={field.value}
-                    onChange={field.onChange}
-                    label={copy.senderLabel}
-                    required
-                    type="tel"
-                    placeholder={copy.senderPlaceholder}
-                    errorMessage={errors.senderPhoneNumber?.message}
-                  />
-              </label>
+              <TelInput
+                {...field}
+                label={copy.senderLabel}
+                required
+                placeholder={copy.senderPlaceholder}
+                errorMessage={errors.senderPhoneNumber?.message}
+              />
             )}
           />
 
@@ -130,17 +126,13 @@ const HeroForm = ({
             control={control}
             rules={{ validate: validateRecipientPhone }}
             render={({ field }) => (
-              <label className='w-full flex flex-col gap-1'>
-                  <Input
-                    value={field.value}
-                    onChange={field.onChange}
-                    label={copy.recipientLabel}
-                    required
-                    type="tel"
-                    placeholder={copy.recipientPlaceholder}
-                    errorMessage={errors.recipientPhoneNumber?.message}
-                  />
-              </label>
+              <TelInput
+                {...field}
+                label={copy.recipientLabel}
+                required
+                placeholder={copy.recipientPlaceholder}
+                errorMessage={errors.recipientPhoneNumber?.message}
+              />
             )}
           />
 

@@ -10,6 +10,7 @@ import {
   FormDescription,
 } from '../ui/form';
 import { Input } from '../ui/input';
+import TelInput from '../inputs/TelInput';
 import { Button } from '../ui/button';
 import {
   Select,
@@ -24,6 +25,7 @@ import { Loader } from '../inputs/Loader';
 import { RoleTypes } from '../../types/auth.type';
 import { UserStatus } from '../../constants/user.constants';
 import type { User } from '../../types/user.type';
+import { validateRwandanPhoneNumber } from '../../utils/phone.util';
 
 export interface UserFormData {
   name?: string;
@@ -141,22 +143,19 @@ export const UserForm: React.FC<UserFormProps> = ({
             name="phoneNumber"
             rules={{
               required: 'Phone number is required',
-              pattern: {
-                value: /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/,
-                message: 'Invalid phone number',
-              },
+              validate: (value) => validateRwandanPhoneNumber(value),
             }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number *</FormLabel>
                 <FormControl>
-                  <Input
-                    type="tel"
-                    placeholder="+1234567890"
+                  <TelInput
                     {...field}
+                    label="Phone Number"
+                    required
+                    placeholder="0788 123 456"
+                    errorMessage={form.formState.errors.phoneNumber?.message}
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />

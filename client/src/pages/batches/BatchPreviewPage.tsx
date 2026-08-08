@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import Button from "@/components/inputs/Button";
+import TelInput from "@/components/inputs/TelInput";
 import {
   PublicPageHero,
   PublicSectionCard,
@@ -98,7 +99,7 @@ const InlinePhoneEditor = ({
     if (order?.id) {
       setLocalSaving(true);
       try {
-        await onSave(order?.id, result.formattedNumber!);
+        await onSave(order?.id, result.e164!);
       } finally {
         setLocalSaving(false);
       }
@@ -117,16 +118,15 @@ const InlinePhoneEditor = ({
   if (isEditing) {
     return (
       <div className="flex items-center gap-1">
-        <input
+        <TelInput
           ref={inputRef}
-          type="text"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={setValue}
           onKeyDown={handleKeyDown}
           onBlur={handleSave}
           disabled={isSaving || localSaving}
-          className="w-36 px-2 py-1 text-[12px] border border-primary-900 rounded focus:outline-none focus:ring-1 focus:ring-primary-900 disabled:opacity-50"
-          placeholder="+250 7XX XXX XXX"
+          className="w-56"
+          placeholder="0788 123 456"
         />
         {(isSaving || localSaving) && (
           <svg className="animate-spin h-4 w-4 text-primary-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -150,7 +150,7 @@ const InlinePhoneEditor = ({
       }`}
       title="Click to edit phone number"
     >
-      {currentPhone || <span className="text-slate-400 italic">Not set</span>}
+      {currentPhone || <span className="text-slate-400">Not set</span>}
     </button>
   );
 };

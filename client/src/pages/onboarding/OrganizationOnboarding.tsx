@@ -1,8 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { motion, Variants } from 'framer-motion';
-import { useState, useCallback } from 'react';
 import Input from '@/components/inputs/Input';
+import TelInput from '@/components/inputs/TelInput';
 import Select from '@/components/inputs/Select';
 import Button from '@/components/inputs/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -14,7 +14,10 @@ import {
 import { useI18n } from '@/i18n/i18n';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrganizationData } from '@/states/slices/onboarding.slice';
-import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import {
+  validateAndFormatPhoneNumber,
+  validateRwandanPhoneNumber,
+} from '@/utils/phone.util';
 import type { OrganizationFormData } from '@/types/organization.type';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 
@@ -84,43 +87,32 @@ const OrganizationOnboarding = () => {
   const dispatch = useAppDispatch();
   const { organization } = useAppSelector((state) => state.onboarding);
   const { t } = useI18n();
-  const [phoneError, setPhoneError] = useState<string | undefined>();
   useDocumentTitle(t('onboarding.organization.title'));
 
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<OrganizationFormData>({
     defaultValues: organization,
   });
 
-  // Handle phone validation on change
-  const handlePhoneChange = useCallback(
-    (value: string, onChange: (value: string) => void) => {
-      onChange(value);
-      if (value) {
-        const validation = validateAndFormatPhoneNumber(value);
-        setPhoneError(validation.isValid ? undefined : validation.error);
-      } else {
-        setPhoneError(undefined);
-      }
-    },
-    []
-  );
-
   const onSubmit = handleSubmit((data) => {
     // Validate phone
     const phoneValidation = validateAndFormatPhoneNumber(data.phoneNumber);
     if (!phoneValidation.isValid) {
-      setPhoneError(phoneValidation.error);
+      setError('phoneNumber', {
+        type: 'validate',
+        message: phoneValidation.error,
+      });
       return;
     }
 
     dispatch(
       setOrganizationData({
         ...data,
-        phoneNumber: phoneValidation.formattedNumber!,
+        phoneNumber: phoneValidation.e164!,
       })
     );
     navigate('/onboarding/admin');
@@ -218,17 +210,17 @@ const OrganizationOnboarding = () => {
             <Controller
               name="phoneNumber"
               control={control}
-              rules={{ required: t('validation.required') }}
+              rules={{
+                required: t('validation.required'),
+                validate: (value) => validateRwandanPhoneNumber(value),
+              }}
               render={({ field }) => (
-                <Input
+                <TelInput
                   {...field}
                   label={t('onboarding.organization.phone')}
                   placeholder={t('onboarding.organization.phonePlaceholder')}
                   required
-                  onChange={(e) =>
-                    handlePhoneChange(e.target.value, field.onChange)
-                  }
-                  errorMessage={phoneError || errors?.phoneNumber?.message}
+                  errorMessage={errors?.phoneNumber?.message}
                 />
               )}
             />

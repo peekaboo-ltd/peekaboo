@@ -5,7 +5,6 @@ import { ChangeEvent, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { cleanPhoneNumber, validateAndFormatPhoneNumber } from '@/utils/phone.util';
-import { validateDeliveryLocation } from '@/utils/location.util';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
 import { Badge } from '@/components/ui/badge';
@@ -114,9 +113,9 @@ function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewSta
     if (isCompletelyEmpty) return;
 
     const phoneValidation = validateAndFormatPhoneNumber(
-      cleanPhoneNumber(recipientPhoneNumber)?.formattedNumber || '',
+      cleanPhoneNumber(recipientPhoneNumber)?.e164 || '',
     );
-    if (!phoneValidation.isValid || !phoneValidation.formattedNumber) {
+    if (!phoneValidation.isValid || !phoneValidation.e164) {
       validationErrors.push({
         rowNumber,
         field: 'recipientPhoneNumber',
@@ -151,7 +150,7 @@ function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewSta
 
     parsedRows.push({
       rowNumber,
-      recipientPhoneNumber: phoneValidation.formattedNumber || recipientPhoneNumber,
+      recipientPhoneNumber: phoneValidation.e164 || recipientPhoneNumber,
       deliveryLocation: deliveryLocation || undefined,
       productReferenceNo: productReferenceNo || undefined,
       productName: productName || undefined,

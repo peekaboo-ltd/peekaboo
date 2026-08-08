@@ -54,11 +54,11 @@ const HeroSection = ({
   const onSubmit = handleSubmit((data) => {
     const sender = validateAndFormatPhoneNumber(data.senderPhoneNumber);
     const recipient = validateAndFormatPhoneNumber(data.recipientPhoneNumber);
-    if (!sender.formattedNumber || !recipient.formattedNumber) return;
+    if (!sender.e164 || !recipient.e164) return;
 
     const payload = {
-      senderPhoneNumber: sender.formattedNumber,
-      recipientPhoneNumber: recipient.formattedNumber,
+      senderPhoneNumber: sender.e164,
+      recipientPhoneNumber: recipient.e164,
     };
 
     if (isAuthenticated) {
