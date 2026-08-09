@@ -56,7 +56,7 @@ export const PublicPageHero = ({
 }: PublicPageHeroProps) => (
   <header
     className={cn(
-      'overflow-hidden rounded-md border border-slate-200 bg-[var(--peekaboo-surface)] px-5 py-5 sm:px-6 sm:py-6',
+      'overflow-hidden rounded-sm border border-slate-200 bg-[var(--peekaboo-surface)] px-5 py-5 sm:px-6 sm:py-6',
       className,
     )}
   >

@@ -12,7 +12,6 @@ import FeaturesSection from './components/FeaturesSection';
 import ServicesSection from './components/ServicesSection';
 import HowItWorksSection from './components/HowItWorksSection';
 import WhyPeekabooSection from './components/WhyPeekabooSection';
-import TestimonialsSection from './components/TestimonialsSection';
 import BusinessSolutionsSection from './components/BusinessSolutionsSection';
 import BusinessPlansSection from './components/BusinessPlansSection';
 import SupportSection from './components/SupportSection';
@@ -31,7 +30,6 @@ const Home = () => {
     howItWorks,
     whyItems,
     businessFeatures,
-    testimonials,
     trustedByLabel,
     trustedByIndustries,
     supportContacts,
@@ -101,13 +99,6 @@ const Home = () => {
         landingStats={landingStats}
         activeCustomersLabel={t('home.stats.activeCustomers')}
         completedOrdersLabel={t('home.stats.customersWithOrders')}
-      />
-
-      <TestimonialsSection
-        badgeLabel={t('home.testimonials.title')}
-        title="Teams and families rely on Peekaboo every day"
-        subtitle={t('home.testimonials.subtitle')}
-        testimonials={testimonials}
       />
 
       <BusinessSolutionsSection

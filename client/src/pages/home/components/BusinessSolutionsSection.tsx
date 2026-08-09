@@ -19,7 +19,7 @@ const BusinessSolutionsSection = ({
   onContactClick,
   onSeePlans,
 }: BusinessSolutionsSectionProps) => (
-  <section id="business" className="w-full border-t border-border bg-[color-mix(in_oklab,var(--secondary)_9%,var(--peekaboo-surface))] py-12 text-foreground lg:py-16">
+  <section id="business" className="w-full bg-[var(--peekaboo-surface)] py-12 text-foreground lg:py-16">
     <article className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:px-10">
       <header>
         <p className="text-[11px] font-medium uppercase text-muted-foreground">

@@ -217,7 +217,7 @@ export const RegisterPage = () => {
           </Button>
         </form>
 
-        <div className="mt-7 border-t border-border pt-6 text-center text-sm font-normal text-foreground">
+        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
           <span>Already have an account? </span>
           <Link
             to="/auth/login"

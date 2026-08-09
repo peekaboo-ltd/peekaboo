@@ -16,7 +16,7 @@ const FinalCtaSection = ({
   buttonLabel,
   onScrollToForm,
 }: FinalCtaSectionProps) => (
-  <section className="relative w-full border-t border-border bg-[#0a0a0a] py-12 text-white lg:py-16">
+  <section className="relative w-full bg-[#0a0a0a] py-12 text-white lg:py-16">
     <motion.article
       className="relative mx-auto max-w-[720px] px-5 text-center sm:px-8 lg:px-10"
       initial="hidden"

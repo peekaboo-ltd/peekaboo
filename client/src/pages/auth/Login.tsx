@@ -142,7 +142,7 @@ export const Login = () => {
           </Button>
         </form>
 
-        <div className="mt-7 border-t border-border pt-6 text-center text-sm font-normal text-foreground">
+        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
           <span>Don&apos;t have an account? </span>
           <Link
             to="/auth/register"

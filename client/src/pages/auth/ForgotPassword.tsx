@@ -64,7 +64,7 @@ const ForgotPassword = () => {
           </form>
         )}
 
-        <div className="mt-7 border-t border-border pt-6 text-center text-sm font-normal text-foreground">
+        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
           <span>Remembered your password? </span>
           <Link
             to="/auth/login"

@@ -223,7 +223,7 @@ const CompleteAccount = () => {
           </form>
         )}
 
-        <div className="mt-7 border-t border-border pt-6 text-center text-sm font-normal text-foreground">
+        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
           <Link
             to="/auth/login"
             className="font-normal text-primary hover:text-secondary-600 underline underline-offset-2"

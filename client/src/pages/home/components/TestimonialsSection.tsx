@@ -34,7 +34,7 @@ const TestimonialsSection = ({
   const current = testimonials[activeTestimonial];
 
   return (
-    <section className="w-full border-t border-border bg-[var(--peekaboo-surface)] py-12 lg:py-16">
+    <section className="w-full bg-[var(--peekaboo-surface)] py-12 lg:py-16">
       <motion.article
         className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10"
         initial="hidden"

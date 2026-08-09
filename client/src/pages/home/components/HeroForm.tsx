@@ -211,7 +211,7 @@ const HeroForm = ({
           </div>
         </fieldset>
 
-        <p className="mt-5 border-t border-border pt-4 text-[12px] font-normal leading-relaxed text-muted-foreground">
+        <p className="mt-5 pt-4 text-[12px] font-normal leading-relaxed text-muted-foreground">
           We confirm the price and ETA as soon as a rider is matched.
         </p>
 

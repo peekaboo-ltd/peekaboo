@@ -119,7 +119,7 @@ const HeroSection = ({
             />
           </motion.header>
 
-          <motion.aside variants={itemVariants} className="w-full lg:justify-self-end">
+          <motion.aside variants={itemVariants} className="w-full bg-white lg:justify-self-end">
             <HeroForm
               formRef={formRef}
               onSubmit={onSubmit}

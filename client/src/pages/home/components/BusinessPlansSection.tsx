@@ -30,7 +30,7 @@ const BusinessPlansSection = ({
   const hasPlans = !isLoading && plans.length > 0;
 
   return (
-    <section id="business-plans" className="w-full border-t border-border bg-[var(--peekaboo-surface)] py-12 lg:py-16">
+    <section id="business-plans" className="w-full bg-[var(--peekaboo-surface)] py-12 lg:py-16">
       <motion.article
         className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10"
         initial="hidden"
@@ -91,7 +91,7 @@ const BusinessPlansSection = ({
                     ) : null}
                   </header>
 
-                  <section className="mt-5 border-t border-border pt-4">
+                  <section className="mt-5 pt-4">
                     <p className="text-[22px] font-semibold text-foreground">
                       {plan.price}
                     </p>
@@ -131,7 +131,7 @@ const BusinessPlansSection = ({
                     {plan.detailsTo ? (
                       <Link
                         to={plan.detailsTo}
-                        className="inline-flex items-center justify-center rounded-md border border-border bg-[var(--peekaboo-surface)] px-4 py-2 text-[12px] font-normal text-foreground transition-all duration-300 hover:bg-[var(--peekaboo-surface)] hover:border-border"
+                        className="inline-flex items-center justify-center rounded-md border border-border bg-[var(--peekaboo-surface)] px-4 py-2 text-[12px] font-normal text-foreground transition-all duration-300 hover:bg-[var(--peekaboo-warm)] hover:border-border"
                       >
                         {detailsCtaLabel}
                       </Link>
