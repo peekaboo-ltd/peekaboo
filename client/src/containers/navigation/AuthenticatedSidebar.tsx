@@ -200,7 +200,7 @@ const Sidebar = () => {
                             <li key={subCategory.label}>
                               <Link
                                 to={subCategory.path}
-                                className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-all duration-200 ${isSubActive
+                                className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-normal transition-all duration-200 ${isSubActive
                                     ? 'bg-white/[0.12] text-white'
                                     : 'text-white/85 hover:bg-white/[0.06] hover:text-white/90'
                                   }`}
@@ -237,7 +237,7 @@ const Sidebar = () => {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.1, duration: 0.2 } }}
-            className="text-center text-[10px] font-light uppercase tracking-wide text-white/25"
+            className="text-center text-[10px] font-light uppercase text-white/25"
           >
             Peekaboo
           </motion.p>

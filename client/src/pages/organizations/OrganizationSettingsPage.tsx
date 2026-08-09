@@ -133,7 +133,7 @@ const OrganizationSettingsPage = () => {
                       <FontAwesomeIcon icon={item.icon} />
                     </span>
                     <section>
-                      <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                      <p className="text-xs uppercase text-slate-400">
                         {item.label}
                       </p>
                       <p className="mt-1 text-sm font-medium text-slate-900">
@@ -160,7 +160,7 @@ const OrganizationSettingsPage = () => {
                     icon={faLocationDot}
                     className="text-slate-700 text-sm"
                   />
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs uppercase text-slate-400">
                     Current Default
                   </p>
                 </header>

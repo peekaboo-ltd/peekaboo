@@ -195,7 +195,7 @@ const CreateBusinessPlanPage = () => {
             control={control}
             render={({ field }) => (
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-slate-700 uppercase tracking-wide">
+                <label className="text-xs font-medium text-slate-700 uppercase ">
                   Description
                 </label>
                 <textarea

@@ -94,10 +94,10 @@ const HeroForm = ({
     <form ref={formRef} onSubmit={onSubmit} className="home-scroll-target relative isolate w-full">
       <article className="relative rounded-md border border-border bg-card p-6 text-foreground shadow-[0_22px_70px_-42px_color-mix(in_oklab,var(--primary)_45%,transparent)] sm:p-8">
         <header className="mb-5">
-          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          <p className="text-[10px] font-medium uppercase text-muted-foreground">
             New order
           </p>
-          <h2 className="mt-2 text-[18px] font-semibold leading-tight tracking-[-0.01em] text-card-foreground sm:text-[20px]">
+          <h2 className="mt-2 text-[18px] font-semibold leading-tight text-card-foreground sm:text-[20px]">
             {copy.formTitle}
           </h2>
           <p className="mt-1.5 text-[12.5px] font-normal leading-relaxed text-muted-foreground">
@@ -236,7 +236,7 @@ const HeroForm = ({
           </Link>
         </nav>
 
-        <aside className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <aside className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[10.5px] font-medium uppercase text-muted-foreground">
           <span className="flex items-center gap-1 text-[8px]">
             <FontAwesomeIcon icon={faShield} className="text-[10px]" aria-hidden="true" />
             {copy.verifiedRidersLabel}

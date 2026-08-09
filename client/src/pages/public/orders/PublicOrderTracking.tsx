@@ -236,7 +236,7 @@ const PublicOrderTracking = () => {
                       </div>
                       <aside className="shrink-0 text-right">
                         {isCurrent ? (
-                          <span className="inline-flex rounded-full border border-primary/15 bg-primary/5 px-2.5 py-1 text-[10px] font-normal uppercase tracking-wide text-primary">
+                          <span className="inline-flex rounded-full border border-primary/15 bg-primary/5 px-2.5 py-1 text-[10px] font-normal uppercase text-primary">
                             Current
                           </span>
                         ) : null}
@@ -342,7 +342,7 @@ const PublicOrderTracking = () => {
                       </p>
 
                       {isCurrent ? (
-                        <span className="mt-2 inline-flex rounded-full border border-primary/15 bg-primary/5 px-2 py-1 text-[10px] font-normal uppercase tracking-wide text-primary">
+                        <span className="mt-2 inline-flex rounded-full border border-primary/15 bg-primary/5 px-2 py-1 text-[10px] font-normal uppercase text-primary">
                           Current
                         </span>
                       ) : null}
@@ -398,7 +398,7 @@ const PublicOrderTracking = () => {
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                  <p className="text-[11px] font-normal uppercase text-slate-400">
                     {item.label}
                   </p>
                   <p className="mt-1 break-all text-sm font-normal text-slate-900">
@@ -433,7 +433,7 @@ const PublicOrderTracking = () => {
               key={contact.title}
               className="rounded-lg border border-slate-200 bg-slate-50/85 p-4"
             >
-              <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+              <p className="text-[11px] font-normal uppercase text-slate-400">
                 {contact.title}
               </p>
               <div className="mt-3 space-y-2">

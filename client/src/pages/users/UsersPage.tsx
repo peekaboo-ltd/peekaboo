@@ -171,7 +171,7 @@ const UsersPage = () => {
               className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between"
             >
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">
+                <p className="text-xs uppercase text-slate-500">
                   {card.label}
                 </p>
                 <p className="text-lg font-semibold text-slate-900 mt-1">

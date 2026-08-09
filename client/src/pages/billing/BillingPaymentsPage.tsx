@@ -196,7 +196,7 @@ const BreakdownTable = ({
               <tr key={`${row.tierLabel}-${index}`}>
                 <td className="px-4 py-3 text-slate-900">{row.tierLabel}</td>
                 <td className="px-4 py-3">
-                  <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] uppercase tracking-[0.15em] text-slate-600">
+                  <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] uppercase text-slate-600">
                     {getBreakdownTypeLabel(row.type)}
                   </span>
                 </td>

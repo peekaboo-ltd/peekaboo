@@ -353,7 +353,7 @@ const UserLocationHistoryPage = () => {
       <section className="border rounded-md p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-semibold uppercase tracking-wide text-slate-600"
+            className="text-xs font-semibold uppercase text-slate-600"
             htmlFor="assigned-order"
           >
             Assigned orders (last 7 days)
@@ -371,7 +371,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-semibold uppercase tracking-wide text-slate-600"
+            className="text-xs font-semibold uppercase text-slate-600"
             htmlFor="order-search"
           >
             Search order (reference id or tracking id)
@@ -408,7 +408,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-semibold uppercase tracking-wide text-slate-600"
+            className="text-xs font-semibold uppercase text-slate-600"
             htmlFor="start-time"
           >
             Start time (local)
@@ -429,7 +429,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-semibold uppercase tracking-wide text-slate-600"
+            className="text-xs font-semibold uppercase text-slate-600"
             htmlFor="end-time"
           >
             End time (local)

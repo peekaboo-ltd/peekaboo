@@ -51,7 +51,7 @@ export const InternalPageHeader = ({
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+          <p className="text-[11px] uppercase text-slate-500">
             {eyebrow}
           </p>
         ) : null}
@@ -84,7 +84,7 @@ export const InternalSectionCard = ({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             {eyebrow ? (
-              <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-[11px] uppercase text-slate-500">
                 {eyebrow}
               </p>
             ) : null}
@@ -118,7 +118,7 @@ export const InternalStatCard = ({
     )}
   >
     <div className="min-w-0">
-      <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{label}</p>
+      <p className="text-[11px] uppercase text-slate-500">{label}</p>
       <p className="mt-2 text-xl font-semibold text-slate-900 break-words">{value}</p>
     </div>
     {icon ? (

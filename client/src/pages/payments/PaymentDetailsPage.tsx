@@ -203,7 +203,7 @@ const PaymentDetailsPage = () => {
           eyebrow="Payment Details"
           title="Core Transaction Information"
           actions={
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+            <span className="text-xs uppercase text-slate-400">
               Created {formatDateLabel(payment.createdAt)}
             </span>
           }
@@ -224,7 +224,7 @@ const PaymentDetailsPage = () => {
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs uppercase text-slate-400">
                       {item.label}
                     </p>
                     <p className="mt-1 text-sm font-medium text-[#25343F] break-all">
@@ -241,7 +241,7 @@ const PaymentDetailsPage = () => {
                   <FontAwesomeIcon icon={faFileLines} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs uppercase text-slate-400">
                     Description
                   </p>
                   <p className="mt-1 text-sm font-medium text-[#25343F]">
@@ -294,7 +294,7 @@ const PaymentDetailsPage = () => {
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs uppercase text-slate-400">
                     {item.label}
                   </p>
                   <p className="mt-1 text-sm font-medium text-[#25343F] break-all">

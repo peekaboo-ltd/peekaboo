@@ -30,10 +30,10 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
   <section id="support" className="w-full border-t border-border bg-[var(--peekaboo-warm)] py-12 lg:py-16">
     <article className="mx-auto grid max-w-[1280px] grid-cols-1 gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.4fr] lg:gap-12 lg:px-10">
       <header>
-        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="text-[11px] font-medium uppercase text-muted-foreground">
           Support
         </p>
-        <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] tracking-[-0.01em] text-foreground sm:text-[30px]">
+        <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[30px]">
           How can
           <br />
           we help?

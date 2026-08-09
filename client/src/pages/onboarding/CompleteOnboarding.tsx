@@ -206,7 +206,7 @@ const CompleteOnboarding = () => {
                   icon={faUser}
                   className="text-slate-400 text-sm"
                 />
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">
+                <h3 className="text-sm font-semibold text-slate-900 uppercase r">
                   {t('completeOnboarding.adminSection')}
                 </h3>
               </div>
@@ -250,7 +250,7 @@ const CompleteOnboarding = () => {
                   icon={faLock}
                   className="text-slate-400 text-sm"
                 />
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">
+                <h3 className="text-sm font-semibold text-slate-900 uppercase r">
                   {t('completeOnboarding.passwordSection')}
                 </h3>
               </div>
@@ -311,7 +311,7 @@ const CompleteOnboarding = () => {
                   icon={faPhone}
                   className="text-slate-400 text-sm"
                 />
-                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">
+                <h3 className="text-sm font-semibold text-slate-900 uppercase r">
                   {t('completeOnboarding.orgSection')}
                 </h3>
               </div>

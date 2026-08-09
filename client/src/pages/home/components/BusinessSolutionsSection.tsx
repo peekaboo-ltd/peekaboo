@@ -22,10 +22,10 @@ const BusinessSolutionsSection = ({
   <section id="business" className="w-full border-t border-border bg-[color-mix(in_oklab,var(--secondary)_9%,var(--peekaboo-warm))] py-12 text-foreground lg:py-16">
     <article className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:px-10">
       <header>
-        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="text-[11px] font-medium uppercase text-muted-foreground">
           For businesses
         </p>
-        <h2 className="mt-3 text-[28px] font-semibold leading-[1.05] tracking-[-0.01em] sm:text-[40px]">
+        <h2 className="mt-3 text-[28px] font-semibold leading-[1.05] sm:text-[40px]">
           Logistics
           <br />
           without the
@@ -66,7 +66,7 @@ const BusinessSolutionsSection = ({
                 <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#0a0a0a] text-[#edb100] transition-all duration-300 group-hover:scale-110 group-hover:bg-[#edb100] group-hover:text-[#0a0a0a]">
                   <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>
-                <h3 className="mt-4 text-[14px] font-medium tracking-[-0.01em]">
+                <h3 className="mt-4 text-[14px] font-medium">
                   {feature.title}
                 </h3>
                 <p className="mt-1.5 text-[13px] font-normal leading-relaxed text-muted-foreground">

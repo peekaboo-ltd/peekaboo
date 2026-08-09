@@ -43,10 +43,10 @@ const TestimonialsSection = ({
         variants={containerVariants}
       >
         <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-[11px] font-medium uppercase text-muted-foreground">
             {badgeLabel}
           </p>
-          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] tracking-[-0.01em] text-foreground sm:text-[34px]">
+          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[34px]">
             {title}
           </h2>
           <p className="mt-3 text-[13px] font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
@@ -68,7 +68,7 @@ const TestimonialsSection = ({
                 transition={{ duration: 0.35, ease: 'easeOut' }}
                 className="relative z-10 max-w-[720px]"
               >
-                <p className="text-[18px] font-normal leading-relaxed tracking-[-0.01em] text-foreground sm:text-[22px]">
+                <p className="text-[18px] font-normal leading-relaxed text-foreground sm:text-[22px]">
                   &ldquo;{current.content}&rdquo;
                 </p>
 

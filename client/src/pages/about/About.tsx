@@ -171,26 +171,26 @@ const Statistics = () => {
       >
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100]">
+            <figcaption className="text-[11px] font-bold uppercase text-[#edb100]">
               Deliveries today
             </figcaption>
-            <p className="text-[40px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white tabular-nums">
+            <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
               {stats.deliveriesToday.toLocaleString()}
             </p>
           </figure>
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100]">
+            <figcaption className="text-[11px] font-bold uppercase text-[#edb100]">
               Active riders
             </figcaption>
-            <p className="text-[40px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white tabular-nums">
+            <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
               {stats.activeRiders.toLocaleString()}
             </p>
           </figure>
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100]">
+            <figcaption className="text-[11px] font-bold uppercase text-[#edb100]">
               Businesses served
             </figcaption>
-            <p className="text-[40px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white tabular-nums">
+            <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
               {stats.businessPartners.toLocaleString()}
             </p>
           </figure>
@@ -222,13 +222,13 @@ const About = () => {
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
           <motion.p
             variants={itemVariants}
-            className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100] mb-4"
+            className="text-[11px] font-bold uppercase text-[#edb100] mb-4"
           >
             About Peekaboo
           </motion.p>
           <motion.h1
             variants={itemVariants}
-            className="text-[32px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white sm:text-[42px] lg:text-[52px] mb-5"
+            className="text-[32px] font-extrabold leading-[1.02] text-white sm:text-[42px] lg:text-[52px] mb-5"
           >
             We move what matters
             <br />
@@ -255,10 +255,10 @@ const About = () => {
         <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
             <motion.article variants={slideInLeft}>
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76] mb-4">
+              <p className="text-[11px] font-bold uppercase text-[#6b6f76] mb-4">
                 Our Story
               </p>
-              <h2 className="text-[24px] font-extrabold leading-[1.02] tracking-[-0.025em] text-[#0a0a0a] sm:text-[30px] mb-6">
+              <h2 className="text-[24px] font-extrabold leading-[1.02] text-[#0a0a0a] sm:text-[30px] mb-6">
                 Built from the streets of{' '}
                 <span className="text-[#6b6f76]">Kigali.</span>
               </h2>
@@ -291,7 +291,7 @@ const About = () => {
                   {milestones.map((m) => (
                     <li key={m.year} className="relative">
                       <mark className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-[#edb100] ring-4 ring-[#f7f6f1] bg-clip-padding" />
-                      <time className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6b6f76] mb-1 block">
+                      <time className="text-[11px] font-bold uppercase text-[#6b6f76] mb-1 block">
                         {m.year}
                       </time>
                       <p className="text-[13px] leading-relaxed text-[#0a0a0a]">
@@ -320,7 +320,7 @@ const About = () => {
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
           <motion.p
             variants={fadeInUp}
-            className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#edb100] mb-10 text-center"
+            className="text-[11px] font-bold uppercase text-[#edb100] mb-10 text-center"
           >
             What drives us
           </motion.p>
@@ -332,10 +332,10 @@ const About = () => {
               <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
                 <Target className="h-4 w-4" aria-hidden="true" />
               </span>
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#edb100] mb-3">
+              <h3 className="text-[11px] font-bold uppercase text-[#edb100] mb-3">
                 Mission
               </h3>
-              <p className="text-[18px] font-bold leading-[1.2] tracking-[-0.01em] text-white italic sm:text-[20px]">
+              <p className="text-[18px] font-bold leading-[1.2] text-white italic sm:text-[20px]">
                 To make sending and receiving parcels across Kigali simple,
                 transparent, and stress-free — for every person and every business.
               </p>
@@ -347,10 +347,10 @@ const About = () => {
               <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
                 <Lightbulb className="h-4 w-4" aria-hidden="true" />
               </span>
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#edb100] mb-3">
+              <h3 className="text-[11px] font-bold uppercase text-[#edb100] mb-3">
                 Vision
               </h3>
-              <p className="text-[18px] font-bold leading-[1.2] tracking-[-0.01em] text-white italic sm:text-[20px]">
+              <p className="text-[18px] font-bold leading-[1.2] text-white italic sm:text-[20px]">
                 To be Rwanda's most trusted last-mile delivery partner,
                 connecting communities and businesses through reliable logistics.
               </p>
@@ -368,10 +368,10 @@ const About = () => {
       >
         <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
           <motion.header variants={fadeInUp} className="mb-10 text-center">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#6b6f76] mb-4">
+            <p className="text-[11px] font-bold uppercase text-[#6b6f76] mb-4">
               Core Values
             </p>
-            <h2 className="text-[24px] font-extrabold leading-[1.02] tracking-[-0.025em] text-[#0a0a0a] sm:text-[30px]">
+            <h2 className="text-[24px] font-extrabold leading-[1.02] text-[#0a0a0a] sm:text-[30px]">
               What we stand{' '}
               <span className="text-[#6b6f76]">for.</span>
             </h2>
@@ -386,7 +386,7 @@ const About = () => {
                 <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a] mb-4">
                   <v.icon className="h-4 w-4" aria-hidden="true" />
                 </span>
-                <h3 className="text-[14px] font-bold tracking-[-0.01em] text-[#0a0a0a] mb-1">
+                <h3 className="text-[14px] font-bold text-[#0a0a0a] mb-1">
                   {v.title}
                 </h3>
                 <p className="text-[12px] leading-relaxed text-[#6b6f76]">
@@ -414,7 +414,7 @@ const About = () => {
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
           <motion.h2
             variants={fadeInUp}
-            className="text-[24px] font-extrabold leading-[1.02] tracking-[-0.025em] text-white sm:text-[30px] mb-3"
+            className="text-[24px] font-extrabold leading-[1.02] text-white sm:text-[30px] mb-3"
           >
             Ready to get started?
           </motion.h2>

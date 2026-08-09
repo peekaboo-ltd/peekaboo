@@ -62,10 +62,10 @@ const ServicesSection = () => (
     <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
       <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <hgroup className="max-w-[660px]">
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-[11px] font-medium uppercase text-muted-foreground">
             Top solutions
           </p>
-          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] tracking-[-0.01em] text-foreground sm:text-[34px]">
+          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[34px]">
             Built for the way
             <br />
             Kigali moves.
@@ -101,7 +101,7 @@ const ServicesSection = () => (
                     </span>
                   </div>
                   <h3
-                    className={`mt-5 font-semibold leading-[1.15] tracking-[-0.01em] ${
+                    className={`mt-5 font-semibold leading-[1.15] ${
                       service.featured ? 'text-[22px]' : 'text-[16px]'
                     }`}
                   >
@@ -115,10 +115,10 @@ const ServicesSection = () => (
                 {service.featured && (
                   <footer className="mt-6 flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <p className="text-[15px] font-medium tracking-[-0.01em]">
+                      <p className="text-[15px] font-medium">
                         Live tracking, end to end
                       </p>
-                      <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white/60">
+                      <p className="mt-1 text-[11px] font-medium uppercase text-white/60">
                         pickup to drop-off
                       </p>
                     </div>

@@ -54,7 +54,7 @@ const UnauthorizedPage = () => {
 
           <header className="space-y-6 text-center">
             <article className="flex justify-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-amber-200/80 bg-amber-50/90 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.24em] text-amber-800">
+              <span className="inline-flex items-center gap-2 rounded-full border border-amber-200/80 bg-amber-50/90 px-4 py-2 text-[11px] font-medium uppercase text-amber-800">
                 <FontAwesomeIcon icon={faShieldHalved} className="text-amber-600" />
                 403 Unauthorized
               </span>
@@ -67,7 +67,7 @@ const UnauthorizedPage = () => {
             </article>
 
             <article className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-900">
+              <h1 className="text-4xl sm:text-5xl font-semibold text-slate-900">
                 Access not allowed.
               </h1>
               <p className="text-base sm:text-lg text-slate-600 max-w-md mx-auto">

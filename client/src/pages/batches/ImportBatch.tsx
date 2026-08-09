@@ -393,7 +393,7 @@ const ImportBatch = () => {
         >
           <header className="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-slate-900">
+              <h3 className="text-sm font-semibold uppercase text-slate-900">
                 Template Upload
               </h3>
               <p className="text-xs text-slate-600 mt-1">

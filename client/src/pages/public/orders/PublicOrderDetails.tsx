@@ -292,7 +292,7 @@ const PublicOrderDetails = () => {
             <article className="min-w-0 rounded-lg border border-slate-200 bg-slate-50/85 p-4">
               <header className="mb-4 flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                  <p className="text-[11px] font-normal uppercase text-slate-400">
                     Pickup
                   </p>
                 </div>
@@ -342,7 +342,7 @@ const PublicOrderDetails = () => {
             <article className="min-w-0 rounded-lg border border-slate-200 bg-slate-50/85 p-4">
               <header className="mb-4 flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                  <p className="text-[11px] font-normal uppercase text-slate-400">
                     Destination
                   </p>
                 </div>
@@ -394,7 +394,7 @@ const PublicOrderDetails = () => {
                 <>
                   <div className="grid gap-4 md:grid-cols-3">
                     <article className="rounded-md border border-slate-200 bg-slate-50/85 p-4">
-                      <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                      <p className="text-[11px] font-normal uppercase text-slate-400">
                         Distance
                       </p>
                       <p className="mt-2 text-2xl font-normal text-slate-900">{distance.toFixed(2)}</p>
@@ -402,7 +402,7 @@ const PublicOrderDetails = () => {
                     </article>
 
                     <article className="rounded-lg border border-slate-200 bg-slate-50/85 p-4">
-                      <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                      <p className="text-[11px] font-normal uppercase text-slate-400">
                         Delivery Time
                       </p>
                       <p className="mt-2 text-2xl font-normal text-slate-900">{renderDeliveryTime()}</p>
@@ -410,7 +410,7 @@ const PublicOrderDetails = () => {
                     </article>
 
                     <article className="rounded-lg border border-slate-200 bg-slate-50/85 p-4">
-                      <p className="text-[11px] font-normal uppercase tracking-[0.24em] text-slate-400">
+                      <p className="text-[11px] font-normal uppercase text-slate-400">
                         Delivery Fee
                       </p>
                       {(orderFee !== undefined && orderFee > 0) ||

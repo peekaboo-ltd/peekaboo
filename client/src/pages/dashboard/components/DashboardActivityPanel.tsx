@@ -41,7 +41,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
       >
         {rows.length > 0 ? (
           <div className="overflow-hidden rounded-md border border-[color:var(--ops-line)] bg-white">
-            <div className="font-data hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--ops-line)] px-5 py-3 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500 sm:grid">
+            <div className="font-data hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--ops-line)] px-5 py-3 text-[11px] font-medium uppercase text-slate-500 sm:grid">
               <span>Activity</span>
               <span>Status</span>
               <span>Updated</span>
@@ -62,7 +62,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-normal uppercase tracking-[0.14em] text-slate-600">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-normal uppercase text-slate-600">
                       {item.type}
                     </span>
                     <span

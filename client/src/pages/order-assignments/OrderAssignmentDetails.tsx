@@ -167,7 +167,7 @@ const OrderAssignmentDetails = () => {
           eyebrow="Assignment Details"
           title="Core Information"
           actions={
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+            <span className="text-xs uppercase text-slate-400">
               Created {formatDateLabel(orderAssignment.createdAt)}
             </span>
           }
@@ -189,7 +189,7 @@ const OrderAssignmentDetails = () => {
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs uppercase text-slate-400">
                       {item.label}
                     </p>
                     <p className="mt-1 text-sm font-medium text-[#25343F] break-all">
@@ -206,7 +206,7 @@ const OrderAssignmentDetails = () => {
                   <FontAwesomeIcon icon={faLocationDot} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs uppercase text-slate-400">
                     Delivery Notes / Destination
                   </p>
                   <p className="mt-1 text-sm font-medium text-[#25343F]">
@@ -238,7 +238,7 @@ const OrderAssignmentDetails = () => {
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  <p className="text-xs uppercase text-slate-400">
                     {item.label}
                   </p>
                   <p className="mt-1 text-sm font-medium text-[#25343F] break-all">

@@ -232,19 +232,19 @@ const PublicServiceDetailsPage = () => {
                 <div className="flex flex-wrap items-center gap-3">
                   <span>{plan.name}</span>
                   {plan.badge ? (
-                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-secondary-500 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-secondary-500 px-3 py-1 text-[11px] font-semibold uppercase text-white">
                       <FontAwesomeIcon icon={faStar} className="text-[10px]" />
                       {plan.badge}
                     </span>
                   ) : null}
                   {plan.isDefault ? (
-                    <span className="inline-flex w-fit items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary-800">
+                    <span className="inline-flex w-fit items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-3 py-1 text-[11px] font-semibold uppercase text-primary-800">
                       Preferred plan
                     </span>
                   ) : null}
                 </div>
                 <div className="flex flex-col gap-2">
-                  <span className="text-[1.05rem] font-normal tracking-normal text-primary-600 sm:text-[1.2rem]">
+                  <span className="text-[1.05rem] font-normal text-primary-600 sm:text-[1.2rem]">
                     {headlinePrice}
                   </span>
                   <span className="max-w-3xl text-sm leading-6 text-slate-600">
@@ -313,15 +313,15 @@ const PublicServiceDetailsPage = () => {
             >
               <div className="grid gap-4 md:grid-cols-2">
                 <article className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <p className="text-[11px] font-semibold uppercase text-slate-500">
                     Headline pricing
                   </p>
-                  <p className="mt-3 text-2xl font-semibold tracking-tight text-primary-900">
+                  <p className="mt-3 text-2xl font-semibold text-primary-900">
                     {headlinePrice}
                   </p>
                 </article>
                 <article className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <p className="text-[11px] font-semibold uppercase text-slate-500">
                     Ideal usage
                   </p>
                   <p className="mt-3 text-sm leading-6 text-slate-600">
@@ -383,7 +383,7 @@ const PublicServiceDetailsPage = () => {
 
                 {overflowRate ? (
                   <article className="rounded-[18px] border border-dashed border-primary-200 bg-primary-50/60 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-700">
+                    <p className="text-[11px] font-semibold uppercase text-primary-700">
                       Overflow rate
                     </p>
                     <p className="mt-2 text-sm text-primary-900">
@@ -394,7 +394,7 @@ const PublicServiceDetailsPage = () => {
 
                 {hasPackageTiers && fallbackRate ? (
                   <article className="rounded-[18px] border border-dashed border-secondary-200 bg-secondary-50/60 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-secondary-700">
+                    <p className="text-[11px] font-semibold uppercase text-secondary-700">
                       Fallback rate
                     </p>
                     <p className="mt-2 text-sm text-secondary-900">

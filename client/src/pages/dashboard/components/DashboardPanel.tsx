@@ -25,7 +25,7 @@ const DashboardPanel = ({
     >
       <header className="border-b border-[color:var(--ops-line)] px-4 py-4 sm:px-6">
         {eyebrow && (
-          <p className="font-data mb-1 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
+          <p className="font-data mb-1 text-[11px] font-medium uppercase text-slate-500">
             {eyebrow}
           </p>
         )}

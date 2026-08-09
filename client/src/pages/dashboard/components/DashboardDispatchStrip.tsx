@@ -34,7 +34,7 @@ const DashboardDispatchStrip = ({ items, variants }: DashboardDispatchStripProps
           >
             <div className="flex items-center gap-2">
               <span className={`h-2 w-2 shrink-0 rounded-full ${toneByStatus[item.status]}`} aria-hidden="true" />
-              <p className="font-data truncate text-[11px] font-medium uppercase tracking-[0.12em] text-slate-600">
+              <p className="font-data truncate text-[11px] font-medium uppercase text-slate-600">
                 {item.label}
               </p>
             </div>

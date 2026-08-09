@@ -616,19 +616,19 @@ const RiderManagementPage = () => {
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <article className="bg-white border border-slate-200 rounded-xl p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Riders (filtered)</p>
+          <p className="text-xs uppercase text-slate-500">Riders (filtered)</p>
           <p className="text-lg font-semibold text-slate-900 mt-1">
             {formatNumbers(totalCount) || '0'}
           </p>
         </article>
         <article className="bg-white border border-slate-200 rounded-xl p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Deliveries (page)</p>
+          <p className="text-xs uppercase text-slate-500">Deliveries (page)</p>
           <p className="text-lg font-semibold text-slate-900 mt-1">
             {formatNumbers(visibleTotals.deliveries) || '0'}
           </p>
         </article>
         <article className="bg-white border border-slate-200 rounded-xl p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Earnings (page)</p>
+          <p className="text-xs uppercase text-slate-500">Earnings (page)</p>
           <p className="text-lg font-semibold text-slate-900 mt-1">
             {formatCurrency(visibleTotals.earnings, 'RWF') || 'RWF 0'}
           </p>
@@ -995,7 +995,7 @@ const RiderManagementPage = () => {
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <article className="border border-slate-200 rounded-lg p-3">
-                <p className="text-xs text-slate-500 uppercase tracking-wide">
+                <p className="text-xs text-slate-500 uppercase ">
                   {leftRider.riderName || 'Rider A'} Wins
                 </p>
                 <p className="text-xl font-semibold text-slate-900">
@@ -1003,7 +1003,7 @@ const RiderManagementPage = () => {
                 </p>
               </article>
               <article className="border border-slate-200 rounded-lg p-3">
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Result</p>
+                <p className="text-xs text-slate-500 uppercase ">Result</p>
                 <p className="text-sm font-semibold mt-1">
                   {comparisonSummary?.leader === 'tie' && (
                     <span className="text-slate-700">Balanced comparison</span>
@@ -1026,7 +1026,7 @@ const RiderManagementPage = () => {
                 </p>
               </article>
               <article className="border border-slate-200 rounded-lg p-3">
-                <p className="text-xs text-slate-500 uppercase tracking-wide">
+                <p className="text-xs text-slate-500 uppercase ">
                   {rightRider.riderName || 'Rider B'} Wins
                 </p>
                 <p className="text-xl font-semibold text-slate-900">

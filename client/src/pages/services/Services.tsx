@@ -36,7 +36,7 @@ const Services = () => {
           variants={containerVariants}
         >
           <motion.header variants={fadeInUp}>
-            <span className="inline-block text-[11px] uppercase tracking-[0.16em] text-secondary-400 font-semibold mb-4">
+            <span className="inline-block text-[11px] uppercase text-secondary-400 font-semibold mb-4">
               Pricing
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
@@ -73,7 +73,7 @@ const Services = () => {
           variants={containerVariants}
         >
           <motion.header variants={fadeInUp}>
-            <span className="inline-block text-[11px] uppercase tracking-[0.14em] font-medium text-primary-400 mb-6">
+            <span className="inline-block text-[11px] uppercase font-medium text-primary-400 mb-6">
               Get started
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">

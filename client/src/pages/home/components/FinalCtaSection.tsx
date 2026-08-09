@@ -25,10 +25,10 @@ const FinalCtaSection = ({
       variants={containerVariants}
     >
       <motion.header variants={itemVariants}>
-        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#edb100]">
+        <p className="text-[11px] font-medium uppercase text-[#edb100]">
           Get started
         </p>
-        <h2 className="mt-3 text-[28px] font-semibold leading-[1.05] tracking-[-0.01em] sm:text-[36px]">
+        <h2 className="mt-3 text-[28px] font-semibold leading-[1.05] sm:text-[36px]">
           {title}
         </h2>
         <p className="mx-auto mt-4 max-w-[480px] text-[13px] font-normal leading-relaxed text-white/70">

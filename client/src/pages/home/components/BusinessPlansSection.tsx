@@ -39,10 +39,10 @@ const BusinessPlansSection = ({
         variants={containerVariants}
       >
         <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-[11px] font-medium uppercase text-muted-foreground">
             {badgeLabel}
           </p>
-          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] tracking-[-0.01em] text-foreground sm:text-[34px]">
+          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[34px]">
             {title}
           </h2>
           <p className="mt-3 text-[13px] font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
@@ -77,7 +77,7 @@ const BusinessPlansSection = ({
                 >
                   <header className="flex items-start justify-between gap-4">
                     <hgroup>
-                      <h3 className="text-[16px] font-medium tracking-[-0.01em] text-foreground">
+                      <h3 className="text-[16px] font-medium text-foreground">
                         {plan.name}
                       </h3>
                       <p className="mt-1.5 text-[12px] font-normal leading-relaxed text-muted-foreground">
@@ -85,17 +85,17 @@ const BusinessPlansSection = ({
                       </p>
                     </hgroup>
                     {plan.isPopular ? (
-                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#0a0a0a]">
+                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[10px] font-medium uppercase text-[#0a0a0a]">
                         {popularLabel}
                       </span>
                     ) : null}
                   </header>
 
                   <section className="mt-5 border-t border-border pt-4">
-                    <p className="text-[22px] font-semibold tracking-[-0.01em] text-foreground">
+                    <p className="text-[22px] font-semibold text-foreground">
                       {plan.price}
                     </p>
-                    <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                    <p className="mt-1 text-[11px] font-medium uppercase text-muted-foreground">
                       {perMonthLabel}
                     </p>
                   </section>

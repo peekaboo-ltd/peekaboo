@@ -13,7 +13,7 @@ const OrderFees = () => {
     <main className="min-h-screen bg-gray-50">
       <section className="bg-primary-900 text-white py-10">
         <article className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-normal uppercase tracking-[0.3em] text-primary-200">
+          <p className="text-sm font-normal uppercase text-primary-200">
             Transparent Pricing
           </p>
           <h1 className="mt-3 text-3xl font-bold sm:text-4xl">

@@ -264,7 +264,7 @@ const InlineLocationEditor = ({
               width: `${dropdownPos.width}px`,
             }}
           >
-            <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+            <p className="text-xs font-semibold text-slate-700 uppercase ">
               Search delivery location
             </p>
             <PlaceSearch

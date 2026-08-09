@@ -283,7 +283,7 @@ const ManageBusinessPlanPage = () => {
         {/* Left: Edit form */}
         <article className="lg:col-span-2 border border-slate-200 bg-white p-6">
           <header className="mb-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Plan Details</p>
+            <p className="text-xs uppercase text-slate-500">Plan Details</p>
             <h2 className="mt-2 text-lg font-semibold text-[#25343F]">Edit Information</h2>
           </header>
 
@@ -369,7 +369,7 @@ const ManageBusinessPlanPage = () => {
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-slate-700 uppercase tracking-wide">
+                  <label className="text-xs font-medium text-slate-700 uppercase ">
                     Description
                   </label>
                   <textarea
@@ -385,7 +385,7 @@ const ManageBusinessPlanPage = () => {
             {/* Features */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="text-xs font-medium text-slate-700 uppercase tracking-wide">
+                <label className="text-xs font-medium text-slate-700 uppercase ">
                   Features
                 </label>
                 <button
@@ -452,7 +452,7 @@ const ManageBusinessPlanPage = () => {
             {!isCustomPricing && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-xs font-medium text-slate-700 uppercase tracking-wide">
+                  <label className="text-xs font-medium text-slate-700 uppercase ">
                     Pricing Tiers
                   </label>
                   <button
@@ -675,7 +675,7 @@ const ManageBusinessPlanPage = () => {
         <aside className="flex flex-col gap-6">
           <article className="border border-slate-200 bg-white p-6">
             <header className="mb-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Assigned To</p>
+              <p className="text-xs uppercase text-slate-500">Assigned To</p>
               <h2 className="mt-2 text-lg font-semibold text-[#25343F]">
                 Organizations
                 <span className="ml-2 text-sm font-normal text-slate-500">
@@ -709,7 +709,7 @@ const ManageBusinessPlanPage = () => {
           {/* Danger zone */}
           <article className="border border-red-200 bg-red-50 p-6">
             <header className="mb-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-red-400">Danger Zone</p>
+              <p className="text-xs uppercase text-red-400">Danger Zone</p>
               <h2 className="mt-2 text-lg font-semibold text-red-700">Delete Plan</h2>
             </header>
             <p className="text-xs text-red-500 mb-4">

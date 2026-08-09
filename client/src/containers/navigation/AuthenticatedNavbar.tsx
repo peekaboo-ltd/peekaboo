@@ -146,7 +146,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                 </section>
 
                 <NavDropdown isOpen={isOpen}>
-                    <section className="py-2 w-full rounded-lg shadow-lg bg-white border border-gray-100">
+                    <section className="py-2 w-full rounded-lg shadow-md bg-white border border-gray-100">
                         <div className="sm:hidden p-4 border-b border-gray-100">
                             <h3 className="font-normal text-gray-800">
                                 {user?.name || user?.phoneNumber}
@@ -201,7 +201,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                     />
 
                     <nav
-                        className={`absolute top-0 left-0 h-full w-[260px] sm:w-[300px] bg-white shadow-xl transform transition-transform duration-300 ease-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                        className={`absolute top-0 left-0 h-full w-[260px] sm:w-[300px] bg-white shadow-sm transform transition-transform duration-300 ease-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
                             }`}
                     >
                         <header className="flex items-center justify-start p-3 border-b border-gray-100 bg-gray-50/50">

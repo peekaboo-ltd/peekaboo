@@ -63,11 +63,11 @@ export const PublicPageHero = ({
     <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+          <p className="text-[11px] font-semibold uppercase text-slate-500">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="mt-2 max-w-3xl text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="mt-2 max-w-3xl text-2xl font-semibold text-slate-900 sm:text-3xl">
           {title}
         </h1>
         {description ? (
@@ -103,7 +103,7 @@ export const PublicSectionCard = ({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             {eyebrow ? (
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              <p className="text-[11px] font-semibold uppercase text-slate-500">
                 {eyebrow}
               </p>
             ) : null}
@@ -138,7 +138,7 @@ export const PublicStatCard = ({
   >
     <menu className="flex items-start justify-between gap-2">
       <ul className="min-w-0">
-        <p className="text-[11px] font-normal uppercase tracking-[0.14em] text-slate-500">
+        <p className="text-[11px] font-normal uppercase text-slate-500">
           {label}
         </p>
         <p className="mt-2 text-sm font-normal text-slate-900 break-words">

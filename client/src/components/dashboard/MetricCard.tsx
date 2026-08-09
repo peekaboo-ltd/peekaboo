@@ -149,7 +149,7 @@ const MetricCard = ({
               </span>
             )}
             <span className="min-w-0">
-              <span className="font-data block truncate text-[11px] font-medium uppercase tracking-[0.14em] text-slate-600">
+              <span className="font-data block truncate text-[11px] font-medium uppercase text-slate-600">
                 {label}
               </span>
               {(comparisonLabel || note) && (
@@ -175,7 +175,7 @@ const MetricCard = ({
         <section className="flex items-end justify-between gap-4">
           <div className="min-w-0 flex-1">
             <p
-              className="font-display truncate text-[2rem] font-semibold leading-none tracking-[-0.03em] text-[color:var(--ops-ink)] sm:text-[2.3rem]"
+              className="font-display truncate text-[2rem] font-semibold leading-none text-[color:var(--ops-ink)] sm:text-[2.3rem]"
               aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
             >
               {value}

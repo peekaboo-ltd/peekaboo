@@ -157,7 +157,7 @@ const BusinessPlansPage = () => {
       </motion.section>
 
       <motion.section variants={itemVariants}>
-        <h3 className="mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+        <h3 className="mb-3 text-sm font-semibold text-slate-700 uppercase ">
           Active Plans
         </h3>
         <Table
@@ -170,7 +170,7 @@ const BusinessPlansPage = () => {
 
       <motion.section variants={itemVariants}>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold text-slate-700 uppercase ">
             Deactivated Plans
           </h3>
           <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">

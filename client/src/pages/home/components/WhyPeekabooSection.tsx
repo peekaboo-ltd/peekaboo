@@ -40,10 +40,10 @@ const WhyPeekabooSection = ({
       <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
         <header className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <hgroup>
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            <p className="text-[11px] font-medium uppercase text-muted-foreground">
               Why Peekaboo
             </p>
-            <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] tracking-[-0.01em] text-foreground sm:text-[34px]">
+            <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[34px]">
               The trusted way
               <br />
               to send.
@@ -53,10 +53,10 @@ const WhyPeekabooSection = ({
             <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-muted-foreground">
               {stats.map((stat) => (
                 <div key={stat.label}>
-                  <dt className="text-[11px] font-medium uppercase tracking-[0.08em]">
+                  <dt className="text-[11px] font-medium uppercase">
                     {stat.label}
                   </dt>
-                  <dd className="mt-1 text-[18px] font-semibold tracking-[-0.01em] text-foreground">
+                  <dd className="mt-1 text-[18px] font-semibold text-foreground">
                     {stat.value}
                   </dd>
                 </div>
@@ -73,7 +73,7 @@ const WhyPeekabooSection = ({
                 <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#fff4be] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110">
                   <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>
-                <h3 className="mt-3 text-[14px] font-medium tracking-[-0.01em] text-foreground">
+                <h3 className="mt-3 text-[14px] font-medium text-foreground">
                   {item.title}
                 </h3>
                 <p className="mt-1.5 text-[13px] font-normal leading-relaxed text-muted-foreground">

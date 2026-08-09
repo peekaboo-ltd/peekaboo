@@ -41,7 +41,7 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
                 <Icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-105" aria-hidden="true" />
               </span>
               <span
-                className={`mt-4 block text-[14px] font-medium tracking-[-0.01em] ${
+                className={`mt-4 block text-[14px] font-medium ${
                   !action.accent ? 'group-hover:text-foreground' : ''
                 }`}
               >

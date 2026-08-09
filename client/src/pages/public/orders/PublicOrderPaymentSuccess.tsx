@@ -114,7 +114,7 @@ const PublicOrderPaymentSuccess = () => {
                 aria-hidden="true"
               />
             </figure>
-            <p className="mb-2 text-xs uppercase tracking-widest text-slate-600">
+            <p className="mb-2 text-xs uppercase st text-slate-600">
               Payment confirmed
             </p>
             <h1 className="mb-2 text-xl font-bold text-slate-900 sm:text-2xl">
@@ -132,7 +132,7 @@ const PublicOrderPaymentSuccess = () => {
               {/* Payment details */}
               <article className="ps-reveal border border-slate-200 rounded-lg p-5 sm:p-6">
                 <header className="mb-4 border-b border-slate-100 pb-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-600 mb-1">
+                  <p className="text-xs uppercase st text-slate-600 mb-1">
                     Payment details
                   </p>
                   <p className="text-sm text-slate-700">
@@ -156,7 +156,7 @@ const PublicOrderPaymentSuccess = () => {
                   <dl className="space-y-4">
                     {successfulPayment && (
                       <div className="flex flex-col gap-1 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
-                        <dt className="text-xs text-slate-600 uppercase tracking-wide">
+                        <dt className="text-xs text-slate-600 uppercase ">
                           Payment Reference
                         </dt>
                         <dd className="text-sm text-slate-700">
@@ -173,7 +173,7 @@ const PublicOrderPaymentSuccess = () => {
                     )}
 
                     <div className="flex flex-col gap-1 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
-                      <dt className="text-xs text-slate-600 uppercase tracking-wide">
+                      <dt className="text-xs text-slate-600 uppercase ">
                         Order Reference
                       </dt>
                       <dd className="flex flex-wrap items-center gap-2">
@@ -204,7 +204,7 @@ const PublicOrderPaymentSuccess = () => {
                     </div>
 
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                      <dt className="text-xs text-slate-600 uppercase tracking-wide">
+                      <dt className="text-xs text-slate-600 uppercase ">
                         Amount Paid
                       </dt>
                       <dd className="text-lg text-slate-900">
@@ -224,7 +224,7 @@ const PublicOrderPaymentSuccess = () => {
               {/* Order summary */}
               <article className="ps-reveal border border-slate-200 rounded-lg p-5 sm:p-6">
                 <header className="mb-5 border-b border-slate-100 pb-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-600 mb-1">
+                  <p className="text-xs uppercase st text-slate-600 mb-1">
                     Order summary
                   </p>
                   <p className="text-sm text-slate-700">
@@ -249,7 +249,7 @@ const PublicOrderPaymentSuccess = () => {
                 ) : (
                   <section className="grid gap-4 sm:grid-cols-2">
                     <article className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-                      <p className="mb-3 text-xs uppercase tracking-widest text-slate-600">
+                      <p className="mb-3 text-xs uppercase st text-slate-600">
                         Pickup
                       </p>
                       {order?.locationFrom ? (
@@ -264,7 +264,7 @@ const PublicOrderPaymentSuccess = () => {
                     </article>
 
                     <article className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-                      <p className="mb-3 text-xs uppercase tracking-widest text-slate-600">
+                      <p className="mb-3 text-xs uppercase st text-slate-600">
                         Destination
                       </p>
                       {order?.locationTo ? (
@@ -281,7 +281,7 @@ const PublicOrderPaymentSuccess = () => {
                 {!orderLoading && (
                   <div className="mt-4 flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
                     <div>
-                      <p className="text-xs uppercase tracking-widest text-slate-600">
+                      <p className="text-xs uppercase st text-slate-600">
                         Delivery fee
                       </p>
                     </div>
@@ -299,7 +299,7 @@ const PublicOrderPaymentSuccess = () => {
             <aside className="space-y-5">
               <article className="ps-reveal border border-slate-200 rounded-lg p-5 sm:p-6">
                 <header className="mb-4 border-b border-slate-100 pb-4">
-                  <p className="text-xs uppercase tracking-widest text-slate-600 mb-1">
+                  <p className="text-xs uppercase st text-slate-600 mb-1">
                     What happens next
                   </p>
                   <p className="text-sm text-slate-700">

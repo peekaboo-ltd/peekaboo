@@ -35,10 +35,10 @@ const DashboardContextPanel = ({
                   key={item.label}
                   className="rounded-md border border-[color:var(--ops-line)] bg-white px-4 py-3"
                 >
-                  <p className="font-data text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500">
+                  <p className="font-data text-[11px] font-medium uppercase text-slate-500">
                     {item.label}
                   </p>
-                  <p className="font-display mt-2 text-2xl font-semibold tracking-[-0.03em] text-[color:var(--ops-ink)]">
+                  <p className="font-display mt-2 text-2xl font-semibold text-[color:var(--ops-ink)]">
                     {item.value}
                   </p>
                   {(item.footerText || item.comparisonLabel) && (
@@ -53,7 +53,7 @@ const DashboardContextPanel = ({
 
           {actions.length > 0 && (
             <div className="rounded-md border border-[color:var(--ops-line)] bg-white p-4">
-              <p className="font-data text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
+              <p className="font-data text-[11px] font-medium uppercase text-slate-500">
                 Quick actions
               </p>
               <div className="mt-3 grid grid-cols-1 gap-2">

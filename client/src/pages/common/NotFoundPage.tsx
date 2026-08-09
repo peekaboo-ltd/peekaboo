@@ -58,7 +58,7 @@ const NotFoundPage = () => {
 
             <header className="space-y-6">
               <article className="flex items-center gap-3">
-                <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-slate-500">
+                <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium uppercase text-slate-500">
                   Error 404
                 </span>
                 <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-500">
@@ -71,7 +71,7 @@ const NotFoundPage = () => {
               </article>
 
               <article className="space-y-4">
-                <h1 className="text-6xl sm:text-7xl font-semibold tracking-tight text-slate-900">
+                <h1 className="text-6xl sm:text-7xl font-semibold text-slate-900">
                   Lost route.
                   <br />
                   Let’s get you back.
@@ -83,7 +83,7 @@ const NotFoundPage = () => {
               </article>
 
               <article className="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm text-slate-600">
-                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                <span className="text-xs uppercase text-slate-400">
                   Requested
                 </span>
                 <p className="mt-1 font-medium text-slate-700">
@@ -130,7 +130,7 @@ const NotFoundPage = () => {
             transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
             <header className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-[0.28em] text-slate-400">
+              <p className="text-xs font-medium uppercase text-slate-400">
                 Quick links
               </p>
               <h2 className="text-2xl font-semibold text-slate-900">

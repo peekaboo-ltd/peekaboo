@@ -111,7 +111,7 @@ const UserProfilePage = () => {
           description="Keep your personal details, roles, and contact information current."
           actions={
             <>
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600">
+              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase text-slate-600">
                 {selectedUser?.status ?? 'Status Unavailable'}
               </span>
               <Button
@@ -157,7 +157,7 @@ const UserProfilePage = () => {
           eyebrow="Personal Details"
           title="Profile Information"
           actions={
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+            <span className="text-xs uppercase text-slate-400">
               Updated {formatDateLabel(selectedUser?.updatedAt)}
             </span>
           }
@@ -180,7 +180,7 @@ const UserProfilePage = () => {
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs uppercase text-slate-400">
                       {item.label}
                     </p>
                     <p className="mt-1 text-sm font-medium text-[#25343F]">
@@ -198,7 +198,7 @@ const UserProfilePage = () => {
                     <FontAwesomeIcon icon={faLocationDot} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs uppercase text-slate-400">
                       Default Pickup Location
                     </p>
                     <p className="mt-1 text-sm font-medium text-[#25343F]">
@@ -229,14 +229,14 @@ const UserProfilePage = () => {
         >
           <section className="mt-6 flex flex-col gap-5">
             <section>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <p className="text-xs uppercase text-slate-400">
                 Assigned Roles
               </p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
-                      <span className="rounded-full border border-secondary-100 bg-secondary-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-secondary-800">
+                      <span className="rounded-full border border-secondary-100 bg-secondary-50 px-3 py-1 text-xs font-medium uppercase text-secondary-800">
                         {role}
                       </span>
                     </li>
@@ -248,7 +248,7 @@ const UserProfilePage = () => {
             </section>
 
             <section>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <p className="text-xs uppercase text-slate-400">
                 Organizations
               </p>
               <ul className="mt-3 flex flex-col gap-2">
@@ -262,7 +262,7 @@ const UserProfilePage = () => {
                         <p className="text-sm font-medium text-[#25343F]">{org}</p>
                         <p className="text-xs text-slate-500">Active membership</p>
                       </section>
-                      <span className="rounded-full bg-secondary-100 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-secondary-800">
+                      <span className="rounded-full bg-secondary-100 px-2.5 py-1 text-[11px] font-medium uppercase text-secondary-800">
                         Active
                       </span>
                     </li>

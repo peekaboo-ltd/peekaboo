@@ -198,7 +198,7 @@ const UserDetailsPage = () => {
     return (
       <main className="w-full max-w-4xl mx-auto px-4 sm:px-6">
         <section className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">
+          <p className="text-sm uppercase text-slate-400">
             User Details
           </p>
           <h1 className="mt-2 text-2xl font-medium text-slate-900">
@@ -236,7 +236,7 @@ const UserDetailsPage = () => {
               <FontAwesomeIcon icon={faUser} />
             </figure>
             <section>
-              <p className="text-xs uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-xs uppercase text-slate-500">
                 User Profile
               </p>
               <h1 className="mt-2 text-2xl font-medium text-slate-900 sm:text-3xl">
@@ -249,7 +249,7 @@ const UserDetailsPage = () => {
             </section>
           </section>
           <aside className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-600">
+            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase text-slate-600">
               {currentUser?.status ?? 'Status Unavailable'}
             </span>
             {(['ADMIN', 'BUSINESS'].some((role) =>
@@ -285,7 +285,7 @@ const UserDetailsPage = () => {
           >
             <header className="flex items-center justify-between">
               <section>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                <p className="text-xs uppercase text-slate-500">
                   {stat?.label}
                 </p>
                 <p className="mt-3 text-xl font-medium text-slate-900">
@@ -307,14 +307,14 @@ const UserDetailsPage = () => {
         <article className="lg:col-span-2 border border-slate-200 bg-white p-6">
           <header className="flex items-center justify-between gap-4">
             <section>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-xs uppercase text-slate-500">
                 Personal Details
               </p>
               <h2 className="mt-2 text-lg font-medium text-slate-900">
                 User Information
               </h2>
             </section>
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+            <span className="text-xs uppercase text-slate-400">
               Updated {formatDateLabel(currentUser?.updatedAt)}
             </span>
           </header>
@@ -361,7 +361,7 @@ const UserDetailsPage = () => {
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    <p className="text-xs uppercase text-slate-400">
                       {item.label}
                     </p>
                     <p className="mt-1 text-sm font-medium text-slate-900">
@@ -376,7 +376,7 @@ const UserDetailsPage = () => {
 
         <article className="border border-slate-200 bg-white p-6">
           <header>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+            <p className="text-xs uppercase text-slate-500">
               Access & Membership
             </p>
             <h2 className="mt-2 text-lg font-medium text-slate-900">
@@ -386,14 +386,14 @@ const UserDetailsPage = () => {
 
           <section className="mt-6 flex flex-col gap-5">
             <section>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <p className="text-xs uppercase text-slate-400">
                 Assigned Roles
               </p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
-                      <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-700">
+                      <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase text-slate-700">
                         {role}
                       </span>
                     </li>
@@ -405,7 +405,7 @@ const UserDetailsPage = () => {
             </section>
 
             <section>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <p className="text-xs uppercase text-slate-400">
                 Organizations
               </p>
               <ul className="mt-3 flex flex-col gap-2">
@@ -423,7 +423,7 @@ const UserDetailsPage = () => {
                           Active membership
                         </p>
                       </section>
-                      <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-slate-700">
+                      <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium uppercase text-slate-700">
                         Active
                       </span>
                     </li>
@@ -441,7 +441,7 @@ const UserDetailsPage = () => {
                 <FontAwesomeIcon icon={faBuilding} />
               </span>
               <section>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                <p className="text-xs uppercase text-slate-400">
                   User ID
                 </p>
                 <p className="text-sm font-medium text-slate-700 break-all">
