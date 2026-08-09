@@ -84,7 +84,7 @@ const Services = () => {
             </p>
 
             <Link to="/contact">
-              <Button className="bg-secondary-500 text-white border-secondary-500 hover:bg-secondary-600 hover:border-secondary-600 hover:text-white px-8">
+              <Button className="bg-white text-black hover:bg-white/90 hover:!text-black">
                 Contact our team
                 <FontAwesomeIcon icon={faArrowRight} className="text-[11px] ml-1" />
               </Button>

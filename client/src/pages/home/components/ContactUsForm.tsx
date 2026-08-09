@@ -87,7 +87,7 @@ const ContactUsForm = ({
         <>
           {!hideIntro ? (
             <div className="flex items-center gap-3 mb-1">
-              <span className="w-10 h-10 rounded-md bg-accent flex items-center justify-center border border-border">
+              <span className="w-10 h-10 rounded-md bg-[var(--peekaboo-surface)] flex items-center justify-center border border-border">
                 <FontAwesomeIcon icon={faBuilding} className="text-foreground" />
               </span>
               <div>

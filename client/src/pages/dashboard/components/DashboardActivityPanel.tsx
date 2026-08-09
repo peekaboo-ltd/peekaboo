@@ -24,7 +24,7 @@ const statusTone = (status?: string) => {
     case 'INACTIVE':
       return 'bg-rose-50 text-rose-700 border-rose-100';
     default:
-      return 'bg-slate-100 text-slate-700 border-slate-200';
+      return 'bg-[var(--peekaboo-surface)] text-slate-700 border-slate-200';
   }
 };
 
@@ -40,8 +40,8 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
         className="rounded-lg"
       >
         {rows.length > 0 ? (
-          <div className="overflow-hidden rounded-md border border-[color:var(--ops-line)] bg-white">
-            <div className="font-data hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--ops-line)] px-5 py-3 text-[11px] font-medium uppercase text-slate-500 sm:grid">
+          <div className="overflow-hidden rounded-md border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)]">
+            <div className="font-ui hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--ops-line)] px-5 py-3 text-[11px] font-medium uppercase text-slate-500 sm:grid">
               <span>Activity</span>
               <span>Status</span>
               <span>Updated</span>
@@ -62,7 +62,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-normal uppercase text-slate-600">
+                    <span className="rounded-full border border-slate-200 bg-[var(--peekaboo-surface)] px-2.5 py-1 text-[11px] font-normal uppercase text-slate-600">
                       {item.type}
                     </span>
                     <span
@@ -80,7 +80,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
             </ul>
           </div>
         ) : (
-          <div className="rounded-md border border-dashed border-[color:var(--ops-line)] bg-white px-5 py-12 text-center">
+          <div className="rounded-md border border-dashed border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-5 py-12 text-center">
             <p className="text-base font-normal text-slate-900">No recent activity yet</p>
             <p className="mt-2 text-sm text-slate-500">
               As new orders or assignments land, they will appear here.

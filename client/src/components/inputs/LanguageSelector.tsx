@@ -52,7 +52,7 @@ const LanguageSelector = ({ className, menuClassName, dropdownDirection = 'down'
       {isOpen && (
         <div
           className={cn(
-            `absolute ${dropdownDirection === 'up' ? 'bottom-full' : 'top-full'} right-[-10px] z-[10001] mt-2 w-[52px] overflow-hidden bg-white/95 p-0.5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.2)] backdrop-blur-sm`,
+            `absolute ${dropdownDirection === 'up' ? 'bottom-full' : 'top-full'} right-[-10px] z-[10001] mt-2 w-[52px] overflow-hidden bg-[var(--peekaboo-surface)] p-0.5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.2)] backdrop-blur-sm`,
             menuClassName
           )}
           role="listbox"
@@ -70,7 +70,7 @@ const LanguageSelector = ({ className, menuClassName, dropdownDirection = 'down'
                   setLanguage(code as Language);
                   setIsOpen(false);
                 }}
-                className={`cursor-pointer ${isActive ? 'text-primary-900' : 'text-slate-500 hover:bg-slate-50 hover:text-primary-900'} flex w-full items-center justify-center rounded-md px-2 py-1 text-[12px] font-light uppercase transition-colors duration-150`}
+                className={`cursor-pointer ${isActive ? 'text-primary-900' : 'text-slate-500 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900'} flex w-full items-center justify-center rounded-md px-2 py-1 text-[12px] font-light uppercase transition-colors duration-150`}
                 role="option"
                 aria-selected={isActive}
                 title={option.label}

@@ -72,7 +72,7 @@ const Home = () => {
   ];
 
   return (
-    <main className="home-page relative min-h-screen w-full overflow-x-clip bg-[var(--peekaboo-warm)]">
+    <main className="home-page relative min-h-screen w-full overflow-x-clip bg-[var(--peekaboo-surface)]">
       <HeroSection
         formRef={formRef}
         onScrollToForm={scrollToForm}

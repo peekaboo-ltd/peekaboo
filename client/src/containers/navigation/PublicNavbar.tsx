@@ -27,8 +27,8 @@ const PublicNavbar = () => {
     <nav
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         pathname === '/'
-          ? 'border-b border-primary-900/5 bg-white/82 backdrop-blur-xl'
-          : 'border-b border-primary-900/8 bg-white/90 backdrop-blur-xl'
+          ? 'border-b border-primary-900/5 bg-[#FAFAF7]'
+          : 'border-b border-primary-900/8 bg-[#FAFAF7]'
       }`}
     >
       <header className="relative mx-auto flex h-[64px] w-[95%] max-w-[1280px] items-center justify-between sm:w-[92%] md:w-[90%]">
@@ -101,7 +101,7 @@ const PublicNavbar = () => {
       )}
 
       <div
-        className={`absolute inset-x-0 top-14 z-40 overflow-hidden border-b border-primary-900/8 bg-white shadow-lg transition-all duration-300 ease-in-out lg:hidden ${
+        className={`absolute inset-x-0 top-14 z-40 overflow-hidden border-b border-primary-900/8 bg-[#FAFAF7] shadow-lg transition-all duration-300 ease-in-out lg:hidden ${
           isMobileMenuOpen ? 'max-h-[calc(100vh-3.5rem)] opacity-100' : 'pointer-events-none max-h-0 opacity-0'
         }`}
       >
@@ -118,7 +118,7 @@ const PublicNavbar = () => {
                   className={`flex items-center rounded-md px-3 py-2.5 text-[13px] font-normal transition-colors duration-150 ${
                     isActive
                       ? 'bg-primary-900 text-white'
-                      : 'text-primary-800/80 hover:bg-primary-50 hover:text-primary-900'
+                      : 'text-primary-800/80 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900'
                   }`}
                 >
                   {capitalizeString(label)}

@@ -15,7 +15,7 @@ const HeroTabs = ({
   businessLabel,
 }: HeroTabsProps) => (
   <nav
-    className="inline-flex w-fit items-center rounded-full border border-border bg-card p-1 text-[12px] font-normal shadow-[0_1px_2px_rgba(10,10,10,0.04)]"
+    className="inline-flex w-fit items-center rounded-full border border-border bg-[var(--peekaboo-surface)] p-1 text-[12px] font-normal shadow-[0_1px_2px_rgba(10,10,10,0.04)]"
     role="tablist"
     aria-label="Delivery audience"
   >

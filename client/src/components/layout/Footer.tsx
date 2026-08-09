@@ -98,7 +98,7 @@ const Footer = () => {
   );
 
   return (
-    <footer className="relative w-full border-t border-primary-100 bg-white">
+    <footer className="relative w-full border-t border-primary-100 bg-[var(--peekaboo-surface)]">
       <motion.article
         className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-8 pt-14 pb-8"
         initial="hidden"
@@ -189,14 +189,14 @@ const Footer = () => {
                       href={contact.href}
                       className="group flex items-start gap-3 text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
                     >
-                      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-primary-50 text-primary-500 group-hover:text-primary-700 transition-colors duration-300">
+                      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--peekaboo-surface)] text-primary-500 group-hover:text-primary-700 transition-colors duration-300">
                         <FontAwesomeIcon icon={contact.icon} className="w-3.5 h-3.5" />
                       </span>
                       <span className="pt-1.5 text-[13px]">{contact.text}</span>
                     </a>
                   ) : (
                     <p className="flex items-start gap-3 text-[13px] text-primary-600">
-                      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-primary-50 text-primary-500">
+                      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--peekaboo-surface)] text-primary-500">
                         <FontAwesomeIcon icon={contact.icon} className="w-3.5 h-3.5" />
                       </span>
                       <span className="pt-1.5 text-[13px]">{contact.text}</span>

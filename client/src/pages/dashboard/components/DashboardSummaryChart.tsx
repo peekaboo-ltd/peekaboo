@@ -96,21 +96,21 @@ const DashboardSummaryChart = ({
   return (
     <motion.section
       aria-label="Summary chart"
-      className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-white p-5 shadow-[0_1px_0_rgba(20,24,29,0.05)] sm:p-6"
+      className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] p-5 shadow-[0_1px_0_rgba(20,24,29,0.05)] sm:p-6"
       variants={containerVariants}
     >
       <motion.div variants={itemVariants}>
         <header className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
-            <p className="font-data text-[11px] font-medium uppercase text-slate-500">
+            <p className="font-ui text-[11px] font-medium uppercase text-slate-500">
               Primary insight
             </p>
             {data.length > 0 ? (
-              <p className="font-display mt-2 text-[2.25rem] font-semibold leading-none text-[color:var(--ops-ink)] sm:text-[3rem]">
+              <p className="font-ui mt-2 text-[2.25rem] font-semibold leading-none text-[color:var(--ops-ink)] sm:text-[3rem]">
                 {formattedTotal}
               </p>
             ) : (
-              <p className="font-display mt-2 text-[2.25rem] font-semibold leading-none text-slate-300 sm:text-[3rem]">
+              <p className="font-ui mt-2 text-[2.25rem] font-semibold leading-none text-slate-300 sm:text-[3rem]">
                 —
               </p>
             )}
@@ -118,10 +118,10 @@ const DashboardSummaryChart = ({
               {capitalizeString(metric.toLowerCase())} across the selected period with a single high-signal trend line.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-normal text-slate-700">
+              <span className="rounded-full border border-slate-200 bg-[var(--peekaboo-surface)] px-3 py-1 text-xs font-normal text-slate-700">
                 {range.toUpperCase()} view
               </span>
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-normal text-slate-600">
+              <span className="rounded-full border border-slate-200 bg-[var(--peekaboo-surface)] px-3 py-1 text-xs font-normal text-slate-600">
                 {data.length} data points
               </span>
               {peakPoint && (
@@ -168,7 +168,7 @@ const DashboardSummaryChart = ({
 
         <section className="relative mt-8 h-64 sm:h-72">
           {isLoading && (
-            <figure className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-white/70">
+            <figure className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-[var(--peekaboo-surface)]">
               <figure className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-[hsl(var(--primary))]" />
             </figure>
           )}
@@ -196,7 +196,7 @@ const DashboardSummaryChart = ({
               />
               <Tooltip
                 contentStyle={{
-                  background: 'hsl(var(--card))',
+                  background: 'var(--peekaboo-surface)',
                   border: '1px solid hsl(var(--border))',
                   borderRadius: 10,
                   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
@@ -224,12 +224,12 @@ const DashboardSummaryChart = ({
             {breakdown.slice(0, 3).map((item) => (
               <article
                 key={item.label}
-                className="rounded-md border border-[color:var(--ops-line)] bg-[color:var(--ops-paper)] px-4 py-3"
+                className="rounded-md border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-4 py-3"
               >
-                <p className="font-data text-[11px] font-medium uppercase text-slate-500">
+                <p className="font-ui text-[11px] font-medium uppercase text-slate-500">
                   {item.label}
                 </p>
-                <p className="font-display mt-2 text-2xl font-semibold text-[color:var(--ops-ink)]">
+                <p className="font-ui mt-2 text-2xl font-semibold text-[color:var(--ops-ink)]">
                   {formatNumbers(item.value)}
                 </p>
               </article>

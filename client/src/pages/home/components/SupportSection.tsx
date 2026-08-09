@@ -27,7 +27,7 @@ const helpLinks = [
 ];
 
 const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
-  <section id="support" className="w-full border-t border-border bg-[var(--peekaboo-warm)] py-12 lg:py-16">
+  <section id="support" className="w-full border-t border-border bg-[var(--peekaboo-surface)] py-12 lg:py-16">
     <article className="mx-auto grid max-w-[1280px] grid-cols-1 gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.4fr] lg:gap-12 lg:px-10">
       <header>
         <p className="text-[11px] font-medium uppercase text-muted-foreground">
@@ -57,7 +57,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                     {contact.subtitle}
                   </span>
                 </span>
-                <span className="rounded-full border border-border bg-[#f7f6f1] px-2 py-0.5 text-[11px] font-medium text-foreground transition-all duration-300 group-hover:border-[#d49e00] group-hover:bg-[#fff4be]">
+                <span className="rounded-full border border-border bg-[var(--peekaboo-surface)] px-2 py-0.5 text-[11px] font-medium text-foreground transition-all duration-300 group-hover:border-[#d49e00] group-hover:bg-[#fff4be]">
                   {contact.badge}
                 </span>
               </>
@@ -70,7 +70,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                     href={contact.href}
                     target={contact.external ? '_blank' : undefined}
                     rel={contact.external ? 'noopener noreferrer' : undefined}
-                    className="group home-card-interactive flex w-full items-center gap-3 rounded-md border border-border bg-card p-3.5 text-left transition-all duration-300"
+                    className="group home-card-interactive flex w-full items-center gap-3 rounded-md border border-border bg-[var(--peekaboo-surface)] p-3.5 text-left transition-all duration-300"
                   >
                     {content}
                   </a>
@@ -84,7 +84,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                   type="button"
                   styled={false}
                   onClick={onContactClick}
-                  className="group home-card-interactive flex w-full items-center gap-3 rounded-md border border-border bg-card p-3.5 text-left transition-all duration-300"
+                  className="group home-card-interactive flex w-full items-center gap-3 rounded-md border border-border bg-[var(--peekaboo-surface)] p-3.5 text-left transition-all duration-300"
                 >
                   {content}
                 </Button>
@@ -95,7 +95,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
       </header>
 
       <aside>
-        <label className="flex items-center gap-3 rounded-md border border-border bg-card p-3.5">
+        <label className="flex items-center gap-3 rounded-md border border-border bg-[var(--peekaboo-surface)] p-3.5">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <input
             type="search"
@@ -110,7 +110,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
               {link.to.startsWith('#') ? (
                 <a
                   href={link.to}
-                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3 text-left text-[13px] font-medium text-foreground transition-all duration-300"
+                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-md border border-border bg-[var(--peekaboo-surface)] px-4 py-3 text-left text-[13px] font-medium text-foreground transition-all duration-300"
                 >
                   {link.label}
                   <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
@@ -118,7 +118,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
               ) : (
                 <Link
                   to={link.to}
-                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3 text-left text-[13px] font-medium text-foreground transition-all duration-300"
+                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-md border border-border bg-[var(--peekaboo-surface)] px-4 py-3 text-left text-[13px] font-medium text-foreground transition-all duration-300"
                 >
                   {link.label}
                   <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />

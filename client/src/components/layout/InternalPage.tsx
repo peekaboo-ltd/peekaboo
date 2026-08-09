@@ -44,7 +44,7 @@ export const InternalPageHeader = ({
 }: InternalPageHeaderProps) => (
   <header
     className={cn(
-      'flex flex-col gap-3 border border-slate-200 bg-white px-5 py-5 sm:px-6',
+      'flex flex-col gap-3 border border-slate-200 bg-[var(--peekaboo-surface)] px-5 py-5 sm:px-6',
       className
     )}
   >
@@ -78,7 +78,7 @@ export const InternalSectionCard = ({
   className,
   contentClassName,
 }: InternalSectionCardProps) => (
-  <section className={cn('border border-slate-200 bg-white', className)}>
+  <section className={cn('border border-slate-200 bg-[var(--peekaboo-surface)]', className)}>
     {(title || description || eyebrow || actions) && (
       <header className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -113,7 +113,7 @@ export const InternalStatCard = ({
 }: InternalStatCardProps) => (
   <article
     className={cn(
-      'border border-slate-200 bg-white px-5 py-4 flex items-start justify-between gap-4',
+      'border border-slate-200 bg-[var(--peekaboo-surface)] px-5 py-4 flex items-start justify-between gap-4',
       className
     )}
   >
@@ -122,7 +122,7 @@ export const InternalStatCard = ({
       <p className="mt-2 text-xl font-semibold text-slate-900 break-words">{value}</p>
     </div>
     {icon ? (
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-[var(--peekaboo-surface)] text-slate-700">
         {icon}
       </span>
     ) : null}

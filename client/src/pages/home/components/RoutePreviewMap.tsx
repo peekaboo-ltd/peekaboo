@@ -22,7 +22,7 @@ const RoutePreviewMap = ({ className = '', dark = false }: RoutePreviewMapProps)
       width="160"
       height="72"
       rx="8"
-      fill={dark ? 'rgba(255,255,255,0.04)' : '#f7f6f1'}
+      fill={dark ? 'rgba(255,255,255,0.04)' : 'var(--peekaboo-surface)'}
     />
 
     {/* Grid */}
@@ -69,7 +69,7 @@ const RoutePreviewMap = ({ className = '', dark = false }: RoutePreviewMapProps)
     />
 
     {/* Pickup */}
-    <circle cx="24" cy="48" r="5" fill={dark ? '#0a0a0a' : '#fff'} stroke="#edb100" strokeWidth="2" />
+    <circle cx="24" cy="48" r="5" fill={dark ? '#0a0a0a' : 'var(--peekaboo-surface)'} stroke="#edb100" strokeWidth="2" />
     <text
       x="24"
       y="62"

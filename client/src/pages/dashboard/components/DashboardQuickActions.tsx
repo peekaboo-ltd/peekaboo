@@ -28,10 +28,10 @@ const DashboardQuickActions = ({ actions, variants }: DashboardQuickActionsProps
             <Link
               key={action.label}
               to={action.to}
-              className="group snap-start flex flex-col items-center gap-2.5 rounded-[22px] bg-[#EEF1F3] px-5 py-4 transition-all duration-200 hover:-translate-y-[2px] hover:bg-[#E4E8EA] min-w-[96px]"
+              className="group snap-start flex flex-col items-center gap-2.5 rounded-[22px] bg-[var(--peekaboo-surface)] px-5 py-4 transition-all duration-200 hover:-translate-y-[2px] hover:bg-[var(--peekaboo-surface)] min-w-[96px]"
             >
               <span
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(61,85,100,0.1)] transition-transform duration-200 group-hover:scale-105"
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--peekaboo-surface)] transition-transform duration-200 group-hover:scale-105"
                 aria-hidden="true"
               >
                 <FontAwesomeIcon

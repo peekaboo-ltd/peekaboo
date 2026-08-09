@@ -103,7 +103,7 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Entity ID</p>
-              <p className="text-sm font-mono mt-1">{log.entityId}</p>
+              <p className="text-sm mt-1">{log.entityId}</p>
             </div>
           </div>
 

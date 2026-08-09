@@ -69,13 +69,13 @@ const HeroSection = ({
   });
 
   return (
-    <section className="relative isolate w-full overflow-hidden bg-[var(--peekaboo-warm)] text-foreground">
+    <section className="relative isolate w-full overflow-hidden bg-[var(--peekaboo-surface)] text-foreground">
       {/* Subtle brand-aligned delivery scene, matching the auth backdrop */}
       <div className="pointer-events-none absolute inset-0">
         <HeroScene />
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--secondary)_12%,transparent)_1px,transparent_1px)] [background-size:44px_44px]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--peekaboo-warm)_36%,transparent)_0%,color-mix(in_oklab,var(--peekaboo-warm)_64%,transparent)_52%,color-mix(in_oklab,var(--peekaboo-warm)_92%,transparent)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--peekaboo-surface)_36%,transparent)_0%,color-mix(in_oklab,var(--peekaboo-surface)_64%,transparent)_52%,color-mix(in_oklab,var(--peekaboo-surface)_92%,transparent)_100%)]" />
 
       <article className="relative z-10 mx-auto max-w-[1280px] px-5 pb-12 pt-18 sm:px-8 lg:px-10 lg:pb-14 lg:pt-22">
         <motion.section

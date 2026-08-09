@@ -66,7 +66,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
     ];
 
     return (
-        <nav className="w-full fixed top-0 z-1000 bg-white shadow-md">
+        <nav className="w-full fixed top-0 z-1000 bg-[#FAFAF7] shadow-md">
             <header
                 className={`relative w-[95%] sm:w-[92%] md:w-[90%] mx-auto transition-all duration-300
         py-2 sm:py-3 h-[64px] min-h-[64px] max-h-[64px] flex items-center justify-between ${className}`}
@@ -83,7 +83,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                     {pathname === '/' && (
                         <Link
                             to="/dashboard"
-                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-normal text-primary-900 hover:bg-primary-900/10 rounded-lg transition-colors duration-200"
+                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-normal text-primary-900 hover:bg-[var(--peekaboo-surface)] rounded-lg transition-colors duration-200"
                         >
                             Dashboard
                         </Link>
@@ -91,7 +91,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                     {pathname === '/' && (
                         <Link
                             to="/track"
-                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-normal text-gray-700 hover:bg-primary-900/10 rounded-lg transition-colors duration-200"
+                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-normal text-gray-700 hover:bg-[var(--peekaboo-surface)] rounded-lg transition-colors duration-200"
                         >
                             Track order
                         </Link>
@@ -99,7 +99,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                     <LanguageSelector className="hidden sm:block" />
 
                     <button
-                        className="md:hidden p-2 rounded-lg cursor-pointer hover:bg-gray-300 transition-colors duration-200"
+                        className="md:hidden p-2 rounded-lg cursor-pointer hover:bg-[var(--peekaboo-surface)] transition-colors duration-200"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         aria-label="Toggle mobile menu"
                     >
@@ -111,7 +111,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
 
                     <section className="relative">
                         <button
-                            className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 pr-2 sm:pr-3 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                            className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 pr-2 sm:pr-3 rounded-lg cursor-pointer hover:bg-[var(--peekaboo-surface)] transition-colors duration-200"
                             onClick={(e) => {
                                 e.preventDefault();
                                 setIsOpen(!isOpen);
@@ -121,7 +121,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         >
                             <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200">
                                 <AvatarImage src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined} alt="" />
-                                <AvatarFallback className="rounded-full bg-primary-900/10 text-black text-xs font-normal">
+                                <AvatarFallback className="rounded-full bg-[var(--peekaboo-surface)] text-black text-xs font-normal">
                                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
@@ -146,7 +146,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                 </section>
 
                 <NavDropdown isOpen={isOpen}>
-                    <section className="py-2 w-full rounded-lg shadow-md bg-white border border-gray-100">
+                    <section className="py-2 w-full rounded-lg shadow-md bg-[#FAFAF7] border border-gray-100">
                         <div className="sm:hidden p-4 border-b border-gray-100">
                             <h3 className="font-normal text-gray-800">
                                 {user?.name || user?.phoneNumber}
@@ -171,7 +171,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                         }
                                         navigate(`${nav?.link}`);
                                     }}
-                                    className={`flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-900 transition-colors duration-200
+                                    className={`flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900 transition-colors duration-200
                   ${['Theme', 'Notifications'].includes(nav?.title)
                                             ? 'min-[450px]:hidden'
                                             : ''
@@ -194,20 +194,20 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         }`}
                 >
                     <section
-                        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'
+                        className={`absolute inset-y-0 right-0 left-[260px] bg-black/60 backdrop-blur-sm transition-opacity duration-300 sm:left-[300px] ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'
                             }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                         aria-hidden="true"
                     />
 
                     <nav
-                        className={`absolute top-0 left-0 h-full w-[260px] sm:w-[300px] bg-white shadow-sm transform transition-transform duration-300 ease-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                        className={`absolute top-0 left-0 h-full w-[260px] sm:w-[300px] bg-[#FAFAF7] shadow-sm transform transition-transform duration-300 ease-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
                             }`}
                     >
-                        <header className="flex items-center justify-start p-3 border-b border-gray-100 bg-gray-50/50">
+                        <header className="flex items-center justify-start p-3 border-b border-gray-100 bg-[#FAFAF7]">
                             <button
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-[var(--peekaboo-surface)] rounded-lg transition-colors duration-200"
                                 aria-label="Close menu"
                             >
                                 <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
@@ -219,7 +219,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                 <div className="flex items-center gap-2.5">
                                     <Avatar className="w-10 h-10 rounded-full border border-slate-200">
                                         <AvatarImage src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined} alt="" />
-                                        <AvatarFallback className="rounded-full bg-primary-900/10 text-black text-sm font-normal">
+                                        <AvatarFallback className="rounded-full bg-[var(--peekaboo-surface)] text-black text-sm font-normal">
                                             {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
                                         </AvatarFallback>
                                     </Avatar>
@@ -243,7 +243,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                         <Link
                                             to="/dashboard"
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
+                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900 transition-all duration-200"
                                         >
                                             <FontAwesomeIcon
                                                 icon={faUser}
@@ -256,7 +256,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                         <Link
                                             to="/track"
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
+                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900 transition-all duration-200"
                                         >
                                             <FontAwesomeIcon
                                                 icon={faBoxOpen}
@@ -280,7 +280,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                                                     }
                                                     navigate(`${nav?.link}`);
                                                 }}
-                                                className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-gray-50 hover:text-primary-900 transition-all duration-200"
+                                                className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900 transition-all duration-200"
                                             >
                                                 <FontAwesomeIcon
                                                     icon={nav.icon}

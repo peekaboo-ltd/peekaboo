@@ -15,14 +15,14 @@ import {
 const accentMap = {
   blue: {
     icon: 'text-slate-700',
-    iconBg: 'bg-slate-50',
+    iconBg: 'bg-[var(--peekaboo-surface)]',
     iconRing: 'ring-slate-200',
     spark: 'hsl(var(--primary))',
     footer: 'text-slate-700',
   },
   teal: {
     icon: 'text-slate-700',
-    iconBg: 'bg-slate-50',
+    iconBg: 'bg-[var(--peekaboo-surface)]',
     iconRing: 'ring-slate-200',
     spark: '#0891b2',
     footer: 'text-slate-700',
@@ -43,7 +43,7 @@ const accentMap = {
   },
   violet: {
     icon: 'text-slate-700',
-    iconBg: 'bg-slate-50',
+    iconBg: 'bg-[var(--peekaboo-surface)]',
     iconRing: 'ring-slate-200',
     spark: 'hsl(var(--primary))',
     footer: 'text-slate-700',
@@ -57,7 +57,7 @@ const accentMap = {
   },
   slate: {
     icon: 'text-slate-700',
-    iconBg: 'bg-slate-100',
+    iconBg: 'bg-[var(--peekaboo-surface)]',
     iconRing: 'ring-slate-200',
     spark: '#475569',
     footer: 'text-slate-700',
@@ -123,7 +123,7 @@ const MetricCard = ({
   const cardContent = (
     <Card
       className={cn(
-        'group relative overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-white shadow-[0_1px_0_rgba(20,24,29,0.05)] transition-all duration-300',
+        'group relative overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] shadow-[0_1px_0_rgba(20,24,29,0.05)] transition-all duration-300',
         destination
           ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_10px_22px_-18px_rgba(20,24,29,0.5)]'
           : 'hover:shadow-[0_10px_22px_-18px_rgba(20,24,29,0.5)]',
@@ -149,7 +149,7 @@ const MetricCard = ({
               </span>
             )}
             <span className="min-w-0">
-              <span className="font-data block truncate text-[11px] font-medium uppercase text-slate-600">
+              <span className="font-ui block truncate text-[11px] font-medium uppercase text-slate-600">
                 {label}
               </span>
               {(comparisonLabel || note) && (
@@ -161,7 +161,7 @@ const MetricCard = ({
           </span>
           {trend && (
             <span
-              className={`font-data shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${trend.isPositive
+              className={`font-ui shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${trend.isPositive
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-rose-50 text-rose-700'
                 }`}
@@ -175,7 +175,7 @@ const MetricCard = ({
         <section className="flex items-end justify-between gap-4">
           <div className="min-w-0 flex-1">
             <p
-              className="font-display truncate text-[2rem] font-semibold leading-none text-[color:var(--ops-ink)] sm:text-[2.3rem]"
+              className="font-ui truncate text-[2rem] font-semibold leading-none text-[color:var(--ops-ink)] sm:text-[2.3rem]"
               aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
             >
               {value}

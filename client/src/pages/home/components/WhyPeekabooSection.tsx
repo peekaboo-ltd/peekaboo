@@ -36,7 +36,7 @@ const WhyPeekabooSection = ({
   ].filter((stat): stat is { value: string; label: string } => stat !== null);
 
   return (
-    <section className="w-full border-t border-border bg-card py-12 lg:py-16">
+    <section className="w-full border-t border-border bg-[var(--peekaboo-surface)] py-12 lg:py-16">
       <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
         <header className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <hgroup>
@@ -69,7 +69,7 @@ const WhyPeekabooSection = ({
           {items.map((item) => {
             const Icon = item.icon;
             return (
-              <li key={item.title} className="group border-t border-border px-1 py-5 transition-all duration-300 hover:bg-[#f7f6f1] sm:px-5">
+              <li key={item.title} className="group border-t border-border px-1 py-5 transition-all duration-300 hover:bg-[var(--peekaboo-surface)] sm:px-5">
                 <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#fff4be] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110">
                   <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>

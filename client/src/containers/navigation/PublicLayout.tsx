@@ -16,7 +16,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
   const isAuthPage = pathname.startsWith('/auth/');
 
   return (
-    <main className="min-h-screen bg-background relative flex flex-col">
+    <main className="relative flex min-h-screen flex-col bg-[var(--peekaboo-surface)]">
       {!isAuthPage && (isAuthenticated ? <AuthenticatedNavbar /> : <PublicNavbar />)}
       <section className={`flex-1 ${pathname === '/' || isAuthPage ? 'pt-0' : 'pt-22'}`}>
         {children || <Outlet />}

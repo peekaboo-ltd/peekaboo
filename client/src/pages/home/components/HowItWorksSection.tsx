@@ -62,7 +62,7 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
   return (
     <section
       id="how-it-works"
-      className="relative w-full bg-[var(--peekaboo-warm)] py-14 lg:min-h-[185vh] lg:py-0"
+      className="relative w-full bg-[var(--peekaboo-surface)] py-14 lg:min-h-[185vh] lg:py-0"
     >
       <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-10">
         <header className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-center lg:self-start lg:py-24">
@@ -116,7 +116,7 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
                   className={`absolute -left-[5px] flex h-[11px] w-[11px] -translate-y-1/2 items-center justify-center rounded-full border transition-colors duration-300 ${
                     isActive
                       ? 'border-[#0a0a0a] bg-[#0a0a0a]'
-                      : 'border-[#c8c7c2] bg-[#f7f6f1]'
+                      : 'border-[#c8c7c2] bg-[var(--peekaboo-surface)]'
                   }`}
                 />
               );
@@ -149,7 +149,7 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
                         {step.step}
                       </span>
                       <span
-                        className={`hidden h-14 w-14 shrink-0 items-center justify-center rounded-md border bg-card sm:flex lg:h-16 lg:w-16 ${
+                        className={`hidden h-14 w-14 shrink-0 items-center justify-center rounded-md border bg-[var(--peekaboo-surface)] sm:flex lg:h-16 lg:w-16 ${
                           isActive
                             ? 'border-[#edb100] shadow-[0_0_0_2px_rgba(255,196,0,0.2)]'
                             : 'border-border'

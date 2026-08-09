@@ -92,7 +92,7 @@ const HeroForm = ({
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="home-scroll-target relative isolate w-full">
-      <article className="relative rounded-md border border-border bg-card p-6 text-foreground shadow-[0_22px_70px_-42px_color-mix(in_oklab,var(--primary)_45%,transparent)] sm:p-8">
+      <article className="relative rounded-md border border-border bg-[var(--peekaboo-surface)] p-6 text-foreground shadow-[0_22px_70px_-42px_color-mix(in_oklab,var(--primary)_45%,transparent)] sm:p-8">
         <header className="mb-5">
           <p className="text-[10px] font-medium uppercase text-muted-foreground">
             New order

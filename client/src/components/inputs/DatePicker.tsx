@@ -129,7 +129,7 @@ const DatePicker = ({
         <Button
           variant={'outline'}
           className={cn(
-            'w-full h-10 px-4 justify-start text-left font-normal text-sm text-gray-900 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ease-in-out hover:border-gray-300 hover:bg-white/90',
+            'w-full h-10 px-4 justify-start text-left font-normal text-sm text-gray-900 bg-[var(--peekaboo-surface)] backdrop-blur-sm border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ease-in-out hover:border-gray-300 hover:bg-[var(--peekaboo-surface)]',
             !normalizedValue && 'text-gray-400',
           )}
           onClick={() => setOpen(!open)}
@@ -151,7 +151,7 @@ const DatePicker = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-full p-0 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg"
+        className="w-full p-0 bg-[var(--peekaboo-surface)] backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg"
         align="start"
       >
         <menu className="flex flex-col w-full gap-3 p-4">

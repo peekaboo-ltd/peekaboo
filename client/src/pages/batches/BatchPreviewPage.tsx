@@ -793,7 +793,7 @@ const BatchPreviewPage = () => {
           description={
             <span className="text-[12px] text-slate-500">
               Ref:{" "}
-              <code className="font-mono text-[11px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/80 text-slate-600">
+              <code className="text-[11px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/80 text-slate-600">
                 {batch.referenceId}
               </code>
               {" · "}

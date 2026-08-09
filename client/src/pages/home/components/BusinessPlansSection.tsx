@@ -30,7 +30,7 @@ const BusinessPlansSection = ({
   const hasPlans = !isLoading && plans.length > 0;
 
   return (
-    <section id="business-plans" className="w-full border-t border-border bg-card py-12 lg:py-16">
+    <section id="business-plans" className="w-full border-t border-border bg-[var(--peekaboo-surface)] py-12 lg:py-16">
       <motion.article
         className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10"
         initial="hidden"
@@ -39,7 +39,7 @@ const BusinessPlansSection = ({
         variants={containerVariants}
       >
         <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
-          <p className="text-[11px] font-medium uppercase text-muted-foreground">
+          <p className="text-[11px] font-normal uppercase text-muted-foreground">
             {badgeLabel}
           </p>
           <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[34px]">
@@ -53,7 +53,7 @@ const BusinessPlansSection = ({
             {Array.from({ length: 3 }).map((_, index) => (
               <li
                 key={index}
-                className="h-[420px] animate-pulse rounded-md border border-border bg-[var(--peekaboo-warm)]"
+                className="h-[420px] animate-pulse rounded-md border border-border bg-[var(--peekaboo-surface)]"
               />
             ))}
           </ul>
@@ -69,15 +69,15 @@ const BusinessPlansSection = ({
                 className={plan.isPopular ? 'lg:-mt-2' : undefined}
               >
                 <article
-                  className={`home-card-interactive group relative flex h-full flex-col rounded-md border p-5 transition-all duration-300 ${
+                  className={`group relative flex h-full flex-col rounded-md border p-5 transition-all duration-300 ${
                     plan.isPopular
-                      ? 'border-[#edb100] bg-[#fffdf5] shadow-[0_0_0_1px_rgba(255,196,0,0.25)] hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]'
-                      : 'border-border bg-[var(--peekaboo-warm)]'
+                      ? 'bg-white shadow-md hover:shadow-xl'
+                      : 'border-border bg-[var(--peekaboo-surface)]'
                   }`}
                 >
                   <header className="flex items-start justify-between gap-4">
                     <hgroup>
-                      <h3 className="text-[16px] font-medium text-foreground">
+                      <h3 className="text-[16px] font-normal text-foreground">
                         {plan.name}
                       </h3>
                       <p className="mt-1.5 text-[12px] font-normal leading-relaxed text-muted-foreground">
@@ -85,7 +85,7 @@ const BusinessPlansSection = ({
                       </p>
                     </hgroup>
                     {plan.isPopular ? (
-                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[10px] font-medium uppercase text-[#0a0a0a]">
+                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[8px] font-normal uppercase text-[#0a0a0a]">
                         {popularLabel}
                       </span>
                     ) : null}
@@ -95,7 +95,7 @@ const BusinessPlansSection = ({
                     <p className="text-[22px] font-semibold text-foreground">
                       {plan.price}
                     </p>
-                    <p className="mt-1 text-[11px] font-medium uppercase text-muted-foreground">
+                    <p className="mt-1 text-[11px] font-normal uppercase text-muted-foreground">
                       {perMonthLabel}
                     </p>
                   </section>
@@ -118,7 +118,7 @@ const BusinessPlansSection = ({
                   <div className="mt-6 flex flex-col gap-2">
                     <Link
                       to="/contact"
-                      className={`group/link inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-medium transition-all duration-300 ${
+                      className={`group/link inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-normal transition-all duration-300 ${
                         plan.isPopular
                           ? 'bg-[#0a0a0a] text-white hover:bg-[#1c1c1c] hover:shadow-[0_4px_12px_-2px_rgba(10,10,10,0.3)]'
                           : 'bg-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00] hover:shadow-[0_4px_12px_-2px_rgba(237,177,0,0.3)]'
@@ -131,7 +131,7 @@ const BusinessPlansSection = ({
                     {plan.detailsTo ? (
                       <Link
                         to={plan.detailsTo}
-                        className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-[12px] font-medium text-foreground transition-all duration-300 hover:bg-accent hover:border-border"
+                        className="inline-flex items-center justify-center rounded-md border border-border bg-[var(--peekaboo-surface)] px-4 py-2 text-[12px] font-normal text-foreground transition-all duration-300 hover:bg-[var(--peekaboo-surface)] hover:border-border"
                       >
                         {detailsCtaLabel}
                       </Link>
@@ -142,7 +142,7 @@ const BusinessPlansSection = ({
             ))}
           </motion.ul>
         ) : (
-          <p className="rounded-md border border-border bg-[var(--peekaboo-warm)] px-5 py-8 text-[13px] font-normal text-muted-foreground">
+          <p className="rounded-md border border-border bg-[var(--peekaboo-surface)] px-5 py-8 text-[13px] font-normal text-muted-foreground">
             Business plans are being updated. Contact our team for current pricing.
           </p>
         )}

@@ -19,7 +19,7 @@ const BusinessSolutionsSection = ({
   onContactClick,
   onSeePlans,
 }: BusinessSolutionsSectionProps) => (
-  <section id="business" className="w-full border-t border-border bg-[color-mix(in_oklab,var(--secondary)_9%,var(--peekaboo-warm))] py-12 text-foreground lg:py-16">
+  <section id="business" className="w-full border-t border-border bg-[color-mix(in_oklab,var(--secondary)_9%,var(--peekaboo-surface))] py-12 text-foreground lg:py-16">
     <article className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:px-10">
       <header>
         <p className="text-[11px] font-medium uppercase text-muted-foreground">
@@ -49,7 +49,7 @@ const BusinessSolutionsSection = ({
           <Button
             type="button"
             onClick={onSeePlans}
-            className="rounded-md border-border bg-card text-foreground transition-all duration-300 hover:bg-accent hover:border-border hover:shadow-[0_2px_8px_-4px_rgba(10,10,10,0.12)]"
+            className="rounded-md border-border bg-[var(--peekaboo-surface)] text-foreground transition-all duration-300 hover:bg-[var(--peekaboo-surface)] hover:border-border hover:shadow-[0_2px_8px_-4px_rgba(10,10,10,0.12)]"
           >
             See plans
             <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
@@ -62,7 +62,7 @@ const BusinessSolutionsSection = ({
           const Icon = feature.icon;
           return (
             <li key={feature.title}>
-              <article className="home-card-interactive group h-full rounded-md border border-border bg-card p-5 text-foreground">
+              <article className="home-card-interactive group h-full rounded-md border border-border bg-[var(--peekaboo-surface)] p-5 text-foreground">
                 <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#0a0a0a] text-[#edb100] transition-all duration-300 group-hover:scale-110 group-hover:bg-[#edb100] group-hover:text-[#0a0a0a]">
                   <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>

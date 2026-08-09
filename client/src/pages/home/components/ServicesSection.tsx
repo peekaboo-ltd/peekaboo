@@ -50,15 +50,15 @@ const toneClasses = {
     arrow: 'bg-[#0a0a0a] text-white transition-all duration-300 group-hover:bg-black/80 group-hover:scale-110',
   },
   white: {
-    card: 'home-card-interactive group border-border bg-card text-foreground',
+    card: 'home-card-interactive group border-border bg-[var(--peekaboo-surface)] text-foreground',
     chip: 'bg-[#fff4be] text-[#6b4d00]',
     body: 'text-muted-foreground',
-    arrow: 'bg-[var(--peekaboo-warm)] text-foreground transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110',
+    arrow: 'bg-[var(--peekaboo-surface)] text-foreground transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110',
   },
 } as const;
 
 const ServicesSection = () => (
-  <section id="services" className="w-full bg-card py-12 lg:py-16">
+  <section id="services" className="w-full bg-[var(--peekaboo-surface)] py-12 lg:py-16">
     <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
       <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <hgroup className="max-w-[660px]">

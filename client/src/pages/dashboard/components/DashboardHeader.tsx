@@ -42,14 +42,14 @@ const DashboardHeader = ({
 
   return (
     <motion.header className="w-full" variants={variants}>
-      <div className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-white shadow-[0_1px_0_rgba(20,24,29,0.05)]">
+      <div className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] shadow-[0_1px_0_rgba(20,24,29,0.05)]">
         <div className="border-b border-[color:var(--ops-line)] px-5 py-4 sm:px-6">
-          <p className="font-data text-[11px] font-medium uppercase text-slate-500">
+          <p className="font-ui text-[11px] font-medium uppercase text-slate-500">
             Command center
           </p>
           <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="font-display text-[2rem] font-semibold text-[color:var(--ops-ink)] sm:text-[2.3rem]">
+              <h1 className="font-ui text-[2rem] font-semibold text-[color:var(--ops-ink)] sm:text-[2.3rem]">
                 Dashboard
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[15px]">
@@ -64,7 +64,7 @@ const DashboardHeader = ({
                   <Link
                     key={action.label}
                     to={action.to}
-                    className="inline-flex items-center gap-2 rounded-md border border-[color:var(--ops-line)] bg-[color:var(--ops-paper)] px-4 py-2 text-sm font-medium text-[color:var(--ops-ink)] transition-colors duration-200 hover:bg-white"
+                    className="inline-flex items-center gap-2 rounded-md border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-4 py-2 text-sm font-medium text-[color:var(--ops-ink)] transition-colors duration-200 hover:bg-[var(--peekaboo-surface)]"
                   >
                     <FontAwesomeIcon icon={action.icon} className="text-xs text-slate-500" />
                     {action.label}
@@ -80,18 +80,18 @@ const DashboardHeader = ({
             <div className="w-full">
               <DatePicker
                 value={startDate}
-                onChange={(e) => onStartDateChange?.(e as Date | undefined)}
+                onChange={(e) => onStartDateChange?.(e as unknown as Date | undefined)}
                 placeholder="Start date"
                 toDate={endDate}
               />
             </div>
-            <span className="font-data hidden text-center text-[11px] uppercase text-slate-400 sm:block">
+            <span className="font-ui hidden text-center text-[11px] uppercase text-slate-400 sm:block">
               to
             </span>
             <div className="w-full">
               <DatePicker
                 value={endDate}
-                onChange={(e) => onEndDateChange?.(e as Date | undefined)}
+                onChange={(e) => onEndDateChange?.(e as unknown as Date | undefined)}
                 placeholder="End date"
                 fromDate={startDate}
               />
@@ -102,7 +102,7 @@ const DashboardHeader = ({
             <Button
               variant="outline"
               size="sm"
-              className="h-10 gap-2 rounded-md border-[color:var(--ops-line)] px-4"
+              className="h-10 gap-2 rounded-md border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-4 hover:bg-[var(--peekaboo-surface)]"
             >
               <FontAwesomeIcon icon={faFileLines} className="text-xs" />
               Export

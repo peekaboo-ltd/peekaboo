@@ -58,7 +58,7 @@ const DashboardPerformanceScorecard = ({
           {kpis.map((kpi) => (
             <article
               key={kpi.label}
-              className="rounded-[20px] bg-[#E4E8EA] p-4"
+              className="rounded-[20px] bg-[var(--peekaboo-surface)] p-4"
             >
               <div className="flex items-start justify-between gap-2 mb-3">
                 <p className="text-xs font-medium text-[color:rgba(37,52,63,0.6)] leading-snug">
@@ -82,12 +82,12 @@ const DashboardPerformanceScorecard = ({
                 )}
               </div>
 
-              <p className="font-display text-2xl leading-none text-[color:var(--primary)] mb-3">
+              <p className="font-ui text-2xl leading-none text-[color:var(--primary)] mb-3">
                 {kpi.value}
               </p>
 
               {/* Progress bar */}
-              <div className="h-1.5 rounded-full bg-[rgba(37,52,63,0.15)]">
+              <div className="h-1.5 rounded-full bg-[var(--peekaboo-surface)]">
                 <div
                   className="h-full rounded-full bg-[color:var(--primary)] opacity-60"
                   style={{ width: `${Math.min(kpi.progress, 100)}%` }}

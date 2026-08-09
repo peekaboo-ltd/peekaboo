@@ -34,7 +34,7 @@ interface PublicStatCardProps {
 export const PublicPage = ({ children, className }: PublicPageProps) => (
   <main
     className={cn(
-      'min-h-screen bg-[#FAFAF7] px-4 py-8 sm:px-6 lg:px-10',
+      'min-h-screen bg-[var(--peekaboo-surface)] px-4 py-8 sm:px-6 lg:px-10',
       className,
     )}
   >
@@ -56,7 +56,7 @@ export const PublicPageHero = ({
 }: PublicPageHeroProps) => (
   <header
     className={cn(
-      'overflow-hidden rounded-md border border-slate-200 bg-white px-5 py-5 sm:px-6 sm:py-6',
+      'overflow-hidden rounded-md border border-slate-200 bg-[var(--peekaboo-surface)] px-5 py-5 sm:px-6 sm:py-6',
       className,
     )}
   >
@@ -94,7 +94,7 @@ export const PublicSectionCard = ({
 }: PublicSectionCardProps) => (
   <section
     className={cn(
-      'overflow-hidden rounded-md border border-slate-200 bg-white',
+      'overflow-hidden rounded-md border border-slate-200 bg-[var(--peekaboo-surface)]',
       className,
     )}
   >
@@ -132,7 +132,7 @@ export const PublicStatCard = ({
 }: PublicStatCardProps) => (
   <article
     className={cn(
-      'rounded-md border border-slate-200 bg-white px-4 py-4',
+      'rounded-md border border-slate-200 bg-[var(--peekaboo-surface)] px-4 py-4',
       className,
     )}
   >

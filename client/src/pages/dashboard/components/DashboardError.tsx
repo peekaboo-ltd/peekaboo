@@ -5,7 +5,7 @@ const DashboardError = () => {
 
   return (
     <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
-      <article className="relative overflow-hidden rounded-2xl border border-rose-100 bg-white px-4 py-10 text-center shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] sm:px-8 sm:py-12">
+      <article className="relative overflow-hidden rounded-2xl border border-rose-100 bg-[var(--peekaboo-surface)] px-4 py-10 text-center shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] sm:px-8 sm:py-12">
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-700">
           <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path

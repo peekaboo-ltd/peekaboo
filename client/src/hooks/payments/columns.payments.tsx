@@ -44,7 +44,7 @@ export const useAdminPaymentsColumns = () => {
         header: 'Reference',
         accessorKey: 'internalReferenceId',
         cell: ({ row }) => (
-          <span className="font-mono text-xs truncate max-w-[120px] block" title={row.original.internalReferenceId}>
+          <span className="text-xs truncate max-w-[120px] block" title={row.original.internalReferenceId}>
             {row.original.internalReferenceId?.slice(0, 8)}...
           </span>
         ),

@@ -10,7 +10,7 @@ export const AuthenticatedLayout = () => {
   useInactivityTimeout();
 
   return (
-    <section className="h-screen w-full overflow-x-hidden bg-gray-50">
+    <section className="h-screen w-full overflow-x-hidden bg-[var(--peekaboo-surface)]">
       <AuthenticatedNavbar />
       <AuthenticatedSidebar />
       <main
