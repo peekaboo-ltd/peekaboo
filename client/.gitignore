@@ -27,6 +27,8 @@ dist-ssr
 .kiro/
 .agents/
 .gemini/
+.agent/
+.cursor/
 
 # DS_Store
 .DS_Store

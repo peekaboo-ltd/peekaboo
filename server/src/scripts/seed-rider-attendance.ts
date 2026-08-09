@@ -128,7 +128,7 @@ const uploadProofIfExists = async (
 
   const absolutePath = path.resolve(filePath);
   if (!fs.existsSync(absolutePath)) {
-    logger.warn(`[seed:rider-attendance] Proof image not found: ${absolutePath}`);
+    logger.warning(`[seed:rider-attendance] Proof image not found: ${absolutePath}`);
     return undefined;
   }
 
@@ -138,8 +138,8 @@ const uploadProofIfExists = async (
       status,
     });
   } catch (error) {
-    logger.warn(`[seed:rider-attendance] Failed to upload proof: ${absolutePath}`);
-    logger.warn(String(error));
+    logger.warning(`[seed:rider-attendance] Failed to upload proof: ${absolutePath}`);
+    logger.warning(String(error));
     return undefined;
   }
 };
