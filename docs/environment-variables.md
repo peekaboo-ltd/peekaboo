@@ -21,7 +21,8 @@ This document is the exhaustive reference for every environment variable used ac
 
 | Variable | Default | Required | Purpose & behavior | Read at |
 | --- | --- | --- | --- | --- |
-| `NODE_ENV` | (unset) | Optional | Runtime environment. **Critical behavior:** when set to `development` (case-insensitive), payment charges are forced to **10 RWF** for testing while order fees stay at catalog price (see `developmentPricing.helper.ts`). Use `production` in live deployments so full fees are charged. Also blocks UrubutoPay startup errors in non-production (`app.ts`) and skips some OneSignal API calls. | `app.ts:21`, `developmentPricing.helper.ts:11`, `oneSignalClient.ts:114` |
+| `NODE_ENV` | (unset) | Optional | Runtime environment. Controls Express/Urubuto startup strictness and OneSignal. **Does not** control payment amounts anymore — use `PAYMENT_MODE` instead. | `app.ts:21`, `oneSignalClient.ts:114` |
+| `PAYMENT_MODE` | `simulate` (non-production) / `live` (production) | Optional | Payment behavior: `simulate` (instant SUCCESSFUL, no provider), `dev_price` (real provider, 10 RWF), `live` (real provider, catalog amount). Forced to `live` when `NODE_ENV=production`. | `paymentMode.helper.ts`, `payment.service.ts` |
 | `PUBLIC_API_BASE_URL` | — | Yes (for payments) | Public base URL of this API. Used to construct the webhook URLs registered with UrubutoPay (`${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/*`). Logs a startup warning if unset while UrubutoPay is the active provider. | `urubuto.config.ts:153`, `urubuto-smoke-test.ts:53` |
 | `PAYMENT_PROVIDER_DEFAULT` | `URUBUTO` | Optional | Selects the payment gateway. Supported values: `URUBUTO`. (Kpay integration exists but is not the default.) When it equals `URUBUTO`, startup validation runs against the Urubuto config. | `urubuto.config.ts:76`, `payment.service.ts:620` |
 | `PORT` | `8080` | Optional | Server port. `server.ts` reads it (default `8080`); the deploy script sets it when starting under PM2. Default local URL: http://localhost:8080 | `server.ts:37`, deploy script |
@@ -195,7 +196,8 @@ Vite only exposes variables prefixed with `VITE_` to the browser; they are read 
 | `VITE_API_BASE_URL` | `http://localhost:8080/api/v1` | Yes (outside local dev) | Base URL of the backend API. Every axios request targets this. | `constants/environments.constants.ts:5` |
 | `VITE_GOOGLE_MAPS_API_KEY` | — | Only for map features | Google Maps key for the admin dashboard maps (`@vis.gl/react-google-maps`). | `constants/environments.constants.ts:6` |
 | `VITE_INACTIVITY_TIMEOUT` | `5` | Optional | Session inactivity timeout in **minutes** before the session-expired modal fires. | `constants/environments.constants.ts:7` |
-| `VITE_NODE_ENVIRONMENT` | falls back to Vite `MODE` | Optional | Overrides the client's detected environment. When it equals `development`, the UI shows catalog fees with a disclaimer that checkout charges 10 RWF (`isDevelopmentPricing`). The server is the source of truth via `NODE_ENV`. | `constants/environments.constants.ts:2,14` |
+| `VITE_NODE_ENVIRONMENT` | falls back to Vite `MODE` | Optional | Overrides the client's detected `NODE_ENVIRONMENT` label. | `constants/environments.constants.ts` |
+| `VITE_PAYMENT_MODE` | `simulate` (non-production Vite MODE) / `live` (production) | Optional | UI payment mode aligned with server: `simulate`, `dev_price`, or `live`. Drives checkout disclaimers (`isPaymentSimulation` / `isDevPrice`). | `constants/environments.constants.ts` |
 
 ---
 

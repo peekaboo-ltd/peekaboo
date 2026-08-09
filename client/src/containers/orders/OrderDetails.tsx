@@ -38,11 +38,16 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         <dt className="text-xs sm:text-sm font-medium text-gray-500">Fee</dt>
         <dd className="text-xs sm:text-sm font-normal text-black">
           {order?.finalFee ? `${formatCurrency(order.finalFee)}` : 'TBD'}
-          {ENVIRONMENTS.isDevelopmentPricing && order?.finalFee ? (
+          {ENVIRONMENTS.isPaymentSimulation && order?.finalFee ? (
             <p className="mt-1 text-[11px] font-normal leading-snug text-amber-700">
-              Development environment: catalog fee shown. You will only be
-              charged {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at
-              checkout.
+              Payments are simulated in this environment. No real charge will be
+              made.
+            </p>
+          ) : null}
+          {ENVIRONMENTS.isDevPrice && order?.finalFee ? (
+            <p className="mt-1 text-[11px] font-normal leading-snug text-amber-700">
+              Catalog fee shown. You will only be charged{' '}
+              {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at checkout.
             </p>
           ) : null}
         </dd>

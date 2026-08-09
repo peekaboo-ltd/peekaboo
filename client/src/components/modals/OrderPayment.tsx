@@ -317,13 +317,19 @@ const OrderPayment = () => {
           />
         </fieldset>
 
-        {ENVIRONMENTS.isDevelopmentPricing ? (
+        {ENVIRONMENTS.isPaymentSimulation ? (
+          <p className="text-xs font-normal leading-snug text-amber-700">
+            Payments are simulated in this environment. No real charge will be
+            made.
+          </p>
+        ) : null}
+        {ENVIRONMENTS.isDevPrice ? (
           <p className="text-xs font-normal leading-snug text-amber-700">
             Catalog fee is{' '}
             {formatCurrency(
               selectedOrder?.finalFee ?? selectedOrder?.initialFee ?? 0,
             )}
-            . In this development environment you will only be charged{' '}
+            . In this environment you will only be charged{' '}
             {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)}.
           </p>
         ) : null}

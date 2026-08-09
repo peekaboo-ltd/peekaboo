@@ -124,7 +124,7 @@ VITE_NODE_ENVIRONMENT=development    # optional override; drives dev pricing UI 
 
 Every variable is documented in [environment-variables.md](environment-variables.md).
 
-**Development pricing:** when `VITE_NODE_ENVIRONMENT` (or Vite `MODE`) equals `development`, the UI shows catalog fees with a disclaimer that checkout charges 10 RWF (`isDevelopmentPricing`). The server is the source of truth via `NODE_ENV` — keep both in agreement locally.
+**Payment modes:** set `VITE_PAYMENT_MODE` to `simulate`, `dev_price`, or `live` (aligned with server `PAYMENT_MODE`). The UI shows simulated-payment or 10 RWF disclaimers via `isPaymentSimulation` / `isDevPrice`. The server is the source of truth for charging.
 
 ## Key commands (from `client/`)
 

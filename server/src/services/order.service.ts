@@ -922,17 +922,27 @@ export class OrderService {
       });
     }
 
-    const assignment = await this.orderAssignmentService.handleOrderAssignment({
-      orderId: orderExists.id,
-    });
-
-    const updatedOrder = await this.getOrderById(orderExists.id);
+    const { order, assignment } = await this.startFulfillmentAfterPaidEquivalent(
+      orderExists.id,
+    );
 
     return {
-      order: updatedOrder,
+      order,
       assignment,
       activity,
     };
+  }
+
+  /** Shared entry after PAID or PAYMENT_DEFERRED: assign rider and reload order. */
+  private async startFulfillmentAfterPaidEquivalent(orderId: UUID): Promise<{
+    order: Order;
+    assignment: OrderAssignment;
+  }> {
+    const assignment = await this.orderAssignmentService.handleOrderAssignment({
+      orderId,
+    });
+    const order = await this.getOrderById(orderId);
+    return { order, assignment };
   }
 
   // GET ORDER BY CONVERSATION ID

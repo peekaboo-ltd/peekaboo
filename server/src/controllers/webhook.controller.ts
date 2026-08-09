@@ -6,6 +6,7 @@ import {
   UrubutoPaymentWebhookPayload,
   UrubutoWebhookAuthRequest,
 } from '../types/urubuto.types';
+import { Payment } from '../entities/payment.entity';
 import logger from '../helpers/logger.helper';
 
 const paymentService = new PaymentService();
@@ -24,23 +25,80 @@ const assertUrubutoToken = (req: Request, res: Response): boolean => {
   return valid;
 };
 
+const parseKpayWebhookBody = (
+  body: Record<string, unknown>,
+): KpayWebhookPayload | null => {
+  const rawPayloadString = Object.keys(body)?.[0];
+  if (!rawPayloadString) return null;
+
+  try {
+    return JSON.parse(rawPayloadString) as KpayWebhookPayload;
+  } catch {
+    return null;
+  }
+};
+
+const buildUrubutoWebhookSuccessResponse = (
+  payment: Payment,
+  payload: UrubutoPaymentWebhookPayload,
+) => ({
+  status: 200,
+  message: 'Successful',
+  timestamp: urubutoService.timestamp(),
+  data: {
+    internal_transaction_id: payment.id,
+    external_transaction_id:
+      payment.externalReferenceId || payload.transaction_id,
+    payer_phone_number: payment.customerPhone || '',
+    payer_email: payment.customerEmail || '',
+  },
+});
+
+const handleUrubutoWebhook = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  source: 'callback' | 'notification' | 'reversal',
+) => {
+  try {
+    if (!assertUrubutoToken(req, res)) return;
+
+    const payload = req.body as UrubutoPaymentWebhookPayload;
+
+    logger.info(`UrubutoPay payment ${source} request`, {
+      request: payload,
+    });
+
+    const payment = await paymentService.processUrubutoPaymentWebhook(
+      payload,
+      source,
+    );
+
+    logger.info(`UrubutoPay payment ${source} response`, {
+      response: payment,
+    });
+
+    return res
+      .status(200)
+      .json(buildUrubutoWebhookSuccessResponse(payment, payload));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const WebhookController = {
   // KPAY WEBHOOK
   async kpayWebhook(req: Request, res: Response, next: NextFunction) {
     try {
-      const { body } = req;
-      const rawPayloadString = Object.keys(body)?.[0];
-      let raw: KpayWebhookPayload;
-      try {
-        raw = JSON.parse(rawPayloadString);
-      } catch (e) {
-        return res.status(400).json({ message: "Invalid webhook payload format" });
+      const raw = parseKpayWebhookBody(req.body);
+      if (!raw) {
+        return res.status(400).json({ message: 'Invalid webhook payload format' });
       }
 
       const { refid, statusid } = raw;
       const payment = await paymentService.updatePaymentStatus(
         refid,
-        statusid as KpayPaymentStatus
+        statusid as KpayPaymentStatus,
       );
 
       return res.status(200).json({
@@ -116,111 +174,15 @@ export const WebhookController = {
     }
   },
 
-  // URUBUTOPAY PAYMENT CALLBACK
   async urubutoCallback(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!assertUrubutoToken(req, res)) return;
-
-      logger.info('UrubutoPay payment callback request', {
-        request: req.body,
-      });
-
-      const payment = await paymentService.processUrubutoPaymentWebhook(
-        req.body as UrubutoPaymentWebhookPayload,
-        'callback',
-      );
-
-      logger.info('UrubutoPay payment callback response', {
-        response: payment,
-      });
-
-      return res.status(200).json({
-        status: 200,
-        message: 'Successful',
-        timestamp: urubutoService.timestamp(),
-        data: {
-          internal_transaction_id: payment.id,
-          external_transaction_id:
-            payment.externalReferenceId ||
-            (req.body as UrubutoPaymentWebhookPayload).transaction_id,
-          payer_phone_number: payment.customerPhone || '',
-          payer_email: payment.customerEmail || '',
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
+    return handleUrubutoWebhook(req, res, next, 'callback');
   },
 
-  // URUBUTOPAY PAYMENT NOTIFICATION
   async urubutoNotification(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!assertUrubutoToken(req, res)) return;
-
-      logger.info('UrubutoPay payment notification request', {
-        request: req.body,
-      });
-
-      const payment = await paymentService.processUrubutoPaymentWebhook(
-        req.body as UrubutoPaymentWebhookPayload,
-        'notification',
-      );
-
-      logger.info('UrubutoPay payment notification response', {
-        response: payment,
-      });
-
-      return res.status(200).json({
-        status: 200,
-        message: 'Successful',
-        timestamp: urubutoService.timestamp(),
-        data: {
-          internal_transaction_id: payment.id,
-          external_transaction_id:
-            payment.externalReferenceId ||
-            (req.body as UrubutoPaymentWebhookPayload).transaction_id,
-          payer_phone_number: payment.customerPhone || '',
-          payer_email: payment.customerEmail || '',
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
+    return handleUrubutoWebhook(req, res, next, 'notification');
   },
 
-  // URUBUTOPAY PAYMENT REVERSAL
   async urubutoReversal(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!assertUrubutoToken(req, res)) return;
-
-      logger.info('UrubutoPay payment reversal request', {
-        request: req.body,
-      });
-
-      const payment = await paymentService.processUrubutoPaymentWebhook(
-        req.body as UrubutoPaymentWebhookPayload,
-        'reversal',
-      );
-
-      logger.info('UrubutoPay payment reversal response', {
-        response: payment,
-      });
-
-      return res.status(200).json({
-        status: 200,
-        message: 'Successful',
-        timestamp: urubutoService.timestamp(),
-        data: {
-          internal_transaction_id: payment.id,
-          external_transaction_id:
-            payment.externalReferenceId ||
-            (req.body as UrubutoPaymentWebhookPayload).transaction_id,
-          payer_phone_number: payment.customerPhone || '',
-          payer_email: payment.customerEmail || '',
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
+    return handleUrubutoWebhook(req, res, next, 'reversal');
   },
 };

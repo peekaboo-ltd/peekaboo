@@ -3,7 +3,7 @@ import { ConversationStep } from "../constants/conversation.constants";
 import { OrderType } from "../constants/order.constants";
 import { PaymentType } from "../constants/payment.constants";
 import { RoleTypes } from "../constants/role.constants";
-import { KpayCurrency } from "../types/kpay.types";
+import { KpayCurrency, KpayPaymentStatus } from "../types/kpay.types";
 import { PaymentProvider } from "../types/urubuto.types";
 import { formatPhoneNumber } from "../helpers/phone.helper";
 import {
@@ -587,11 +587,13 @@ export class WhatsappService {
       orderSource: "whatsapp_flow",
     });
 
-    const chargedAmount = Number(order.finalFee ?? order.initialFee ?? initialAmount);
+    const catalogAmount = Number(
+      order.finalFee ?? order.initialFee ?? initialAmount,
+    );
 
     const payment = await this.paymentService.createPayment({
       entityId: order.id,
-      amount: chargedAmount,
+      amount: catalogAmount,
       currency: KpayCurrency.RWF,
       type: PaymentType.ORDER,
       customerPhone: params.senderPhone,
@@ -607,13 +609,25 @@ export class WhatsappService {
     });
 
     const paymentUrl = payment.paymentUrl || payment.metadata?.paymentUrl;
+    const isSimulated =
+      payment.status === KpayPaymentStatus.SUCCESSFUL &&
+      Boolean(payment.metadata?.simulated);
+    const displayAmount = Number(payment.amount ?? catalogAmount);
 
-    if (paymentUrl) {
+    if (isSimulated && paymentUrl) {
       sendCtaUrlButton({
         phoneNumber: params.senderPhone,
-        displayText: `Pay ${chargedAmount.toLocaleString()} RWF`,
+        displayText: "View order",
         url: paymentUrl,
-        bodyText: paymentCTABodyText(order.referenceId, chargedAmount),
+        bodyText: `Your order ${order.referenceId} was created and payment was simulated for local testing. Tap below to view details.`,
+        footerText: "Simulated payment",
+      }).catch(() => {});
+    } else if (paymentUrl) {
+      sendCtaUrlButton({
+        phoneNumber: params.senderPhone,
+        displayText: `Pay ${displayAmount.toLocaleString()} RWF`,
+        url: paymentUrl,
+        bodyText: paymentCTABodyText(order.referenceId, displayAmount),
         footerText: "Payment link expires in 5 hours",
       }).catch(() => {});
     } else {
@@ -626,7 +640,9 @@ export class WhatsappService {
     }
 
     await this.conversationService.updateConversation(effectiveConversationId, {
-      step: ConversationStep.PAYMENT_PENDING,
+      step: isSimulated
+        ? ConversationStep.ORDER_CONFIRMATION
+        : ConversationStep.PAYMENT_PENDING,
     });
 
     return { order };

@@ -43,8 +43,21 @@ import { ConversationStatus } from '../constants/conversation.constants';
 import logger from '../helpers/logger.helper';
 import {
   DEVELOPMENT_PAYMENT_AMOUNT_RWF,
+  getPaymentMode,
   resolveChargeableAmount,
-} from '../helpers/developmentPricing.helper';
+} from '../helpers/paymentMode.helper';
+
+type InitiationContext = {
+  provider: PaymentProvider;
+  requestedMethod: string;
+  customerPhone?: string;
+  redirectUrl?: string;
+  chargeAmount: number;
+  catalogAmount: number;
+  isDevPrice: boolean;
+  isSimulated: boolean;
+  metadata: Record<string, any>;
+};
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
@@ -69,231 +82,56 @@ export class PaymentService {
     entityType: AuditLogEntityTypes.PAYMENT,
   })
   async createPayment(payment: CreatePaymentDto): Promise<Payment> {
-    const provider = this.resolvePaymentProvider(payment.provider);
-    const requestedMethod =
-      payment.channelName ||
-      payment.method ||
-      payment.metadata?.channelName ||
-      (provider === PaymentProvider.URUBUTO
-        ? UrubutoChannelName.MOMO
-        : KpayPaymentMethod.MOBILE_MONEY);
-    const phoneValidation = payment.customerPhone
-      ? validateAndFormatPhoneNumber(payment.customerPhone)
-      : undefined;
-    const customerPhone = phoneValidation?.e164;
-    const requiresPhone =
-      provider === PaymentProvider.KPAY ||
-      requestedMethod === UrubutoChannelName.MOMO ||
-      requestedMethod === UrubutoChannelName.AIRTEL_MONEY ||
-      requestedMethod === KpayPaymentMethod.MOBILE_MONEY;
+    const context = this.resolveInitiationContext(payment);
 
-    if (requiresPhone && !customerPhone) {
-      throw new ValidationError('A valid payer phone number is required');
+    const newPayment = await this.paymentRepository.save(
+      this.buildPaymentRecord(payment, context),
+    );
+
+    if (context.isSimulated) {
+      return this.completeSimulatedPayment(newPayment, payment, context);
     }
 
-    const requiresMobile =
-      requestedMethod === UrubutoChannelName.MOMO ||
-      requestedMethod === UrubutoChannelName.AIRTEL_MONEY ||
-      requestedMethod === KpayPaymentMethod.MOBILE_MONEY;
-    if (requiresMobile && phoneValidation?.type !== 'MOBILE') {
-      throw new ValidationError(
-        'A valid Rwandan mobile number is required for mobile money',
-      );
-    }
-
-    let redirectUrl: string | undefined;
-
-    if (requestedMethod === UrubutoChannelName.CARD) {
-      redirectUrl = this.getPaymentRedirectUrl(payment.entityId);
-      this.validateCardPaymentRedirectUrl(redirectUrl);
-
-      logger.debug('Resolved CARD payment redirect URL', {
-        entityId: payment.entityId,
-        provider,
-        channelName: requestedMethod,
-        redirectUrl,
-      });
-    }
-
-    const {
-      chargeAmount,
-      isDevelopmentPricing,
-      catalogAmount,
-    } = resolveChargeableAmount(Number(payment.amount));
-
-    const paymentMetadata: Record<string, any> = {
-      ...(payment.metadata || {}),
-      ...(isDevelopmentPricing
-        ? {
-            developmentPricing: true,
-            catalogAmount,
-            chargedAmount: DEVELOPMENT_PAYMENT_AMOUNT_RWF,
-          }
-        : {}),
-    };
-
-    if (isDevelopmentPricing) {
-      logger.info('Development pricing applied to payment', {
-        entityId: payment.entityId,
-        catalogAmount,
-        chargeAmount,
-      });
-    }
-
-    const newPayment: Payment = await this.paymentRepository.save({
-      entityId: payment.entityId,
-      amount: chargeAmount,
-      externalReferenceId: undefined,
-      internalReferenceId: payment?.entityId,
-      status: KpayPaymentStatus.PENDING,
-      customerEmail: payment?.customerEmail,
-      customerName: payment?.customerName,
-      customerPhone,
-      currency: payment.currency,
-      type: payment.type,
-      description: payment.description || '',
-      createdById: payment.createdById,
-      provider,
-      method: requestedMethod,
-      metadata: paymentMetadata,
-    });
-
-    let result: any;
-
-    if (newPayment && provider === PaymentProvider.KPAY) {
-      result = await this.kpayService.initiatePayment({
-        amount: chargeAmount,
-        currency: payment.currency,
-        customerEmail: payment?.customerEmail,
-        customerName: payment?.customerName,
-        customerPhone,
-        refId: newPayment?.id as UUID,
-        description: payment.description,
-      });
-    } else if (newPayment) {
-      const payerCode = await this.resolveUrubutoPayerCode(payment.entityId);
-
-      result = await this.urubutoService.initiatePayment({
-        amount: chargeAmount,
-        currency: payment.currency,
-        customerEmail: payment?.customerEmail,
-        customerName: payment?.customerName,
-        customerPhone,
-        refId: newPayment?.id as UUID,
-        payerCode,
-        channelName: requestedMethod,
-        redirectUrl: redirectUrl || this.getPaymentRedirectUrl(payment.entityId),
-      });
-    }
+    const result = await this.initiateProviderPayment(
+      payment,
+      newPayment,
+      context,
+    );
 
     logger.debug('Payment initiation result', {
       entityId: payment.entityId,
-      provider,
-      channelName: requestedMethod,
+      provider: context.provider,
+      channelName: context.requestedMethod,
       success: result?.success,
       status: result?.data?.status,
       errorCode: result?.error?.code,
       errorMessage: result?.error?.message,
     });
 
-    if (result && result.success && result.data?.transactionId) {
-      newPayment.externalReferenceId = result.data?.transactionId;
-      newPayment.status = result.data?.status as KpayPaymentStatus;
-      newPayment.metadata = {
-        ...(newPayment.metadata || {}),
-        ...(result.data?.metadata || {}),
-        ...(result.data?.paymentUrl
-          ? { paymentUrl: result.data.paymentUrl }
-          : {}),
-        providerMessage: result.data?.message,
-      };
-      newPayment.paymentUrl = result.data?.paymentUrl;
-      await this.paymentRepository.update(newPayment.id, {
-        externalReferenceId: newPayment.externalReferenceId,
-        status: newPayment.status,
-        metadata: newPayment.metadata,
-        method: newPayment.method,
-      });
-      if (result.data?.status === KpayPaymentStatus.SUCCESSFUL) {
-        await this.updatePaymentStatus(
-          newPayment?.id as UUID,
-          result.data?.status as KpayPaymentStatus,
-        );
-      }
+    if (result?.success && result.data?.transactionId) {
+      await this.applyInitiationResult(newPayment, result);
+      this.sendPaymentInitiatedEmail(payment, context.chargeAmount);
       return newPayment;
     }
 
     if (result && !result.success) {
       const isUrubutoTimeout =
-        provider === PaymentProvider.URUBUTO &&
+        context.provider === PaymentProvider.URUBUTO &&
         result.error?.code === 'URUBUTO_TIMEOUT';
 
       if (isUrubutoTimeout) {
-        const timeoutMetadata = result.error?.metadata || {};
-        const transactionId =
-          timeoutMetadata.transactionId ||
-          timeoutMetadata.localPaymentId ||
-          newPayment.id;
-        const verification =
-          await this.verifyUrubutoTransactionStatus(transactionId as string);
-        const verifiedStatus = verification.data?.transaction_status
-          ? this.urubutoService.mapStatusToInternal(
-              verification.data.transaction_status,
-            )
-          : undefined;
-        const verifiedTransactionId =
-          verification.data?.internal_transaction_id ||
-          verification.data?.transaction_id ||
-          transactionId;
-
-        newPayment.status = verifiedStatus || KpayPaymentStatus.PENDING;
-        newPayment.externalReferenceId = verifiedTransactionId;
-        newPayment.metadata = {
-          ...(newPayment.metadata || {}),
-          initiationError: result.error,
-          urubutoTimeoutReconciliation: {
-            checkedAt: new Date().toISOString(),
-            transactionId,
-            verification,
-          },
-        };
-
-        await this.paymentRepository.update(newPayment.id, {
-          externalReferenceId: newPayment.externalReferenceId,
-          status: newPayment.status,
-          metadata: newPayment.metadata,
-        });
-
-        if (newPayment.status === KpayPaymentStatus.SUCCESSFUL) {
-          await this.updatePaymentStatus(
-            newPayment.id as UUID,
-            newPayment.status,
-            newPayment.metadata,
-          );
-        }
-
-        return newPayment;
+        return this.reconcileUrubutoTimeout(newPayment, result);
       }
 
       newPayment.status = KpayPaymentStatus.FAILED;
       newPayment.metadata = {
         ...(newPayment.metadata || {}),
         initiationError: result.error,
-        ...(isUrubutoTimeout
-          ? {
-              pendingReconciliation: true,
-              reconciliationReason: 'URUBUTO_INITIATION_TIMEOUT',
-            }
-          : {}),
       };
       await this.paymentRepository.update(newPayment.id, {
         status: newPayment.status,
         metadata: newPayment.metadata,
       });
-
-      if (isUrubutoTimeout) {
-        return newPayment;
-      }
 
       throw new ValidationError(
         result.error?.message ||
@@ -301,25 +139,7 @@ export class PaymentService {
       );
     }
 
-    // Send payment initiated email (non-blocking)
-    if (payment.customerEmail) {
-      this.emailService
-        .sendPaymentInitiatedEmail({
-          customerName: payment.customerName || '',
-          customerEmail: payment.customerEmail,
-          orderReference: payment.entityId as string,
-          amount: chargeAmount,
-          currency: payment.currency || 'RWF',
-        })
-        .catch((error: any) => {
-          logger.error('Failed to send payment initiated email', {
-            entityId: payment.entityId,
-            customerEmail: payment.customerEmail,
-            message: error?.message,
-          });
-        });
-    }
-
+    this.sendPaymentInitiatedEmail(payment, context.chargeAmount);
     return newPayment;
   }
 
@@ -579,6 +399,302 @@ export class PaymentService {
     });
   }
 
+
+  private resolveInitiationContext(payment: CreatePaymentDto): InitiationContext {
+    const mode = getPaymentMode();
+    const isSimulated = mode === 'simulate';
+    const provider = this.resolvePaymentProvider(payment.provider);
+    const requestedMethod =
+      payment.channelName ||
+      payment.method ||
+      payment.metadata?.channelName ||
+      (provider === PaymentProvider.URUBUTO
+        ? UrubutoChannelName.MOMO
+        : KpayPaymentMethod.MOBILE_MONEY);
+
+    const phoneValidation = payment.customerPhone
+      ? validateAndFormatPhoneNumber(payment.customerPhone)
+      : undefined;
+    const customerPhone = phoneValidation?.e164;
+
+    const requiresPhone =
+      !isSimulated &&
+      (provider === PaymentProvider.KPAY ||
+        requestedMethod === UrubutoChannelName.MOMO ||
+        requestedMethod === UrubutoChannelName.AIRTEL_MONEY ||
+        requestedMethod === KpayPaymentMethod.MOBILE_MONEY);
+
+    if (requiresPhone && !customerPhone) {
+      throw new ValidationError('A valid payer phone number is required');
+    }
+
+    const requiresMobile =
+      !isSimulated &&
+      (requestedMethod === UrubutoChannelName.MOMO ||
+        requestedMethod === UrubutoChannelName.AIRTEL_MONEY ||
+        requestedMethod === KpayPaymentMethod.MOBILE_MONEY);
+
+    if (requiresMobile && phoneValidation?.type !== 'MOBILE') {
+      throw new ValidationError(
+        'A valid Rwandan mobile number is required for mobile money',
+      );
+    }
+
+    let redirectUrl: string | undefined;
+    if (requestedMethod === UrubutoChannelName.CARD && !isSimulated) {
+      redirectUrl = this.getPaymentRedirectUrl(payment.entityId);
+      this.validateCardPaymentRedirectUrl(redirectUrl);
+
+      logger.debug('Resolved CARD payment redirect URL', {
+        entityId: payment.entityId,
+        provider,
+        channelName: requestedMethod,
+        redirectUrl,
+      });
+    }
+
+    const { chargeAmount, isDevPrice, catalogAmount, isSimulated: simulated } =
+      resolveChargeableAmount(Number(payment.amount));
+
+    const metadata: Record<string, any> = {
+      ...(payment.metadata || {}),
+      paymentMode: mode,
+      ...(isDevPrice
+        ? {
+            developmentPricing: true,
+            catalogAmount,
+            chargedAmount: DEVELOPMENT_PAYMENT_AMOUNT_RWF,
+          }
+        : {}),
+      ...(simulated
+        ? {
+            simulated: true,
+            catalogAmount,
+          }
+        : {}),
+    };
+
+    if (isDevPrice) {
+      logger.info('Dev price applied to payment', {
+        entityId: payment.entityId,
+        catalogAmount,
+        chargeAmount,
+      });
+    }
+
+    return {
+      provider,
+      requestedMethod,
+      customerPhone,
+      redirectUrl,
+      chargeAmount,
+      catalogAmount,
+      isDevPrice,
+      isSimulated: simulated,
+      metadata,
+    };
+  }
+
+  private buildPaymentRecord(
+    payment: CreatePaymentDto,
+    context: InitiationContext,
+  ): Partial<Payment> {
+    return {
+      entityId: payment.entityId,
+      amount: context.chargeAmount,
+      externalReferenceId: undefined,
+      internalReferenceId: payment?.entityId,
+      status: KpayPaymentStatus.PENDING,
+      customerEmail: payment?.customerEmail,
+      customerName: payment?.customerName,
+      customerPhone: context.customerPhone,
+      currency: payment.currency,
+      type: payment.type,
+      description: payment.description || '',
+      createdById: payment.createdById,
+      provider: context.provider,
+      method: context.requestedMethod,
+      metadata: context.metadata,
+    };
+  }
+
+  private async completeSimulatedPayment(
+    newPayment: Payment,
+    payment: CreatePaymentDto,
+    context: InitiationContext,
+  ): Promise<Payment> {
+    const paymentUrl = this.getPaymentRedirectUrl(payment.entityId);
+    const externalReferenceId = `sim_${newPayment.id}`;
+
+    newPayment.externalReferenceId = externalReferenceId;
+    newPayment.paymentUrl = paymentUrl;
+    newPayment.metadata = {
+      ...(newPayment.metadata || {}),
+      simulated: true,
+      catalogAmount: context.catalogAmount,
+      paymentUrl,
+      paymentMode: 'simulate',
+    };
+
+    await this.paymentRepository.update(newPayment.id, {
+      externalReferenceId,
+      metadata: newPayment.metadata,
+    });
+
+    logger.info('Simulated payment completed', {
+      paymentId: newPayment.id,
+      entityId: payment.entityId,
+      catalogAmount: context.catalogAmount,
+    });
+
+    const updated = await this.updatePaymentStatus(
+      newPayment.id as UUID,
+      KpayPaymentStatus.SUCCESSFUL,
+      newPayment.metadata,
+    );
+
+    updated.paymentUrl = paymentUrl;
+    updated.externalReferenceId = externalReferenceId;
+    this.sendPaymentInitiatedEmail(payment, context.chargeAmount);
+    return updated;
+  }
+
+  private async initiateProviderPayment(
+    payment: CreatePaymentDto,
+    newPayment: Payment,
+    context: InitiationContext,
+  ): Promise<any> {
+    if (context.provider === PaymentProvider.KPAY) {
+      return this.kpayService.initiatePayment({
+        amount: context.chargeAmount,
+        currency: payment.currency,
+        customerEmail: payment?.customerEmail,
+        customerName: payment?.customerName,
+        customerPhone: context.customerPhone,
+        refId: newPayment?.id as UUID,
+        description: payment.description,
+      });
+    }
+
+    const payerCode = await this.resolveUrubutoPayerCode(payment.entityId);
+
+    return this.urubutoService.initiatePayment({
+      amount: context.chargeAmount,
+      currency: payment.currency,
+      customerEmail: payment?.customerEmail,
+      customerName: payment?.customerName,
+      customerPhone: context.customerPhone,
+      refId: newPayment?.id as UUID,
+      payerCode,
+      channelName: context.requestedMethod,
+      redirectUrl:
+        context.redirectUrl || this.getPaymentRedirectUrl(payment.entityId),
+    });
+  }
+
+  private async applyInitiationResult(
+    newPayment: Payment,
+    result: any,
+  ): Promise<void> {
+    newPayment.externalReferenceId = result.data?.transactionId;
+    newPayment.status = result.data?.status as KpayPaymentStatus;
+    newPayment.metadata = {
+      ...(newPayment.metadata || {}),
+      ...(result.data?.metadata || {}),
+      ...(result.data?.paymentUrl
+        ? { paymentUrl: result.data.paymentUrl }
+        : {}),
+      providerMessage: result.data?.message,
+    };
+    newPayment.paymentUrl = result.data?.paymentUrl;
+
+    await this.paymentRepository.update(newPayment.id, {
+      externalReferenceId: newPayment.externalReferenceId,
+      status: newPayment.status,
+      metadata: newPayment.metadata,
+      method: newPayment.method,
+    });
+
+    if (result.data?.status === KpayPaymentStatus.SUCCESSFUL) {
+      await this.updatePaymentStatus(
+        newPayment.id as UUID,
+        result.data?.status as KpayPaymentStatus,
+      );
+    }
+  }
+
+  private async reconcileUrubutoTimeout(
+    newPayment: Payment,
+    result: any,
+  ): Promise<Payment> {
+    const timeoutMetadata = result.error?.metadata || {};
+    const transactionId =
+      timeoutMetadata.transactionId ||
+      timeoutMetadata.localPaymentId ||
+      newPayment.id;
+    const verification =
+      await this.verifyUrubutoTransactionStatus(transactionId as string);
+    const verifiedStatus = verification.data?.transaction_status
+      ? this.urubutoService.mapStatusToInternal(
+          verification.data.transaction_status,
+        )
+      : undefined;
+    const verifiedTransactionId =
+      verification.data?.internal_transaction_id ||
+      verification.data?.transaction_id ||
+      transactionId;
+
+    newPayment.status = verifiedStatus || KpayPaymentStatus.PENDING;
+    newPayment.externalReferenceId = verifiedTransactionId;
+    newPayment.metadata = {
+      ...(newPayment.metadata || {}),
+      initiationError: result.error,
+      urubutoTimeoutReconciliation: {
+        checkedAt: new Date().toISOString(),
+        transactionId,
+        verification,
+      },
+    };
+
+    await this.paymentRepository.update(newPayment.id, {
+      externalReferenceId: newPayment.externalReferenceId,
+      status: newPayment.status,
+      metadata: newPayment.metadata,
+    });
+
+    if (newPayment.status === KpayPaymentStatus.SUCCESSFUL) {
+      await this.updatePaymentStatus(
+        newPayment.id as UUID,
+        newPayment.status,
+        newPayment.metadata,
+      );
+    }
+
+    return newPayment;
+  }
+
+  private sendPaymentInitiatedEmail(
+    payment: CreatePaymentDto,
+    chargeAmount: number,
+  ): void {
+    if (!payment.customerEmail) return;
+
+    this.emailService
+      .sendPaymentInitiatedEmail({
+        customerName: payment.customerName || '',
+        customerEmail: payment.customerEmail,
+        orderReference: payment.entityId as string,
+        amount: chargeAmount,
+        currency: payment.currency || 'RWF',
+      })
+      .catch((error: any) => {
+        logger.error('Failed to send payment initiated email', {
+          entityId: payment.entityId,
+          customerEmail: payment.customerEmail,
+          message: error?.message,
+        });
+      });
+  }
 
   private async isWhatsappSessionExpired(
     metadata: Record<string, any>,

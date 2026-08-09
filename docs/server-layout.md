@@ -118,7 +118,7 @@ Enums/constants per feature: `order.constants.ts`, `payment.constants.ts`, `role
 Shared TypeScript types: `auth.types.ts`, `kpay.types.ts`, `urubuto.types.ts`, `payment.types.ts`, `push.types.ts`, `dashboard.types.ts`, `b2b.types.ts`, `orderImport.types.ts`, `auditLog.types.ts`, `index.ts`.
 
 ### `src/helpers/`
-Pure utilities: `auth.helper.ts`, `phone.helper.ts`, `pricing.helper.ts`, `developmentPricing.helper.ts`, `distance.helper.ts`, `location.helper.ts`, `string.helper.ts`, `errors.helper.ts`, `logger.helper.ts`, `pagination.helper.ts`, `audit.helper.ts`, `whatsapp.helper.ts`, `whatsapp.flows.helper.ts`.
+Pure utilities: `auth.helper.ts`, `phone.helper.ts`, `pricing.helper.ts`, `paymentMode.helper.ts`, `distance.helper.ts`, `location.helper.ts`, `string.helper.ts`, `errors.helper.ts`, `logger.helper.ts`, `pagination.helper.ts`, `audit.helper.ts`, `whatsapp.helper.ts`, `whatsapp.flows.helper.ts`.
 
 ### `src/cron/`
 Scheduled jobs via `node-cron`: `billingCron.ts`, `businessReportCron.ts`, `whatsappSessionCron.ts`.
@@ -164,7 +164,7 @@ Status transitions are managed in `order.service.ts` and `orderActivity.service.
 - **UrubutoPay** (primary): configured via `URUBUTO_*` vars. Supports CARD redirects (`URUBUTO_CARD_REDIRECT_BASE_URL`) and server-to-server webhooks (auth, validation, callback, notification, reversal). Startup validation in `integrations/urubuto/urubuto.config.ts` fails fast on misconfiguration in production.
 - **Kpay** (secondary): configured via `KPAY_*` vars (`integrations/kpay/kpay.service.ts`). Supports Mobile Money, Cards, SPENN, SmartCash.
 - Payment flows support payer selection (Sender / Recipient / custom phone) and Rwanda phone formatting (250XXXXXXXXX).
-- In development (`NODE_ENV=development`), charges are forced to 10 RWF (see `helpers/developmentPricing.helper.ts`).
+- Payment charges are controlled by `PAYMENT_MODE` (`simulate` | `dev_price` | `live`); see `helpers/paymentMode.helper.ts`.
 
 ## Webhook endpoints
 
@@ -205,4 +205,4 @@ npm run test                       # node --test over src/**/*.test.ts
 
 ## Tests
 
-Unit tests are colocated with source as `*.test.ts` (e.g. `payment.service.test.ts`, `urubuto.config.test.ts`, `urubuto.service.test.ts`, `developmentPricing.helper.test.ts`). Run with `npm run test`.
+Unit tests are colocated with source as `*.test.ts` (e.g. `payment.service.test.ts`, `urubuto.config.test.ts`, `urubuto.service.test.ts`, `paymentMode.helper.test.ts`). Run with `npm run test`.

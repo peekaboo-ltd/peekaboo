@@ -422,10 +422,15 @@ const PublicOrderDetails = () => {
                             {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
                           </p>
                           <p className="mt-1 text-xs text-slate-500">including VAT</p>
-                          {ENVIRONMENTS.isDevelopmentPricing ? (
+                          {ENVIRONMENTS.isPaymentSimulation ? (
                             <p className="mt-2 text-xs font-normal leading-snug text-amber-700">
-                              Development environment: catalog fee shown. You
-                              will only be charged{' '}
+                              Payments are simulated in this environment. No real
+                              charge will be made.
+                            </p>
+                          ) : null}
+                          {ENVIRONMENTS.isDevPrice ? (
+                            <p className="mt-2 text-xs font-normal leading-snug text-amber-700">
+                              Catalog fee shown. You will only be charged{' '}
                               {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at
                               checkout.
                             </p>
@@ -453,11 +458,15 @@ const PublicOrderDetails = () => {
                         </Button>
                       </span>
                     </p>
-                    {ENVIRONMENTS.isDevelopmentPricing ? (
+                    {ENVIRONMENTS.isPaymentSimulation ? (
+                      <p className="mt-2 text-sm font-normal text-amber-700">
+                        Payments are simulated in this environment.
+                      </p>
+                    ) : null}
+                    {ENVIRONMENTS.isDevPrice ? (
                       <p className="mt-2 text-sm font-normal text-amber-700">
                         Environment pricing: checkout charges{' '}
-                        {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} only
-                        while this environment is in development.
+                        {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} only.
                       </p>
                     ) : null}
                   </div>
