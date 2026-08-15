@@ -8,6 +8,10 @@ import {
 import { Link } from 'react-router-dom';
 import type { HomeFormValues } from '../home.types';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import {
+  describeLocation,
+  placeSearchResultToOrderLocation,
+} from '@/utils/locations.util';
 import PlaceSearch from '@/components/inputs/PlaceSearch';
 import Button from '@/components/inputs/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -47,6 +51,84 @@ const validateRwandanPhone = (value: string | undefined) => {
   return result.isValid ? true : (result.error ?? 'Invalid phone number');
 };
 
+interface LocationFieldProps {
+  name: 'locationFrom' | 'locationTo';
+  control: Control<HomeFormValues>;
+  label: string;
+  placeholder: string;
+  requiredMessage: string;
+  errorMessage?: string;
+}
+
+// The picked place — coordinates included — is what gets submitted, so the form
+// value is only ever set from a dropdown selection. Free text the user types is
+// held locally and clears the selection, otherwise "required" would be satisfied
+// by an address we have no coordinates for.
+const LocationField = ({
+  name,
+  control,
+  label,
+  placeholder,
+  requiredMessage,
+  errorMessage,
+}: LocationFieldProps) => {
+  const [searchText, setSearchText] = useState('');
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      rules={{ required: requiredMessage }}
+      render={({ field }) => (
+        <label className="w-full flex flex-col gap-1">
+          <p className="text-[12.5px] font-medium text-foreground">
+            {label} <span className="text-red-600">*</span>
+          </p>
+          {field.value ? (
+            <ul className="flex items-center gap-2 rounded-md border border-green-700/15 bg-green-700/5 px-3 py-2">
+              <FontAwesomeIcon
+                icon={faCheckCircle}
+                className="text-green-700 text-[13px]"
+                aria-hidden="true"
+              />
+              <span className="flex-1 text-[13px] text-foreground truncate">
+                {describeLocation(field.value)}
+              </span>
+              <FontAwesomeIcon
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSearchText(describeLocation(field.value));
+                  field.onChange(undefined);
+                }}
+                icon={faPenToSquare}
+                className="text-[11px] cursor-pointer"
+                aria-hidden="true"
+              />
+            </ul>
+          ) : (
+            <>
+              <PlaceSearch
+                value={searchText}
+                onChange={setSearchText}
+                onLocationSelect={(result) => {
+                  setSearchText(result.formattedAddress || result.name);
+                  field.onChange(placeSearchResultToOrderLocation(result));
+                }}
+                placeholder={placeholder}
+                country="rw"
+              />
+              {errorMessage ? (
+                <span className="text-[11.5px] text-red-600">{errorMessage}</span>
+              ) : null}
+            </>
+          )}
+        </label>
+      )}
+    />
+  );
+};
+
 const HeroForm = ({
   formRef,
   onSubmit,
@@ -56,11 +138,6 @@ const HeroForm = ({
   errors,
 }: HeroFormProps) => {
   const senderPhoneNumber = useWatch({ control, name: 'senderPhoneNumber' });
-
-  const [confirmedLocations, setConfirmedLocations] = useState<{
-    from: boolean;
-    to: boolean;
-  }>({ from: false, to: false });
 
   const validateRecipientPhone = (value: string | undefined) => {
     const baseValidation = validateRwandanPhone(value);
@@ -137,76 +214,22 @@ const HeroForm = ({
           />
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Controller
+            <LocationField
               name="locationFrom"
               control={control}
-              render={({ field }) => (
-                <label className="w-full flex flex-col gap-1">
-                  <p className="text-[12.5px] font-medium text-foreground">
-                    Pickup location <span className="text-red-600">*</span>
-                  </p>
-                  {confirmedLocations.from && field.value ? (
-                    <ul className="flex items-center gap-2 rounded-md border border-green-700/15 bg-green-700/5 px-3 py-2">
-                      <FontAwesomeIcon icon={faCheckCircle} className="text-green-700 text-[13px]" aria-hidden="true" />
-                      <span className="flex-1 text-[13px] text-foreground truncate">
-                        {field.value}
-                      </span>
-                        <FontAwesomeIcon onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setConfirmedLocations((prev) => ({ ...prev, from: false }));
-                        }} icon={faPenToSquare} className="text-[11px] cursor-pointer" aria-hidden="true" />
-                    </ul>
-                  ) : (
-                    <PlaceSearch
-                      value={field.value}
-                      onChange={field.onChange}
-                      onLocationSelect={(result) => {
-                        field.onChange(result.formattedAddress);
-                        setConfirmedLocations((prev) => ({ ...prev, from: true }));
-                      }}
-                      placeholder="Pickup location"
-                      country="rw"
-                    />
-                  )}
-                </label>
-              )}
+              label="Pickup location"
+              placeholder="Pickup location"
+              requiredMessage="Select a pickup location from the suggestions"
+              errorMessage={errors.locationFrom?.message}
             />
 
-            <Controller
+            <LocationField
               name="locationTo"
               control={control}
-              render={({ field }) => (
-                <label className="w-full flex flex-col gap-1">
-                  <p className="text-[12.5px] font-medium text-foreground">
-                    Drop-off location <span className="text-red-600">*</span>
-                  </p>
-                  {confirmedLocations.to && field.value ? (
-                    <ul className="flex items-center gap-2 rounded-md border border-green-700/15 bg-green-700/5 px-3 py-2">
-                      <FontAwesomeIcon icon={faCheckCircle} className="text-green-700 text-[13px]" aria-hidden="true" />
-                      <span className="flex-1 text-[13px] text-foreground truncate">
-                        {field.value}
-                      </span>
-                      <FontAwesomeIcon onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setConfirmedLocations((prev) => ({ ...prev, to: false }));
-                      }} icon={faPenToSquare} className="text-[11px] cursor-pointer" aria-hidden="true" />
-                    </ul>
-                  ) : (
-                    <PlaceSearch
-                      value={field.value}
-                      onChange={field.onChange}
-                      onLocationSelect={(result) => {
-                        field.onChange(result.formattedAddress);
-                        setConfirmedLocations((prev) => ({ ...prev, to: true }));
-                      }}
-                      placeholder="Drop-off location"
-                      country="rw"
-                    />
-                  )}
-                </label>
-              )}
+              label="Drop-off location"
+              placeholder="Drop-off location"
+              requiredMessage="Select a drop-off location from the suggestions"
+              errorMessage={errors.locationTo?.message}
             />
           </div>
         </fieldset>

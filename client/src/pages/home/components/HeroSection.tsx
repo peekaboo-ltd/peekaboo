@@ -43,8 +43,8 @@ const HeroSection = ({
     defaultValues: {
       senderPhoneNumber: '',
       recipientPhoneNumber: '',
-      locationFrom: 'Kacyiru',
-      locationTo: 'Nyamirambo',
+      locationFrom: undefined,
+      locationTo: undefined,
     },
   });
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -59,6 +59,8 @@ const HeroSection = ({
     const payload = {
       senderPhoneNumber: sender.e164,
       recipientPhoneNumber: recipient.e164,
+      locationFrom: data.locationFrom,
+      locationTo: data.locationTo,
     };
 
     if (isAuthenticated) {

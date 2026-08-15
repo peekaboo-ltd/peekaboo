@@ -99,10 +99,16 @@ export class Order extends AbstractEntity {
   conversationId: UUID;
 
   // LOCATION FROM
+  // `name`/`formattedAddress`/`placeId` are the human friendly labels captured
+  // when the place was picked, so the order can be described without a reverse
+  // geocode lookup. They are absent on orders created from a raw map pin.
   @Column({ name: 'location_from', type: 'jsonb', nullable: true })
   locationFrom: {
     latitude: number;
     longitude: number;
+    name?: string;
+    formattedAddress?: string;
+    placeId?: string;
   };
 
   // LOCATION TO
@@ -110,6 +116,9 @@ export class Order extends AbstractEntity {
   locationTo: {
     latitude: number;
     longitude: number;
+    name?: string;
+    formattedAddress?: string;
+    placeId?: string;
   };
 
   // ORGANIZATION ID (null for individual/B2C orders)

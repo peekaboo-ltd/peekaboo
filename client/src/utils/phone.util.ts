@@ -133,3 +133,24 @@ export function toProviderPhoneNumber(
   const e164 = normalizePhoneNumber(input);
   return e164 ? e164.slice(1) : null;
 }
+
+export type RwandaMobileNetwork = 'MTN' | 'AIRTEL';
+
+/**
+ * Guesses the network from the prefix of a Rwandan mobile number.
+ *
+ * Rwanda allows number portability, so this is a hint only — never use it to
+ * block a payment, just to warn about a likely mismatched provider.
+ */
+export function detectRwandaMobileNetwork(
+  input: string | null | undefined,
+): RwandaMobileNetwork | null {
+  const e164 = normalizePhoneNumber(input);
+  if (!e164?.startsWith('+250')) return null;
+
+  // E.164 drops the national trunk "0", so 078… arrives as +25078…
+  const nationalPrefix = e164.slice(4, 6);
+  if (['78', '79'].includes(nationalPrefix)) return 'MTN';
+  if (['72', '73'].includes(nationalPrefix)) return 'AIRTEL';
+  return null;
+}

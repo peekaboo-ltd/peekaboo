@@ -1,8 +1,15 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
 import type { UUID } from '@/types';
-import type { Order } from '@/types/order.type';
+import type { Order, OrderLocation } from '@/types/order.type';
 import type { ImportTemplateRow } from '@/types/orderImport.type';
+
+interface CreateOrderArgs {
+  senderPhoneNumber: string;
+  recipientPhoneNumber: string;
+  locationFrom?: OrderLocation;
+  locationTo?: OrderLocation;
+}
 
 export const ordersMutationApiSlice = createApi({
   reducerPath: 'ordersMutationApi',
@@ -13,13 +20,17 @@ export const ordersMutationApiSlice = createApi({
       query: ({
         senderPhoneNumber,
         recipientPhoneNumber,
-      }: {
-        senderPhoneNumber: string;
-        recipientPhoneNumber: string;
-      }) => ({
+        locationFrom,
+        locationTo,
+      }: CreateOrderArgs) => ({
         url: '/orders',
         method: 'POST',
-        body: { senderPhoneNumber, recipientPhoneNumber },
+        body: {
+          senderPhoneNumber,
+          recipientPhoneNumber,
+          ...(locationFrom ? { locationFrom } : {}),
+          ...(locationTo ? { locationTo } : {}),
+        },
       }),
     }),
 
@@ -28,13 +39,17 @@ export const ordersMutationApiSlice = createApi({
       query: ({
         senderPhoneNumber,
         recipientPhoneNumber,
-      }: {
-        senderPhoneNumber: string;
-        recipientPhoneNumber: string;
-      }) => ({
+        locationFrom,
+        locationTo,
+      }: CreateOrderArgs) => ({
         url: '/orders/public',
         method: 'POST',
-        body: { senderPhoneNumber, recipientPhoneNumber },
+        body: {
+          senderPhoneNumber,
+          recipientPhoneNumber,
+          ...(locationFrom ? { locationFrom } : {}),
+          ...(locationTo ? { locationTo } : {}),
+        },
       }),
     }),
 

@@ -16,13 +16,14 @@ import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { APIProvider } from '@vis.gl/react-google-maps';
 import {
   DEVELOPMENT_PAYMENT_AMOUNT_RWF,
   ENVIRONMENTS,
 } from '@/constants/environments.constants';
 import RouteCalculator from '@/containers/locations/RouteCalculator';
 import AdministrativeLocation from '@/containers/locations/AdministrativeLocation';
+import NearestPlace from '@/containers/locations/NearestPlace';
+import LocationMiniMap from '@/components/orders/LocationMiniMap';
 import Button from '@/components/inputs/Button';
 import { formatCurrency } from '@/utils/strings.util';
 import UpdateOrderLocationFrom from '@/components/modals/UpdateOrderLocationFrom';
@@ -250,7 +251,8 @@ const PublicOrderDetails = () => {
   ];
 
   return (
-    <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY}>
+    // The Maps APIProvider is mounted app-wide in App.tsx.
+    <>
       {currentOrder?.locationFrom && currentOrder?.locationTo ? (
         <RouteCalculator
           locationFrom={{
@@ -330,7 +332,9 @@ const PublicOrderDetails = () => {
 
               {currentOrder?.locationFrom ? (
                 <div className="space-y-3">
+                  <NearestPlace location={currentOrder.locationFrom} />
                   <AdministrativeLocation location={currentOrder?.locationFrom} />
+                  <LocationMiniMap location={currentOrder.locationFrom} label="Pickup" />
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-center">
@@ -361,7 +365,9 @@ const PublicOrderDetails = () => {
 
               {currentOrder?.locationTo ? (
                 <div className="space-y-3">
+                  <NearestPlace location={currentOrder.locationTo} />
                   <AdministrativeLocation location={currentOrder.locationTo} />
+                  <LocationMiniMap location={currentOrder.locationTo} label="Destination" />
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed border-slate-200 bg-white p-4 text-center">
@@ -530,7 +536,7 @@ const PublicOrderDetails = () => {
         <UpdateOrderLocationTo />
         <OrderPayment />
       </PublicPage>
-    </APIProvider>
+    </>
   );
 };
 

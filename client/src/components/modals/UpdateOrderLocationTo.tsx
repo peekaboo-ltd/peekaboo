@@ -5,6 +5,7 @@ import { useUpdateOrder, useUpdatePublicOrder } from '@/hooks/orders/orders.hook
 import Modal from '../Modal';
 import PlaceSearch, { type PlaceSearchResult } from '../inputs/PlaceSearch';
 import Button from '../inputs/Button';
+import { placeSearchResultToOrderLocation } from '@/utils/locations.util';
 import { toast } from 'sonner';
 
 const UpdateOrderLocationTo = () => {
@@ -26,10 +27,7 @@ const UpdateOrderLocationTo = () => {
       const payload = {
         id: order.id,
         order: {
-          locationTo: {
-            latitude: selectedLocation.coordinates.latitude,
-            longitude: selectedLocation.coordinates.longitude,
-          },
+          locationTo: placeSearchResultToOrderLocation(selectedLocation),
         },
       };
       if (token) {

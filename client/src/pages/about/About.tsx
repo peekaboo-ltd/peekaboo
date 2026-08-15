@@ -158,10 +158,10 @@ const Statistics = () => {
   return (
     <section
       ref={ref}
-      className="relative w-full overflow-hidden bg-[#0a0a0a] py-14 lg:py-20"
+      className="relative w-full overflow-hidden bg-[#0a0a0a] py-8 pb-6 lg:py-20"
     >
       <figure
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_300px_at_30%_40%,rgba(255,196,0,0.08),transparent_60%),radial-gradient(500px_300px_at_80%_60%,rgba(255,255,255,0.03),transparent_60%)]"
+        className="pointer-events-none absolute inset-0"
         aria-hidden="true"
       />
       <article
@@ -171,7 +171,7 @@ const Statistics = () => {
       >
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-bold uppercase text-[#edb100]">
+            <figcaption className="text-[11px] font-medium uppercase text-[#edb100]">
               Deliveries today
             </figcaption>
             <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
@@ -179,7 +179,7 @@ const Statistics = () => {
             </p>
           </figure>
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-bold uppercase text-[#edb100]">
+            <figcaption className="text-[11px] font-medium uppercase text-[#edb100]">
               Active riders
             </figcaption>
             <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
@@ -187,7 +187,7 @@ const Statistics = () => {
             </p>
           </figure>
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-bold uppercase text-[#edb100]">
+            <figcaption className="text-[11px] font-medium uppercase text-[#edb100]">
               Businesses served
             </figcaption>
             <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
@@ -212,17 +212,17 @@ const About = () => {
         variants={containerVariants}
       >
         <figure
-          className="pointer-events-none absolute -right-32 -top-40 h-[520px] w-[520px] rounded-full bg-[radial-gradient(closest-side,rgba(255,196,0,0.15),transparent_70%)]"
+          className="pointer-events-none absolute -right-32 -top-40 h-[520px] w-[520px] rounded-full"
           aria-hidden="true"
         />
         <figure
-          className="pointer-events-none absolute -bottom-32 -left-24 h-[400px] w-[400px] rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.04),transparent_70%)]"
+          className="pointer-events-none absolute -bottom-32 -left-24 h-[400px] w-[400px] rounded-full"
           aria-hidden="true"
         />
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
           <motion.p
             variants={itemVariants}
-            className="text-[11px] font-bold uppercase text-[#edb100] mb-4"
+            className="text-[11px] font-medium uppercase text-[#edb100] mb-4"
           >
             About Peekaboo
           </motion.p>
@@ -255,7 +255,7 @@ const About = () => {
         <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
             <motion.article variants={slideInLeft}>
-              <p className="text-[11px] font-bold uppercase text-[#6b6f76] mb-4">
+              <p className="text-[11px] font-medium uppercase text-[#6b6f76] mb-4">
                 Our Story
               </p>
               <h2 className="text-[24px] font-extrabold leading-[1.02] text-[#0a0a0a] sm:text-[30px] mb-6">
@@ -269,8 +269,8 @@ const About = () => {
                   and a shared phone has grown into a technology-driven delivery platform
                   trusted by thousands.
                 </p>
-                <blockquote className="border-l-2 border-[#edb100] pl-5 italic text-[#1f1f1f] my-6 text-[13px]">
-                  "We believe every delivery is a promise — and we take promises seriously."
+                <blockquote className="text-[#1f1f1f] my-6 text-[13px]">
+                  "We believe every delivery is a promise, and we take promises seriously."
                 </blockquote>
                 <p>
                   Today, Peekaboo combines routing logic, rider location data, and smart
@@ -291,7 +291,7 @@ const About = () => {
                   {milestones.map((m) => (
                     <li key={m.year} className="relative">
                       <mark className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-[#edb100] ring-4 ring-[#f7f6f1] bg-clip-padding" />
-                      <time className="text-[11px] font-bold uppercase text-[#6b6f76] mb-1 block">
+                      <time className="text-[11px] font-medium uppercase text-[#6b6f76] mb-1 block">
                         {m.year}
                       </time>
                       <p className="text-[13px] leading-relaxed text-[#0a0a0a]">
@@ -314,13 +314,13 @@ const About = () => {
         variants={containerVariants}
       >
         <figure
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_350px_at_70%_30%,rgba(255,196,0,0.08),transparent_60%)]"
+          className="pointer-events-none absolute inset-0"
           aria-hidden="true"
         />
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
           <motion.p
             variants={fadeInUp}
-            className="text-[11px] font-bold uppercase text-[#edb100] mb-10 text-center"
+            className="text-[11px] font-medium uppercase text-[#edb100] mb-10 text-center"
           >
             What drives us
           </motion.p>
@@ -332,10 +332,10 @@ const About = () => {
               <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
                 <Target className="h-4 w-4" aria-hidden="true" />
               </span>
-              <h3 className="text-[11px] font-bold uppercase text-[#edb100] mb-3">
+              <h3 className="text-[11px] font-medium uppercase text-[#edb100] mb-3">
                 Mission
               </h3>
-              <p className="text-[18px] font-bold leading-[1.2] text-white italic sm:text-[20px]">
+              <p className="text-[18px] font-medium leading-[1.2] text-white sm:text-[20px]">
                 To make sending and receiving parcels across Kigali simple,
                 transparent, and stress-free — for every person and every business.
               </p>
@@ -347,10 +347,10 @@ const About = () => {
               <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
                 <Lightbulb className="h-4 w-4" aria-hidden="true" />
               </span>
-              <h3 className="text-[11px] font-bold uppercase text-[#edb100] mb-3">
+              <h3 className="text-[11px] font-medium uppercase text-[#edb100] mb-3">
                 Vision
               </h3>
-              <p className="text-[18px] font-bold leading-[1.2] text-white italic sm:text-[20px]">
+              <p className="text-[18px] font-medium leading-[1.2] text-white sm:text-[20px]">
                 To be Rwanda's most trusted last-mile delivery partner,
                 connecting communities and businesses through reliable logistics.
               </p>
@@ -368,7 +368,7 @@ const About = () => {
       >
         <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
           <motion.header variants={fadeInUp} className="mb-10 text-center">
-            <p className="text-[11px] font-bold uppercase text-[#6b6f76] mb-4">
+            <p className="text-[11px] font-medium uppercase text-[#6b6f76] mb-4">
               Core Values
             </p>
             <h2 className="text-[24px] font-extrabold leading-[1.02] text-[#0a0a0a] sm:text-[30px]">
@@ -386,7 +386,7 @@ const About = () => {
                 <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a] mb-4">
                   <v.icon className="h-4 w-4" aria-hidden="true" />
                 </span>
-                <h3 className="text-[14px] font-bold text-[#0a0a0a] mb-1">
+                <h3 className="text-[14px] font-medium text-[#0a0a0a] mb-1">
                   {v.title}
                 </h3>
                 <p className="text-[12px] leading-relaxed text-[#6b6f76]">
@@ -408,7 +408,7 @@ const About = () => {
         variants={containerVariants}
       >
         <figure
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(500px_250px_at_50%_50%,rgba(255,196,0,0.06),transparent_60%)]"
+          className="pointer-events-none absolute inset-0"
           aria-hidden="true"
         />
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">

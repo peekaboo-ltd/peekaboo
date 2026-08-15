@@ -12,6 +12,16 @@ import CustomTooltip from './CustomTooltip';
 import useDebounce from '@/hooks/common/debounce.hooks';
 import { SkeletonLoader } from './Loader';
 
+const RADIX_NAVIGATION_KEYS = new Set([
+  'ArrowDown',
+  'ArrowUp',
+  'Home',
+  'End',
+  'Enter',
+  'Escape',
+  'Tab',
+]);
+
 interface SelectProps {
   label?: string | number | undefined;
   options?: Array<{
@@ -53,6 +63,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
   ) => {
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -71,11 +82,13 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       setSearchTerm('');
     };
 
+    // Radix focuses the selected item when the list opens and again as the list
+    // re-renders, so the search input has to reclaim focus after each of those.
     useEffect(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, [debouncedSearchTerm]);
+      if (!searchable || !isOpen) return;
+      const frame = requestAnimationFrame(() => inputRef.current?.focus());
+      return () => cancelAnimationFrame(frame);
+    }, [debouncedSearchTerm, isOpen, searchable]);
 
     return (
       <label className={`flex flex-col gap-1 w-full ${labelClassName}`}>
@@ -93,6 +106,10 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
         ) : (
           <SelectComponent
             onValueChange={handleValueChange}
+            onOpenChange={(open) => {
+              setIsOpen(open);
+              if (!open) setSearchTerm('');
+            }}
             defaultValue={defaultValue}
             value={value}
             name={name}
@@ -108,20 +125,48 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
               />
             </SelectTrigger>
             <SelectContent>
+              {searchable ? (
+                <search className="sticky top-0 z-10 -mt-1 bg-popover pb-2 pt-1">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    // Radix runs its own typeahead on keydown and would swallow
+                    // the keystrokes, but it still owns list navigation and
+                    // closing, so those keys are left to bubble.
+                    onKeyDown={(e) => {
+                      if (!RADIX_NAVIGATION_KEYS.has(e.key)) {
+                        e.stopPropagation();
+                      }
+                    }}
+                    placeholder="Search..."
+                    aria-label={label ? `Search ${label}` : 'Search options'}
+                    autoComplete="off"
+                    className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-[13px] placeholder:text-[13px] focus:border-transparent focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </search>
+              ) : null}
               <SelectGroup>
-                {filteredOptions.map((option, index: number) => {
-                  return (
-                    <SelectItem
-                      ref={ref}
-                      key={index}
-                      value={option.value}
-                      disabled={option?.disabled || readOnly}
-                      className="cursor-pointer text-[13px] py-1 hover:bg-background"
-                    >
-                      <p className="text-[13px] py-[3px] truncate">{option?.label}</p>
-                    </SelectItem>
-                  );
-                })}
+                {filteredOptions.length === 0 ? (
+                  <p className="px-2 py-3 text-center text-[13px] text-gray-500">
+                    No matches found
+                  </p>
+                ) : (
+                  filteredOptions.map((option, index: number) => {
+                    return (
+                      <SelectItem
+                        ref={ref}
+                        key={index}
+                        value={option.value}
+                        disabled={option?.disabled || readOnly}
+                        className="cursor-pointer text-[13px] py-1 hover:bg-background"
+                      >
+                        <p className="text-[13px] py-[3px] truncate">{option?.label}</p>
+                      </SelectItem>
+                    );
+                  })
+                )}
               </SelectGroup>
             </SelectContent>
           </SelectComponent>

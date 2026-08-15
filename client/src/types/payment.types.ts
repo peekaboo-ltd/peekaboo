@@ -15,6 +15,27 @@ export enum PaymentProvider {
   KPAY = 'KPAY',
 }
 
+/** Mirrors the server's UrubutoChannelName (server/src/types/urubuto.types.ts). */
+export enum PaymentChannel {
+  MOMO = 'MOMO',
+  AIRTEL_MONEY = 'AIRTEL_MONEY',
+  CARD = 'CARD',
+}
+
+export const MOBILE_MONEY_CHANNELS = [
+  PaymentChannel.MOMO,
+  PaymentChannel.AIRTEL_MONEY,
+] as const;
+
+export const isMobileMoneyChannel = (channel: PaymentChannel): boolean =>
+  channel !== PaymentChannel.CARD;
+
+export const PAYMENT_CHANNEL_LABELS: Record<PaymentChannel, string> = {
+  [PaymentChannel.MOMO]: 'MTN Mobile Money',
+  [PaymentChannel.AIRTEL_MONEY]: 'Airtel Money',
+  [PaymentChannel.CARD]: 'Card (Visa / Mastercard)',
+};
+
 // Payment Entity (matches backend Payment entity)
 export interface Payment {
   // Base entity fields (from AbstractEntity)

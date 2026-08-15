@@ -1,348 +1,320 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm, useWatch } from 'react-hook-form';
+import { toast } from 'sonner';
 import Modal from '../Modal';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrderPaymentModal, setSelectedOrder } from '@/states/slices/order.slice';
-import { PaymentType } from '@/types/payment.types';
+import {
+  PaymentChannel,
+  PaymentType,
+  isMobileMoneyChannel,
+} from '@/types/payment.types';
 import { formatCurrency, formatPhone } from '@/utils/strings.util';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import Button from '../inputs/Button';
-import TelInput from '../inputs/TelInput';
-import { useCreatePayment, useCreatePublicPayment } from '@/hooks/payments/payment.hooks';
-import { toast } from 'sonner';
+import {
+  useCreatePayment,
+  useCreatePublicPayment,
+} from '@/hooks/payments/payment.hooks';
 import {
   DEVELOPMENT_PAYMENT_AMOUNT_RWF,
   ENVIRONMENTS,
 } from '@/constants/environments.constants';
+import PaymentChannelSelect from './payment/PaymentChannelSelect';
+import MobileMoneyFields from './payment/MobileMoneyFields';
+import CardFields from './payment/CardFields';
+import type { PaymentFormValues } from './payment/payment.types';
 
-type PayerType = 'sender' | 'recipient' | 'other';
-type UrubutoChannelName = 'MOMO' | 'AIRTEL_MONEY' | 'CARD';
+const FALLBACK_EMAIL = 'info@peekaboo.co.rw';
+
+const defaultValues: PaymentFormValues = {
+  channelName: PaymentChannel.MOMO,
+  payerType: 'sender',
+  customPhone: '',
+  fallbackPhone: '',
+  cardholderName: '',
+  payerEmail: '',
+};
 
 const OrderPayment = () => {
-
   // STATE VARIABLES
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { orderPaymentModal, selectedOrder } = useAppSelector((state) => state.order);
   const { token } = useAppSelector((state) => state.auth);
   const isPublic = !token;
-  const [payerType, setPayerType] = useState<PayerType>('sender');
-  const [customPhone, setCustomPhone] = useState<string>('');
-  const [phoneError, setPhoneError] = useState<string>('');
-  const [fallbackPhone, setFallbackPhone] = useState<string>('');
-  const [fallbackPhoneError, setFallbackPhoneError] = useState<string>('');
-  const [channelName, setChannelName] = useState<UrubutoChannelName>('MOMO');
+
+  // Payers picked from the order have no form field of their own, so their
+  // validation error is held here rather than in the form state.
+  const [payerPhoneError, setPayerPhoneError] = useState('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<PaymentFormValues>({ defaultValues });
+
+  const channelName = useWatch({ control, name: 'channelName' });
+  const payerType = useWatch({ control, name: 'payerType' });
+  const customPhone = useWatch({ control, name: 'customPhone' });
+  const isMobileMoney = isMobileMoneyChannel(channelName);
+
+  const amount = selectedOrder?.finalFee ?? selectedOrder?.initialFee ?? 0;
 
   // CLOSE MODAL
   const closeModal = useCallback(() => {
     dispatch(setOrderPaymentModal(false));
     dispatch(setSelectedOrder(undefined));
-    setPayerType('sender');
-    setCustomPhone('');
-    setPhoneError('');
-    setFallbackPhone('');
-    setFallbackPhoneError('');
-    setChannelName('MOMO');
-  }, [dispatch]);
+    reset(defaultValues);
+    setPayerPhoneError('');
+    setIsRedirecting(false);
+  }, [dispatch, reset]);
 
-  const { createPayment: createAuthPaymentMutation, isLoading: authPaymentLoading } = useCreatePayment();
-  const { createPublicPayment: createPublicPaymentMutation, isLoading: publicPaymentLoading } = useCreatePublicPayment();
+  const { createPayment: createAuthPaymentMutation, isLoading: authPaymentLoading } =
+    useCreatePayment();
+  const {
+    createPublicPayment: createPublicPaymentMutation,
+    isLoading: publicPaymentLoading,
+  } = useCreatePublicPayment();
 
   const isLoading = isPublic ? publicPaymentLoading : authPaymentLoading;
-  const createPaymentMutation = isPublic ? createPublicPaymentMutation : createAuthPaymentMutation;
-
-  // Validate phone using shared util; returns canonical E.164 for the API.
-  const validatePhone = useCallback((
-    phone: string,
-    options?: {
-      setError: (s: string) => void;
-      optional?: boolean;
-      mobileOnly?: boolean;
-    },
-  ): string | null => {
-    const setError = options?.setError ?? setPhoneError;
-    const optional = options?.optional ?? false;
-
-    if (!phone?.trim()) {
-      setError(optional ? '' : 'Phone number is required');
-      return null;
-    }
-
-    const result = validateAndFormatPhoneNumber(phone);
-    setError(result.error ?? '');
-
-    if (!result.isValid || !result.e164) return null;
-    if (options?.mobileOnly && result.type !== 'MOBILE') {
-      setError('Enter a Rwandan mobile number for mobile money');
-      return null;
-    }
-
-    return result.e164;
-  }, []);
+  const createPaymentMutation = isPublic
+    ? createPublicPaymentMutation
+    : createAuthPaymentMutation;
 
   // GET PAYER INFORMATION
-  const getPayerInfo = useCallback((): {
-    phone?: string;
-    email: string;
-    name: string;
-  } => {
-    if (payerType === 'sender') {
+  const getPayerInfo = useCallback(
+    (values: PaymentFormValues): { phone?: string; email: string; name: string } => {
+      if (values.payerType === 'sender') {
+        return {
+          phone: selectedOrder?.sender?.phoneNumber
+            ? formatPhone(selectedOrder.sender.phoneNumber, 'RW')
+            : selectedOrder?.senderPhoneNumber
+              ? formatPhone(selectedOrder.senderPhoneNumber, 'RW')
+              : undefined,
+          email: selectedOrder?.sender?.email || FALLBACK_EMAIL,
+          name: selectedOrder?.sender?.name || selectedOrder?.senderName || 'Sender',
+        };
+      }
+      if (values.payerType === 'recipient') {
+        return {
+          phone: selectedOrder?.recipient?.phoneNumber
+            ? formatPhone(selectedOrder.recipient.phoneNumber, 'RW')
+            : selectedOrder?.recipientPhoneNumber
+              ? formatPhone(selectedOrder.recipientPhoneNumber, 'RW')
+              : undefined,
+          email: selectedOrder?.recipient?.email || FALLBACK_EMAIL,
+          name:
+            selectedOrder?.recipient?.name || selectedOrder?.recipientName || 'Recipient',
+        };
+      }
       return {
-        phone: selectedOrder?.sender?.phoneNumber
-          ? formatPhone(selectedOrder.sender.phoneNumber, 'RW')
-          : selectedOrder?.senderPhoneNumber
-            ? formatPhone(selectedOrder.senderPhoneNumber, 'RW')
-            : undefined,
-        email: selectedOrder?.sender?.email || 'info@peekaboo.co.rw',
-        name: selectedOrder?.sender?.name || selectedOrder?.senderName || 'Sender',
-      };
-    } else if (payerType === 'recipient') {
-      return {
-        phone: selectedOrder?.recipient?.phoneNumber
-          ? formatPhone(selectedOrder.recipient.phoneNumber, 'RW')
-          : selectedOrder?.recipientPhoneNumber
-            ? formatPhone(selectedOrder.recipientPhoneNumber, 'RW')
-            : undefined,
-        email: selectedOrder?.recipient?.email || 'info@peekaboo.co.rw',
-        name: selectedOrder?.recipient?.name || selectedOrder?.recipientName || 'Recipient',
-      };
-    } else {
-      return {
-        phone: customPhone,
-        email: 'info@peekaboo.co.rw',
+        phone: values.customPhone,
+        email: FALLBACK_EMAIL,
         name: 'Custom Payer',
       };
-    }
-  }, [payerType, selectedOrder, customPhone]);
+    },
+    [selectedOrder],
+  );
+
+  // The number shown to the network-mismatch hint, before submit validation.
+  const resolvedPayerPhone =
+    payerType === 'other' ? customPhone : getPayerInfo({ ...defaultValues, payerType }).phone;
 
   // CREATE PAYMENT
-  const createPayment = useCallback(async () => {
-    const payerInfo = getPayerInfo();
-    const payerPhone = validatePhone(payerInfo.phone || '', {
-      setError: setPhoneError,
-      mobileOnly: channelName !== 'CARD',
-    });
+  const createPayment = useCallback(
+    async (values: PaymentFormValues) => {
+      setPayerPhoneError('');
+      const payerInfo = getPayerInfo(values);
+      const isCard = values.channelName === PaymentChannel.CARD;
 
-    if (!payerPhone) {
-      return;
-    }
+      const phoneValidation = validateAndFormatPhoneNumber(payerInfo.phone || '');
+      const payerPhone = phoneValidation.isValid ? phoneValidation.e164 : null;
 
-    const fallbackContactPhone = validatePhone(fallbackPhone, {
-      setError: setFallbackPhoneError,
-      optional: true,
-    });
-    if (fallbackPhone.trim() && !fallbackContactPhone) return;
-
-    const payload = {
-      entityId: selectedOrder?.id,
-      ...(isPublic && { orderId: selectedOrder?.id }),
-      amount: selectedOrder?.finalFee || selectedOrder?.initialFee || 0,
-      currency: "RWF",
-      type: PaymentType.ORDER,
-      description: selectedOrder?.notes,
-      customerEmail: payerInfo.email,
-      customerName: payerInfo.name,
-      customerPhone: payerPhone,
-      channelName,
-      method: channelName,
-      metadata: {
-        channelName,
-        ...(fallbackContactPhone ? { fallbackContactPhone } : {}),
-      },
-    };
-
-    try {
-      const response = await (createPaymentMutation(payload)).unwrap();
-      const paymentUrl =
-        response?.paymentUrl ||
-        response?.data?.paymentUrl ||
-        response?.data?.metadata?.cardProcessingUrl;
-      const initiationError = response?.data?.metadata?.initiationError;
-      const orderId = selectedOrder?.id;
-
-      if (initiationError) {
-        toast.error(
-          initiationError?.message ||
-            'Payment could not be initiated. Please try again.',
-        );
-        return;
+      // Mobile money charges a phone; cards don't need one at all.
+      if (!isCard) {
+        if (!payerPhone) {
+          const message = !payerInfo.phone?.trim()
+            ? 'No phone number on file for this payer. Choose "Other" and enter one.'
+            : (phoneValidation.error ?? 'Enter a valid Rwandan phone number');
+          setPayerPhoneError(message);
+          return;
+        }
+        if (phoneValidation.type !== 'MOBILE') {
+          setPayerPhoneError('Enter a Rwandan mobile number for mobile money');
+          return;
+        }
       }
 
-      if (channelName === 'CARD' && paymentUrl) {
-        closeModal();
-        window.location.href = paymentUrl;
-        return;
-      }
+      const fallbackValidation = validateAndFormatPhoneNumber(values.fallbackPhone || '');
+      const fallbackContactPhone = values.fallbackPhone?.trim()
+        ? fallbackValidation.e164
+        : undefined;
 
-      if (orderId) {
-        closeModal();
-        navigate(`/p/orders/${orderId}/payment-success`);
-      }
-    } catch (error) {
-      console.error('Payment creation failed:', error);
-      toast.error('Payment could not be initiated. Please try again.');
-    }
-  }, [createPaymentMutation, selectedOrder, getPayerInfo, validatePhone, fallbackPhone, channelName, isPublic, closeModal, navigate]);
+      const payload = {
+        entityId: selectedOrder?.id,
+        ...(isPublic && { orderId: selectedOrder?.id }),
+        amount,
+        currency: 'RWF',
+        type: PaymentType.ORDER,
+        description: selectedOrder?.notes,
+        customerEmail: isCard ? values.payerEmail.trim() : payerInfo.email,
+        customerName: isCard ? values.cardholderName.trim() : payerInfo.name,
+        ...(payerPhone ? { customerPhone: payerPhone } : {}),
+        channelName: values.channelName,
+        method: values.channelName,
+        metadata: {
+          channelName: values.channelName,
+          ...(fallbackContactPhone ? { fallbackContactPhone } : {}),
+        },
+      };
 
-  // RESET PHONE ERROR WHEN CHANGING PAYER TYPE
+      try {
+        const response = await createPaymentMutation(payload).unwrap();
+        const paymentUrl =
+          response?.paymentUrl ||
+          response?.data?.paymentUrl ||
+          response?.data?.metadata?.cardProcessingUrl;
+        const initiationError = response?.data?.metadata?.initiationError;
+        const orderId = selectedOrder?.id;
+
+        if (initiationError) {
+          toast.error(
+            initiationError?.message ||
+              'Payment could not be initiated. Please try again.',
+          );
+          return;
+        }
+
+        if (isCard) {
+          // Without a hosted checkout URL the card payment never started, so
+          // don't send the user to the success page.
+          if (!paymentUrl) {
+            toast.error(
+              'Card payment could not be started. Please try again or pay with mobile money.',
+            );
+            return;
+          }
+          setIsRedirecting(true);
+          window.location.href = paymentUrl;
+          return;
+        }
+
+        if (orderId) {
+          closeModal();
+          navigate(`/p/orders/${orderId}/payment-success`);
+        }
+      } catch (error) {
+        console.error('Payment creation failed:', error);
+        toast.error('Payment could not be initiated. Please try again.');
+      }
+    },
+    [
+      amount,
+      closeModal,
+      createPaymentMutation,
+      getPayerInfo,
+      isPublic,
+      navigate,
+      selectedOrder,
+    ],
+  );
+
+  // RESET THE PAYER ERROR WHEN THE PAYER OR CHANNEL CHANGES
   useEffect(() => {
-    setPhoneError('');
-    setCustomPhone('');
-  }, [payerType]);
+    setPayerPhoneError('');
+  }, [payerType, channelName]);
+
+  // PREFILL CARD DETAILS FROM THE ORDER
   useEffect(() => {
-    setFallbackPhoneError('');
-  }, [fallbackPhone]);
+    if (!selectedOrder) return;
+    reset(
+      (current) => ({
+        ...current,
+        cardholderName:
+          current.cardholderName ||
+          selectedOrder.sender?.name ||
+          selectedOrder.senderName ||
+          '',
+        payerEmail:
+          current.payerEmail ||
+          (selectedOrder.sender?.email !== FALLBACK_EMAIL
+            ? (selectedOrder.sender?.email ?? '')
+            : ''),
+      }),
+      { keepDefaultValues: true },
+    );
+  }, [selectedOrder, reset]);
 
   return (
-    <Modal isOpen={orderPaymentModal} onClose={closeModal} className='min-w-[50vw]' heading="Order Payment" description="Payment for the order">
-      <article className='w-full flex flex-col gap-4'>
-        <p className='text-sm'>
-          Select who will make the payment for this order:
-        </p>
+    <Modal
+      isOpen={orderPaymentModal}
+      onClose={closeModal}
+      className="min-w-[50vw]"
+      heading="Order Payment"
+      description="Payment for the order"
+    >
+      <form
+        className="w-full flex flex-col gap-4"
+        onSubmit={handleSubmit((values) => void createPayment(values))}
+      >
+        <PaymentChannelSelect
+          value={channelName}
+          onChange={(channel) =>
+            reset((current) => ({ ...current, channelName: channel }), {
+              keepDefaultValues: true,
+              keepErrors: false,
+            })
+          }
+        />
 
-        {/* PAYER SELECTION */}
-        <fieldset className='flex flex-col gap-3'>
-          <legend className='sr-only'>Select payer</legend>
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='radio'
-              name='payer'
-              value='sender'
-              checked={payerType === 'sender'}
-              onChange={(e) => setPayerType(e.target.value as PayerType)}
-              className='w-4 h-4 cursor-pointer'
-            />
-            <span className='text-sm'>
-              Sender {selectedOrder?.senderName || selectedOrder?.sender?.name
-                ? `(${selectedOrder?.senderName || selectedOrder?.sender?.name})`
-                : ''}
-            </span>
-          </label>
-
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='radio'
-              name='payer'
-              value='recipient'
-              checked={payerType === 'recipient'}
-              onChange={(e) => setPayerType(e.target.value as PayerType)}
-              className='w-4 h-4 cursor-pointer'
-            />
-            <span className='text-sm'>
-              Recipient {selectedOrder?.recipientName || selectedOrder?.recipient?.name
-                ? `(${selectedOrder?.recipientName || selectedOrder?.recipient?.name})`
-                : ''}
-            </span>
-          </label>
-
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='radio'
-              name='payer'
-              value='other'
-              checked={payerType === 'other'}
-              onChange={(e) => setPayerType(e.target.value as PayerType)}
-              className='w-4 h-4 cursor-pointer'
-            />
-            <span className='text-sm'>Other</span>
-          </label>
-        </fieldset>
-        {phoneError && payerType !== 'other' && (
-          <p className='text-sm text-black'>{phoneError}</p>
-        )}
-
-        <fieldset className='flex flex-col gap-3'>
-          <legend className='text-sm font-medium'>Payment method</legend>
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='radio'
-              name='channelName'
-              value='MOMO'
-              checked={channelName === 'MOMO'}
-              onChange={(e) => setChannelName(e.target.value as UrubutoChannelName)}
-              className='w-4 h-4 cursor-pointer'
-            />
-            <span className='text-sm'>MTN Mobile Money</span>
-          </label>
-
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='radio'
-              name='channelName'
-              value='AIRTEL_MONEY'
-              checked={channelName === 'AIRTEL_MONEY'}
-              onChange={(e) => setChannelName(e.target.value as UrubutoChannelName)}
-              className='w-4 h-4 cursor-pointer'
-            />
-            <span className='text-sm'>Airtel Money</span>
-          </label>
-
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='radio'
-              name='channelName'
-              value='CARD'
-              checked={channelName === 'CARD'}
-              onChange={(e) => setChannelName(e.target.value as UrubutoChannelName)}
-              className='w-4 h-4 cursor-pointer'
-            />
-            <span className='text-sm'>Card</span>
-          </label>
-        </fieldset>
-
-        {/* CUSTOM PHONE INPUT */}
-        {payerType === 'other' && (
-          <fieldset>
-            <TelInput
-              id='customPhone'
-              value={customPhone}
-              onChange={setCustomPhone}
-              label="Phone Number"
-              required
-              placeholder='0788 123 456'
-              errorMessage={phoneError}
-            />
-          </fieldset>
-        )}
-
-        {/* FALLBACK CONTACT — who to call if sender and recipient aren't answering */}
-        <fieldset>
-          <TelInput
-            id='fallbackPhone'
-            value={fallbackPhone}
-            onChange={setFallbackPhone}
-            label="Fallback contact number (optional)"
-            placeholder='0788 123 456'
-            errorMessage={fallbackPhoneError}
+        {isMobileMoney ? (
+          <MobileMoneyFields
+            control={control}
+            errors={errors}
+            channelName={channelName}
+            payerType={payerType}
+            senderLabel={selectedOrder?.senderName || selectedOrder?.sender?.name}
+            recipientLabel={
+              selectedOrder?.recipientName || selectedOrder?.recipient?.name
+            }
+            payerPhone={resolvedPayerPhone}
+            payerPhoneError={payerPhoneError}
           />
-        </fieldset>
+        ) : (
+          <CardFields control={control} errors={errors} />
+        )}
+
+        <p className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm">
+          <span className="text-slate-500">Amount due</span>
+          <span className="font-medium text-slate-900">{formatCurrency(amount)}</span>
+        </p>
 
         {ENVIRONMENTS.isPaymentSimulation ? (
           <p className="text-xs font-normal leading-snug text-amber-700">
-            Payments are simulated in this environment. No real charge will be
-            made.
+            Payments are simulated in this environment. No real charge will be made.
           </p>
         ) : null}
         {ENVIRONMENTS.isDevPrice ? (
           <p className="text-xs font-normal leading-snug text-amber-700">
-            Catalog fee is{' '}
-            {formatCurrency(
-              selectedOrder?.finalFee ?? selectedOrder?.initialFee ?? 0,
-            )}
-            . In this environment you will only be charged{' '}
-            {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)}.
+            Catalog fee is {formatCurrency(amount)}. In this environment you will only
+            be charged {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)}.
           </p>
         ) : null}
 
-        <Button primary onClick={(e) => {
-          e.preventDefault();
-          void createPayment();
-        }} isLoading={isLoading}>
-          Pay {formatCurrency(selectedOrder?.finalFee ?? selectedOrder?.initialFee ?? 0)}
+        <Button submit primary isLoading={isLoading || isRedirecting}>
+          {isRedirecting
+            ? 'Redirecting to secure payment…'
+            : isMobileMoney
+              ? `Pay ${formatCurrency(amount)}`
+              : 'Continue to secure card payment'}
         </Button>
-      </article>
+      </form>
     </Modal>
-  )
-}
+  );
+};
 
 export default OrderPayment;

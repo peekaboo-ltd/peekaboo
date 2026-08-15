@@ -1,13 +1,14 @@
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import type { LucideIcon } from 'lucide-react';
+import type { OrderLocation } from '@/types/order.type';
 
 export type CustomerTab = 'personal' | 'business';
 
 export interface HomeFormValues {
   senderPhoneNumber: string;
   recipientPhoneNumber: string;
-  locationFrom?: string;
-  locationTo?: string;
+  locationFrom?: OrderLocation;
+  locationTo?: OrderLocation;
 }
 
 export interface HeroCopy {

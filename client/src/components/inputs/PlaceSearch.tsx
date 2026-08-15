@@ -10,6 +10,7 @@ export interface PlaceSearchResult {
   };
   formattedAddress: string;
   name: string;
+  placeId?: string;
 }
 
 interface PlaceSearchProps {
@@ -62,6 +63,7 @@ const PlaceSearch = ({
         },
         formattedAddress: place.formatted_address || '',
         name: place.name || '',
+        placeId: place.place_id,
       };
 
       setInputValue(place.formatted_address || place.name || '');

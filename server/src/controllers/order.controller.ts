@@ -19,6 +19,16 @@ type OrderLocation = NonNullable<Order['locationFrom']>;
 const hasOwn = (value: Record<string, unknown>, key: string) =>
   Object.prototype.hasOwnProperty.call(value, key);
 
+const LOCATION_LABEL_MAX_LENGTH = 512;
+
+const normalizeLocationLabel = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const trimmed = value.trim().slice(0, LOCATION_LABEL_MAX_LENGTH);
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
 const normalizeOrderLocation = (
   value: unknown,
   fieldName: 'locationFrom' | 'locationTo'
@@ -45,7 +55,18 @@ const normalizeOrderLocation = (
     );
   }
 
-  return { latitude, longitude };
+  // Optional human friendly labels captured by the place picker.
+  const name = normalizeLocationLabel(location.name);
+  const formattedAddress = normalizeLocationLabel(location.formattedAddress);
+  const placeId = normalizeLocationLabel(location.placeId);
+
+  return {
+    latitude,
+    longitude,
+    ...(name ? { name } : {}),
+    ...(formattedAddress ? { formattedAddress } : {}),
+    ...(placeId ? { placeId } : {}),
+  };
 };
 
 export const OrderController = {
@@ -256,6 +277,21 @@ export const OrderController = {
         if (order?.[key] !== undefined) {
           (sanitized as Record<string, unknown>)[key] = order[key];
         }
+      }
+
+      // Locations arrive as free-form JSON, so validate them the same way the
+      // create path does instead of persisting whatever was sent.
+      if (sanitized.locationFrom !== undefined) {
+        sanitized.locationFrom = normalizeOrderLocation(
+          sanitized.locationFrom,
+          'locationFrom'
+        );
+      }
+      if (sanitized.locationTo !== undefined) {
+        sanitized.locationTo = normalizeOrderLocation(
+          sanitized.locationTo,
+          'locationTo'
+        );
       }
 
       const updatedOrder = await orderService.updateOrder(id as UUID, sanitized, {

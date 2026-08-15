@@ -1,3 +1,6 @@
+import type { PlaceSearchResult } from '@/components/inputs/PlaceSearch';
+import type { OrderLocation } from '@/types/order.type';
+
 export interface LocationCoordinates {
   latitude: number | null;
   longitude: number | null;
@@ -73,4 +76,49 @@ export const estimateTwoWheelerTime = (distanceKm: number): number => {
   const avgSpeed = 25;
   const timeHours = (distanceKm / avgSpeed) * 1.2;
   return Math.round(timeHours * 60); // Return in minutes
+};
+
+// Keep the human friendly labels alongside the coordinates so the order can be
+// described without a reverse geocode lookup later on.
+export const placeSearchResultToOrderLocation = (
+  result: PlaceSearchResult
+): OrderLocation => ({
+  latitude: result.coordinates.latitude,
+  longitude: result.coordinates.longitude,
+  ...(result.name ? { name: result.name } : {}),
+  ...(result.formattedAddress ? { formattedAddress: result.formattedAddress } : {}),
+  ...(result.placeId ? { placeId: result.placeId } : {}),
+});
+
+export const hasCoordinates = (
+  location?: OrderLocation | LocationCoordinates | null
+): boolean =>
+  typeof location?.latitude === 'number' &&
+  typeof location?.longitude === 'number' &&
+  Number.isFinite(location.latitude) &&
+  Number.isFinite(location.longitude);
+
+// Best available single-line description of a location, without any lookups.
+export const describeLocation = (location?: OrderLocation | null): string => {
+  if (!location) return '';
+  return (
+    location.name ||
+    location.formattedAddress ||
+    (hasCoordinates(location)
+      ? `${location.latitude?.toFixed(5)}, ${location.longitude?.toFixed(5)}`
+      : '')
+  );
+};
+
+export const openInGoogleMapsUrl = (location?: OrderLocation | null): string | null => {
+  if (!hasCoordinates(location)) return null;
+  const query = `${location?.latitude},${location?.longitude}`;
+  const url = new URL('https://www.google.com/maps/search/');
+  url.searchParams.set('api', '1');
+  url.searchParams.set('query', query);
+  // Anchors the pin to the exact place the user picked rather than the raw point.
+  if (location?.placeId) {
+    url.searchParams.set('query_place_id', location.placeId);
+  }
+  return url.toString();
 };

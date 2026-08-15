@@ -30,7 +30,11 @@ export enum OrderPaymentStatus {
 export interface OrderLocation {
   latitude: number | null;
   longitude: number | null;
-  address?: string;
+  // Human friendly labels captured when the place was picked, e.g.
+  // name: "Kacyiru Police Station", formattedAddress: "KG 7 Ave, Kigali, Rwanda"
+  name?: string;
+  formattedAddress?: string;
+  placeId?: string;
 }
 
 export interface Order extends BaseDomain {
