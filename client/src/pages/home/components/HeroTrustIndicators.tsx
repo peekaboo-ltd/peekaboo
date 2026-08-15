@@ -42,7 +42,7 @@ const HeroTrustIndicators = ({
         {AVATARS.map((avatar, index) => (
           <span
             key={avatar.initials}
-            className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-[var(--peekaboo-warm)] text-[11px] font-semibold ${
+            className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-[var(--peekaboo-warm)] text-[11px] font-medium ${
               index === 0 ? '' : '-ml-2.5'
             } ${avatar.className}`}
           >

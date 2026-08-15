@@ -42,7 +42,7 @@ const BusinessPlansSection = ({
           <p className="text-[11px] font-normal uppercase text-muted-foreground">
             {badgeLabel}
           </p>
-          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[34px]">
+          <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
             {title}
           </h2>
           <p className="mt-3 text-[13px] font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
@@ -85,14 +85,14 @@ const BusinessPlansSection = ({
                       </p>
                     </hgroup>
                     {plan.isPopular ? (
-                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[8px] font-normal uppercase text-[#0a0a0a]">
+                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[11px] font-normal uppercase tracking-[0.04em] text-[#0a0a0a]">
                         {popularLabel}
                       </span>
                     ) : null}
                   </header>
 
                   <section className="mt-5 pt-4">
-                    <p className="text-[22px] font-semibold text-foreground">
+                    <p className="text-[22px] font-medium text-foreground">
                       {plan.price}
                     </p>
                     <p className="mt-1 text-[11px] font-normal uppercase text-muted-foreground">

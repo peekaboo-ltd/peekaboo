@@ -24,12 +24,12 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
           <li key={action.title}>
             <Link
               type="button"
-              to={"#"}
+              to="#"
               onClick={(e) => {
                 e.preventDefault();
                 action.onClick?.();
               }}
-              className="group relative flex h-full min-h-[150px] w-full flex-col items-start rounded-md border p-5 text-left transition-all duration-200"
+              className="group home-card-interactive relative flex h-full min-h-[150px] w-full flex-col items-start rounded-md p-5 text-left"
             >
               <span
                 className={`flex h-9 w-9 items-center justify-center rounded-md transition-all duration-200 ${
@@ -47,10 +47,7 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
               >
                 {action.title}
               </span>
-              <span
-                className={`mt-1 block text-[12px] font-normal leading-relaxed`}
-                // Remove group-hover opacity changes, keep text readable
-              >
+              <span className="mt-1 block text-[12px] font-normal leading-relaxed">
                 {action.description}
               </span>
               <span

@@ -31,16 +31,16 @@ const HeroBusinessCta = ({
     <Button
       type="button"
       onClick={isActive ? onContactClick : onTrackClick}
-      className="rounded-md border-border bg-[var(--peekaboo-surface)] text-foreground hover:!bg-[var(--peekaboo-surface)] hover:!border-border hover:!shadow-[0_2px_8px_-4px_rgba(10,10,10,0.12)] hover:!text-foreground transition-all duration-300"
+      className={`rounded-md border-border bg-[var(--peekaboo-surface)] text-foreground`}
     >
       {isActive ? (
         <>
           {accountLabel}
-          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
         </>
       ) : (
         <>
-          <Route className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
+          <Route className="h-3.5 w-3.5" aria-hidden="true" />
           Track package
         </>
       )}

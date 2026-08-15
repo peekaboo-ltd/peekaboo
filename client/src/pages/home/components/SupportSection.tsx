@@ -33,7 +33,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
         <p className="text-[11px] font-medium uppercase text-muted-foreground">
           Support
         </p>
-        <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[30px]">
+        <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[30px]">
           How can
           <br />
           we help?
@@ -70,7 +70,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                     href={contact.href}
                     target={contact.external ? '_blank' : undefined}
                     rel={contact.external ? 'noopener noreferrer' : undefined}
-                    className="group home-card-interactive flex w-full items-center gap-3 rounded-md border border-border bg-[var(--peekaboo-surface)] p-3.5 text-left transition-all duration-300"
+                    className="group home-card-interactive flex w-full items-center gap-3 rounded-md bg-[var(--peekaboo-surface)] p-3.5 text-left"
                   >
                     {content}
                   </a>
@@ -84,7 +84,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                   type="button"
                   styled={false}
                   onClick={onContactClick}
-                  className="group home-card-interactive flex w-full items-center gap-3 rounded-md border border-border bg-[var(--peekaboo-surface)] p-3.5 text-left transition-all duration-300"
+                  className="group home-card-interactive flex w-full items-center gap-3 rounded-md bg-[var(--peekaboo-surface)] p-3.5 text-left"
                 >
                   {content}
                 </Button>
@@ -110,7 +110,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
               {link.to.startsWith('#') ? (
                 <a
                   href={link.to}
-                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-md border border-border bg-[var(--peekaboo-surface)] px-4 py-3 text-left text-[13px] font-medium text-foreground transition-all duration-300"
+                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-md bg-[var(--peekaboo-surface)] px-4 py-3 text-left text-[13px] font-medium text-foreground"
                 >
                   {link.label}
                   <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
@@ -118,7 +118,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
               ) : (
                 <Link
                   to={link.to}
-                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-md border border-border bg-[var(--peekaboo-surface)] px-4 py-3 text-left text-[13px] font-medium text-foreground transition-all duration-300"
+                  className="group home-card-interactive flex w-full items-center justify-between gap-4 rounded-md bg-[var(--peekaboo-surface)] px-4 py-3 text-left text-[13px] font-medium text-foreground"
                 >
                   {link.label}
                   <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />

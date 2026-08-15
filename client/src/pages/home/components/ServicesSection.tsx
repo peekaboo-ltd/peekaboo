@@ -50,7 +50,7 @@ const toneClasses = {
     arrow: 'bg-[#0a0a0a] text-white transition-all duration-300 group-hover:bg-black/80 group-hover:scale-110',
   },
   white: {
-    card: 'home-card-interactive group border-border bg-[var(--peekaboo-surface)] text-foreground',
+    card: 'home-card-interactive group bg-[var(--peekaboo-surface)] text-foreground',
     chip: 'bg-[#fff4be] text-[#6b4d00]',
     body: 'text-muted-foreground',
     arrow: 'bg-[var(--peekaboo-surface)] text-foreground transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110',
@@ -65,7 +65,7 @@ const ServicesSection = () => (
           <p className="text-[11px] font-medium uppercase text-muted-foreground">
             Top solutions
           </p>
-          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[34px]">
+          <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
             Built for the way
             <br />
             Kigali moves.
@@ -101,7 +101,7 @@ const ServicesSection = () => (
                     </span>
                   </div>
                   <h3
-                    className={`mt-5 font-semibold leading-[1.15] ${
+                    className={`mt-5 font-medium leading-[1.15] ${
                       service.featured ? 'text-[22px]' : 'text-[16px]'
                     }`}
                   >

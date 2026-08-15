@@ -25,7 +25,7 @@ const BusinessSolutionsSection = ({
         <p className="text-[11px] font-medium uppercase text-muted-foreground">
           For businesses
         </p>
-        <h2 className="mt-3 text-[28px] font-semibold leading-[1.05] sm:text-[40px]">
+        <h2 className="mt-3 text-[28px] font-medium leading-[1.05] sm:text-[40px]">
           Logistics
           <br />
           without the
@@ -49,10 +49,10 @@ const BusinessSolutionsSection = ({
           <Button
             type="button"
             onClick={onSeePlans}
-            className="rounded-md border-border bg-[var(--peekaboo-surface)] text-foreground transition-all duration-300 hover:bg-[var(--peekaboo-surface)] hover:border-border hover:shadow-[0_2px_8px_-4px_rgba(10,10,10,0.12)]"
+            className={`rounded-md border-border bg-[var(--peekaboo-surface)] text-foreground`}
           >
             See plans
-            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         </nav>
       </header>
@@ -62,7 +62,7 @@ const BusinessSolutionsSection = ({
           const Icon = feature.icon;
           return (
             <li key={feature.title}>
-              <article className="home-card-interactive group h-full rounded-md border border-border bg-[var(--peekaboo-surface)] p-5 text-foreground">
+              <article className="home-card-interactive group h-full rounded-md bg-[var(--peekaboo-surface)] p-5 text-foreground">
                 <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#0a0a0a] text-[#edb100] transition-all duration-300 group-hover:scale-110 group-hover:bg-[#edb100] group-hover:text-[#0a0a0a]">
                   <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>

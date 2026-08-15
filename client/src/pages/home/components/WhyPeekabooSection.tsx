@@ -43,7 +43,7 @@ const WhyPeekabooSection = ({
             <p className="text-[11px] font-medium uppercase text-muted-foreground">
               Why Peekaboo
             </p>
-            <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[34px]">
+            <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
               The trusted way
               <br />
               to send.
@@ -56,7 +56,7 @@ const WhyPeekabooSection = ({
                   <dt className="text-[11px] font-medium uppercase">
                     {stat.label}
                   </dt>
-                  <dd className="mt-1 text-[18px] font-semibold text-foreground">
+                  <dd className="mt-1 text-[18px] font-medium text-foreground">
                     {stat.value}
                   </dd>
                 </div>
@@ -69,7 +69,7 @@ const WhyPeekabooSection = ({
           {items.map((item) => {
             const Icon = item.icon;
             return (
-              <li key={item.title} className="group px-1 py-5 transition-all duration-300 hover:bg-[var(--peekaboo-surface)] sm:px-5">
+              <li key={item.title} className="group px-1 py-5 sm:px-5">
                 <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#fff4be] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110">
                   <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>

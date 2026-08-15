@@ -3,18 +3,16 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { useCreateOrder, useCreatePublicOrder } from '@/hooks/orders/orders.hooks';
-import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
+import { normalizePhoneNumber } from '@/utils/phone.util';
 import { useAppSelector } from '@/states/hooks';
 import type { LandingStats } from '@/types/landing.type';
 import type { CustomerTab, HeroCopy, HomeFormValues } from '../home.types';
 import { containerVariants, itemVariants } from '../home.animations';
-import HeroScene from '@/components/three/HeroScene';
 import HeroTabs from './HeroTabs';
 import HeroHeadline from './HeroHeadline';
 import HeroTrustIndicators from './HeroTrustIndicators';
 import HeroBusinessCta from './HeroBusinessCta';
 import HeroForm from './HeroForm';
-import HeroScrollIndicator from './HeroScrollIndicator';
 
 interface HeroSectionProps {
   formRef: RefObject<HTMLFormElement | null>;
@@ -52,13 +50,15 @@ const HeroSection = ({
   const { createPublicOrder, isLoading: isCreatingPublicOrder } = useCreatePublicOrder();
 
   const onSubmit = handleSubmit((data) => {
-    const sender = validateAndFormatPhoneNumber(data.senderPhoneNumber);
-    const recipient = validateAndFormatPhoneNumber(data.recipientPhoneNumber);
-    if (!sender.e164 || !recipient.e164) return;
+    // react-hook-form has already validated these fields (via TelInput and
+    // PlaceSearch in HeroForm); this only canonicalizes them to E.164 for the API.
+    const senderPhoneNumber = normalizePhoneNumber(data.senderPhoneNumber);
+    const recipientPhoneNumber = normalizePhoneNumber(data.recipientPhoneNumber);
+    if (!senderPhoneNumber || !recipientPhoneNumber) return;
 
     const payload = {
-      senderPhoneNumber: sender.e164,
-      recipientPhoneNumber: recipient.e164,
+      senderPhoneNumber,
+      recipientPhoneNumber,
       locationFrom: data.locationFrom,
       locationTo: data.locationTo,
     };
@@ -72,12 +72,6 @@ const HeroSection = ({
 
   return (
     <section className="relative isolate w-full overflow-hidden bg-[var(--peekaboo-surface)] text-foreground">
-      {/* Subtle brand-aligned delivery scene, matching the auth backdrop */}
-      <div className="pointer-events-none absolute inset-0">
-        <HeroScene />
-      </div>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--secondary)_12%,transparent)_1px,transparent_1px)] [background-size:44px_44px]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--peekaboo-surface)_36%,transparent)_0%,color-mix(in_oklab,var(--peekaboo-surface)_64%,transparent)_52%,color-mix(in_oklab,var(--peekaboo-surface)_92%,transparent)_100%)]" />
 
       <article className="relative z-10 mx-auto max-w-[1280px] px-5 pb-12 pt-18 sm:px-8 lg:px-10 lg:pb-14 lg:pt-22">
         <motion.section
@@ -147,9 +141,6 @@ const HeroSection = ({
         </motion.section>
       </article>
 
-      <aside className="relative z-10 border-t border-border" />
-
-      <HeroScrollIndicator />
     </section>
   );
 };

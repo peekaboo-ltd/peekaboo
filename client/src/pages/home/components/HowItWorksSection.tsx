@@ -69,7 +69,7 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
           <p className="text-[11px] font-medium uppercase text-muted-foreground">
             How it works
           </p>
-          <h2 className="mt-4 text-[28px] font-semibold leading-[1.02] text-foreground sm:text-[36px] lg:text-[48px]">
+          <h2 className="mt-4 text-[28px] font-medium leading-[1.02] text-foreground sm:text-[36px] lg:text-[48px]">
             Three taps.
             <br />
             <span className="text-muted-foreground">One delivery.</span>
@@ -140,7 +140,7 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
                     <div className="flex w-full items-end justify-between gap-6">
                       <span
                         aria-hidden="true"
-                        className={`block font-semibold leading-[0.82] text-[clamp(96px,26vw,160px)] lg:text-[clamp(140px,16vw,220px)] ${
+                        className={`block font-medium leading-[0.82] text-[clamp(96px,26vw,160px)] lg:text-[clamp(140px,16vw,220px)] ${
                           isActive
                             ? 'text-foreground'
                             : 'text-foreground lg:text-transparent lg:[-webkit-text-stroke:1.25px_#c8c7c2]'
@@ -162,7 +162,7 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
                       </span>
                     </div>
                     <div className="max-w-[480px]">
-                      <span className="block text-[22px] font-semibold leading-tight text-foreground sm:text-[28px] lg:text-[36px]">
+                      <span className="block text-[22px] font-medium leading-tight text-foreground sm:text-[28px] lg:text-[36px]">
                         {step.title}
                       </span>
                       <span className="mt-3 block text-[13px] font-normal leading-relaxed text-muted-foreground lg:text-[15px]">

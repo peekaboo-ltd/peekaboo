@@ -46,7 +46,7 @@ const TestimonialsSection = ({
           <p className="text-[11px] font-medium uppercase text-muted-foreground">
             {badgeLabel}
           </p>
-          <h2 className="mt-3 text-[24px] font-semibold leading-[1.05] text-foreground sm:text-[34px]">
+          <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
             {title}
           </h2>
           <p className="mt-3 text-[13px] font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
@@ -73,7 +73,7 @@ const TestimonialsSection = ({
                 </p>
 
                 <figcaption className="mt-6 flex items-center gap-4">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0a0a0a] text-[15px] font-semibold text-[#edb100]">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0a0a0a] text-[15px] font-medium text-[#edb100]">
                     {current.name.charAt(0)}
                   </span>
                   <cite className="not-italic">

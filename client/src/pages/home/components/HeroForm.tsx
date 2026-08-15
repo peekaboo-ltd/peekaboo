@@ -7,6 +7,7 @@ import {
 } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import type { HomeFormValues } from '../home.types';
+import type { OrderLocation } from '@/types/order.type';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import {
   describeLocation,
@@ -58,6 +59,7 @@ interface LocationFieldProps {
   placeholder: string;
   requiredMessage: string;
   errorMessage?: string;
+  validate?: (value: OrderLocation | undefined) => true | string;
 }
 
 // The picked place — coordinates included — is what gets submitted, so the form
@@ -71,6 +73,7 @@ const LocationField = ({
   placeholder,
   requiredMessage,
   errorMessage,
+  validate,
 }: LocationFieldProps) => {
   const [searchText, setSearchText] = useState('');
 
@@ -78,7 +81,7 @@ const LocationField = ({
     <Controller
       name={name}
       control={control}
-      rules={{ required: requiredMessage }}
+      rules={{ required: requiredMessage, validate }}
       render={({ field }) => (
         <label className="w-full flex flex-col gap-1">
           <p className="text-[12.5px] font-medium text-foreground">
@@ -102,7 +105,7 @@ const LocationField = ({
                   field.onChange(undefined);
                 }}
                 icon={faPenToSquare}
-                className="text-[11px] cursor-pointer"
+                className="text-[9px] cursor-pointer"
                 aria-hidden="true"
               />
             </ul>
@@ -138,6 +141,18 @@ const HeroForm = ({
   errors,
 }: HeroFormProps) => {
   const senderPhoneNumber = useWatch({ control, name: 'senderPhoneNumber' });
+  const locationFrom = useWatch({ control, name: 'locationFrom' });
+
+  const validateDistinctLocation = (
+    value: OrderLocation | undefined,
+  ): true | string => {
+    if (!value || !locationFrom) return true;
+    const same = locationFrom.placeId
+      ? locationFrom.placeId === value.placeId
+      : locationFrom.latitude === value.latitude &&
+        locationFrom.longitude === value.longitude;
+    return same ? 'Pickup and drop-off must be different places' : true;
+  };
 
   const validateRecipientPhone = (value: string | undefined) => {
     const baseValidation = validateRwandanPhone(value);
@@ -174,7 +189,7 @@ const HeroForm = ({
           <p className="text-[10px] font-medium uppercase text-muted-foreground">
             New order
           </p>
-          <h2 className="mt-2 text-[18px] font-semibold leading-tight text-card-foreground sm:text-[20px]">
+          <h2 className="mt-2 text-[18px] font-medium leading-tight text-card-foreground sm:text-[20px]">
             {copy.formTitle}
           </h2>
           <p className="mt-1.5 text-[12.5px] font-normal leading-relaxed text-muted-foreground">
@@ -230,6 +245,7 @@ const HeroForm = ({
               placeholder="Drop-off location"
               requiredMessage="Select a drop-off location from the suggestions"
               errorMessage={errors.locationTo?.message}
+              validate={validateDistinctLocation}
             />
           </div>
         </fieldset>
@@ -259,17 +275,17 @@ const HeroForm = ({
           </Link>
         </nav>
 
-        <aside className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[10.5px] font-medium uppercase text-muted-foreground">
-          <span className="flex items-center gap-1 text-[8px]">
-            <FontAwesomeIcon icon={faShield} className="text-[10px]" aria-hidden="true" />
+        <aside className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[9px] font-normal uppercase text-muted-foreground">
+          <span className="flex items-center gap-1.5 text-[9px]">
+            <FontAwesomeIcon icon={faShield} className="text-[9px]" aria-hidden="true" />
             {copy.verifiedRidersLabel}
           </span>
-          <span className="flex items-center gap-1.5 text-[8px]">
-            <FontAwesomeIcon icon={faClock} className="text-[10px]" aria-hidden="true" />
+          <span className="flex items-center gap-1.5 text-[9px]">
+            <FontAwesomeIcon icon={faClock} className="text-[9px]" aria-hidden="true" />
             {copy.realtimeTrackingLabel}
           </span>
-          <span className="flex items-center gap-1.5 text-[8px]">
-            <FontAwesomeIcon icon={faCreditCard} className="text-[10px]" aria-hidden="true" />
+          <span className="flex items-center gap-1.5 text-[9px]">
+            <FontAwesomeIcon icon={faCreditCard} className="text-[9px]" aria-hidden="true" />
             3+ payment methods
           </span>
         </aside>
