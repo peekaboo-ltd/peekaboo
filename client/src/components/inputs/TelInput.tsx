@@ -31,7 +31,6 @@ const PhoneTextField = forwardRef<HTMLInputElement, PhoneTextFieldProps>(
     <input
       {...props}
       ref={ref}
-      required={false}
       type="tel"
       inputMode="tel"
       className={cn('peekaboo-tel-number', className)}

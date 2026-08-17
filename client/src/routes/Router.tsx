@@ -1,9 +1,10 @@
 import { ReactElement } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Home } from '../pages/home';
 import { PublicOrderDetails, TrackOrder } from '../pages/public/orders';
 import PublicOrderTracking from '@/pages/public/orders/PublicOrderTracking';
 import PublicOrderPaymentSuccess from '@/pages/public/orders/PublicOrderPaymentSuccess';
+import PublicOrderPaymentPending from '@/pages/public/orders/PublicOrderPaymentPending';
 import PublicLayout from '@/containers/navigation/PublicLayout';
 import { NotFoundPage, UnauthorizedPage } from '../pages/common';
 import { Login, RegisterPage } from '@/pages/auth';
@@ -363,6 +364,18 @@ const Router = () => {
                 path: '/p/orders',
               },
               <PublicOrderDetails />,
+            )}
+          />
+          <Route
+            path="orders/:id/payment-pending"
+            element={withSEO(
+              {
+                title: 'Payment Pending | Peekaboo',
+                description: 'Confirming your order payment securely.',
+                path: '/p/orders/payment-pending',
+                noindex: true,
+              },
+              <PublicOrderPaymentPending />,
             )}
           />
           <Route

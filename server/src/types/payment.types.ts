@@ -46,6 +46,18 @@ export interface PaymentResponseDto {
   };
 }
 
+export interface PublicPaymentStatusDto {
+  id: UUID;
+  entityId: UUID;
+  status: KpayPaymentStatus;
+  provider: PaymentProvider;
+  method: string;
+  amount: number;
+  currency: 'RWF' | 'USD';
+  externalReferenceId?: string;
+  updatedAt: Date;
+}
+
 // Payment list query params
 export interface PaymentQueryParams {
   entityId?: UUID;

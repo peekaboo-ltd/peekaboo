@@ -63,7 +63,7 @@ Defaults (override via `.env`):
 For UrubutoPay `CARD` payments, set `URUBUTO_CARD_REDIRECT_BASE_URL` in `server/.env` to the public frontend origin that UrubutoPay has approved for card redirects. The server trims whitespace, removes trailing slashes, and sends UrubutoPay success redirects in this format:
 
 ```text
-${URUBUTO_CARD_REDIRECT_BASE_URL}/p/orders/${orderId}/payment-success
+${URUBUTO_CARD_REDIRECT_BASE_URL}/p/orders/${orderId}/payment-pending?paymentId=${paymentId}
 ```
 
 If `URUBUTO_CARD_REDIRECT_BASE_URL` is not configured, the backend falls back to `FRONTEND_URL`. In production, the configured base URL must be a public HTTPS URL approved by UrubutoPay for `CARD` payments.
@@ -416,4 +416,3 @@ async updateOrder(id: UUID, order: Partial<Order>, options: UpdateOptions) {
 - Password hashing with bcrypt
 - Comprehensive audit logging for all critical operations
 - Context-aware user tracking in audit trails
-

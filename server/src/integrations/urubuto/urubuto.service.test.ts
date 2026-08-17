@@ -62,6 +62,7 @@ test('CARD payment with a valid redirect URL sends redirection_url', async () =>
     assert.equal(postedPayload.channel_name, UrubutoChannelName.CARD);
     assert.equal(postedPayload.service_code, config.serviceCode);
     assert.equal(postedPayload.merchant_code, config.merchantCode);
+    assert.equal(result.data?.status, KpayPaymentStatus.PENDING);
   } finally {
     restore();
   }
@@ -188,6 +189,104 @@ test('service code errors include actionable metadata and guidance', async () =>
     assert.match(result.error?.message || '', /URUBUTO_SERVICE_CODE/i);
     assert.equal(result.error?.metadata?.serviceCodeSource, 'URUBUTO_SERVICE_CODE');
     assert.equal(result.error?.metadata?.serviceCodeError, true);
+  } finally {
+    restore();
+  }
+});
+
+test('wallet account validation sends a digit-only Rwanda number and selected channel', async () => {
+  let postedUrl = '';
+  let postedPayload: any;
+  const restore = mockAxiosPost(async (url, payload) => {
+    postedUrl = url;
+    postedPayload = payload;
+    return {
+      status: 200,
+      data: {
+        status: 200,
+        message: 'Successful',
+        data: { valid: true },
+      },
+    };
+  });
+
+  try {
+    const result = await new UrubutoService(config).validateAccountHolder({
+      customerPhone: '+250 788 000 000',
+      channelName: UrubutoChannelName.MOMO,
+    });
+
+    assert.equal(postedUrl, '/api/v2/payment/account-holder/validate');
+    assert.deepEqual(postedPayload, {
+      payer_phone_number: '250788000000',
+      payment_channel_name: UrubutoChannelName.MOMO,
+    });
+    assert.equal(result.success, true);
+    assert.equal(result.valid, true);
+  } finally {
+    restore();
+  }
+});
+
+test('wallet initiation remains pending until a webhook confirms VALID', async () => {
+  const restore = mockAxiosPost(async () => ({
+    status: 200,
+    data: {
+      status: 200,
+      message: 'initiated',
+      data: {
+        transaction_status: UrubutoTransactionStatus.VALID,
+        internal_transaction_ref_number: 'wallet-ref',
+        external_transaction_ref_number: 'merchant-ref',
+        currency: KpayCurrency.RWF,
+      },
+    },
+  }));
+
+  try {
+    const result = await new UrubutoService(config).initiatePayment({
+      amount: 1000,
+      currency: KpayCurrency.RWF,
+      customerName: 'Momo Payer',
+      customerPhone: '+250788000000',
+      refId: '11111111-1111-4111-8111-111111111116',
+      payerCode: 'ORDER-6',
+      channelName: UrubutoChannelName.MOMO,
+    });
+
+    assert.equal(result.success, true);
+    assert.equal(result.data?.status, KpayPaymentStatus.PENDING);
+    assert.equal(result.data?.paymentUrl, undefined);
+  } finally {
+    restore();
+  }
+});
+
+test('incomplete Urubuto initiation responses are rejected', async () => {
+  const restore = mockAxiosPost(async () => ({
+    status: 200,
+    data: {
+      status: 200,
+      message: 'initiated',
+      data: {
+        transaction_status: UrubutoTransactionStatus.PENDING,
+      },
+    },
+  }));
+
+  try {
+    const result = await new UrubutoService(config).initiatePayment({
+      amount: 1000,
+      currency: KpayCurrency.RWF,
+      customerName: 'Momo Payer',
+      customerPhone: '250788000000',
+      refId: '11111111-1111-4111-8111-111111111117',
+      payerCode: 'ORDER-7',
+      channelName: UrubutoChannelName.MOMO,
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.error?.code, 'INVALID_URUBUTO_RESPONSE');
   } finally {
     restore();
   }

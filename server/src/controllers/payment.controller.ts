@@ -66,6 +66,33 @@ export const PaymentController = {
     }
   },
 
+  async getPublicPaymentStatus(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { paymentId } = req.params;
+      const { entityId } = req.query;
+
+      if (!entityId) {
+        throw new ValidationError('entityId query parameter is required');
+      }
+
+      const payment = await paymentService.getPublicPaymentStatus(
+        paymentId as UUID,
+        entityId as UUID,
+      );
+
+      return res.status(200).json({
+        message: 'Payment status fetched successfully',
+        data: payment,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   /**
    * Create a new payment
    */

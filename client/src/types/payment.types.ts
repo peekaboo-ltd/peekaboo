@@ -88,3 +88,15 @@ export interface Payment {
     lastName: string;
   };
 }
+
+export interface PublicPaymentStatus {
+  id: string;
+  entityId: string;
+  amount: number;
+  currency: 'RWF' | 'USD';
+  externalReferenceId?: string;
+  status: KpayPaymentStatus;
+  method: string;
+  provider: PaymentProvider;
+  updatedAt: string;
+}

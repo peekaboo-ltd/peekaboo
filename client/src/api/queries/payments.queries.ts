@@ -1,5 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
+import type { PublicPaymentStatus } from '@/types/payment.types';
 
 export interface AdminPaymentsQueryParams {
   page?: number;
@@ -24,6 +25,17 @@ export const paymentsQueriesApiSlice = createApi({
         url: `/payments/public`,
         method: 'GET',
         params: { entityId, paymentType },
+      }),
+    }),
+
+    getPublicPaymentStatus: builder.query<
+      { message: string; data: PublicPaymentStatus },
+      { paymentId: string; entityId: string }
+    >({
+      query: ({ paymentId, entityId }) => ({
+        url: `/payments/public/${paymentId}/status`,
+        method: 'GET',
+        params: { entityId },
       }),
     }),
 
@@ -66,6 +78,7 @@ export const paymentsQueriesApiSlice = createApi({
 
 export const {
   useLazyFetchPublicPaymentsQuery,
+  useGetPublicPaymentStatusQuery,
   useLazyFetchPaymentsQuery,
   useLazyGetPaymentQuery,
   useLazyFetchAdminPaymentsQuery,

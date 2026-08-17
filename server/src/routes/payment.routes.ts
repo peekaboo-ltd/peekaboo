@@ -9,6 +9,10 @@ const router = Router();
 // Public payment endpoints (no auth, scoped by order/entity ID)
 router.post('/public', PaymentController.createPublicPayment);
 router.get('/public', PaymentController.fetchPublicPayments);
+router.get(
+  '/public/:paymentId/status',
+  PaymentController.getPublicPaymentStatus,
+);
 
 router.use(authenticate);
 

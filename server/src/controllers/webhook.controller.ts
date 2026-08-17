@@ -66,7 +66,11 @@ const handleUrubutoWebhook = async (
     const payload = req.body as UrubutoPaymentWebhookPayload;
 
     logger.info(`UrubutoPay payment ${source} request`, {
-      request: payload,
+      transactionId:
+        payload.transaction_id || payload.internal_transaction_id,
+      transactionStatus: payload.transaction_status,
+      payerCode: payload.payer_code,
+      paymentChannelName: payload.payment_channel_name,
     });
 
     const payment = await paymentService.processUrubutoPaymentWebhook(
@@ -75,7 +79,9 @@ const handleUrubutoWebhook = async (
     );
 
     logger.info(`UrubutoPay payment ${source} response`, {
-      response: payment,
+      paymentId: payment.id,
+      status: payment.status,
+      externalReferenceId: payment.externalReferenceId,
     });
 
     return res
@@ -144,13 +150,16 @@ export const WebhookController = {
       if (!assertUrubutoToken(req, res)) return;
 
       logger.info('UrubutoPay payer validation request', {
-        request: req.body,
+        payerCode: req.body?.payer_code,
+        currency: req.body?.currency,
       });
 
       const data = await paymentService.validateUrubutoPayer(req.body);
 
       logger.info('UrubutoPay payer validation response', {
-        response: data,
+        payerCode: data.payer_code,
+        amount: data.amount,
+        currency: data.currency,
       });
 
       return res.status(200).json({

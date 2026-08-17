@@ -129,6 +129,32 @@ export interface UrubutoPaymentResult {
   };
 }
 
+export interface UrubutoAccountHolderValidationRequest {
+  payer_phone_number: string;
+  payment_channel_name:
+    | UrubutoChannelName.MOMO
+    | UrubutoChannelName.AIRTEL_MONEY;
+}
+
+export interface UrubutoAccountHolderValidationApiResponse {
+  timestamp?: string;
+  status: number;
+  message?: string;
+  data?: {
+    valid: boolean;
+  };
+}
+
+export interface UrubutoAccountHolderValidationResult {
+  success: boolean;
+  valid?: boolean;
+  message?: string;
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
 export interface UrubutoVerifyTransactionStatusRequest {
   merchant_code: string;
   transaction_id: string;

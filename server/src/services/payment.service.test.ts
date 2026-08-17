@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import { AppDataSource } from '../data-source';
 import { PaymentService } from './payment.service';
 import { KpayCurrency, KpayPaymentStatus } from '../types/kpay.types';
-import { PaymentProvider, UrubutoChannelName } from '../types/urubuto.types';
+import {
+  PaymentProvider,
+  UrubutoChannelName,
+  UrubutoTransactionStatus,
+} from '../types/urubuto.types';
 import { PaymentType } from '../constants/payment.constants';
 import { DEVELOPMENT_PAYMENT_AMOUNT_RWF } from '../helpers/paymentMode.helper';
 import { ValidationError } from '../helpers/errors.helper';
@@ -46,8 +50,13 @@ function createRepositoryMock(orderOverrides: Record<string, any> = {}) {
     saves,
     updates,
     save: async (payment: any) => {
+      if (payment.amount === undefined || !payment.currency) {
+        return { id: 'audit-log-1', ...payment };
+      }
       const saved = {
         id: paymentId,
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-01-01T00:00:00.000Z'),
         ...payment,
       };
       savedPayment = saved;
@@ -63,8 +72,18 @@ function createRepositoryMock(orderOverrides: Record<string, any> = {}) {
     },
     findOne: async (options?: { where?: Record<string, any> }) => {
       const where = options?.where || {};
+      if (
+        where.id === paymentId &&
+        where.entityId &&
+        savedPayment?.entityId !== where.entityId
+      ) {
+        return null;
+      }
       if (where.id === paymentId || (savedPayment && where.id === savedPayment.id)) {
         return savedPayment;
+      }
+      if (where.orderId) {
+        return null;
       }
       if (where.entityId || where.referenceId || where.id === orderId) {
         return {
@@ -97,16 +116,24 @@ function createRepositoryMock(orderOverrides: Record<string, any> = {}) {
 }
 
 function stubSideEffects(service: PaymentService) {
+  const counts = { activities: 0, assignments: 0 };
   (service as any).orderActivityService = {
-    createOrderActivity: async () => ({ id: 'activity-1' }),
+    createOrderActivity: async () => {
+      counts.activities += 1;
+      return { id: 'activity-1' };
+    },
   };
   (service as any).orderAssignmentService = {
-    handleOrderAssignment: async () => ({ id: 'assignment-1' }),
+    handleOrderAssignment: async () => {
+      counts.assignments += 1;
+      return { id: 'assignment-1' };
+    },
   };
   (service as any).emailService = {
     sendPaymentInitiatedEmail: async () => undefined,
     sendPaymentFailedEmail: async () => undefined,
   };
+  return counts;
 }
 
 test('PaymentService rejects a valid Rwanda fixed line at a mobile-money boundary', async () => {
@@ -166,6 +193,7 @@ test('PaymentService.createPayment keeps Urubuto timeout payments pending for re
         const service = new PaymentService();
         stubSideEffects(service);
         (service as any).urubutoService = {
+          validateAccountHolder: async () => ({ success: true, valid: true }),
           initiatePayment: async () => ({
             success: false,
             error: {
@@ -236,6 +264,7 @@ test('PaymentService.createPayment charges 10 RWF in dev_price mode', async () =
         const service = new PaymentService();
         stubSideEffects(service);
         (service as any).urubutoService = {
+          validateAccountHolder: async () => ({ success: true, valid: true }),
           initiatePayment: async (request: { amount: number }) => {
             initiatedAmount = request.amount;
             return {
@@ -301,6 +330,7 @@ test('PaymentService.createPayment keeps catalog amount in live mode', async () 
         const service = new PaymentService();
         stubSideEffects(service);
         (service as any).urubutoService = {
+          validateAccountHolder: async () => ({ success: true, valid: true }),
           initiatePayment: async (request: { amount: number }) => {
             initiatedAmount = request.amount;
             return {
@@ -386,7 +416,7 @@ test('PaymentService.createPayment simulates success without provider call', asy
         assert.equal(payment.externalReferenceId, `sim_${paymentId}`);
         assert.match(
           payment.paymentUrl || payment.metadata.paymentUrl || '',
-          /\/p\/orders\/.*\/payment-success/,
+          /\/p\/orders\/.*\/payment-pending\?paymentId=/,
         );
       } finally {
         (AppDataSource.getRepository as any) = originalGetRepository;
@@ -469,4 +499,314 @@ test('PaymentService.validateUrubutoPayer returns catalog fee in live mode', asy
       }
     },
   );
+});
+
+test('PaymentService requires the selected Urubuto wallet to be registered', async () => {
+  const originalGetRepository = AppDataSource.getRepository;
+  const repository = createRepositoryMock();
+
+  await withEnv(
+    {
+      RESEND_API_KEY: 're_test',
+      PAYMENT_MODE: 'live',
+      NODE_ENV: 'test',
+    },
+    async () => {
+      (AppDataSource.getRepository as any) = () => repository;
+      try {
+        const service = new PaymentService();
+        stubSideEffects(service);
+        (service as any).urubutoService = {
+          validateAccountHolder: async () => ({ success: true, valid: false }),
+        };
+
+        await assert.rejects(
+          service.createPayment({
+            entityId: orderId,
+            amount: 2500,
+            currency: KpayCurrency.RWF,
+            type: PaymentType.ORDER,
+            customerEmail: 'payer@example.com',
+            customerName: 'Wallet Payer',
+            customerPhone: '0788000000',
+            provider: PaymentProvider.URUBUTO,
+            channelName: UrubutoChannelName.MOMO,
+          }),
+          /not registered for MTN Mobile Money/i,
+        );
+        assert.equal(repository.saves.length, 0);
+      } finally {
+        (AppDataSource.getRepository as any) = originalGetRepository;
+      }
+    },
+  );
+});
+
+test('PaymentService fails closed when Urubuto wallet validation is unavailable', async () => {
+  const originalGetRepository = AppDataSource.getRepository;
+  const repository = createRepositoryMock();
+
+  await withEnv(
+    {
+      RESEND_API_KEY: 're_test',
+      PAYMENT_MODE: 'live',
+      NODE_ENV: 'test',
+    },
+    async () => {
+      (AppDataSource.getRepository as any) = () => repository;
+      try {
+        const service = new PaymentService();
+        stubSideEffects(service);
+        (service as any).urubutoService = {
+          validateAccountHolder: async () => ({ success: false }),
+        };
+
+        await assert.rejects(
+          service.createPayment({
+            entityId: orderId,
+            amount: 2500,
+            currency: KpayCurrency.RWF,
+            type: PaymentType.ORDER,
+            customerEmail: 'payer@example.com',
+            customerName: 'Wallet Payer',
+            customerPhone: '+250788000000',
+            provider: PaymentProvider.URUBUTO,
+            channelName: UrubutoChannelName.MOMO,
+          }),
+          (error: any) => error?.statusCode === 503,
+        );
+        assert.equal(repository.saves.length, 0);
+      } finally {
+        (AppDataSource.getRepository as any) = originalGetRepository;
+      }
+    },
+  );
+});
+
+test('PaymentService preserves the provider reference and terminal success on delayed callbacks', async () => {
+  const originalGetRepository = AppDataSource.getRepository;
+  const repository = createRepositoryMock();
+  await repository.save({
+    entityId: orderId,
+    amount: 2500,
+    currency: KpayCurrency.RWF,
+    type: PaymentType.ORDER,
+    status: KpayPaymentStatus.PENDING,
+    provider: PaymentProvider.URUBUTO,
+    method: UrubutoChannelName.MOMO,
+    externalReferenceId: 'urubuto-provider-ref',
+    metadata: { payerCode: 'ORDER-TIMEOUT' },
+  });
+
+  (AppDataSource.getRepository as any) = () => repository;
+  try {
+    const service = new PaymentService();
+    stubSideEffects(service);
+    (service as any).urubutoService = {
+      getMerchantCode: () => 'MERCHANT',
+      mapStatusToInternal: (status: UrubutoTransactionStatus) =>
+        status === UrubutoTransactionStatus.VALID
+          ? KpayPaymentStatus.SUCCESSFUL
+          : KpayPaymentStatus.PENDING,
+    };
+
+    const successful = await service.processUrubutoPaymentWebhook(
+      {
+        merchant_code: 'MERCHANT',
+        payer_code: 'ORDER-TIMEOUT',
+        transaction_id: paymentId,
+        transaction_status: UrubutoTransactionStatus.VALID,
+        amount: 2500,
+        currency: KpayCurrency.RWF,
+        callback_type: 'PAYMENT',
+      },
+      'callback',
+    );
+    assert.equal(successful.status, KpayPaymentStatus.SUCCESSFUL);
+    assert.equal(successful.externalReferenceId, 'urubuto-provider-ref');
+
+    const delayed = await service.processUrubutoPaymentWebhook(
+      {
+        merchant_code: 'MERCHANT',
+        payer_code: 'ORDER-TIMEOUT',
+        transaction_id: paymentId,
+        transaction_status: UrubutoTransactionStatus.PENDING,
+        callback_type: 'PAYMENT',
+      },
+      'callback',
+    );
+    assert.equal(delayed.status, KpayPaymentStatus.SUCCESSFUL);
+    assert.equal(delayed.externalReferenceId, 'urubuto-provider-ref');
+  } finally {
+    (AppDataSource.getRepository as any) = originalGetRepository;
+  }
+});
+
+test('PaymentService rejects mismatched Urubuto webhook correlation data', async () => {
+  const originalGetRepository = AppDataSource.getRepository;
+  const repository = createRepositoryMock();
+  await repository.save({
+    entityId: orderId,
+    amount: 2500,
+    currency: KpayCurrency.RWF,
+    type: PaymentType.ORDER,
+    status: KpayPaymentStatus.PENDING,
+    provider: PaymentProvider.URUBUTO,
+    method: UrubutoChannelName.MOMO,
+    metadata: { payerCode: 'ORDER-TIMEOUT' },
+  });
+
+  (AppDataSource.getRepository as any) = () => repository;
+  try {
+    const service = new PaymentService();
+    stubSideEffects(service);
+    (service as any).urubutoService = {
+      getMerchantCode: () => 'MERCHANT',
+      mapStatusToInternal: () => KpayPaymentStatus.SUCCESSFUL,
+    };
+
+    const validBase = {
+      merchant_code: 'MERCHANT',
+      payer_code: 'ORDER-TIMEOUT',
+      transaction_id: paymentId,
+      transaction_status: UrubutoTransactionStatus.VALID,
+      amount: 2500,
+      currency: KpayCurrency.RWF,
+      callback_type: 'PAYMENT',
+    };
+
+    await assert.rejects(
+      service.processUrubutoPaymentWebhook(
+        { ...validBase, merchant_code: 'OTHER' },
+        'callback',
+      ),
+      /merchant code does not match/i,
+    );
+    await assert.rejects(
+      service.processUrubutoPaymentWebhook(
+        { ...validBase, amount: 2501 },
+        'callback',
+      ),
+      /amount does not match/i,
+    );
+    await assert.rejects(
+      service.processUrubutoPaymentWebhook(
+        { ...validBase, currency: 'USD' },
+        'callback',
+      ),
+      /currency does not match/i,
+    );
+    await assert.rejects(
+      service.processUrubutoPaymentWebhook(
+        { ...validBase, payer_code: 'OTHER-ORDER' },
+        'callback',
+      ),
+      /payer code does not match/i,
+    );
+  } finally {
+    (AppDataSource.getRepository as any) = originalGetRepository;
+  }
+});
+
+test('PaymentService handles notification duplicates once and explicit reversals', async () => {
+  const originalGetRepository = AppDataSource.getRepository;
+  const repository = createRepositoryMock();
+  await repository.save({
+    entityId: orderId,
+    amount: 2500,
+    currency: KpayCurrency.RWF,
+    type: PaymentType.ORDER,
+    status: KpayPaymentStatus.PENDING,
+    provider: PaymentProvider.URUBUTO,
+    method: UrubutoChannelName.MOMO,
+    externalReferenceId: 'urubuto-provider-ref',
+    metadata: { payerCode: 'ORDER-TIMEOUT' },
+  });
+
+  (AppDataSource.getRepository as any) = () => repository;
+  try {
+    const service = new PaymentService();
+    const sideEffects = stubSideEffects(service);
+    (service as any).urubutoService = {
+      getMerchantCode: () => 'MERCHANT',
+      mapStatusToInternal: (status: UrubutoTransactionStatus) =>
+        status === UrubutoTransactionStatus.VALID
+          ? KpayPaymentStatus.SUCCESSFUL
+          : status === UrubutoTransactionStatus.CANCELED
+            ? KpayPaymentStatus.FAILED
+            : KpayPaymentStatus.PENDING,
+    };
+
+    const notification = {
+      merchant_code: 'MERCHANT',
+      payer_code: 'ORDER-TIMEOUT',
+      transaction_id: paymentId,
+      amount: 2500,
+      currency: KpayCurrency.RWF,
+      slip_number: 'SLIP-001',
+    };
+
+    const first = await service.processUrubutoPaymentWebhook(
+      notification,
+      'notification',
+    );
+    const duplicate = await service.processUrubutoPaymentWebhook(
+      notification,
+      'notification',
+    );
+
+    assert.equal(first.status, KpayPaymentStatus.SUCCESSFUL);
+    assert.equal(duplicate.status, KpayPaymentStatus.SUCCESSFUL);
+    assert.deepEqual(sideEffects, { activities: 1, assignments: 1 });
+
+    const reversed = await service.processUrubutoPaymentWebhook(
+      {
+        merchant_code: 'MERCHANT',
+        payer_code: 'ORDER-TIMEOUT',
+        transaction_id: paymentId,
+        initial_slip_number: 'SLIP-001',
+      },
+      'reversal',
+    );
+    assert.equal(reversed.status, KpayPaymentStatus.FAILED);
+    assert.equal(reversed.externalReferenceId, 'urubuto-provider-ref');
+  } finally {
+    (AppDataSource.getRepository as any) = originalGetRepository;
+  }
+});
+
+test('PaymentService public status is scoped to the matching order and omits private metadata', async () => {
+  const originalGetRepository = AppDataSource.getRepository;
+  const repository = createRepositoryMock();
+  await repository.save({
+    entityId: orderId,
+    amount: 2500,
+    currency: KpayCurrency.RWF,
+    type: PaymentType.ORDER,
+    status: KpayPaymentStatus.PENDING,
+    provider: PaymentProvider.URUBUTO,
+    method: UrubutoChannelName.MOMO,
+    customerPhone: '+250788000000',
+    metadata: { secret: 'private' },
+  });
+  (AppDataSource.getRepository as any) = () => repository;
+
+  try {
+    const service = new PaymentService();
+    const status = await service.getPublicPaymentStatus(paymentId, orderId);
+    assert.equal(status.id, paymentId);
+    assert.equal(status.entityId, orderId);
+    assert.equal('metadata' in status, false);
+    assert.equal('customerPhone' in status, false);
+
+    await assert.rejects(
+      service.getPublicPaymentStatus(
+        paymentId,
+        '44444444-4444-4444-8444-444444444444',
+      ),
+      /Payment not found/,
+    );
+  } finally {
+    (AppDataSource.getRepository as any) = originalGetRepository;
+  }
 });

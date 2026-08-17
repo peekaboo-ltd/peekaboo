@@ -174,6 +174,7 @@ const OrderPayment = () => {
 
       try {
         const response = await createPaymentMutation(payload).unwrap();
+        const paymentId = response?.data?.id;
         const paymentUrl =
           response?.paymentUrl ||
           response?.data?.paymentUrl ||
@@ -192,7 +193,7 @@ const OrderPayment = () => {
         if (isCard) {
           // Without a hosted checkout URL the card payment never started, so
           // don't send the user to the success page.
-          if (!paymentUrl) {
+          if (!paymentUrl || !paymentId) {
             toast.error(
               'Card payment could not be started. Please try again or pay with mobile money.',
             );
@@ -203,13 +204,28 @@ const OrderPayment = () => {
           return;
         }
 
-        if (orderId) {
+        if (orderId && paymentId) {
           closeModal();
-          navigate(`/p/orders/${orderId}/payment-success`);
+          navigate(
+            `/p/orders/${orderId}/payment-pending?paymentId=${paymentId}`,
+          );
+        } else {
+          toast.error('Payment status could not be tracked. Please try again.');
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Payment creation failed:', error);
-        toast.error('Payment could not be initiated. Please try again.');
+        const apiError = error as {
+          data?: { message?: string };
+          error?: string;
+        };
+        const message =
+          apiError?.data?.message ||
+          apiError?.error ||
+          'Payment could not be initiated. Please try again.';
+        if (!isCard && /phone|mobile money|wallet/i.test(message)) {
+          setPayerPhoneError(message);
+        }
+        toast.error(message);
       }
     },
     [

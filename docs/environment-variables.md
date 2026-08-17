@@ -89,7 +89,7 @@ This document is the exhaustive reference for every environment variable used ac
 | `URUBUTO_WEBHOOK_PASSWORD` | — | Yes (for Urubuto) | Basic-auth password for inbound Urubuto webhooks. | `urubuto.config.ts:61` |
 | `URUBUTO_WEBHOOK_JWT_SECRET` | falls back to `JWT_SECRET`, then `peekaboo` | Optional | Secret for verifying webhook JWTs. Set a strong, dedicated value. | `urubuto.config.ts:62-65` |
 | `URUBUTO_CHECKOUT_BASE_URL` | derived from `URUBUTO_BASE_URL` | Optional | Public checkout URL used in redirects. When unset, resolves from the API base (staging → `https://staging.urubutopay.rw`, otherwise `https://urubutopay.rw`). Startup validation rejects mismatched staging/production combinations. | `urubuto.config.ts:36-49,66-69,96-113` |
-| `URUBUTO_CARD_REDIRECT_BASE_URL` | falls back to `FRONTEND_URL` | Optional | Public HTTPS origin approved by UrubutoPay for `CARD` payment redirects. Server builds `{base}/p/orders/{orderId}/payment-success` after trimming whitespace/trailing slashes. **Must be the approved domain in production.** | `payment.service.ts:635-636` |
+| `URUBUTO_CARD_REDIRECT_BASE_URL` | falls back to `FRONTEND_URL` | Optional | Public HTTPS origin approved by UrubutoPay for `CARD` payment redirects. Server builds `{base}/p/orders/{orderId}/payment-pending?paymentId={paymentId}` after trimming whitespace/trailing slashes. **Must be the approved domain in production.** | `payment.service.ts` |
 
 **UrubutoPay webhook URLs** registered with the provider (constructed from `PUBLIC_API_BASE_URL`):
 

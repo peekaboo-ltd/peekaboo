@@ -6,7 +6,10 @@ import {
 } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { Payment } from '../entities/payment.entity';
-import { CreatePaymentDto } from '../types/payment.types';
+import {
+  CreatePaymentDto,
+  PublicPaymentStatusDto,
+} from '../types/payment.types';
 import { KpayService } from '../integrations/kpay/kpay.service';
 import { KpayPaymentMethod, KpayPaymentStatus } from '../types/kpay.types';
 import { UrubutoService } from '../integrations/urubuto/urubuto.service';
@@ -25,7 +28,11 @@ import {
 } from '../helpers/pagination.helper';
 import { UUID } from '../types';
 import { PaymentType } from '../constants/payment.constants';
-import { NotFoundError, ValidationError } from '../helpers/errors.helper';
+import {
+  AppError,
+  NotFoundError,
+  ValidationError,
+} from '../helpers/errors.helper';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import { OrderActivityService } from './orderActivity.service';
 import { OrderActivityStatus } from '../constants/order.constants';
@@ -51,7 +58,6 @@ type InitiationContext = {
   provider: PaymentProvider;
   requestedMethod: string;
   customerPhone?: string;
-  redirectUrl?: string;
   chargeAmount: number;
   catalogAmount: number;
   isDevPrice: boolean;
@@ -83,6 +89,8 @@ export class PaymentService {
   })
   async createPayment(payment: CreatePaymentDto): Promise<Payment> {
     const context = this.resolveInitiationContext(payment);
+
+    await this.validateUrubutoWallet(context);
 
     const newPayment = await this.paymentRepository.save(
       this.buildPaymentRecord(payment, context),
@@ -196,6 +204,35 @@ export class PaymentService {
       page: Number(page),
       size: Number(size),
     });
+  }
+
+  async getPublicPaymentStatus(
+    paymentId: UUID,
+    entityId: UUID,
+  ): Promise<PublicPaymentStatusDto> {
+    const payment = await this.paymentRepository.findOne({
+      where: {
+        id: paymentId,
+        entityId,
+        type: PaymentType.ORDER,
+      },
+    });
+
+    if (!payment) {
+      throw new NotFoundError('Payment not found');
+    }
+
+    return {
+      id: payment.id,
+      entityId: payment.entityId,
+      status: payment.status,
+      provider: payment.provider,
+      method: payment.method,
+      amount: Number(payment.amount),
+      currency: payment.currency,
+      externalReferenceId: payment.externalReferenceId,
+      updatedAt: payment.updatedAt,
+    };
   }
 
   // UPDATE PAYMENT STATUS
@@ -355,6 +392,21 @@ export class PaymentService {
     payload: UrubutoPaymentWebhookPayload,
     source: 'callback' | 'notification' | 'reversal',
   ): Promise<Payment> {
+    if (
+      !payload.merchant_code ||
+      payload.merchant_code !== this.urubutoService.getMerchantCode()
+    ) {
+      throw new ValidationError('UrubutoPay merchant code does not match');
+    }
+
+    if (
+      source === 'callback' &&
+      payload.callback_type &&
+      payload.callback_type !== 'PAYMENT'
+    ) {
+      throw new ValidationError('Unsupported UrubutoPay callback type');
+    }
+
     const payment = await this.findUrubutoPayment(payload);
 
     logger.debug('UrubutoPay webhook payment lookup', {
@@ -368,6 +420,8 @@ export class PaymentService {
       throw new NotFoundError('Payment not found');
     }
 
+    this.validateUrubutoWebhookPayment(payment, payload);
+
     const inferredStatus =
       source === 'reversal'
         ? UrubutoTransactionStatus.CANCELED
@@ -377,17 +431,25 @@ export class PaymentService {
             : UrubutoTransactionStatus.PENDING_SETTLEMENT);
 
     const status = this.urubutoService.mapStatusToInternal(inferredStatus);
-    const externalReference =
-      payload.internal_transaction_id ||
-      payload.transaction_id ||
-      payment.externalReferenceId;
+    const externalReference = this.resolveUrubutoExternalReference(
+      payment,
+      payload,
+      source,
+    );
+    const nextStatus =
+      source !== 'reversal' &&
+      status === KpayPaymentStatus.PENDING &&
+      (payment.status === KpayPaymentStatus.SUCCESSFUL ||
+        payment.status === KpayPaymentStatus.FAILED)
+        ? payment.status
+        : status;
 
     payment.externalReferenceId = externalReference;
     await this.paymentRepository.update(payment.id, {
       externalReferenceId: externalReference,
     });
 
-    return this.updatePaymentStatus(payment.id as UUID, status, {
+    return this.updatePaymentStatus(payment.id as UUID, nextStatus, {
       [`urubuto${this.capitalize(source)}Payload`]: payload,
       urubutoLastStatus: inferredStatus,
       urubutoLastWebhookSource: source,
@@ -440,19 +502,6 @@ export class PaymentService {
       );
     }
 
-    let redirectUrl: string | undefined;
-    if (requestedMethod === UrubutoChannelName.CARD && !isSimulated) {
-      redirectUrl = this.getPaymentRedirectUrl(payment.entityId);
-      this.validateCardPaymentRedirectUrl(redirectUrl);
-
-      logger.debug('Resolved CARD payment redirect URL', {
-        entityId: payment.entityId,
-        provider,
-        channelName: requestedMethod,
-        redirectUrl,
-      });
-    }
-
     const { chargeAmount, isDevPrice, catalogAmount, isSimulated: simulated } =
       resolveChargeableAmount(Number(payment.amount));
 
@@ -486,7 +535,6 @@ export class PaymentService {
       provider,
       requestedMethod,
       customerPhone,
-      redirectUrl,
       chargeAmount,
       catalogAmount,
       isDevPrice,
@@ -523,7 +571,7 @@ export class PaymentService {
     payment: CreatePaymentDto,
     context: InitiationContext,
   ): Promise<Payment> {
-    const paymentUrl = this.getPaymentRedirectUrl(payment.entityId);
+    const paymentUrl = this.getPaymentPendingUrl(payment.entityId, newPayment.id);
     const externalReferenceId = `sim_${newPayment.id}`;
 
     newPayment.externalReferenceId = externalReferenceId;
@@ -577,6 +625,21 @@ export class PaymentService {
     }
 
     const payerCode = await this.resolveUrubutoPayerCode(payment.entityId);
+    const redirectUrl = this.getPaymentPendingUrl(
+      payment.entityId,
+      newPayment.id,
+    );
+
+    if (context.requestedMethod === UrubutoChannelName.CARD) {
+      this.validateCardPaymentRedirectUrl(redirectUrl);
+      logger.debug('Resolved CARD payment redirect URL', {
+        entityId: payment.entityId,
+        paymentId: newPayment.id,
+        provider: context.provider,
+        channelName: context.requestedMethod,
+        redirectUrl,
+      });
+    }
 
     return this.urubutoService.initiatePayment({
       amount: context.chargeAmount,
@@ -587,9 +650,49 @@ export class PaymentService {
       refId: newPayment?.id as UUID,
       payerCode,
       channelName: context.requestedMethod,
-      redirectUrl:
-        context.redirectUrl || this.getPaymentRedirectUrl(payment.entityId),
+      redirectUrl,
     });
+  }
+
+  private async validateUrubutoWallet(
+    context: InitiationContext,
+  ): Promise<void> {
+    if (
+      context.isSimulated ||
+      context.provider !== PaymentProvider.URUBUTO ||
+      (context.requestedMethod !== UrubutoChannelName.MOMO &&
+        context.requestedMethod !== UrubutoChannelName.AIRTEL_MONEY)
+    ) {
+      return;
+    }
+
+    if (!context.customerPhone) {
+      throw new ValidationError('A valid payer phone number is required');
+    }
+
+    const result = await this.urubutoService.validateAccountHolder({
+      customerPhone: context.customerPhone,
+      channelName: context.requestedMethod,
+    });
+
+    if (!result.success) {
+      throw new AppError(
+        result.error?.message ||
+          'We could not verify this mobile money account. Please try again.',
+        503,
+      );
+    }
+
+    if (!result.valid) {
+      const providerName =
+        context.requestedMethod === UrubutoChannelName.AIRTEL_MONEY
+          ? 'Airtel Money'
+          : 'MTN Mobile Money';
+      throw new ValidationError(
+        result.message ||
+          `This phone number is not registered for ${providerName}. Check the number or choose the correct network.`,
+      );
+    }
   }
 
   private async applyInitiationResult(
@@ -634,17 +737,14 @@ export class PaymentService {
       newPayment.id;
     const verification =
       await this.verifyUrubutoTransactionStatus(transactionId as string);
-    const verifiedStatus = verification.data?.transaction_status
-      ? this.urubutoService.mapStatusToInternal(
-          verification.data.transaction_status,
-        )
-      : undefined;
     const verifiedTransactionId =
       verification.data?.internal_transaction_id ||
       verification.data?.transaction_id ||
       transactionId;
 
-    newPayment.status = verifiedStatus || KpayPaymentStatus.PENDING;
+    // A provider status lookup helps correlate a timed-out request, but only
+    // an authenticated UrubutoPay webhook may complete the payment.
+    newPayment.status = KpayPaymentStatus.PENDING;
     newPayment.externalReferenceId = verifiedTransactionId;
     newPayment.metadata = {
       ...(newPayment.metadata || {}),
@@ -661,14 +761,6 @@ export class PaymentService {
       status: newPayment.status,
       metadata: newPayment.metadata,
     });
-
-    if (newPayment.status === KpayPaymentStatus.SUCCESSFUL) {
-      await this.updatePaymentStatus(
-        newPayment.id as UUID,
-        newPayment.status,
-        newPayment.metadata,
-      );
-    }
 
     return newPayment;
   }
@@ -754,16 +846,70 @@ export class PaymentService {
     return PaymentProvider.URUBUTO;
   }
 
-  private getPaymentRedirectUrl(orderId: UUID): string {
+  private getPaymentPendingUrl(orderId: UUID, paymentId: UUID): string {
     const baseUrl =
       this.normalizeBaseUrl(process.env.URUBUTO_CARD_REDIRECT_BASE_URL) ||
       this.normalizeBaseUrl(process.env.FRONTEND_URL);
 
     if (baseUrl) {
-      return `${baseUrl}/p/orders/${orderId}/payment-success`;
+      return `${baseUrl}/p/orders/${orderId}/payment-pending?paymentId=${paymentId}`;
     }
 
-    return `https://peekaboo.co.rw/p/orders/${orderId}/payment-success`;
+    return `https://peekaboo.co.rw/p/orders/${orderId}/payment-pending?paymentId=${paymentId}`;
+  }
+
+  private validateUrubutoWebhookPayment(
+    payment: Payment,
+    payload: UrubutoPaymentWebhookPayload,
+  ): void {
+    if (payload.amount !== undefined) {
+      const webhookAmount = Number(payload.amount);
+      if (
+        !Number.isFinite(webhookAmount) ||
+        Math.abs(webhookAmount - Number(payment.amount)) > 0.001
+      ) {
+        throw new ValidationError('UrubutoPay webhook amount does not match');
+      }
+    }
+
+    if (
+      payload.currency &&
+      payload.currency.toUpperCase() !== payment.currency.toUpperCase()
+    ) {
+      throw new ValidationError('UrubutoPay webhook currency does not match');
+    }
+
+    const expectedPayerCode = payment.metadata?.payerCode;
+    if (
+      expectedPayerCode &&
+      payload.payer_code &&
+      payload.payer_code !== expectedPayerCode
+    ) {
+      throw new ValidationError('UrubutoPay webhook payer code does not match');
+    }
+  }
+
+  private resolveUrubutoExternalReference(
+    payment: Payment,
+    payload: UrubutoPaymentWebhookPayload,
+    source: 'callback' | 'notification' | 'reversal',
+  ): string | undefined {
+    if (payload.internal_transaction_id) {
+      return payload.internal_transaction_id;
+    }
+
+    if (payment.externalReferenceId) {
+      return payment.externalReferenceId;
+    }
+
+    if (
+      payload.transaction_id &&
+      (source !== 'callback' || payload.transaction_id !== payment.id)
+    ) {
+      return payload.transaction_id;
+    }
+
+    return undefined;
   }
 
   private validateCardPaymentRedirectUrl(redirectUrl: string): void {

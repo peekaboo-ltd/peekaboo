@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAppSelector } from "@/states/hooks";
 import { useGetPublicOrder } from "@/hooks/orders/orders.hooks";
-import { useFetchPublicPayments } from "@/hooks/payments/payment.hooks";
-import { KpayPaymentStatus, PaymentType } from "@/types/payment.types";
+import { KpayPaymentStatus } from "@/types/payment.types";
 import type { UUID } from "@/types";
 import Button from "@/components/inputs/Button";
 import AdministrativeLocation from "@/containers/locations/AdministrativeLocation";
@@ -12,6 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faCopy } from "@fortawesome/free-regular-svg-icons";
 import { toast } from "sonner";
 import { useDocumentTitle } from "@/hooks/common/useDocumentTitle";
+import { useGetPublicPaymentStatusQuery } from "@/api/queries/payments.queries";
 
 const SkeletonLine = ({ className = "" }: { className?: string }) => (
   <span
@@ -21,11 +21,53 @@ const SkeletonLine = ({ className = "" }: { className?: string }) => (
 
 const PublicOrderPaymentSuccess = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const [isCopied, setIsCopied] = useState(false);
+  const [copiedReference, setCopiedReference] = useState<
+    "payment" | "order" | null
+  >(null);
   useDocumentTitle("Payment Successful");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const paymentId = searchParams.get("paymentId") || "";
+
+  const { id } = useParams();
+  const { order } = useAppSelector((state) => state.order);
+  const currentOrder = order?.id === id ? order : undefined;
+
+  const { getPublicOrder, isFetching: orderLoading } = useGetPublicOrder();
+  const exactPaymentQuery = useGetPublicPaymentStatusQuery(
+    { paymentId, entityId: id || "" },
+    { skip: !id || !paymentId },
+  );
 
   useEffect(() => {
+    if (id) {
+      getPublicOrder({ id: id as UUID });
+    }
+  }, [id, getPublicOrder]);
+
+  useEffect(() => {
+    const exactPayment = exactPaymentQuery.data?.data;
+    if (
+      id &&
+      paymentId &&
+      exactPayment &&
+      exactPayment.status !== KpayPaymentStatus.SUCCESSFUL
+    ) {
+      navigate(`/p/orders/${id}/payment-pending?paymentId=${paymentId}`, {
+        replace: true,
+      });
+    }
+  }, [exactPaymentQuery.data?.data, id, navigate, paymentId]);
+
+  const exactPayment = exactPaymentQuery.data?.data;
+  const successfulPayment =
+    exactPayment?.status === KpayPaymentStatus.SUCCESSFUL
+      ? exactPayment
+      : undefined;
+
+  useEffect(() => {
+    if (!successfulPayment) return;
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -41,46 +83,64 @@ const PublicOrderPaymentSuccess = () => {
       observerRef.current?.observe(el);
     });
 
-    return () => {
-      observerRef.current?.disconnect();
-    };
-  }, []);
+    return () => observerRef.current?.disconnect();
+  }, [successfulPayment]);
 
-  const { id } = useParams();
-  const { order } = useAppSelector((state) => state.order);
-  const { paymentsList } = useAppSelector((state) => state.payment);
-
-  const { getPublicOrder, isFetching: orderLoading } = useGetPublicOrder();
-  const { fetchPublicPayments, isFetching: paymentsLoading } =
-    useFetchPublicPayments();
-
-  useEffect(() => {
-    if (id) {
-      getPublicOrder({ id: id as UUID });
-    }
-  }, [id, getPublicOrder]);
-
-  useEffect(() => {
-    if (order?.id) {
-      fetchPublicPayments({
-        entityId: order.id,
-        paymentType: PaymentType.ORDER,
-      });
-    }
-  }, [fetchPublicPayments, order?.id]);
-
-  const successfulPayment = paymentsList?.find(
-    (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL,
-  );
-
-  const handleCopyReferenceId = () => {
-    if (order?.referenceId) {
-      navigator.clipboard.writeText(order.referenceId);
-      toast.success("Reference ID copied to clipboard");
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    }
+  const copyReference = (value: string, field: "payment" | "order") => {
+    void navigator.clipboard.writeText(value);
+    toast.success(
+      `${field === "payment" ? "Payment" : "Order"} reference copied to clipboard`,
+    );
+    setCopiedReference(field);
+    window.setTimeout(() => setCopiedReference(null), 2000);
   };
+
+  if (
+    paymentId &&
+    !exactPaymentQuery.error &&
+    (exactPaymentQuery.isLoading ||
+      exactPaymentQuery.isFetching ||
+      !successfulPayment)
+  ) {
+    return (
+      <main className="min-h-[70vh] bg-[#FAFAF7] px-4 py-16 sm:px-6">
+        <section
+          className="mx-auto max-w-xl rounded-xl border border-slate-200 bg-white p-8 text-center"
+          role="status"
+          aria-live="polite"
+        >
+          <span className="mx-auto block h-9 w-9 animate-spin rounded-full border-2 border-slate-200 border-t-[#edb100] motion-reduce:animate-none" />
+          <h1 className="mt-5 text-xl font-bold text-slate-900">
+            Confirming your payment
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">
+            We are checking the completed transaction before showing the receipt.
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!successfulPayment || exactPaymentQuery.error) {
+    return (
+      <main className="min-h-[70vh] bg-[#FAFAF7] px-4 py-16 sm:px-6">
+        <section className="mx-auto max-w-xl rounded-xl border border-slate-200 bg-white p-8 text-center">
+          <h1 className="text-xl font-bold text-slate-900">
+            Payment confirmation unavailable
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            We could not verify a completed payment for this order. Return to the
+            order to check its current status.
+          </p>
+          {id ? (
+            <Button primary route={`/p/orders/${id}`} className="mt-6">
+              Return to order
+            </Button>
+          ) : null}
+        </section>
+      </main>
+    );
+  }
 
   return (
     <>
@@ -99,6 +159,9 @@ const PublicOrderPaymentSuccess = () => {
         .ps-reveal:nth-child(2) { transition-delay: 0.08s; }
         .ps-reveal:nth-child(3) { transition-delay: 0.16s; }
         .ps-reveal:nth-child(4) { transition-delay: 0.24s; }
+        @media (prefers-reduced-motion: reduce) {
+          .ps-reveal { opacity: 1; transform: none; transition: none; }
+        }
       `,
         }}
       />
@@ -140,7 +203,7 @@ const PublicOrderPaymentSuccess = () => {
                   </p>
                 </header>
 
-                {paymentsLoading ? (
+                {exactPaymentQuery.isFetching ? (
                   <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
                       <div
@@ -154,20 +217,36 @@ const PublicOrderPaymentSuccess = () => {
                   </div>
                 ) : (
                   <dl className="space-y-4">
-                    {successfulPayment && (
+                    {successfulPayment.externalReferenceId && (
                       <div className="flex flex-col gap-1 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
                         <dt className="text-xs text-slate-600 uppercase ">
                           Payment Reference
                         </dt>
-                        <dd className="text-sm text-slate-700">
-                          <Link
-                            to={`https://kpay.co.rw/transactions/${successfulPayment.externalReferenceId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary underline underline-offset-4 transition-opacity hover:opacity-70"
-                          >
+                        <dd className="flex flex-wrap items-center gap-2 text-sm text-slate-700">
+                          <code className="break-all rounded-md bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs text-slate-700">
                             {successfulPayment.externalReferenceId}
-                          </Link>
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              copyReference(
+                                successfulPayment.externalReferenceId,
+                                "payment",
+                              )
+                            }
+                            className="cursor-pointer rounded border border-slate-200 p-1.5 text-slate-600 transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                            aria-label="Copy payment reference to clipboard"
+                          >
+                            <FontAwesomeIcon
+                              icon={
+                                copiedReference === "payment"
+                                  ? faCheckCircle
+                                  : faCopy
+                              }
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </button>
                         </dd>
                       </div>
                     )}
@@ -182,17 +261,26 @@ const PublicOrderPaymentSuccess = () => {
                         ) : (
                           <>
                             <code className="break-all rounded-md bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs text-slate-600">
-                              {order?.referenceId ?? "—"}
+                              {currentOrder?.referenceId ?? "—"}
                             </code>
-                            {order?.referenceId && (
+                            {currentOrder?.referenceId && (
                               <button
                                 type="button"
-                                onClick={handleCopyReferenceId}
+                                onClick={() =>
+                                  copyReference(
+                                    currentOrder.referenceId,
+                                    "order",
+                                  )
+                                }
                                 className="cursor-pointer rounded border border-slate-200 p-1.5 text-slate-600 transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
                                 aria-label="Copy reference ID to clipboard"
                               >
                                 <FontAwesomeIcon
-                                  icon={isCopied ? faCheckCircle : faCopy}
+                                  icon={
+                                    copiedReference === "order"
+                                      ? faCheckCircle
+                                      : faCopy
+                                  }
                                   className="h-3.5 w-3.5"
                                   aria-hidden="true"
                                 />
@@ -211,9 +299,7 @@ const PublicOrderPaymentSuccess = () => {
                         {orderLoading ? (
                           <SkeletonLine className="h-6 w-24" />
                         ) : (
-                          formatCurrency(
-                            order?.finalFee ?? order?.initialFee ?? 0,
-                          )
+                          formatCurrency(successfulPayment.amount)
                         )}
                       </dd>
                     </div>
@@ -252,10 +338,10 @@ const PublicOrderPaymentSuccess = () => {
                       <p className="mb-3 text-xs uppercase st text-slate-600">
                         Pickup
                       </p>
-                      {order?.locationFrom ? (
+                      {currentOrder?.locationFrom ? (
                         <ul className="space-y-2">
                           <AdministrativeLocation
-                            location={order.locationFrom}
+                            location={currentOrder.locationFrom}
                           />
                         </ul>
                       ) : (
@@ -267,9 +353,9 @@ const PublicOrderPaymentSuccess = () => {
                       <p className="mb-3 text-xs uppercase st text-slate-600">
                         Destination
                       </p>
-                      {order?.locationTo ? (
+                      {currentOrder?.locationTo ? (
                         <ul className="space-y-2">
-                          <AdministrativeLocation location={order.locationTo} />
+                          <AdministrativeLocation location={currentOrder.locationTo} />
                         </ul>
                       ) : (
                         <p className="text-sm text-slate-600">Not set</p>
@@ -287,7 +373,7 @@ const PublicOrderPaymentSuccess = () => {
                     </div>
                     <p className="text-base text-slate-900">
                       {formatCurrency(
-                        order?.finalFee ?? order?.initialFee ?? 0,
+                        currentOrder?.finalFee ?? currentOrder?.initialFee ?? 0,
                       )}
                     </p>
                   </div>
@@ -335,7 +421,7 @@ const PublicOrderPaymentSuccess = () => {
             >
               Back
             </Button>
-            <Button primary route={`/p/orders/${order?.id}/tracking`}>
+            <Button primary route={`/p/orders/${id}/tracking`}>
               Track Order
             </Button>
           </footer>
