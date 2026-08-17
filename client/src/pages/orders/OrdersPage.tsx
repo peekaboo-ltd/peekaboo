@@ -116,16 +116,21 @@ const OrdersPage = () => {
   const { ordersColumns } = useOrdersColumns();
 
   return (
-    <main className="text-primary h-full w-full">
-      <header className="w-full flex flex-col gap-4 mb-4">
-        <section className="flex items-start justify-between gap-4 flex-wrap">
+    <main className="h-full w-full text-[var(--peekaboo-text)]">
+      <header className="mb-5 flex w-full flex-col gap-5 border-b border-[var(--peekaboo-line)] pb-5">
+        <section className="flex flex-wrap items-start justify-between gap-4">
           <article>
-            <h1 className="text-2xl font-bold text-slate-700">Orders</h1>
-            <p className="text-sm text-muted-foreground">
-              Search and filter orders by status or Order ID.
+            <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--peekaboo-muted)]">
+              Delivery operations
+            </p>
+            <h1 className="mt-1 font-['Space_Grotesk'] text-2xl font-semibold tracking-[-0.03em] text-[var(--peekaboo-dark)]">
+              Orders
+            </h1>
+            <p className="mt-1 text-sm text-[var(--peekaboo-muted)]">
+              Find an order by reference or narrow the list by status.
             </p>
           </article>
-          <nav className="w-full sm:w-auto flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+          <nav className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
             <Button
               type="button"
               icon={faUpload}
@@ -135,7 +140,7 @@ const OrdersPage = () => {
                 dispatch(setImportBatchModal(true));
               }}
             >
-              Import batch orders
+              Import orders
             </Button>
             <Button
               type="button"
@@ -147,28 +152,28 @@ const OrdersPage = () => {
                 dispatch(setCreateOrderModal(true));
               }}
             >
-              Create Order
+              Create order
             </Button>
           </nav>
         </section>
 
-        <fieldset className="w-full grid grid-cols-4 gap-4 max-md:grid-cols-3 max-sm:grid-cols-2">
+        <fieldset className="grid w-full grid-cols-4 gap-4 rounded-[var(--radius)] border border-[var(--peekaboo-line)] bg-white p-3 max-md:grid-cols-3 max-sm:grid-cols-2">
           {statusFilter}
         </fieldset>
       </header>
 
-        <Table
-          columns={ordersColumns}
-          data={ordersList}
-          showPagination={true}
-          page={page}
-          setPage={setPage}
-          size={size}
-          setSize={setSize}
-          totalPages={totalPages}
-          totalCount={totalCount}
-          isLoading={isFetching}
-        />
+      <Table
+        columns={ordersColumns}
+        data={ordersList}
+        showPagination={true}
+        page={page}
+        setPage={setPage}
+        size={size}
+        setSize={setSize}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        isLoading={isFetching}
+      />
       <CreateOrder />
       <DeleteOrder />
       <ImportBatch />

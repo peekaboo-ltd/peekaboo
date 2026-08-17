@@ -10,6 +10,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useGetPublicPaymentStatusQuery } from '@/api/queries/payments.queries';
 import Button from '@/components/inputs/Button';
+import {
+  OrderStageRail,
+  PublicPage,
+  PublicPageHero,
+  PublicSectionCard,
+} from '@/components/layout/PublicPage';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useGetPublicOrder } from '@/hooks/orders/orders.hooks';
 import { useAppSelector } from '@/states/hooks';
@@ -43,8 +49,7 @@ const PublicOrderPaymentPending = () => {
     { paymentId, entityId: id || '' },
     {
       skip: !id || !paymentId,
-      pollingInterval:
-        isVisible && !stopPolling ? POLLING_INTERVAL_MS : 0,
+      pollingInterval: isVisible && !stopPolling ? POLLING_INTERVAL_MS : 0,
     },
   );
   const refetchPaymentStatus = statusQuery.refetch;
@@ -99,174 +104,190 @@ const PublicOrderPaymentPending = () => {
 
   if (!id || !paymentId) {
     return (
-      <main className="min-h-[70vh] bg-[#fafaf7] px-4 py-16 sm:px-6">
-        <section className="mx-auto max-w-xl rounded-xl border border-slate-200 bg-white p-7 text-center shadow-[0_18px_60px_-45px_rgba(10,10,10,0.35)]">
-          <FontAwesomeIcon
-            icon={faTriangleExclamation}
-            className="mb-4 h-6 w-6 text-amber-600"
-          />
-          <h1 className="text-xl font-bold text-slate-900">
-            Payment reference missing
-          </h1>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
-            Return to the order and start the payment again so we can track its
-            confirmation.
-          </p>
-          {id ? (
-            <Button primary route={`/p/orders/${id}`} className="mt-6">
-              Return to order
-            </Button>
-          ) : null}
-        </section>
-      </main>
+      <PublicPage>
+        <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
+          <div className="py-5 text-center">
+            <FontAwesomeIcon
+              icon={faTriangleExclamation}
+              className="mb-4 h-5 w-5 text-[var(--destructive)]"
+            />
+            <h1 className="font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)]">
+              Payment reference missing
+            </h1>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--peekaboo-muted)]">
+              Return to the order and start payment again so we can track its
+              confirmation.
+            </p>
+            {id ? (
+              <Button primary route={`/p/orders/${id}`} className="mt-6">
+                Return to order
+              </Button>
+            ) : null}
+          </div>
+        </PublicSectionCard>
+      </PublicPage>
     );
   }
 
   return (
-    <main className="min-h-[78vh] bg-[#fafaf7] px-4 py-10 sm:px-6 lg:px-10">
-      <div className="mx-auto grid max-w-4xl gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)]">
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_24px_80px_-58px_rgba(10,10,10,0.5)]">
-          <div className="border-b border-slate-100 px-6 py-7 sm:px-8">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-amber-800">
-                Secure confirmation
-              </span>
-              <FontAwesomeIcon
-                icon={faShieldHalved}
-                className="h-4 w-4 text-slate-400"
+    <PublicPage>
+      <PublicPageHero
+        eyebrow={isFailed ? 'Payment stopped' : 'Payment in progress'}
+        title={
+          isFailed
+            ? 'The payment was not completed'
+            : 'Confirm the payment on your phone'
+        }
+        description={
+          isFailed
+            ? 'No charge was confirmed. Check the payer details or choose another payment method.'
+            : isMobilePayment
+              ? 'Approve the mobile money prompt. This page will move forward automatically when the payment is confirmed.'
+              : 'Complete the provider checkout. This page will move forward automatically when the payment is confirmed.'
+        }
+        actions={
+          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--peekaboo-gray)] px-3 py-2 text-xs font-medium text-[var(--peekaboo-dark)]">
+            <FontAwesomeIcon
+              icon={isFailed ? faTriangleExclamation : faShieldHalved}
+              aria-hidden="true"
+            />
+            {isFailed ? 'Not completed' : 'Secure checkout'}
+          </span>
+        }
+      />
+
+      <OrderStageRail currentStage="payment" />
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(17rem,0.7fr)] lg:items-start">
+        <PublicSectionCard
+          eyebrow="Confirmation"
+          title={isFailed ? 'Payment needs attention' : 'Waiting for approval'}
+          description={
+            isFailed
+              ? 'This attempt has ended. Return to the order to try again.'
+              : 'Keep this page open while the provider confirms the charge.'
+          }
+        >
+          <ol
+            className="relative grid grid-cols-2 gap-8"
+            aria-label="Payment confirmation progress"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute left-3.5 right-3.5 top-3.5 h-px bg-[var(--peekaboo-line)]"
+            />
+            {!isFailed ? (
+              <span
                 aria-hidden="true"
+                className="absolute left-3.5 top-3.5 h-px w-[calc(50%-0.875rem)] bg-[var(--peekaboo-yellow)]"
               />
-            </div>
+            ) : null}
 
-            <h1 className="max-w-xl text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-              {isFailed
-                ? 'The payment was not completed'
-                : 'Confirm the payment on your phone'}
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">
-              {isFailed
-                ? 'No charge was confirmed. Return to the order to check the payer details or choose another payment method.'
-                : isMobilePayment
-                  ? 'Approve the mobile money prompt. This page will move forward automatically when the payment is confirmed.'
-                  : 'Complete the provider checkout. This page will move forward automatically when the payment is confirmed.'}
-            </p>
-          </div>
-
-          <div className="px-6 py-7 sm:px-8">
-            <div
-              className="relative grid grid-cols-2 gap-8"
-              aria-label="Payment confirmation progress"
-            >
-              <span className="absolute left-[13px] right-[13px] top-[13px] h-px bg-slate-200" />
-              {!isFailed ? (
-                <span className="absolute left-[13px] top-[11px] h-[5px] w-[calc(50%-13px)] origin-left bg-[#edb100] motion-safe:animate-pulse motion-reduce:animate-none" />
-              ) : null}
-              <div className="relative">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0a0a0a] text-white">
-                  <FontAwesomeIcon icon={faCircleCheck} className="h-3 w-3" />
-                </span>
-                <p className="mt-3 text-xs font-medium uppercase tracking-[0.12em] text-slate-800">
-                  Initiated
-                </p>
-                <p className="mt-1 text-xs text-slate-500">Request sent</p>
-              </div>
-              <div className="relative text-right">
-                <span
-                  className={`ml-auto flex h-7 w-7 items-center justify-center rounded-full border-2 bg-white ${
-                    isFailed
-                      ? 'border-red-500 text-red-600'
-                      : 'border-[#edb100] text-amber-700'
-                  }`}
-                >
-                  <FontAwesomeIcon
-                    icon={isFailed ? faTriangleExclamation : faArrowsRotate}
-                    className={`h-3 w-3 ${
-                      isFailed
-                        ? ''
-                        : 'motion-safe:animate-spin motion-reduce:animate-none'
-                    }`}
-                  />
-                </span>
-                <p className="mt-3 text-xs font-medium uppercase tracking-[0.12em] text-slate-800">
-                  {isFailed ? 'Not completed' : 'Confirmation'}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {isFailed ? 'Try again' : 'Waiting securely'}
-                </p>
-              </div>
-            </div>
-
-            <div
-              className={`mt-7 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm ${
-                isFailed
-                  ? 'border-red-200 bg-red-50 text-red-800'
-                  : statusQuery.error
-                    ? 'border-amber-200 bg-amber-50 text-amber-800'
-                    : 'border-slate-200 bg-slate-50 text-slate-700'
-              }`}
-              role="status"
-              aria-live="polite"
-            >
-              <FontAwesomeIcon
-                icon={
-                  isFailed
-                    ? faTriangleExclamation
-                    : isMobilePayment
-                      ? faMobileScreenButton
-                      : faShieldHalved
-                }
-                className="mt-0.5 h-4 w-4 shrink-0"
-              />
-              <span>
-                {isFailed
-                  ? 'UrubutoPay reported that this attempt failed or was cancelled.'
-                  : statusQuery.error
-                    ? 'Connection interrupted. We are still checking automatically.'
-                    : statusQuery.isLoading || hasTrackingError
-                      ? 'Finding your payment status…'
-                      : 'Waiting for UrubutoPay to confirm the payment.'}
+            <li className="relative">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--peekaboo-dark)] text-white">
+                <FontAwesomeIcon icon={faCircleCheck} className="h-3 w-3" />
               </span>
-            </div>
+              <p className="mt-3 font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-dark)]">
+                Initiated
+              </p>
+              <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">
+                Request sent
+              </p>
+            </li>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              {isFailed ? (
-                <Button primary route={`/p/orders/${id}`}>
-                  Return to order
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={() => void refetchPaymentStatus()}
-                  isLoading={statusQuery.isFetching}
-                >
-                  Check again
-                </Button>
-              )}
-              <Button route={`/p/orders/${id}`}>View order</Button>
-            </div>
+            <li className="relative text-right">
+              <span
+                className={`ml-auto flex h-7 w-7 items-center justify-center rounded-full border-2 bg-white ${
+                  isFailed
+                    ? 'border-[var(--destructive)] text-[var(--destructive)]'
+                    : 'border-[var(--peekaboo-yellow)] text-[var(--peekaboo-dark)]'
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={isFailed ? faTriangleExclamation : faArrowsRotate}
+                  className={`h-3 w-3 ${
+                    isFailed
+                      ? ''
+                      : 'motion-safe:animate-spin motion-reduce:animate-none'
+                  }`}
+                />
+              </span>
+              <p className="mt-3 font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-dark)]">
+                {isFailed ? 'Not completed' : 'Confirmation'}
+              </p>
+              <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">
+                {isFailed ? 'Try again' : 'Waiting securely'}
+              </p>
+            </li>
+          </ol>
+
+          <div
+            className={`mt-7 flex items-start gap-3 border-l-2 px-4 py-3 text-sm leading-6 ${
+              isFailed
+                ? 'border-[var(--destructive)] bg-[color-mix(in_oklab,var(--destructive)_7%,white)] text-[var(--peekaboo-text)]'
+                : 'border-[var(--peekaboo-yellow)] bg-[var(--peekaboo-warm)] text-[var(--peekaboo-text)]'
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            <FontAwesomeIcon
+              icon={
+                isFailed
+                  ? faTriangleExclamation
+                  : isMobilePayment
+                    ? faMobileScreenButton
+                    : faShieldHalved
+              }
+              className="mt-1 h-4 w-4 shrink-0"
+            />
+            <span>
+              {isFailed
+                ? 'UrubutoPay reported that this attempt failed or was cancelled.'
+                : statusQuery.error
+                  ? 'Connection interrupted. We are still checking automatically.'
+                  : statusQuery.isLoading || hasTrackingError
+                    ? 'Finding your payment status…'
+                    : 'Waiting for UrubutoPay to confirm the payment.'}
+            </span>
           </div>
-        </section>
 
-        <aside className="rounded-xl border border-slate-200 bg-white p-6 lg:self-start">
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500">
-            Payment details
-          </p>
-          <dl className="mt-5 space-y-4 text-sm">
-            <div className="border-b border-slate-100 pb-4">
-              <dt className="text-xs text-slate-500">Method</dt>
-              <dd className="mt-1 font-medium text-slate-900">
+          <div className="mt-6 flex flex-wrap gap-3">
+            {isFailed ? (
+              <Button primary route={`/p/orders/${id}`}>
+                Return to order
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={() => void refetchPaymentStatus()}
+                isLoading={statusQuery.isFetching}
+              >
+                Check again
+              </Button>
+            )}
+            <Button route={`/p/orders/${id}`}>View order</Button>
+          </div>
+        </PublicSectionCard>
+
+        <PublicSectionCard eyebrow="Payment" title="Attempt details">
+          <dl className="divide-y divide-[var(--peekaboo-line)] text-sm">
+            <div className="pb-4">
+              <dt className="text-xs text-[var(--peekaboo-muted)]">Method</dt>
+              <dd className="mt-1 font-medium text-[var(--peekaboo-dark)]">
                 {payment ? channelLabel : 'Loading…'}
               </dd>
             </div>
-            <div className="border-b border-slate-100 pb-4">
-              <dt className="text-xs text-slate-500">Order reference</dt>
-              <dd className="mt-1 break-all font-mono text-xs text-slate-800">
+            <div className="py-4">
+              <dt className="text-xs text-[var(--peekaboo-muted)]">
+                Order reference
+              </dt>
+              <dd className="mt-1 break-all font-['IBM_Plex_Mono'] text-xs text-[var(--peekaboo-text)]">
                 {orderLoading ? 'Loading…' : currentOrder?.referenceId || '—'}
               </dd>
             </div>
-            <div>
-              <dt className="text-xs text-slate-500">Amount</dt>
-              <dd className="mt-1 text-lg font-semibold text-slate-950">
+            <div className="pt-4">
+              <dt className="text-xs text-[var(--peekaboo-muted)]">Amount</dt>
+              <dd className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)]">
                 {payment
                   ? formatCurrency(payment.amount)
                   : orderLoading
@@ -277,13 +298,13 @@ const PublicOrderPaymentPending = () => {
               </dd>
             </div>
           </dl>
-          <p className="mt-6 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">
-            Keep this page open. Closing it does not cancel the payment; you can
-            return using the same payment link.
+          <p className="mt-6 border-t border-[var(--peekaboo-line)] pt-4 text-xs leading-5 text-[var(--peekaboo-muted)]">
+            Closing this page doesn’t cancel the payment. You can return using
+            the same link.
           </p>
-        </aside>
+        </PublicSectionCard>
       </div>
-    </main>
+    </PublicPage>
   );
 };
 

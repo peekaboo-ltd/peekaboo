@@ -120,8 +120,8 @@ const CreateOrder = () => {
       <Modal
         isOpen={createOrderModal}
         onClose={closeModal}
-        heading="Create Order"
-        description="Create a delivery without leaving the dashboard."
+        heading="Create order"
+        description="Enter the recipient’s phone number. You’ll set the route before payment."
       >
         <form onSubmit={onSubmit} className="w-full flex flex-col gap-4">
           <fieldset className="flex flex-col gap-4">
@@ -132,7 +132,7 @@ const CreateOrder = () => {
               render={({ field }) => (
                 <TelInput
                   {...field}
-                  label="Recipient Phone Number"
+                  label="Recipient phone number"
                   required
                   placeholder="0788123456"
                   errorMessage={errors?.recipientPhoneNumber?.message}
@@ -142,15 +142,15 @@ const CreateOrder = () => {
           </fieldset>
 
           {isError && !billingGuardPrompt && (
-            <p className="text-sm text-red-700">
+            <p className="border-l-2 border-[var(--destructive)] bg-[color-mix(in_oklab,var(--destructive)_7%,white)] px-3 py-2 text-sm text-[var(--peekaboo-text)]">
               {(error as { data?: { message?: string } })?.data?.message ||
                 String(error)}
             </p>
           )}
 
-          <footer className="flex justify-end gap-3 pt-4 border-t">
+          <footer className="flex justify-end gap-3 border-t border-[var(--peekaboo-line)] pt-4">
             <Button type="submit" primary isLoading={isLoading}>
-              Create Order
+              Create order
             </Button>
           </footer>
         </form>
@@ -159,24 +159,24 @@ const CreateOrder = () => {
       <Modal
         isOpen={Boolean(billingGuardPrompt)}
         onClose={closeBillingGuardModal}
-        heading={billingGuardPrompt?.title || "Billing Action Needed"}
+        heading={billingGuardPrompt?.title || "Billing action needed"}
         description={billingGuardPrompt?.description || ""}
       >
         <section className="flex flex-col gap-4">
           {billingGuardPrompt?.billingStatus ? (
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-[var(--peekaboo-muted)]">
               Billing status:{" "}
-              <span className="font-medium text-slate-900">
+              <span className="font-medium text-[var(--peekaboo-dark)]">
                 {billingGuardPrompt.billingStatus}
               </span>
             </p>
           ) : null}
-          <footer className="flex justify-end gap-3 pt-2 border-t">
+          <footer className="flex justify-end gap-3 border-t border-[var(--peekaboo-line)] pt-3">
             <Button type="button" onClick={closeBillingGuardModal}>
               Close
             </Button>
             <Button type="button" primary onClick={handlePayFirst}>
-              Pay First To Continue
+              Pay first to continue
             </Button>
           </footer>
         </section>

@@ -31,17 +31,26 @@ interface PublicStatCardProps {
   className?: string;
 }
 
+type OrderStage = 'locations' | 'payment' | 'tracking';
+
+interface OrderStageRailProps {
+  currentStage: OrderStage;
+}
+
+const orderStages: Array<{ key: OrderStage; label: string }> = [
+  { key: 'locations', label: 'Locations' },
+  { key: 'payment', label: 'Payment' },
+  { key: 'tracking', label: 'Tracking' },
+];
+
 export const PublicPage = ({ children, className }: PublicPageProps) => (
   <main
     className={cn(
-      'min-h-screen bg-[var(--peekaboo-surface)] px-4 py-8 sm:px-6 lg:px-10',
+      'min-h-screen bg-[var(--peekaboo-warm)] px-4 py-8 text-[var(--peekaboo-text)] sm:px-6 lg:px-10 lg:py-10',
       className,
     )}
   >
-    <section className={cn(
-      'mx-auto flex w-full max-w-6xl flex-col gap-4',
-      className,
-    )}>
+    <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
       {children}
     </section>
   </main>
@@ -56,22 +65,22 @@ export const PublicPageHero = ({
 }: PublicPageHeroProps) => (
   <header
     className={cn(
-      'overflow-hidden rounded-sm border border-slate-200 bg-[var(--peekaboo-surface)] px-5 py-5 sm:px-6 sm:py-6',
+      'overflow-hidden rounded-[var(--radius)] border border-[var(--peekaboo-line)] bg-white px-5 py-6 sm:px-7 sm:py-7',
       className,
     )}
   >
     <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="text-[11px] font-semibold uppercase text-slate-500">
+          <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--peekaboo-muted)]">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="mt-2 max-w-3xl text-2xl font-semibold text-slate-900 sm:text-3xl">
+        <h1 className="mt-2 max-w-3xl font-['Space_Grotesk'] text-[1.75rem] font-semibold leading-[1.08] tracking-[-0.035em] text-[var(--peekaboo-dark)] sm:text-[2.15rem]">
           {title}
         </h1>
         {description ? (
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--peekaboo-muted)]">
             {description}
           </p>
         ) : null}
@@ -94,24 +103,28 @@ export const PublicSectionCard = ({
 }: PublicSectionCardProps) => (
   <section
     className={cn(
-      'overflow-hidden rounded-md border border-slate-200 bg-[var(--peekaboo-surface)]',
+      'overflow-hidden rounded-[var(--radius)] border border-[var(--peekaboo-line)] bg-white',
       className,
     )}
   >
     {(title || description || eyebrow || actions) && (
-      <header className="flex flex-col gap-3 border-b border-slate-200/80 px-5 py-4 sm:px-6">
+      <header className="flex flex-col gap-3 border-b border-[var(--peekaboo-line)] px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             {eyebrow ? (
-              <p className="text-[11px] font-semibold uppercase text-slate-500">
+              <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--peekaboo-muted)]">
                 {eyebrow}
               </p>
             ) : null}
             {title ? (
-              <h2 className="mt-1 text-lg font-semibold text-slate-900">{title}</h2>
+              <h2 className="mt-1 font-['Space_Grotesk'] text-lg font-semibold tracking-[-0.02em] text-[var(--peekaboo-dark)]">
+                {title}
+              </h2>
             ) : null}
             {description ? (
-              <p className="mt-1 text-sm text-slate-600">{description}</p>
+              <p className="mt-1 text-sm text-[var(--peekaboo-muted)]">
+                {description}
+              </p>
             ) : null}
           </div>
           {actions ? (
@@ -132,24 +145,85 @@ export const PublicStatCard = ({
 }: PublicStatCardProps) => (
   <article
     className={cn(
-      'rounded-md border border-slate-200 bg-[var(--peekaboo-surface)] px-4 py-4',
+      'rounded-[var(--radius)] border border-[var(--peekaboo-line)] bg-white px-4 py-4',
       className,
     )}
   >
-    <menu className="flex items-start justify-between gap-2">
-      <ul className="min-w-0">
-        <p className="text-[11px] font-normal uppercase text-slate-500">
+    <div className="flex items-start justify-between gap-2">
+      <div className="min-w-0">
+        <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
           {label}
         </p>
-        <p className="mt-2 text-sm font-normal text-slate-900 break-words">
+        <p className="mt-2 break-words text-sm font-medium text-[var(--peekaboo-dark)]">
           {value}
         </p>
-      </ul>
+      </div>
       {icon ? (
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center text-slate-700">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--peekaboo-gray)] text-[var(--peekaboo-dark)]">
           {icon}
         </span>
       ) : null}
-    </menu>
+    </div>
   </article>
 );
+
+export const OrderStageRail = ({ currentStage }: OrderStageRailProps) => {
+  const currentIndex = orderStages.findIndex(
+    (stage) => stage.key === currentStage,
+  );
+
+  return (
+    <nav
+      aria-label="Order steps"
+      className="rounded-[var(--radius)] border border-[var(--peekaboo-line)] bg-white px-5 py-4 sm:px-6"
+    >
+      <ol className="grid grid-cols-3">
+        {orderStages.map((stage, index) => {
+          const isReached = index <= currentIndex;
+          const isCurrent = index === currentIndex;
+
+          return (
+            <li
+              key={stage.key}
+              className="relative min-w-0"
+              aria-current={isCurrent ? 'step' : undefined}
+            >
+              {index > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'absolute right-1/2 top-2.5 h-px w-full',
+                    isReached
+                      ? 'bg-[var(--peekaboo-yellow)]'
+                      : 'bg-[var(--peekaboo-line)]',
+                  )}
+                />
+              ) : null}
+              <div className="relative flex flex-col items-center text-center">
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'h-5 w-5 rounded-full border-[5px] bg-white',
+                    isReached
+                      ? 'border-[var(--peekaboo-yellow)]'
+                      : 'border-[var(--peekaboo-line)]',
+                  )}
+                />
+                <span
+                  className={cn(
+                    "mt-2 font-['IBM_Plex_Mono'] text-[9px] uppercase tracking-[0.08em] sm:text-[10px]",
+                    isCurrent
+                      ? 'font-medium text-[var(--peekaboo-dark)]'
+                      : 'text-[var(--peekaboo-muted)]',
+                  )}
+                >
+                  {stage.label}
+                </span>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+};

@@ -62,7 +62,7 @@ const TrackOrder = () => {
   }, [isError, t]);
 
   return (
-    <PublicPage className="max-lg:mt-16 min-h-fit">
+    <PublicPage className="min-h-fit max-lg:mt-16">
       <PublicPageHero
         eyebrow={t('trackOrder.eyebrow')}
         title={t('trackOrder.title')}
@@ -70,7 +70,8 @@ const TrackOrder = () => {
       />
 
       <PublicSectionCard
-        className="mx-auto w-full border-primary-200"
+        className="mx-auto w-full max-w-2xl"
+        eyebrow="Order reference"
         title={t('trackOrder.searchButton')}
         description={t('trackOrder.searchDescription')}
       >
@@ -79,16 +80,16 @@ const TrackOrder = () => {
             e.preventDefault();
             handleSearch();
           }}
-          className="flex flex-col gap-4"
+          className="flex flex-col"
         >
           <label
             htmlFor="reference-id"
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-2 block text-sm font-medium text-[var(--peekaboo-text)]"
           >
             {t('trackOrder.orderIdLabel')}
           </label>
           <div className="relative">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--peekaboo-muted)]">
               <FontAwesomeIcon icon={faMagnifyingGlass} />
             </span>
             <Input
@@ -99,21 +100,23 @@ const TrackOrder = () => {
                 setErrorMessage('');
               }}
               placeholder={t('trackOrder.orderIdPlaceholder')}
-              className="h-11 rounded-lg border-slate-200 bg-white pl-4 pr-3 uppercase"
+              className="h-11 rounded-md border-[var(--peekaboo-line)] bg-white pl-10 pr-3 font-['IBM_Plex_Mono'] uppercase"
             />
           </div>
-          <p className="mt-2 text-xs leading-5 text-slate-500">
+          <p className="mt-2 text-xs leading-5 text-[var(--peekaboo-muted)]">
             {t('trackOrder.hint')}
           </p>
           {errorMessage ? (
-            <p className="mt-2 text-sm text-black">{errorMessage}</p>
+            <p className="mt-3 border-l-2 border-[var(--peekaboo-yellow)] bg-[var(--peekaboo-warm)] px-3 py-2 text-sm text-[var(--peekaboo-text)]">
+              {errorMessage}
+            </p>
           ) : null}
 
           <Button
             type="submit"
             primary
             isLoading={isFetching}
-            className="self-end"
+            className="mt-5 self-end"
           >
             {t('trackOrder.searchButton')}
           </Button>

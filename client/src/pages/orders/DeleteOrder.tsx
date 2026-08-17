@@ -46,16 +46,16 @@ const DeleteOrder = () => {
     <Modal
       isOpen={deleteOrderModal}
       onClose={closeModal}
-      heading={`Delete ${selectedOrder?.referenceId}`}
-      headingClassName="text-red-700"
+      heading={`Delete ${selectedOrder?.referenceId || 'order'}?`}
+      headingClassName="text-[var(--destructive)]"
     >
       <article className="w-full flex flex-col gap-4">
-        <p className="text-[13px]">
-          Are you sure you want to delete{' '}
-          <span className="text-[13px] text-red-700">
+        <p className="text-sm leading-6 text-[var(--peekaboo-muted)]">
+          This permanently deletes{' '}
+          <span className="font-['IBM_Plex_Mono'] text-xs text-[var(--peekaboo-dark)]">
             {selectedOrder?.referenceId}
           </span>
-          ? This action cannot be undone.
+          . This action can’t be undone.
         </p>
         <Button
           danger
@@ -66,9 +66,9 @@ const DeleteOrder = () => {
             }
           }}
           isLoading={isLoading}
-          className='self-end'
+          className="self-end"
         >
-          Delete
+          Delete order
         </Button>
       </article>
     </Modal>

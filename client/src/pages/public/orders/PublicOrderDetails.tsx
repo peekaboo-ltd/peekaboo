@@ -41,6 +41,7 @@ import {
   faRoute,
 } from '@fortawesome/free-solid-svg-icons';
 import {
+  OrderStageRail,
   PublicPage,
   PublicPageHero,
   PublicSectionCard,
@@ -49,7 +50,7 @@ import {
 import { useFetchUserById } from '@/hooks/users/users.hooks';
 
 const SkeletonLine = ({ className = '' }: { className?: string }) => (
-  <span className={`inline-block animate-pulse rounded bg-slate-100 ${className}`} />
+  <span className={`inline-block animate-pulse rounded bg-[var(--peekaboo-gray)] ${className}`} />
 );
 
 interface LocationCardProps {
@@ -69,9 +70,9 @@ const LocationCard = ({
   onUseCurrent,
   usingCurrentLocation = false,
 }: LocationCardProps) => (
-  <article className="min-w-0">
+  <article className="relative min-w-0 border-l-2 border-[var(--peekaboo-yellow)] pl-5">
     <header className="mb-4 flex items-start justify-between gap-3">
-      <p className="text-[11px] font-normal uppercase tracking-[0.08em] text-slate-500">
+      <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
         {label}
       </p>
       {location ? (
@@ -82,7 +83,7 @@ const LocationCard = ({
             onEdit();
           }}
           aria-label={`Edit ${label.toLowerCase()} location`}
-          className="cursor-pointer text-slate-500 transition-colors hover:text-primary"
+          className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--peekaboo-line)] text-[var(--peekaboo-muted)] hover:border-[var(--peekaboo-dark)] hover:text-[var(--peekaboo-dark)]"
         >
           <FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4" />
         </button>
@@ -116,7 +117,7 @@ const LocationCard = ({
       </div>
     ) : (
       <div className="flex min-h-[7rem] items-center justify-center">
-        <p className="text-sm font-normal text-slate-500">{emptyHint}</p>
+        <p className="text-sm text-[var(--peekaboo-muted)]">{emptyHint}</p>
       </div>
     )}
   </article>
@@ -355,24 +356,30 @@ const PublicOrderDetails = () => {
 
       <PublicPage>
         <PublicPageHero
-          eyebrow="Order"
+          eyebrow="Delivery setup"
           title={currentOrder?.referenceId || 'Set delivery locations'}
-          description="Set pickup and destination, then continue."
+          description="Confirm where the delivery starts and ends. We’ll calculate the route and price before payment."
         />
+
+        <OrderStageRail currentStage="locations" />
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {stats?.map((stat) => (
             <PublicStatCard
               key={stat.label}
               label={stat.label}
-              value={currentOrder ? stat?.value : 'Loading…'}
-              icon={<FontAwesomeIcon icon={stat?.icon} />}
+              value={currentOrder ? stat.value : 'Loading…'}
+              icon={<FontAwesomeIcon icon={stat.icon} />}
             />
           ))}
         </section>
 
-        <PublicSectionCard eyebrow="Locations" title="Pickup and destination">
-          <div className="grid gap-8 lg:grid-cols-2">
+        <PublicSectionCard
+          eyebrow="Route"
+          title="Pickup and destination"
+          description="Set two different locations to calculate the delivery."
+        >
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-10 lg:divide-x lg:divide-[var(--peekaboo-line)] [&>article:last-child]:lg:pl-10">
             <LocationCard
               label="Pickup"
               location={pickup}
@@ -390,19 +397,19 @@ const PublicOrderDetails = () => {
           </div>
 
           {isSameLocation ? (
-            <p className="mt-6 text-sm font-normal text-amber-700">
+            <p className="mt-6 border-l-2 border-[var(--peekaboo-yellow)] bg-[var(--peekaboo-warm)] px-4 py-3 text-sm text-[var(--peekaboo-text)]">
               Pickup and destination are the same place. Choose a different
               destination to continue.
             </p>
           ) : null}
 
           {locationsReady ? (
-            <div className="mt-8 border-t border-slate-200 pt-6">
+            <div className="mt-8 border-t border-[var(--peekaboo-line)] pt-6">
               <div className="mb-5">
-                <p className="text-[11px] font-normal uppercase tracking-[0.08em] text-slate-500">
+                <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                   Route summary
                 </p>
-                <h3 className="mt-1 text-base font-medium text-slate-900">
+                <h3 className="mt-1 font-['Space_Grotesk'] text-base font-semibold text-[var(--peekaboo-dark)]">
                   Distance, time, and fee
                 </h3>
               </div>
@@ -419,25 +426,25 @@ const PublicOrderDetails = () => {
                 </div>
               ) : (
                 <>
-                  <div className="grid gap-6 md:grid-cols-3">
+                  <div className="grid gap-6 md:grid-cols-3 md:divide-x md:divide-[var(--peekaboo-line)] [&>div:not(:first-child)]:md:pl-6">
                     <div>
-                      <p className="text-[11px] font-normal uppercase tracking-[0.08em] text-slate-500">
+                      <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                         Distance
                       </p>
-                      <p className="mt-2 text-2xl font-normal text-slate-900">{distance.toFixed(2)}</p>
-                      <p className="mt-1 text-xs text-slate-500">kilometers</p>
+                      <p className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold text-[var(--peekaboo-dark)]">{distance.toFixed(2)}</p>
+                      <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">kilometers</p>
                     </div>
 
                     <div>
-                      <p className="text-[11px] font-normal uppercase tracking-[0.08em] text-slate-500">
+                      <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                         Delivery time
                       </p>
-                      <p className="mt-2 text-2xl font-normal text-slate-900">{renderDeliveryTime()}</p>
-                      <p className="mt-1 text-xs text-slate-500">{deliveryTimeUnit}</p>
+                      <p className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold text-[var(--peekaboo-dark)]">{renderDeliveryTime()}</p>
+                      <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">{deliveryTimeUnit}</p>
                     </div>
 
                     <div>
-                      <p className="text-[11px] font-normal uppercase tracking-[0.08em] text-slate-500">
+                      <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                         Delivery fee
                       </p>
                       {(orderFee !== undefined && orderFee > 0) ||
@@ -445,18 +452,18 @@ const PublicOrderDetails = () => {
                           currentOrder?.finalFee !== undefined &&
                           currentOrder.finalFee > 0) ? (
                         <>
-                          <p className="mt-2 text-2xl font-normal text-slate-900">
+                          <p className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold text-[var(--peekaboo-dark)]">
                             {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
                           </p>
-                          <p className="mt-1 text-xs text-slate-500">including VAT</p>
+                          <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">including VAT</p>
                           {ENVIRONMENTS.isPaymentSimulation ? (
-                            <p className="mt-2 text-xs font-normal leading-snug text-amber-700">
+                          <p className="mt-2 border-l-2 border-[var(--peekaboo-yellow)] pl-2 text-xs leading-snug text-[var(--peekaboo-text)]">
                               Payments are simulated in this environment. No real
                               charge will be made.
                             </p>
                           ) : null}
                           {ENVIRONMENTS.isDevPrice ? (
-                            <p className="mt-2 text-xs font-normal leading-snug text-amber-700">
+                            <p className="mt-2 border-l-2 border-[var(--peekaboo-yellow)] pl-2 text-xs leading-snug text-[var(--peekaboo-text)]">
                               Catalog fee shown. You will only be charged{' '}
                               {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at
                               checkout.
@@ -472,22 +479,22 @@ const PublicOrderDetails = () => {
                     </div>
                   </div>
 
-                  <p className="mt-5 text-sm font-normal text-slate-600">
+                  <p className="mt-5 text-sm text-[var(--peekaboo-muted)]">
                     Fee is based on distance between the two locations.{' '}
                     <Link
                       to="/about/orders/fees"
-                      className="text-primary underline underline-offset-2 hover:text-primary-600"
+                      className="font-medium text-[var(--peekaboo-dark)] underline decoration-[var(--peekaboo-yellow)] decoration-2 underline-offset-2"
                     >
                       Learn more about fees
                     </Link>
                   </p>
                   {ENVIRONMENTS.isPaymentSimulation ? (
-                    <p className="mt-2 text-sm font-normal text-amber-700">
+                    <p className="mt-2 text-sm text-[var(--peekaboo-text)]">
                       Payments are simulated in this environment.
                     </p>
                   ) : null}
                   {ENVIRONMENTS.isDevPrice ? (
-                    <p className="mt-2 text-sm font-normal text-amber-700">
+                    <p className="mt-2 text-sm text-[var(--peekaboo-text)]">
                       Environment pricing: checkout charges{' '}
                       {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} only.
                     </p>
@@ -516,7 +523,7 @@ const PublicOrderDetails = () => {
                   }
                 }}
               >
-                Track Order
+                Track order
               </Button>
             ) : canDeferPayment ? (
               <Button
@@ -531,10 +538,10 @@ const PublicOrderDetails = () => {
                 }}
               >
                 {!hasBothLocations
-                  ? 'Set Both Locations to Continue'
+                  ? 'Set both locations to continue'
                   : isSameLocation
-                    ? 'Pickup and Destination Must Differ'
-                    : 'Defer Payment'}
+                    ? 'Pickup and destination must differ'
+                    : 'Defer payment'}
               </Button>
             ) : (
               <Button
@@ -547,10 +554,10 @@ const PublicOrderDetails = () => {
                 }}
               >
                 {!hasBothLocations
-                  ? 'Set Both Locations to Continue'
+                  ? 'Set both locations to continue'
                   : isSameLocation
-                    ? 'Pickup and Destination Must Differ'
-                    : 'Complete Payment'}
+                    ? 'Pickup and destination must differ'
+                    : 'Complete payment'}
               </Button>
             )}
           </div>
