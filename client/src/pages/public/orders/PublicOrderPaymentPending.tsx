@@ -197,10 +197,10 @@ const PublicOrderPaymentPending = () => {
 
             <li className="relative text-right">
               <span
-                className={`ml-auto flex h-7 w-7 items-center justify-center rounded-full border-2 bg-white ${
+                className={`ml-auto flex h-7 w-7 items-center justify-center rounded-full border border-[var(--peekaboo-line)] ${
                   isFailed
-                    ? 'border-[var(--destructive)] text-[var(--destructive)]'
-                    : 'border-[var(--peekaboo-yellow)] text-[var(--peekaboo-dark)]'
+                    ? 'bg-white text-[var(--destructive)]'
+                    : 'bg-[var(--peekaboo-yellow)] text-[var(--peekaboo-dark)]'
                 }`}
               >
                 <FontAwesomeIcon
@@ -222,10 +222,10 @@ const PublicOrderPaymentPending = () => {
           </ol>
 
           <div
-            className={`mt-7 flex items-start gap-3 border-l-2 px-4 py-3 text-sm leading-6 ${
+            className={`mt-7 flex items-start gap-3 rounded-md px-4 py-3 text-sm leading-6 ${
               isFailed
-                ? 'border-[var(--destructive)] bg-[color-mix(in_oklab,var(--destructive)_7%,white)] text-[var(--peekaboo-text)]'
-                : 'border-[var(--peekaboo-yellow)] bg-[var(--peekaboo-warm)] text-[var(--peekaboo-text)]'
+                ? 'bg-[color-mix(in_oklab,var(--destructive)_7%,white)] text-[var(--peekaboo-text)]'
+                : 'bg-[var(--peekaboo-warm)] text-[var(--peekaboo-text)]'
             }`}
             role="status"
             aria-live="polite"
@@ -260,7 +260,6 @@ const PublicOrderPaymentPending = () => {
               <Button
                 type="button"
                 onClick={() => void refetchPaymentStatus()}
-                isLoading={statusQuery.isFetching}
               >
                 Check again
               </Button>

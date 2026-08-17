@@ -107,7 +107,7 @@ const TrackOrder = () => {
             {t('trackOrder.hint')}
           </p>
           {errorMessage ? (
-            <p className="mt-3 border-l-2 border-[var(--peekaboo-yellow)] bg-[var(--peekaboo-warm)] px-3 py-2 text-sm text-[var(--peekaboo-text)]">
+            <p className="mt-3 rounded-md bg-[var(--peekaboo-warm)] px-3 py-2 text-sm text-[var(--peekaboo-text)]">
               {errorMessage}
             </p>
           ) : null}

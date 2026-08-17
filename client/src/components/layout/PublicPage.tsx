@@ -192,7 +192,7 @@ export const OrderStageRail = ({ currentStage }: OrderStageRailProps) => {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    'absolute right-1/2 top-2.5 h-px w-full',
+                    'absolute right-1/2 top-1.5 h-px w-full',
                     isReached
                       ? 'bg-[var(--peekaboo-yellow)]'
                       : 'bg-[var(--peekaboo-line)]',
@@ -203,10 +203,10 @@ export const OrderStageRail = ({ currentStage }: OrderStageRailProps) => {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    'h-5 w-5 rounded-full border-[5px] bg-white',
+                    'h-3 w-3 rounded-full',
                     isReached
-                      ? 'border-[var(--peekaboo-yellow)]'
-                      : 'border-[var(--peekaboo-line)]',
+                      ? 'bg-[var(--peekaboo-yellow)]'
+                      : 'bg-[var(--peekaboo-line)]',
                   )}
                 />
                 <span

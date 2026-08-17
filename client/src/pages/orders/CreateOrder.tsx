@@ -142,7 +142,7 @@ const CreateOrder = () => {
           </fieldset>
 
           {isError && !billingGuardPrompt && (
-            <p className="border-l-2 border-[var(--destructive)] bg-[color-mix(in_oklab,var(--destructive)_7%,white)] px-3 py-2 text-sm text-[var(--peekaboo-text)]">
+            <p className="rounded-md bg-[color-mix(in_oklab,var(--destructive)_7%,white)] px-3 py-2 text-sm text-[var(--peekaboo-text)]">
               {(error as { data?: { message?: string } })?.data?.message ||
                 String(error)}
             </p>

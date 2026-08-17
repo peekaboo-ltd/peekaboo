@@ -70,7 +70,7 @@ const LocationCard = ({
   onUseCurrent,
   usingCurrentLocation = false,
 }: LocationCardProps) => (
-  <article className="relative min-w-0 border-l-2 border-[var(--peekaboo-yellow)] pl-5">
+  <article className="relative min-w-0">
     <header className="mb-4 flex items-start justify-between gap-3">
       <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
         {label}
@@ -397,7 +397,7 @@ const PublicOrderDetails = () => {
           </div>
 
           {isSameLocation ? (
-            <p className="mt-6 border-l-2 border-[var(--peekaboo-yellow)] bg-[var(--peekaboo-warm)] px-4 py-3 text-sm text-[var(--peekaboo-text)]">
+            <p className="mt-6 rounded-md bg-[var(--peekaboo-warm)] px-4 py-3 text-sm text-[var(--peekaboo-text)]">
               Pickup and destination are the same place. Choose a different
               destination to continue.
             </p>
@@ -457,13 +457,13 @@ const PublicOrderDetails = () => {
                           </p>
                           <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">including VAT</p>
                           {ENVIRONMENTS.isPaymentSimulation ? (
-                          <p className="mt-2 border-l-2 border-[var(--peekaboo-yellow)] pl-2 text-xs leading-snug text-[var(--peekaboo-text)]">
+                          <p className="mt-2 text-xs leading-snug text-[var(--peekaboo-text)]">
                               Payments are simulated in this environment. No real
                               charge will be made.
                             </p>
                           ) : null}
                           {ENVIRONMENTS.isDevPrice ? (
-                            <p className="mt-2 border-l-2 border-[var(--peekaboo-yellow)] pl-2 text-xs leading-snug text-[var(--peekaboo-text)]">
+                            <p className="mt-2 text-xs leading-snug text-[var(--peekaboo-text)]">
                               Catalog fee shown. You will only be charged{' '}
                               {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at
                               checkout.
@@ -483,7 +483,7 @@ const PublicOrderDetails = () => {
                     Fee is based on distance between the two locations.{' '}
                     <Link
                       to="/about/orders/fees"
-                      className="font-medium text-[var(--peekaboo-dark)] underline decoration-[var(--peekaboo-yellow)] decoration-2 underline-offset-2"
+                      className="font-medium text-[var(--peekaboo-dark)] underline underline-offset-2"
                     >
                       Learn more about fees
                     </Link>

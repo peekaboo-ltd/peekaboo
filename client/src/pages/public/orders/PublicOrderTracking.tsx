@@ -216,7 +216,7 @@ const PublicOrderTracking = () => {
                       isCompleted || isCurrent
                         ? 'border-[var(--peekaboo-dark)] bg-[var(--peekaboo-dark)] text-white'
                         : hasActivity
-                          ? 'border-[var(--peekaboo-yellow)] bg-white text-[var(--peekaboo-dark)]'
+                          ? 'border-[var(--peekaboo-line)] bg-[var(--peekaboo-yellow)] text-[var(--peekaboo-dark)]'
                           : 'border-[var(--peekaboo-line)] bg-white text-[var(--peekaboo-muted)]'
                     }`}
                   >
@@ -236,7 +236,7 @@ const PublicOrderTracking = () => {
                       </div>
                       <aside className="shrink-0 text-right">
                         {isCurrent ? (
-                          <span className="inline-flex border-l-2 border-[var(--peekaboo-yellow)] px-2 py-0.5 font-['IBM_Plex_Mono'] text-[9px] uppercase tracking-[0.08em] text-[var(--peekaboo-dark)]">
+                          <span className="inline-flex rounded-full bg-[var(--peekaboo-gray)] px-2 py-1 font-['IBM_Plex_Mono'] text-[9px] uppercase tracking-[0.08em] text-[var(--peekaboo-dark)]">
                             Current
                           </span>
                         ) : null}
@@ -290,7 +290,7 @@ const PublicOrderTracking = () => {
                         isCompleted || isCurrent
                           ? 'border-[var(--peekaboo-dark)] bg-[var(--peekaboo-dark)] text-white'
                           : hasActivity
-                            ? 'border-[var(--peekaboo-yellow)] bg-white text-[var(--peekaboo-dark)]'
+                            ? 'border-[var(--peekaboo-line)] bg-[var(--peekaboo-yellow)] text-[var(--peekaboo-dark)]'
                             : 'border-[var(--peekaboo-line)] bg-white text-[var(--peekaboo-muted)]'
                       }`}
                     >
@@ -309,7 +309,7 @@ const PublicOrderTracking = () => {
                       </p>
 
                       {isCurrent ? (
-                        <span className="mt-2 inline-flex border-l-2 border-[var(--peekaboo-yellow)] px-2 py-0.5 font-['IBM_Plex_Mono'] text-[9px] uppercase tracking-[0.08em] text-[var(--peekaboo-dark)]">
+                        <span className="mt-2 inline-flex rounded-full bg-[var(--peekaboo-gray)] px-2 py-1 font-['IBM_Plex_Mono'] text-[9px] uppercase tracking-[0.08em] text-[var(--peekaboo-dark)]">
                           Current
                         </span>
                       ) : null}
@@ -358,7 +358,7 @@ const PublicOrderTracking = () => {
           ].map((item) => (
             <article
               key={item.label}
-              className="border-l-2 border-[var(--peekaboo-yellow)] py-1 pl-4"
+              className="py-1"
             >
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--peekaboo-gray)] text-[var(--peekaboo-dark)]">
@@ -398,7 +398,7 @@ const PublicOrderTracking = () => {
           ].map((contact) => (
             <article
               key={contact.title}
-              className="border-l-2 border-[var(--peekaboo-yellow)] py-1 pl-4"
+              className="py-1"
             >
               <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.08em] text-[var(--peekaboo-muted)]">
                 {contact.title}

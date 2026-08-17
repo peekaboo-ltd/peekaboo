@@ -122,7 +122,7 @@ const PublicOrderPaymentSuccess = () => {
       <PublicPage>
         <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
           <div className="py-5 text-center" role="status" aria-live="polite">
-            <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-[var(--peekaboo-line)] border-t-[var(--peekaboo-yellow)] motion-reduce:animate-none" />
+            <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-[var(--peekaboo-line)] border-t-[var(--peekaboo-dark)] motion-reduce:animate-none" />
             <h1 className="mt-5 font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)]">
               Confirming your payment
             </h1>
@@ -264,7 +264,7 @@ const PublicOrderPaymentSuccess = () => {
                   },
                 ].map((stop) => (
                   <article key={stop.label} className="relative min-w-0 pl-6">
-                    <span className="absolute left-0 top-0.5 h-4 w-4 rounded-full border-4 border-[var(--peekaboo-yellow)] bg-white" />
+                    <span className="absolute left-0 top-0.5 h-3 w-3 rounded-full bg-[var(--peekaboo-yellow)]" />
                     <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                       {stop.label}
                     </p>
