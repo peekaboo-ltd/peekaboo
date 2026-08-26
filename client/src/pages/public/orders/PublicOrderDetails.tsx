@@ -50,7 +50,7 @@ import {
 import { useFetchUserById } from '@/hooks/users/users.hooks';
 
 const SkeletonLine = ({ className = '' }: { className?: string }) => (
-  <span className={`inline-block animate-pulse rounded bg-[var(--peekaboo-gray)] ${className}`} />
+  <span className={`inline-block animate-pulse rounded bg-[var(--surface)] ${className}`} />
 );
 
 interface LocationCardProps {
@@ -72,7 +72,7 @@ const LocationCard = ({
 }: LocationCardProps) => (
   <article className="relative min-w-0">
     <header className="mb-4 flex items-start justify-between gap-3">
-      <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
+      <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--muted)]">
         {label}
       </p>
       {location ? (
@@ -83,7 +83,7 @@ const LocationCard = ({
             onEdit();
           }}
           aria-label={`Edit ${label.toLowerCase()} location`}
-          className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--peekaboo-line)] text-[var(--peekaboo-muted)] hover:border-[var(--peekaboo-dark)] hover:text-[var(--peekaboo-dark)]"
+          className="flex size-9 items-center justify-center rounded-[--radius-control] border border-[--line] text-[--muted] outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-[--ink] hover:text-[--ink] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
         >
           <FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4" />
         </button>
@@ -117,7 +117,7 @@ const LocationCard = ({
       </div>
     ) : (
       <div className="flex min-h-[7rem] items-center justify-center">
-        <p className="text-sm text-[var(--peekaboo-muted)]">{emptyHint}</p>
+        <p className="text-sm text-[var(--muted)]">{emptyHint}</p>
       </div>
     )}
   </article>
@@ -379,7 +379,7 @@ const PublicOrderDetails = () => {
           title="Pickup and destination"
           description="Set two different locations to calculate the delivery."
         >
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-10 lg:divide-x lg:divide-[var(--peekaboo-line)] [&>article:last-child]:lg:pl-10">
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-10 lg:divide-x lg:divide-[var(--line)] [&>article:last-child]:lg:pl-10">
             <LocationCard
               label="Pickup"
               location={pickup}
@@ -397,19 +397,19 @@ const PublicOrderDetails = () => {
           </div>
 
           {isSameLocation ? (
-            <p className="mt-6 rounded-md bg-[var(--peekaboo-warm)] px-4 py-3 text-sm text-[var(--peekaboo-text)]">
+            <p className="mt-6 rounded-[--radius-control] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--ink)]">
               Pickup and destination are the same place. Choose a different
               destination to continue.
             </p>
           ) : null}
 
           {locationsReady ? (
-            <div className="mt-8 border-t border-[var(--peekaboo-line)] pt-6">
+            <div className="mt-8 border-t border-[var(--line)] pt-6">
               <div className="mb-5">
-                <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
+                <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--muted)]">
                   Route summary
                 </p>
-                <h3 className="mt-1 text-base font-medium text-[var(--peekaboo-dark)]">
+                <h3 className="mt-1 text-base font-medium text-[var(--ink)]">
                   Distance, time, and fee
                 </h3>
               </div>
@@ -426,25 +426,25 @@ const PublicOrderDetails = () => {
                 </div>
               ) : (
                 <>
-                  <div className="grid gap-6 md:grid-cols-3 md:divide-x md:divide-[var(--peekaboo-line)] [&>div:not(:first-child)]:md:pl-6">
+                  <div className="grid gap-6 md:grid-cols-3 md:divide-x md:divide-[var(--line)] [&>div:not(:first-child)]:md:pl-6">
                     <div>
-                      <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
+                      <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
                         Distance
                       </p>
-                      <p className="mt-2 text-2xl font-medium text-[var(--peekaboo-dark)]">{distance.toFixed(2)}</p>
-                      <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">kilometers</p>
+                      <p className="mt-2 text-2xl font-medium text-[var(--ink)]">{distance.toFixed(2)}</p>
+                      <p className="mt-1 text-xs text-[var(--muted)]">kilometers</p>
                     </div>
 
                     <div>
-                      <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
+                      <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
                         Delivery time
                       </p>
-                      <p className="mt-2 text-2xl font-medium text-[var(--peekaboo-dark)]">{renderDeliveryTime()}</p>
-                      <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">{deliveryTimeUnit}</p>
+                      <p className="mt-2 text-2xl font-medium text-[var(--ink)]">{renderDeliveryTime()}</p>
+                      <p className="mt-1 text-xs text-[var(--muted)]">{deliveryTimeUnit}</p>
                     </div>
 
                     <div>
-                      <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
+                      <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
                         Delivery fee
                       </p>
                       {(orderFee !== undefined && orderFee > 0) ||
@@ -452,18 +452,18 @@ const PublicOrderDetails = () => {
                           currentOrder?.finalFee !== undefined &&
                           currentOrder.finalFee > 0) ? (
                         <>
-                          <p className="mt-2 text-2xl font-medium text-[var(--peekaboo-dark)]">
+                          <p className="mt-2 text-2xl font-medium text-[var(--ink)]">
                             {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
                           </p>
-                          <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">including VAT</p>
+                          <p className="mt-1 text-xs text-[var(--muted)]">including VAT</p>
                           {ENVIRONMENTS.isPaymentSimulation ? (
-                          <p className="mt-2 text-xs leading-snug text-[var(--peekaboo-text)]">
+                          <p className="mt-2 text-xs leading-snug text-[var(--ink)]">
                               Payments are simulated in this environment. No real
                               charge will be made.
                             </p>
                           ) : null}
                           {ENVIRONMENTS.isDevPrice ? (
-                            <p className="mt-2 text-xs leading-snug text-[var(--peekaboo-text)]">
+                            <p className="mt-2 text-xs leading-snug text-[var(--ink)]">
                               Catalog fee shown. You will only be charged{' '}
                               {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at
                               checkout.
@@ -479,22 +479,22 @@ const PublicOrderDetails = () => {
                     </div>
                   </div>
 
-                  <p className="mt-5 text-sm text-[var(--peekaboo-muted)]">
+                  <p className="mt-5 text-sm text-[var(--muted)]">
                     Fee is based on distance between the two locations.{' '}
                     <Link
                       to="/about/orders/fees"
-                      className="font-medium text-[var(--peekaboo-dark)] underline underline-offset-2"
+                      className="font-medium text-[var(--ink)] underline underline-offset-2"
                     >
                       Learn more about fees
                     </Link>
                   </p>
                   {ENVIRONMENTS.isPaymentSimulation ? (
-                    <p className="mt-2 text-sm text-[var(--peekaboo-text)]">
+                    <p className="mt-2 text-sm text-[var(--ink)]">
                       Payments are simulated in this environment.
                     </p>
                   ) : null}
                   {ENVIRONMENTS.isDevPrice ? (
-                    <p className="mt-2 text-sm text-[var(--peekaboo-text)]">
+                    <p className="mt-2 text-sm text-[var(--ink)]">
                       Environment pricing: checkout charges{' '}
                       {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} only.
                     </p>

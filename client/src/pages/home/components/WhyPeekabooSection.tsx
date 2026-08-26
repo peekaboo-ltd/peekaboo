@@ -36,8 +36,8 @@ const WhyPeekabooSection = ({
   ].filter((stat): stat is { value: string; label: string } => stat !== null);
 
   return (
-    <section className="w-full bg-[var(--peekaboo-surface)] py-12 lg:py-16">
-      <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
+    <section className="section-rhythm w-full border-t border-[--line] bg-[--paper]">
+      <article className="app-container">
         <header className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <hgroup>
             <p className="text-[11px] font-medium uppercase text-muted-foreground">
@@ -65,13 +65,13 @@ const WhyPeekabooSection = ({
           )}
         </header>
 
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => {
             const Icon = item.icon;
             return (
-              <li key={item.title} className="group px-1 py-5 sm:px-5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[var(--surface)] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[var(--ink)] group-hover:scale-110">
-                  <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
+              <li key={item.title} className="rounded-[--radius-card] border border-[--line] p-6">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[--radius-control] border border-[--ink] text-[--ink]">
+                  <Icon className="h-4 w-4 transition-transform duration-200" aria-hidden="true" />
                 </span>
                 <h3 className="mt-3 text-[14px] font-medium text-foreground">
                   {item.title}

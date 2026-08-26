@@ -4,8 +4,8 @@ interface TrustedBySectionProps {
 }
 
 const TrustedBySection = ({ label, industries }: TrustedBySectionProps) => (
-  <section className="w-full bg-[var(--peekaboo-surface)]">
-    <article className="mx-auto flex max-w-[1280px] flex-col gap-3 px-5 py-4 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10">
+  <section className="w-full border-y border-[--line] bg-[--paper]">
+    <article className="app-container flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between">
       <p className="text-[11px] font-normal uppercase text-muted-foreground">
         {label}
       </p>

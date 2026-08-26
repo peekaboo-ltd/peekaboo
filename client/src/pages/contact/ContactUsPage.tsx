@@ -12,7 +12,7 @@ const ContactUsPage = () => {
   useDocumentTitle('Contact Us');
 
   return (
-    <PublicPage className="max-lg:mt-16">
+    <PublicPage>
       <PublicPageHero
         eyebrow="Contact"
         title={t('contact.title')}
@@ -20,7 +20,7 @@ const ContactUsPage = () => {
       />
 
       <PublicSectionCard
-        className="mx-auto w-full border-primary-200"
+        className="mx-auto w-full max-w-3xl border-[--line]"
         title="Send us a message"
         description="Tell us about your business or delivery needs."
       >

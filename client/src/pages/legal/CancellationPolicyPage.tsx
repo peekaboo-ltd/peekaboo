@@ -10,7 +10,7 @@ const CancellationPolicyPage = () => {
   useDocumentTitle(t('legal.cancellation.docTitle'));
 
   return (
-    <PublicPage className="max-lg:mt-16">
+    <PublicPage className="">
       <LegalBreadcrumb
         currentPage={{
           labelKey: 'legal.cancellation.title',

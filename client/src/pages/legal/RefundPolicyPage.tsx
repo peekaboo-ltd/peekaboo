@@ -10,7 +10,7 @@ const RefundPolicyPage = () => {
   useDocumentTitle(t('legal.refund.docTitle'));
 
   return (
-    <PublicPage className="max-lg:mt-16">
+    <PublicPage className="">
       <LegalBreadcrumb
         currentPage={{
           labelKey: 'legal.refund.title',

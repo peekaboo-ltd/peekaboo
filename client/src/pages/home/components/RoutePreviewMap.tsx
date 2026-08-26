@@ -22,7 +22,7 @@ const RoutePreviewMap = ({ className = '', dark = false }: RoutePreviewMapProps)
       width="160"
       height="72"
       rx="8"
-      fill={dark ? 'rgba(255,255,255,0.04)' : 'var(--peekaboo-surface)'}
+      fill={dark ? 'rgba(255,255,255,0.04)' : 'var(--surface)'}
     />
 
     {/* Grid */}
@@ -69,35 +69,35 @@ const RoutePreviewMap = ({ className = '', dark = false }: RoutePreviewMapProps)
     />
 
     {/* Pickup */}
-    <circle cx="24" cy="48" r="5" fill={dark ? '#0a0a0a' : 'var(--peekaboo-surface)'} stroke="var(--ink)" strokeWidth="2" />
+    <circle cx="24" cy="48" r="5" fill={dark ? 'var(--ink)' : 'var(--surface)'} stroke="var(--ink)" strokeWidth="2" />
     <text
       x="24"
       y="62"
       textAnchor="middle"
       fontSize="7"
       fontWeight="600"
-      fill={dark ? 'rgba(255,255,255,0.7)' : '#6b6f76'}
+      fill={dark ? 'rgba(255,255,255,0.7)' : 'var(--muted)'}
       fontFamily="system-ui, sans-serif"
     >
       Kacyiru
     </text>
 
     {/* Drop-off */}
-    <circle cx="140" cy="34" r="5" fill="var(--ink)" stroke={dark ? '#0a0a0a' : '#fff'} strokeWidth="1.5" />
+    <circle cx="140" cy="34" r="5" fill="var(--ink)" stroke={dark ? 'var(--ink)' : 'var(--paper)'} strokeWidth="1.5" />
     <text
       x="140"
       y="62"
       textAnchor="middle"
       fontSize="7"
       fontWeight="600"
-      fill={dark ? 'rgba(255,255,255,0.7)' : '#6b6f76'}
+      fill={dark ? 'rgba(255,255,255,0.7)' : 'var(--muted)'}
       fontFamily="system-ui, sans-serif"
     >
       Nyamirambo
     </text>
 
     {/* Rider dot */}
-    <circle cx="88" cy="26" r="3.5" fill="#0a0a0a">
+    <circle cx="88" cy="26" r="3.5" fill="var(--ink)">
       <animate
         attributeName="cx"
         values="24;88;140"

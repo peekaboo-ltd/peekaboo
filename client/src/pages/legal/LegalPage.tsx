@@ -33,7 +33,7 @@ const LegalPage = () => {
   useDocumentTitle(t('legal.hub.docTitle'));
 
   return (
-    <PublicPage className="max-lg:mt-16">
+    <PublicPage>
       <LegalBreadcrumb />
 
       <PublicPageHero
@@ -43,17 +43,17 @@ const LegalPage = () => {
       />
 
       <PublicSectionCard title={t('legal.hub.linksHeading')} contentClassName="p-0 sm:p-0">
-        <ul className="divide-y divide-slate-200">
+        <ul className="divide-y divide-[--line]">
           {hubLinks.map((item) => (
             <li key={item.to}>
               <Link
                 to={item.to}
-                className="group flex flex-col gap-1 px-5 py-4 transition-colors hover:bg-slate-50 sm:px-6 sm:py-5"
+                className="group flex flex-col gap-1 px-5 py-4 transition-colors hover:bg-[--surface] sm:px-6 sm:py-5"
               >
-                <span className="text-sm font-medium text-slate-900 group-hover:text-primary-900">
+                <span className="text-sm font-medium text-[--ink] group-hover:text-[--ink]">
                   {t(item.titleKey)}
                 </span>
-                <span className="text-sm leading-6 text-slate-600">{t(item.summaryKey)}</span>
+                <span className="text-sm leading-6 text-[--muted]">{t(item.summaryKey)}</span>
               </Link>
             </li>
           ))}

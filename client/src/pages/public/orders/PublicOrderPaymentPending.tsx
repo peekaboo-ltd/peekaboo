@@ -111,10 +111,10 @@ const PublicOrderPaymentPending = () => {
               icon={faTriangleExclamation}
               className="mb-4 h-5 w-5 text-[var(--destructive)]"
             />
-            <h1 className="text-xl font-medium text-[var(--peekaboo-dark)]">
+            <h1 className="text-xl font-medium text-[var(--ink)]">
               Payment reference missing
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--peekaboo-muted)]">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
               Return to the order and start payment again so we can track its
               confirmation.
             </p>
@@ -146,7 +146,13 @@ const PublicOrderPaymentPending = () => {
               : 'Complete the provider checkout. This page will move forward automatically when the payment is confirmed.'
         }
         actions={
-          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--peekaboo-gray)] px-3 py-2 text-xs font-medium text-[var(--peekaboo-dark)]">
+          <span
+            className={`inline-flex h-6 items-center gap-2 rounded-[--radius-pill] border px-2.5 text-xs font-medium ${
+              isFailed
+                ? 'border-[--ink] text-[--ink] line-through'
+                : 'border-dashed border-[--line-strong] text-[--muted]'
+            }`}
+          >
             <FontAwesomeIcon
               icon={isFailed ? faTriangleExclamation : faShieldHalved}
               aria-hidden="true"
@@ -174,7 +180,7 @@ const PublicOrderPaymentPending = () => {
           >
             <span
               aria-hidden="true"
-              className="absolute left-3.5 right-3.5 top-3.5 h-px bg-[var(--peekaboo-line)]"
+              className="absolute left-3.5 right-3.5 top-3.5 h-px bg-[var(--line)]"
             />
             {!isFailed ? (
               <span
@@ -184,23 +190,23 @@ const PublicOrderPaymentPending = () => {
             ) : null}
 
             <li className="relative">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--peekaboo-dark)] text-white">
+              <span className="flex h-7 w-7 items-center justify-center rounded-[--radius-pill] border border-[--ink] bg-[--paper] text-[--ink]">
                 <FontAwesomeIcon icon={faCircleCheck} className="h-3 w-3" />
               </span>
-              <p className="mt-3 font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-dark)]">
+              <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--ink)]">
                 Initiated
               </p>
-              <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">
+              <p className="mt-1 text-xs text-[var(--muted)]">
                 Request sent
               </p>
             </li>
 
             <li className="relative text-right">
               <span
-                className={`ml-auto flex h-7 w-7 items-center justify-center rounded-full border border-[var(--peekaboo-line)] ${
+                className={`ml-auto flex h-7 w-7 items-center justify-center rounded-full border border-[var(--line)] ${
                   isFailed
-                    ? 'bg-white text-[var(--destructive)]'
-                    : 'bg-[var(--ink)] text-[var(--peekaboo-dark)]'
+                    ? 'border-[--ink] bg-[--paper] text-[--ink]'
+                    : 'border-[--ink] bg-[--ink] text-[--paper]'
                 }`}
               >
                 <FontAwesomeIcon
@@ -212,20 +218,20 @@ const PublicOrderPaymentPending = () => {
                   }`}
                 />
               </span>
-              <p className="mt-3 font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-dark)]">
+              <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--ink)]">
                 {isFailed ? 'Not completed' : 'Confirmation'}
               </p>
-              <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">
+              <p className="mt-1 text-xs text-[var(--muted)]">
                 {isFailed ? 'Try again' : 'Waiting securely'}
               </p>
             </li>
           </ol>
 
           <div
-            className={`mt-7 flex items-start gap-3 rounded-md px-4 py-3 text-sm leading-6 ${
+            className={`mt-7 flex items-start gap-3 rounded-[--radius-control] px-4 py-3 text-sm leading-6 ${
               isFailed
-                ? 'bg-[color-mix(in_oklab,var(--destructive)_7%,white)] text-[var(--peekaboo-text)]'
-                : 'bg-[var(--peekaboo-warm)] text-[var(--peekaboo-text)]'
+                ? 'border border-[--ink] bg-[--paper] text-[--ink]'
+                : 'border border-dashed border-[--line-strong] bg-[--surface] text-[--ink]'
             }`}
             role="status"
             aria-live="polite"
@@ -269,24 +275,24 @@ const PublicOrderPaymentPending = () => {
         </PublicSectionCard>
 
         <PublicSectionCard eyebrow="Payment" title="Attempt details">
-          <dl className="divide-y divide-[var(--peekaboo-line)] text-sm">
+          <dl className="divide-y divide-[var(--line)] text-sm">
             <div className="pb-4">
-              <dt className="text-xs text-[var(--peekaboo-muted)]">Method</dt>
-              <dd className="mt-1 font-medium text-[var(--peekaboo-dark)]">
+              <dt className="text-xs text-[var(--muted)]">Method</dt>
+              <dd className="mt-1 font-medium text-[var(--ink)]">
                 {payment ? channelLabel : 'Loading…'}
               </dd>
             </div>
             <div className="py-4">
-              <dt className="text-xs text-[var(--peekaboo-muted)]">
+              <dt className="text-xs text-[var(--muted)]">
                 Order reference
               </dt>
-              <dd className="mt-1 break-all font-['IBM_Plex_Mono'] text-xs text-[var(--peekaboo-text)]">
+              <dd className="mt-1 break-all text-xs text-[var(--ink)]">
                 {orderLoading ? 'Loading…' : currentOrder?.referenceId || '—'}
               </dd>
             </div>
             <div className="pt-4">
-              <dt className="text-xs text-[var(--peekaboo-muted)]">Amount</dt>
-              <dd className="mt-1 text-xl font-medium text-[var(--peekaboo-dark)]">
+              <dt className="text-xs text-[var(--muted)]">Amount</dt>
+              <dd className="mt-1 text-xl font-medium text-[var(--ink)]">
                 {payment
                   ? formatCurrency(payment.amount)
                   : orderLoading
@@ -297,7 +303,7 @@ const PublicOrderPaymentPending = () => {
               </dd>
             </div>
           </dl>
-          <p className="mt-6 border-t border-[var(--peekaboo-line)] pt-4 text-xs leading-5 text-[var(--peekaboo-muted)]">
+          <p className="mt-6 border-t border-[var(--line)] pt-4 text-xs leading-5 text-[var(--muted)]">
             Closing this page doesn’t cancel the payment. You can return using
             the same link.
           </p>

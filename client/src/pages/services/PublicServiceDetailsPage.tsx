@@ -23,19 +23,20 @@ import type { BusinessPlan, PricingTier } from '@/types/businessPlan.type';
 import { BillingPeriod } from '@/types/businessPlan.type';
 
 const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.2, ease: [0, 0, 1, 1] as const },
   },
 };
 
 const containerVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08 },
+    y: 0,
+    transition: { duration: 0.2, ease: [0, 0, 1, 1] as const },
   },
 };
 
@@ -147,20 +148,20 @@ const PublicServiceDetailsPage = () => {
 
   if (isFetching) {
     return (
-      <PublicPage className="bg-[var(--peekaboo-surface)]">
+      <PublicPage className="bg-[var(--surface)]">
         <section className="grid gap-4">
-          <div className="h-64 animate-pulse rounded-[28px] border border-slate-200 bg-white" />
+          <div className="h-64 animate-pulse rounded-[--radius-card] border border-[--line] bg-[--paper]" />
           <div className="grid gap-4 md:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
-                className="h-32 animate-pulse rounded-[22px] border border-slate-200 bg-white"
+                className="h-32 animate-pulse rounded-[--radius-card] border border-[--line] bg-[--paper]"
               />
             ))}
           </div>
           <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="h-96 animate-pulse rounded-[24px] border border-slate-200 bg-white" />
-            <div className="h-96 animate-pulse rounded-[24px] border border-slate-200 bg-white" />
+            <div className="h-96 animate-pulse rounded-[--radius-card] border border-[--line] bg-[--paper]" />
+            <div className="h-96 animate-pulse rounded-[--radius-card] border border-[--line] bg-[--paper]" />
           </div>
         </section>
       </PublicPage>
@@ -169,16 +170,16 @@ const PublicServiceDetailsPage = () => {
 
   if (error || !plan) {
     return (
-      <PublicPage className="bg-[var(--peekaboo-surface)]">
+      <PublicPage className="bg-[var(--surface)]">
         <PublicPageHero
           eyebrow="Service details"
           title="We couldn’t find that delivery plan"
           description="The plan may have moved, been archived, or the link may be incomplete."
-          className="border-primary-200 bg-white"
+          className="border-[--line] bg-[--paper]"
           actions={
             <Link
               to="/services"
-              className="inline-flex items-center gap-2 rounded-sm border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-[--radius-control] border border-[--line] px-4 py-2 text-[13px] font-medium text-[--muted] transition-colors duration-200 hover:bg-[--surface]"
             >
               <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
               Back to services
@@ -189,7 +190,7 @@ const PublicServiceDetailsPage = () => {
           eyebrow="Next step"
           title="Explore active services"
           description="Browse our current delivery plans or reach out directly for a tailored setup."
-          className="rounded-[24px] border-primary-200"
+          className="rounded-[--radius-card] border-[--line]"
         >
           <div className="flex flex-wrap gap-3">
             <Button route="/services" className="w-fit" primary>
@@ -217,7 +218,7 @@ const PublicServiceDetailsPage = () => {
       : pricingRows.map((row) => `${row.label} → ${row.priceLabel}`);
 
   return (
-    <PublicPage className="bg-[var(--peekaboo-surface)]">
+    <PublicPage className="bg-[var(--surface)]">
       <motion.section
         className="grid gap-4"
         initial="hidden"
@@ -232,22 +233,22 @@ const PublicServiceDetailsPage = () => {
                 <div className="flex flex-wrap items-center gap-3">
                   <span>{plan.name}</span>
                   {plan.badge ? (
-                    <span className="inline-flex w-fit items-center gap-2 rounded-sm bg-[--surface] px-3 py-1 text-[11px] font-medium uppercase text-white">
+                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-[--radius-pill] bg-[--ink] px-3 text-xs font-medium text-[--paper]">
                       <FontAwesomeIcon icon={faStar} className="text-[10px]" />
                       {plan.badge}
                     </span>
                   ) : null}
                   {plan.isDefault ? (
-                    <span className="inline-flex w-fit items-center gap-2 rounded-sm border border-primary-200 bg-primary-50 px-3 py-1 text-[11px] font-medium uppercase text-primary-800">
+                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-[--radius-pill] border border-[--ink] px-3 text-xs font-medium text-[--ink]">
                       Preferred plan
                     </span>
                   ) : null}
                 </div>
                 <div className="flex flex-col gap-2">
-                  <span className="text-[1.05rem] font-normal text-primary-600 sm:text-[1.2rem]">
+                  <span className="text-[1.05rem] font-normal text-[--muted] sm:text-[1.2rem]">
                     {headlinePrice}
                   </span>
-                  <span className="max-w-3xl text-sm leading-6 text-slate-600">
+                  <span className="max-w-3xl text-sm leading-6 text-[--muted]">
                     {plan.description || 'A flexible business delivery plan built around your operational rhythm and shipment volume.'}
                   </span>
                 </div>
@@ -258,12 +259,12 @@ const PublicServiceDetailsPage = () => {
               <div className="flex flex-wrap gap-2">
                 <Link
                   to="/services"
-                  className="inline-flex items-center gap-2 rounded-sm border border-slate-200 bg-white px-4 py-2 text-[13px] font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-50"
+                  className="inline-flex items-center gap-2 rounded-[--radius-control] border border-[--line] bg-[--paper] px-4 py-2 text-[13px] font-medium text-[--muted] transition-colors duration-200 hover:bg-[--surface]"
                 >
                   <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
                   Back to services
                 </Link>
-                <Button route="/contact" primary className="rounded-sm px-6!">
+                <Button route="/contact" primary className="rounded-[--radius-control] px-6!">
                   Talk to our team
                   <FontAwesomeIcon icon={faArrowRight} className="text-[11px]" />
                 </Button>
@@ -279,25 +280,25 @@ const PublicServiceDetailsPage = () => {
           <PublicStatCard
             label="Billing rhythm"
             value={getBillingPeriodLabel(plan.billingPeriod)}
-            className="rounded-sm border-primary-200"
+            className="border-[--line]"
             icon={<FontAwesomeIcon icon={faClock} />}
           />
           <PublicStatCard
             label="Pricing mode"
             value={plan.isCustomPricing ? 'Custom agreement' : 'Structured tiers'}
-            className="rounded-sm border-primary-200"
+            className="border-[--line]"
             icon={<FontAwesomeIcon icon={faLayerGroup} />}
           />
           <PublicStatCard
             label="Currency"
             value={plan.currency || 'RWF'}
-            className="rounded-sm border-primary-200"
+            className="border-[--line]"
             icon={<FontAwesomeIcon icon={faCoins} />}
           />
           <PublicStatCard
             label="Positioning"
             value={plan.badge || (plan.isDefault ? 'Recommended' : 'Active plan')}
-            className="rounded-sm border-primary-200"
+            className="border-[--line]"
             icon={<FontAwesomeIcon icon={faStar} />}
           />
         </motion.section>
@@ -308,22 +309,22 @@ const PublicServiceDetailsPage = () => {
               eyebrow="Overview"
               title="What this plan is built for"
               description="Designed for teams that want transparent pricing and dependable delivery operations."
-              className="rounded-md border-primary-200"
+              className="border-[--line]"
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <article className="rounded-md border border-slate-200 bg-slate-50/80 p-5">
-                  <p className="text-[11px] font-medium uppercase text-slate-500">
+                <article className="rounded-[--radius-control] border border-[--line] bg-[--surface] p-5">
+                  <p className="text-[11px] font-medium uppercase text-[--muted]">
                     Headline pricing
                   </p>
-                  <p className="mt-3 text-2xl font-medium text-primary-900">
+                  <p className="mt-3 text-2xl font-medium text-[--ink]">
                     {headlinePrice}
                   </p>
                 </article>
-                <article className="rounded-md border border-slate-200 bg-slate-50/80 p-5">
-                  <p className="text-[11px] font-medium uppercase text-slate-500">
+                <article className="rounded-[--radius-control] border border-[--line] bg-[--surface] p-5">
+                  <p className="text-[11px] font-medium uppercase text-[--muted]">
                     Ideal usage
                   </p>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                  <p className="mt-3 text-sm leading-6 text-[--muted]">
                     {plan.isCustomPricing
                       ? 'Best for businesses that need a dedicated operational setup and negotiated service design.'
                       : `Best for teams running ${getBillingPeriodLabel(plan.billingPeriod).toLowerCase()} delivery cycles and wanting predictable cost control.`}
@@ -336,18 +337,18 @@ const PublicServiceDetailsPage = () => {
               eyebrow="Included"
               title="Features and benefits"
               description="Every plan includes the operational essentials listed below."
-              className="rounded-md border-primary-200"
+              className="border-[--line]"
             >
               <ul className="grid gap-3 md:grid-cols-2">
                 {featureList.map((feature) => (
                   <li
                     key={feature}
-                    className="flex items-start gap-3 rounded-md border border-slate-200 bg-white p-4"
+                    className="flex items-start gap-3 rounded-[--radius-control] border border-[--line] bg-[--paper] p-4"
                   >
-                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-[--surface] text-[--muted]">
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[--radius-control] bg-[--surface] text-[--muted]">
                       <FontAwesomeIcon icon={faCheck} className="text-xs" />
                     </span>
-                    <span className="text-sm leading-6 text-slate-700">{feature}</span>
+                    <span className="text-sm leading-6 text-[--muted]">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -359,29 +360,29 @@ const PublicServiceDetailsPage = () => {
               eyebrow="Pricing structure"
               title="Tier details"
               description="A breakdown of volume bands, fallback rates, and overflow charges."
-              className="rounded-md border-primary-200"
+              className="border-[--line]"
             >
               <div className="space-y-3">
                 {pricingRows.length > 0 ? (
                   pricingRows.map((row) => (
                     <article
                       key={`${row.label}-${row.priceLabel}`}
-                      className="rounded-md border border-slate-200 bg-slate-50/80 p-4"
+                      className="rounded-[--radius-control] border border-[--line] bg-[--surface] p-4"
                     >
-                      <p className="text-sm font-medium text-primary-900">{row.label}</p>
-                      <p className="mt-1 text-sm text-slate-600">{row.priceLabel}</p>
+                      <p className="text-sm font-medium text-[--ink]">{row.label}</p>
+                      <p className="mt-1 text-sm text-[--muted]">{row.priceLabel}</p>
                     </article>
                   ))
                 ) : (
-                  <article className="rounded-md border border-slate-200 bg-slate-50/80 p-4">
-                    <p className="text-sm text-slate-600">
+                  <article className="rounded-[--radius-control] border border-[--line] bg-[--surface] p-4">
+                    <p className="text-sm text-[--muted]">
                       Pricing is tailored with our team based on your exact operational needs.
                     </p>
                   </article>
                 )}
 
                 {overflowRate ? (
-                  <article className="rounded-md border border-primary-200 p-4">
+                  <article className="rounded-[--radius-control] border border-[--line] p-4">
                     <p className="text-[11px] font-normal uppercase text-muted-foreground">
                       Overflow rate
                     </p>
@@ -392,7 +393,7 @@ const PublicServiceDetailsPage = () => {
                 ) : null}
 
                 {hasPackageTiers && fallbackRate ? (
-                  <article className="rounded-md border p-4">
+                  <article className="rounded-[--radius-control] border p-4">
                     <p className="text-[11px] font-normal uppercase">
                       Fallback rate
                     </p>
@@ -408,18 +409,18 @@ const PublicServiceDetailsPage = () => {
               eyebrow="Next step"
               title="Talk through your rollout"
               description="We’ll help match this plan to your volumes, locations, and operating model."
-              className="rounded-md border-primary-200"
+              className="border-[--line]"
             >
               <div className="space-y-4">
-                <p className="text-sm leading-6 text-slate-600">
+                <p className="text-sm leading-6 text-[--muted]">
                   Tell us about your expected delivery volume and service area, and we’ll confirm the best plan setup for your team.
                 </p>
                 <div className="flex flex-col gap-3">
-                  <Button route="/contact" primary className="w-full rounded-sm">
+                  <Button route="/contact" primary className="w-full rounded-[--radius-control]">
                     Talk to our team
                     <FontAwesomeIcon icon={faArrowRight} className="text-[11px]" />
                   </Button>
-                  <Button route="/services" className="w-full rounded-sm">
+                  <Button route="/services" className="w-full rounded-[--radius-control]">
                     Explore all services
                   </Button>
                 </div>

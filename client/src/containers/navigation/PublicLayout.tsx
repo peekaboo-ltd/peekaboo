@@ -10,19 +10,17 @@ interface PublicLayoutProps {
 }
 
 const PublicLayout = ({ children }: PublicLayoutProps) => {
-  // NAVIGATION
   const { pathname } = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const isAuthPage = pathname.startsWith('/auth/');
 
   return (
-    <main className="relative flex min-h-screen flex-col bg-[var(--peekaboo-surface)]">
-      {!isAuthPage && (isAuthenticated ? <AuthenticatedNavbar /> : <PublicNavbar />)}
-      <section className={`flex-1 ${pathname === '/' || isAuthPage ? 'pt-0' : 'pt-22'}`}>
-        {children || <Outlet />}
-      </section>
+    <div className="flex min-h-screen flex-col bg-[--paper] text-[--ink]">
+      {!isAuthPage &&
+        (isAuthenticated ? <AuthenticatedNavbar /> : <PublicNavbar />)}
+      <div className="flex-1">{children || <Outlet />}</div>
       {!isAuthPage && <Footer />}
-    </main>
+    </div>
   );
 };
 

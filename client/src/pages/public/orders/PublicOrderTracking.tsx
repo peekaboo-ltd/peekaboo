@@ -152,9 +152,9 @@ const PublicOrderTracking = () => {
         actions={
           order?.referenceId ? (
             <div className="flex flex-wrap items-center gap-2">
-              <code className="font-['IBM_Plex_Mono'] text-xs text-[var(--peekaboo-text)]">
+              <span className="text-xs text-[var(--ink)] tabular-nums">
                 {order.referenceId}
-              </code>
+              </span>
               <button
                 type="button"
                 onClick={() => {
@@ -163,7 +163,7 @@ const PublicOrderTracking = () => {
                   setIsCopied(true);
                   setTimeout(() => setIsCopied(false), 2000);
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--peekaboo-line)] bg-white text-[var(--peekaboo-muted)] hover:border-[var(--peekaboo-dark)] hover:text-[var(--peekaboo-dark)]"
+                className="flex size-9 items-center justify-center rounded-[--radius-control] border border-[--line] bg-[--paper] text-[--muted] outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-[--ink] hover:text-[--ink] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
                 aria-label="Copy reference ID"
               >
                 <FontAwesomeIcon
@@ -186,11 +186,11 @@ const PublicOrderTracking = () => {
         <nav className="relative">
           <ol className="space-y-4 sm:hidden">
             <span
-              className="absolute bottom-0 left-5 top-0 w-px bg-[var(--peekaboo-line)]"
+              className="absolute bottom-0 left-5 top-0 w-px bg-[var(--line)]"
               aria-hidden="true"
             />
             <span
-              className="absolute left-5 top-0 w-px bg-[var(--ink)] transition-all duration-700 motion-reduce:transition-none"
+              className="absolute left-5 top-0 w-px bg-[var(--ink)] transition-[background-color,color,border-color,box-shadow] duration-200 motion-reduce:transition-none"
               style={{
                 height:
                   furthestActivityIndex >= 0
@@ -213,11 +213,11 @@ const PublicOrderTracking = () => {
                 >
                   <span
                     className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm transition-colors ${
-                      isCompleted || isCurrent
-                        ? 'border-[var(--peekaboo-dark)] bg-[var(--peekaboo-dark)] text-white'
-                        : hasActivity
-                          ? 'border-[var(--peekaboo-line)] bg-[var(--ink)] text-[var(--peekaboo-dark)]'
-                          : 'border-[var(--peekaboo-line)] bg-white text-[var(--peekaboo-muted)]'
+                      isCurrent
+                        ? 'border-[--ink] bg-[--ink] text-[--paper]'
+                        : isCompleted || hasActivity
+                          ? 'border-[--ink] bg-[--paper] text-[--ink]'
+                          : 'border-dashed border-[--line-strong] bg-[--paper] text-[--muted]'
                     }`}
                   >
                     <FontAwesomeIcon
@@ -226,23 +226,23 @@ const PublicOrderTracking = () => {
                     />
                   </span>
 
-                  <section className="min-w-0 flex-1 border-b border-[var(--peekaboo-line)] pb-4">
+                  <section className="min-w-0 flex-1 border-b border-[var(--line)] pb-4">
                     <header className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className={`text-sm font-medium ${hasActivity || isCurrent ? 'text-[var(--peekaboo-dark)]' : 'text-[var(--peekaboo-muted)]'}`}>
+                        <p className={`text-sm font-medium ${hasActivity || isCurrent ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}`}>
                           {status.label}
                         </p>
-                        <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">{status.description}</p>
+                        <p className="mt-1 text-xs text-[var(--muted)]">{status.description}</p>
                       </div>
                       <aside className="shrink-0 text-right">
                         {isCurrent ? (
-                          <span className="inline-flex rounded-full bg-[var(--peekaboo-gray)] px-2 py-1 font-['IBM_Plex_Mono'] text-[9px] uppercase tracking-[0.08em] text-[var(--peekaboo-dark)]">
+                          <span className="inline-flex h-6 items-center rounded-[--radius-pill] bg-[--ink] px-2.5 text-xs font-medium text-[--paper]">
                             Current
                           </span>
                         ) : null}
                         {activity?.createdAt ? (
                           <time
-                            className={`mt-1 block font-['IBM_Plex_Mono'] text-[9px] ${hasActivity || isCurrent ? 'text-[var(--peekaboo-text)]' : 'text-[var(--peekaboo-muted)]'}`}
+                            className={`mt-1 block text-[9px] ${hasActivity || isCurrent ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}`}
                           >
                             {formatTimestamp(activity.createdAt)}
                           </time>
@@ -258,11 +258,11 @@ const PublicOrderTracking = () => {
 
           <section className="hidden overflow-x-auto pb-2 sm:block">
             <span
-              className="absolute left-6 right-6 top-5 h-px bg-[var(--peekaboo-line)]"
+              className="absolute left-6 right-6 top-5 h-px bg-[var(--line)]"
               aria-hidden="true"
             />
             <span
-              className="absolute top-5 h-px bg-[var(--ink)] transition-all duration-700 motion-reduce:transition-none"
+              className="absolute top-5 h-px bg-[var(--ink)] transition-[background-color,color,border-color,box-shadow] duration-200 motion-reduce:transition-none"
               style={{
                 left: '1.5rem',
                 width:
@@ -287,11 +287,11 @@ const PublicOrderTracking = () => {
                   >
                     <span
                       className={`relative z-10 flex h-10 w-10 items-center justify-center rounded-full border text-sm transition-colors ${
-                        isCompleted || isCurrent
-                          ? 'border-[var(--peekaboo-dark)] bg-[var(--peekaboo-dark)] text-white'
-                          : hasActivity
-                            ? 'border-[var(--peekaboo-line)] bg-[var(--ink)] text-[var(--peekaboo-dark)]'
-                            : 'border-[var(--peekaboo-line)] bg-white text-[var(--peekaboo-muted)]'
+                        isCurrent
+                          ? 'border-[--ink] bg-[--ink] text-[--paper]'
+                          : isCompleted || hasActivity
+                            ? 'border-[--ink] bg-[--paper] text-[--ink]'
+                            : 'border-dashed border-[--line-strong] bg-[--paper] text-[--muted]'
                       }`}
                     >
                       <FontAwesomeIcon
@@ -300,23 +300,23 @@ const PublicOrderTracking = () => {
                       />
                     </span>
 
-                    <div className="mt-4 w-full max-w-[150px] border-t border-[var(--peekaboo-line)] pt-3 text-center">
-                      <p className={`text-xs font-medium ${hasActivity || isCurrent ? 'text-[var(--peekaboo-dark)]' : 'text-[var(--peekaboo-muted)]'}`}>
+                    <div className="mt-4 w-full max-w-[150px] border-t border-[var(--line)] pt-3 text-center">
+                      <p className={`text-xs font-medium ${hasActivity || isCurrent ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}`}>
                         {status.label}
                       </p>
-                      <p className="mt-1 min-h-8 text-[10px] leading-snug text-[var(--peekaboo-muted)]">
+                      <p className="mt-1 min-h-8 text-[10px] leading-snug text-[var(--muted)]">
                         {status.description}
                       </p>
 
                       {isCurrent ? (
-                        <span className="mt-2 inline-flex rounded-full bg-[var(--peekaboo-gray)] px-2 py-1 font-['IBM_Plex_Mono'] text-[9px] uppercase tracking-[0.08em] text-[var(--peekaboo-dark)]">
+                        <span className="mt-2 inline-flex h-6 items-center rounded-[--radius-pill] bg-[--ink] px-2.5 text-xs font-medium text-[--paper]">
                           Current
                         </span>
                       ) : null}
 
                       {activity?.createdAt ? (
                         <time
-                          className={`mt-2 block font-['IBM_Plex_Mono'] text-[9px] ${hasActivity || isCurrent ? 'text-[var(--peekaboo-text)]' : 'text-[var(--peekaboo-muted)]'}`}
+                          className={`mt-2 block text-[9px] ${hasActivity || isCurrent ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}`}
                           title={formatTimestamp(activity.createdAt)}
                         >
                           {formatTimestamp(activity.createdAt)}
@@ -361,14 +361,14 @@ const PublicOrderTracking = () => {
               className="py-1"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--peekaboo-gray)] text-[var(--peekaboo-dark)]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--ink)]">
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <div className="min-w-0">
-                  <p className="font-['IBM_Plex_Mono'] text-[9px] uppercase tracking-[0.08em] text-[var(--peekaboo-muted)]">
+                  <p className="text-[9px] uppercase tracking-[0.08em] text-[var(--muted)]">
                     {item.label}
                   </p>
-                  <p className="mt-1 break-all font-['IBM_Plex_Mono'] text-xs text-[var(--peekaboo-dark)]">
+                  <p className="mt-1 break-all text-xs text-[var(--ink)]">
                     {orderLoading ? 'Loading…' : item.value}
                   </p>
                 </div>
@@ -400,16 +400,16 @@ const PublicOrderTracking = () => {
               key={contact.title}
               className="py-1"
             >
-              <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.08em] text-[var(--peekaboo-muted)]">
+              <p className="text-[10px] uppercase tracking-[0.08em] text-[var(--muted)]">
                 {contact.title}
               </p>
               <div className="mt-3 space-y-2">
-                <div className="flex items-center gap-2 text-sm text-[var(--peekaboo-text)]">
-                  <FontAwesomeIcon icon={faUser} className="h-3.5 w-3.5 text-[var(--peekaboo-muted)]" />
+                <div className="flex items-center gap-2 text-sm text-[var(--ink)]">
+                  <FontAwesomeIcon icon={faUser} className="h-3.5 w-3.5 text-[var(--muted)]" />
                   <span>{orderLoading ? 'Loading…' : contact.name}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-[var(--peekaboo-text)]">
-                  <FontAwesomeIcon icon={faPhone} className="h-3.5 w-3.5 text-[var(--peekaboo-muted)]" />
+                <div className="flex items-center gap-2 text-sm text-[var(--ink)]">
+                  <FontAwesomeIcon icon={faPhone} className="h-3.5 w-3.5 text-[var(--muted)]" />
                   <span>{orderLoading ? 'Loading…' : contact.phone}</span>
                 </div>
               </div>

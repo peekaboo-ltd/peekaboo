@@ -19,8 +19,8 @@ const BusinessSolutionsSection = ({
   onContactClick,
   onSeePlans,
 }: BusinessSolutionsSectionProps) => (
-  <section id="business" className="w-full bg-[var(--peekaboo-surface)] py-12 text-foreground lg:py-16">
-    <article className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:px-10">
+  <section id="business" className="section-rhythm w-full border-t border-[--line] bg-[--paper] text-[--ink]">
+    <article className="app-container grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
       <header>
         <p className="text-[11px] font-medium uppercase text-muted-foreground">
           For businesses
@@ -41,7 +41,7 @@ const BusinessSolutionsSection = ({
             type="button"
             primary
             onClick={onContactClick}
-            className="rounded-md font-medium"
+            className="rounded-[--radius-control] font-medium"
           >
             Request business account
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -49,7 +49,7 @@ const BusinessSolutionsSection = ({
           <Button
             type="button"
             onClick={onSeePlans}
-            className={`rounded-md border-border bg-[var(--peekaboo-surface)] text-foreground`}
+            className={`rounded-[--radius-control] border-border bg-[var(--surface)] text-foreground`}
           >
             See plans
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -57,14 +57,14 @@ const BusinessSolutionsSection = ({
         </nav>
       </header>
 
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {features.map((feature) => {
           const Icon = feature.icon;
           return (
             <li key={feature.title}>
-              <article className="home-card-interactive group h-full rounded-md bg-[var(--peekaboo-surface)] p-5 text-foreground">
-                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#0a0a0a] text-[var(--ink)] transition-all duration-300 group-hover:scale-110 group-hover:bg-[var(--ink)] group-hover:text-[#0a0a0a]">
-                  <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
+              <article className="group h-full rounded-[--radius-card] border border-[--line] bg-[--paper] p-6 transition-[border-color] duration-200 hover:border-[--ink]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[--radius-control] bg-[--ink] text-[--paper]">
+                  <Icon className="h-4 w-4 transition-transform duration-200" aria-hidden="true" />
                 </span>
                 <h3 className="mt-4 text-[14px] font-medium">
                   {feature.title}

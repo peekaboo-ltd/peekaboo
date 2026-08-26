@@ -26,7 +26,7 @@ const LegalBreadcrumb = ({ currentPage }: LegalBreadcrumbProps) => {
 
   return (
     <nav aria-label={t('legal.breadcrumb.navLabel')} className="w-full">
-      <div className="rounded-md border border-slate-200 bg-white px-4 py-3 sm:px-5">
+      <div className="rounded-[--radius-card] border border-[--line] bg-[--paper] px-4 py-3 sm:px-5">
         <CustomBreadcrumb navigationLinks={navigationLinks} />
       </div>
     </nav>

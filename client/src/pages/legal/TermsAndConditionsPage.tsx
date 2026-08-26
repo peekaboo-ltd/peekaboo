@@ -10,7 +10,7 @@ const TermsAndConditionsPage = () => {
   useDocumentTitle(t('legal.terms.docTitle'));
 
   return (
-    <PublicPage className="max-lg:mt-16">
+    <PublicPage className="">
       <LegalBreadcrumb
         currentPage={{
           labelKey: 'legal.terms.title',

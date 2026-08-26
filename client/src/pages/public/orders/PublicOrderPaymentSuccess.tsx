@@ -21,7 +21,7 @@ import {
 
 const SkeletonLine = ({ className = '' }: { className?: string }) => (
   <span
-    className={`inline-block animate-pulse rounded bg-[var(--peekaboo-gray)] ${className}`}
+    className={`inline-block animate-pulse rounded bg-[var(--surface)] ${className}`}
   />
 );
 
@@ -39,14 +39,14 @@ const ReferenceValue = ({
   onCopy,
 }: ReferenceValueProps) => (
   <span className="flex min-w-0 items-center gap-2">
-    <code className="min-w-0 break-all font-['IBM_Plex_Mono'] text-xs text-[var(--peekaboo-text)]">
+    <span className="min-w-0 break-all text-xs text-[var(--ink)] tabular-nums">
       {value || '—'}
-    </code>
+    </span>
     {value ? (
       <button
         type="button"
         onClick={onCopy}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--peekaboo-line)] bg-white text-[var(--peekaboo-muted)] hover:border-[var(--peekaboo-dark)] hover:text-[var(--peekaboo-dark)]"
+        className="flex size-9 shrink-0 items-center justify-center rounded-[--radius-control] border border-[--line] bg-[--paper] text-[--muted] outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-[--ink] hover:text-[--ink] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
         aria-label={`Copy ${label} to clipboard`}
       >
         <FontAwesomeIcon
@@ -122,11 +122,11 @@ const PublicOrderPaymentSuccess = () => {
       <PublicPage>
         <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
           <div className="py-5 text-center" role="status" aria-live="polite">
-            <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-[var(--peekaboo-line)] border-t-[var(--peekaboo-dark)] motion-reduce:animate-none" />
-            <h1 className="mt-5 text-xl font-medium text-[var(--peekaboo-dark)]">
+            <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--ink)] motion-reduce:animate-none" />
+            <h1 className="mt-5 text-xl font-medium text-[var(--ink)]">
               Confirming your payment
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--peekaboo-muted)]">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
               We’re checking the transaction before showing your receipt.
             </p>
           </div>
@@ -140,10 +140,10 @@ const PublicOrderPaymentSuccess = () => {
       <PublicPage>
         <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
           <div className="py-5 text-center">
-            <h1 className="text-xl font-medium text-[var(--peekaboo-dark)]">
+            <h1 className="text-xl font-medium text-[var(--ink)]">
               Payment confirmation unavailable
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--peekaboo-muted)]">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
               We couldn’t verify a completed payment for this order. Return to
               the order to check its current status.
             </p>
@@ -165,7 +165,7 @@ const PublicOrderPaymentSuccess = () => {
         title="Payment confirmed"
         description="Your order is paid and ready for rider assignment. Keep the references below for your records."
         actions={
-          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--peekaboo-gray)] px-3 py-2 text-xs font-medium text-[var(--peekaboo-dark)]">
+          <span className="inline-flex h-6 items-center gap-2 rounded-[--radius-pill] border border-[--ink] px-2.5 text-xs font-medium text-[--ink]">
             <FontAwesomeIcon icon={faCheckCircle} aria-hidden="true" />
             Confirmed
           </span>
@@ -181,10 +181,10 @@ const PublicOrderPaymentSuccess = () => {
             title="Payment details"
             description="Transaction and order references."
           >
-            <dl className="divide-y divide-[var(--peekaboo-line)]">
+            <dl className="divide-y divide-[var(--line)]">
               {successfulPayment.externalReferenceId ? (
                 <div className="grid gap-2 py-4 first:pt-0 sm:grid-cols-[10rem_1fr] sm:items-center">
-                  <dt className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
+                  <dt className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
                     Payment reference
                   </dt>
                   <dd className="sm:justify-self-end">
@@ -204,7 +204,7 @@ const PublicOrderPaymentSuccess = () => {
               ) : null}
 
               <div className="grid gap-2 py-4 sm:grid-cols-[10rem_1fr] sm:items-center">
-                <dt className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
+                <dt className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
                   Order reference
                 </dt>
                 <dd className="sm:justify-self-end">
@@ -226,10 +226,10 @@ const PublicOrderPaymentSuccess = () => {
               </div>
 
               <div className="grid gap-2 py-4 pb-0 sm:grid-cols-[10rem_1fr] sm:items-center">
-                <dt className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
+                <dt className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
                   Amount paid
                 </dt>
-                <dd className="text-xl font-medium text-[var(--peekaboo-dark)] sm:justify-self-end">
+                <dd className="text-xl font-medium text-[var(--ink)] sm:justify-self-end">
                   {formatCurrency(successfulPayment.amount)}
                 </dd>
               </div>
@@ -265,10 +265,10 @@ const PublicOrderPaymentSuccess = () => {
                 ].map((stop) => (
                   <article key={stop.label} className="relative min-w-0 pl-6">
                     <span className="absolute left-0 top-0.5 h-3 w-3 rounded-full bg-[var(--ink)]" />
-                    <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
+                    <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
                       {stop.label}
                     </p>
-                    <div className="mt-3 text-sm text-[var(--peekaboo-text)]">
+                    <div className="mt-3 text-sm text-[var(--ink)]">
                       {stop.location ? (
                         <AdministrativeLocation location={stop.location} />
                       ) : (
@@ -281,11 +281,11 @@ const PublicOrderPaymentSuccess = () => {
             )}
 
             {!orderLoading ? (
-              <div className="mt-6 flex items-center justify-between border-t border-[var(--peekaboo-line)] pt-4">
-                <span className="text-sm text-[var(--peekaboo-muted)]">
+              <div className="mt-6 flex items-center justify-between border-t border-[var(--line)] pt-4">
+                <span className="text-sm text-[var(--muted)]">
                   Delivery fee
                 </span>
-                <span className="font-medium text-[var(--peekaboo-dark)]">
+                <span className="font-medium text-[var(--ink)]">
                   {formatCurrency(
                     currentOrder?.finalFee ?? currentOrder?.initialFee ?? 0,
                   )}
@@ -300,7 +300,7 @@ const PublicOrderPaymentSuccess = () => {
           title="Track rider assignment"
           description="We’ll update the tracking page when a rider is assigned and as the delivery moves."
         >
-          <p className="text-sm leading-6 text-[var(--peekaboo-muted)]">
+          <p className="text-sm leading-6 text-[var(--muted)]">
             You can leave this receipt safely. Your order reference will remain
             available on the tracking page.
           </p>

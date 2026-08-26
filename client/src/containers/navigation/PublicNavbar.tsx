@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import Button from '../../components/inputs/Button';
+import { Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { NAVIGATION_LINKS } from '@/constants/navigation.constants';
 import { capitalizeString } from '@/utils/strings.util';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
@@ -11,138 +12,100 @@ const PublicNavbar = () => {
   const { pathname } = useLocation();
 
   const toggleMobileMenu = useCallback(() => {
-    setIsMobileMenuOpen((prev) => !prev);
+    setIsMobileMenuOpen((previous) => !previous);
   }, []);
 
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
+  useEffect(() => setIsMobileMenuOpen(false), [pathname]);
 
   useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isMobileMenuOpen]);
 
+  const publicLinks = Object.entries(NAVIGATION_LINKS).filter(
+    ([label]) => label !== 'MY_ACCOUNT',
+  );
+
   return (
-    <nav
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        pathname === '/'
-          ? 'border-b border-primary-900/5 bg-[#FAFAF7]'
-          : 'border-b border-primary-900/8 bg-[#FAFAF7]'
-      }`}
-    >
-      <header className="relative mx-auto flex h-[64px] w-[95%] max-w-[1280px] items-center justify-between sm:w-[92%] md:w-[90%]">
+    <header className="invert-surface sticky top-0 z-50 h-16">
+      <nav className="app-container flex h-16 items-center justify-between" aria-label="Primary navigation">
         <Link
           to="/"
-          className="flex shrink-0 items-center transition-opacity duration-200 hover:opacity-80"
+          className="flex h-12 shrink-0 items-center rounded-[--radius-control] px-2 outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+          aria-label="Peekaboo home"
         >
           <img
             src={peekabooLogo}
-            className="h-14 w-auto object-contain sm:h-16"
-            alt="Peekaboo Logo"
+            className="h-10 w-auto object-contain invert dark:invert-0"
+            alt="Peekaboo"
           />
         </Link>
 
-        <ul className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex">
-          {Object.entries(NAVIGATION_LINKS).map(([label, link]) => {
-            if (label === 'MY_ACCOUNT') return null;
-            const isActive = pathname === link;
-
-            return (
-              <li key={label}>
-                <Link
-                  to={link}
-                  className={`rounded-sm px-3 py-1.5 text-[13px] font-normal transition-all duration-200 ${
-                    isActive
-                      ? 'bg-primary-900 text-white shadow-sm'
-                      : 'text-primary-900 hover:bg-primary-900/6'
-                  }`}
-                >
-                  {capitalizeString(label)}
-                </Link>
-              </li>
-            );
-          })}
+        <ul className="hidden items-center gap-1 lg:flex">
+          {publicLinks.map(([label, link]) => (
+            <li key={label}>
+              <Link
+                to={link}
+                aria-current={pathname === link ? 'page' : undefined}
+                className="inline-flex min-h-10 items-center rounded-[--radius-pill] px-3 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface] active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+              >
+                {capitalizeString(label)}
+              </Link>
+            </li>
+          ))}
         </ul>
 
         <div className="flex items-center gap-2">
           <div className="hidden items-center gap-2 lg:flex">
             <LanguageSelector />
-            <Button route={NAVIGATION_LINKS.MY_ACCOUNT} primary>
-              {capitalizeString('MY_ACCOUNT')}
+            <Button asChild size="sm" className="bg-[--ink] text-[--paper]">
+              <Link to={NAVIGATION_LINKS.MY_ACCOUNT}>
+                {capitalizeString('MY_ACCOUNT')}
+              </Link>
             </Button>
           </div>
-
           <button
             type="button"
             onClick={toggleMobileMenu}
-            className="relative z-50 flex h-9 w-9 items-center justify-center rounded-md text-primary-800 transition-colors duration-200 hover:bg-primary-900/5 hover:text-primary-950 focus:outline-none lg:hidden"
-            aria-label="Toggle navigation menu"
+            className="relative z-50 flex size-11 items-center justify-center rounded-[--radius-control] outline-none transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface] active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] lg:hidden"
+            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={isMobileMenuOpen}
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d={isMobileMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'}
-              />
-            </svg>
+            {isMobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
-      </header>
+      </nav>
 
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 top-14 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      <div
-        className={`absolute inset-x-0 top-14 z-40 overflow-hidden border-b border-primary-900/8 bg-[#FAFAF7] shadow-lg transition-all duration-300 ease-in-out lg:hidden ${
-          isMobileMenuOpen ? 'max-h-[calc(100vh-3.5rem)] opacity-100' : 'pointer-events-none max-h-0 opacity-0'
-        }`}
-      >
-        <ul className="flex flex-col gap-0.5 px-4 py-3">
-          {Object.entries(NAVIGATION_LINKS).map(([label, link]) => {
-            if (label === 'MY_ACCOUNT') return null;
-            const isActive = pathname === link;
-
-            return (
-              <li key={label}>
-                <Link
-                  to={link}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center rounded-md px-3 py-2.5 text-[13px] font-normal transition-colors duration-150 ${
-                    isActive
-                      ? 'bg-primary-900 text-white'
-                      : 'text-primary-800/80 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900'
-                  }`}
-                >
-                  {capitalizeString(label)}
+      {isMobileMenuOpen ? (
+        <div className="fixed inset-x-0 bottom-0 top-16 z-40 bg-[--paper] text-[--ink] lg:hidden">
+          <nav className="flex h-full flex-col overflow-y-auto px-5 py-6" aria-label="Mobile navigation">
+            <ul className="border-t border-[--line]">
+              {publicLinks.map(([label, link]) => (
+                <li key={label} className="border-b border-[--line]">
+                  <Link
+                    to={link}
+                    aria-current={pathname === link ? 'page' : undefined}
+                    className="flex min-h-16 items-center px-3 text-lg font-normal outline-none transition-[background-color,color] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface]"
+                  >
+                    {capitalizeString(label)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto flex items-center gap-3 pt-8">
+              <LanguageSelector />
+              <Button asChild className="flex-1">
+                <Link to={NAVIGATION_LINKS.MY_ACCOUNT}>
+                  {capitalizeString('MY_ACCOUNT')}
                 </Link>
-              </li>
-            );
-          })}
-        </ul>
-
-        <div className="border-t border-primary-100 px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <LanguageSelector />
-            <Button
-              route={NAVIGATION_LINKS.MY_ACCOUNT}
-              primary
-              className="flex-1"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {capitalizeString('MY_ACCOUNT')}
-            </Button>
-          </div>
+              </Button>
+            </div>
+          </nav>
         </div>
-      </div>
-    </nav>
+      ) : null}
+    </header>
   );
 };
 

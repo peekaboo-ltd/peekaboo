@@ -62,7 +62,7 @@ const TrackOrder = () => {
   }, [isError, t]);
 
   return (
-    <PublicPage className="min-h-fit max-lg:mt-16">
+    <PublicPage className="min-h-fit">
       <PublicPageHero
         eyebrow={t('trackOrder.eyebrow')}
         title={t('trackOrder.title')}
@@ -84,12 +84,12 @@ const TrackOrder = () => {
         >
           <label
             htmlFor="reference-id"
-            className="mb-2 block text-sm font-medium text-[var(--peekaboo-text)]"
+            className="mb-2 block text-sm font-medium text-[var(--ink)]"
           >
             {t('trackOrder.orderIdLabel')}
           </label>
           <div className="relative">
-            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--peekaboo-muted)]">
+            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]">
               <FontAwesomeIcon icon={faMagnifyingGlass} />
             </span>
             <Input
@@ -100,14 +100,14 @@ const TrackOrder = () => {
                 setErrorMessage('');
               }}
               placeholder={t('trackOrder.orderIdPlaceholder')}
-              className="h-11 rounded-md border-[var(--peekaboo-line)] bg-white pl-10 pr-3 font-['IBM_Plex_Mono'] uppercase"
+              className="h-14 rounded-[--radius-control] border-0 bg-[--surface] pl-10 pr-4 uppercase tabular-nums"
             />
           </div>
-          <p className="mt-2 text-xs leading-5 text-[var(--peekaboo-muted)]">
+          <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
             {t('trackOrder.hint')}
           </p>
           {errorMessage ? (
-            <p className="mt-3 rounded-md bg-[var(--peekaboo-warm)] px-3 py-2 text-sm text-[var(--peekaboo-text)]">
+            <p className="mt-3 rounded-[--radius-control] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)]">
               {errorMessage}
             </p>
           ) : null}
