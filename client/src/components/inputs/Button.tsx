@@ -10,7 +10,7 @@ interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchor
   route?: string;
   value?: ReactNode;
   onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
-  type?: 'submit' | 'button' | 'reset';
+  type?: 'submit' | 'button' | 'reset' | null;
   disabled?: boolean;
   primary?: boolean;
   styled?: boolean;
@@ -20,17 +20,6 @@ interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchor
   isLoading?: boolean;
   children?: ReactNode;
 }
-
-const baseStyles =
-  'inline-flex items-center gap-2 justify-center text-center text-[12px] font-normal! h-9 min-h-9 py-2.5! px-5! rounded-md border transition-all duration-300 cursor-pointer';
-
-const variantStyles = {
-  default: 'border-primary-900 text-primary-900 bg-transparent hover:bg-primary-900 hover:text-white',
-  primary: 'bg-[#0a0a0a] text-white border-[#0a0a0a] hover:bg-[#1c1c1c] hover:shadow-[0_2px_4px_-1px_rgba(10,10,10,0.2)]',
-  danger: 'bg-red-600 text-white border-red-600 hover:bg-red-700',
-  unstyled: 'bg-transparent border-transparent text-primary-900 hover:opacity-70',
-  disabled: 'opacity-50 cursor-not-allowed pointer-events-none',
-};
 
 const Button: FC<ButtonProps> = ({
   route = '#',
@@ -43,68 +32,58 @@ const Button: FC<ButtonProps> = ({
   className,
   submit = false,
   danger = false,
-  icon = undefined,
+  icon,
   isLoading = false,
   children,
   ...rest
 }) => {
-  const variant = disabled
-    ? 'disabled'
-    : danger
-      ? 'danger'
-      : !styled
-        ? 'unstyled'
-        : primary
-          ? 'primary'
-          : 'default';
+  const variant = primary ? 'default' : danger ? 'outline' : styled ? 'outline' : 'ghost';
+  const content = isLoading ? (
+    <Loader className="text-current" />
+  ) : (
+    <>
+      {icon ? <FontAwesomeIcon icon={icon} aria-hidden="true" /> : null}
+      {children || value}
+    </>
+  );
 
-  const classes = cn(baseStyles, variantStyles[variant], className);
-
-  if (submit || type === 'submit' || type === 'button' || type === 'reset') {
+  if (submit || type) {
     return (
       <ButtonUI
         type={type || 'submit'}
+        variant={variant}
         onClick={onClick as MouseEventHandler<HTMLButtonElement> | undefined}
-        className={classes}
-        disabled={disabled}
+        className={cn(danger && 'line-through', className)}
+        disabled={disabled || isLoading}
         {...rest}
       >
-        {isLoading ? (
-          <Loader className={primary ? 'text-white' : 'text-primary-900'} />
-        ) : (
-          <>
-            {icon && <FontAwesomeIcon icon={icon} />}
-            {children || value}
-          </>
-        )}
+        {content}
       </ButtonUI>
     );
   }
 
   return (
-    <Link
-      to={route}
-      onClick={(e) => {
-        if (disabled) {
-          e.preventDefault();
-          return;
-        }
-        if (onClick) {
-          onClick(e);
-        }
-      }}
-      className={classes}
-      {...rest}
+    <ButtonUI
+      asChild
+      variant={variant}
+      className={cn(danger && 'line-through', className)}
+      disabled={disabled || isLoading}
     >
-      {isLoading ? (
-        <Loader className={primary ? 'text-white' : 'text-primary-900'} />
-      ) : (
-        <>
-          {icon && <FontAwesomeIcon icon={icon} />}
-          {children || value}
-        </>
-      )}
-    </Link>
+      <Link
+        to={disabled ? '#' : route}
+        onClick={(event) => {
+          if (disabled || isLoading) {
+            event.preventDefault();
+            return;
+          }
+          onClick?.(event);
+        }}
+        aria-disabled={disabled || isLoading || undefined}
+        {...rest}
+      >
+        {content}
+      </Link>
+    </ButtonUI>
   );
 };
 

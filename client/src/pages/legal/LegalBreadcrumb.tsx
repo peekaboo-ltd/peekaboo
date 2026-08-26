@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import CustomBreadcrumb from '@/components/inputs/CustomBreadcrumb';
 import { useI18n } from '@/i18n/i18n';
 
@@ -15,14 +14,13 @@ type LegalBreadcrumbProps = {
 const LegalBreadcrumb = ({ currentPage }: LegalBreadcrumbProps) => {
   const { t } = useI18n();
 
-  const navigationLinks = useMemo(() => {
-    const leaf = currentPage;
-    return [
-      { route: '/', label: t('legal.breadcrumb.home') },
-      { route: '/legal', label: t('footer.legalOverview') },
-      ...(leaf ? [{ route: leaf.path, label: t(leaf.labelKey) }] : []),
-    ];
-  }, [t, currentPage?.path, currentPage?.labelKey]);
+  const navigationLinks = [
+    { route: '/', label: t('legal.breadcrumb.home') },
+    { route: '/legal', label: t('footer.legalOverview') },
+    ...(currentPage
+      ? [{ route: currentPage.path, label: t(currentPage.labelKey) }]
+      : []),
+  ];
 
   return (
     <nav aria-label={t('legal.breadcrumb.navLabel')} className="w-full">

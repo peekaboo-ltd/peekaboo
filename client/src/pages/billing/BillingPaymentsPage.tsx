@@ -71,11 +71,10 @@ interface OrganizationRow {
 }
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -156,7 +155,7 @@ const BreakdownTable = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="rounded border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-600">
+      <div className="rounded border border-[--line] bg-[--surface] px-4 py-3 text-[13px] text-[--muted]">
         Loading billing breakdown...
       </div>
     );
@@ -164,7 +163,7 @@ const BreakdownTable = ({
 
   if (errorMessage) {
     return (
-      <div className="rounded border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
+      <div className="rounded border border-[--line] bg-[--surface] px-4 py-3 text-[13px] text-[--ink]">
         {errorMessage}
       </div>
     );
@@ -172,17 +171,17 @@ const BreakdownTable = ({
 
   if (!breakdown?.length) {
     return (
-      <div className="rounded border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] text-slate-600">
+      <div className="rounded border border-[--line] bg-[--surface] px-4 py-3 text-[13px] text-[--muted]">
         {emptyMessage}
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded border border-slate-200">
+    <div className="overflow-hidden rounded border border-[--line]">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-[13px]">
-          <thead className="bg-slate-50 text-left text-slate-600">
+          <thead className="bg-[--surface] text-left text-[--muted]">
             <tr>
               <th className="px-4 py-3 font-normal text-[12px]">Tier</th>
               <th className="px-4 py-3 font-normal text-[12px]">Type</th>
@@ -191,20 +190,20 @@ const BreakdownTable = ({
               <th className="px-4 py-3 font-normal text-[12px]">Subtotal</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-white">
+          <tbody className="divide-y divide-slate-200 bg-[--paper]">
             {breakdown.map((row, index) => (
               <tr key={`${row.tierLabel}-${index}`}>
-                <td className="px-4 py-3 text-slate-900">{row.tierLabel}</td>
+                <td className="px-4 py-3 text-[--ink]">{row.tierLabel}</td>
                 <td className="px-4 py-3">
-                  <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] uppercase text-slate-600">
+                  <span className="inline-flex rounded-full border border-[--line] bg-[--surface] px-2 py-1 text-[11px] uppercase text-[--muted]">
                     {getBreakdownTypeLabel(row.type)}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-700">{row.quantity}</td>
-                <td className="px-4 py-3 text-slate-700">
+                <td className="px-4 py-3 text-[--ink]">{row.quantity}</td>
+                <td className="px-4 py-3 text-[--ink]">
                   {formatCurrency(row.unitPrice, currency)}
                 </td>
-                <td className="px-4 py-3 font-normal text-[12px] text-slate-900">
+                <td className="px-4 py-3 font-normal text-[12px] text-[--ink]">
                   {formatCurrency(row.subtotal, currency)}
                 </td>
               </tr>
@@ -830,7 +829,7 @@ const BillingPaymentsPage = () => {
               setInvoiceDeliveriesModalOpen(true);
             }}
           >
-            <FontAwesomeIcon icon={faFileLines} className="text-primary" />
+            <FontAwesomeIcon icon={faFileLines} className="text-[--ink]" />
             View Invoice
           </Link>
         ),
@@ -1097,10 +1096,10 @@ const BillingPaymentsPage = () => {
             }
           >
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              <label className="text-[13px] text-slate-700">
+              <label className="text-[13px] text-[--ink]">
                 Business
                 <Select
-                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-[13px]"
+                  className="mt-1"
                   value={selectedOrganizationId}
                   onChange={(value) => setSelectedOrganizationId(value as UUID)}
                   options={organizations.map((org) => ({
@@ -1110,29 +1109,29 @@ const BillingPaymentsPage = () => {
                 />
               </label>
 
-              <label className="text-[13px] text-slate-700">
+              <label className="text-[13px] text-[--ink]">
                 Start date
                 <input
                   type="date"
-                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-[13px]"
+                  className="mt-1 h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-[13px] outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                   value={reportStartDate}
                   onChange={(event) => setReportStartDate(event.target.value)}
                 />
               </label>
 
-              <label className="text-[13px] text-slate-700">
+              <label className="text-[13px] text-[--ink]">
                 End date
                 <input
                   type="date"
-                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-[13px]"
+                  className="mt-1 h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-[13px] outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                   value={reportEndDate}
                   onChange={(event) => setReportEndDate(event.target.value)}
                 />
               </label>
             </div>
-            <p className="mt-3 text-[13px] text-slate-600">
+            <p className="mt-3 text-[13px] text-[--muted]">
               Selected:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {selectedOrganization?.name || "N/A"}
               </span>{" "}
               | {reportStartDate} to {reportEndDate}
@@ -1201,7 +1200,7 @@ const BillingPaymentsPage = () => {
                 } cycle`
           }
         >
-          <p className="text-[13px] text-slate-600">
+          <p className="text-[13px] text-[--muted]">
             {isAdmin
               ? "Highlighted plan is based on the currently selected business."
               : "This plan card reflects the active business plan tied to the current billing cycle."}
@@ -1219,10 +1218,10 @@ const BillingPaymentsPage = () => {
             title="Select Business"
             description="Choose a business to load deliveries and billing details for that organization."
           >
-            <label className="block max-w-md text-[13px] text-slate-700">
+            <label className="block max-w-md text-[13px] text-[--ink]">
               Business
               <Select
-                className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-[13px]"
+                className="mt-1"
                 value={selectedOrganizationId}
                 onChange={(value) => setSelectedOrganizationId(value as UUID)}
                 options={organizations.map((org) => ({
@@ -1261,16 +1260,16 @@ const BillingPaymentsPage = () => {
           >
             {selectedOrganizationDue ? (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-3 rounded border border-slate-200 bg-slate-50 p-4 text-[13px] text-slate-700 md:grid-cols-2">
-                  <p className="text-[12px] font-medium text-black">
+                <div className="grid grid-cols-1 gap-3 rounded border border-[--line] bg-[--surface] p-4 text-[13px] text-[--ink] md:grid-cols-2">
+                  <p className="text-[12px] font-medium text-[--ink]">
                     Invoice:{" "}
-                    <span className="font-normal text-[12px] text-slate-900">
+                    <span className="font-normal text-[12px] text-[--ink]">
                       {resolveInvoiceIdentifier(selectedOrganizationDue)}
                     </span>
                   </p>
-                  <p className="text-[12px] font-medium text-black">
+                  <p className="text-[12px] font-medium text-[--ink]">
                     Billing period:{" "}
-                    <span className="font-normal text-[12px] text-slate-900">
+                    <span className="font-normal text-[12px] text-[--ink]">
                       {formatBillingPeriodRange(
                         currentBreakdown?.periodStart ||
                           selectedOrganizationDue.periodStart,
@@ -1279,15 +1278,15 @@ const BillingPaymentsPage = () => {
                       )}
                     </span>
                   </p>
-                  <p className="text-[12px] font-medium text-black">
+                  <p className="text-[12px] font-medium text-[--ink]">
                     Deliveries so far:{" "}
-                    <span className="font-normal text-[12px] text-slate-900">
+                    <span className="font-normal text-[12px] text-[--ink]">
                       {currentTotalOrders}
                     </span>
                   </p>
-                  <p className="text-[12px] font-medium text-black">
+                  <p className="text-[12px] font-medium text-[--ink]">
                     Outstanding across unpaid billings:{" "}
-                    <span className="font-normal text-[12px] text-slate-900">
+                    <span className="font-normal text-[12px] text-[--ink]">
                       {formatCurrency(
                         pendingAmountAdminSelectedOrganization,
                         currentBillingCurrency,
@@ -1298,10 +1297,10 @@ const BillingPaymentsPage = () => {
 
                 <div className="space-y-2">
                   <div>
-                    <h3 className="text-[13px] font-medium text-slate-900">
+                    <h3 className="text-[13px] font-medium text-[--ink]">
                       Billing Breakdown
                     </h3>
-                    <p className="text-[13px] text-slate-600">
+                    <p className="text-[13px] text-[--muted]">
                       Invoice totals come from the billing record and its
                       pricing breakdown, not by summing delivery fees.
                     </p>
@@ -1320,13 +1319,13 @@ const BillingPaymentsPage = () => {
                 </div>
 
                 {currentEstimate?.note ? (
-                  <p className="text-[13px] text-slate-600">
+                  <p className="text-[13px] text-[--muted]">
                     {currentEstimate.note}
                   </p>
                 ) : null}
               </div>
             ) : (
-              <p className="text-[13px] text-slate-600">
+              <p className="text-[13px] text-[--muted]">
                 No unpaid billing at the moment for this business.
               </p>
             )}
@@ -1348,12 +1347,12 @@ const BillingPaymentsPage = () => {
               isLoading={adminOrdersLoading}
               noDataMessage="No deliveries found for the selected business."
             />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13px] text-slate-600">
-              <p className="text-[12px] font-medium text-black">Showing up to 10 deliveries per page.</p>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13px] text-[--muted]">
+              <p className="text-[12px] font-medium text-[--ink]">Showing up to 10 deliveries per page.</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                  className="rounded border border-[--line] px-3 py-1 disabled:opacity-50"
                   disabled={adminOrdersPage <= 0}
                   onClick={() =>
                     setAdminOrdersPage((prev) => Math.max(prev - 1, 0))
@@ -1367,7 +1366,7 @@ const BillingPaymentsPage = () => {
                 </span>
                 <button
                   type="button"
-                  className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                  className="rounded border border-[--line] px-3 py-1 disabled:opacity-50"
                   disabled={
                     adminOrdersTotalPages === 0 ||
                     adminOrdersPage >= adminOrdersTotalPages - 1
@@ -1384,7 +1383,7 @@ const BillingPaymentsPage = () => {
                 </button>
               </div>
             </div>
-            <div className="mt-4 rounded border border-slate-200 bg-slate-50 p-3 text-[13px] text-slate-600">
+            <div className="mt-4 rounded border border-[--line] bg-[--surface] p-3 text-[13px] text-[--muted]">
               Delivery fees shown below are operational records. Invoice totals
               come from the billing breakdown above.
             </div>
@@ -1414,10 +1413,10 @@ const BillingPaymentsPage = () => {
                   isLoading={adminPaidBillingsLoading}
                   noDataMessage="No payment history for this business yet."
                 />
-                <div className="flex items-center justify-end gap-2 text-[13px] text-slate-600">
+                <div className="flex items-center justify-end gap-2 text-[13px] text-[--muted]">
                   <button
                     type="button"
-                    className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                    className="rounded border border-[--line] px-3 py-1 disabled:opacity-50"
                     disabled={adminHistoryPage <= 0}
                     onClick={() =>
                       setAdminHistoryPage((prev) => Math.max(prev - 1, 0))
@@ -1431,7 +1430,7 @@ const BillingPaymentsPage = () => {
                   </span>
                   <button
                     type="button"
-                    className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                    className="rounded border border-[--line] px-3 py-1 disabled:opacity-50"
                     disabled={
                       adminHistoryPage >=
                       selectedOrganizationPaidHistoryTotalPages - 1
@@ -1453,7 +1452,7 @@ const BillingPaymentsPage = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-[13px] text-slate-500">
+              <p className="text-[13px] text-[--muted]">
                 History is hidden. Toggle to view.
               </p>
             )}
@@ -1486,16 +1485,16 @@ const BillingPaymentsPage = () => {
             }
           >
             <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-3 rounded border border-slate-200 bg-slate-50 p-4 text-[13px] text-slate-700 md:grid-cols-2">
-                <p className="text-[12px] font-medium text-black">
+              <div className="grid grid-cols-1 gap-3 rounded border border-[--line] bg-[--surface] p-4 text-[13px] text-[--ink] md:grid-cols-2">
+                <p className="text-[12px] font-medium text-[--ink]">
                   Current plan:{" "}
-                  <span className="font-normal text-[12px] text-slate-900">
+                  <span className="font-normal text-[12px] text-[--ink]">
                     {currentPlanName}
                   </span>
                 </p>
-                <p className="text-[12px] font-medium text-black">
+                <p className="text-[12px] font-medium text-[--ink]">
                   Billing period:{" "}
-                  <span className="font-normal text-[12px] text-slate-900">
+                  <span className="font-normal text-[12px] text-[--ink]">
                     {formatBillingPeriodRange(
                       currentBreakdown?.periodStart ||
                         myCurrentDue?.periodStart,
@@ -1503,15 +1502,15 @@ const BillingPaymentsPage = () => {
                     )}
                   </span>
                 </p>
-                <p className="text-[12px] font-medium text-black">
+                <p className="text-[12px] font-medium text-[--ink]">
                   Deliveries so far:{" "}
-                  <span className="font-normal text-[12px] text-slate-900">
+                  <span className="font-normal text-[12px] text-[--ink]">
                     {currentTotalOrders}
                   </span>
                 </p>
-                <p className="text-[12px] font-medium text-black">
+                <p className="text-[12px] font-medium text-[--ink]">
                   Current estimated amount due:{" "}
-                  <span className="font-normal text-[12px] text-slate-900">
+                  <span className="font-normal text-[12px] text-[--ink]">
                     {formatCurrency(
                       currentEstimateAmount,
                       currentBillingCurrency,
@@ -1520,7 +1519,7 @@ const BillingPaymentsPage = () => {
                 </p>
               </div>
 
-              <div className="rounded border border-amber-200 bg-amber-50 p-4 text-[13px] text-amber-900">
+              <div className="rounded border border-[--line] bg-[--surface] p-4 text-[13px] text-[--ink]">
                 <p className="font-normal text-[12px]">How this estimate works</p>
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   <li>
@@ -1548,10 +1547,10 @@ const BillingPaymentsPage = () => {
 
               <div className="space-y-2">
                 <div>
-                  <h3 className="text-[13px] font-medium text-slate-900">
+                  <h3 className="text-[13px] font-medium text-[--ink]">
                     Billing Breakdown
                   </h3>
-                  <p className="text-[13px] text-slate-600">
+                  <p className="text-[13px] text-[--muted]">
                     This table reflects the current billing estimate from the
                     server.
                   </p>
@@ -1570,17 +1569,17 @@ const BillingPaymentsPage = () => {
               </div>
 
               {currentEstimate?.note ? (
-                <p className="text-[13px] text-slate-600">
+                <p className="text-[13px] text-[--muted]">
                   {currentEstimate.note}
                 </p>
               ) : null}
 
               {businessPayDisabledReason ? (
-                <p className="text-[13px] text-amber-700">
+                <p className="text-[13px] text-[--ink]">
                   {businessPayDisabledReason}
                 </p>
               ) : (
-                <p className="text-[13px] text-emerald-700">
+                <p className="text-[13px] text-[--ink]">
                   Payment is active. After payment, new deliveries continue on a
                   new billing record.
                 </p>
@@ -1599,12 +1598,12 @@ const BillingPaymentsPage = () => {
               showPagination={false}
               noDataMessage="No deliveries in current billing cycle."
             />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13px] text-slate-600">
-              <p className="text-[12px] font-medium text-black">Showing up to 10 deliveries per page.</p>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13px] text-[--muted]">
+              <p className="text-[12px] font-medium text-[--ink]">Showing up to 10 deliveries per page.</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                  className="rounded border border-[--line] px-3 py-1 disabled:opacity-50"
                   disabled={businessOrdersPage <= 0}
                   onClick={() =>
                     setBusinessOrdersPage((prev) => Math.max(prev - 1, 0))
@@ -1619,7 +1618,7 @@ const BillingPaymentsPage = () => {
                 </span>
                 <button
                   type="button"
-                  className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                  className="rounded border border-[--line] px-3 py-1 disabled:opacity-50"
                   disabled={
                     businessOrdersTotalPages === 0 ||
                     businessOrdersPage >= businessOrdersTotalPages - 1
@@ -1636,7 +1635,7 @@ const BillingPaymentsPage = () => {
                 </button>
               </div>
             </div>
-            <div className="mt-4 rounded border border-slate-200 bg-slate-50 p-3 text-[13px] text-slate-600">
+            <div className="mt-4 rounded border border-[--line] bg-[--surface] p-3 text-[13px] text-[--muted]">
               Delivery fees shown below are operational records. Invoice totals
               come from the billing breakdown above.
             </div>
@@ -1666,10 +1665,10 @@ const BillingPaymentsPage = () => {
                   isLoading={myPaidBillingsLoading}
                   noDataMessage="No payment history yet."
                 />
-                <div className="flex items-center justify-end gap-2 text-[13px] text-slate-600">
+                <div className="flex items-center justify-end gap-2 text-[13px] text-[--muted]">
                   <button
                     type="button"
-                    className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                    className="rounded border border-[--line] px-3 py-1 disabled:opacity-50"
                     disabled={businessHistoryPage <= 0}
                     onClick={() =>
                       setBusinessHistoryPage((prev) => Math.max(prev - 1, 0))
@@ -1683,7 +1682,7 @@ const BillingPaymentsPage = () => {
                   </span>
                   <button
                     type="button"
-                    className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
+                    className="rounded border border-[--line] px-3 py-1 disabled:opacity-50"
                     disabled={
                       businessHistoryPage >= myBillingHistoryTotalPages - 1
                     }
@@ -1701,7 +1700,7 @@ const BillingPaymentsPage = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-[13px] text-slate-500">
+              <p className="text-[13px] text-[--muted]">
                 History is hidden. Toggle to view.
               </p>
             )}
@@ -1720,28 +1719,28 @@ const BillingPaymentsPage = () => {
         description="Please confirm the selected business and report time range."
       >
         <section className="space-y-4">
-          <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-3 text-[13px]">
-            <p className="text-[12px] font-medium text-black">
+          <div className="space-y-2 rounded border border-[--line] bg-[--surface] p-3 text-[13px]">
+            <p className="text-[12px] font-medium text-[--ink]">
               Business:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {selectedOrganization?.name || "Not selected"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Start date:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {reportStartDate || "Not selected"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               End date:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {reportEndDate || "Not selected"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Action:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {adminReportAction === "download"
                   ? "Download report"
                   : "Request report by email"}
@@ -1749,7 +1748,7 @@ const BillingPaymentsPage = () => {
             </p>
           </div>
 
-          <p className="text-[13px] text-slate-700">
+          <p className="text-[13px] text-[--ink]">
             Is this the correct business and time range for your report?
           </p>
 
@@ -1784,28 +1783,28 @@ const BillingPaymentsPage = () => {
         description="Review the current server-calculated estimate before paying early."
       >
         <section className="space-y-4">
-          <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-3 text-[13px]">
-            <p className="text-[12px] font-medium text-black">
+          <div className="space-y-2 rounded border border-[--line] bg-[--surface] p-3 text-[13px]">
+            <p className="text-[12px] font-medium text-[--ink]">
               Current business plan:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {currentPlanName}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Amount to pay now:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {formatCurrency(currentEstimateAmount, currentBillingCurrency)}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Deliveries so far:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {currentTotalOrders}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Billing period:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {formatBillingPeriodRange(
                   currentBreakdown?.periodStart || myCurrentDue?.periodStart,
                   currentBreakdown?.periodEnd || myCurrentDue?.periodEnd,
@@ -1827,7 +1826,7 @@ const BillingPaymentsPage = () => {
           />
 
           {currentEstimate?.note ? (
-            <p className="text-[13px] text-slate-600">{currentEstimate.note}</p>
+            <p className="text-[13px] text-[--muted]">{currentEstimate.note}</p>
           ) : null}
 
           <div>
@@ -1840,14 +1839,14 @@ const BillingPaymentsPage = () => {
             />
           </div>
 
-          <div className="rounded border border-amber-200 bg-amber-50 p-3 text-[13px] text-amber-900">
+          <div className="rounded border border-[--line] bg-[--surface] p-3 text-[13px] text-[--ink]">
             Early payment settles the server estimate shown above. Package,
             fallback, and overflow rows can still change if more deliveries are
             added before the billing period closes.
           </div>
 
           {!canBusinessPay ? (
-            <p className="text-[13px] text-amber-700">
+            <p className="text-[13px] text-[--ink]">
               {businessPayDisabledReason}
             </p>
           ) : null}
@@ -1880,30 +1879,30 @@ const BillingPaymentsPage = () => {
         }
       >
         <section className="space-y-4">
-          <div className="grid grid-cols-1 gap-3 rounded border border-slate-200 bg-slate-50 p-4 text-[13px] text-slate-700 md:grid-cols-2">
-            <p className="text-[12px] font-medium text-black">
+          <div className="grid grid-cols-1 gap-3 rounded border border-[--line] bg-[--surface] p-4 text-[13px] text-[--ink] md:grid-cols-2">
+            <p className="text-[12px] font-medium text-[--ink]">
               Invoice:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {resolveInvoiceIdentifier(selectedHistoryBilling)}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Status:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {selectedHistoryBilling?.status || "N/A"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Paid date:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {selectedHistoryBilling?.paidAt
                   ? formatDate(selectedHistoryBilling.paidAt, "YYYY-MM-DD")
                   : "N/A"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Billing period:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {formatBillingPeriodRange(
                   historyBreakdown?.periodStart ||
                     selectedHistoryBilling?.periodStart,
@@ -1912,17 +1911,17 @@ const BillingPaymentsPage = () => {
                 )}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Deliveries:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {historyBreakdown?.totalOrders ||
                   selectedHistoryBilling?.totalOrders ||
                   0}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-black">
+            <p className="text-[12px] font-medium text-[--ink]">
               Total amount:{" "}
-              <span className="font-normal text-[12px] text-slate-900">
+              <span className="font-normal text-[12px] text-[--ink]">
                 {formatCurrency(
                   historyBreakdown?.totalAmount ||
                     selectedHistoryBilling?.totalAmount ||
@@ -1935,10 +1934,10 @@ const BillingPaymentsPage = () => {
 
           <div className="space-y-2">
             <div>
-              <h3 className="text-[13px] font-medium text-slate-900">
+              <h3 className="text-[13px] font-medium text-[--ink]">
                 Billing Breakdown
               </h3>
-              <p className="text-[13px] text-slate-600">
+              <p className="text-[13px] text-[--muted]">
                 Invoice totals are calculated from the billing breakdown first.
                 Linked deliveries are shown below for auditability.
               </p>
@@ -1956,7 +1955,7 @@ const BillingPaymentsPage = () => {
             />
           </div>
 
-          <div className="rounded border border-slate-200 bg-slate-50 p-3 text-[13px] text-slate-600">
+          <div className="rounded border border-[--line] bg-[--surface] p-3 text-[13px] text-[--muted]">
             Delivery fees shown below are operational records. Invoice totals
             come from the billing breakdown above.
           </div>

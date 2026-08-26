@@ -26,25 +26,23 @@ const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+    transition: { duration: 0.2, ease: [0, 0, 1, 1] },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 };
 
 const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 };
 
@@ -57,10 +55,9 @@ const StepProgress = ({ currentStep }: { currentStep: 1 | 2 | 3 }) => {
           <motion.span
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
               currentStep >= step
-                ? 'bg-primary-600 text-white'
-                : 'bg-slate-200 text-slate-500'
+                ? 'bg-[--ink] text-[--paper]'
+                : 'bg-[--surface] text-[--muted]'
             }`}
-            animate={{ scale: currentStep === step ? 1.1 : 1 }}
             transition={{ duration: 0.2 }}
           >
             {currentStep > step ? (
@@ -72,7 +69,7 @@ const StepProgress = ({ currentStep }: { currentStep: 1 | 2 | 3 }) => {
           {step < 3 && (
             <div
               className={`w-12 h-0.5 mx-1 transition-colors ${
-                currentStep > step ? 'bg-primary-600' : 'bg-slate-200'
+                currentStep > step ? 'bg-[--ink]' : 'bg-[--surface]'
               }`}
             />
           )}
@@ -131,7 +128,7 @@ const AdminOnboarding = () => {
 
   return (
     <motion.main
-      className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen bg-[--surface] py-10 px-4 sm:px-6 lg:px-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -142,13 +139,13 @@ const AdminOnboarding = () => {
         </motion.div>
 
         <motion.header variants={itemVariants} className="flex flex-col gap-3">
-          <span className="text-sm font-medium text-black">
+          <span className="text-sm font-medium text-[--ink]">
             {t('onboarding.step', { step: 2 })}
           </span>
-          <h1 className="text-3xl sm:text-4xl font-medium text-slate-900">
+          <h1 className="text-3xl sm:text-4xl font-medium text-[--ink]">
             {t('onboarding.admin.title')}
           </h1>
-          <p className="text-slate-600 max-w-2xl">
+          <p className="text-[--muted] max-w-2xl">
             {t('onboarding.admin.subtitle')}
           </p>
         </motion.header>
@@ -156,24 +153,23 @@ const AdminOnboarding = () => {
         <motion.form
           variants={cardVariants}
           onSubmit={onSubmit}
-          className="bg-white border border-slate-200 p-6 sm:p-8 space-y-6"
+          className="bg-[--paper] border border-[--line] p-6 sm:p-8 space-y-6"
         >
-          <section className="flex items-center gap-3 text-slate-800">
+          <section className="flex items-center gap-3 text-[--ink]">
             <motion.span
-              className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200"
-              whileHover={{ scale: 1.05 }}
+              className="w-10 h-10 rounded-full bg-[--surface] flex items-center justify-center border border-[--line]"
               transition={{ duration: 0.2 }}
             >
               <FontAwesomeIcon
                 icon={faUserShield}
-                className="text-black"
+                className="text-[--ink]"
               />
             </motion.span>
             <div>
               <h2 className="text-lg font-medium">
                 {t('onboarding.admin.detailsTitle')}
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[--muted]">
                 {t('onboarding.admin.detailsSubtitle')}
               </p>
             </div>
@@ -285,14 +281,14 @@ const AdminOnboarding = () => {
             />
           </div>
 
-          <aside className="text-xs text-slate-500 -mt-2">
+          <aside className="text-xs text-[--muted] -mt-2">
             {t('onboarding.admin.passwordHint')}
           </aside>
 
-          <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+          <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[--line] pt-4">
             <Link
               to="/onboarding/organization"
-              className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+              className="text-sm text-[--muted] hover:text-[--ink] transition-colors"
             >
               {t('onboarding.admin.back')}
             </Link>

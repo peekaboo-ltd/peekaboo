@@ -142,13 +142,13 @@ const CreateOrder = () => {
           </fieldset>
 
           {isError && !billingGuardPrompt && (
-            <p className="rounded-md bg-[color-mix(in_oklab,var(--destructive)_7%,white)] px-3 py-2 text-sm text-[var(--peekaboo-text)]">
+            <p className="rounded-md bg-[color-mix(in_oklab,var(--destructive)_7%,white)] px-3 py-2 text-sm text-[var(--ink)]">
               {(error as { data?: { message?: string } })?.data?.message ||
                 String(error)}
             </p>
           )}
 
-          <footer className="flex justify-end gap-3 border-t border-[var(--peekaboo-line)] pt-4">
+          <footer className="flex justify-end gap-3 border-t border-[var(--line)] pt-4">
             <Button type="submit" primary isLoading={isLoading}>
               Create order
             </Button>
@@ -164,14 +164,14 @@ const CreateOrder = () => {
       >
         <section className="flex flex-col gap-4">
           {billingGuardPrompt?.billingStatus ? (
-            <p className="text-sm text-[var(--peekaboo-muted)]">
+            <p className="text-sm text-[var(--muted)]">
               Billing status:{" "}
-              <span className="font-medium text-[var(--peekaboo-dark)]">
+              <span className="font-medium text-[var(--ink)]">
                 {billingGuardPrompt.billingStatus}
               </span>
             </p>
           ) : null}
-          <footer className="flex justify-end gap-3 border-t border-[var(--peekaboo-line)] pt-3">
+          <footer className="flex justify-end gap-3 border-t border-[var(--line)] pt-3">
             <Button type="button" onClick={closeBillingGuardModal}>
               Close
             </Button>

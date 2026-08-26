@@ -66,11 +66,11 @@ const CardFields = ({ control, errors }: CardFieldsProps) => (
       )}
     />
 
-    <aside className="rounded-md border border-slate-200 bg-slate-50 p-3">
-      <p className="flex items-start gap-2 text-xs leading-snug text-slate-600">
+    <aside className="rounded-md border border-[--line] bg-[--surface] p-3">
+      <p className="flex items-start gap-2 text-xs leading-snug text-[--muted]">
         <FontAwesomeIcon
           icon={faLock}
-          className="mt-0.5 text-slate-400"
+          className="mt-0.5 text-[--muted]"
           aria-hidden="true"
         />
         <span>
@@ -78,7 +78,7 @@ const CardFields = ({ control, errors }: CardFieldsProps) => (
           Peekaboo never sees or stores your card number.
         </span>
       </p>
-      <p className="mt-2 flex items-center gap-2 text-slate-400">
+      <p className="mt-2 flex items-center gap-2 text-[--muted]">
         <span className="sr-only">Accepted cards: Visa and Mastercard</span>
         <FontAwesomeIcon icon={faCcVisa} className="text-2xl" aria-hidden="true" />
         <FontAwesomeIcon icon={faCcMastercard} className="text-2xl" aria-hidden="true" />

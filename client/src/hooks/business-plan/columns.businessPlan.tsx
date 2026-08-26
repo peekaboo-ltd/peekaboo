@@ -34,7 +34,7 @@ export const useBusinessPlansColumns = ({
         <article className="flex items-center gap-2">
           <span className="text-[13px] font-normal">{row.original.name}</span>
           {row?.original?.badge && (
-            <span className="rounded-full bg-green-100 px-2 py-0.8 font-medium uppercase text-green-800">
+            <span className="rounded-full bg-[--surface] px-2 py-0.8 font-medium uppercase text-[--ink]">
               <span className="text-[9px] font-normal">{row.original.badge}</span>
             </span>
           )}
@@ -47,21 +47,21 @@ export const useBusinessPlansColumns = ({
       cell: ({ row }) => {
         const plan = row.original;
         if (plan.isCustomPricing)
-          return <span className="text-slate-500 text-[13px]">Custom</span>;
+          return <span className="text-[--muted] text-[13px]">Custom</span>;
         if (plan.pricingTiers?.tiers?.length) {
           const tiers = plan.pricingTiers.tiers.filter((t) => !t.isCustom);
           if (tiers.length === 0)
-            return <span className="text-slate-500 text-[13px]">Custom</span>;
+            return <span className="text-[--muted] text-[13px]">Custom</span>;
           const prices = tiers
             .map((t) => t.pricePerUnit ?? t.totalPrice)
             .filter((p): p is number => p != null);
-          if (prices.length === 0) return <span className="text-slate-500 text-[13px]">—</span>;
+          if (prices.length === 0) return <span className="text-[--muted] text-[13px]">—</span>;
           return `${plan.currency} ${Math.min(...prices).toLocaleString()} – ${Math.max(...prices).toLocaleString()}`;
         }
         if (plan.pricePerOrder != null) {
           return `${plan.currency} ${Number(plan.pricePerOrder).toLocaleString()} / order`;
         }
-        return <span className="text-slate-500 text-[13px]">—</span>;
+        return <span className="text-[--muted] text-[13px]">—</span>;
       },
     },
     {
@@ -89,7 +89,7 @@ export const useBusinessPlansColumns = ({
             className="text-[--muted] cursor-pointer"
           />
         ) : (
-          <span className="text-slate-400 text-[13px]">—</span>
+          <span className="text-[--muted] text-[13px]">—</span>
         ),
     },
     {
@@ -108,7 +108,7 @@ export const useBusinessPlansColumns = ({
         const planId = plan.id;
 
         if (!planId) {
-          return <span className="text-slate-400 text-[13px]">—</span>;
+          return <span className="text-[--muted] text-[13px]">—</span>;
         }
 
         if (isArchived && onRestorePlan && onPermanentlyDeletePlan) {

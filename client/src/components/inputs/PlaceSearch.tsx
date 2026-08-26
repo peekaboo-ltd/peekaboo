@@ -224,7 +224,7 @@ const PlaceSearch = ({
     <ul
       ref={dropdownRef}
       data-place-search-dropdown
-      className="fixed z-[10000] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto pointer-events-auto"
+      className="pointer-events-auto fixed z-[10000] max-h-60 overflow-auto rounded-[--radius-control] border-0 bg-[--surface] shadow-[var(--shadow-menu)]"
       role="listbox"
       style={{
         top: `${dropdownPosition.top}px`,
@@ -240,14 +240,14 @@ const PlaceSearch = ({
       {predictions.map((prediction) => (
         <li
           key={prediction.place_id}
-          className="px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+          className="px-3 py-2 cursor-pointer hover:bg-[--surface] border-b border-[--line] last:border-b-0"
           onMouseDown={(e) => handleSuggestionClick(prediction, e)}
           role="option"
         >
-          <strong className="font-medium text-gray-900 text-[13px]">
+          <strong className="font-medium text-[--ink] text-[13px]">
             {prediction.structured_formatting?.main_text}
           </strong>
-          <address className="text-sm text-gray-600 not-italic text-[13px]">
+          <address className="text-sm text-[--muted] not-italic text-[13px]">
             {prediction.structured_formatting?.secondary_text}
           </address>
         </li>
@@ -268,10 +268,10 @@ const PlaceSearch = ({
           placeholder={placeholder}
           disabled={disabled}
           autoComplete="off"
-          className="w-full px-3 py-2 placeholder:text-[13px] text-[13px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent"
+          className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-[13px] outline-none placeholder:text-[--muted] focus:shadow-[var(--ink)_0_0_0_2px_inset]"
         />
         {isMapsUnavailable && (
-          <p className="mt-1 text-xs text-red-500">Maps failed to load.</p>
+          <p className="mt-1 text-xs text-[--ink]">Maps failed to load.</p>
         )}
       </section>
       {dropdownContent && createPortal(dropdownContent, document.body)}

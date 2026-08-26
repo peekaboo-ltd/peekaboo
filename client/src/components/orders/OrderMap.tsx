@@ -36,7 +36,7 @@ export const OrderMap: React.FC<OrderMapProps> = ({ order, riderLocation }) => {
 
   if (!hasValidCoordinates) {
     return (
-      <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
+      <div className="flex items-center justify-center h-96 bg-[--surface] rounded-lg">
         <p className="text-muted-foreground">No location coordinates available</p>
       </div>
     );
@@ -113,12 +113,16 @@ const DirectionsRenderer: React.FC<{
   React.useEffect(() => {
     if (!map) return;
 
+    const ink = getComputedStyle(document.documentElement)
+      .getPropertyValue('--ink')
+      .trim();
+
     const directionsService = new google.maps.DirectionsService();
     const directionsRenderer = new google.maps.DirectionsRenderer({
       map,
       suppressMarkers: true,
       polylineOptions: {
-        strokeColor: '#4F46E5',
+        strokeColor: ink,
         strokeWeight: 4,
         strokeOpacity: 0.8,
       },

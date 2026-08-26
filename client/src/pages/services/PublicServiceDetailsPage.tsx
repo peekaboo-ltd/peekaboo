@@ -23,19 +23,17 @@ import type { BusinessPlan, PricingTier } from '@/types/businessPlan.type';
 import { BillingPeriod } from '@/types/businessPlan.type';
 
 const fadeInUp = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
     transition: { duration: 0.2, ease: [0, 0, 1, 1] as const },
   },
 };
 
 const containerVariants = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
     transition: { duration: 0.2, ease: [0, 0, 1, 1] as const },
   },
 };

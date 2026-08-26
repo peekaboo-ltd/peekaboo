@@ -305,6 +305,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       prefixIconHandler,
       prefixText = undefined,
       defaultChecked = undefined,
+      id,
       name,
       accept = 'application/pdf',
       min,
@@ -372,9 +373,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               defaultChecked={defaultChecked || !!value}
               className={`${
                 value || defaultChecked || checked
-                  ? 'data-[state=checked]:bg-primary text-white'
+                  ? 'data-[state=checked]:bg-[--ink] text-[--paper]'
                   : ''
-              } w-4 h-4 border-[1.5px] cursor-pointer border-secondary outline-none focus:outline-none ease-in-out duration-50`}
+              } size-5 cursor-pointer border-[--ink] outline-none duration-100`}
             />
             <p
               className={`${
@@ -395,7 +396,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             defaultChecked={defaultChecked as boolean}
             checked={checked as boolean}
             onChange={onChange}
-            className={`w-4 h-4 border-[1.5px] rounded-xl cursor-pointer border-secondary outline-none focus:outline-none accent-primary focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className}`}
+            className={`size-5 cursor-pointer rounded-[--radius-pill] border border-[--ink] accent-[--ink] outline-none duration-100 ${className}`}
           />
           <p className={`${label ? 'flex' : 'hidden'} text-[13px]`}>{label}</p>
         </label>
@@ -416,7 +417,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 type="button"
                 onClick={handleClick}
                 disabled={readOnly}
-                className={`!bg-primary !text-white hover:!bg-primary hover:!text-white !shadow-sm py-[5px] w-full text-[13px] text-center max-[800px]:!text-[13px] px-8 rounded-md cursor-pointer ease-in-out duration-400 hover:scale-[1.005] ${
+                className={`h-11 w-full cursor-pointer rounded-[--radius-control] bg-[--ink] px-5 text-sm font-medium text-[--paper] outline-none transition-[background-color,color,box-shadow,transform] duration-200 ease-[var(--ease-flat)] active:translate-y-px active:scale-[0.99] active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] ${
                   readOnly &&
                   '!bg-[--surface] hover:!bg-[--surface] !cursor-not-allowed'
                 } ${className}`}
@@ -463,16 +464,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
           <p
             className={`${
-              label ? 'flex items-center gap-[5px] text-[13px] text-slate-800' : 'hidden'
+              label ? 'flex items-center gap-[5px] text-[13px] text-[--ink]' : 'hidden'
             }`}
           >
             {label}{' '}
             {required && (
               <CustomTooltip
                 label={required ? `${label} is required` : ''}
-                labelClassName="text-[13px] bg-red-600"
+                labelClassName="text-[13px] bg-[--surface]"
               >
-                <span className="text-red-600 cursor-pointer">*</span>
+                <span className="text-[--ink] cursor-pointer">*</span>
               </CustomTooltip>
             )}
           </p>
@@ -504,16 +505,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
         <p
           className={`${
-            label ? 'pl-1 flex items-center gap-[5px] text-[13px] text-slate-800' : 'hidden'
+            label ? 'pl-1 flex items-center gap-[5px] text-[13px] text-[--ink]' : 'hidden'
           }`}
         >
           {label}{' '}
           {required && (
             <CustomTooltip
               label={required ? `${label} is required` : ''}
-              labelClassName="text-[13px] bg-red-600"
+              labelClassName="text-[13px] bg-[--surface]"
             >
-              <span className="text-red-600 cursor-pointer">*</span>
+              <span className="text-[--ink] cursor-pointer">*</span>
             </CustomTooltip>
           )}
         </p>
@@ -540,8 +541,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               onClick={suffixIconHandler}
               className={`absolute top-0 end-0 p-2.5 px-3.5 text-sm font-medium h-full rounded-e-lg border focus:outline-none ${
                 suffixIconPrimary
-                  ? 'bg-primary text-white border-primary border-l-none'
-                  : 'border-secondary border-opacity-50 bg-white text-primary border-l-none'
+                  ? 'bg-[--ink] text-[--paper] border-[--ink] border-l-none'
+                  : 'border-[--line] border-opacity-50 bg-[--paper] text-[--ink] border-l-none'
               }`}
             >
               <FontAwesomeIcon icon={suffixIcon || faSearch} />
@@ -552,6 +553,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <SkeletonLoader type="input" />
           ) : (
             <input
+              id={id}
               defaultValue={defaultValue as string}
               value={resolvedValue}
               type={isPasswordWithToggle ? (passwordVisible ? 'text' : 'password') : type || 'text'}
@@ -569,19 +571,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               autoCapitalize={autoCapitalize}
               autoCorrect={autoCorrect}
               spellCheck={spellCheck}
+              aria-invalid={Boolean(errorMessage)}
               className={`
-                py-[7px] px-4
+                h-11 px-4 py-0
                 font-normal
                 placeholder:!font-light
                 placeholder:text-[13px]
-                placeholder:text-slate-400
-                text-[13px] text-slate-900
+                placeholder:text-[--muted]
+                text-[13px] text-[--ink]
                 flex items-center w-full
-                rounded-md border-[1.5px]
-                border-slate-300 border-opacity-10
+                rounded-[--radius-control] border-0 bg-[--surface]
                 outline-none focus:outline-none
-                focus:border-[1.6px] focus:border-primary
-                ease-in-out duration-50
+                focus:shadow-[var(--ink)_0_0_0_2px_inset]
+                aria-invalid:shadow-[var(--ink)_0_0_0_2px_inset]
+                transition-[background-color,color,box-shadow] duration-200 ease-[var(--ease-flat)]
                 ${className}
                 ${prefixIcon && 'ps-10'}
                 ${prefixText ? 'ps-[3.6rem]' : ''}
@@ -598,7 +601,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setPasswordVisible((v) => !v)}
-              className="absolute right-0 top-0 flex h-full items-center justify-center px-3 text-slate-500 hover:text-slate-700 focus:outline-none"
+              className="absolute right-0 top-0 flex h-full items-center justify-center px-3 text-[--muted] hover:text-[--ink] focus:outline-none"
               aria-label={passwordVisible ? 'Hide password' : 'Show password'}
               tabIndex={-1}
             >
@@ -614,14 +617,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               onClick={
                 suffixIconHandler as unknown as MouseEventHandler<HTMLButtonElement>
               }
-              className="absolute top-0 right-0 h-full p-2 px-4 text-xs text-white rounded-r-md bg-primary"
+              className="absolute top-0 right-0 h-full p-2 px-4 text-xs text-[--paper] rounded-r-md bg-[--ink]"
             >
               Search
             </button>
           )}
         </section>
         {errorMessage && (
-          <p className="text-red-700 text-[13px]">{errorMessage}</p>
+          <p className="text-[13px] text-[--ink] before:mr-1 before:content-['—']">{errorMessage}</p>
         )}
       </label>
     );

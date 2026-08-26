@@ -17,13 +17,13 @@ interface DashboardChartsSectionProps {
 }
 
 const accentStroke: Record<NonNullable<DashboardSupportCardData['accent']>, string> = {
-  blue: 'hsl(var(--primary))',
-  teal: '#0891b2',
-  amber: '#d97706',
-  emerald: '#059669',
-  violet: 'hsl(var(--primary))',
-  rose: '#e11d48',
-  slate: '#475569',
+  blue: 'var(--chart-1)',
+  teal: 'var(--chart-2)',
+  amber: 'var(--chart-3)',
+  emerald: 'var(--chart-4)',
+  violet: 'var(--chart-5)',
+  rose: 'var(--chart-2)',
+  slate: 'var(--chart-3)',
 };
 
 const DashboardChartsSection = ({
@@ -43,7 +43,7 @@ const DashboardChartsSection = ({
             className="rounded-lg p-0"
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="text-[2rem] font-medium leading-none text-[color:var(--ops-ink)]">
+              <p className="text-[2rem] font-medium leading-none text-[color:var(--ink)]">
                 {widget.value}
               </p>
               {widget.chartType !== 'status' && widget.data && widget.data.length > 0 && (
@@ -82,13 +82,13 @@ const DashboardChartsSection = ({
                   const width = total > 0 ? (item.value / total) * 100 : 0;
                   return (
                     <div key={item.label}>
-                      <div className="mb-1.5 flex items-center justify-between text-sm text-slate-600">
+                      <div className="mb-1.5 flex items-center justify-between text-sm text-[--muted]">
                         <span>{item.label}</span>
-                        <span className="font-medium text-slate-800">{formatNumbers(item.value)}</span>
+                        <span className="font-medium text-[--ink]">{formatNumbers(item.value)}</span>
                       </div>
-                      <div className="h-2 rounded-full bg-[var(--peekaboo-surface)]">
+                      <div className="h-2 rounded-full bg-[var(--surface)]">
                         <div
-                          className="h-full rounded-full bg-[color:var(--ops-route)]"
+                          className="h-full rounded-full bg-[color:var(--chart-2)]"
                           style={{ width: `${Math.max(width, 8)}%` }}
                         />
                       </div>
@@ -97,7 +97,7 @@ const DashboardChartsSection = ({
                 })}
               </div>
             ) : (
-              <p className="mt-4 text-sm leading-6 text-slate-500">
+              <p className="mt-4 text-sm leading-6 text-[--muted]">
                 {widget.subtitle}
               </p>
             )}

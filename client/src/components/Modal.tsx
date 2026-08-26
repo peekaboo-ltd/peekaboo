@@ -45,14 +45,14 @@ const JSX_MODAL: FC<ModalProps> = ({
       >
         <DialogHeader className="shrink-0">
           <DialogTitle
-            className={`text-lg font-medium text-black uppercase mt-[-10px] ${
+            className={`text-lg font-medium text-[--ink] uppercase mt-[-10px] ${
               headingClassName ?? ''
             }`}
           >
             {heading}
           </DialogTitle>
             <DialogDescription
-              className={`text-sm text-gray-500 ${descriptionClassName ?? ''}`}
+              className={`text-sm text-[--muted] ${descriptionClassName ?? ''}`}
             >
               {description}
             </DialogDescription>

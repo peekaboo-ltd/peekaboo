@@ -14,15 +14,15 @@ const statusConfig: Record<UserStatus, {
 }> = {
   [UserStatus.ACTIVE]: {
     label: 'Active',
-    className: 'bg-green-100 text-black hover:bg-green-200',
+    className: 'border-[--ink] bg-[--ink] text-[--paper]',
   },
   [UserStatus.INACTIVE]: {
     label: 'Inactive',
-    className: 'bg-gray-100 text-black hover:bg-gray-200',
+    className: 'border-[--line] bg-transparent text-[--muted]',
   },
   [UserStatus.SUSPENDED]: {
     label: 'Suspended',
-    className: 'bg-red-100 text-black hover:bg-red-200',
+    className: 'border-[--ink] bg-transparent text-[--ink] line-through',
   },
 };
 
@@ -43,7 +43,7 @@ export const UserStatusBadge: React.FC<UserStatusBadgeProps> = ({
   return (
     <Badge 
       className={cn(config.className, className)}
-      variant="secondary"
+      variant="outline"
     >
       {config.label}
     </Badge>

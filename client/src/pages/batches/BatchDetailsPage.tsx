@@ -119,7 +119,7 @@ const BatchDetailsPage = () => {
     return (
       <main className="w-full flex flex-col gap-6">
         <PublicSectionCard title="Loading" description="Fetching batch details…">
-          <p className="text-sm text-slate-500 text-center py-8">
+          <p className="text-sm text-[--muted] text-center py-8">
             Loading batch details...
           </p>
         </PublicSectionCard>
@@ -131,7 +131,7 @@ const BatchDetailsPage = () => {
     return (
       <main className="w-full flex flex-col gap-6">
         <PublicSectionCard title="Not found">
-          <p className="text-sm text-slate-500 text-center py-8">Batch not found.</p>
+          <p className="text-sm text-[--muted] text-center py-8">Batch not found.</p>
         </PublicSectionCard>
       </main>
     );
@@ -144,8 +144,8 @@ const BatchDetailsPage = () => {
   return (
     <main className="w-full flex flex-col gap-6">
       <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         className="flex flex-col gap-4"
       >
         <PublicPageHero
@@ -222,7 +222,7 @@ const BatchDetailsPage = () => {
             value={referenceFilter}
             onChange={(e) => setReferenceFilter(e.target.value)}
             placeholder="Search by order reference"
-            className="bg-white"
+            className="bg-[--paper]"
           />
         </div>
         <div className="px-0 sm:px-0">

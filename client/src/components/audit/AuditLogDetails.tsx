@@ -35,17 +35,17 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
                 {key.replace(/_/g, ' ')}
               </h5>
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-md border border-red-200 bg-red-50 p-3">
-                  <p className="text-xs font-medium text-black mb-1">Before</p>
-                  <pre className="text-xs text-black overflow-auto whitespace-pre-wrap">
+                <div className="rounded-md border border-[--line] bg-[--surface] p-3">
+                  <p className="text-xs font-medium text-[--ink] mb-1">Before</p>
+                  <pre className="text-xs text-[--ink] overflow-auto whitespace-pre-wrap">
                     {typeof before === 'object' 
                       ? JSON.stringify(before, null, 2)
                       : String(before ?? 'null')}
                   </pre>
                 </div>
-                <div className="rounded-md border border-green-200 bg-green-50 p-3">
-                  <p className="text-xs font-medium text-black mb-1">After</p>
-                  <pre className="text-xs text-black overflow-auto whitespace-pre-wrap">
+                <div className="rounded-md border border-[--line] bg-[--surface] p-3">
+                  <p className="text-xs font-medium text-[--ink] mb-1">After</p>
+                  <pre className="text-xs text-[--ink] overflow-auto whitespace-pre-wrap">
                     {typeof after === 'object'
                       ? JSON.stringify(after, null, 2)
                       : String(after ?? 'null')}
@@ -65,7 +65,7 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
     }
 
     return (
-      <div className="rounded-md bg-gray-50 p-4">
+      <div className="rounded-md bg-[--surface] p-4">
         <pre className="text-xs overflow-auto whitespace-pre-wrap">
           {JSON.stringify(log.details, null, 2)}
         </pre>

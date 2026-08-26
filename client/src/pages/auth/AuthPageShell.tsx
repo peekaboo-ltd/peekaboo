@@ -20,16 +20,16 @@ interface AuthNoticeProps {
 const trustMarks = ['Businesses', 'Families', 'Riders', 'Teams', 'Kigali'];
 
 export const authInputClassName =
-  'h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary';
+  'h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-[--ink]';
 
 export const authPrimaryButtonClassName =
-  'mt-2 w-full !rounded-md !bg-primary !font-normal hover:!bg-primary-800';
+  'mt-2 w-full !rounded-md !bg-[--ink] !font-normal hover:!bg-[--ink]';
 
 export const authSecondaryButtonClassName =
-  'w-full !rounded-md !border-border !bg-card !font-normal !text-primary hover:!bg-accent';
+  'w-full !rounded-md !border-border !bg-card !font-normal !text-[--ink] hover:!bg-accent';
 
 export const GoogleIcon = () => (
-  <svg className="h-4 w-4 text-primary" viewBox="0 0 24 24" aria-hidden="true">
+  <svg className="h-4 w-4 text-[--ink]" viewBox="0 0 24 24" aria-hidden="true">
     <path
       fill="currentColor"
       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -58,7 +58,7 @@ export const AuthDivider = () => (
 );
 
 export const AuthCard = ({ title, subtitle, children }: AuthCardProps) => (
-  <section className="w-full max-w-[480px] rounded-md border border-border bg-card px-10 py-10 shadow-[0_22px_70px_-42px_color-mix(in_oklab,var(--primary)_45%,transparent)] max-sm:px-6 max-sm:py-8">
+  <section className="w-full max-w-[480px] rounded-md border border-border bg-card px-10 py-10 max-sm:px-6 max-sm:py-8">
     <header className="mb-8 text-center">
       <h1 className="text-xl font-normal leading-7 text-card-foreground">{title}</h1>
       <p className="mt-1 text-base font-normal leading-6 text-muted-foreground">{subtitle}</p>

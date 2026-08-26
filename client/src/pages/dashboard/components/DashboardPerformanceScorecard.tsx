@@ -58,18 +58,18 @@ const DashboardPerformanceScorecard = ({
           {kpis.map((kpi) => (
             <article
               key={kpi.label}
-              className="rounded-[20px] bg-[var(--peekaboo-surface)] p-4"
+              className="rounded-[--radius-card] border border-[--line] bg-[--paper] p-4"
             >
               <div className="flex items-start justify-between gap-2 mb-3">
-                <p className="text-xs font-medium text-[color:rgba(37,52,63,0.6)] leading-snug">
+                <p className="text-xs font-medium text-[--muted] leading-snug">
                   {kpi.label}
                 </p>
                 {kpi.trend && (
                   <span
                     className={`shrink-0 flex items-center gap-0.5 text-[11px] font-medium px-1.5 py-0.5 rounded-full ${
                       kpi.trend.isPositive
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-rose-50 text-rose-700'
+                        ? 'bg-[--surface] text-[--ink]'
+                        : 'bg-[--surface] text-[--ink]'
                     }`}
                   >
                     <FontAwesomeIcon
@@ -82,14 +82,14 @@ const DashboardPerformanceScorecard = ({
                 )}
               </div>
 
-              <p className="text-2xl leading-none text-[color:var(--primary)] mb-3">
+              <p className="text-2xl leading-none text-[--ink] mb-3">
                 {kpi.value}
               </p>
 
               {/* Progress bar */}
-              <div className="h-1.5 rounded-full bg-[var(--peekaboo-surface)]">
+              <div className="h-1.5 rounded-full bg-[var(--surface)]">
                 <div
-                  className="h-full rounded-full bg-[color:var(--primary)] opacity-60"
+                  className="h-full rounded-full bg-[--ink] opacity-60"
                   style={{ width: `${Math.min(kpi.progress, 100)}%` }}
                 />
               </div>

@@ -32,12 +32,12 @@ const AcceptOrderAssignment = () => {
     }, [isSuccess, closeModal, selectedOrderAssignment?.id, selectedOrderAssignment?.order?.referenceId]);
 
     return (
-        <Modal heading={`Accept Assignment for ${selectedOrderAssignment?.order?.referenceId}`} headingClassName='text-black' isOpen={acceptOrderAssignmentModal} onClose={closeModal}>
+        <Modal heading={`Accept Assignment for ${selectedOrderAssignment?.order?.referenceId}`} headingClassName='text-[--ink]' isOpen={acceptOrderAssignmentModal} onClose={closeModal}>
             <article className='w-full flex flex-col gap-4'>
                 <p className='text-[13px]'>
                     Are you sure you want to accept this assignment?
                 </p>
-                <Button className='self-end bg-green-700! !hover:bg-green-700/80 border-green-700! text-white!' onClick={(e) => {
+                <Button className='self-end bg-[--surface]! !hover:bg-[--surface] border-[--line]! text-[--paper]!' onClick={(e) => {
                     e.preventDefault();
                     if (!selectedOrderAssignment?.id) return;
                     acceptOrderAssignment({ id: selectedOrderAssignment?.id });

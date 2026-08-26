@@ -26,16 +26,11 @@ type TrackingUser = {
 };
 
 const RIDER_COLORS = [
-  '#ef4444', // red
-  '#3b82f6', // blue
-  '#22c55e', // green
-  '#f97316', // orange
-  '#a855f7', // purple
-  '#06b6d4', // cyan
-  '#eab308', // yellow
-  '#ec4899', // pink
-  '#14b8a6', // teal
-  '#f43f5e', // rose
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
 ];
 
 const getCoordinates = (location?: Coordinate | null) => {
@@ -149,7 +144,7 @@ const UsersTrackingPage = () => {
         id: 'locationHistory',
         header: 'History',
         cell: ({ row }) => (
-          <Link className="text-primary underline" to={`/users/${row.original.id}/location-history`}>
+          <Link className="text-[--ink] underline" to={`/users/${row.original.id}/location-history`}>
             View history
           </Link>
         ),
@@ -161,7 +156,7 @@ const UsersTrackingPage = () => {
   return (
     <main className="w-full flex flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-medium text-black">Users tracking</h1>
+        <h1 className="text-2xl font-medium text-[--ink]">Users tracking</h1>
         <p className="text-sm text-muted-foreground">
           Live map and latest known location for trackable users.
         </p>
@@ -179,7 +174,7 @@ const UsersTrackingPage = () => {
                 <Pin
                   background={color}
                   borderColor={color}
-                  glyphColor="#ffffff"
+                  glyphColor="var(--paper)"
                 />
               </AdvancedMarker>
             ))}

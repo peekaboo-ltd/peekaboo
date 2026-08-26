@@ -28,11 +28,10 @@ import {
 } from '@/api/mutations/businessPlan.mutations';
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -157,7 +156,7 @@ const BusinessPlansPage = () => {
       </motion.section>
 
       <motion.section variants={itemVariants}>
-        <h3 className="mb-3 text-sm font-medium text-slate-700 uppercase ">
+        <h3 className="mb-3 text-sm font-medium text-[--ink] uppercase ">
           Active Plans
         </h3>
         <Table
@@ -170,10 +169,10 @@ const BusinessPlansPage = () => {
 
       <motion.section variants={itemVariants}>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-medium text-slate-700 uppercase ">
+          <h3 className="text-sm font-medium text-[--ink] uppercase ">
             Deactivated Plans
           </h3>
-          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+          <span className="inline-flex items-center gap-1 rounded-full border border-[--line] bg-[--surface] px-3 py-1 text-xs font-medium text-[--muted]">
             <FontAwesomeIcon icon={faBoxArchive} />
             {stats.deactivated}
           </span>

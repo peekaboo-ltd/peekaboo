@@ -19,7 +19,7 @@ const CustomPopover = ({
     return (
         <Popover>
             <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-            <PopoverContent className={`bg-white mt-4 w-full p-2 ${className}`}>{children}</PopoverContent>
+            <PopoverContent className={`bg-[--paper] mt-4 w-full p-2 ${className}`}>{children}</PopoverContent>
         </Popover>
     );
 };

@@ -125,7 +125,7 @@ const ReassignOrderAssignment = () => {
                         <fieldset className="flex flex-col mb-2" disabled={isAssigning}>
                             <legend className="sr-only">Search for a rider</legend>
 
-                            <label htmlFor="rider-search" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="rider-search" className="block text-sm font-medium text-[--ink] mb-2">
                                 Search for a new rider
                             </label>
                             <input
@@ -135,21 +135,21 @@ const ReassignOrderAssignment = () => {
                                 placeholder="Search by name or phone..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                                 aria-label="Search riders"
                                 disabled={isAssigning}
                             />
                         </fieldset>
 
                         {/* Riders List */}
-                        <section className="flex-1 overflow-auto border border-gray-200 rounded-md min-h-0">
+                        <section className="flex-1 overflow-auto border border-[--line] rounded-md min-h-0">
                             {isFetchingRiders ? (
-                                <p className="px-4 py-8 text-sm text-gray-500 text-center" role="status" aria-live="polite">
+                                <p className="px-4 py-8 text-sm text-[--muted] text-center" role="status" aria-live="polite">
                                     <FontAwesomeIcon icon={faSpinner} spin className="mr-2" aria-hidden="true" />
                                     Loading riders...
                                 </p>
                             ) : riders.length === 0 ? (
-                                <p className="px-4 py-8 text-sm text-gray-500 text-center" role="status">
+                                <p className="px-4 py-8 text-sm text-[--muted] text-center" role="status">
                                     {searchTerm ? 'No riders found matching your search' : 'No riders available'}
                                 </p>
                             ) : (
@@ -165,22 +165,22 @@ const ReassignOrderAssignment = () => {
                                                         handleRiderSelect(rider);
                                                     }}
                                                     disabled={isAssigning || isCurrentRider}
-                                                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer ${isCurrentRider ? 'bg-blue-50' : ''
+                                                    className={`w-full px-4 py-3 text-left hover:bg-[--surface] transition-colors disabled:opacity-50 cursor-pointer ${isCurrentRider ? 'bg-[--surface]' : ''
                                                         }`}
                                                     role="option"
                                                     aria-selected={isCurrentRider}
                                                 >
                                                     <span className="flex items-center justify-between">
                                                         <span className="flex-1">
-                                                            <strong className="block text-sm font-medium text-gray-900">
+                                                            <strong className="block text-sm font-medium text-[--ink]">
                                                                 {rider.name || 'Unnamed Rider'}
                                                             </strong>
-                                                            <span className="block text-xs text-gray-600 mt-0.5">
+                                                            <span className="block text-xs text-[--muted] mt-0.5">
                                                                 {rider.phoneNumber}
                                                             </span>
                                                         </span>
                                                         {isCurrentRider && (
-                                                            <span className="text-xs text-black font-medium ml-2">
+                                                            <span className="text-xs text-[--ink] font-medium ml-2">
                                                                 Current
                                                             </span>
                                                         )}
@@ -199,7 +199,7 @@ const ReassignOrderAssignment = () => {
                                 type="button"
                                 onClick={closeModal}
                                 disabled={isAssigning}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 cursor-pointer"
+                                className="px-4 py-2 text-sm font-medium text-[--ink] bg-[--surface] rounded-md hover:bg-[--surface] cursor-pointer"
                                 styled={false}
                             >
                                 Cancel
@@ -214,41 +214,41 @@ const ReassignOrderAssignment = () => {
                                 <Button
                                     type="button"
                                     onClick={handleBackToSelection}
-                                    className="flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4 cursor-pointer"
+                                    className="flex items-center text-sm text-[--muted] hover:text-[--ink] mb-4 cursor-pointer"
                                     disabled={isAssigning}
                                     icon={faArrowLeft}
                                     styled={false}
                                 >
                                     Back to selection
                                 </Button>
-                                <h2 className="text-lg font-medium text-gray-900">
+                                <h2 className="text-lg font-medium text-[--ink]">
                                     Confirm Rider Assignment
                                 </h2>
-                                <p className="text-sm text-gray-600 mt-1">
+                                <p className="text-sm text-[--muted] mt-1">
                                     Review the rider details before confirming the assignment
                                 </p>
                             </header>
 
-                            <article className="flex-1 bg-gray-50 rounded-lg border border-gray-200 p-6">
+                            <article className="flex-1 bg-[--surface] rounded-lg border border-[--line] p-6">
                                 <figure className="flex items-start space-x-4">
-                                    <span className="shrink-0 w-16 h-16 bg-primary-900/10 rounded-full flex items-center justify-center" role="img" aria-label="Rider avatar">
+                                    <span className="shrink-0 w-16 h-16 bg-[--ink] rounded-full flex items-center justify-center" role="img" aria-label="Rider avatar">
                                         <FontAwesomeIcon
                                             icon={faUser}
-                                            className="w-8 h-8 text-black"
+                                            className="w-8 h-8 text-[--ink]"
                                             aria-hidden="true"
                                         />
                                     </span>
                                     <figcaption className="flex-1 min-w-0">
-                                        <h3 className="text-xl font-medium text-gray-900 mb-2">
+                                        <h3 className="text-xl font-medium text-[--ink] mb-2">
                                             {selectedRider.name || 'Unnamed Rider'}
                                         </h3>
 
                                         <dl className="space-y-3">
                                             <dt className="sr-only">Phone Number</dt>
-                                            <dd className="flex items-center text-sm text-gray-700">
+                                            <dd className="flex items-center text-sm text-[--ink]">
                                                 <FontAwesomeIcon
                                                     icon={faPhone}
-                                                    className="w-4 h-4 mr-2 text-gray-400"
+                                                    className="w-4 h-4 mr-2 text-[--muted]"
                                                     aria-hidden="true"
                                                 />
                                                 <span>{selectedRider.phoneNumber}</span>
@@ -257,10 +257,10 @@ const ReassignOrderAssignment = () => {
                                             {selectedRider.email && (
                                                 <>
                                                     <dt className="sr-only">Email</dt>
-                                                    <dd className="flex items-center text-sm text-gray-700">
+                                                    <dd className="flex items-center text-sm text-[--ink]">
                                                         <FontAwesomeIcon
                                                             icon={faEnvelope}
-                                                            className="w-4 h-4 mr-2 text-gray-400"
+                                                            className="w-4 h-4 mr-2 text-[--muted]"
                                                             aria-hidden="true"
                                                         />
                                                         <span>{selectedRider.email}</span>
@@ -271,8 +271,8 @@ const ReassignOrderAssignment = () => {
                                             <dt className="sr-only">Status</dt>
                                             <dd className="flex items-center">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedRider.status === UserStatus.ACTIVE
-                                                    ? 'bg-green-100 text-black'
-                                                    : 'bg-gray-100 text-black'
+                                                    ? 'bg-[--surface] text-[--ink]'
+                                                    : 'bg-[--surface] text-[--ink]'
                                                     }`}>
                                                     {selectedRider.status}
                                                 </span>

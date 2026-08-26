@@ -34,11 +34,10 @@ import {
 } from '@/components/layout/InternalPage';
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 14 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -96,7 +95,7 @@ const PaymentDetailsPage = () => {
   if (isFetchingPayment && !payment) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-slate-500">Loading payment details…</p>
+        <p className="text-sm text-[--muted]">Loading payment details…</p>
       </main>
     );
   }
@@ -104,7 +103,7 @@ const PaymentDetailsPage = () => {
   if (!payment) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-slate-500">Payment not found.</p>
+        <p className="text-sm text-[--muted]">Payment not found.</p>
         <menu className="w-full flex items-center gap-3">
           <Button type="button" onClick={(e) => { e.preventDefault(); navigate(-1); }}>
             Back
@@ -134,14 +133,14 @@ const PaymentDetailsPage = () => {
       iconBg: payment.status === KpayPaymentStatus.SUCCESSFUL
         ? 'bg-[--surface] text-[--muted]'
         : payment.status === KpayPaymentStatus.FAILED
-          ? 'bg-red-50 text-red-700'
-          : 'bg-amber-50 text-amber-700',
+          ? 'bg-[--surface] text-[--ink]'
+          : 'bg-[--surface] text-[--ink]',
     },
     {
       label: 'Amount',
       value: formatCurrency(amount, payment.currency),
       icon: faMoneyBillWave,
-      iconBg: 'bg-primary-50 text-primary-900',
+      iconBg: 'bg-[--ink] text-[--ink]',
     },
     {
       label: 'Updated At',
@@ -194,7 +193,7 @@ const PaymentDetailsPage = () => {
           eyebrow="Payment Details"
           title="Core Transaction Information"
           actions={
-            <span className="text-xs uppercase text-slate-400">
+            <span className="text-xs uppercase text-[--muted]">
               Created {formatDateLabel(payment.createdAt)}
             </span>
           }
@@ -208,17 +207,17 @@ const PaymentDetailsPage = () => {
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                className="rounded-lg border border-[--line] bg-[--surface] p-4"
               >
                 <header className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase text-slate-400">
+                    <p className="text-xs uppercase text-[--muted]">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-[#25343F] break-all">
+                    <p className="mt-1 text-sm font-medium text-[--ink] break-all">
                       {item.value || '—'}
                     </p>
                   </section>
@@ -226,16 +225,16 @@ const PaymentDetailsPage = () => {
               </li>
             ))}
 
-            <li className="rounded-lg border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+            <li className="rounded-lg border border-[--line] bg-[--surface] p-4 sm:col-span-2">
               <header className="flex items-center gap-3">
-                <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
+                <span className="h-9 w-9 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center">
                   <FontAwesomeIcon icon={faFileLines} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase text-slate-400">
+                  <p className="text-xs uppercase text-[--muted]">
                     Description
                   </p>
-                  <p className="mt-1 text-sm font-medium text-[#25343F]">
+                  <p className="mt-1 text-sm font-medium text-[--ink]">
                     {payment.description || 'No description provided.'}
                   </p>
                 </section>
@@ -279,16 +278,16 @@ const PaymentDetailsPage = () => {
             ].map((item) => (
               <article
                 key={item.label}
-                className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3"
+                className="flex items-start gap-3 rounded-lg border border-[--line] bg-[--surface] px-4 py-3"
               >
-                <span className="mt-0.5 h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center shrink-0">
+                <span className="mt-0.5 h-8 w-8 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center shrink-0">
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase text-slate-400">
+                  <p className="text-xs uppercase text-[--muted]">
                     {item.label}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-[#25343F] break-all">
+                  <p className="mt-1 text-sm font-medium text-[--ink] break-all">
                     {item.value || '—'}
                   </p>
                 </section>

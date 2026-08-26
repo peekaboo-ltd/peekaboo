@@ -42,17 +42,17 @@ const DashboardHeader = ({
 
   return (
     <motion.header className="w-full" variants={variants}>
-      <div className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] shadow-[0_1px_0_rgba(20,24,29,0.05)]">
-        <div className="border-b border-[color:var(--ops-line)] px-5 py-4 sm:px-6">
-          <p className="text-[11px] font-medium uppercase text-slate-500">
+      <div className="overflow-hidden rounded-xl border border-[color:var(--line)] bg-[var(--surface)]">
+        <div className="border-b border-[color:var(--line)] px-5 py-4 sm:px-6">
+          <p className="text-[11px] font-medium uppercase text-[--muted]">
             Command center
           </p>
           <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[2rem] font-medium text-[color:var(--ops-ink)] sm:text-[2.3rem]">
+              <h1 className="text-[2rem] font-medium text-[color:var(--ink)] sm:text-[2.3rem]">
                 Dashboard
               </h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[15px]">
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-[--muted] sm:text-[15px]">
                 {userName ? `${t('dashboard.welcome', { name: userName })}. ` : ''}
                 {description}
               </p>
@@ -64,9 +64,9 @@ const DashboardHeader = ({
                   <Link
                     key={action.label}
                     to={action.to}
-                    className="inline-flex items-center gap-2 rounded-md border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-4 py-2 text-sm font-medium text-[color:var(--ops-ink)] transition-colors duration-200 hover:bg-[var(--peekaboo-surface)]"
+                    className="inline-flex items-center gap-2 rounded-md border border-[color:var(--line)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[color:var(--ink)] transition-colors duration-200 hover:bg-[var(--surface)]"
                   >
-                    <FontAwesomeIcon icon={action.icon} className="text-xs text-slate-500" />
+                    <FontAwesomeIcon icon={action.icon} className="text-xs text-[--muted]" />
                     {action.label}
                   </Link>
                 ))}
@@ -85,7 +85,7 @@ const DashboardHeader = ({
                 toDate={endDate}
               />
             </div>
-            <span className="hidden text-center text-[11px] uppercase text-slate-400 sm:block">
+            <span className="hidden text-center text-[11px] uppercase text-[--muted] sm:block">
               to
             </span>
             <div className="w-full">
@@ -102,7 +102,7 @@ const DashboardHeader = ({
             <Button
               variant="outline"
               size="sm"
-              className="h-10 gap-2 rounded-md border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-4 hover:bg-[var(--peekaboo-surface)]"
+              className="h-10 gap-2 rounded-md border-[color:var(--line)] bg-[var(--surface)] px-4 hover:bg-[var(--surface)]"
             >
               <FontAwesomeIcon icon={faFileLines} className="text-xs" />
               Export

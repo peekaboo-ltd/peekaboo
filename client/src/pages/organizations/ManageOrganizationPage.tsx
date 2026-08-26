@@ -34,11 +34,10 @@ import OrganizationMembers from '@/containers/organizations/OrganizationMembers'
 import { validateRwandanPhoneNumber } from '@/utils/phone.util';
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -163,20 +162,20 @@ const ManageOrganizationPage = () => {
       label: 'Status',
       value: organization?.status ?? '—',
       icon: faShieldHalved,
-      iconBg: 'bg-primary-50 text-primary-900',
+      iconBg: 'bg-[--ink] text-[--ink]',
     },
     {
       label: 'Business Plan',
       value: currentBusinessPlan?.name ?? 'No plan assigned',
       icon: faCreditCard,
-      iconBg: 'bg-amber-50 text-amber-700',
+      iconBg: 'bg-[--surface] text-[--ink]',
     },
   ];
 
   if (organizationIsFetching && !organization) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-slate-500">Loading organization…</p>
+        <p className="text-sm text-[--muted]">Loading organization…</p>
       </main>
     );
   }
@@ -184,7 +183,7 @@ const ManageOrganizationPage = () => {
   if (!organization && !organizationIsFetching) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-slate-500">Organization not found.</p>
+        <p className="text-sm text-[--muted]">Organization not found.</p>
         <Button type="button" onClick={() => navigate(-1)}>Back</Button>
       </main>
     );
@@ -226,10 +225,10 @@ const ManageOrganizationPage = () => {
         variants={itemVariants}
       >
         {/* Left: Edit form */}
-        <article className="lg:col-span-2 border border-slate-200 bg-white p-6">
+        <article className="lg:col-span-2 border border-[--line] bg-[--paper] p-6">
           <header className="mb-6">
-            <p className="text-xs uppercase text-slate-500">Organization Details</p>
-            <h2 className="mt-2 text-lg font-medium text-[#25343F]">Edit Information</h2>
+            <p className="text-xs uppercase text-[--muted]">Organization Details</p>
+            <h2 className="mt-2 text-lg font-medium text-[--ink]">Edit Information</h2>
           </header>
 
           <form onSubmit={onSubmitOrgInfo} className="flex flex-col gap-5">
@@ -353,14 +352,14 @@ const ManageOrganizationPage = () => {
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-slate-700 uppercase ">
+                  <label className="text-xs font-medium text-[--ink] uppercase ">
                     Description
                   </label>
                   <textarea
                     {...field}
                     rows={3}
                     placeholder="Brief description of the organization..."
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="rounded-lg border border-[--line] bg-[--paper] px-3 py-2 text-sm text-[--ink] resize-none focus:outline-none focus:ring-2 focus:ring-[--ink]"
                   />
                 </div>
               )}
@@ -377,19 +376,19 @@ const ManageOrganizationPage = () => {
         {/* Right: Plan + Members */}
         <aside className="flex flex-col gap-6">
           {/* Business Plan */}
-          <article className="border border-slate-200 bg-white p-6">
+          <article className="border border-[--line] bg-[--paper] p-6">
             <header className="mb-4">
-              <p className="text-xs uppercase text-slate-500">Billing</p>
-              <h2 className="mt-2 text-lg font-medium text-[#25343F]">Business Plan</h2>
+              <p className="text-xs uppercase text-[--muted]">Billing</p>
+              <h2 className="mt-2 text-lg font-medium text-[--ink]">Business Plan</h2>
             </header>
 
             {currentBusinessPlan && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                <FontAwesomeIcon icon={faTag} className="text-slate-700" />
+              <div className="mb-4 flex items-center gap-2 rounded-lg border border-[--line] bg-[--surface] px-4 py-3">
+                <FontAwesomeIcon icon={faTag} className="text-[--ink]" />
                 <section>
-                  <p className="text-xs text-slate-500 uppercase ">Current Plan</p>
-                  <p className="text-sm font-medium text-[#25343F]">{currentBusinessPlan.name}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[--muted] uppercase ">Current Plan</p>
+                  <p className="text-sm font-medium text-[--ink]">{currentBusinessPlan.name}</p>
+                  <p className="text-xs text-[--muted]">
                     {currentBusinessPlan.isCustomPricing
                       ? 'Custom pricing'
                       : currentBusinessPlan.pricePerOrder != null

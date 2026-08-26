@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -48,6 +48,37 @@ const AuthCallback = () => {
     formState: { errors },
   } = useForm<AddPhoneFormData>();
 
+  const completeAuthentication = useCallback(async (authToken: string) => {
+    try {
+      const response = await fetch(`${ENVIRONMENTS.API_URL}/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const result = await response.json();
+      const userData = result.data;
+
+      localStorageUtil.setItem('token', authToken);
+      localStorageUtil.setItem('user', userData);
+
+      dispatch(setToken(authToken));
+      dispatch(setUser(userData));
+      dispatch(setIsAuthenticated(true));
+
+      toast.success('Successfully signed in with Google!');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Authentication error:', error);
+      toast.error('Authentication failed. Please try again.');
+      navigate('/auth/login');
+    }
+  }, [dispatch, navigate]);
+
   useEffect(() => {
     const processCallback = async () => {
       const tokenParam = searchParams.get('token');
@@ -78,38 +109,7 @@ const AuthCallback = () => {
     };
 
     processCallback();
-  }, [searchParams, navigate, dispatch]);
-
-  const completeAuthentication = async (authToken: string) => {
-    try {
-      const response = await fetch(`${ENVIRONMENTS.API_URL}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch user data');
-      }
-
-      const result = await response.json();
-      const userData = result.data;
-
-      localStorageUtil.setItem('token', authToken);
-      localStorageUtil.setItem('user', userData);
-
-      dispatch(setToken(authToken));
-      dispatch(setUser(userData));
-      dispatch(setIsAuthenticated(true));
-
-      toast.success('Successfully signed in with Google!');
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Authentication error:', error);
-      toast.error('Authentication failed. Please try again.');
-      navigate('/auth/login');
-    }
-  };
+  }, [completeAuthentication, navigate, searchParams]);
 
   const handlePhoneSubmit = handleSubmit(async (data) => {
     const validation = validateAndFormatPhoneNumber(data.phoneNumber);
@@ -172,7 +172,7 @@ const AuthCallback = () => {
       <AuthPageShell>
         <AuthCard title="Completing sign in" subtitle="We are securing your session.">
           <div className="flex justify-center py-4">
-            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-[--ink]" />
           </div>
         </AuthCard>
       </AuthPageShell>

@@ -128,7 +128,7 @@ export default function Table<TData, TValue>({
 
   return (
     <>
-      <section className="w-full border rounded-md">
+      <section className="w-full overflow-hidden rounded-[--radius-card] border border-[--line] bg-[--paper]">
         <DataTable>
           <TableHeader className="px-0">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -136,7 +136,7 @@ export default function Table<TData, TValue>({
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className="text-[12px] font-normal text-black p-4"
+                      className="text-[12px] font-normal text-[--ink] p-4"
                       key={header.id}
                       colSpan={header.colSpan}
                     >
@@ -169,7 +169,7 @@ export default function Table<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
                   className={`p-2 ${rowClickHandler ? 'cursor-pointer' : ''
-                    } hover:bg-background ${typeof rowClassName === 'function'
+                    } hover:bg-[--surface] ${typeof rowClassName === 'function'
                       ? rowClassName(row.original)
                       : rowClassName
                     }`}
@@ -191,7 +191,7 @@ export default function Table<TData, TValue>({
                     return (
                       <TableCell
                         className={`${preventAction ? '!cursor-auto' : ''
-                          } text-[12px] text-black p-4 py-3`}
+                        } p-4 py-3 text-[12px] tabular-nums text-[--ink]`}
                         key={cell.id}
                         onClick={(e) => {
                           if (preventAction) {
@@ -215,7 +215,7 @@ export default function Table<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  <span className="text-gray-500 font-light text-[13px]">
+                  <span className="text-[--muted] font-light text-[13px]">
                     {noDataMessage}
                   </span>
                 </TableCell>

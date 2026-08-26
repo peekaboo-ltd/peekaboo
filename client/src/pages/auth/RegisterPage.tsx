@@ -120,7 +120,7 @@ export const RegisterPage = () => {
                   label="Phone number"
                   placeholder="7XXXXXXXX"
                   required
-                  className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
+                  className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-[--ink]"
                   errorMessage={errors?.phoneNumber?.message}
                 />
               )}
@@ -146,7 +146,7 @@ export const RegisterPage = () => {
                 autoComplete="new-password"
                 required
                 showPasswordToggle
-                className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
+                className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-[--ink]"
                 errorMessage={errors?.password?.message}
               />
             )}
@@ -169,7 +169,7 @@ export const RegisterPage = () => {
                 autoComplete="new-password"
                 required
                 showPasswordToggle
-                className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
+                className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-[--ink]"
                 errorMessage={errors?.confirmPassword?.message}
               />
             )}
@@ -184,7 +184,7 @@ export const RegisterPage = () => {
                   {...field}
                   label="Name"
                   placeholder="Your name"
-                  className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
+                  className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-[--ink]"
                   errorMessage={errors?.name?.message}
                 />
               )}
@@ -200,7 +200,7 @@ export const RegisterPage = () => {
                   type="email"
                   placeholder="you@company.com"
                   autoComplete="email"
-                  className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
+                  className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-[--ink]"
                   errorMessage={errors?.email?.message}
                 />
               )}
@@ -211,7 +211,7 @@ export const RegisterPage = () => {
             type="submit"
             primary
             isLoading={isLoading}
-            className="mt-2 w-full !rounded-md !bg-primary !font-normal hover:!bg-primary-800"
+            className="mt-2 w-full !rounded-md !bg-[--ink] !font-normal hover:!bg-[--ink]"
           >
             Sign up
           </Button>
@@ -221,7 +221,7 @@ export const RegisterPage = () => {
           <span>Already have an account? </span>
           <Link
             to="/auth/login"
-            className="font-normal text-primary hover:text-[--muted] underline underline-offset-2"
+            className="font-normal text-[--ink] hover:text-[--muted] underline underline-offset-2"
           >
             Log in
           </Link>

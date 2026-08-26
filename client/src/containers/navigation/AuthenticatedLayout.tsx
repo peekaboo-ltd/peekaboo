@@ -6,24 +6,17 @@ import { useAppSelector } from '@/states/hooks';
 
 export const AuthenticatedLayout = () => {
   const { isOpen: sidebarOpen } = useAppSelector((state) => state.sidebar);
-
   useInactivityTimeout();
 
   return (
-    <section className="h-screen w-full overflow-x-hidden bg-[var(--peekaboo-surface)]">
+    <div className="min-h-screen bg-[--paper] text-[--ink]">
       <AuthenticatedNavbar />
       <AuthenticatedSidebar />
-      <main
-        className={`mt-20 min-h-[calc(100vh-64px)] overflow-x-hidden transition-all duration-300 ease-in-out ${
-          sidebarOpen
-            ? 'ml-[220px] lg:ml-[260px]'
-            : 'ml-[60px] lg:ml-[80px]'
-        }`}
-      >
-        <article className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+      <main className={sidebarOpen ? 'ml-[240px]' : 'ml-[72px]'}>
+        <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[1280px] px-5 py-8 sm:px-8 lg:px-10">
           <Outlet />
-        </article>
+        </div>
       </main>
-    </section>
+    </div>
   );
 };

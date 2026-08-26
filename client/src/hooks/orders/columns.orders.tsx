@@ -128,7 +128,7 @@ export const useOrdersColumns = () => {
                     >
                       <FontAwesomeIcon
                         icon={faTrash}
-                        className="text-red-700"
+                        className="text-[--ink]"
                       />
                       Delete
                     </Link>

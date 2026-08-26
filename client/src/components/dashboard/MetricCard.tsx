@@ -14,53 +14,53 @@ import {
 
 const accentMap = {
   blue: {
-    icon: 'text-slate-700',
-    iconBg: 'bg-[var(--peekaboo-surface)]',
-    iconRing: 'ring-slate-200',
-    spark: 'hsl(var(--primary))',
-    footer: 'text-slate-700',
+    icon: 'text-[--ink]',
+    iconBg: 'bg-[var(--surface)]',
+    iconRing: 'ring-[--line]',
+    spark: 'var(--chart-1)',
+    footer: 'text-[--ink]',
   },
   teal: {
-    icon: 'text-slate-700',
-    iconBg: 'bg-[var(--peekaboo-surface)]',
-    iconRing: 'ring-slate-200',
-    spark: '#0891b2',
-    footer: 'text-slate-700',
+    icon: 'text-[--ink]',
+    iconBg: 'bg-[var(--surface)]',
+    iconRing: 'ring-[--line]',
+    spark: 'var(--chart-2)',
+    footer: 'text-[--ink]',
   },
   amber: {
-    icon: 'text-amber-600',
-    iconBg: 'bg-amber-50',
-    iconRing: 'ring-amber-100',
-    spark: '#d97706',
-    footer: 'text-amber-700',
+    icon: 'text-[--ink]',
+    iconBg: 'bg-[--surface]',
+    iconRing: 'ring-[--ink]',
+    spark: 'var(--chart-3)',
+    footer: 'text-[--ink]',
   },
   emerald: {
-    icon: 'text-emerald-600',
-    iconBg: 'bg-emerald-50',
-    iconRing: 'ring-emerald-100',
-    spark: '#059669',
-    footer: 'text-emerald-700',
+    icon: 'text-[--ink]',
+    iconBg: 'bg-[--surface]',
+    iconRing: 'ring-[--ink]',
+    spark: 'var(--chart-4)',
+    footer: 'text-[--ink]',
   },
   violet: {
-    icon: 'text-slate-700',
-    iconBg: 'bg-[var(--peekaboo-surface)]',
-    iconRing: 'ring-slate-200',
-    spark: 'hsl(var(--primary))',
-    footer: 'text-slate-700',
+    icon: 'text-[--ink]',
+    iconBg: 'bg-[var(--surface)]',
+    iconRing: 'ring-[--line]',
+    spark: 'var(--chart-5)',
+    footer: 'text-[--ink]',
   },
   rose: {
-    icon: 'text-rose-600',
-    iconBg: 'bg-rose-50',
-    iconRing: 'ring-rose-100',
-    spark: '#e11d48',
-    footer: 'text-rose-700',
+    icon: 'text-[--ink]',
+    iconBg: 'bg-[--surface]',
+    iconRing: 'ring-[--ink]',
+    spark: 'var(--chart-2)',
+    footer: 'text-[--ink]',
   },
   slate: {
-    icon: 'text-slate-700',
-    iconBg: 'bg-[var(--peekaboo-surface)]',
-    iconRing: 'ring-slate-200',
-    spark: '#475569',
-    footer: 'text-slate-700',
+    icon: 'text-[--ink]',
+    iconBg: 'bg-[var(--surface)]',
+    iconRing: 'ring-[--line]',
+    spark: 'var(--chart-3)',
+    footer: 'text-[--ink]',
   },
 } as const;
 
@@ -123,10 +123,10 @@ const MetricCard = ({
   const cardContent = (
     <Card
       className={cn(
-        'group relative overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] shadow-[0_1px_0_rgba(20,24,29,0.05)] transition-all duration-300',
+        'group relative overflow-hidden rounded-[--radius-card] border border-[--line] bg-[--paper] transition-[border-color,background-color,transform] duration-200 ease-[var(--ease-flat)]',
         destination
-          ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_10px_22px_-18px_rgba(20,24,29,0.5)]'
-          : 'hover:shadow-[0_10px_22px_-18px_rgba(20,24,29,0.5)]',
+          ? 'cursor-pointer hover:border-[--ink] active:translate-y-px active:scale-[0.99]'
+          : '',
       )}
     >
       <CardContent className="relative p-5 sm:p-6">
@@ -135,7 +135,7 @@ const MetricCard = ({
             {icon && (
               <span
                 className={cn(
-                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-md ring-1 transition-transform duration-300 group-hover:scale-[1.03]',
+                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-[--radius-control] ring-1',
                   accentMap[accent].iconBg,
                   accentMap[accent].iconRing,
                 )}
@@ -149,11 +149,11 @@ const MetricCard = ({
               </span>
             )}
             <span className="min-w-0">
-              <span className="block truncate text-[11px] font-medium uppercase text-slate-600">
+              <span className="block truncate text-[11px] font-medium uppercase text-[--muted]">
                 {label}
               </span>
               {(comparisonLabel || note) && (
-                <span className="mt-0.5 block truncate text-xs text-slate-500">
+                <span className="mt-0.5 block truncate text-xs text-[--muted]">
                   {comparisonLabel || note}
                 </span>
               )}
@@ -162,8 +162,8 @@ const MetricCard = ({
           {trend && (
             <span
               className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${trend.isPositive
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-rose-50 text-rose-700'
+                  ? 'bg-[--surface] text-[--ink]'
+                  : 'bg-[--surface] text-[--ink]'
                 }`}
               aria-label={`Trend: ${trend.isPositive ? 'increasing' : 'decreasing'} by ${Math.abs(trend.value)}%`}
             >
@@ -175,12 +175,12 @@ const MetricCard = ({
         <section className="flex items-end justify-between gap-4">
           <div className="min-w-0 flex-1">
             <p
-              className="truncate text-[2rem] font-medium leading-none text-[color:var(--ops-ink)] sm:text-[2.3rem]"
+              className="truncate text-[2rem] font-medium leading-none text-[color:var(--ink)] sm:text-[2.3rem]"
               aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
             >
               {value}
             </p>
-            <p className="mt-3 max-w-[16rem] text-sm leading-6 text-slate-600">
+            <p className="mt-3 max-w-[16rem] text-sm leading-6 text-[--muted]">
               {footerText || note || comparisonLabel || 'Performance snapshot'}
             </p>
           </div>
@@ -189,12 +189,12 @@ const MetricCard = ({
             {renderSparkline()}
             {destination && (
               <span
-                className="opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                 aria-hidden="true"
               >
                 <FontAwesomeIcon
                   icon={faArrowRight}
-                  className="transform text-sm text-slate-700 transition-transform duration-300 group-hover:translate-x-1"
+                  className="text-sm text-[--ink] transition-transform duration-200 group-hover:translate-x-1"
                   aria-hidden="true"
                 />
               </span>
@@ -202,14 +202,14 @@ const MetricCard = ({
           </div>
         </section>
 
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-[color:var(--ops-line)] pt-4 sm:hidden">
+        <div className="mt-5 flex items-center justify-between gap-3 border-t border-[color:var(--line)] pt-4 sm:hidden">
           <span className={cn('text-xs font-medium', accentMap[accent].footer)}>
             {footerText || comparisonLabel || 'Live dashboard signal'}
           </span>
           {destination && (
             <FontAwesomeIcon
               icon={faArrowRight}
-              className="text-sm text-slate-500"
+              className="text-sm text-[--muted]"
               aria-hidden="true"
             />
           )}

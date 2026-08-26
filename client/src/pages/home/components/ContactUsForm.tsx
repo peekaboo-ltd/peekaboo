@@ -184,7 +184,7 @@ const ContactUsForm = ({
                     {...field}
                     rows={3}
                     placeholder={t('contact.messagePlaceholder')}
-                    className="w-full rounded-[--radius-control] border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary resize-none"
+                    className="w-full rounded-[--radius-control] border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[--ink] resize-none"
                   />
                 </div>
               )}

@@ -78,7 +78,7 @@ const VehiclesStatusChart = ({
     if (active && payload && payload.length) {
       const item = payload[0].payload;
       return (
-        <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-md">
+        <div className="rounded-[--radius-control] border border-[--line] bg-[--paper] px-3 py-2 shadow-[var(--shadow-popover)]">
           <p className="text-sm font-medium text-foreground">
             {item.translatedName}
           </p>
@@ -127,7 +127,7 @@ const VehiclesStatusChart = ({
   };
 
   return (
-    <Card className="h-full border-slate-200/70 bg-white">
+    <Card className="h-full border-[--line] bg-[--paper]">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-medium">
           {title || t('dashboard.vehiclesOnRoad')}
@@ -148,8 +148,8 @@ const VehiclesStatusChart = ({
                 labelLine={false}
                 label={renderCustomizedLabel}
               >
-                {translatedData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {translatedData.map((_entry, index) => (
+                  <Cell key={`cell-${index}`} fill={`var(--chart-${(index % 5) + 1})`} />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />

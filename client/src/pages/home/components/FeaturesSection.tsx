@@ -34,7 +34,7 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
               <span
                 className={`flex h-9 w-9 items-center justify-center rounded-[--radius-control] transition-[background-color,color,border-color,box-shadow] duration-200 ${
                   action.accent
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-[--ink] text-[--paper]'
                     : 'bg-[--surface] text-[--ink]'
                 }`}
               >
@@ -53,7 +53,7 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
               <span
                 className={`mt-auto inline-flex items-center gap-1.5 pt-4 text-[12px] font-medium transition-colors duration-200 ${
                   action.accent
-                    ? 'text-primary'
+                    ? 'text-[--ink]'
                     : 'text-foreground group-hover:text-[var(--muted)]'
                 }`}
               >

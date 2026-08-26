@@ -82,7 +82,7 @@ const MobileMoneyFields = ({
       />
 
       {payerType !== 'other' && payerPhoneError ? (
-        <p className="text-sm text-red-600">{payerPhoneError}</p>
+        <p className="text-sm text-[--ink]">{payerPhoneError}</p>
       ) : null}
 
       {payerType === 'other' && (
@@ -115,7 +115,7 @@ const MobileMoneyFields = ({
       )}
 
       {showNetworkWarning && detected ? (
-        <p className="text-xs font-normal leading-snug text-amber-700">
+        <p className="text-xs font-normal leading-snug text-[--ink]">
           This number looks like {networkLabels[detected]}, but you selected{' '}
           {networkLabels[expected]}. Continue if it is registered with{' '}
           {networkLabels[expected]}.

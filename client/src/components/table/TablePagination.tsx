@@ -109,7 +109,7 @@ export function DataTablePagination<TData>({
             min={1}
             max={totalPages || 1}
             defaultValue={page + 1}
-            className="w-12 text-center placeholder:!text-[11px] !text-[11px] py-1 px-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className="h-11 w-14 rounded-[--radius-control] border-0 bg-[--surface] px-2 text-center text-xs tabular-nums outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
             onChange={(e) => {
               const targetPage = e.target.value ? Number(e.target.value) : 0;
               if (targetPage >= 1 && targetPage <= (totalPages || 1)) {

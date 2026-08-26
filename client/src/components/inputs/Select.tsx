@@ -96,9 +96,9 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
           {label}{' '}
           <CustomTooltip
             label={required ? `${label} is required` : ''}
-            labelClassName="text-[13px] bg-red-600"
+            labelClassName="text-[13px] bg-[--surface]"
           >
-            <span className={required ? `text-red-600 cursor-pointer` : 'hidden'}>*</span>
+            <span className={required ? `text-[--ink] cursor-pointer` : 'hidden'}>*</span>
           </CustomTooltip>
         </p>
         {isLoading ? (
@@ -115,18 +115,19 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
             name={name}
           >
             <SelectTrigger
-              className={`w-full focus:ring-transparent ring-0 h-10 ${className}`}
+              size="sm"
+              className={`w-full ${className}`}
             >
               <SelectValue
                 className="!text-[10px] truncate"
                 placeholder={
-                  <p className="text-[13px] text-gray-500 truncate">{placeholder}</p>
+                  <p className="text-[13px] text-[--muted] truncate">{placeholder}</p>
                 }
               />
             </SelectTrigger>
             <SelectContent>
               {searchable ? (
-                <search className="sticky top-0 z-10 -mt-1 bg-popover pb-2 pt-1">
+                <search className="sticky top-0 z-10 -mt-1 bg-[--surface] pb-2 pt-1">
                   <input
                     ref={inputRef}
                     type="text"
@@ -143,13 +144,13 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                     placeholder="Search..."
                     aria-label={label ? `Search ${label}` : 'Search options'}
                     autoComplete="off"
-                    className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-[13px] placeholder:text-[13px] focus:border-transparent focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="h-11 w-full rounded-[--radius-control] border-0 bg-[--paper] px-3 text-[13px] outline-none placeholder:text-[--muted] focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                   />
                 </search>
               ) : null}
               <SelectGroup>
                 {filteredOptions.length === 0 ? (
-                  <p className="px-2 py-3 text-center text-[13px] text-gray-500">
+                  <p className="px-2 py-3 text-center text-[13px] text-[--muted]">
                     No matches found
                   </p>
                 ) : (

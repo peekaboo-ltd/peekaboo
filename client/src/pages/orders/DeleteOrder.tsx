@@ -50,9 +50,9 @@ const DeleteOrder = () => {
       headingClassName="text-[var(--destructive)]"
     >
       <article className="w-full flex flex-col gap-4">
-        <p className="text-sm leading-6 text-[var(--peekaboo-muted)]">
+        <p className="text-sm leading-6 text-[var(--muted)]">
           This permanently deletes{' '}
-          <span className="font-['IBM_Plex_Mono'] text-xs text-[var(--peekaboo-dark)]">
+          <span className="font-['IBM_Plex_Mono'] text-xs text-[var(--ink)]">
             {selectedOrder?.referenceId}
           </span>
           . This action can’t be undone.

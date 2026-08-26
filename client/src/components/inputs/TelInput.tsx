@@ -134,10 +134,10 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
         {label ? (
           <label
             htmlFor={inputId}
-            className="flex items-center gap-[5px] pl-1 text-[13px] text-slate-800"
+            className="flex items-center gap-[5px] pl-1 text-[13px] text-[--ink]"
           >
             {label}
-            {required ? <span className="text-red-600">*</span> : null}
+            {required ? <span className="text-[--ink]">*</span> : null}
           </label>
         ) : null}
 
@@ -181,7 +181,7 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
             id={errorId}
             role="status"
             aria-live="polite"
-            className="text-[11px] text-red-700"
+            className="text-[11px] text-[--ink]"
           >
             {resolvedError}
           </span>

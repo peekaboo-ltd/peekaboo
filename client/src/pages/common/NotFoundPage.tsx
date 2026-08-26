@@ -20,69 +20,51 @@ const NotFoundPage = () => {
   const canGoBack = typeof window !== 'undefined' && window.history.length > 1;
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-slate-50 px-4 py-12 sm:px-6 lg:px-10">
-      <span
-        className="pointer-events-none absolute -left-24 top-20 h-72 w-72 rounded-full bg-primary-200/20 blur-3xl"
-        aria-hidden="true"
-      />
-      <span
-        className="pointer-events-none absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-slate-200/60 blur-3xl"
-        aria-hidden="true"
-      />
-
+    <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[--surface] px-4 py-12 sm:px-6 lg:px-10">
       <motion.section
         className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-8"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       >
         <article className="grid grid-cols-1 gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <motion.article
-            className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/95 p-8 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.45)]"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="relative overflow-hidden rounded-[--radius-card] border border-[--line] bg-[--paper] p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            <span
-              className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl"
-              aria-hidden="true"
-            />
-            <span
-              className="pointer-events-none absolute -left-10 bottom-8 h-32 w-32 rounded-full bg-emerald-200/40 blur-3xl"
-              aria-hidden="true"
-            />
-
             <header className="space-y-6">
               <article className="flex items-center gap-3">
-                <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium uppercase text-slate-500">
+                <span className="inline-flex items-center rounded-full border border-[--line] bg-[--paper] px-3 py-1 text-[11px] font-medium uppercase text-[--muted]">
                   Error 404
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-500">
+                <span className="inline-flex items-center gap-2 rounded-full bg-[--surface] px-3 py-1 text-[11px] font-medium text-[--muted]">
                   <FontAwesomeIcon
                     icon={faExclamationTriangle}
-                    className="text-xs text-primary-700"
+                    className="text-xs text-[--ink]"
                   />
                   Page missing
                 </span>
               </article>
 
               <article className="space-y-4">
-                <h1 className="text-6xl sm:text-7xl font-medium text-slate-900">
+                <h1 className="text-6xl sm:text-7xl font-medium text-[--ink]">
                   Lost route.
                   <br />
                   Let’s get you back.
                 </h1>
-                <p className="text-base sm:text-lg text-slate-600">
+                <p className="text-base sm:text-lg text-[--muted]">
                   We couldn’t find the page you requested. The link might be
                   broken, or the route has changed.
                 </p>
               </article>
 
-              <article className="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm text-slate-600">
-                <span className="text-xs uppercase text-slate-400">
+              <article className="rounded-[--radius-card] border border-[--line] bg-[--surface] px-4 py-3 text-sm text-[--muted]">
+                <span className="text-xs uppercase text-[--muted]">
                   Requested
                 </span>
-                <p className="mt-1 font-medium text-slate-700">
+                <p className="mt-1 font-medium text-[--ink]">
                   {location.pathname}
                 </p>
               </article>
@@ -120,19 +102,19 @@ const NotFoundPage = () => {
           </motion.article>
 
           <motion.aside
-            className="flex h-full flex-col gap-5 rounded-3xl border border-slate-200 bg-white/95 p-7 shadow-[0_20px_45px_-35px_rgba(15,23,42,0.4)]"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="flex h-full flex-col gap-5 rounded-[--radius-card] border border-[--line] bg-[--paper] p-7"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
             <header className="space-y-2">
-              <p className="text-xs font-medium uppercase text-slate-400">
+              <p className="text-xs font-medium uppercase text-[--muted]">
                 Quick links
               </p>
-              <h2 className="text-2xl font-medium text-slate-900">
+              <h2 className="text-2xl font-medium text-[--ink]">
                 Keep exploring
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[--muted]">
                 Here are a few useful places to continue from.
               </p>
             </header>
@@ -140,36 +122,36 @@ const NotFoundPage = () => {
             <article className="grid gap-3">
               <Link
                 to="/track"
-                className="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300"
+                className="group flex items-center justify-between rounded-[--radius-card] border border-[--line] bg-[--paper] px-4 py-3 text-sm font-medium text-[--ink] transition-colors hover:border-[--line]"
               >
                 <span className="flex items-center gap-2">
                   <FontAwesomeIcon
                     icon={faBox}
-                    className="text-xs text-primary-700"
+                    className="text-xs text-[--ink]"
                   />
                   Track an order
                 </span>
-                <span className="text-xs text-slate-400">Order ID needed</span>
+                <span className="text-xs text-[--muted]">Order ID needed</span>
               </Link>
 
               <Link
                 to="/contact"
-                className="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300"
+                className="group flex items-center justify-between rounded-[--radius-card] border border-[--line] bg-[--paper] px-4 py-3 text-sm font-medium text-[--ink] transition-colors hover:border-[--line]"
               >
                 <span className="flex items-center gap-2">
                   <FontAwesomeIcon
                     icon={faInfoCircle}
-                    className="text-xs text-primary-700"
+                    className="text-xs text-[--ink]"
                   />
                   Contact support
                 </span>
-                <span className="text-xs text-slate-400">We can help</span>
+                <span className="text-xs text-[--muted]">We can help</span>
               </Link>
 
               <article className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Link
                   to="/auth/login"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-[--line] bg-[--surface] px-4 py-2.5 text-sm font-medium text-[--ink] transition-colors hover:bg-[--surface]"
                 >
                   <FontAwesomeIcon
                     icon={faSignInAlt}
@@ -180,7 +162,7 @@ const NotFoundPage = () => {
                 </Link>
                 <Link
                   to="/auth/register"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-[--line] bg-[--surface] px-4 py-2.5 text-sm font-medium text-[--ink] transition-colors hover:bg-[--surface]"
                 >
                   <FontAwesomeIcon
                     icon={faUserPlus}

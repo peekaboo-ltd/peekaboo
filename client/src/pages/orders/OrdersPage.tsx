@@ -116,17 +116,17 @@ const OrdersPage = () => {
   const { ordersColumns } = useOrdersColumns();
 
   return (
-    <main className="h-full w-full text-[var(--peekaboo-text)]">
-      <header className="mb-5 flex w-full flex-col gap-5 border-b border-[var(--peekaboo-line)] pb-5">
+    <main className="h-full w-full text-[var(--ink)]">
+      <header className="mb-5 flex w-full flex-col gap-5 border-b border-[var(--line)] pb-5">
         <section className="flex flex-wrap items-start justify-between gap-4">
           <article>
-            <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--peekaboo-muted)]">
+            <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--muted)]">
               Delivery operations
             </p>
-            <h1 className="mt-1 text-2xl font-medium tracking-[-0.03em] text-[var(--peekaboo-dark)]">
+            <h1 className="mt-1 text-2xl font-medium tracking-[-0.03em] text-[var(--ink)]">
               Orders
             </h1>
-            <p className="mt-1 text-sm text-[var(--peekaboo-muted)]">
+            <p className="mt-1 text-sm text-[var(--muted)]">
               Find an order by reference or narrow the list by status.
             </p>
           </article>
@@ -157,7 +157,7 @@ const OrdersPage = () => {
           </nav>
         </section>
 
-        <fieldset className="grid w-full grid-cols-4 gap-4 rounded-[var(--radius)] border border-[var(--peekaboo-line)] bg-white p-3 max-md:grid-cols-3 max-sm:grid-cols-2">
+        <fieldset className="grid w-full grid-cols-4 gap-4 rounded-[var(--radius)] border border-[var(--line)] bg-[--paper] p-3 max-md:grid-cols-3 max-sm:grid-cols-2">
           {statusFilter}
         </fieldset>
       </header>

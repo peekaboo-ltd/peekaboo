@@ -20,7 +20,7 @@ import type { DashboardStatusBreakdownItem } from '@/types/dashboard.type';
 import { capitalizeString, formatCurrency, formatNumbers } from '@/utils/strings.util';
 import { RoleTypes } from '@/types/auth.type';
 
-const chartStroke = 'var(--ops-route)';
+const chartStroke = 'var(--chart-2)';
 
 const getMetricOptionsForRole = (role?: RoleTypes): string[] => {
   switch (role) {
@@ -96,36 +96,36 @@ const DashboardSummaryChart = ({
   return (
     <motion.section
       aria-label="Summary chart"
-      className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] p-5 shadow-[0_1px_0_rgba(20,24,29,0.05)] sm:p-6"
+      className="overflow-hidden rounded-[--radius-card] border border-[--line] bg-[--paper] p-5 sm:p-6"
       variants={containerVariants}
     >
       <motion.div variants={itemVariants}>
         <header className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase text-slate-500">
+            <p className="text-[11px] font-medium uppercase text-[--muted]">
               Primary insight
             </p>
             {data.length > 0 ? (
-              <p className="mt-2 text-[2.25rem] font-medium leading-none text-[color:var(--ops-ink)] sm:text-[3rem]">
+              <p className="mt-2 text-[2.25rem] font-medium leading-none text-[color:var(--ink)] sm:text-[3rem]">
                 {formattedTotal}
               </p>
             ) : (
-              <p className="mt-2 text-[2.25rem] font-medium leading-none text-slate-300 sm:text-[3rem]">
+              <p className="mt-2 text-[2.25rem] font-medium leading-none text-[--muted] sm:text-[3rem]">
                 —
               </p>
             )}
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-[--muted]">
               {capitalizeString(metric.toLowerCase())} across the selected period with a single high-signal trend line.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-full border border-slate-200 bg-[var(--peekaboo-surface)] px-3 py-1 text-xs font-normal text-slate-700">
+              <span className="rounded-full border border-[--line] bg-[var(--surface)] px-3 py-1 text-xs font-normal text-[--ink]">
                 {range.toUpperCase()} view
               </span>
-              <span className="rounded-full border border-slate-200 bg-[var(--peekaboo-surface)] px-3 py-1 text-xs font-normal text-slate-600">
+              <span className="rounded-full border border-[--line] bg-[var(--surface)] px-3 py-1 text-xs font-normal text-[--muted]">
                 {data.length} data points
               </span>
               {peakPoint && (
-                <span className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                <span className="rounded-full border border-[--line] bg-[--surface] px-3 py-1 text-xs font-medium text-[--ink]">
                   Peak {formatLabel(peakPoint.name)}
                 </span>
               )}
@@ -140,8 +140,8 @@ const DashboardSummaryChart = ({
                 onClick={() => onRangeChange(key)}
                 className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-normal transition ${
                   range === key
-                    ? 'border-slate-900 bg-slate-900 text-white'
-                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                    ? 'border-[--ink] bg-[--ink] text-[--paper]'
+                    : 'border-[--line] text-[--muted] hover:border-[--line]'
                 }`}
               >
                 {key.toUpperCase()}
@@ -168,8 +168,8 @@ const DashboardSummaryChart = ({
 
         <section className="relative mt-8 h-64 sm:h-72">
           {isLoading && (
-            <figure className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-[var(--peekaboo-surface)]">
-              <figure className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-[hsl(var(--primary))]" />
+            <figure className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-[var(--surface)]">
+              <figure className="h-5 w-5 animate-spin rounded-full border-2 border-[--line] border-t-[--ink]" />
             </figure>
           )}
           <ResponsiveContainer width="100%" height="100%">
@@ -177,32 +177,32 @@ const DashboardSummaryChart = ({
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="#D4DCE3"
+                stroke="var(--line)"
                 strokeOpacity={0.9}
               />
               <XAxis
                 dataKey="name"
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 11, fill: '#64748b' }}
+                tick={{ fontSize: 11, fill: 'var(--muted)' }}
                 minTickGap={20}
                 tickFormatter={formatLabel}
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
-                tick={{ fontSize: 11, fill: '#64748b' }}
+                tick={{ fontSize: 11, fill: 'var(--muted)' }}
                 width={36}
               />
               <Tooltip
                 contentStyle={{
-                  background: 'var(--peekaboo-surface)',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: 10,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 'var(--radius-control)',
+                  boxShadow: 'var(--shadow-popover)',
                   fontSize: 13,
                 }}
-                labelStyle={{ color: 'hsl(var(--foreground))', fontWeight: 500 }}
+                labelStyle={{ color: 'var(--ink)', fontWeight: 500 }}
                 labelFormatter={formatLabel}
                 cursor={{ stroke: chartStroke, strokeWidth: 1, strokeDasharray: '4 4' }}
               />
@@ -213,7 +213,7 @@ const DashboardSummaryChart = ({
                 strokeWidth={2.8}
                 fill="transparent"
                 dot={false}
-                activeDot={{ r: 5, fill: chartStroke, stroke: '#fff', strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: chartStroke, stroke: 'var(--paper)', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -224,12 +224,12 @@ const DashboardSummaryChart = ({
             {breakdown.slice(0, 3).map((item) => (
               <article
                 key={item.label}
-                className="rounded-md border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-4 py-3"
+                className="rounded-md border border-[color:var(--line)] bg-[var(--surface)] px-4 py-3"
               >
-                <p className="text-[11px] font-medium uppercase text-slate-500">
+                <p className="text-[11px] font-medium uppercase text-[--muted]">
                   {item.label}
                 </p>
-                <p className="mt-2 text-2xl font-medium text-[color:var(--ops-ink)]">
+                <p className="mt-2 text-2xl font-medium text-[color:var(--ink)]">
                   {formatNumbers(item.value)}
                 </p>
               </article>

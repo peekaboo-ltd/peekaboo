@@ -101,14 +101,14 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
 
   // Get background color based on assignment status
   const getStatusBackgroundColor = (status?: string) => {
-    let bgColor = 'bg-gray-100 hover:bg-gray-200';
+    let bgColor = 'bg-[--surface] hover:bg-[--surface]';
 
     switch (status) {
       case OrderAssignmentStatus.PENDING:
-        bgColor = 'bg-yellow-700 text-white';
+        bgColor = 'bg-[--surface] text-[--paper]';
         break;
       case OrderAssignmentStatus.ACTIVE:
-        bgColor = 'bg-green-700 text-white';
+        bgColor = 'bg-[--surface] text-[--paper]';
         break;
       case OrderAssignmentStatus.REJECTED:
     }
@@ -120,7 +120,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
   const renderAssignmentStatus = () => {
     if (isAssigning) {
       return (
-        <span className="text-xs text-gray-500 w-full text-center">
+        <span className="text-xs text-[--muted] w-full text-center">
           <FontAwesomeIcon icon={faSpinner} spin className="mr-1" />
           Assigning...
         </span>
@@ -136,7 +136,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
     }
 
     return (
-      <span className="text-xs text-gray-400 w-full text-center">
+      <span className="text-xs text-[--muted] w-full text-center">
         <FontAwesomeIcon icon={faUser} className="mr-1" />
         No assignment
       </span>
@@ -147,32 +147,32 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
     isDropdownOpen && dropdownPosition ? (
       <section
         ref={dropdownRef}
-        className="fixed z-10000 bg-white border border-gray-300 rounded-md shadow-lg overflow-hidden"
+        className="fixed z-10000 overflow-hidden rounded-[--radius-control] border-0 bg-[--surface] shadow-[var(--shadow-menu)]"
         style={{
           top: `${dropdownPosition.top}px`,
           left: `${dropdownPosition.left}px`,
           width: `${dropdownPosition.width}px`,
         }}
       >
-        <header className="p-2 border-b border-gray-200">
+        <header className="p-2 border-b border-[--line]">
           <input
             ref={inputRef}
             type="search"
             placeholder="Search by name or phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className="h-11 w-full rounded-[--radius-control] border-0 bg-[--paper] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
             aria-label="Search riders"
           />
         </header>
         <menu className="max-h-60 overflow-auto">
           {isFetchingRiders ? (
-            <li className="px-3 py-2 text-sm text-gray-500 text-center list-none">
+            <li className="px-3 py-2 text-sm text-[--muted] text-center list-none">
               <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
               Loading riders...
             </li>
           ) : riders.length === 0 ? (
-            <li className="px-3 py-2 text-sm text-gray-500 text-center list-none">
+            <li className="px-3 py-2 text-sm text-[--muted] text-center list-none">
               No riders found
             </li>
           ) : (
@@ -180,7 +180,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
               <li key={rider.id} className="list-none">
                 <Link
                   to={`/users/${rider?.id}`}
-                  className="w-full px-3 py-2 text-left hover:bg-gray-100 border-b border-gray-100 last:border-b-0 cursor-pointer"
+                  className="w-full px-3 py-2 text-left hover:bg-[--surface] border-b border-[--line] last:border-b-0 cursor-pointer"
                   onClick={(e) => {
                     e.preventDefault();
                     if (rider?.id) {
@@ -188,10 +188,10 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
                     }
                   }}
                 >
-                  <strong className="block text-sm font-medium text-gray-900">
+                  <strong className="block text-sm font-medium text-[--ink]">
                     {rider?.name || 'Unnamed Rider'}
                   </strong>
-                  <span className="block text-xs text-gray-600">
+                  <span className="block text-xs text-[--muted]">
                     {rider?.phoneNumber}
                   </span>
                 </Link>
@@ -206,7 +206,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
   if (isCustomer) {
     return (
       <p
-        className={`text-sm text-black px-4 py-2 rounded-md ${getStatusBackgroundColor(activeAssignment?.status)}`}
+        className={`text-sm text-[--ink] px-4 py-2 rounded-md ${getStatusBackgroundColor(activeAssignment?.status)}`}
       >
         {renderAssignmentStatus()}
       </p>
@@ -220,7 +220,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
         type="button"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         disabled={isAssigning}
-        className={`text-sm text-black px-4 py-2 cursor-pointer rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${getStatusBackgroundColor(activeAssignment?.status)}`}
+        className={`text-sm text-[--ink] px-4 py-2 cursor-pointer rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${getStatusBackgroundColor(activeAssignment?.status)}`}
         aria-label="Assign rider to order"
         aria-expanded={isDropdownOpen}
         aria-haspopup="true"
