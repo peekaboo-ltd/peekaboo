@@ -7,7 +7,6 @@ import Button from '@/components/inputs/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
-  faArrowRight,
   faCheck,
   faRocket,
 } from '@fortawesome/free-solid-svg-icons';

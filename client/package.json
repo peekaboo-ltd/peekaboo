@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm i && vite build",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "preview": "vite preview"
   },

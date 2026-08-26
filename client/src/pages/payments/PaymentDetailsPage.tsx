@@ -18,7 +18,6 @@ import {
   faHashtag,
   faMoneyBillWave,
   faPhone,
-  faReceipt,
   faTruckFast,
   faUser,
   faUserGear,
@@ -33,14 +32,6 @@ import {
   InternalSectionCard,
   InternalStatCard,
 } from '@/components/layout/InternalPage';
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.08 },
-  },
-};
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 14 },
