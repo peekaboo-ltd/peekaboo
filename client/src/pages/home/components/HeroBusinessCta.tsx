@@ -1,49 +1,46 @@
-import { ArrowRight, PackagePlus, Route } from 'lucide-react';
-import Button from '@/components/inputs/Button';
+import { ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface HeroBusinessCtaProps {
   isActive: boolean;
+  isLoading: boolean;
   accountLabel: string;
+  primaryLabel: string;
   tryQuickDeliveryLabel: string;
-  onScrollToForm: () => void;
   onContactClick?: () => void;
   onTrackClick?: () => void;
 }
 
 const HeroBusinessCta = ({
   isActive,
+  isLoading,
   accountLabel,
+  primaryLabel,
   tryQuickDeliveryLabel,
-  onScrollToForm,
   onContactClick,
   onTrackClick,
 }: HeroBusinessCtaProps) => (
-  <nav className="flex flex-wrap gap-3 pt-1">
+  <nav className="flex flex-wrap items-center gap-6 pt-2" aria-label="Delivery actions">
     <Button
-      type="button"
-      primary
-      onClick={onScrollToForm}
-      className="rounded-md font-medium"
+      form="hero-delivery-form"
+      type="submit"
+      size="lg"
+      disabled={isLoading}
     >
-      <PackagePlus className="h-3.5 w-3.5" aria-hidden="true" />
-      {isActive ? tryQuickDeliveryLabel : 'Book delivery'}
+      {isLoading
+        ? 'Booking…'
+        : isActive
+          ? tryQuickDeliveryLabel
+          : primaryLabel}
     </Button>
     <Button
       type="button"
+      variant="link"
+      className="link-arrow"
       onClick={isActive ? onContactClick : onTrackClick}
-      className={`rounded-md border-border bg-[var(--peekaboo-surface)] text-foreground`}
     >
-      {isActive ? (
-        <>
-          {accountLabel}
-          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-        </>
-      ) : (
-        <>
-          <Route className="h-3.5 w-3.5" aria-hidden="true" />
-          Track package
-        </>
-      )}
+      {isActive ? accountLabel : 'Track an order'}
+      <ArrowRight data-slot="icon" className="size-4" aria-hidden="true" />
     </Button>
   </nav>
 );

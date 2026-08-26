@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import HeroScene from '@/components/three/HeroScene';
 import peekabooLogo from '/peekaboo.png';
 
 interface AuthPageShellProps {
@@ -85,11 +84,8 @@ export const AuthNotice = ({ children, tone = 'default' }: AuthNoticeProps) => {
 };
 
 export const AuthPageShell = ({ children }: AuthPageShellProps) => (
-  <main className="relative min-h-screen overflow-x-hidden bg-[var(--peekaboo-warm)] text-foreground">
-    <div className="absolute inset-0">
-      <HeroScene />
-    </div>
-    <section className="relative z-10 flex min-h-screen flex-col px-5 py-9">
+  <main className="min-h-screen overflow-x-hidden bg-[--paper] text-[--ink]">
+    <section className="flex min-h-screen flex-col px-5 py-9">
       <header className="flex justify-center">
         <Link
           to="/"
