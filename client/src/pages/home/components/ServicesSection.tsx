@@ -39,21 +39,21 @@ const services = [
 const toneClasses = {
   black: {
     card: 'group border-transparent bg-[#0a0a0a] text-white transition-all duration-300 hover:shadow-[0_18px_50px_-32px_rgba(10,10,10,0.7)]',
-    chip: 'bg-[#edb100] text-[#0a0a0a]',
+    chip: 'bg-[var(--ink)] text-[#0a0a0a]',
     body: 'text-white/65',
     arrow: 'bg-white/[0.06] text-white transition-all duration-300 group-hover:bg-white/10 group-hover:scale-110',
   },
   yellow: {
-    card: 'group border-transparent bg-[#edb100] text-[#0a0a0a] transition-all duration-300 hover:shadow-[0_18px_50px_-32px_rgba(10,10,10,0.28)]',
+    card: 'group border-transparent bg-[var(--ink)] text-[#0a0a0a] transition-all duration-300 hover:shadow-[0_18px_50px_-32px_rgba(10,10,10,0.28)]',
     chip: 'bg-[#0a0a0a] text-white',
     body: 'text-black/60',
     arrow: 'bg-[#0a0a0a] text-white transition-all duration-300 group-hover:bg-black/80 group-hover:scale-110',
   },
   white: {
     card: 'home-card-interactive group bg-[var(--peekaboo-surface)] text-foreground',
-    chip: 'bg-[#fff4be] text-[#6b4d00]',
+    chip: 'bg-[var(--surface)] text-[#6b4d00]',
     body: 'text-muted-foreground',
-    arrow: 'bg-[var(--peekaboo-surface)] text-foreground transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110',
+    arrow: 'bg-[var(--peekaboo-surface)] text-foreground transition-all duration-300 group-hover:bg-[var(--ink)] group-hover:scale-110',
   },
 } as const;
 

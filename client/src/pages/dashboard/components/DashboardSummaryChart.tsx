@@ -102,15 +102,15 @@ const DashboardSummaryChart = ({
       <motion.div variants={itemVariants}>
         <header className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
-            <p className="font-ui text-[11px] font-medium uppercase text-slate-500">
+            <p className="text-[11px] font-medium uppercase text-slate-500">
               Primary insight
             </p>
             {data.length > 0 ? (
-              <p className="font-ui mt-2 text-[2.25rem] font-semibold leading-none text-[color:var(--ops-ink)] sm:text-[3rem]">
+              <p className="mt-2 text-[2.25rem] font-medium leading-none text-[color:var(--ops-ink)] sm:text-[3rem]">
                 {formattedTotal}
               </p>
             ) : (
-              <p className="font-ui mt-2 text-[2.25rem] font-semibold leading-none text-slate-300 sm:text-[3rem]">
+              <p className="mt-2 text-[2.25rem] font-medium leading-none text-slate-300 sm:text-[3rem]">
                 —
               </p>
             )}
@@ -226,10 +226,10 @@ const DashboardSummaryChart = ({
                 key={item.label}
                 className="rounded-md border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-4 py-3"
               >
-                <p className="font-ui text-[11px] font-medium uppercase text-slate-500">
+                <p className="text-[11px] font-medium uppercase text-slate-500">
                   {item.label}
                 </p>
-                <p className="font-ui mt-2 text-2xl font-semibold text-[color:var(--ops-ink)]">
+                <p className="mt-2 text-2xl font-medium text-[color:var(--ops-ink)]">
                   {formatNumbers(item.value)}
                 </p>
               </article>

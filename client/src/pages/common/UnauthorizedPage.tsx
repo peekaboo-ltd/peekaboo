@@ -19,10 +19,6 @@ const UnauthorizedPage = () => {
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-slate-50 px-4 py-12 sm:px-6 lg:px-10">
       <span
-        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.2),_transparent_70%)]"
-        aria-hidden="true"
-      />
-      <span
         className="pointer-events-none absolute -left-24 top-20 h-72 w-72 rounded-full bg-primary-200/20 blur-3xl"
         aria-hidden="true"
       />
@@ -67,7 +63,7 @@ const UnauthorizedPage = () => {
             </article>
 
             <article className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl font-semibold text-slate-900">
+              <h1 className="text-4xl sm:text-5xl font-medium text-slate-900">
                 Access not allowed.
               </h1>
               <p className="text-base sm:text-lg text-slate-600 max-w-md mx-auto">

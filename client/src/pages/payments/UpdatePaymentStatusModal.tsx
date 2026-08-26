@@ -56,7 +56,7 @@ const UpdatePaymentStatusModal = () => {
           <DialogTitle>Update Payment Status</DialogTitle>
           <DialogDescription>
             Update the status for payment{' '}
-            <span className="font-semibold">
+            <span className="font-medium">
               {selectedPayment?.internalReferenceId?.slice(0, 8)}...
             </span>{' '}
             ({formatCurrency(selectedPayment?.amount, selectedPayment?.currency)})

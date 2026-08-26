@@ -1262,13 +1262,13 @@ const BillingPaymentsPage = () => {
             {selectedOrganizationDue ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-3 rounded border border-slate-200 bg-slate-50 p-4 text-[13px] text-slate-700 md:grid-cols-2">
-                  <p className="text-[12px] font-semibold text-black">
+                  <p className="text-[12px] font-medium text-black">
                     Invoice:{" "}
                     <span className="font-normal text-[12px] text-slate-900">
                       {resolveInvoiceIdentifier(selectedOrganizationDue)}
                     </span>
                   </p>
-                  <p className="text-[12px] font-semibold text-black">
+                  <p className="text-[12px] font-medium text-black">
                     Billing period:{" "}
                     <span className="font-normal text-[12px] text-slate-900">
                       {formatBillingPeriodRange(
@@ -1279,13 +1279,13 @@ const BillingPaymentsPage = () => {
                       )}
                     </span>
                   </p>
-                  <p className="text-[12px] font-semibold text-black">
+                  <p className="text-[12px] font-medium text-black">
                     Deliveries so far:{" "}
                     <span className="font-normal text-[12px] text-slate-900">
                       {currentTotalOrders}
                     </span>
                   </p>
-                  <p className="text-[12px] font-semibold text-black">
+                  <p className="text-[12px] font-medium text-black">
                     Outstanding across unpaid billings:{" "}
                     <span className="font-normal text-[12px] text-slate-900">
                       {formatCurrency(
@@ -1298,7 +1298,7 @@ const BillingPaymentsPage = () => {
 
                 <div className="space-y-2">
                   <div>
-                    <h3 className="text-[13px] font-semibold text-slate-900">
+                    <h3 className="text-[13px] font-medium text-slate-900">
                       Billing Breakdown
                     </h3>
                     <p className="text-[13px] text-slate-600">
@@ -1349,7 +1349,7 @@ const BillingPaymentsPage = () => {
               noDataMessage="No deliveries found for the selected business."
             />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13px] text-slate-600">
-              <p className="text-[12px] font-semibold text-black">Showing up to 10 deliveries per page.</p>
+              <p className="text-[12px] font-medium text-black">Showing up to 10 deliveries per page.</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -1487,13 +1487,13 @@ const BillingPaymentsPage = () => {
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3 rounded border border-slate-200 bg-slate-50 p-4 text-[13px] text-slate-700 md:grid-cols-2">
-                <p className="text-[12px] font-semibold text-black">
+                <p className="text-[12px] font-medium text-black">
                   Current plan:{" "}
                   <span className="font-normal text-[12px] text-slate-900">
                     {currentPlanName}
                   </span>
                 </p>
-                <p className="text-[12px] font-semibold text-black">
+                <p className="text-[12px] font-medium text-black">
                   Billing period:{" "}
                   <span className="font-normal text-[12px] text-slate-900">
                     {formatBillingPeriodRange(
@@ -1503,13 +1503,13 @@ const BillingPaymentsPage = () => {
                     )}
                   </span>
                 </p>
-                <p className="text-[12px] font-semibold text-black">
+                <p className="text-[12px] font-medium text-black">
                   Deliveries so far:{" "}
                   <span className="font-normal text-[12px] text-slate-900">
                     {currentTotalOrders}
                   </span>
                 </p>
-                <p className="text-[12px] font-semibold text-black">
+                <p className="text-[12px] font-medium text-black">
                   Current estimated amount due:{" "}
                   <span className="font-normal text-[12px] text-slate-900">
                     {formatCurrency(
@@ -1548,7 +1548,7 @@ const BillingPaymentsPage = () => {
 
               <div className="space-y-2">
                 <div>
-                  <h3 className="text-[13px] font-semibold text-slate-900">
+                  <h3 className="text-[13px] font-medium text-slate-900">
                     Billing Breakdown
                   </h3>
                   <p className="text-[13px] text-slate-600">
@@ -1600,7 +1600,7 @@ const BillingPaymentsPage = () => {
               noDataMessage="No deliveries in current billing cycle."
             />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13px] text-slate-600">
-              <p className="text-[12px] font-semibold text-black">Showing up to 10 deliveries per page.</p>
+              <p className="text-[12px] font-medium text-black">Showing up to 10 deliveries per page.</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -1721,25 +1721,25 @@ const BillingPaymentsPage = () => {
       >
         <section className="space-y-4">
           <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-3 text-[13px]">
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Business:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {selectedOrganization?.name || "Not selected"}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Start date:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {reportStartDate || "Not selected"}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               End date:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {reportEndDate || "Not selected"}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Action:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {adminReportAction === "download"
@@ -1785,25 +1785,25 @@ const BillingPaymentsPage = () => {
       >
         <section className="space-y-4">
           <div className="space-y-2 rounded border border-slate-200 bg-slate-50 p-3 text-[13px]">
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Current business plan:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {currentPlanName}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Amount to pay now:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {formatCurrency(currentEstimateAmount, currentBillingCurrency)}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Deliveries so far:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {currentTotalOrders}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Billing period:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {formatBillingPeriodRange(
@@ -1881,19 +1881,19 @@ const BillingPaymentsPage = () => {
       >
         <section className="space-y-4">
           <div className="grid grid-cols-1 gap-3 rounded border border-slate-200 bg-slate-50 p-4 text-[13px] text-slate-700 md:grid-cols-2">
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Invoice:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {resolveInvoiceIdentifier(selectedHistoryBilling)}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Status:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {selectedHistoryBilling?.status || "N/A"}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Paid date:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {selectedHistoryBilling?.paidAt
@@ -1901,7 +1901,7 @@ const BillingPaymentsPage = () => {
                   : "N/A"}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Billing period:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {formatBillingPeriodRange(
@@ -1912,7 +1912,7 @@ const BillingPaymentsPage = () => {
                 )}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Deliveries:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {historyBreakdown?.totalOrders ||
@@ -1920,7 +1920,7 @@ const BillingPaymentsPage = () => {
                   0}
               </span>
             </p>
-            <p className="text-[12px] font-semibold text-black">
+            <p className="text-[12px] font-medium text-black">
               Total amount:{" "}
               <span className="font-normal text-[12px] text-slate-900">
                 {formatCurrency(
@@ -1935,7 +1935,7 @@ const BillingPaymentsPage = () => {
 
           <div className="space-y-2">
             <div>
-              <h3 className="text-[13px] font-semibold text-slate-900">
+              <h3 className="text-[13px] font-medium text-slate-900">
                 Billing Breakdown
               </h3>
               <p className="text-[13px] text-slate-600">

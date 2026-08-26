@@ -108,7 +108,7 @@ const CompleteOnboarding = () => {
             icon={faExclamationTriangle}
             className="text-amber-500 text-4xl mb-4"
           />
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">
+          <h2 className="text-xl font-medium text-slate-900 mb-2">
             {t('completeOnboarding.noToken')}
           </h2>
           <p className="text-slate-600 text-sm mb-6">
@@ -148,7 +148,7 @@ const CompleteOnboarding = () => {
             icon={faExclamationTriangle}
             className="text-red-500 text-4xl mb-4"
           />
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">
+          <h2 className="text-xl font-medium text-slate-900 mb-2">
             {t('completeOnboarding.invalidToken')}
           </h2>
           <p className="text-slate-600 text-sm mb-6">
@@ -183,7 +183,7 @@ const CompleteOnboarding = () => {
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900">
+              <h1 className="text-xl font-medium text-slate-900">
                 {t('completeOnboarding.title')}
               </h1>
               <p className="text-sm text-slate-500">
@@ -206,7 +206,7 @@ const CompleteOnboarding = () => {
                   icon={faUser}
                   className="text-slate-400 text-sm"
                 />
-                <h3 className="text-sm font-semibold text-slate-900 uppercase r">
+                <h3 className="text-sm font-medium text-slate-900 uppercase r">
                   {t('completeOnboarding.adminSection')}
                 </h3>
               </div>
@@ -250,7 +250,7 @@ const CompleteOnboarding = () => {
                   icon={faLock}
                   className="text-slate-400 text-sm"
                 />
-                <h3 className="text-sm font-semibold text-slate-900 uppercase r">
+                <h3 className="text-sm font-medium text-slate-900 uppercase r">
                   {t('completeOnboarding.passwordSection')}
                 </h3>
               </div>
@@ -311,7 +311,7 @@ const CompleteOnboarding = () => {
                   icon={faPhone}
                   className="text-slate-400 text-sm"
                 />
-                <h3 className="text-sm font-semibold text-slate-900 uppercase r">
+                <h3 className="text-sm font-medium text-slate-900 uppercase r">
                   {t('completeOnboarding.orgSection')}
                 </h3>
               </div>

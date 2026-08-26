@@ -286,7 +286,7 @@ const PaymentsPage = () => {
       <header className="flex flex-col gap-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-bold text-black">Payments</h1>
+            <h1 className="text-2xl font-medium text-black">Payments</h1>
             <p className="text-sm text-muted-foreground">
               View and manage all payments across the platform.
             </p>
@@ -392,7 +392,7 @@ const PaymentsPage = () => {
                 <p className="text-xs uppercase text-slate-500">
                   {card.label}
                 </p>
-                <p className="text-lg font-semibold text-slate-900 mt-1">
+                <p className="text-lg font-medium text-slate-900 mt-1">
                   {card.value}
                 </p>
                 {card.subtitle && (

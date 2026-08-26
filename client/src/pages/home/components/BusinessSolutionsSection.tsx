@@ -63,7 +63,7 @@ const BusinessSolutionsSection = ({
           return (
             <li key={feature.title}>
               <article className="home-card-interactive group h-full rounded-md bg-[var(--peekaboo-surface)] p-5 text-foreground">
-                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#0a0a0a] text-[#edb100] transition-all duration-300 group-hover:scale-110 group-hover:bg-[#edb100] group-hover:text-[#0a0a0a]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#0a0a0a] text-[var(--ink)] transition-all duration-300 group-hover:scale-110 group-hover:bg-[var(--ink)] group-hover:text-[#0a0a0a]">
                   <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>
                 <h3 className="mt-4 text-[14px] font-medium">

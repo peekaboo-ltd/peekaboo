@@ -35,7 +35,7 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
                 className={`flex h-9 w-9 items-center justify-center rounded-md transition-all duration-200 ${
                   action.accent
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground'
+                    : 'bg-[--surface] text-[--ink]'
                 }`}
               >
                 <Icon className="h-4 w-4 transition-transform duration-200 group-hover:scale-105" aria-hidden="true" />

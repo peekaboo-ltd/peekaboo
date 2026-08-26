@@ -389,11 +389,11 @@ const ImportBatch = () => {
         <motion.article
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100 p-4"
+          className="rounded-[--radius-card] border border-[--line] bg-[--surface] p-4"
         >
           <header className="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <h3 className="text-sm font-semibold uppercase text-slate-900">
+              <h3 className="text-sm font-medium uppercase text-slate-900">
                 Template Upload
               </h3>
               <p className="text-xs text-slate-600 mt-1">
@@ -425,7 +425,7 @@ const ImportBatch = () => {
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h4 className="text-sm font-semibold text-red-800">
+                <h4 className="text-sm font-medium text-red-800">
                   {preview.errors.length} Validation Issue{preview.errors.length !== 1 ? 's' : ''} Found
                 </h4>
                 <p className="text-xs text-red-700 mt-1">
@@ -466,7 +466,7 @@ const ImportBatch = () => {
             animate={{ opacity: 1, y: 0 }}
             className="rounded-xl border border-amber-200 bg-amber-50 p-4"
           >
-            <h4 className="text-sm font-semibold text-amber-800">
+            <h4 className="text-sm font-medium text-amber-800">
               ⚠️ {missingLocationCount} order{missingLocationCount !== 1 ? 's' : ''} missing delivery location
             </h4>
             <p className="text-xs text-amber-700 mt-1">
@@ -483,7 +483,7 @@ const ImportBatch = () => {
             className="rounded-xl border border-slate-200 bg-white"
           >
             <header className="px-4 py-3 border-b bg-slate-50 rounded-t-xl flex justify-between items-center">
-              <h4 className="text-sm font-semibold text-slate-900">
+              <h4 className="text-sm font-medium text-slate-900">
                 Preview ({preview.rows.length} rows)
               </h4>
               <Badge variant={preview.errors.length ? 'destructive' : 'secondary'}>
@@ -543,7 +543,7 @@ const ImportBatch = () => {
           animate={{ opacity: 1, y: 0 }}
           className="rounded-xl border border-slate-200 bg-white p-4"
         >
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Batch Details (Optional)</h3>
+          <h3 className="text-sm font-medium text-slate-900 mb-3">Batch Details (Optional)</h3>
           <Input
             label="Batch Name"
             placeholder="e.g. Morning Kigali Drop-offs"

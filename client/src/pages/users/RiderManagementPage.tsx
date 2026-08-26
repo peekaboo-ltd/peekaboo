@@ -576,7 +576,7 @@ const RiderManagementPage = () => {
         accessorKey: "leftValue",
         cell: ({ row }) => {
           return (
-            <p className={`text-[11px] ${row.original.winner === 'left' ? 'font-semibold text-green-700' : 'text-red-700'}`}>
+            <p className={`text-[11px] ${row.original.winner === 'left' ? 'font-medium text-green-700' : 'text-red-700'}`}>
               {formatComparisonValue(row.original.label, row.original.leftValue)}
             </p>
           );
@@ -587,7 +587,7 @@ const RiderManagementPage = () => {
         accessorKey: "rightValue",
         cell: ({ row }) => {
           return (
-            <p className={`text-[11px] ${row.original.winner === 'right' ? 'font-semibold text-green-700' : ''}`}>
+            <p className={`text-[11px] ${row.original.winner === 'right' ? 'font-medium text-green-700' : ''}`}>
               {formatComparisonValue(row.original.label, row.original.rightValue)}
             </p>
           );
@@ -608,7 +608,7 @@ const RiderManagementPage = () => {
   return (
     <main className="w-full flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-black">Rider Management</h1>
+        <h1 className="text-2xl font-medium text-black">Rider Management</h1>
         <p className="text-sm text-muted-foreground">
           Admin dashboard for rider performance, ranking, and reliability tracking.
         </p>
@@ -617,19 +617,19 @@ const RiderManagementPage = () => {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <article className="bg-white border border-slate-200 rounded-xl p-4">
           <p className="text-xs uppercase text-slate-500">Riders (filtered)</p>
-          <p className="text-lg font-semibold text-slate-900 mt-1">
+          <p className="text-lg font-medium text-slate-900 mt-1">
             {formatNumbers(totalCount) || '0'}
           </p>
         </article>
         <article className="bg-white border border-slate-200 rounded-xl p-4">
           <p className="text-xs uppercase text-slate-500">Deliveries (page)</p>
-          <p className="text-lg font-semibold text-slate-900 mt-1">
+          <p className="text-lg font-medium text-slate-900 mt-1">
             {formatNumbers(visibleTotals.deliveries) || '0'}
           </p>
         </article>
         <article className="bg-white border border-slate-200 rounded-xl p-4">
           <p className="text-xs uppercase text-slate-500">Earnings (page)</p>
-          <p className="text-lg font-semibold text-slate-900 mt-1">
+          <p className="text-lg font-medium text-slate-900 mt-1">
             {formatCurrency(visibleTotals.earnings, 'RWF') || 'RWF 0'}
           </p>
         </article>
@@ -752,7 +752,7 @@ const RiderManagementPage = () => {
 
       <section className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-4">
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-slate-900">Daily Attendance</h2>
+          <h2 className="text-lg font-medium text-slate-900">Daily Attendance</h2>
           <p className="text-xs text-slate-500">
             View all raw proof events for riders by date and name.
           </p>
@@ -791,7 +791,7 @@ const RiderManagementPage = () => {
 
       <section className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-4">
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-slate-900">Problem Reports</h2>
+          <h2 className="text-lg font-medium text-slate-900">Problem Reports</h2>
           <p className="text-xs text-slate-500">
             View rider-submitted problem evidence separately from attendance logs.
           </p>
@@ -922,7 +922,7 @@ const RiderManagementPage = () => {
 
       <section className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-4">
         <header>
-          <h2 className="text-lg font-semibold text-slate-900">Compare Two Riders</h2>
+          <h2 className="text-lg font-medium text-slate-900">Compare Two Riders</h2>
           <p className="text-xs text-slate-500">
             Green means winner on that metric, red means lower performance for that metric.
           </p>
@@ -998,13 +998,13 @@ const RiderManagementPage = () => {
                 <p className="text-xs text-slate-500 uppercase ">
                   {leftRider.riderName || 'Rider A'} Wins
                 </p>
-                <p className="text-xl font-semibold text-slate-900">
+                <p className="text-xl font-medium text-slate-900">
                   {comparisonSummary?.leftWins ?? 0}
                 </p>
               </article>
               <article className="border border-slate-200 rounded-lg p-3">
                 <p className="text-xs text-slate-500 uppercase ">Result</p>
-                <p className="text-sm font-semibold mt-1">
+                <p className="text-sm font-medium mt-1">
                   {comparisonSummary?.leader === 'tie' && (
                     <span className="text-slate-700">Balanced comparison</span>
                   )}
@@ -1029,7 +1029,7 @@ const RiderManagementPage = () => {
                 <p className="text-xs text-slate-500 uppercase ">
                   {rightRider.riderName || 'Rider B'} Wins
                 </p>
-                <p className="text-xl font-semibold text-slate-900">
+                <p className="text-xl font-medium text-slate-900">
                   {comparisonSummary?.rightWins ?? 0}
                 </p>
                 <p className="text-xs text-slate-500 mt-1">Ties: {comparisonSummary?.ties ?? 0}</p>

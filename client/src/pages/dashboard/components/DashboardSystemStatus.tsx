@@ -46,7 +46,7 @@ const DashboardSystemStatus = ({
               }`}
             />
           </span>
-          <span className="text-xs font-semibold uppercase text-[color:rgba(37,52,63,0.55)]">
+          <span className="text-xs font-medium uppercase text-[color:rgba(37,52,63,0.55)]">
             {allOperational ? 'All Systems Operational' : 'Partial Disruption'}
           </span>
         </div>

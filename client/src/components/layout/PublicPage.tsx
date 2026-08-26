@@ -76,7 +76,7 @@ export const PublicPageHero = ({
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="mt-2 max-w-3xl font-['Space_Grotesk'] text-[1.75rem] font-semibold leading-[1.08] tracking-[-0.035em] text-[var(--peekaboo-dark)] sm:text-[2.15rem]">
+        <h1 className="mt-2 max-w-3xl text-[1.75rem] font-medium leading-[1.08] tracking-[-0.035em] text-[var(--peekaboo-dark)] sm:text-[2.15rem]">
           {title}
         </h1>
         {description ? (
@@ -117,7 +117,7 @@ export const PublicSectionCard = ({
               </p>
             ) : null}
             {title ? (
-              <h2 className="mt-1 font-['Space_Grotesk'] text-lg font-semibold tracking-[-0.02em] text-[var(--peekaboo-dark)]">
+              <h2 className="mt-1 text-lg font-medium tracking-[-0.02em] text-[var(--peekaboo-dark)]">
                 {title}
               </h2>
             ) : null}
@@ -194,7 +194,7 @@ export const OrderStageRail = ({ currentStage }: OrderStageRailProps) => {
                   className={cn(
                     'absolute right-1/2 top-1.5 h-px w-full',
                     isReached
-                      ? 'bg-[var(--peekaboo-yellow)]'
+                      ? 'bg-[var(--ink)]'
                       : 'bg-[var(--peekaboo-line)]',
                   )}
                 />
@@ -205,7 +205,7 @@ export const OrderStageRail = ({ currentStage }: OrderStageRailProps) => {
                   className={cn(
                     'h-3 w-3 rounded-full',
                     isReached
-                      ? 'bg-[var(--peekaboo-yellow)]'
+                      ? 'bg-[var(--ink)]'
                       : 'bg-[var(--peekaboo-line)]',
                   )}
                 />

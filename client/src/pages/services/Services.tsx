@@ -21,7 +21,7 @@ const Services = () => {
       <section className="relative w-full pt-28 pb-20 lg:pt-36 lg:pb-28 bg-primary-900 overflow-hidden">
         {/* Decorative background blobs */}
         <figure
-          className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-secondary-200/10 blur-3xl"
+          className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-[--surface] blur-3xl"
           aria-hidden="true"
         />
         <figure
@@ -36,10 +36,10 @@ const Services = () => {
           variants={containerVariants}
         >
           <motion.header variants={fadeInUp}>
-            <span className="inline-block text-[11px] uppercase text-secondary-400 font-semibold mb-4">
+            <span className="inline-block text-[11px] uppercase text-[--muted] font-medium mb-4">
               Pricing
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-medium text-white leading-tight mb-4">
               Business Delivery Plans
             </h1>
             <p className="text-[13px] text-primary-300 max-w-3xl mx-auto leading-relaxed">
@@ -76,7 +76,7 @@ const Services = () => {
             <span className="inline-block text-[11px] uppercase font-medium text-primary-400 mb-6">
               Get started
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
+            <h2 className="text-3xl sm:text-4xl font-medium text-white leading-tight mb-4">
               Ready to streamline your deliveries?
             </h2>
             <p className="text-[13px] text-primary-300 max-w-xl mx-auto mb-8 leading-relaxed">

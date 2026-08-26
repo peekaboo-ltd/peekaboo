@@ -10,9 +10,9 @@ interface HeroTrustIndicatorsProps {
 }
 
 const AVATARS = [
-  { initials: 'JM', className: 'bg-[#edb100] text-[#0a0a0a]' },
+  { initials: 'JM', className: 'bg-[var(--ink)] text-[#0a0a0a]' },
   { initials: 'AK', className: 'bg-[#0a0a0a] text-white' },
-  { initials: 'MP', className: 'bg-[#fff4be] text-[#0a0a0a]' },
+  { initials: 'MP', className: 'bg-[var(--surface)] text-[#0a0a0a]' },
   { initials: 'CN', className: 'bg-[#3a3a3a] text-white' },
 ];
 

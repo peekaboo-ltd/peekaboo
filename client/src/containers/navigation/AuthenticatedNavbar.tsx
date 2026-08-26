@@ -215,7 +215,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                         </header>
 
                         <section className="py-2">
-                            <header className="px-3 py-3 border-b border-gray-100 bg-gradient-to-r from-primary-900/5 to-transparent">
+                            <header className="border-b border-[--line] bg-[--surface] px-3 py-3">
                                 <div className="flex items-center gap-2.5">
                                     <Avatar className="w-10 h-10 rounded-full border border-slate-200">
                                         <AvatarImage src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined} alt="" />

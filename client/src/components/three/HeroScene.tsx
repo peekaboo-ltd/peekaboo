@@ -12,9 +12,9 @@ const palette = {
   structure: '#1f1f1f',
   ink: '#0a0a0a',
   muted: '#6b7280',
-  yellow: '#edb100',
-  yellowBright: '#ffc400',
-  yellowDark: '#d49e00',
+  yellow: 'var(--ink)',
+  yellowBright: 'var(--ink)',
+  yellowDark: 'var(--surface-hover)',
   panel: '#fbfaf6',
 };
 

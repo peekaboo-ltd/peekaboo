@@ -86,7 +86,7 @@ export const useBusinessPlansColumns = ({
         row.original.isDefault ? (
           <FontAwesomeIcon
             icon={faCircleCheck}
-            className="text-secondary-600 cursor-pointer"
+            className="text-[--muted] cursor-pointer"
           />
         ) : (
           <span className="text-slate-400 text-[13px]">—</span>

@@ -159,10 +159,10 @@ const UserManagementOnboarding = () => {
         </motion.div>
 
         <motion.header variants={itemVariants} className="flex flex-col gap-3">
-          <span className="text-sm font-semibold text-black">
+          <span className="text-sm font-medium text-black">
             {t('onboarding.step', { step: 3 })}
           </span>
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
+          <h1 className="text-3xl sm:text-4xl font-medium text-slate-900">
             {t('onboarding.users.title')}
           </h1>
           <p className="text-slate-600 max-w-3xl">
@@ -185,7 +185,7 @@ const UserManagementOnboarding = () => {
                 <FontAwesomeIcon icon={faUsers} className="text-black" />
               </motion.span>
               <div>
-                <h2 className="text-lg font-semibold">
+                <h2 className="text-lg font-medium">
                   {t('onboarding.users.detailsTitle')}
                 </h2>
                 <p className="text-sm text-slate-500">
@@ -272,7 +272,7 @@ const UserManagementOnboarding = () => {
             className="border border-slate-200 bg-white p-6 sm:p-8 flex flex-col gap-6"
           >
             <header>
-              <h3 className="text-xl font-semibold text-slate-900">
+              <h3 className="text-xl font-medium text-slate-900">
                 {t('onboarding.users.nextTitle')}
               </h3>
               <p className="text-sm text-slate-600 mt-2">

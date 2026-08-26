@@ -226,7 +226,7 @@ const CompleteAccount = () => {
         <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
           <Link
             to="/auth/login"
-            className="font-normal text-primary hover:text-secondary-600 underline underline-offset-2"
+            className="font-normal text-primary hover:text-[--muted] underline underline-offset-2"
           >
             Sign in with a different account
           </Link>

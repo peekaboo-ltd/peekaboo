@@ -12,7 +12,7 @@ const RecentActivityCard = ({ activities }: RecentActivityCardProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+          <CardTitle className="text-lg font-medium">Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">No recent activity</p>
@@ -24,7 +24,7 @@ const RecentActivityCard = ({ activities }: RecentActivityCardProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+        <CardTitle className="text-lg font-medium">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">

@@ -14,7 +14,7 @@ const HeroScrollIndicator = () => (
       transition={{ duration: 1.5, repeat: Infinity }}
     >
       <motion.span
-        className="block h-1.5 w-1 rounded-full bg-[#edb100]"
+        className="block h-1.5 w-1 rounded-full bg-[var(--ink)]"
         animate={{ y: [0, 8, 0], opacity: [1, 0.4, 1] }}
         transition={{ duration: 1.5, repeat: Infinity }}
       />

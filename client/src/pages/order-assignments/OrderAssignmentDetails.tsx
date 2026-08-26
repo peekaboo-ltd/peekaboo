@@ -107,7 +107,7 @@ const OrderAssignmentDetails = () => {
       label: 'Assignment Status',
       value: orderAssignment?.status || '—',
       icon: faCircleCheck,
-      iconBg: 'bg-secondary-50 text-secondary-800',
+      iconBg: 'bg-[--surface] text-[--muted]',
     },
     {
       label: 'Order Status',
@@ -119,7 +119,7 @@ const OrderAssignmentDetails = () => {
       label: 'Last Updated',
       value: formatDateLabel(orderAssignment?.updatedAt),
       icon: faClockRotateLeft,
-      iconBg: 'bg-secondary-50 text-secondary-800',
+      iconBg: 'bg-[--surface] text-[--muted]',
     },
   ];
 

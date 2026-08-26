@@ -379,7 +379,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <p
               className={`${
                 label ? 'flex' : 'hidden'
-              } text-secondary text-[13px]`}
+              } text-[--muted] text-[13px]`}
             >
               {label}
             </p>
@@ -418,7 +418,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 disabled={readOnly}
                 className={`!bg-primary !text-white hover:!bg-primary hover:!text-white !shadow-sm py-[5px] w-full text-[13px] text-center max-[800px]:!text-[13px] px-8 rounded-md cursor-pointer ease-in-out duration-400 hover:scale-[1.005] ${
                   readOnly &&
-                  '!bg-secondary hover:!bg-secondary !cursor-not-allowed'
+                  '!bg-[--surface] hover:!bg-[--surface] !cursor-not-allowed'
                 } ${className}`}
               >
                 {placeholder || 'Choose file'}
@@ -524,7 +524,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               <Link
                 to={'#'}
                 onClick={prefixIconHandler}
-                className="text-secondary"
+                className="text-[--muted]"
               >
                 {prefixIcon && (
                   <FontAwesomeIcon className="text-current" icon={prefixIcon} />

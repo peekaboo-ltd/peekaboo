@@ -72,7 +72,7 @@ export const AuthCard = ({ title, subtitle, children }: AuthCardProps) => (
 export const AuthNotice = ({ children, tone = 'default' }: AuthNoticeProps) => {
   const toneClassName =
     tone === 'success'
-      ? 'border-secondary-200 bg-secondary-50 text-secondary-900'
+      ? 'border-[--line] bg-[--surface] text-[--muted]'
       : tone === 'error'
         ? 'border-destructive/30 bg-destructive/10 text-destructive'
         : 'border-border bg-accent text-foreground';
@@ -89,9 +89,6 @@ export const AuthPageShell = ({ children }: AuthPageShellProps) => (
     <div className="absolute inset-0">
       <HeroScene />
     </div>
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--secondary)_12%,transparent)_1px,transparent_1px)] [background-size:44px_44px]" />
-    <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--peekaboo-warm)_42%,transparent)_0%,color-mix(in_oklab,var(--peekaboo-warm)_72%,transparent)_46%,color-mix(in_oklab,var(--peekaboo-warm)_94%,transparent)_100%)]" />
-
     <section className="relative z-10 flex min-h-screen flex-col px-5 py-9">
       <header className="flex justify-center">
         <Link

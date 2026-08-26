@@ -171,26 +171,26 @@ const Statistics = () => {
       >
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-medium uppercase text-[#edb100]">
+            <figcaption className="text-[11px] font-medium uppercase text-[var(--ink)]">
               Deliveries today
             </figcaption>
-            <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
+            <p className="text-[40px] font-medium leading-[1.02] text-white tabular-nums">
               {stats.deliveriesToday.toLocaleString()}
             </p>
           </figure>
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-medium uppercase text-[#edb100]">
+            <figcaption className="text-[11px] font-medium uppercase text-[var(--ink)]">
               Active riders
             </figcaption>
-            <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
+            <p className="text-[40px] font-medium leading-[1.02] text-white tabular-nums">
               {stats.activeRiders.toLocaleString()}
             </p>
           </figure>
           <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-medium uppercase text-[#edb100]">
+            <figcaption className="text-[11px] font-medium uppercase text-[var(--ink)]">
               Businesses served
             </figcaption>
-            <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
+            <p className="text-[40px] font-medium leading-[1.02] text-white tabular-nums">
               {stats.businessPartners.toLocaleString()}
             </p>
           </figure>
@@ -222,17 +222,17 @@ const About = () => {
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
           <motion.p
             variants={itemVariants}
-            className="text-[11px] font-medium uppercase text-[#edb100] mb-4"
+            className="text-[11px] font-medium uppercase text-[var(--ink)] mb-4"
           >
             About Peekaboo
           </motion.p>
           <motion.h1
             variants={itemVariants}
-            className="text-[32px] font-extrabold leading-[1.02] text-white sm:text-[42px] lg:text-[52px] mb-5"
+            className="text-[32px] font-medium leading-[1.02] text-white sm:text-[42px] lg:text-[52px] mb-5"
           >
             We move what matters
             <br />
-            <span className="text-[#edb100]">across Kigali.</span>
+            <span className="text-[var(--ink)]">across Kigali.</span>
           </motion.h1>
           <motion.p
             variants={itemVariants}
@@ -258,7 +258,7 @@ const About = () => {
               <p className="text-[11px] font-medium uppercase text-[#6b6f76] mb-4">
                 Our Story
               </p>
-              <h2 className="text-[24px] font-extrabold leading-[1.02] text-[#0a0a0a] sm:text-[30px] mb-6">
+              <h2 className="text-[24px] font-medium leading-[1.02] text-[#0a0a0a] sm:text-[30px] mb-6">
                 Built from the streets of{' '}
                 <span className="text-[#6b6f76]">Kigali.</span>
               </h2>
@@ -290,7 +290,7 @@ const About = () => {
                 <ol className="space-y-10">
                   {milestones.map((m) => (
                     <li key={m.year} className="relative">
-                      <mark className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-[#edb100] ring-4 ring-[#f7f6f1] bg-clip-padding" />
+                      <mark className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-[var(--ink)] ring-4 ring-[#f7f6f1] bg-clip-padding" />
                       <time className="text-[11px] font-medium uppercase text-[#6b6f76] mb-1 block">
                         {m.year}
                       </time>
@@ -320,7 +320,7 @@ const About = () => {
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
           <motion.p
             variants={fadeInUp}
-            className="text-[11px] font-medium uppercase text-[#edb100] mb-10 text-center"
+            className="text-[11px] font-medium uppercase text-[var(--ink)] mb-10 text-center"
           >
             What drives us
           </motion.p>
@@ -329,10 +329,10 @@ const About = () => {
               variants={scaleIn}
               className="rounded-[18px] border border-white/10 bg-white/[0.03] p-6 lg:p-8"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[var(--ink)] text-[#0a0a0a] mb-4">
                 <Target className="h-4 w-4" aria-hidden="true" />
               </span>
-              <h3 className="text-[11px] font-medium uppercase text-[#edb100] mb-3">
+              <h3 className="text-[11px] font-medium uppercase text-[var(--ink)] mb-3">
                 Mission
               </h3>
               <p className="text-[18px] font-medium leading-[1.2] text-white sm:text-[20px]">
@@ -344,10 +344,10 @@ const About = () => {
               variants={scaleIn}
               className="rounded-[18px] border border-white/10 bg-white/[0.03] p-6 lg:p-8"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[var(--ink)] text-[#0a0a0a] mb-4">
                 <Lightbulb className="h-4 w-4" aria-hidden="true" />
               </span>
-              <h3 className="text-[11px] font-medium uppercase text-[#edb100] mb-3">
+              <h3 className="text-[11px] font-medium uppercase text-[var(--ink)] mb-3">
                 Vision
               </h3>
               <p className="text-[18px] font-medium leading-[1.2] text-white sm:text-[20px]">
@@ -371,7 +371,7 @@ const About = () => {
             <p className="text-[11px] font-medium uppercase text-[#6b6f76] mb-4">
               Core Values
             </p>
-            <h2 className="text-[24px] font-extrabold leading-[1.02] text-[#0a0a0a] sm:text-[30px]">
+            <h2 className="text-[24px] font-medium leading-[1.02] text-[#0a0a0a] sm:text-[30px]">
               What we stand{' '}
               <span className="text-[#6b6f76]">for.</span>
             </h2>
@@ -383,7 +383,7 @@ const About = () => {
                 variants={itemVariants}
                 className="group rounded-[18px] border border-[#ececea] bg-white p-5 transition duration-200 hover:-translate-y-px hover:border-[#d9d8d4]"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a] mb-4">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[var(--surface)] text-[#0a0a0a] mb-4">
                   <v.icon className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <h3 className="text-[14px] font-medium text-[#0a0a0a] mb-1">
@@ -414,7 +414,7 @@ const About = () => {
         <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
           <motion.h2
             variants={fadeInUp}
-            className="text-[24px] font-extrabold leading-[1.02] text-white sm:text-[30px] mb-3"
+            className="text-[24px] font-medium leading-[1.02] text-white sm:text-[30px] mb-3"
           >
             Ready to get started?
           </motion.h2>
@@ -427,7 +427,7 @@ const About = () => {
           <motion.nav variants={scaleIn}>
             <Link
               to="/"
-              className="inline-flex items-center gap-2 rounded-full bg-[#edb100] px-6 py-2.5 text-[13px] font-semibold text-[#0a0a0a] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] transition hover:bg-[#d49e00]"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-6 py-2.5 text-[13px] font-medium text-[#0a0a0a] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] transition hover:bg-[var(--surface-hover)]"
             >
               Get Started
             </Link>

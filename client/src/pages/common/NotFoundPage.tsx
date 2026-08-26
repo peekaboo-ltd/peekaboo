@@ -22,10 +22,6 @@ const NotFoundPage = () => {
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-slate-50 px-4 py-12 sm:px-6 lg:px-10">
       <span
-        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,_rgba(95,149,152,0.2),_transparent_70%)]"
-        aria-hidden="true"
-      />
-      <span
         className="pointer-events-none absolute -left-24 top-20 h-72 w-72 rounded-full bg-primary-200/20 blur-3xl"
         aria-hidden="true"
       />
@@ -71,7 +67,7 @@ const NotFoundPage = () => {
               </article>
 
               <article className="space-y-4">
-                <h1 className="text-6xl sm:text-7xl font-semibold text-slate-900">
+                <h1 className="text-6xl sm:text-7xl font-medium text-slate-900">
                   Lost route.
                   <br />
                   Let’s get you back.
@@ -133,7 +129,7 @@ const NotFoundPage = () => {
               <p className="text-xs font-medium uppercase text-slate-400">
                 Quick links
               </p>
-              <h2 className="text-2xl font-semibold text-slate-900">
+              <h2 className="text-2xl font-medium text-slate-900">
                 Keep exploring
               </h2>
               <p className="text-sm text-slate-500">

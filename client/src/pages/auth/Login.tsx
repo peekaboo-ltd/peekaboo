@@ -126,7 +126,7 @@ export const Login = () => {
             />
             <Link
               to="/auth/forgot-password"
-              className="text-sm font-normal text-primary hover:text-secondary-600 underline underline-offset-2"
+              className="text-sm font-normal text-primary hover:text-[--muted] underline underline-offset-2"
             >
               Forgot password?
             </Link>
@@ -146,7 +146,7 @@ export const Login = () => {
           <span>Don&apos;t have an account? </span>
           <Link
             to="/auth/register"
-            className="font-normal text-primary hover:text-secondary-600 underline underline-offset-2"
+            className="font-normal text-primary hover:text-[--muted] underline underline-offset-2"
           >
             Sign up
           </Link>

@@ -34,7 +34,7 @@ export const useRiderManagementColumns = (
         header: "#",
         accessorKey: "rank",
         cell: ({ row }) => (
-          <span className="font-semibold">#{row.original.rank}</span>
+          <span className="font-medium">#{row.original.rank}</span>
         ),
       },
       {

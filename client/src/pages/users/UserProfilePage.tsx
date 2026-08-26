@@ -92,7 +92,7 @@ const UserProfilePage = () => {
       label: 'Active Roles',
       value: roles.length ? roles.length.toString() : '—',
       icon: faIdBadge,
-      iconBg: 'bg-secondary-50 text-secondary-800',
+      iconBg: 'bg-[--surface] text-[--muted]',
     },
     {
       label: 'Orders',
@@ -214,7 +214,7 @@ const UserProfilePage = () => {
                     e.preventDefault();
                     dispatch(setUserDefaultLocationModal(true));
                   }}
-                  className="text-xs font-medium text-secondary-700 hover:underline underline-offset-2 shrink-0"
+                  className="text-xs font-medium text-[--muted] hover:underline underline-offset-2 shrink-0"
                 >
                   {selectedUser?.defaultLocation ? 'Update' : 'Set Location'}
                 </Link>
@@ -236,7 +236,7 @@ const UserProfilePage = () => {
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
-                      <span className="rounded-full border border-secondary-100 bg-secondary-50 px-3 py-1 text-xs font-medium uppercase text-secondary-800">
+                      <span className="rounded-full border border-[--line] bg-[--surface] px-3 py-1 text-xs font-medium uppercase text-[--muted]">
                         {role}
                       </span>
                     </li>
@@ -262,7 +262,7 @@ const UserProfilePage = () => {
                         <p className="text-sm font-medium text-[#25343F]">{org}</p>
                         <p className="text-xs text-slate-500">Active membership</p>
                       </section>
-                      <span className="rounded-full bg-secondary-100 px-2.5 py-1 text-[11px] font-medium uppercase text-secondary-800">
+                      <span className="rounded-full bg-[--surface] px-2.5 py-1 text-[11px] font-medium uppercase text-[--muted]">
                         Active
                       </span>
                     </li>

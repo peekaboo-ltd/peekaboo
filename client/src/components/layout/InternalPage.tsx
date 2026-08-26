@@ -55,7 +55,7 @@ export const InternalPageHeader = ({
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="mt-1 text-2xl font-semibold text-slate-900 sm:text-[28px]">
+        <h1 className="mt-1 text-2xl font-medium text-slate-900 sm:text-[28px]">
           {title}
         </h1>
         {description ? (
@@ -89,7 +89,7 @@ export const InternalSectionCard = ({
               </p>
             ) : null}
             {title ? (
-              <h2 className="mt-1 text-lg font-semibold text-slate-900">{title}</h2>
+              <h2 className="mt-1 text-lg font-medium text-slate-900">{title}</h2>
             ) : null}
             {description ? (
               <p className="mt-1 text-sm text-slate-600">{description}</p>
@@ -119,7 +119,7 @@ export const InternalStatCard = ({
   >
     <div className="min-w-0">
       <p className="text-[11px] uppercase text-slate-500">{label}</p>
-      <p className="mt-2 text-xl font-semibold text-slate-900 break-words">{value}</p>
+      <p className="mt-2 text-xl font-medium text-slate-900 break-words">{value}</p>
     </div>
     {icon ? (
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-[var(--peekaboo-surface)] text-slate-700">

@@ -229,7 +229,7 @@ const ManageOrganizationPage = () => {
         <article className="lg:col-span-2 border border-slate-200 bg-white p-6">
           <header className="mb-6">
             <p className="text-xs uppercase text-slate-500">Organization Details</p>
-            <h2 className="mt-2 text-lg font-semibold text-[#25343F]">Edit Information</h2>
+            <h2 className="mt-2 text-lg font-medium text-[#25343F]">Edit Information</h2>
           </header>
 
           <form onSubmit={onSubmitOrgInfo} className="flex flex-col gap-5">
@@ -380,7 +380,7 @@ const ManageOrganizationPage = () => {
           <article className="border border-slate-200 bg-white p-6">
             <header className="mb-4">
               <p className="text-xs uppercase text-slate-500">Billing</p>
-              <h2 className="mt-2 text-lg font-semibold text-[#25343F]">Business Plan</h2>
+              <h2 className="mt-2 text-lg font-medium text-[#25343F]">Business Plan</h2>
             </header>
 
             {currentBusinessPlan && (
@@ -388,7 +388,7 @@ const ManageOrganizationPage = () => {
                 <FontAwesomeIcon icon={faTag} className="text-slate-700" />
                 <section>
                   <p className="text-xs text-slate-500 uppercase ">Current Plan</p>
-                  <p className="text-sm font-semibold text-[#25343F]">{currentBusinessPlan.name}</p>
+                  <p className="text-sm font-medium text-[#25343F]">{currentBusinessPlan.name}</p>
                   <p className="text-xs text-slate-500">
                     {currentBusinessPlan.isCustomPricing
                       ? 'Custom pricing'

@@ -50,7 +50,7 @@ const LegalPage = () => {
                 to={item.to}
                 className="group flex flex-col gap-1 px-5 py-4 transition-colors hover:bg-slate-50 sm:px-6 sm:py-5"
               >
-                <span className="text-sm font-semibold text-slate-900 group-hover:text-primary-900">
+                <span className="text-sm font-medium text-slate-900 group-hover:text-primary-900">
                   {t(item.titleKey)}
                 </span>
                 <span className="text-sm leading-6 text-slate-600">{t(item.summaryKey)}</span>

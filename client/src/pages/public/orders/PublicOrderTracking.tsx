@@ -190,7 +190,7 @@ const PublicOrderTracking = () => {
               aria-hidden="true"
             />
             <span
-              className="absolute left-5 top-0 w-px bg-[var(--peekaboo-yellow)] transition-all duration-700 motion-reduce:transition-none"
+              className="absolute left-5 top-0 w-px bg-[var(--ink)] transition-all duration-700 motion-reduce:transition-none"
               style={{
                 height:
                   furthestActivityIndex >= 0
@@ -216,7 +216,7 @@ const PublicOrderTracking = () => {
                       isCompleted || isCurrent
                         ? 'border-[var(--peekaboo-dark)] bg-[var(--peekaboo-dark)] text-white'
                         : hasActivity
-                          ? 'border-[var(--peekaboo-line)] bg-[var(--peekaboo-yellow)] text-[var(--peekaboo-dark)]'
+                          ? 'border-[var(--peekaboo-line)] bg-[var(--ink)] text-[var(--peekaboo-dark)]'
                           : 'border-[var(--peekaboo-line)] bg-white text-[var(--peekaboo-muted)]'
                     }`}
                   >
@@ -262,7 +262,7 @@ const PublicOrderTracking = () => {
               aria-hidden="true"
             />
             <span
-              className="absolute top-5 h-px bg-[var(--peekaboo-yellow)] transition-all duration-700 motion-reduce:transition-none"
+              className="absolute top-5 h-px bg-[var(--ink)] transition-all duration-700 motion-reduce:transition-none"
               style={{
                 left: '1.5rem',
                 width:
@@ -290,7 +290,7 @@ const PublicOrderTracking = () => {
                         isCompleted || isCurrent
                           ? 'border-[var(--peekaboo-dark)] bg-[var(--peekaboo-dark)] text-white'
                           : hasActivity
-                            ? 'border-[var(--peekaboo-line)] bg-[var(--peekaboo-yellow)] text-[var(--peekaboo-dark)]'
+                            ? 'border-[var(--peekaboo-line)] bg-[var(--ink)] text-[var(--peekaboo-dark)]'
                             : 'border-[var(--peekaboo-line)] bg-white text-[var(--peekaboo-muted)]'
                       }`}
                     >

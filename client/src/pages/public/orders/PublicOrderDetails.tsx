@@ -409,7 +409,7 @@ const PublicOrderDetails = () => {
                 <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                   Route summary
                 </p>
-                <h3 className="mt-1 font-['Space_Grotesk'] text-base font-semibold text-[var(--peekaboo-dark)]">
+                <h3 className="mt-1 text-base font-medium text-[var(--peekaboo-dark)]">
                   Distance, time, and fee
                 </h3>
               </div>
@@ -431,7 +431,7 @@ const PublicOrderDetails = () => {
                       <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                         Distance
                       </p>
-                      <p className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold text-[var(--peekaboo-dark)]">{distance.toFixed(2)}</p>
+                      <p className="mt-2 text-2xl font-medium text-[var(--peekaboo-dark)]">{distance.toFixed(2)}</p>
                       <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">kilometers</p>
                     </div>
 
@@ -439,7 +439,7 @@ const PublicOrderDetails = () => {
                       <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                         Delivery time
                       </p>
-                      <p className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold text-[var(--peekaboo-dark)]">{renderDeliveryTime()}</p>
+                      <p className="mt-2 text-2xl font-medium text-[var(--peekaboo-dark)]">{renderDeliveryTime()}</p>
                       <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">{deliveryTimeUnit}</p>
                     </div>
 
@@ -452,7 +452,7 @@ const PublicOrderDetails = () => {
                           currentOrder?.finalFee !== undefined &&
                           currentOrder.finalFee > 0) ? (
                         <>
-                          <p className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold text-[var(--peekaboo-dark)]">
+                          <p className="mt-2 text-2xl font-medium text-[var(--peekaboo-dark)]">
                             {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
                           </p>
                           <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">including VAT</p>

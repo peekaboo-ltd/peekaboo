@@ -53,7 +53,7 @@ const VehiclesStatusChart = ({
         <tspan
           x={cx}
           dy="-0.5em"
-          className="text-2xl font-bold fill-foreground"
+          className="text-2xl font-medium fill-foreground"
         >
           {computedUtilization}%
         </tspan>
@@ -117,7 +117,7 @@ const VehiclesStatusChart = ({
                 {entry.payload.translatedName}
               </span>
             </span>
-            <span className="font-semibold text-foreground">
+            <span className="font-medium text-foreground">
               {entry.payload.value}
             </span>
           </li>
@@ -129,7 +129,7 @@ const VehiclesStatusChart = ({
   return (
     <Card className="h-full border-slate-200/70 bg-white">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold">
+        <CardTitle className="text-base font-medium">
           {title || t('dashboard.vehiclesOnRoad')}
         </CardTitle>
       </CardHeader>

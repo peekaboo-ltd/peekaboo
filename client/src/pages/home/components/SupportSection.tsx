@@ -46,7 +46,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
             const Icon = contact.icon;
             const content = (
               <>
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#fff4be] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--surface)] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[var(--ink)] group-hover:scale-110">
                   <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">
@@ -57,7 +57,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                     {contact.subtitle}
                   </span>
                 </span>
-                <span className="rounded-full border border-border bg-[var(--peekaboo-surface)] px-2 py-0.5 text-[11px] font-medium text-foreground transition-all duration-300 group-hover:border-[#d49e00] group-hover:bg-[#fff4be]">
+                <span className="rounded-full border border-border bg-[var(--peekaboo-surface)] px-2 py-0.5 text-[11px] font-medium text-foreground transition-all duration-300 group-hover:border-[var(--surface-hover)] group-hover:bg-[var(--surface)]">
                   {contact.badge}
                 </span>
               </>

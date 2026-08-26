@@ -149,7 +149,7 @@ const MetricCard = ({
               </span>
             )}
             <span className="min-w-0">
-              <span className="font-ui block truncate text-[11px] font-medium uppercase text-slate-600">
+              <span className="block truncate text-[11px] font-medium uppercase text-slate-600">
                 {label}
               </span>
               {(comparisonLabel || note) && (
@@ -161,7 +161,7 @@ const MetricCard = ({
           </span>
           {trend && (
             <span
-              className={`font-ui shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${trend.isPositive
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${trend.isPositive
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-rose-50 text-rose-700'
                 }`}
@@ -175,7 +175,7 @@ const MetricCard = ({
         <section className="flex items-end justify-between gap-4">
           <div className="min-w-0 flex-1">
             <p
-              className="font-ui truncate text-[2rem] font-semibold leading-none text-[color:var(--ops-ink)] sm:text-[2.3rem]"
+              className="truncate text-[2rem] font-medium leading-none text-[color:var(--ops-ink)] sm:text-[2.3rem]"
               aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
             >
               {value}

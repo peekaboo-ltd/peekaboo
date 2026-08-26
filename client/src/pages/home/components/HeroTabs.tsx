@@ -26,7 +26,7 @@ const HeroTabs = ({
       aria-selected={activeTab === 'personal'}
       className={`group relative inline-flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-1.5 transition-all duration-300 ${
         activeTab === 'personal'
-          ? 'bg-[#edb100] text-[#0a0a0a] shadow-[0_2px_8px_-2px_rgba(237,177,0,0.4)]'
+          ? 'bg-[var(--ink)] text-[#0a0a0a] shadow-[0_2px_8px_-2px_rgba(237,177,0,0.4)]'
           : 'text-muted-foreground group-hover:text-foreground'
       }`}
     >
@@ -41,7 +41,7 @@ const HeroTabs = ({
       aria-selected={activeTab === 'business'}
       className={`group relative inline-flex cursor-pointer items-center gap-2 rounded-full px-3.5 py-1.5 transition-all duration-300 ${
         activeTab === 'business'
-          ? 'bg-[#edb100] text-[#0a0a0a] shadow-[0_2px_8px_-2px_rgba(237,177,0,0.4)]'
+          ? 'bg-[var(--ink)] text-[#0a0a0a] shadow-[0_2px_8px_-2px_rgba(237,177,0,0.4)]'
           : 'text-muted-foreground group-hover:text-foreground'
       }`}
     >

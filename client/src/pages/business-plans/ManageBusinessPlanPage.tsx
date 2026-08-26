@@ -284,7 +284,7 @@ const ManageBusinessPlanPage = () => {
         <article className="lg:col-span-2 border border-slate-200 bg-white p-6">
           <header className="mb-6">
             <p className="text-xs uppercase text-slate-500">Plan Details</p>
-            <h2 className="mt-2 text-lg font-semibold text-[#25343F]">Edit Information</h2>
+            <h2 className="mt-2 text-lg font-medium text-[#25343F]">Edit Information</h2>
           </header>
 
           <form onSubmit={onSubmit} className="flex flex-col gap-5">
@@ -676,7 +676,7 @@ const ManageBusinessPlanPage = () => {
           <article className="border border-slate-200 bg-white p-6">
             <header className="mb-4">
               <p className="text-xs uppercase text-slate-500">Assigned To</p>
-              <h2 className="mt-2 text-lg font-semibold text-[#25343F]">
+              <h2 className="mt-2 text-lg font-medium text-[#25343F]">
                 Organizations
                 <span className="ml-2 text-sm font-normal text-slate-500">
                   ({orgCount})
@@ -710,7 +710,7 @@ const ManageBusinessPlanPage = () => {
           <article className="border border-red-200 bg-red-50 p-6">
             <header className="mb-4">
               <p className="text-xs uppercase text-red-400">Danger Zone</p>
-              <h2 className="mt-2 text-lg font-semibold text-red-700">Delete Plan</h2>
+              <h2 className="mt-2 text-lg font-medium text-red-700">Delete Plan</h2>
             </header>
             <p className="text-xs text-red-500 mb-4">
               {orgCount > 0

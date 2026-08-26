@@ -90,7 +90,7 @@ const BatchesPage = () => {
       >
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-bold text-black">Batches</h1>
+            <h1 className="text-2xl font-medium text-black">Batches</h1>
             <p className="text-sm text-muted-foreground">
               Manage imports, review draft records, and track batch progress.
             </p>
@@ -128,7 +128,7 @@ const BatchesPage = () => {
                 <p className="text-xs uppercase text-slate-500">
                   {card.label}
                 </p>
-                <p className="text-lg font-semibold text-slate-900 mt-1">
+                <p className="text-lg font-medium text-slate-900 mt-1">
                   {card.value}
                 </p>
               </div>

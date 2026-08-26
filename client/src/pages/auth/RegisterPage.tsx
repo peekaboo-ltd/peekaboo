@@ -221,7 +221,7 @@ export const RegisterPage = () => {
           <span>Already have an account? </span>
           <Link
             to="/auth/login"
-            className="font-normal text-primary hover:text-secondary-600 underline underline-offset-2"
+            className="font-normal text-primary hover:text-[--muted] underline underline-offset-2"
           >
             Log in
           </Link>

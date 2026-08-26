@@ -85,7 +85,7 @@ const BusinessPlansSection = ({
                       </p>
                     </hgroup>
                     {plan.isPopular ? (
-                      <span className="rounded-full bg-[#edb100] px-2.5 py-1 text-[11px] font-normal uppercase tracking-[0.04em] text-[#0a0a0a]">
+                      <span className="rounded-full bg-[var(--ink)] px-2.5 py-1 text-[11px] font-normal uppercase tracking-[0.04em] text-[#0a0a0a]">
                         {popularLabel}
                       </span>
                     ) : null}
@@ -107,7 +107,7 @@ const BusinessPlansSection = ({
                         className="flex items-start gap-2 text-[12.5px] font-normal leading-relaxed text-muted-foreground"
                       >
                         <Check
-                          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#d49e00] transition-transform duration-300 group-hover:scale-110"
+                          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--surface-hover)] transition-transform duration-300 group-hover:scale-110"
                           aria-hidden="true"
                         />
                         <span>{feature}</span>
@@ -121,7 +121,7 @@ const BusinessPlansSection = ({
                       className={`group/link inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-[13px] font-normal transition-all duration-300 ${
                         plan.isPopular
                           ? 'bg-[#0a0a0a] text-white hover:bg-[#1c1c1c] hover:shadow-[0_4px_12px_-2px_rgba(10,10,10,0.3)]'
-                          : 'bg-[#edb100] text-[#0a0a0a] hover:bg-[#d49e00] hover:shadow-[0_4px_12px_-2px_rgba(237,177,0,0.3)]'
+                          : 'bg-[var(--ink)] text-[#0a0a0a] hover:bg-[var(--surface-hover)] hover:shadow-[0_4px_12px_-2px_rgba(237,177,0,0.3)]'
                       }`}
                     >
                       {ctaLabel}

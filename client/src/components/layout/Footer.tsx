@@ -109,10 +109,10 @@ const Footer = () => {
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 mb-12">
           <motion.article variants={itemVariants as unknown as Variants} className="lg:col-span-5">
             <header className="mb-5">
-              <h3 className="text-2xl font-semibold text-primary-900">
+              <h3 className="text-2xl font-medium text-primary-900">
                 Peekaboo
               </h3>
-              <hr className="mt-2 h-[2px] w-10 bg-secondary-500/60 rounded-full border-0" />
+              <hr className="mt-2 h-[2px] w-10 bg-[--surface] rounded-full border-0" />
             </header>
             <p className="text-[13px] leading-relaxed text-primary-600 mb-6 max-w-sm">
               {t('footer.description')}
@@ -136,7 +136,7 @@ const Footer = () => {
 
           <motion.div variants={itemVariants as unknown as Variants} className="lg:col-span-3">
             <nav aria-label={t('footer.quickLinks')}>
-              <h4 className="text-xs font-semibold uppercase text-primary-400 mb-5">
+              <h4 className="text-xs font-medium uppercase text-primary-400 mb-5">
                 {t('footer.quickLinks')}
               </h4>
               <ul className="space-y-3">
@@ -148,7 +148,7 @@ const Footer = () => {
                     >
                       <span className="relative text-[13px]">
                         {t(link.labelKey)}
-                        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-secondary-600/70 group-hover:w-full transition-all duration-300" />
+                        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-[--surface] group-hover:w-full transition-all duration-300" />
                       </span>
                     </Link>
                   </li>
@@ -156,7 +156,7 @@ const Footer = () => {
               </ul>
             </nav>
             <nav className="mt-10" aria-label={t('footer.legal')}>
-              <h4 className="text-xs font-semibold uppercase text-primary-400 mb-5">
+              <h4 className="text-xs font-medium uppercase text-primary-400 mb-5">
                 {t('footer.legal')}
               </h4>
               <ul className="space-y-3">
@@ -168,7 +168,7 @@ const Footer = () => {
                     >
                       <span className="relative text-[13px]">
                         {t(link.labelKey)}
-                        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-secondary-600/70 group-hover:w-full transition-all duration-300" />
+                        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-[--surface] group-hover:w-full transition-all duration-300" />
                       </span>
                     </Link>
                   </li>
@@ -178,7 +178,7 @@ const Footer = () => {
           </motion.div>
 
           <motion.address variants={itemVariants as unknown as Variants} className="not-italic lg:col-span-4">
-            <h4 className="text-xs font-semibold uppercase text-primary-400 mb-5">
+            <h4 className="text-xs font-medium uppercase text-primary-400 mb-5">
               {t('footer.contactUs')}
             </h4>
             <ul className="space-y-4">

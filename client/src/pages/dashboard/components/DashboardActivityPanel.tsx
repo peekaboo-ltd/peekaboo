@@ -41,7 +41,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
       >
         {rows.length > 0 ? (
           <div className="overflow-hidden rounded-md border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)]">
-            <div className="font-ui hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--ops-line)] px-5 py-3 text-[11px] font-medium uppercase text-slate-500 sm:grid">
+            <div className="hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--ops-line)] px-5 py-3 text-[11px] font-medium uppercase text-slate-500 sm:grid">
               <span>Activity</span>
               <span>Status</span>
               <span>Updated</span>

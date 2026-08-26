@@ -119,7 +119,7 @@ const UsersPage = () => {
       <header className="flex flex-col gap-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-bold text-black">
+            <h1 className="text-2xl font-medium text-black">
               {hasOrganizationMembership
                 ? t('organization.users.title')
                 : 'User management'}
@@ -174,7 +174,7 @@ const UsersPage = () => {
                 <p className="text-xs uppercase text-slate-500">
                   {card.label}
                 </p>
-                <p className="text-lg font-semibold text-slate-900 mt-1">
+                <p className="text-lg font-medium text-slate-900 mt-1">
                   {card.value}
                 </p>
               </div>

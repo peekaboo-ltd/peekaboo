@@ -66,7 +66,7 @@ const DashboardPerformanceScorecard = ({
                 </p>
                 {kpi.trend && (
                   <span
-                    className={`shrink-0 flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${
+                    className={`shrink-0 flex items-center gap-0.5 text-[11px] font-medium px-1.5 py-0.5 rounded-full ${
                       kpi.trend.isPositive
                         ? 'bg-emerald-50 text-emerald-700'
                         : 'bg-rose-50 text-rose-700'
@@ -82,7 +82,7 @@ const DashboardPerformanceScorecard = ({
                 )}
               </div>
 
-              <p className="font-ui text-2xl leading-none text-[color:var(--primary)] mb-3">
+              <p className="text-2xl leading-none text-[color:var(--primary)] mb-3">
                 {kpi.value}
               </p>
 

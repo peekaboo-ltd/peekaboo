@@ -34,11 +34,11 @@ const DashboardDispatchStrip = ({ items, variants }: DashboardDispatchStripProps
           >
             <div className="flex items-center gap-2">
               <span className={`h-2 w-2 shrink-0 rounded-full ${toneByStatus[item.status]}`} aria-hidden="true" />
-              <p className="font-ui truncate text-[11px] font-medium uppercase text-slate-600">
+              <p className="truncate text-[11px] font-medium uppercase text-slate-600">
                 {item.label}
               </p>
             </div>
-            <p className="font-ui mt-1 truncate text-xl font-semibold text-[color:var(--ops-ink)]">
+            <p className="mt-1 truncate text-xl font-medium text-[color:var(--ops-ink)]">
               {item.value}
             </p>
           </article>

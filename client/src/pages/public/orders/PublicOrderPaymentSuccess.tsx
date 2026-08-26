@@ -123,7 +123,7 @@ const PublicOrderPaymentSuccess = () => {
         <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
           <div className="py-5 text-center" role="status" aria-live="polite">
             <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-[var(--peekaboo-line)] border-t-[var(--peekaboo-dark)] motion-reduce:animate-none" />
-            <h1 className="mt-5 font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)]">
+            <h1 className="mt-5 text-xl font-medium text-[var(--peekaboo-dark)]">
               Confirming your payment
             </h1>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--peekaboo-muted)]">
@@ -140,7 +140,7 @@ const PublicOrderPaymentSuccess = () => {
       <PublicPage>
         <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
           <div className="py-5 text-center">
-            <h1 className="font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)]">
+            <h1 className="text-xl font-medium text-[var(--peekaboo-dark)]">
               Payment confirmation unavailable
             </h1>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--peekaboo-muted)]">
@@ -229,7 +229,7 @@ const PublicOrderPaymentSuccess = () => {
                 <dt className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                   Amount paid
                 </dt>
-                <dd className="font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)] sm:justify-self-end">
+                <dd className="text-xl font-medium text-[var(--peekaboo-dark)] sm:justify-self-end">
                   {formatCurrency(successfulPayment.amount)}
                 </dd>
               </div>
@@ -251,7 +251,7 @@ const PublicOrderPaymentSuccess = () => {
               <div className="relative grid gap-6 sm:grid-cols-2 sm:gap-10">
                 <span
                   aria-hidden="true"
-                  className="absolute left-2 top-5 hidden h-px w-[calc(50%-0.5rem)] bg-[var(--peekaboo-yellow)] sm:block"
+                  className="absolute left-2 top-5 hidden h-px w-[calc(50%-0.5rem)] bg-[var(--ink)] sm:block"
                 />
                 {[
                   {
@@ -264,7 +264,7 @@ const PublicOrderPaymentSuccess = () => {
                   },
                 ].map((stop) => (
                   <article key={stop.label} className="relative min-w-0 pl-6">
-                    <span className="absolute left-0 top-0.5 h-3 w-3 rounded-full bg-[var(--peekaboo-yellow)]" />
+                    <span className="absolute left-0 top-0.5 h-3 w-3 rounded-full bg-[var(--ink)]" />
                     <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
                       {stop.label}
                     </p>

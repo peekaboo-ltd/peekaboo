@@ -123,7 +123,7 @@ const OrdersPage = () => {
             <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--peekaboo-muted)]">
               Delivery operations
             </p>
-            <h1 className="mt-1 font-['Space_Grotesk'] text-2xl font-semibold tracking-[-0.03em] text-[var(--peekaboo-dark)]">
+            <h1 className="mt-1 text-2xl font-medium tracking-[-0.03em] text-[var(--peekaboo-dark)]">
               Orders
             </h1>
             <p className="mt-1 text-sm text-[var(--peekaboo-muted)]">

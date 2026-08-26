@@ -31,7 +31,7 @@ const HeroHeadline = ({
     >
       <p className="inline-flex w-fit items-center gap-2 text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
         <span
-          className="h-1.5 w-1.5 rounded-full bg-[var(--peekaboo-yellow-dark)]"
+          className="h-1.5 w-1.5 rounded-full bg-[var(--ink)]"
           aria-hidden="true"
         />
         {activeTab === 'personal'
@@ -41,7 +41,7 @@ const HeroHeadline = ({
       <h1 className="max-w-[620px] text-[30px] font-medium leading-[1.08] tracking-[-0.01em] text-foreground sm:text-[40px] lg:text-[48px]">
         {activeTab === 'personal' ? personalTitle1 : businessTitle1}
         <br />
-        <span className="text-[var(--peekaboo-yellow-dark)] text-[30px] font-medium leading-[1.08] tracking-[-0.01em]">
+        <span className="text-[var(--ink)] text-[30px] font-medium leading-[1.08] tracking-[-0.01em]">
           {activeTab === 'personal' ? personalTitle2 : businessTitle2}
         </span>{' '}
         in Kigali.

@@ -70,7 +70,7 @@ const WhyPeekabooSection = ({
             const Icon = item.icon;
             return (
               <li key={item.title} className="group px-1 py-5 sm:px-5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#fff4be] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110">
+                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[var(--surface)] text-[#0a0a0a] transition-all duration-300 group-hover:bg-[var(--ink)] group-hover:scale-110">
                   <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 </span>
                 <h3 className="mt-3 text-[14px] font-medium text-foreground">

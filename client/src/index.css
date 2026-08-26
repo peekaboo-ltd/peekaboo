@@ -255,7 +255,7 @@
 }
 
 @utility link-sweep {
-  background-image: linear-gradient(currentColor, currentColor);
+  background-image: linear-\000067radient(currentColor, currentColor);
   background-repeat: no-repeat;
   background-position: 0 100%;
   background-size: 0% 1px;

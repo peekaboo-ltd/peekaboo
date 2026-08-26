@@ -109,7 +109,7 @@ const CreateBusinessPlanPage = () => {
         <form onSubmit={onSubmit} className="flex flex-col gap-6">
           {/* Basic Info */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-800 mb-3">
+            <h3 className="text-sm font-medium text-slate-800 mb-3">
               Basic Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -211,7 +211,7 @@ const CreateBusinessPlanPage = () => {
           {/* Features */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-800">Features</h3>
+              <h3 className="text-sm font-medium text-slate-800">Features</h3>
               <button
                 type="button"
                 onClick={() => appendFeature({ value: '' })}
@@ -278,7 +278,7 @@ const CreateBusinessPlanPage = () => {
           {!isCustomPricing && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-slate-800">
+                <h3 className="text-sm font-medium text-slate-800">
                   Pricing Tiers
                 </h3>
                 <button

@@ -43,7 +43,7 @@ const DashboardChartsSection = ({
             className="rounded-lg p-0"
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="font-ui text-[2rem] font-semibold leading-none text-[color:var(--ops-ink)]">
+              <p className="text-[2rem] font-medium leading-none text-[color:var(--ops-ink)]">
                 {widget.value}
               </p>
               {widget.chartType !== 'status' && widget.data && widget.data.length > 0 && (

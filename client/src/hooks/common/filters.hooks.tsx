@@ -230,7 +230,7 @@ export const useStatusFilter = ({
                   );
                 })
               ) : (
-                <p className="text-[13px] text-secondary text-center py-2">
+                <p className="text-[13px] text-[--muted] text-center py-2">
                   No statuses found
                 </p>
               )}

@@ -221,7 +221,7 @@ const ReassignOrderAssignment = () => {
                                 >
                                     Back to selection
                                 </Button>
-                                <h2 className="text-lg font-semibold text-gray-900">
+                                <h2 className="text-lg font-medium text-gray-900">
                                     Confirm Rider Assignment
                                 </h2>
                                 <p className="text-sm text-gray-600 mt-1">
@@ -239,7 +239,7 @@ const ReassignOrderAssignment = () => {
                                         />
                                     </span>
                                     <figcaption className="flex-1 min-w-0">
-                                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                        <h3 className="text-xl font-medium text-gray-900 mb-2">
                                             {selectedRider.name || 'Unnamed Rider'}
                                         </h3>
 

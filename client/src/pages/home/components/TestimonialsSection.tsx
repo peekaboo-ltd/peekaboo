@@ -55,7 +55,7 @@ const TestimonialsSection = ({
         <motion.figure className="relative" variants={itemVariants}>
           <blockquote className="relative overflow-hidden rounded-md border border-border bg-[var(--peekaboo-surface)] p-6 sm:p-8 lg:p-10 shadow-[0_22px_70px_-52px_color-mix(in_oklab,var(--primary)_45%,transparent)]">
             <Quote
-              className="absolute right-6 top-6 h-10 w-10 text-[#fff4be]"
+              className="absolute right-6 top-6 h-10 w-10 text-[var(--surface)]"
               aria-hidden="true"
             />
 
@@ -73,7 +73,7 @@ const TestimonialsSection = ({
                 </p>
 
                 <figcaption className="mt-6 flex items-center gap-4">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0a0a0a] text-[15px] font-medium text-[#edb100]">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0a0a0a] text-[15px] font-medium text-[var(--ink)]">
                     {current.name.charAt(0)}
                   </span>
                   <cite className="not-italic">
@@ -104,7 +104,7 @@ const TestimonialsSection = ({
                   onClick={() => setActiveTestimonial(index)}
                   className={`group relative h-2 rounded-full transition-all duration-300 ${
                     index === activeTestimonial
-                      ? 'w-8 bg-[#edb100] shadow-[0_0_8px_rgba(237,177,0,0.4)]'
+                      ? 'w-8 bg-[var(--ink)] shadow-[0_0_8px_rgba(237,177,0,0.4)]'
                       : 'w-2 bg-border hover:bg-[#d9d8d4] hover:w-4'
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
@@ -123,7 +123,7 @@ const TestimonialsSection = ({
                     (prev) => (prev - 1 + testimonials.length) % testimonials.length
                   )
                 }
-                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--peekaboo-surface)] text-muted-foreground shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition-all duration-300 hover:border-[#d49e00] hover:text-foreground hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]"
+                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--peekaboo-surface)] text-muted-foreground shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition-all duration-300 hover:border-[var(--surface-hover)] hover:text-foreground hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]"
                 aria-label="Previous testimonial"
               >
                 <ChevronLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
@@ -133,7 +133,7 @@ const TestimonialsSection = ({
                 onClick={() =>
                   setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
                 }
-                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--peekaboo-surface)] text-muted-foreground shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition-all duration-300 hover:border-[#d49e00] hover:text-foreground hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]"
+                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--peekaboo-surface)] text-muted-foreground shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition-all duration-300 hover:border-[var(--surface-hover)] hover:text-foreground hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]"
                 aria-label="Next testimonial"
               >
                 <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />

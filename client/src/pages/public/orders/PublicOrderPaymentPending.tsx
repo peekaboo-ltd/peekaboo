@@ -111,7 +111,7 @@ const PublicOrderPaymentPending = () => {
               icon={faTriangleExclamation}
               className="mb-4 h-5 w-5 text-[var(--destructive)]"
             />
-            <h1 className="font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)]">
+            <h1 className="text-xl font-medium text-[var(--peekaboo-dark)]">
               Payment reference missing
             </h1>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--peekaboo-muted)]">
@@ -179,7 +179,7 @@ const PublicOrderPaymentPending = () => {
             {!isFailed ? (
               <span
                 aria-hidden="true"
-                className="absolute left-3.5 top-3.5 h-px w-[calc(50%-0.875rem)] bg-[var(--peekaboo-yellow)]"
+                className="absolute left-3.5 top-3.5 h-px w-[calc(50%-0.875rem)] bg-[var(--ink)]"
               />
             ) : null}
 
@@ -200,7 +200,7 @@ const PublicOrderPaymentPending = () => {
                 className={`ml-auto flex h-7 w-7 items-center justify-center rounded-full border border-[var(--peekaboo-line)] ${
                   isFailed
                     ? 'bg-white text-[var(--destructive)]'
-                    : 'bg-[var(--peekaboo-yellow)] text-[var(--peekaboo-dark)]'
+                    : 'bg-[var(--ink)] text-[var(--peekaboo-dark)]'
                 }`}
               >
                 <FontAwesomeIcon
@@ -286,7 +286,7 @@ const PublicOrderPaymentPending = () => {
             </div>
             <div className="pt-4">
               <dt className="text-xs text-[var(--peekaboo-muted)]">Amount</dt>
-              <dd className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)]">
+              <dd className="mt-1 text-xl font-medium text-[var(--peekaboo-dark)]">
                 {payment
                   ? formatCurrency(payment.amount)
                   : orderLoading

@@ -59,9 +59,9 @@ const LocationMiniMap = ({
           >
             <AdvancedMarker position={center} title={description || label}>
               <Pin
-                background="var(--color-secondary-500, #ffc400)"
-                borderColor="#0a0a0a"
-                glyphColor="#0a0a0a"
+                background="var(--ink)"
+                borderColor="var(--paper)"
+                glyphColor="var(--paper)"
               />
             </AdvancedMarker>
           </Map>

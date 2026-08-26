@@ -264,7 +264,7 @@ const InlineLocationEditor = ({
               width: `${dropdownPos.width}px`,
             }}
           >
-            <p className="text-xs font-semibold text-slate-700 uppercase ">
+            <p className="text-xs font-medium text-slate-700 uppercase ">
               Search delivery location
             </p>
             <PlaceSearch
@@ -713,7 +713,7 @@ const BatchPreviewPage = () => {
               </PopoverTrigger>
               <PopoverContent className="w-80" align="end">
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-sm text-red-800">
+                  <h4 className="font-medium text-sm text-red-800">
                     Validation Issues
                   </h4>
                   <ul className="space-y-1">
@@ -777,7 +777,7 @@ const BatchPreviewPage = () => {
           eyebrow="Batch preview"
           title={
             <span className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <span className="text-base font-bold">
+              <span className="text-base font-medium">
                 {batch.name || "Unnamed Batch"}
               </span>
               <Badge
@@ -814,7 +814,7 @@ const BatchPreviewPage = () => {
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h3 className={`text-sm font-semibold ${
+                <h3 className={`text-sm font-medium ${
                   canComplete ? "text-green-800" : "text-amber-800"
                 }`}>
                   {canComplete ? "✓ Batch Ready" : "⚠ Validation Summary"}

@@ -132,7 +132,7 @@ const PaymentDetailsPage = () => {
             ? faXmarkCircle
             : faClockRotateLeft,
       iconBg: payment.status === KpayPaymentStatus.SUCCESSFUL
-        ? 'bg-secondary-50 text-secondary-800'
+        ? 'bg-[--surface] text-[--muted]'
         : payment.status === KpayPaymentStatus.FAILED
           ? 'bg-red-50 text-red-700'
           : 'bg-amber-50 text-amber-700',
@@ -147,7 +147,7 @@ const PaymentDetailsPage = () => {
       label: 'Updated At',
       value: formatDateLabel(payment.updatedAt),
       icon: faCalendarDay,
-      iconBg: 'bg-secondary-50 text-secondary-800',
+      iconBg: 'bg-[--surface] text-[--muted]',
     },
   ];
 

@@ -16,7 +16,7 @@ const DashboardError = () => {
             />
           </svg>
         </div>
-        <h2 className="text-xl font-semibold text-slate-900">{t('dashboard.failedToLoad')}</h2>
+        <h2 className="text-xl font-medium text-slate-900">{t('dashboard.failedToLoad')}</h2>
         <p className="mt-2 text-sm text-slate-600">{t('dashboard.tryRefreshing')}</p>
       </article>
     </main>

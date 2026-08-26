@@ -44,12 +44,12 @@ const DashboardHeader = ({
     <motion.header className="w-full" variants={variants}>
       <div className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] shadow-[0_1px_0_rgba(20,24,29,0.05)]">
         <div className="border-b border-[color:var(--ops-line)] px-5 py-4 sm:px-6">
-          <p className="font-ui text-[11px] font-medium uppercase text-slate-500">
+          <p className="text-[11px] font-medium uppercase text-slate-500">
             Command center
           </p>
           <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="font-ui text-[2rem] font-semibold text-[color:var(--ops-ink)] sm:text-[2.3rem]">
+              <h1 className="text-[2rem] font-medium text-[color:var(--ops-ink)] sm:text-[2.3rem]">
                 Dashboard
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[15px]">
@@ -85,7 +85,7 @@ const DashboardHeader = ({
                 toDate={endDate}
               />
             </div>
-            <span className="font-ui hidden text-center text-[11px] uppercase text-slate-400 sm:block">
+            <span className="hidden text-center text-[11px] uppercase text-slate-400 sm:block">
               to
             </span>
             <div className="w-full">

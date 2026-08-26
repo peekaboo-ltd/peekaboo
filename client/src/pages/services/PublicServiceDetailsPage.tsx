@@ -232,7 +232,7 @@ const PublicServiceDetailsPage = () => {
                 <div className="flex flex-wrap items-center gap-3">
                   <span>{plan.name}</span>
                   {plan.badge ? (
-                    <span className="inline-flex w-fit items-center gap-2 rounded-sm bg-secondary-500 px-3 py-1 text-[11px] font-medium uppercase text-white">
+                    <span className="inline-flex w-fit items-center gap-2 rounded-sm bg-[--surface] px-3 py-1 text-[11px] font-medium uppercase text-white">
                       <FontAwesomeIcon icon={faStar} className="text-[10px]" />
                       {plan.badge}
                     </span>
@@ -344,7 +344,7 @@ const PublicServiceDetailsPage = () => {
                     key={feature}
                     className="flex items-start gap-3 rounded-md border border-slate-200 bg-white p-4"
                   >
-                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-secondary-50 text-secondary-700">
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-sm bg-[--surface] text-[--muted]">
                       <FontAwesomeIcon icon={faCheck} className="text-xs" />
                     </span>
                     <span className="text-sm leading-6 text-slate-700">{feature}</span>
