@@ -126,10 +126,7 @@ export const useOrdersColumns = () => {
                         dispatch(setDeleteOrderModal(true));
                       }}
                     >
-                      <FontAwesomeIcon
-                        icon={faTrash}
-                        className="text-(--ink)"
-                      />
+                      <FontAwesomeIcon icon={faTrash} />
                       Delete
                     </Link>
                   </>

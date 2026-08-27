@@ -24,7 +24,7 @@ const statusTone = (status?: string) => {
     case 'INACTIVE':
       return 'bg-(--surface) text-(--ink) border-(--line)';
     default:
-      return 'bg-[var(--surface)] text-(--ink) border-(--line)';
+      return 'bg-(--surface) text-(--ink) border-(--line)';
   }
 };
 
@@ -40,8 +40,8 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
         className="rounded-lg"
       >
         {rows.length > 0 ? (
-          <div className="overflow-hidden rounded-md border border-[color:var(--line)] bg-[var(--surface)]">
-            <div className="hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--line)] px-5 py-3 text-[11px] font-medium text-(--muted) sm:grid">
+          <div className="overflow-hidden rounded-md bg-(--surface)">
+            <div className="hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-(--line) px-5 py-3 text-xs font-normal text-(--muted) sm:grid">
               <span>Activity</span>
               <span>Status</span>
               <span>Updated</span>
@@ -50,7 +50,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
               {rows.map((item) => (
                 <li
                   key={item.id}
-                  className="grid gap-3 border-b border-[color:var(--line)] px-5 py-4 last:border-b-0 sm:grid-cols-[1.2fr_1fr_auto] sm:items-center"
+                  className="grid gap-3 border-b border-(--line) px-5 py-4 last:border-b-0 sm:grid-cols-[1.2fr_1fr_auto] sm:items-center"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-normal text-(--ink)">
@@ -62,11 +62,11 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-(--line) bg-[var(--surface)] px-2.5 py-1 text-[11px] font-normal text-(--muted)">
+                    <span className="rounded-full bg-(--surface) px-2.5 py-1 text-xs font-normal text-(--muted)">
                       {item.type}
                     </span>
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-normal ${statusTone(item.status)}`}
+                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-normal ${statusTone(item.status)}`}
                     >
                       {item.status}
                     </span>
@@ -80,7 +80,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
             </ul>
           </div>
         ) : (
-          <div className="rounded-md border border-dashed border-[color:var(--line)] bg-[var(--surface)] px-5 py-12 text-center">
+          <div className="rounded-md border border-dashed border-(--line) bg-(--surface) px-5 py-12 text-center">
             <p className="text-base font-normal text-(--ink)">No recent activity yet</p>
             <p className="mt-2 text-sm text-(--muted)">
               As new orders or assignments land, they will appear here.

@@ -223,10 +223,10 @@ const CompleteAccount = () => {
           </form>
         )}
 
-        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
+        <div className="mt-6 text-center text-sm">
           <Link
             to="/auth/login"
-            className="font-normal text-(--ink) hover:text-(--muted) underline underline-offset-2"
+            className="link-sweep text-(--ink)"
           >
             Sign in with a different account
           </Link>

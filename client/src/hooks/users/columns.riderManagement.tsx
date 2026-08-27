@@ -34,7 +34,7 @@ export const useRiderManagementColumns = (
         header: "#",
         accessorKey: "rank",
         cell: ({ row }) => (
-          <span className="font-medium">#{row.original.rank}</span>
+          <span className="font-normal">#{row.original.rank}</span>
         ),
       },
       {
@@ -42,8 +42,8 @@ export const useRiderManagementColumns = (
         accessorKey: "riderName",
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <span className="font-medium">{row.original.riderName || "-"}</span>
-            <span className="text-xs text-(--muted)">
+            <span className="font-normal">{row.original.riderName || "-"}</span>
+            <span className="type-meta">
               {row.original.riderEmail || "-"}
             </span>
           </div>
@@ -66,7 +66,7 @@ export const useRiderManagementColumns = (
           const performance = getPerformanceLabel(row.original);
           return (
             <span
-              className={`px-2 py-1 rounded-md text-[11px] font-medium ${performance.className}`}
+              className={`px-2 py-1 rounded-md text-xs font-normal ${performance.className}`}
             >
               {performance.text}
             </span>
@@ -83,7 +83,7 @@ export const useRiderManagementColumns = (
               e.preventDefault();
               onViewDetails(row.original);
             }}
-            className="text-(--ink) underline text-[11px] underline-offset-2"
+            className="text-(--ink) underline text-xs underline-offset-2"
           >
             View details
           </Link>

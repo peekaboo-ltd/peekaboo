@@ -286,7 +286,7 @@ const PaymentsPage = () => {
       <header className="flex flex-col gap-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-medium text-(--ink)">Payments</h1>
+            <h1 className="type-page-title">Payments</h1>
             <p className="text-sm text-muted-foreground">
               View and manage all payments across the platform.
             </p>
@@ -328,7 +328,7 @@ const PaymentsPage = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleApplyFilters();
                 }}
-                className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) pl-8 pr-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) pl-8 pr-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
               />
             </div>
             <input
@@ -337,7 +337,7 @@ const PaymentsPage = () => {
               value={startDate}
               max={endDate || undefined}
               onChange={(e) => handleStartDateChange(e.target.value)}
-              className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset] md:w-[170px]"
+              className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] md:w-[170px]"
             />
             <input
               type="date"
@@ -345,7 +345,7 @@ const PaymentsPage = () => {
               value={endDate}
               min={startDate || undefined}
               onChange={(e) => handleEndDateChange(e.target.value)}
-              className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset] md:w-[170px]"
+              className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] md:w-[170px]"
             />
             <Button primary type="button" onClick={handleApplyFilters}>
               Apply
@@ -389,10 +389,10 @@ const PaymentsPage = () => {
               className="bg-(--paper) border border-(--line) rounded-xl p-4 flex items-center justify-between"
             >
               <div>
-                <p className="text-xs text-(--muted)">
+                <p className="type-meta">
                   {card.label}
                 </p>
-                <p className="text-lg font-medium text-(--ink) mt-1">
+                <p className="type-metric mt-1">
                   {card.value}
                 </p>
                 {card.subtitle && (
@@ -416,7 +416,7 @@ const PaymentsPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Search */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-(--muted)">
+                <label className="type-meta">
                   Search
                 </label>
                 <div className="relative">
@@ -432,14 +432,14 @@ const PaymentsPage = () => {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleApplyFilters();
                     }}
-                    className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) pl-8 pr-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                    className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) pl-8 pr-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                   />
                 </div>
               </div>
 
               {/* Status */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-(--muted)">
+                <label className="type-meta">
                   Status
                 </label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -458,7 +458,7 @@ const PaymentsPage = () => {
 
               {/* Currency */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-(--muted)">
+                <label className="type-meta">
                   Currency
                 </label>
                 <Select
@@ -480,7 +480,7 @@ const PaymentsPage = () => {
 
               {/* Payment Method */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-(--muted)">
+                <label className="type-meta">
                   Payment Method
                 </label>
                 <Select value={methodFilter} onValueChange={setMethodFilter}>
@@ -499,7 +499,7 @@ const PaymentsPage = () => {
 
               {/* Start Date */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-(--muted)">
+                <label className="type-meta">
                   From Date
                 </label>
                 <input
@@ -507,13 +507,13 @@ const PaymentsPage = () => {
                   value={startDate}
                   max={endDate || undefined}
                   onChange={(e) => handleStartDateChange(e.target.value)}
-                  className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                 />
               </div>
 
               {/* End Date */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-(--muted)">
+                <label className="type-meta">
                   To Date
                 </label>
                 <input
@@ -521,13 +521,13 @@ const PaymentsPage = () => {
                   value={endDate}
                   min={startDate || undefined}
                   onChange={(e) => handleEndDateChange(e.target.value)}
-                  className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                 />
               </div>
 
               {/* Min Amount */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-(--muted)">
+                <label className="type-meta">
                   Min Amount
                 </label>
                 <input
@@ -535,13 +535,13 @@ const PaymentsPage = () => {
                   placeholder="0"
                   value={minAmount}
                   onChange={(e) => setMinAmount(e.target.value)}
-                  className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                 />
               </div>
 
               {/* Max Amount */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-(--muted)">
+                <label className="type-meta">
                   Max Amount
                 </label>
                 <input
@@ -549,7 +549,7 @@ const PaymentsPage = () => {
                   placeholder="0"
                   value={maxAmount}
                   onChange={(e) => setMaxAmount(e.target.value)}
-                  className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                 />
               </div>
             </div>

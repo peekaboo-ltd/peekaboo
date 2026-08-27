@@ -69,12 +69,7 @@ const TrackOrder = () => {
         description={t('trackOrder.subtitle')}
       />
 
-      <PublicSectionCard
-        className="mx-auto w-full max-w-2xl"
-        eyebrow="Order reference"
-        title={t('trackOrder.searchButton')}
-        description={t('trackOrder.searchDescription')}
-      >
+      <PublicSectionCard className="mx-auto w-full max-w-xl">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -84,12 +79,12 @@ const TrackOrder = () => {
         >
           <label
             htmlFor="reference-id"
-            className="mb-2 block text-sm font-medium text-[var(--ink)]"
+            className="field-label"
           >
             {t('trackOrder.orderIdLabel')}
           </label>
           <div className="relative">
-            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]">
+            <span className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-(--muted)">
               <FontAwesomeIcon icon={faMagnifyingGlass} />
             </span>
             <Input
@@ -100,17 +95,11 @@ const TrackOrder = () => {
                 setErrorMessage('');
               }}
               placeholder={t('trackOrder.orderIdPlaceholder')}
-              className="h-14 rounded-(--radius-control) border-0 bg-(--surface) pl-10 pr-4 tabular-nums"
+              className="ps-10"
+              errorMessage={errorMessage}
             />
           </div>
-          <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
-            {t('trackOrder.hint')}
-          </p>
-          {errorMessage ? (
-            <p className="mt-3 rounded-(--radius-control) bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)]">
-              {errorMessage}
-            </p>
-          ) : null}
+          <p className="type-meta mt-1.5">{t('trackOrder.hint')}</p>
 
           <Button
             type="submit"

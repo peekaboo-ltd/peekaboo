@@ -1,4 +1,5 @@
-import { Button } from '@/components/ui/button';
+import Button from "@/components/inputs/Button";
+import { Link } from "react-router-dom";
 
 interface HeroBusinessCtaProps {
   isActive: boolean;
@@ -19,20 +20,28 @@ const HeroBusinessCta = ({
   onContactClick,
   onTrackClick,
 }: HeroBusinessCtaProps) => (
-  <nav className="flex flex-wrap items-center gap-x-5 gap-y-3" aria-label="Delivery actions">
-    <Button form="hero-delivery-form" type="submit" size="lg" disabled={isLoading}>
+  <nav
+    className="flex w-full flex-wrap items-center gap-4 max-sm:flex-col max-sm:items-stretch"
+    aria-label="Delivery actions"
+  >
+    <Button
+      onClick={isActive ? onContactClick : onTrackClick}
+      type="submit"
+      variant="primary"
+      size="lg"
+      disabled={isLoading}
+      className="max-sm:w-full"
+    >
       {isLoading ? 'Booking…' : isActive ? tryQuickDeliveryLabel : primaryLabel}
     </Button>
-
-    <span className="hidden h-6 w-px bg-(--line) sm:block" aria-hidden="true" />
-
-    <Button
-      type="button"
-      variant="link"
+    <span className="h-6 w-px bg-(--line) max-sm:hidden" aria-hidden="true" />
+    <Link
       onClick={isActive ? onContactClick : onTrackClick}
+      to={isActive ? '/contact' : '/track'}
+      className="link-sweep text-sm text-(--ink) max-sm:text-center"
     >
       {isActive ? accountLabel : 'Track an order'}
-    </Button>
+    </Link>
   </nav>
 );
 

@@ -152,7 +152,7 @@ const PublicOrderTracking = () => {
         actions={
           order?.referenceId ? (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-[var(--ink)] tabular-nums">
+              <span className="text-xs text-(--ink) tabular-nums">
                 {order.referenceId}
               </span>
               <button
@@ -186,11 +186,11 @@ const PublicOrderTracking = () => {
         <nav className="relative">
           <ol className="space-y-4 sm:hidden">
             <span
-              className="absolute bottom-0 left-5 top-0 w-px bg-[var(--line)]"
+              className="absolute bottom-0 left-5 top-0 w-px bg-(--line)"
               aria-hidden="true"
             />
             <span
-              className="absolute left-5 top-0 w-px bg-[var(--ink)] transition-[background-color,color,border-color,box-shadow] duration-200 motion-reduce:transition-none"
+              className="absolute left-5 top-0 w-px bg-(--ink) transition-[background-color,color,border-color,box-shadow] duration-200 motion-reduce:transition-none"
               style={{
                 height:
                   furthestActivityIndex >= 0
@@ -226,23 +226,23 @@ const PublicOrderTracking = () => {
                     />
                   </span>
 
-                  <section className="min-w-0 flex-1 border-b border-[var(--line)] pb-4">
+                  <section className="min-w-0 flex-1 border-b border-(--line) pb-4">
                     <header className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className={`text-sm font-medium ${hasActivity || isCurrent ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}`}>
+                        <p className={`text-sm font-normal ${hasActivity || isCurrent ? 'text-(--ink)' : 'text-(--muted)'}`}>
                           {status.label}
                         </p>
-                        <p className="mt-1 text-xs text-[var(--muted)]">{status.description}</p>
+                        <p className="type-meta mt-1">{status.description}</p>
                       </div>
                       <aside className="shrink-0 text-right">
                         {isCurrent ? (
-                          <span className="inline-flex h-6 items-center rounded-(--radius-pill) bg-(--ink) px-2.5 text-xs font-medium text-(--paper)">
+                          <span className="inline-flex h-6 items-center rounded-(--radius-pill) bg-(--ink) px-2.5 text-xs font-normal text-(--paper)">
                             Current
                           </span>
                         ) : null}
                         {activity?.createdAt ? (
                           <time
-                            className={`mt-1 block text-[9px] ${hasActivity || isCurrent ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}`}
+                            className={`mt-1 block text-xs ${hasActivity || isCurrent ? 'text-(--ink)' : 'text-(--muted)'}`}
                           >
                             {formatTimestamp(activity.createdAt)}
                           </time>
@@ -258,11 +258,11 @@ const PublicOrderTracking = () => {
 
           <section className="hidden overflow-x-auto pb-2 sm:block">
             <span
-              className="absolute left-6 right-6 top-5 h-px bg-[var(--line)]"
+              className="absolute left-6 right-6 top-5 h-px bg-(--line)"
               aria-hidden="true"
             />
             <span
-              className="absolute top-5 h-px bg-[var(--ink)] transition-[background-color,color,border-color,box-shadow] duration-200 motion-reduce:transition-none"
+              className="absolute top-5 h-px bg-(--ink) transition-[background-color,color,border-color,box-shadow] duration-200 motion-reduce:transition-none"
               style={{
                 left: '1.5rem',
                 width:
@@ -300,23 +300,23 @@ const PublicOrderTracking = () => {
                       />
                     </span>
 
-                    <div className="mt-4 w-full max-w-[150px] border-t border-[var(--line)] pt-3 text-center">
-                      <p className={`text-xs font-medium ${hasActivity || isCurrent ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}`}>
+                    <div className="mt-4 w-full max-w-[150px] border-t border-(--line) pt-3 text-center">
+                      <p className={`text-xs font-normal ${hasActivity || isCurrent ? 'text-(--ink)' : 'text-(--muted)'}`}>
                         {status.label}
                       </p>
-                      <p className="mt-1 min-h-8 text-[10px] leading-snug text-[var(--muted)]">
+                      <p className="mt-1 min-h-8 text-xs leading-snug text-(--muted)">
                         {status.description}
                       </p>
 
                       {isCurrent ? (
-                        <span className="mt-2 inline-flex h-6 items-center rounded-(--radius-pill) bg-(--ink) px-2.5 text-xs font-medium text-(--paper)">
+                        <span className="mt-2 inline-flex h-6 items-center rounded-(--radius-pill) bg-(--ink) px-2.5 text-xs font-normal text-(--paper)">
                           Current
                         </span>
                       ) : null}
 
                       {activity?.createdAt ? (
                         <time
-                          className={`mt-2 block text-[9px] ${hasActivity || isCurrent ? 'text-[var(--ink)]' : 'text-[var(--muted)]'}`}
+                          className={`mt-2 block text-xs ${hasActivity || isCurrent ? 'text-(--ink)' : 'text-(--muted)'}`}
                           title={formatTimestamp(activity.createdAt)}
                         >
                           {formatTimestamp(activity.createdAt)}
@@ -361,14 +361,14 @@ const PublicOrderTracking = () => {
               className="py-1"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--ink)]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-(--surface) text-(--ink)">
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[9px] text-[var(--muted)]">
+                  <p className="type-meta">
                     {item.label}
                   </p>
-                  <p className="mt-1 break-all text-xs text-[var(--ink)]">
+                  <p className="mt-1 break-all text-xs text-(--ink)">
                     {orderLoading ? 'Loading…' : item.value}
                   </p>
                 </div>
@@ -400,16 +400,16 @@ const PublicOrderTracking = () => {
               key={contact.title}
               className="py-1"
             >
-              <p className="text-[10px] text-[var(--muted)]">
+              <p className="type-meta">
                 {contact.title}
               </p>
               <div className="mt-3 space-y-2">
-                <div className="flex items-center gap-2 text-sm text-[var(--ink)]">
-                  <FontAwesomeIcon icon={faUser} className="h-3.5 w-3.5 text-[var(--muted)]" />
+                <div className="flex items-center gap-2 text-sm text-(--ink)">
+                  <FontAwesomeIcon icon={faUser} className="h-3.5 w-3.5 text-(--muted)" />
                   <span>{orderLoading ? 'Loading…' : contact.name}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-[var(--ink)]">
-                  <FontAwesomeIcon icon={faPhone} className="h-3.5 w-3.5 text-[var(--muted)]" />
+                <div className="flex items-center gap-2 text-sm text-(--ink)">
+                  <FontAwesomeIcon icon={faPhone} className="h-3.5 w-3.5 text-(--muted)" />
                   <span>{orderLoading ? 'Loading…' : contact.phone}</span>
                 </div>
               </div>

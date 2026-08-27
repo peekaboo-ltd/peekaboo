@@ -25,30 +25,30 @@ const UnauthorizedPage = () => {
         transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.article
-          className="relative overflow-hidden rounded-(--radius-card) border border-(--line) bg-(--paper) p-8 sm:p-10"
+          className="relative overflow-hidden rounded-md border border-(--line) bg-(--paper) p-8 sm:p-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         >
           <header className="space-y-6 text-center">
             <article className="flex justify-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-(--line) bg-(--surface) px-4 py-2 text-[11px] font-medium text-(--ink)">
+              <span className="inline-flex items-center gap-2 rounded-full bg-(--surface) px-4 py-2 text-xs font-normal text-(--ink)">
                 <FontAwesomeIcon icon={faShieldHalved} className="text-(--ink)" />
                 403 Unauthorized
               </span>
             </article>
 
             <article className="flex justify-center">
-              <span className="inline-flex h-16 w-16 items-center justify-center rounded-(--radius-card) border border-(--line) bg-(--surface) text-2xl text-(--muted)">
+              <span className="inline-flex h-16 w-16 items-center justify-center rounded-md bg-(--surface) text-2xl text-(--muted)">
                 <FontAwesomeIcon icon={faLock} className="text-(--muted)" />
               </span>
             </article>
 
             <article className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl font-medium text-(--ink)">
+              <h1 className="type-display text-(--ink)">
                 Access not allowed.
               </h1>
-              <p className="text-base sm:text-lg text-(--muted) max-w-md mx-auto">
+              <p className="type-body mx-auto max-w-md text-(--muted)">
                 You don’t have permission to view this page. You’ve been signed out for your security.
               </p>
             </article>
@@ -57,7 +57,7 @@ const UnauthorizedPage = () => {
               <Button
                 route="/"
                 primary
-                className="!px-6 !py-3 !rounded-xl !text-sm !font-medium"
+               
               >
                 <FontAwesomeIcon
                   icon={faHome}

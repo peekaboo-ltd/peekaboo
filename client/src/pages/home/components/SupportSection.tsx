@@ -27,18 +27,18 @@ const helpLinks = [
 ];
 
 const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
-  <section id="support" className="section-rhythm w-full border-t border-(--line) bg-(--paper)">
+  <section id="support" className="section-rhythm w-full border-(--line) bg-(--paper)">
     <article className="app-container grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.4fr]">
       <header>
-        <p className="text-[11px] font-medium text-muted-foreground">
+        <p className="type-eyebrow">
           Support
         </p>
-        <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[30px]">
+        <h2 className="type-h2 mt-2">
           How can
           <br />
           we help?
         </h2>
-        <p className="mt-3 max-w-[340px] text-[13px] font-normal leading-relaxed text-muted-foreground">
+        <p className="mt-3 max-w-[340px] text-sm font-normal leading-relaxed text-muted-foreground">
           Talk to a real person, anytime. Our Kigali team replies in under 90 seconds.
         </p>
         <ul className="mt-5 grid gap-2">
@@ -50,14 +50,14 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                   <Icon className="h-4 w-4 transition-transform duration-200" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-medium text-foreground">
+                  <span className="block text-sm font-normal text-foreground">
                     {contact.title}
                   </span>
-                  <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
+                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
                     {contact.subtitle}
                   </span>
                 </span>
-                <span className="rounded-full border border-border bg-[var(--surface)] px-2 py-0.5 text-[11px] font-medium text-foreground transition-[background-color,color,border-color,box-shadow] duration-200 group-hover:border-[var(--surface-hover)] group-hover:bg-[var(--surface)]">
+                <span className="rounded-full border border-border bg-(--surface) px-2 py-0.5 text-xs font-normal text-foreground transition-[background-color,color,border-color,box-shadow] duration-200 group-hover:border-(--surface-hover) group-hover:bg-(--surface)">
                   {contact.badge}
                 </span>
               </>
@@ -70,7 +70,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
                     href={contact.href}
                     target={contact.external ? '_blank' : undefined}
                     rel={contact.external ? 'noopener noreferrer' : undefined}
-                    className="group flex w-full items-center gap-3 rounded-(--radius-card) border border-(--line) bg-(--paper) p-4 text-left transition-[border-color] duration-200 hover:border-(--ink)"
+                    className="card-framed card-interactive group flex h-auto w-full items-center gap-3 p-4 text-left"
                   >
                     {content}
                   </a>
@@ -82,9 +82,9 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
               <li key={contact.title}>
                 <Button
                   type="button"
-                  styled={false}
+                  variant="ghost"
                   onClick={onContactClick}
-                  className="group flex w-full items-center gap-3 rounded-(--radius-card) border border-(--line) bg-(--paper) p-4 text-left transition-[border-color] duration-200 hover:border-(--ink)"
+                  className="group flex w-full items-center gap-3 rounded-md border border-(--line) bg-(--paper) p-4 text-left transition-[border-color] duration-200 hover:border-(--ink)"
                 >
                   {content}
                 </Button>
@@ -95,12 +95,12 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
       </header>
 
       <aside>
-        <label className="flex items-center gap-3 rounded-(--radius-control) border border-border bg-[var(--surface)] p-3.5">
+        <label className="flex items-center gap-3 rounded-(--radius-control) border border-border bg-(--surface) p-3.5">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <input
             type="search"
             placeholder="Search help topics — billing, tracking, coverage..."
-            className="min-w-0 flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
+            className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
         </label>
 
@@ -110,7 +110,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
               {link.to.startsWith('#') ? (
                 <a
                   href={link.to}
-                  className="group border border-(--line) transition-[border-color] duration-200 hover:border-(--ink) flex w-full items-center justify-between gap-4 rounded-(--radius-control) bg-[var(--surface)] px-4 py-3 text-left text-[13px] font-medium text-foreground"
+                  className="group card-framed transition-[border-color] duration-200 hover:border-(--ink) flex w-full items-center justify-between gap-4 rounded-(--radius-control) bg-(--surface) px-4 py-3 text-left text-sm font-normal text-foreground"
                 >
                   {link.label}
                   <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200" aria-hidden="true" />
@@ -118,7 +118,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
               ) : (
                 <Link
                   to={link.to}
-                  className="group border border-(--line) transition-[border-color] duration-200 hover:border-(--ink) flex w-full items-center justify-between gap-4 rounded-(--radius-control) bg-[var(--surface)] px-4 py-3 text-left text-[13px] font-medium text-foreground"
+                  className="group card-framed transition-[border-color] duration-200 hover:border-(--ink) flex w-full items-center justify-between gap-4 rounded-(--radius-control) bg-(--surface) px-4 py-3 text-left text-sm font-normal text-foreground"
                 >
                   {link.label}
                   <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200" aria-hidden="true" />
@@ -128,10 +128,10 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
           ))}
         </ul>
 
-        <section className="invert-surface mt-3 flex flex-col gap-4 rounded-(--radius-card) p-6 sm:flex-row sm:items-center sm:justify-between">
+        <section className="invert-surface mt-3 flex flex-col gap-4 rounded-md p-6 sm:flex-row sm:items-center sm:justify-between">
           <hgroup>
-            <h3 className="text-[14px] font-medium">Still stuck? Open a ticket.</h3>
-            <p className="mt-1 text-xs font-normal leading-[1.5] text-(--muted)">
+            <h3 className="type-label">Still stuck? Open a ticket.</h3>
+            <p className="type-meta mt-1">
               Average first response in under 8 minutes during business hours.
             </p>
           </hgroup>
@@ -139,7 +139,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
             type="button"
             primary
             onClick={onContactClick}
-            className="shrink-0 rounded-(--radius-control) font-medium"
+            className="shrink-0 rounded-(--radius-control) font-normal"
           >
             Contact support
             <ArrowRight className="ml-2 h-3.5 w-3.5" aria-hidden="true" />

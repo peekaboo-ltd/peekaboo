@@ -119,7 +119,7 @@ const UsersPage = () => {
       <header className="flex flex-col gap-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-medium text-(--ink)">
+            <h1 className="type-page-title">
               {hasOrganizationMembership
                 ? t('organization.users.title')
                 : 'User management'}
@@ -171,14 +171,14 @@ const UsersPage = () => {
               className="bg-(--paper) border border-(--line) rounded-xl p-4 flex items-center justify-between"
             >
               <div>
-                <p className="text-xs text-(--muted)">
+                <p className="type-meta">
                   {card.label}
                 </p>
-                <p className="text-lg font-medium text-(--ink) mt-1">
+                <p className="type-metric mt-1">
                   {card.value}
                 </p>
               </div>
-              <span className="w-10 h-10 rounded-lg bg-(--ink) flex items-center justify-center text-(--ink)">
+              <span className="w-10 h-10 rounded-lg bg-(--ink) flex items-center justify-center text-(--paper)">
                 <FontAwesomeIcon icon={card.icon} />
               </span>
             </article>

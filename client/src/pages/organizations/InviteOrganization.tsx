@@ -54,7 +54,7 @@ const InviteOrganization = () => {
   return (
     <main className="w-full flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-medium text-(--ink)">
+        <h1 className="type-page-title">
           Invite an organization
         </h1>
         <p className="text-sm text-muted-foreground max-w-2xl">
@@ -65,7 +65,7 @@ const InviteOrganization = () => {
       <section className="bg-(--paper) border border-(--line) rounded-xl p-6">
         <form onSubmit={onSubmit} className="flex flex-col gap-5">
           <div>
-            <h2 className="text-sm font-medium text-(--ink) mb-3">
+            <h2 className="type-label mb-3">
               Organization details
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -139,7 +139,7 @@ const InviteOrganization = () => {
           </div>
 
           <div>
-            <h2 className="text-sm font-medium text-(--ink) mb-3">
+            <h2 className="type-label mb-3">
               Admin contact
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -182,7 +182,7 @@ const InviteOrganization = () => {
           </div>
 
           {statusMessage && (
-            <p className="rounded-lg border border-(--line) bg-(--surface) px-4 py-3 text-sm text-(--ink)">
+            <p className="rounded-lg bg-(--surface) px-4 py-3 text-sm text-(--ink)">
               {statusMessage}
             </p>
           )}

@@ -78,7 +78,7 @@ const Footer = () => {
       <div className="app-container py-16">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-12">
           <section className="lg:col-span-5">
-            <h2 className="text-2xl font-medium">Peekaboo</h2>
+            <h2 className="type-h3">Peekaboo</h2>
             <p className="mt-4 max-w-[46ch] text-sm leading-[1.6] text-(--muted)">
               {t('footer.description')}
             </p>
@@ -99,14 +99,14 @@ const Footer = () => {
           </section>
 
           <nav className="lg:col-span-3" aria-label="Footer links">
-            <h3 className="mb-4 text-xs font-medium text-(--muted)">{t('footer.quickLinks')}</h3>
+            <h3 className="type-eyebrow mb-4">{t('footer.quickLinks')}</h3>
             {renderLinks(quickLinks)}
-            <h3 className="mb-4 mt-8 text-xs font-medium text-(--muted)">{t('footer.legal')}</h3>
+            <h3 className="type-eyebrow mt-8 mb-4">{t('footer.legal')}</h3>
             {renderLinks(legalLinks)}
           </nav>
 
           <address className="not-italic lg:col-span-4">
-            <h3 className="mb-4 text-xs font-medium text-(--muted)">{t('footer.contactUs')}</h3>
+            <h3 className="type-eyebrow mb-4">{t('footer.contactUs')}</h3>
             <ul className="space-y-4">
               {contactInfo.map((contact) => (
                 <li key={contact.text}>
@@ -128,7 +128,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-(--line) pt-6 sm:flex-row sm:items-center">
-          <p className="text-xs text-(--muted)">
+          <p className="type-meta">
             &copy; {new Date().getFullYear()} Peekaboo. {t('footer.copyright')}
           </p>
           <LanguageSelector dropdownDirection="up" />

@@ -389,14 +389,14 @@ const ImportBatch = () => {
         <motion.article
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="rounded-(--radius-card) border border-(--line) bg-(--surface) p-4"
+          className="rounded-md bg-(--surface) p-4"
         >
           <header className="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <h3 className="text-sm font-medium text-(--ink)">
+              <h3 className="type-label">
                 Template Upload
               </h3>
-              <p className="text-xs text-(--muted) mt-1">
+              <p className="type-meta mt-1">
                 Accepted formats: <code>.xlsx</code> or <code>.csv</code> with exact 5-column template headers.
               </p>
             </div>
@@ -410,7 +410,7 @@ const ImportBatch = () => {
           <label className="mt-4 block rounded-lg border border-dashed border-(--line) bg-(--paper) p-4 cursor-pointer hover:border-(--ink) transition-colors">
             <input type="file" accept=".xlsx,.csv,text/csv" onChange={onFileChange} className="hidden" />
             <p className="text-sm text-(--ink)">Click to select import file</p>
-            <p className="text-xs text-(--muted) mt-1">
+            <p className="type-meta mt-1">
               Recipient phone is required. Delivery location, product ref, and description are optional.
             </p>
           </label>
@@ -421,11 +421,11 @@ const ImportBatch = () => {
           <motion.article
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="rounded-xl border border-(--line) bg-(--surface) p-4 sticky top-0 z-20"
+            className="rounded-xl bg-(--surface) p-4 sticky top-0 z-20"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h4 className="text-sm font-medium text-(--ink)">
+                <h4 className="type-label">
                   {preview.errors.length} Validation Issue{preview.errors.length !== 1 ? 's' : ''} Found
                 </h4>
                 <p className="text-xs text-(--ink) mt-1">
@@ -435,7 +435,7 @@ const ImportBatch = () => {
                 {/* Error Summary by Type */}
                 <div className="mt-3 flex flex-wrap gap-2">
                   {Array.from(errorSummary.entries()).map(([field, count]) => (
-                    <Badge key={field} variant="destructive" className="text-[10px]">
+                    <Badge key={field} variant="destructive" className="text-xs">
                       {field}: {count}
                     </Badge>
                   ))}
@@ -445,7 +445,7 @@ const ImportBatch = () => {
             
             {/* Scrollable Error List */}
             <details className="mt-3">
-              <summary className="text-xs font-medium text-(--ink) cursor-pointer hover:text-(--ink)">
+              <summary className="text-xs font-normal text-(--ink) cursor-pointer hover:text-(--ink)">
                 View all errors
               </summary>
               <ul className="mt-2 space-y-1 text-xs text-(--ink) max-h-48 overflow-y-auto">
@@ -464,9 +464,9 @@ const ImportBatch = () => {
           <motion.article
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="rounded-xl border border-(--line) bg-(--surface) p-4"
+            className="rounded-xl bg-(--surface) p-4"
           >
-            <h4 className="text-sm font-medium text-(--ink)">
+            <h4 className="type-label">
               ⚠️ {missingLocationCount} order{missingLocationCount !== 1 ? 's' : ''} missing delivery location
             </h4>
             <p className="text-xs text-(--ink) mt-1">
@@ -483,7 +483,7 @@ const ImportBatch = () => {
             className="rounded-xl border border-(--line) bg-(--paper)"
           >
             <header className="px-4 py-3 border-b bg-(--surface) rounded-t-xl flex justify-between items-center">
-              <h4 className="text-sm font-medium text-(--ink)">
+              <h4 className="type-label">
                 Preview ({preview.rows.length} rows)
               </h4>
               <Badge variant={preview.errors.length ? 'destructive' : 'secondary'}>
@@ -523,7 +523,7 @@ const ImportBatch = () => {
                         <td className="px-3 py-2">
                           <Badge
                             variant={rowErrors.length ? 'destructive' : 'secondary'}
-                            className="text-[10px]"
+                            className="text-xs"
                           >
                             {rowErrors.length ? `${rowErrors.length} issue(s)` : 'Validated'}
                           </Badge>
@@ -543,13 +543,13 @@ const ImportBatch = () => {
           animate={{ opacity: 1 }}
           className="rounded-xl border border-(--line) bg-(--paper) p-4"
         >
-          <h3 className="text-sm font-medium text-(--ink) mb-3">Batch Details (Optional)</h3>
+          <h3 className="type-label mb-3">Batch Details (Optional)</h3>
           <Input
             label="Batch Name"
             placeholder="e.g. Morning Kigali Drop-offs"
             {...register('batchName')}
           />
-          <p className="text-xs text-(--muted) mt-1">
+          <p className="type-meta mt-1">
             Leave blank to create an unnamed batch. You can review and edit all orders on the next page.
           </p>
         </motion.article>
@@ -587,7 +587,7 @@ const ImportBatch = () => {
           {billingGuardPrompt?.billingStatus ? (
             <p className="text-sm text-(--muted)">
               Billing status:{' '}
-              <span className="font-medium text-(--ink)">
+              <span className="font-normal text-(--ink)">
                 {billingGuardPrompt.billingStatus}
               </span>
             </p>

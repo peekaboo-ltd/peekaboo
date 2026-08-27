@@ -156,7 +156,7 @@ const BusinessPlansPage = () => {
       </motion.section>
 
       <motion.section variants={itemVariants}>
-        <h3 className="mb-3 text-sm font-medium text-(--ink)">
+        <h3 className="type-label mb-3">
           Active Plans
         </h3>
         <Table
@@ -169,10 +169,10 @@ const BusinessPlansPage = () => {
 
       <motion.section variants={itemVariants}>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-medium text-(--ink)">
+          <h3 className="type-label">
             Deactivated Plans
           </h3>
-          <span className="inline-flex items-center gap-1 rounded-full border border-(--line) bg-(--surface) px-3 py-1 text-xs font-medium text-(--muted)">
+          <span className="inline-flex items-center gap-1 rounded-full bg-(--surface) px-3 py-1 text-xs font-normal text-(--muted)">
             <FontAwesomeIcon icon={faBoxArchive} />
             {stats.deactivated}
           </span>

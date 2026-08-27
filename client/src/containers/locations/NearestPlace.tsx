@@ -32,11 +32,11 @@ const NearestPlace = ({ location }: { location?: OrderLocation | null }) => {
     <p className="flex items-start gap-2">
       <FontAwesomeIcon
         icon={faLocationDot}
-        className="mt-0.5 text-xs text-(--muted)"
+        className="type-meta mt-0.5"
         aria-hidden="true"
       />
       <span className="min-w-0">
-        <span className="block break-words text-sm font-medium text-(--ink)">
+        <span className="block break-words text-sm font-normal text-(--ink)">
           {heading}
         </span>
         {subtitle ? (

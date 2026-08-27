@@ -15,7 +15,7 @@ interface FeaturesSectionProps {
 }
 
 const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
-<section className="section-rhythm w-full border-t border-(--line) bg-(--paper)">
+<section className="section-rhythm w-full border-(--line) bg-(--paper)">
   <article className="app-container">
     <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {actions.map((action) => {
@@ -29,7 +29,7 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
                 e.preventDefault();
                 action.onClick?.();
               }}
-              className="group relative flex h-full min-h-[150px] w-full flex-col items-start rounded-(--radius-card) border border-(--line) p-6 text-left transition-[border-color] duration-200 hover:border-(--ink)"
+              className="group relative flex h-full min-h-[150px] w-full flex-col items-start rounded-md border border-(--line) p-6 text-left transition-[border-color] duration-200 hover:border-(--ink)"
             >
               <span
                 className={`flex h-9 w-9 items-center justify-center rounded-(--radius-control) transition-[background-color,color,border-color,box-shadow] duration-200 ${
@@ -41,20 +41,20 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
                 <Icon className="h-4 w-4 transition-transform duration-200" aria-hidden="true" />
               </span>
               <span
-                className={`mt-4 block text-[14px] font-medium ${
+                className={`mt-4 block text-[14px] font-normal ${
                   !action.accent ? 'group-hover:text-foreground' : ''
                 }`}
               >
                 {action.title}
               </span>
-              <span className="mt-1 block text-[12px] font-normal leading-relaxed">
+              <span className="mt-1 block text-xs font-normal leading-relaxed">
                 {action.description}
               </span>
               <span
-                className={`mt-auto inline-flex items-center gap-1.5 pt-4 text-[12px] font-medium transition-colors duration-200 ${
+                className={`mt-auto inline-flex items-center gap-1.5 pt-4 text-xs font-normal transition-colors duration-200 ${
                   action.accent
                     ? 'text-(--ink)'
-                    : 'text-foreground group-hover:text-[var(--muted)]'
+                    : 'text-foreground group-hover:text-(--muted)'
                 }`}
               >
                 Open

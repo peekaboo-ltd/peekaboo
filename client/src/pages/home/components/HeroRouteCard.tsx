@@ -11,7 +11,7 @@ const HeroRouteCard = ({
   etaLabel = '12 min away',
   statusLabel = 'Rider on the way',
 }: HeroRouteCardProps) => (
-  <figure className="relative isolate w-full overflow-hidden rounded-(--radius-card) border border-(--line) bg-(--surface)">
+  <figure className="relative isolate w-full overflow-hidden rounded-md bg-(--surface)">
     <svg
       viewBox="0 0 480 360"
       role="img"
@@ -66,7 +66,7 @@ const HeroRouteCard = ({
     <figcaption className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-(--radius-control) bg-(--paper) px-4 py-3">
       <span className="flex min-w-0 items-center gap-2.5">
         <span className="size-2 shrink-0 rounded-full bg-(--ink)" aria-hidden="true" />
-        <span className="truncate text-sm font-medium text-(--ink)">{statusLabel}</span>
+        <span className="truncate text-sm font-normal text-(--ink)">{statusLabel}</span>
       </span>
       <span className="shrink-0 text-sm text-(--muted) tabular">{etaLabel}</span>
     </figcaption>

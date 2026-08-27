@@ -306,7 +306,7 @@ const OrderPayment = () => {
 
         <p className="flex items-center justify-between border-t border-(--line) pt-3 text-sm">
           <span className="text-(--muted)">Amount due</span>
-          <span className="font-medium text-(--ink)">{formatCurrency(amount)}</span>
+          <span className="font-normal text-(--ink)">{formatCurrency(amount)}</span>
         </p>
 
         {ENVIRONMENTS.isPaymentSimulation ? (

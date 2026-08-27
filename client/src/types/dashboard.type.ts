@@ -119,7 +119,6 @@ export interface MetricCardData {
     value: number;
     isPositive: boolean;
   };
-  colorClass?: string;
   accent?: DashboardAccent;
   href?: string;
   query?: Record<string, string>;

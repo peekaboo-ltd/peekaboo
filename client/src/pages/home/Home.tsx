@@ -7,7 +7,6 @@ import { useI18n } from '@/i18n/i18n';
 import { useHomeContent } from './useHomeContent';
 import { mapApiPlanToCard } from './home.utils';
 import HeroSection from './components/HeroSection';
-import TrustedBySection from './components/TrustedBySection';
 import FeaturesSection from './components/FeaturesSection';
 import ServicesSection from './components/ServicesSection';
 import HowItWorksSection from './components/HowItWorksSection';
@@ -30,8 +29,6 @@ const Home = () => {
     howItWorks,
     whyItems,
     businessFeatures,
-    trustedByLabel,
-    trustedByIndustries,
     supportContacts,
   } = useHomeContent();
 
@@ -80,8 +77,6 @@ const Home = () => {
         onTrackClick={handleTrackNavigation}
       />
 
-      <TrustedBySection label={trustedByLabel} industries={trustedByIndustries} />
-
       <FeaturesSection
         actions={quickActions.map((action, index) => ({
           ...action,
@@ -112,7 +107,6 @@ const Home = () => {
         title={t('home.b2b.pricing.title')}
         subtitle={t('home.b2b.pricing.subtitle')}
         popularLabel="Most popular"
-        perMonthLabel="Transparent, predictable pricing for growing teams"
         ctaLabel={t('home.b2b.cta.contact')}
         plans={businessPlans}
         isLoading={isLoadingPlans}

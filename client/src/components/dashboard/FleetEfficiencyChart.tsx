@@ -48,7 +48,7 @@ const FleetEfficiencyChart = ({
         <tspan
           x={cx}
           dy="-0.5em"
-          className="text-2xl font-medium fill-foreground"
+          className="text-2xl font-normal fill-foreground"
         >
           {centerValue}%
         </tspan>
@@ -73,11 +73,11 @@ const FleetEfficiencyChart = ({
     if (active && payload && payload.length) {
       const item = payload[0].payload;
       return (
-        <div className="rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 py-2 shadow-[var(--shadow-popover)]">
-          <p className="text-sm font-medium text-foreground">
+        <div className="rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 py-2 shadow-(--shadow-menu)">
+          <p className="text-sm font-normal text-foreground">
             {item.translatedName}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="type-meta">
             {item.value} ({Math.round((item.value / total) * 100)}%)
           </p>
         </div>
@@ -112,7 +112,7 @@ const FleetEfficiencyChart = ({
                 {entry.payload.translatedName}
               </span>
             </span>
-            <span className="font-medium text-foreground">
+            <span className="font-normal text-foreground">
               {entry.payload.value}
             </span>
           </li>
@@ -124,7 +124,7 @@ const FleetEfficiencyChart = ({
   return (
     <Card className="h-full border-(--line) bg-(--paper)">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base font-medium">
+        <CardTitle className="text-base font-normal">
           {title || t('dashboard.fleetEfficiency')}
         </CardTitle>
       </CardHeader>

@@ -21,7 +21,7 @@ import {
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>{children}</TooltipTrigger>
-          <TooltipContent className={`bg-(--ink) text-(--paper) shadow-[var(--shadow-menu)] text-[13px] ${labelClassName}`}>
+          <TooltipContent className={`invert-surface shadow-(--shadow-menu) text-sm ${labelClassName}`}>
             <>{label}</>
           </TooltipContent>
         </Tooltip>

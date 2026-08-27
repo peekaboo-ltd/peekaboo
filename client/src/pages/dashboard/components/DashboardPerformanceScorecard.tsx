@@ -58,15 +58,15 @@ const DashboardPerformanceScorecard = ({
           {kpis.map((kpi) => (
             <article
               key={kpi.label}
-              className="rounded-(--radius-card) border border-(--line) bg-(--paper) p-4"
+              className="rounded-md border border-(--line) bg-(--paper) p-4"
             >
               <div className="flex items-start justify-between gap-2 mb-3">
-                <p className="text-xs font-medium text-(--muted) leading-snug">
+                <p className="text-xs font-normal text-(--muted) leading-snug">
                   {kpi.label}
                 </p>
                 {kpi.trend && (
                   <span
-                    className={`shrink-0 flex items-center gap-0.5 text-[11px] font-medium px-1.5 py-0.5 rounded-full ${
+                    className={`shrink-0 flex items-center gap-0.5 text-xs font-normal px-1.5 py-0.5 rounded-full ${
                       kpi.trend.isPositive
                         ? 'bg-(--surface) text-(--ink)'
                         : 'bg-(--surface) text-(--ink)'
@@ -74,7 +74,7 @@ const DashboardPerformanceScorecard = ({
                   >
                     <FontAwesomeIcon
                       icon={kpi.trend.isPositive ? faArrowTrendUp : faArrowTrendDown}
-                      className="text-[9px]"
+                      className="text-xs"
                       aria-hidden="true"
                     />
                     {kpi.trend.value}%
@@ -82,12 +82,12 @@ const DashboardPerformanceScorecard = ({
                 )}
               </div>
 
-              <p className="text-2xl leading-none text-(--ink) mb-3">
+              <p className="type-metric mb-3">
                 {kpi.value}
               </p>
 
               {/* Progress bar */}
-              <div className="h-1.5 rounded-full bg-[var(--surface)]">
+              <div className="h-1.5 rounded-full bg-(--surface)">
                 <div
                   className="h-full rounded-full bg-(--ink) opacity-60"
                   style={{ width: `${Math.min(kpi.progress, 100)}%` }}

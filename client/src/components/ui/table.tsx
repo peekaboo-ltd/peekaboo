@@ -42,7 +42,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "border-t border-(--line) bg-(--surface) font-medium [&>tr]:last:border-b-0",
+        "border-t border-(--line) bg-(--surface) font-normal [&>tr]:last:border-b-0",
         className
       )}
       {...props}
@@ -55,7 +55,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "h-14 border-b border-(--line) transition-[background-color,color] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) data-[state=selected]:bg-(--ink) data-[state=selected]:text-(--paper)",
+        "h-12 border-b border-(--line) transition-[background-color,color] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) data-[state=selected]:bg-(--ink) data-[state=selected]:text-(--paper)",
         className
       )}
       {...props}
@@ -68,7 +68,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-11 px-4 text-left align-middle text-[0.8125rem] font-medium whitespace-nowrap text-(--muted) [&:has([role=checkbox])]:pr-0",
+        "h-(--control-md) px-4 text-left align-middle text-[0.8125rem] font-medium whitespace-nowrap text-(--muted) [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}

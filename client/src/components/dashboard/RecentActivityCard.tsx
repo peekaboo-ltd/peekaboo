@@ -12,7 +12,7 @@ const RecentActivityCard = ({ activities }: RecentActivityCardProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Recent Activity</CardTitle>
+          <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">No recent activity</p>
@@ -24,7 +24,7 @@ const RecentActivityCard = ({ activities }: RecentActivityCardProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Recent Activity</CardTitle>
+        <CardTitle>Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">
@@ -34,14 +34,14 @@ const RecentActivityCard = ({ activities }: RecentActivityCardProps) => {
               className="flex items-center justify-between py-2 border-b border-border last:border-0"
             >
               <article className="flex flex-col gap-1">
-                <span className="font-medium text-sm">{activity.title}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="font-normal text-sm">{activity.title}</span>
+                <span className="type-meta">
                   {activity.description}
                 </span>
               </article>
               <aside className="flex flex-col items-end gap-1">
                 <StatusBadge status={activity.status} />
-                <time className="text-xs text-muted-foreground">
+                <time className="type-meta">
                   {formatDistanceToNow(new Date(activity.timestamp), {
                     addSuffix: true,
                   })}

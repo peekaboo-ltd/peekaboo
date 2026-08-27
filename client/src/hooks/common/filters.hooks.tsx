@@ -166,10 +166,10 @@ export const useStatusFilter = ({
         trigger={
           <Button
             variant="outline"
-            className="cursor-pointer font-normal text-(--ink) !justify-start bg-(--paper) flex !w-full items-center gap-2 !h-[38px] text-[13px]"
+            className="w-full justify-start gap-2"
           >
             <FontAwesomeIcon icon={labelIcon} />
-            <p className="text-[13px]">{label}</p>
+            <p className="text-sm">{label}</p>
           </Button>
         }
       >
@@ -180,7 +180,7 @@ export const useStatusFilter = ({
               placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-[13px] h-9"
+              className="w-full text-sm h-9"
             />
           </fieldset>
 
@@ -220,7 +220,7 @@ export const useStatusFilter = ({
                                   : 'w-4.5 h-4.5'
                               }
                             />
-                            <p className="text-[13px] text-(--ink)">
+                            <p className="text-sm text-(--ink)">
                               {capitalizeString(status)}
                             </p>
                           </Link>
@@ -230,7 +230,7 @@ export const useStatusFilter = ({
                   );
                 })
               ) : (
-                <p className="text-[13px] text-(--muted) text-center py-2">
+                <p className="text-sm text-(--muted) text-center py-2">
                   No statuses found
                 </p>
               )}
@@ -238,7 +238,7 @@ export const useStatusFilter = ({
             <ul className="flex items-center justify-between w-full gap-2 mt-4">
               <li>
                 <Link
-                  className="text-center text-(--ink) text-[13px] p-1 px-3 border hover:!border-(--ink) hover:!bg-(--ink) hover:!text-(--paper) font-normal rounded-sm"
+                  className="h-(--control-sm) rounded-(--radius-control) border border-(--line) px-3 text-sm transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:border-(--ink) hover:bg-(--surface)"
                   to={`#`}
                   onClick={handleClear}
                 >
@@ -247,7 +247,7 @@ export const useStatusFilter = ({
               </li>
               <li>
                 <Link
-                  className="text-center text-(--ink) text-[13px] p-1 px-3 border hover:!border-(--ink) hover:!bg-(--ink) hover:!text-(--paper) font-normal rounded-sm"
+                  className="h-(--control-sm) rounded-(--radius-control) border border-(--line) px-3 text-sm transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:border-(--ink) hover:bg-(--surface)"
                   to={`#`}
                   onClick={handleSelectAll}
                 >

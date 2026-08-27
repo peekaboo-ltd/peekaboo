@@ -39,7 +39,7 @@ const DashboardSystemStatus = ({
               className={`relative inline-flex h-2 w-2 ${allOperational ? 'rounded-full bg-(--ink)' : 'rotate-45 bg-(--ink)'}`}
             />
           </span>
-          <span className="text-xs font-medium text-(--muted)">
+          <span className="type-meta">
             {allOperational ? 'All Systems Operational' : 'Partial Disruption'}
           </span>
         </div>

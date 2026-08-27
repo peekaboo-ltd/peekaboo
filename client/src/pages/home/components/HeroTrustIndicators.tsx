@@ -17,17 +17,17 @@ const HeroTrustIndicators = ({
   const completedOrders = landingStats?.customersWithOrders;
 
   const items = [
-    typeof activeCustomers === 'number'
+    typeof activeCustomers === 'number' && activeCustomers > 0
       ? `${activeCustomers.toLocaleString()} ${activeCustomersLabel}`
       : fallbackLabel,
-    typeof completedOrders === 'number'
+    typeof completedOrders === 'number' && completedOrders > 0
       ? `${completedOrders.toLocaleString()} ${completedOrdersLabel}`
       : 'Verified riders',
     'Kigali-wide',
   ];
 
   return (
-    <p className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] font-normal text-(--muted)">
+    <p className="type-meta flex flex-wrap items-center gap-x-2">
       {items.map((item, index) => (
         <span key={item} className="inline-flex items-center gap-x-2">
           {index > 0 ? <span aria-hidden="true">·</span> : null}

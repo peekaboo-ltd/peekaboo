@@ -85,7 +85,7 @@ const LocationMiniMap = ({
           Open in Google Maps
           <FontAwesomeIcon
             icon={faArrowUpRightFromSquare}
-            className="text-[10px]"
+            className="text-xs"
             aria-hidden="true"
           />
         </a>

@@ -69,11 +69,11 @@ const HeroSection = ({
   });
 
   return (
-    <section className="w-full bg-(--paper) text-(--ink)">
-      <div className="app-container pb-14 pt-10 lg:pb-20 lg:pt-14">
-        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-16">
+    <section className="w-full bg-(--paper) text-(--ink) min-h-[calc(100vh-64px)] flex items-center justify-center">
+      <div className="app-container pb-10 pt-8 lg:pb-14 lg:pt-10">
+        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-14">
           <motion.div
-            className="flex flex-col items-start gap-6"
+            className="flex flex-col items-start gap-5"
             variants={entranceVariants}
             initial="hidden"
             animate="visible"
@@ -85,17 +85,9 @@ const HeroSection = ({
               businessLabel={heroCopy.businessTabLabel}
             />
 
-            <p className="flex items-center gap-1.5 text-sm text-(--muted)">
-              <MapPin className="size-4 shrink-0" aria-hidden="true" />
+            <p className="type-meta flex items-center gap-1.5">
+              <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
               Kigali, RW
-              <span aria-hidden="true">·</span>
-              <button
-                type="button"
-                onClick={onContactClick}
-                className="link-sweep text-(--ink) outline-none"
-              >
-                Change city
-              </button>
             </p>
 
             <HeroHeadline

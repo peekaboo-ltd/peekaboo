@@ -117,17 +117,17 @@ const OrganizationSettingsPage = () => {
               {details.map((item) => (
                 <li
                   key={item.label}
-                  className="rounded-lg border border-(--line) bg-(--surface) p-4"
+                  className="rounded-lg bg-(--surface) p-4"
                 >
                   <header className="flex items-center gap-3">
                     <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                       <FontAwesomeIcon icon={item.icon} />
                     </span>
                     <section>
-                      <p className="text-xs text-(--muted)">
+                      <p className="type-meta">
                         {item.label}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-(--ink)">
+                      <p className="mt-1 text-sm font-normal text-(--ink)">
                         {item.value}
                       </p>
                     </section>
@@ -145,17 +145,17 @@ const OrganizationSettingsPage = () => {
         >
           <section className="mt-6">
             {organization?.defaultLocation ? (
-              <aside className="p-4 rounded-lg border border-(--line) bg-(--surface) space-y-2">
+              <aside className="p-4 rounded-lg bg-(--surface) space-y-2">
                 <header className="flex items-center gap-2">
                   <FontAwesomeIcon
                     icon={faLocationDot}
                     className="text-(--ink) text-sm"
                   />
-                  <p className="text-xs text-(--muted)">
+                  <p className="type-meta">
                     Current Default
                   </p>
                 </header>
-                <p className="text-sm font-medium text-(--ink)">
+                <p className="text-sm font-normal text-(--ink)">
                   {organization.defaultLocation.latitude.toFixed(5)},{' '}
                   {organization.defaultLocation.longitude.toFixed(5)}
                 </p>
@@ -186,7 +186,7 @@ const OrganizationSettingsPage = () => {
         <article className="space-y-6">
           <section className="space-y-4">
             <header>
-              <h4 className="text-lg font-medium text-(--ink)">Search Location</h4>
+              <h4 className="type-card-title">Search Location</h4>
               <p className="text-sm text-(--muted)">
                 Enter an address or place name to use as the organization's default
                 pickup point
@@ -203,7 +203,7 @@ const OrganizationSettingsPage = () => {
 
           {selectedLocation && (
             <aside className="p-4 bg-(--surface) rounded-lg border">
-              <h5 className="text-sm font-medium text-(--ink) mb-2">
+              <h5 className="text-sm font-normal text-(--ink) mb-2">
                 Selected Location:
               </h5>
               <address className="text-sm text-(--ink) not-italic">

@@ -156,7 +156,7 @@ const UsersTrackingPage = () => {
   return (
     <main className="w-full flex flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-medium text-(--ink)">Users tracking</h1>
+        <h1 className="type-page-title">Users tracking</h1>
         <p className="text-sm text-muted-foreground">
           Live map and latest known location for trackable users.
         </p>

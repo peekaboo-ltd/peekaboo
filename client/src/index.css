@@ -45,7 +45,7 @@
 
 :root {
   color-scheme: light;
-  --font-family-sans: 'DM Sans', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-sans: 'DM Sans', system-ui, -apple-system;
   --paper: #ffffff;
   --ink: #000000;
   --surface: #f3f3f3;
@@ -64,6 +64,12 @@
   --radius-control: 8px;
   --radius-card: 12px;
   --radius-pill: 999px;
+
+  /* Control heights — one scale for every input, select, and button.
+     A field and the button next to it must always share an edge. */
+  --control-sm: 36px;
+  --control-md: 40px;
+  --control-lg: 44px;
   --ease-flat: cubic-bezier(0, 0, 1, 1);
   --ease-menu: cubic-bezier(0.2, 0.8, 0.4, 1);
   --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
@@ -232,14 +238,14 @@ button[aria-current='page'],
 }
 
 @utility section-rhythm {
-  padding-block: 56px;
+  padding-block: 40px;
 
   @media (width >= 48rem) {
-    padding-block: 72px;
+    padding-block: 48px;
   }
 
   @media (width >= 64rem) {
-    padding-block: 88px;
+    padding-block: 56px;
   }
 }
 
@@ -250,7 +256,7 @@ button[aria-current='page'],
     content: '';
     position: absolute;
     inset-inline: 0;
-    bottom: -2px;
+    bottom: -0.5px;
     height: 1px;
     background-color: currentColor;
     transform: scaleX(0);
@@ -288,6 +294,110 @@ button[aria-current='page'],
 
 @utility home-scroll-target {
   scroll-margin-top: 96px;
+}
+
+/* ── Type scale ────────────────────────────────────────────────────────────
+   Every size in the system lives here. Pages compose these instead of
+   hand-picking text-[24px]/text-2xl, so a scale change is one edit, not 300.
+   Hierarchy is carried by size, spacing, and color; 500 is the weight ceiling. */
+
+@utility type-display {
+  font-size: clamp(2rem, 1.5rem + 2.1vw, 2.875rem); /* 32 → 46px */
+  line-height: 1.08;
+  font-weight: 500;
+}
+
+@utility type-h2 {
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 1.875rem); /* 24 → 30px */
+  line-height: 1.16;
+  font-weight: 500;
+}
+
+@utility type-h3 {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+/* Dashboard page heading — the authenticated app tops out here, not at display. */
+@utility type-page-title {
+  font-size: 1.375rem; /* 22px */
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+@utility type-card-title {
+  font-size: 1rem; /* 16px */
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+@utility type-body {
+  font-size: 1rem; /* 16px */
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+@utility type-body-sm {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+@utility type-label {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+@utility type-meta {
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* Big numbers: counters, metric cards, totals. Tabular so columns align. */
+@utility type-metric {
+  font-size: 1.75rem; /* 28px */
+  line-height: 1.1;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-eyebrow {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ── Surfaces ──────────────────────────────────────────────────────────────
+   Three card treatments, and nothing else. A surface fill and a border are
+   two ways of saying the same thing — a card gets one of them, never both. */
+
+/* Framed card: paper ground, hairline edge. The default for content. */
+@utility card-framed {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+/* Quiet card: surface fill, no border. For stats and inert grouping. */
+@utility card-quiet {
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+/* Interactive framed card — the edge darkens on hover. No lift, no shadow. */
+@utility card-interactive {
+  transition: border-color var(--dur-state) var(--ease-flat);
+
+  &:hover {
+    border-color: var(--ink);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

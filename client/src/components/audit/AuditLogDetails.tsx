@@ -31,20 +31,20 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
 
           return (
             <div key={key} className="space-y-2">
-              <h5 className="text-sm font-medium capitalize">
+              <h5 className="text-sm font-normal capitalize">
                 {key.replace(/_/g, ' ')}
               </h5>
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-md border border-(--line) bg-(--surface) p-3">
-                  <p className="text-xs font-medium text-(--ink) mb-1">Before</p>
+                <div className="rounded-md bg-(--surface) p-3">
+                  <p className="text-xs font-normal text-(--ink) mb-1">Before</p>
                   <pre className="text-xs text-(--ink) overflow-auto whitespace-pre-wrap">
                     {typeof before === 'object' 
                       ? JSON.stringify(before, null, 2)
                       : String(before ?? 'null')}
                   </pre>
                 </div>
-                <div className="rounded-md border border-(--line) bg-(--surface) p-3">
-                  <p className="text-xs font-medium text-(--ink) mb-1">After</p>
+                <div className="rounded-md bg-(--surface) p-3">
+                  <p className="text-xs font-normal text-(--ink) mb-1">After</p>
                   <pre className="text-xs text-(--ink) overflow-auto whitespace-pre-wrap">
                     {typeof after === 'object'
                       ? JSON.stringify(after, null, 2)
@@ -86,23 +86,23 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Action</p>
+              <p className="text-sm font-normal text-muted-foreground">Action</p>
               <Badge variant="outline" className="mt-1">
                 {log.action}
               </Badge>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Timestamp</p>
+              <p className="text-sm font-normal text-muted-foreground">Timestamp</p>
               <p className="text-sm mt-1">
                 {format(new Date(log.createdAt), 'PPpp')}
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Entity Type</p>
+              <p className="text-sm font-normal text-muted-foreground">Entity Type</p>
               <p className="text-sm mt-1 capitalize">{log.entityType}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Entity ID</p>
+              <p className="text-sm font-normal text-muted-foreground">Entity ID</p>
               <p className="text-sm mt-1">{log.entityId}</p>
             </div>
           </div>
@@ -112,7 +112,7 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
             <>
               <Separator />
               <div>
-                <h4 className="text-sm font-medium mb-2">Performed By</h4>
+                <h4 className="type-label mb-2">Performed By</h4>
                 <div className="space-y-1">
                   <p className="text-sm">{log.user.name}</p>
                   <p className="text-sm text-muted-foreground">{log.user.email}</p>

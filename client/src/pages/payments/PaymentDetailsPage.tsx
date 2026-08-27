@@ -140,7 +140,7 @@ const PaymentDetailsPage = () => {
       label: 'Amount',
       value: formatCurrency(amount, payment.currency),
       icon: faMoneyBillWave,
-      iconBg: 'bg-(--ink) text-(--ink)',
+      iconBg: 'bg-(--ink) text-(--paper)',
     },
     {
       label: 'Updated At',
@@ -193,7 +193,7 @@ const PaymentDetailsPage = () => {
           eyebrow="Payment Details"
           title="Core Transaction Information"
           actions={
-            <span className="text-xs text-(--muted)">
+            <span className="type-meta">
               Created {formatDateLabel(payment.createdAt)}
             </span>
           }
@@ -207,17 +207,17 @@ const PaymentDetailsPage = () => {
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-lg border border-(--line) bg-(--surface) p-4"
+                className="rounded-lg bg-(--surface) p-4"
               >
                 <header className="flex items-center gap-3">
                   <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs text-(--muted)">
+                    <p className="type-meta">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-(--ink) break-all">
+                    <p className="mt-1 text-sm font-normal text-(--ink) break-all">
                       {item.value || '—'}
                     </p>
                   </section>
@@ -225,16 +225,16 @@ const PaymentDetailsPage = () => {
               </li>
             ))}
 
-            <li className="rounded-lg border border-(--line) bg-(--surface) p-4 sm:col-span-2">
+            <li className="rounded-lg bg-(--surface) p-4 sm:col-span-2">
               <header className="flex items-center gap-3">
                 <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                   <FontAwesomeIcon icon={faFileLines} />
                 </span>
                 <section>
-                  <p className="text-xs text-(--muted)">
+                  <p className="type-meta">
                     Description
                   </p>
-                  <p className="mt-1 text-sm font-medium text-(--ink)">
+                  <p className="mt-1 text-sm font-normal text-(--ink)">
                     {payment.description || 'No description provided.'}
                   </p>
                 </section>
@@ -278,16 +278,16 @@ const PaymentDetailsPage = () => {
             ].map((item) => (
               <article
                 key={item.label}
-                className="flex items-start gap-3 rounded-lg border border-(--line) bg-(--surface) px-4 py-3"
+                className="flex items-start gap-3 rounded-lg bg-(--surface) px-4 py-3"
               >
                 <span className="mt-0.5 h-8 w-8 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center shrink-0">
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <section>
-                  <p className="text-xs text-(--muted)">
+                  <p className="type-meta">
                     {item.label}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-(--ink) break-all">
+                  <p className="mt-1 text-sm font-normal text-(--ink) break-all">
                     {item.value || '—'}
                   </p>
                 </section>

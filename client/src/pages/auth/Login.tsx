@@ -12,7 +12,7 @@ import {
   AuthCard,
   AuthDivider,
   AuthPageShell,
-  GoogleIcon,
+  AuthSocialButton,
 } from './AuthPageShell';
 
 interface LoginFormData {
@@ -55,14 +55,7 @@ export const Login = () => {
   return (
     <AuthPageShell>
       <AuthCard title="Welcome back" subtitle="Log in to your account">
-        <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-normal text-card-foreground transition-colors hover:bg-accent"
-        >
-          <GoogleIcon />
-          Log in with Google
-        </button>
+        <AuthSocialButton onClick={handleGoogleSignIn}>Log in with Google</AuthSocialButton>
 
         <AuthDivider />
 
@@ -81,7 +74,6 @@ export const Login = () => {
                 autoCorrect="off"
                 spellCheck={false}
                 required
-                className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-(--ink)"
                 errorMessage={errors?.username?.message}
               />
             )}
@@ -103,7 +95,6 @@ export const Login = () => {
                 spellCheck={false}
                 required
                 showPasswordToggle
-                className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-(--ink)"
                 errorMessage={errors?.password?.message}
               />
             )}
@@ -114,11 +105,11 @@ export const Login = () => {
               name="rememberMe"
               control={control}
               render={({ field }) => (
-                <label className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-(--muted)">
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="cursor-pointer border-border"
+                    className="cursor-pointer"
                   />
                   <span>Remember me</span>
                 </label>
@@ -126,7 +117,7 @@ export const Login = () => {
             />
             <Link
               to="/auth/forgot-password"
-              className="text-sm font-normal text-(--ink) hover:text-(--muted) underline underline-offset-2"
+              className="link-sweep text-sm text-(--ink)"
             >
               Forgot password?
             </Link>
@@ -134,19 +125,18 @@ export const Login = () => {
 
           <Button
             type="submit"
-            primary
+            variant="primary"
             isLoading={isLoading}
-            className="mt-2 w-full !rounded-md !bg-(--ink) !font-normal hover:!bg-(--ink)"
           >
             Log in
           </Button>
         </form>
 
-        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
+        <div className="mt-6 text-center text-sm">
           <span>Don&apos;t have an account? </span>
           <Link
             to="/auth/register"
-            className="font-normal text-(--ink) hover:text-(--muted) underline underline-offset-2"
+            className="link-sweep text-(--ink)"
           >
             Sign up
           </Link>

@@ -1,3 +1,3 @@
-export const ellipsisHClassName = `text-primary cursor-pointer text-[11px] transition-all duration-300 hover:scale-[.98] bg-slate-200 hover:bg-slate-300 rounded-sm p-1 px-3`;
+export const ellipsisHClassName = `inline-flex size-(--control-sm) cursor-pointer items-center justify-center rounded-(--radius-control) text-(--ink) transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]`;
 
-export const tableActionClassName = `w-full flex items-center gap-2 text-[11px] text-center p-1 px-2 rounded-md hover:bg-gray-100`;
+export const tableActionClassName = `flex h-(--control-sm) w-full cursor-pointer items-center gap-2 rounded-(--radius-control) px-2 text-sm transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface-hover)`;

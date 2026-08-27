@@ -11,6 +11,7 @@ import { useState, useRef, useEffect, forwardRef } from 'react';
 import CustomTooltip from './CustomTooltip';
 import useDebounce from '@/hooks/common/debounce.hooks';
 import { SkeletonLoader } from './Loader';
+import { cn } from '@/lib/utils';
 
 const RADIX_NAVIGATION_KEYS = new Set([
   'ArrowDown',
@@ -91,12 +92,12 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
     }, [debouncedSearchTerm, isOpen, searchable]);
 
     return (
-      <label className={`flex flex-col gap-1 w-full ${labelClassName}`}>
-        <p className={label ? 'flex items-center gap-1 text-[13px]' : 'hidden'}>
+      <label className={cn('flex w-full flex-col gap-1.5', labelClassName)}>
+        <p className={label ? 'type-label flex items-center gap-1' : 'hidden'}>
           {label}{' '}
           <CustomTooltip
             label={required ? `${label} is required` : ''}
-            labelClassName="text-[13px] bg-(--surface)"
+            labelClassName="bg-(--surface) text-sm"
           >
             <span className={required ? `text-(--ink) cursor-pointer` : 'hidden'}>*</span>
           </CustomTooltip>
@@ -114,20 +115,12 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
             value={value}
             name={name}
           >
-            <SelectTrigger
-              size="sm"
-              className={`w-full ${className}`}
-            >
-              <SelectValue
-                className="!text-[10px] truncate"
-                placeholder={
-                  <p className="text-[13px] text-(--muted) truncate">{placeholder}</p>
-                }
-              />
+            <SelectTrigger className={cn('w-full', className)}>
+              <SelectValue className="truncate" placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>
               {searchable ? (
-                <search className="sticky top-0 z-10 -mt-1 bg-(--paper) pb-2 pt-1">
+                <search className="sticky top-0 z-10 border-b border-(--line) bg-(--paper) p-2">
                   <input
                     ref={inputRef}
                     type="text"
@@ -144,13 +137,13 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                     placeholder="Search..."
                     aria-label={label ? `Search ${label}` : 'Search options'}
                     autoComplete="off"
-                    className="h-10 w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm outline-none placeholder:text-(--muted) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                    className="h-(--control-sm) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm outline-none placeholder:text-(--muted) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                   />
                 </search>
               ) : null}
               <SelectGroup>
                 {filteredOptions.length === 0 ? (
-                  <p className="px-2 py-3 text-center text-[13px] text-(--muted)">
+                  <p className="px-2 py-3 text-center text-sm text-(--muted)">
                     No matches found
                   </p>
                 ) : (
@@ -161,9 +154,9 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                         key={index}
                         value={option.value}
                         disabled={option?.disabled || readOnly}
-                        className="cursor-pointer text-[13px] py-1 hover:bg-background"
+                        className="cursor-pointer"
                       >
-                        <p className="text-[13px] py-[3px] truncate">{option?.label}</p>
+                        <span className="truncate">{option?.label}</span>
                       </SelectItem>
                     );
                   })

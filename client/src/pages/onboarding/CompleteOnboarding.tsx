@@ -106,9 +106,9 @@ const CompleteOnboarding = () => {
         <div className="text-center max-w-md">
           <FontAwesomeIcon
             icon={faExclamationTriangle}
-            className="text-(--ink) text-4xl mb-4"
+            className="text-(--ink) text-[2rem] mb-4"
           />
-          <h2 className="text-xl font-medium text-(--ink) mb-2">
+          <h2 className="type-h3 mb-2">
             {t('completeOnboarding.noToken')}
           </h2>
           <p className="text-(--muted) text-sm mb-6">
@@ -116,7 +116,7 @@ const CompleteOnboarding = () => {
           </p>
           <Link
             to="/"
-            className="text-(--ink) hover:text-(--ink) text-sm font-medium"
+            className="text-(--ink) hover:text-(--ink) text-sm font-normal"
           >
             {t('onboarding.organization.backHome')}
           </Link>
@@ -146,9 +146,9 @@ const CompleteOnboarding = () => {
         <div className="text-center max-w-md">
           <FontAwesomeIcon
             icon={faExclamationTriangle}
-            className="text-(--ink) text-4xl mb-4"
+            className="text-(--ink) text-[2rem] mb-4"
           />
-          <h2 className="text-xl font-medium text-(--ink) mb-2">
+          <h2 className="type-h3 mb-2">
             {t('completeOnboarding.invalidToken')}
           </h2>
           <p className="text-(--muted) text-sm mb-6">
@@ -156,7 +156,7 @@ const CompleteOnboarding = () => {
           </p>
           <Link
             to="/"
-            className="text-(--ink) hover:text-(--ink) text-sm font-medium"
+            className="text-(--ink) hover:text-(--ink) text-sm font-normal"
           >
             {t('onboarding.organization.backHome')}
           </Link>
@@ -172,7 +172,7 @@ const CompleteOnboarding = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="bg-(--paper) rounded-(--radius-card) border border-(--line) p-8"
+          className="bg-(--paper) rounded-md border border-(--line) p-8"
         >
           {/* Header */}
           <div className="flex items-center gap-4 mb-8 pb-6 border-b border-(--line)">
@@ -183,12 +183,12 @@ const CompleteOnboarding = () => {
               />
             </div>
             <div>
-              <h1 className="text-xl font-medium text-(--ink)">
+              <h1 className="type-h3">
                 {t('completeOnboarding.title')}
               </h1>
               <p className="text-sm text-(--muted)">
                 {tokenData?.data?.organizationName && (
-                  <span className="font-medium text-(--ink)">
+                  <span className="font-normal text-(--ink)">
                     {tokenData.data.organizationName}
                   </span>
                 )}
@@ -206,7 +206,7 @@ const CompleteOnboarding = () => {
                   icon={faUser}
                   className="text-(--muted) text-sm"
                 />
-                <h3 className="text-sm font-medium text-(--ink) r">
+                <h3 className="type-label">
                   {t('completeOnboarding.adminSection')}
                 </h3>
               </div>
@@ -250,7 +250,7 @@ const CompleteOnboarding = () => {
                   icon={faLock}
                   className="text-(--muted) text-sm"
                 />
-                <h3 className="text-sm font-medium text-(--ink) r">
+                <h3 className="type-label">
                   {t('completeOnboarding.passwordSection')}
                 </h3>
               </div>
@@ -311,7 +311,7 @@ const CompleteOnboarding = () => {
                   icon={faPhone}
                   className="text-(--muted) text-sm"
                 />
-                <h3 className="text-sm font-medium text-(--ink) r">
+                <h3 className="type-label">
                   {t('completeOnboarding.orgSection')}
                 </h3>
               </div>
@@ -354,7 +354,7 @@ const CompleteOnboarding = () => {
               <Button
                 type="submit"
                 primary
-                className="w-full !py-3 !text-sm"
+                className="w-full"
                 isLoading={isSubmitting}
                 disabled={isSubmitting}
               >

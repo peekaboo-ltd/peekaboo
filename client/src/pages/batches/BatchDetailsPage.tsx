@@ -155,7 +155,7 @@ const BatchDetailsPage = () => {
               <span>{batch.name || 'Unnamed Batch'}</span>
               <Badge
                 variant={batchStatusVariantMap[batch.status] ?? 'outline'}
-                className="text-[11px] font-normal"
+                className="text-xs font-normal"
               >
                 {batch.status}
               </Badge>

@@ -146,20 +146,20 @@ const PublicServiceDetailsPage = () => {
 
   if (isFetching) {
     return (
-      <PublicPage className="bg-[var(--surface)]">
+      <PublicPage className="bg-(--surface)">
         <section className="grid gap-4">
-          <div className="h-64 animate-pulse rounded-(--radius-card) border border-(--line) bg-(--paper)" />
+          <div className="h-64 animate-pulse rounded-md border border-(--line) bg-(--paper)" />
           <div className="grid gap-4 md:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
-                className="h-32 animate-pulse rounded-(--radius-card) border border-(--line) bg-(--paper)"
+                className="h-32 animate-pulse rounded-md border border-(--line) bg-(--paper)"
               />
             ))}
           </div>
           <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="h-96 animate-pulse rounded-(--radius-card) border border-(--line) bg-(--paper)" />
-            <div className="h-96 animate-pulse rounded-(--radius-card) border border-(--line) bg-(--paper)" />
+            <div className="h-96 animate-pulse rounded-md border border-(--line) bg-(--paper)" />
+            <div className="h-96 animate-pulse rounded-md border border-(--line) bg-(--paper)" />
           </div>
         </section>
       </PublicPage>
@@ -168,7 +168,7 @@ const PublicServiceDetailsPage = () => {
 
   if (error || !plan) {
     return (
-      <PublicPage className="bg-[var(--surface)]">
+      <PublicPage className="bg-(--surface)">
         <PublicPageHero
           eyebrow="Service details"
           title="We couldn’t find that delivery plan"
@@ -177,7 +177,7 @@ const PublicServiceDetailsPage = () => {
           actions={
             <Link
               to="/services"
-              className="inline-flex items-center gap-2 rounded-(--radius-control) border border-(--line) px-4 py-2 text-[13px] font-medium text-(--muted) transition-colors duration-200 hover:bg-(--surface)"
+              className="inline-flex items-center gap-2 rounded-(--radius-control) px-4 py-2 text-sm font-normal text-(--muted) transition-colors duration-200 hover:bg-(--surface)"
             >
               <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
               Back to services
@@ -188,7 +188,7 @@ const PublicServiceDetailsPage = () => {
           eyebrow="Next step"
           title="Explore active services"
           description="Browse our current delivery plans or reach out directly for a tailored setup."
-          className="rounded-(--radius-card) border-(--line)"
+          className="rounded-md border-(--line)"
         >
           <div className="flex flex-wrap gap-3">
             <Button route="/services" className="w-fit" primary>
@@ -216,7 +216,7 @@ const PublicServiceDetailsPage = () => {
       : pricingRows.map((row) => `${row.label} → ${row.priceLabel}`);
 
   return (
-    <PublicPage className="bg-[var(--surface)]">
+    <PublicPage className="bg-(--surface)">
       <motion.section
         className="grid gap-4"
         initial="hidden"
@@ -231,13 +231,13 @@ const PublicServiceDetailsPage = () => {
                 <div className="flex flex-wrap items-center gap-3">
                   <span>{plan.name}</span>
                   {plan.badge ? (
-                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-(--radius-pill) bg-(--ink) px-3 text-xs font-medium text-(--paper)">
-                      <FontAwesomeIcon icon={faStar} className="text-[10px]" />
+                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-(--radius-pill) bg-(--ink) px-3 text-xs font-normal text-(--paper)">
+                      <FontAwesomeIcon icon={faStar} className="text-xs" />
                       {plan.badge}
                     </span>
                   ) : null}
                   {plan.isDefault ? (
-                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-(--radius-pill) border border-(--ink) px-3 text-xs font-medium text-(--ink)">
+                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-(--radius-pill) border border-(--ink) px-3 text-xs font-normal text-(--ink)">
                       Preferred plan
                     </span>
                   ) : null}
@@ -257,14 +257,14 @@ const PublicServiceDetailsPage = () => {
               <div className="flex flex-wrap gap-2">
                 <Link
                   to="/services"
-                  className="inline-flex items-center gap-2 rounded-(--radius-control) border border-(--line) bg-(--paper) px-4 py-2 text-[13px] font-medium text-(--muted) transition-colors duration-200 hover:bg-(--surface)"
+                  className="inline-flex items-center gap-2 rounded-(--radius-control) bg-(--paper) px-4 py-2 text-sm font-normal text-(--muted) transition-colors duration-200 hover:bg-(--surface)"
                 >
                   <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
                   Back to services
                 </Link>
                 <Button route="/contact" primary className="rounded-(--radius-control) px-6!">
                   Talk to our team
-                  <FontAwesomeIcon icon={faArrowRight} className="text-[11px]" />
+                  <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
                 </Button>
               </div>
             }
@@ -310,16 +310,16 @@ const PublicServiceDetailsPage = () => {
               className="border-(--line)"
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <article className="rounded-(--radius-control) border border-(--line) bg-(--surface) p-5">
-                  <p className="text-[11px] font-medium text-(--muted)">
+                <article className="rounded-(--radius-control) bg-(--surface) p-5">
+                  <p className="type-eyebrow">
                     Headline pricing
                   </p>
-                  <p className="mt-3 text-2xl font-medium text-(--ink)">
+                  <p className="type-metric mt-3">
                     {headlinePrice}
                   </p>
                 </article>
-                <article className="rounded-(--radius-control) border border-(--line) bg-(--surface) p-5">
-                  <p className="text-[11px] font-medium text-(--muted)">
+                <article className="rounded-(--radius-control) bg-(--surface) p-5">
+                  <p className="type-eyebrow">
                     Ideal usage
                   </p>
                   <p className="mt-3 text-sm leading-6 text-(--muted)">
@@ -365,14 +365,14 @@ const PublicServiceDetailsPage = () => {
                   pricingRows.map((row) => (
                     <article
                       key={`${row.label}-${row.priceLabel}`}
-                      className="rounded-(--radius-control) border border-(--line) bg-(--surface) p-4"
+                      className="rounded-(--radius-control) bg-(--surface) p-4"
                     >
-                      <p className="text-sm font-medium text-(--ink)">{row.label}</p>
+                      <p className="text-sm font-normal text-(--ink)">{row.label}</p>
                       <p className="mt-1 text-sm text-(--muted)">{row.priceLabel}</p>
                     </article>
                   ))
                 ) : (
-                  <article className="rounded-(--radius-control) border border-(--line) bg-(--surface) p-4">
+                  <article className="rounded-(--radius-control) bg-(--surface) p-4">
                     <p className="text-sm text-(--muted)">
                       Pricing is tailored with our team based on your exact operational needs.
                     </p>
@@ -381,7 +381,7 @@ const PublicServiceDetailsPage = () => {
 
                 {overflowRate ? (
                   <article className="rounded-(--radius-control) border border-(--line) p-4">
-                    <p className="text-[11px] font-normal text-muted-foreground">
+                    <p className="type-eyebrow">
                       Overflow rate
                     </p>
                     <p className="mt-2 text-sm text-foreground">
@@ -392,7 +392,7 @@ const PublicServiceDetailsPage = () => {
 
                 {hasPackageTiers && fallbackRate ? (
                   <article className="rounded-(--radius-control) border p-4">
-                    <p className="text-[11px] font-normal">
+                    <p className="text-xs font-normal">
                       Fallback rate
                     </p>
                     <p className="mt-2 text-sm">
@@ -416,7 +416,7 @@ const PublicServiceDetailsPage = () => {
                 <div className="flex flex-col gap-3">
                   <Button route="/contact" primary className="w-full rounded-(--radius-control)">
                     Talk to our team
-                    <FontAwesomeIcon icon={faArrowRight} className="text-[11px]" />
+                    <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
                   </Button>
                   <Button route="/services" className="w-full rounded-(--radius-control)">
                     Explore all services

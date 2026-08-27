@@ -1,7 +1,7 @@
 .PhoneInput.peekaboo-tel-input {
   display: flex;
   width: 100%;
-  min-height: 48px;
+  min-height: 40px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
@@ -41,9 +41,9 @@
   flex: 1;
   border: 0;
   background: transparent;
-  padding: 7px 14px;
+  padding: 6px 12px;
   color: var(--ink);
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 400;
   outline: none;
 }
@@ -54,7 +54,7 @@
 
 .peekaboo-tel-number::placeholder {
   color: var(--muted);
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 400;
 }
 

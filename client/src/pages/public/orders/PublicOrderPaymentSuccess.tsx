@@ -21,7 +21,7 @@ import {
 
 const SkeletonLine = ({ className = '' }: { className?: string }) => (
   <span
-    className={`inline-block animate-pulse rounded bg-[var(--surface)] ${className}`}
+    className={`inline-block animate-pulse rounded bg-(--surface) ${className}`}
   />
 );
 
@@ -39,7 +39,7 @@ const ReferenceValue = ({
   onCopy,
 }: ReferenceValueProps) => (
   <span className="flex min-w-0 items-center gap-2">
-    <span className="min-w-0 break-all text-xs text-[var(--ink)] tabular-nums">
+    <span className="min-w-0 break-all text-xs text-(--ink) tabular-nums">
       {value || '—'}
     </span>
     {value ? (
@@ -122,11 +122,11 @@ const PublicOrderPaymentSuccess = () => {
       <PublicPage>
         <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
           <div className="py-5 text-center" role="status" aria-live="polite">
-            <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--ink)] motion-reduce:animate-none" />
-            <h1 className="mt-5 text-xl font-medium text-[var(--ink)]">
+            <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-(--line) border-t-(--ink) motion-reduce:animate-none" />
+            <h1 className="type-h3 mt-5">
               Confirming your payment
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--muted)">
               We’re checking the transaction before showing your receipt.
             </p>
           </div>
@@ -140,10 +140,10 @@ const PublicOrderPaymentSuccess = () => {
       <PublicPage>
         <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
           <div className="py-5 text-center">
-            <h1 className="text-xl font-medium text-[var(--ink)]">
+            <h1 className="type-h3">
               Payment confirmation unavailable
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--muted)">
               We couldn’t verify a completed payment for this order. Return to
               the order to check its current status.
             </p>
@@ -165,7 +165,7 @@ const PublicOrderPaymentSuccess = () => {
         title="Payment confirmed"
         description="Your order is paid and ready for rider assignment. Keep the references below for your records."
         actions={
-          <span className="inline-flex h-6 items-center gap-2 rounded-(--radius-pill) border border-(--ink) px-2.5 text-xs font-medium text-(--ink)">
+          <span className="inline-flex h-6 items-center gap-2 rounded-(--radius-pill) border border-(--ink) px-2.5 text-xs font-normal text-(--ink)">
             <FontAwesomeIcon icon={faCheckCircle} aria-hidden="true" />
             Confirmed
           </span>
@@ -181,10 +181,10 @@ const PublicOrderPaymentSuccess = () => {
             title="Payment details"
             description="Transaction and order references."
           >
-            <dl className="divide-y divide-[var(--line)]">
+            <dl className="divide-y divide-(--line)">
               {successfulPayment.externalReferenceId ? (
                 <div className="grid gap-2 py-4 first:pt-0 sm:grid-cols-[10rem_1fr] sm:items-center">
-                  <dt className="text-[10px] text-[var(--muted)]">
+                  <dt className="type-meta">
                     Payment reference
                   </dt>
                   <dd className="sm:justify-self-end">
@@ -204,7 +204,7 @@ const PublicOrderPaymentSuccess = () => {
               ) : null}
 
               <div className="grid gap-2 py-4 sm:grid-cols-[10rem_1fr] sm:items-center">
-                <dt className="text-[10px] text-[var(--muted)]">
+                <dt className="type-meta">
                   Order reference
                 </dt>
                 <dd className="sm:justify-self-end">
@@ -226,10 +226,10 @@ const PublicOrderPaymentSuccess = () => {
               </div>
 
               <div className="grid gap-2 py-4 pb-0 sm:grid-cols-[10rem_1fr] sm:items-center">
-                <dt className="text-[10px] text-[var(--muted)]">
+                <dt className="type-meta">
                   Amount paid
                 </dt>
-                <dd className="text-xl font-medium text-[var(--ink)] sm:justify-self-end">
+                <dd className="type-metric sm:justify-self-end">
                   {formatCurrency(successfulPayment.amount)}
                 </dd>
               </div>
@@ -251,7 +251,7 @@ const PublicOrderPaymentSuccess = () => {
               <div className="relative grid gap-6 sm:grid-cols-2 sm:gap-10">
                 <span
                   aria-hidden="true"
-                  className="absolute left-2 top-5 hidden h-px w-[calc(50%-0.5rem)] bg-[var(--ink)] sm:block"
+                  className="absolute left-2 top-5 hidden h-px w-[calc(50%-0.5rem)] bg-(--ink) sm:block"
                 />
                 {[
                   {
@@ -264,11 +264,11 @@ const PublicOrderPaymentSuccess = () => {
                   },
                 ].map((stop) => (
                   <article key={stop.label} className="relative min-w-0 pl-6">
-                    <span className="absolute left-0 top-0.5 h-3 w-3 rounded-full bg-[var(--ink)]" />
-                    <p className="text-[10px] text-[var(--muted)]">
+                    <span className="absolute left-0 top-0.5 h-3 w-3 rounded-full bg-(--ink)" />
+                    <p className="type-meta">
                       {stop.label}
                     </p>
-                    <div className="mt-3 text-sm text-[var(--ink)]">
+                    <div className="mt-3 text-sm text-(--ink)">
                       {stop.location ? (
                         <AdministrativeLocation location={stop.location} />
                       ) : (
@@ -281,11 +281,11 @@ const PublicOrderPaymentSuccess = () => {
             )}
 
             {!orderLoading ? (
-              <div className="mt-6 flex items-center justify-between border-t border-[var(--line)] pt-4">
-                <span className="text-sm text-[var(--muted)]">
+              <div className="mt-6 flex items-center justify-between border-t border-(--line) pt-4">
+                <span className="text-sm text-(--muted)">
                   Delivery fee
                 </span>
-                <span className="font-medium text-[var(--ink)]">
+                <span className="font-normal text-(--ink)">
                   {formatCurrency(
                     currentOrder?.finalFee ?? currentOrder?.initialFee ?? 0,
                   )}
@@ -300,7 +300,7 @@ const PublicOrderPaymentSuccess = () => {
           title="Track rider assignment"
           description="We’ll update the tracking page when a rider is assigned and as the delivery moves."
         >
-          <p className="text-sm leading-6 text-[var(--muted)]">
+          <p className="text-sm leading-6 text-(--muted)">
             You can leave this receipt safely. Your order reference will remain
             available on the tracking page.
           </p>

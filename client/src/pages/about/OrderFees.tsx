@@ -16,10 +16,10 @@ const OrderFees = () => {
           <p className="text-sm font-normal text-(--muted)">
             Transparent Pricing
           </p>
-          <h1 className="mt-3 text-3xl font-medium sm:text-4xl">
+          <h1 className="mt-3 type-h2">
             Order Fee Breakdown
           </h1>
-          <p className="mt-4 max-w-3xl text-base sm:text-lg font-normal text-(--muted)">
+          <p className="type-body mt-3 max-w-[68ch] text-(--muted)">
             Fees are calculated from the distance between pickup and delivery.
             The table below shows the fee range we apply per order.
           </p>
@@ -30,7 +30,7 @@ const OrderFees = () => {
         <article className="app-container">
           <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-2xl font-medium text-(--ink)">
+              <h2 className="type-h3 text-(--ink)">
                 Distance-Based Pricing
               </h2>
               <p className="mt-2 text-sm font-normal text-(--muted)">
@@ -40,9 +40,9 @@ const OrderFees = () => {
           </header>
 
           <section className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <article className="lg:col-span-2 overflow-hidden rounded-(--radius-card) border border-(--line) bg-(--paper)">
+            <article className="lg:col-span-2 overflow-hidden rounded-md border border-(--line) bg-(--paper)">
               <header className="px-6 py-5 border-b border-(--line)">
-                <h3 className="text-lg font-medium text-(--ink)">
+                <h3 className="type-card-title">
                   Fee Ranges
                 </h3>
               </header>
@@ -76,8 +76,8 @@ const OrderFees = () => {
               </div>
             </article>
 
-            <aside className="space-y-4 rounded-(--radius-card) border border-(--line) bg-(--paper) p-6">
-              <h3 className="text-lg font-medium text-(--ink)">
+            <aside className="space-y-4 rounded-md border border-(--line) bg-(--paper) p-6">
+              <h3 className="type-card-title">
                 How We Calculate
               </h3>
               <p className="text-sm text-(--muted)">

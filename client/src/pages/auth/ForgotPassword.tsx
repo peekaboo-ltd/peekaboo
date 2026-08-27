@@ -64,11 +64,11 @@ const ForgotPassword = () => {
           </form>
         )}
 
-        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
+        <div className="mt-6 text-center text-sm">
           <span>Remembered your password? </span>
           <Link
             to="/auth/login"
-            className="font-normal text-(--ink) hover:text-(--muted)"
+            className="link-sweep text-(--ink)"
           >
             Back to sign in
           </Link>

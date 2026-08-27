@@ -42,14 +42,14 @@ const DashboardHeader = ({
 
   return (
     <motion.header className="w-full" variants={variants}>
-      <div className="overflow-hidden rounded-xl border border-[color:var(--line)] bg-[var(--surface)]">
-        <div className="border-b border-[color:var(--line)] px-5 py-4 sm:px-6">
-          <p className="text-[11px] font-medium text-(--muted)">
+      <div className="overflow-hidden rounded-xl bg-(--surface)">
+        <div className="border-b border-(--line) px-5 py-4 sm:px-6">
+          <p className="type-eyebrow">
             Command center
           </p>
           <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="text-[2rem] font-medium text-[color:var(--ink)] sm:text-[2.3rem]">
+              <h1 className="type-display">
                 Dashboard
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-(--muted) sm:text-[15px]">
@@ -64,9 +64,9 @@ const DashboardHeader = ({
                   <Link
                     key={action.label}
                     to={action.to}
-                    className="inline-flex items-center gap-2 rounded-md border border-[color:var(--line)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[color:var(--ink)] transition-colors duration-200 hover:bg-[var(--surface)]"
+                    className="inline-flex items-center gap-2 rounded-md bg-(--surface) px-4 py-2 text-sm font-normal text-(--ink) transition-colors duration-200 hover:bg-(--surface)"
                   >
-                    <FontAwesomeIcon icon={action.icon} className="text-xs text-(--muted)" />
+                    <FontAwesomeIcon icon={action.icon} className="type-meta" />
                     {action.label}
                   </Link>
                 ))}
@@ -85,7 +85,7 @@ const DashboardHeader = ({
                 toDate={endDate}
               />
             </div>
-            <span className="hidden text-center text-[11px] text-(--muted) sm:block">
+            <span className="hidden text-center text-xs text-(--muted) sm:block">
               to
             </span>
             <div className="w-full">
@@ -102,7 +102,7 @@ const DashboardHeader = ({
             <Button
               variant="outline"
               size="sm"
-              className="h-10 gap-2 rounded-md border-[color:var(--line)] bg-[var(--surface)] px-4 hover:bg-[var(--surface)]"
+              className="h-10 gap-2 rounded-md border-(--line) bg-(--surface) px-4 hover:bg-(--surface)"
             >
               <FontAwesomeIcon icon={faFileLines} className="text-xs" />
               Export

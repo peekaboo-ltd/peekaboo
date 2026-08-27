@@ -18,7 +18,7 @@ const getMeaning = (status?: string): StatusMeaning => {
 };
 
 const treatments = {
-  active: { icon: LoaderCircle, className: 'border-transparent bg-(--ink) text-(--paper)' },
+  active: { icon: LoaderCircle, className: 'invert-surface border-transparent' },
   completed: { icon: Check, className: 'border-(--ink) bg-transparent text-(--ink)' },
   pending: { icon: Clock3, className: 'border-dashed border-(--line-strong) bg-transparent text-(--muted)' },
   failed: { icon: X, className: 'border-(--ink) bg-transparent text-(--ink) line-through' },

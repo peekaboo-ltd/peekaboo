@@ -58,8 +58,8 @@ const About = () => {
     <main className="min-h-screen bg-(--paper) text-(--ink)">
       <section className="section-rhythm border-b border-(--line)">
         <div className="app-container">
-          <p className="text-xs font-medium text-(--muted)">About Peekaboo</p>
-          <h1 className="mt-4 max-w-[18ch] text-[clamp(2.5rem,1.6rem+3.6vw,3.75rem)] font-medium leading-[1.06]">
+          <p className="type-eyebrow">About Peekaboo</p>
+          <h1 className="type-display mt-3 max-w-[18ch]">
             Kigali moves quickly. Delivery should too.
           </h1>
           <p className="mt-6 max-w-[46ch] text-base leading-[1.6] text-(--muted)">
@@ -71,8 +71,8 @@ const About = () => {
       <section className="section-rhythm border-b border-(--line)">
         <div className="app-container grid gap-12 lg:grid-cols-2">
           <div>
-            <p className="text-xs font-medium text-(--muted)">Our story</p>
-            <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15]">
+            <p className="type-eyebrow">Our story</p>
+            <h2 className="type-h2 mt-2">
               Built in Kigali, for Kigali.
             </h2>
             <div className="mt-6 max-w-[68ch] space-y-4 text-base leading-[1.6] text-(--muted)">
@@ -84,7 +84,7 @@ const About = () => {
             {milestones.map((milestone) => (
               <li key={milestone.year} className="relative pb-8 last:pb-0">
                 <span className="absolute -left-[37px] top-1 size-4 rounded-(--radius-pill) bg-(--ink)" aria-hidden="true" />
-                <time className="text-xs font-medium text-(--muted)">{milestone.year}</time>
+                <time className="type-meta">{milestone.year}</time>
                 <p className="mt-1 text-sm leading-[1.55]">{milestone.label}</p>
               </li>
             ))}
@@ -100,8 +100,8 @@ const About = () => {
             ['Businesses served', stats.businessPartners],
           ].map(([label, value]) => (
             <div key={label}>
-              <dt className="text-xs font-medium text-(--muted)">{label}</dt>
-              <dd className="mt-2 text-5xl font-light leading-none tabular-nums">{Number(value).toLocaleString()}</dd>
+              <dt className="type-meta">{label}</dt>
+              <dd className="mt-2 text-[2.25rem] font-medium leading-none tabular-nums">{Number(value).toLocaleString()}</dd>
             </div>
           ))}
         </dl>
@@ -109,17 +109,17 @@ const About = () => {
 
       <section className="section-rhythm border-b border-(--line)">
         <div className="app-container">
-          <p className="text-xs font-medium text-(--muted)">Core values</p>
-          <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15]">What we stand for.</h2>
+          <p className="type-eyebrow">Core values</p>
+          <h2 className="type-h2 mt-2">What we stand for.</h2>
           <ul className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {coreValues.map((value) => {
               const Icon = value.icon;
               return (
-                <li key={value.title} className="rounded-(--radius-card) border border-(--line) p-6">
+                <li key={value.title} className="rounded-md border border-(--line) p-6">
                   <span className="flex size-10 items-center justify-center rounded-(--radius-control) border border-(--ink)">
                     <Icon className="size-4" aria-hidden="true" />
                   </span>
-                  <h3 className="mt-6 text-lg font-medium">{value.title}</h3>
+                  <h3 className="type-card-title mt-6">{value.title}</h3>
                   <p className="mt-2 text-sm leading-[1.55] text-(--muted)">{value.description}</p>
                 </li>
               );
@@ -131,8 +131,8 @@ const About = () => {
       <section className="section-rhythm">
         <div className="app-container flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
           <div>
-            <p className="text-xs font-medium text-(--muted)">Ready when you are</p>
-            <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15]">Move something across Kigali.</h2>
+            <p className="type-eyebrow">Ready when you are</p>
+            <h2 className="type-h2 mt-2">Move something across Kigali.</h2>
           </div>
           <Button asChild size="lg" className="link-arrow">
             <Link to="/contact">

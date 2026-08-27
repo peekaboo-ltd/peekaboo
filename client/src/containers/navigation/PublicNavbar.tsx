@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { NAVIGATION_LINKS } from '@/constants/navigation.constants';
 import { capitalizeString } from '@/utils/strings.util';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
 import peekabooLogo from '/peekaboo.png';
+import Button from '@/components/inputs/Button';
 
 const PublicNavbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -33,7 +33,7 @@ const PublicNavbar = () => {
       <nav className="app-container flex h-16 items-center justify-between" aria-label="Primary navigation">
         <Link
           to="/"
-          className="flex h-12 shrink-0 items-center rounded-(--radius-control) px-2 outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+          className="flex h-(--control-lg) shrink-0 items-center rounded-(--radius-control) px-2 outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
           aria-label="Peekaboo home"
         >
           <img
@@ -49,7 +49,7 @@ const PublicNavbar = () => {
               <Link
                 to={link}
                 aria-current={pathname === link ? 'page' : undefined}
-                className="inline-flex min-h-10 items-center rounded-(--radius-pill) px-3 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+                className="inline-flex min-h-10 items-center rounded-(--radius-pill) px-3 text-sm font-normal transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
               >
                 {capitalizeString(label)}
               </Link>
@@ -60,10 +60,8 @@ const PublicNavbar = () => {
         <div className="flex items-center gap-2">
           <div className="hidden items-center gap-2 lg:flex">
             <LanguageSelector />
-            <Button asChild size="sm" className="bg-(--ink) text-(--paper)">
-              <Link to={NAVIGATION_LINKS.MY_ACCOUNT}>
-                {capitalizeString('MY_ACCOUNT')}
-              </Link>
+            <Button variant="primary" className="flex-1" route={NAVIGATION_LINKS.MY_ACCOUNT}>
+              {capitalizeString('MY_ACCOUNT')}
             </Button>
           </div>
           <button
@@ -96,10 +94,8 @@ const PublicNavbar = () => {
             </ul>
             <div className="mt-auto flex items-center gap-3 pt-8">
               <LanguageSelector />
-              <Button asChild className="flex-1">
-                <Link to={NAVIGATION_LINKS.MY_ACCOUNT}>
-                  {capitalizeString('MY_ACCOUNT')}
-                </Link>
+              <Button variant="primary" className="flex-1" route={NAVIGATION_LINKS.MY_ACCOUNT}>
+                {capitalizeString('MY_ACCOUNT')}
               </Button>
             </div>
           </nav>

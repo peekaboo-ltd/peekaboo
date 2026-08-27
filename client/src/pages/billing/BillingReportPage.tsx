@@ -148,7 +148,7 @@ const BillingReportPage = () => {
               Start date
               <input
                 type="date"
-                className="mt-1 h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                className="mt-1 h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
               />
@@ -157,14 +157,14 @@ const BillingReportPage = () => {
               End date
               <input
                 type="date"
-                className="mt-1 h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                className="mt-1 h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                 value={endDate}
                 onChange={(event) => setEndDate(event.target.value)}
               />
             </label>
           </div>
-          <div className="mt-4 rounded border border-(--line) bg-(--surface) p-4 text-sm text-(--ink)">
-            <p className="font-medium">What the report includes</p>
+          <div className="mt-4 rounded bg-(--surface) p-4 text-sm text-(--ink)">
+            <p className="font-normal">What the report includes</p>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               <li>Current billing breakdown details from the server for the active billing record.</li>
               <li>Delivery activity for the selected report period.</li>

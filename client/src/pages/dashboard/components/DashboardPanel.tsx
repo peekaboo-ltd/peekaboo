@@ -18,25 +18,16 @@ const DashboardPanel = ({
 }: DashboardPanelProps) => {
   return (
     <div
-      className={cn(
-        'rounded-(--radius-card) border border-(--line) bg-(--paper) p-0',
-        className,
-      )}
+      className={cn('card-framed', className)}
     >
-      <header className="border-b border-[color:var(--line)] px-4 py-4 sm:px-6">
-        {eyebrow && (
-          <p className="mb-1 text-[11px] font-medium text-(--muted)">
-            {eyebrow}
-          </p>
-        )}
-        <h2 className="text-lg font-medium text-[color:var(--ink)]">
-          {title}
-        </h2>
+      <header className="border-b border-(--line) px-4 py-3.5 sm:px-5">
+        {eyebrow && <p className="type-eyebrow mb-0.5">{eyebrow}</p>}
+        <h2 className="type-card-title">{title}</h2>
         {description && (
-          <p className="mt-0.5 max-w-[56ch] text-sm text-(--muted)">{description}</p>
+          <p className="type-meta mt-0.5 max-w-[56ch]">{description}</p>
         )}
       </header>
-      <div className="px-4 py-4 sm:px-6 sm:py-5">{children}</div>
+      <div className="px-4 py-4 sm:px-5">{children}</div>
     </div>
   );
 };

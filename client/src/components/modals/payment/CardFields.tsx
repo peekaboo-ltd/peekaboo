@@ -66,7 +66,7 @@ const CardFields = ({ control, errors }: CardFieldsProps) => (
       )}
     />
 
-    <aside className="rounded-md border border-(--line) bg-(--surface) p-3">
+    <aside className="rounded-md bg-(--surface) p-3">
       <p className="flex items-start gap-2 text-xs leading-snug text-(--muted)">
         <FontAwesomeIcon
           icon={faLock}

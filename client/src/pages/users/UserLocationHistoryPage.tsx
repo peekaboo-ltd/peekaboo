@@ -342,7 +342,7 @@ const UserLocationHistoryPage = () => {
     <main className="w-full flex flex-col gap-6">
       <header className="flex items-center justify-between gap-3 flex-wrap">
         <article>
-          <h1 className="text-2xl font-medium text-(--ink)">
+          <h1 className="type-page-title">
             User location history
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -357,7 +357,7 @@ const UserLocationHistoryPage = () => {
       <section className="border rounded-md p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-medium text-(--muted)"
+            className="type-meta"
             htmlFor="assigned-order"
           >
             Assigned orders (last 7 days)
@@ -375,7 +375,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-medium text-(--muted)"
+            className="type-meta"
             htmlFor="order-search"
           >
             Search order (reference id or tracking id)
@@ -383,7 +383,7 @@ const UserLocationHistoryPage = () => {
           <div className="flex gap-2">
             <input
               id="order-search"
-              className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+              className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
               placeholder="Type reference id or tracking id"
               value={orderSearchTerm}
               onChange={(event) => setOrderSearchTerm(event.target.value)}
@@ -412,7 +412,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-medium text-(--muted)"
+            className="type-meta"
             htmlFor="start-time"
           >
             Start time (local)
@@ -420,7 +420,7 @@ const UserLocationHistoryPage = () => {
           <input
             id="start-time"
             type="datetime-local"
-            className="h-11 rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+            className="h-(--control-md) rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
             value={dateRange.startTime}
             onChange={(event) =>
               setDateRange((prev) => ({
@@ -433,7 +433,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-medium text-(--muted)"
+            className="type-meta"
             htmlFor="end-time"
           >
             End time (local)
@@ -441,7 +441,7 @@ const UserLocationHistoryPage = () => {
           <input
             id="end-time"
             type="datetime-local"
-            className="h-11 rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+            className="h-(--control-md) rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
             value={dateRange.endTime}
             onChange={(event) =>
               setDateRange((prev) => ({ ...prev, endTime: event.target.value }))

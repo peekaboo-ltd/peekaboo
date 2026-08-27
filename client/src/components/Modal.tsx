@@ -45,7 +45,7 @@ const JSX_MODAL: FC<ModalProps> = ({
       >
         <DialogHeader className="shrink-0">
           <DialogTitle
-            className={`text-lg font-medium text-(--ink) mt-[-10px] ${
+            className={`type-card-title mt-[-10px] ${
               headingClassName ?? ''
             }`}
           >

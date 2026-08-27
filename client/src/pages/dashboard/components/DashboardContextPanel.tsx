@@ -33,12 +33,12 @@ const DashboardContextPanel = ({
               {highlights.slice(0, 4).map((item) => (
                 <article
                   key={item.label}
-                  className="rounded-md border border-[color:var(--line)] bg-[var(--surface)] px-4 py-3"
+                  className="rounded-md bg-(--surface) px-4 py-3"
                 >
-                  <p className="text-[11px] font-medium text-(--muted)">
+                  <p className="type-eyebrow">
                     {item.label}
                   </p>
-                  <p className="mt-2 text-2xl font-medium text-[color:var(--ink)]">
+                  <p className="type-metric mt-2">
                     {item.value}
                   </p>
                   {(item.footerText || item.comparisonLabel) && (
@@ -52,8 +52,8 @@ const DashboardContextPanel = ({
           )}
 
           {actions.length > 0 && (
-            <div className="rounded-md border border-[color:var(--line)] bg-[var(--surface)] p-4">
-              <p className="text-[11px] font-medium text-(--muted)">
+            <div className="rounded-md bg-(--surface) p-4">
+              <p className="type-eyebrow">
                 Quick actions
               </p>
               <div className="mt-3 grid grid-cols-1 gap-2">
@@ -61,10 +61,10 @@ const DashboardContextPanel = ({
                   <Link
                     key={action.label}
                     to={action.to}
-                    className="flex items-center justify-between rounded-md border border-[color:var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[color:var(--ink)] transition-colors duration-200 hover:bg-[var(--surface)]"
+                    className="flex items-center justify-between rounded-md bg-(--surface) px-4 py-3 text-sm font-normal text-(--ink) transition-colors duration-200 hover:bg-(--surface)"
                   >
                     <span className="flex items-center gap-2">
-                      <FontAwesomeIcon icon={action.icon} className="text-xs text-(--muted)" />
+                      <FontAwesomeIcon icon={action.icon} className="type-meta" />
                       {action.label}
                     </span>
                     <span className="text-(--muted)">→</span>
@@ -74,7 +74,7 @@ const DashboardContextPanel = ({
             </div>
           )}
 
-          <div className="rounded-md border border-[color:var(--line)] bg-[var(--surface)] px-4 py-5">
+          <div className="rounded-md bg-(--surface) px-4 py-5">
             <p className="text-sm font-normal text-(--ink)">Focused workspace</p>
             <p className="mt-2 text-sm leading-6 text-(--muted)">
               Use the signals on the left to spot movement, then jump into one of the shortcuts here to act on it without leaving the dashboard flow.

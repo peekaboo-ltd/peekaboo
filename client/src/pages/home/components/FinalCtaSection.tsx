@@ -16,7 +16,7 @@ const FinalCtaSection = ({
   buttonLabel,
   onScrollToForm,
 }: FinalCtaSectionProps) => (
-  <section className="invert-surface section-rhythm relative w-full">
+  <section className="section-rhythm relative w-full">
     <motion.article
       className="relative mx-auto max-w-[720px] px-5 text-center sm:px-8 lg:px-10"
       initial="hidden"
@@ -25,10 +25,10 @@ const FinalCtaSection = ({
       variants={containerVariants}
     >
       <motion.header variants={itemVariants}>
-        <p className="text-xs font-medium text-(--muted)">
+        <p className="type-eyebrow">
           Get started
         </p>
-        <h2 className="mt-3 text-[28px] font-medium leading-[1.05] sm:text-[36px]">
+        <h2 className="type-h2 mt-2">
           {title}
         </h2>
         <p className="mx-auto mt-4 max-w-[46ch] text-base font-normal leading-[1.6] text-(--muted)">
@@ -39,7 +39,7 @@ const FinalCtaSection = ({
           type="button"
           primary
           onClick={onScrollToForm}
-          className="mt-6 rounded-(--radius-control) bg-[var(--ink)] px-6 font-normal text-[var(--paper)] hover:bg-[var(--surface-hover)]"
+          className="mt-6"
         >
           {buttonLabel}
           <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

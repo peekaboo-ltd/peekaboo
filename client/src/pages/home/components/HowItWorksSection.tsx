@@ -11,12 +11,12 @@ interface HowItWorksSectionProps {
 type StepIcon = ComponentType<SVGProps<SVGSVGElement> & { 'aria-hidden'?: boolean }>;
 
 const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) => (
-  <section id="how-it-works" className="section-rhythm w-full border-t border-(--line) bg-(--paper)">
+  <section id="how-it-works" className="section-rhythm w-full border-(--line) bg-(--paper)">
     <div className="app-container">
       <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <hgroup>
-          <p className="text-xs font-medium text-(--muted)">How it works</p>
-          <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15]">
+          <p className="type-eyebrow">How it works</p>
+          <h2 className="type-h2 mt-2">
             Three steps. One delivery.
           </h2>
         </hgroup>
@@ -35,14 +35,14 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
         {steps.map((step, index) => {
           const Icon = step.icon as StepIcon;
           return (
-            <li key={step.step} className="relative rounded-(--radius-card) border border-(--line) p-6">
+            <li key={step.step} className="relative rounded-md border border-(--line) p-6">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-xs font-medium text-(--muted)">0{index + 1}</span>
+                <span className="type-meta">0{index + 1}</span>
                 <span className="flex size-10 items-center justify-center rounded-(--radius-control) border border-(--ink)">
                   <Icon className="size-4" aria-hidden={true} />
                 </span>
               </div>
-              <h3 className="mt-8 text-2xl font-medium leading-[1.25]">{step.title}</h3>
+              <h3 className="type-h3 mt-8">{step.title}</h3>
               <p className="mt-3 text-sm leading-[1.55] text-(--muted)">{step.description}</p>
             </li>
           );

@@ -162,7 +162,7 @@ const ManageOrganizationPage = () => {
       label: 'Status',
       value: organization?.status ?? '—',
       icon: faShieldHalved,
-      iconBg: 'bg-(--ink) text-(--ink)',
+      iconBg: 'bg-(--ink) text-(--paper)',
     },
     {
       label: 'Business Plan',
@@ -227,8 +227,8 @@ const ManageOrganizationPage = () => {
         {/* Left: Edit form */}
         <article className="lg:col-span-2 border border-(--line) bg-(--paper) p-6">
           <header className="mb-6">
-            <p className="text-xs text-(--muted)">Organization Details</p>
-            <h2 className="mt-2 text-lg font-medium text-(--ink)">Edit Information</h2>
+            <p className="type-meta">Organization Details</p>
+            <h2 className="type-card-title mt-2">Edit Information</h2>
           </header>
 
           <form onSubmit={onSubmitOrgInfo} className="flex flex-col gap-5">
@@ -352,7 +352,7 @@ const ManageOrganizationPage = () => {
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-(--ink)">
+                  <label className="text-[0.8125rem] text-(--ink)">
                     Description
                   </label>
                   <textarea
@@ -378,17 +378,17 @@ const ManageOrganizationPage = () => {
           {/* Business Plan */}
           <article className="border border-(--line) bg-(--paper) p-6">
             <header className="mb-4">
-              <p className="text-xs text-(--muted)">Billing</p>
-              <h2 className="mt-2 text-lg font-medium text-(--ink)">Business Plan</h2>
+              <p className="type-meta">Billing</p>
+              <h2 className="type-card-title mt-2">Business Plan</h2>
             </header>
 
             {currentBusinessPlan && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg border border-(--line) bg-(--surface) px-4 py-3">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-(--surface) px-4 py-3">
                 <FontAwesomeIcon icon={faTag} className="text-(--ink)" />
                 <section>
-                  <p className="text-xs text-(--muted)">Current Plan</p>
-                  <p className="text-sm font-medium text-(--ink)">{currentBusinessPlan.name}</p>
-                  <p className="text-xs text-(--muted)">
+                  <p className="type-meta">Current Plan</p>
+                  <p className="text-sm font-normal text-(--ink)">{currentBusinessPlan.name}</p>
+                  <p className="type-meta">
                     {currentBusinessPlan.isCustomPricing
                       ? 'Custom pricing'
                       : currentBusinessPlan.pricePerOrder != null

@@ -43,7 +43,7 @@ const DashboardChartsSection = ({
             className="rounded-lg p-0"
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="text-[2rem] font-medium leading-none text-[color:var(--ink)]">
+              <p className="text-[2rem] font-normal leading-none text-(--ink)">
                 {widget.value}
               </p>
               {widget.chartType !== 'status' && widget.data && widget.data.length > 0 && (
@@ -84,9 +84,9 @@ const DashboardChartsSection = ({
                     <div key={item.label}>
                       <div className="mb-1.5 flex items-center justify-between text-sm text-(--muted)">
                         <span>{item.label}</span>
-                        <span className="font-medium text-(--ink)">{formatNumbers(item.value)}</span>
+                        <span className="font-normal text-(--ink)">{formatNumbers(item.value)}</span>
                       </div>
-                      <div className="h-2 rounded-full bg-[var(--surface)]">
+                      <div className="h-2 rounded-full bg-(--surface)">
                         <div
                           className="h-full rounded-full bg-[color:var(--chart-2)]"
                           style={{ width: `${Math.max(width, 8)}%` }}

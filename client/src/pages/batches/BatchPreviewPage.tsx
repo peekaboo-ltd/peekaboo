@@ -143,11 +143,7 @@ const InlinePhoneEditor = ({
       type="button"
       onClick={() => setIsEditing(true)}
       disabled={isSaving || localSaving}
-      className={`text-[12px] px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-        isValid
-          ? "border-transparent hover:border-(--line) hover:bg-(--surface) text-(--ink)"
-          : "border-(--line) bg-(--surface) text-(--ink) hover:bg-(--surface)"
-      }`}
+      className={`text-xs px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ isValid ? "border-transparent hover:border-(--line) hover:bg-(--surface) text-(--ink)" : "border-(--line) bg-(--surface) text-(--ink) hover:bg-(--surface)" }`}
       title="Click to edit phone number"
     >
       {currentPhone || <span className="text-(--muted)">Not set</span>}
@@ -257,14 +253,14 @@ const InlineLocationEditor = ({
       ? createPortal(
           <div
             ref={dropdownRef}
-            className="fixed z-[10000] space-y-3 rounded-(--radius-control) border-0 bg-(--surface) p-4 shadow-[var(--shadow-menu)]"
+            className="fixed z-[10000] space-y-3 rounded-(--radius-control) border border-(--line) bg-(--paper) p-4 shadow-(--shadow-menu)"
             style={{
               top: `${dropdownPos.top}px`,
               left: `${dropdownPos.left}px`,
               width: `${dropdownPos.width}px`,
             }}
           >
-            <p className="text-xs font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Search delivery location
             </p>
             <PlaceSearch
@@ -275,10 +271,10 @@ const InlineLocationEditor = ({
             />
             {selectedLocation && (
               <div className="p-2 bg-(--surface) rounded-md border">
-                <p className="font-normal text-(--ink) text-[12px]">
+                <p className="font-normal text-(--ink) text-xs">
                   {selectedLocation?.name}
                 </p>
-                <p className="text-(--muted) text-[12px]">
+                <p className="text-(--muted) text-xs">
                   {selectedLocation?.formattedAddress}
                 </p>
               </div>
@@ -316,17 +312,13 @@ const InlineLocationEditor = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={isSaving || localSaving}
-        className={`text-[12px] px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-          hasLocation
-            ? "border-transparent hover:border-(--line) hover:bg-(--surface)"
-            : "border-(--line) bg-(--surface) hover:bg-(--surface)"
-        }`}
+        className={`text-xs px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ hasLocation ? "border-transparent hover:border-(--line) hover:bg-(--surface)" : "border-(--line) bg-(--surface) hover:bg-(--surface)" }`}
         title="Click to set delivery location"
       >
         {locationDisplay ? (
-          <span className="text-(--ink) text-[12px]">{locationDisplay}</span>
+          <span className="text-(--ink) text-xs">{locationDisplay}</span>
         ) : (
-          <span className="text-(--muted) italic text-[12px]">
+          <span className="text-(--muted) italic text-xs">
             Click to set location
           </span>
         )}
@@ -389,7 +381,7 @@ const InlineTextEditor = ({
           onKeyDown={handleKeyDown}
           onBlur={handleSave}
           disabled={isSaving || localSaving}
-          className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-xs outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset] disabled:opacity-50"
+          className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] disabled:opacity-50"
           placeholder={placeholder}
         />
         {(isSaving || localSaving) && (
@@ -407,14 +399,14 @@ const InlineTextEditor = ({
       type="button"
       onClick={() => setIsEditing(true)}
       disabled={isSaving || localSaving}
-      className="text-[12px] px-2 py-1 rounded border border-transparent hover:border-(--line) hover:bg-(--surface) cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="text-xs px-2 py-1 rounded border border-transparent hover:border-(--line) hover:bg-(--surface) cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {value ? (
-        <span className="text-(--ink) truncate block max-w-[180px] text-[12px]">
+        <span className="text-(--ink) truncate block max-w-[180px] text-xs">
           {value}
         </span>
       ) : (
-        <span className="text-(--muted) italic text-[12px]">{placeholder}</span>
+        <span className="text-(--muted) italic text-xs">{placeholder}</span>
       )}
     </button>
   );
@@ -591,7 +583,7 @@ const BatchPreviewPage = () => {
                   isSaving={isUpdating}
                 />
               ) : (
-                <span className="text-[12px] text-(--muted)">
+                <span className="type-meta">
                   {row.original.recipient?.phoneNumber || "—"}
                 </span>
               )}
@@ -616,7 +608,7 @@ const BatchPreviewPage = () => {
                   isSaving={isUpdating}
                 />
               ) : (
-                <span className="text-[12px] text-(--muted)">
+                <span className="type-meta">
                   {row.original.notes || "—"}
                 </span>
               )}
@@ -645,7 +637,7 @@ const BatchPreviewPage = () => {
                   placeholder="Add ref..."
                 />
               ) : (
-                <span className="text-[12px] text-(--muted)">
+                <span className="type-meta">
                   {row.original.externalReferenceId || "—"}
                 </span>
               )}
@@ -685,7 +677,7 @@ const BatchPreviewPage = () => {
           
           if (!isDraftOrder) {
             return (
-              <Badge variant="default" className="text-[10px]">
+              <Badge variant="default" className="text-xs">
                 {row.original.status}
               </Badge>
             );
@@ -693,7 +685,7 @@ const BatchPreviewPage = () => {
 
           if (validation.isValid) {
             return (
-              <Badge variant="secondary" className="text-[10px]">
+              <Badge variant="secondary" className="text-xs">
                 Valid
               </Badge>
             );
@@ -705,7 +697,7 @@ const BatchPreviewPage = () => {
                 <button className="text-left">
                   <Badge
                     variant="destructive"
-                    className="text-[10px] cursor-pointer hover:bg-(--surface)"
+                    className="text-xs cursor-pointer hover:bg-(--surface)"
                   >
                     {validation.issues.length} issue{validation.issues.length !== 1 ? 's' : ''}
                   </Badge>
@@ -713,7 +705,7 @@ const BatchPreviewPage = () => {
               </PopoverTrigger>
               <PopoverContent className="w-80" align="end">
                 <div className="space-y-2">
-                  <h4 className="font-medium text-sm text-(--ink)">
+                  <h4 className="type-label">
                     Validation Issues
                   </h4>
                   <ul className="space-y-1">
@@ -777,23 +769,23 @@ const BatchPreviewPage = () => {
           eyebrow="Batch preview"
           title={
             <span className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <span className="text-base font-medium">
+              <span className="text-base font-normal">
                 {batch.name || "Unnamed Batch"}
               </span>
               <Badge
                 variant={
                   batch.status === BatchStatus.DRAFT ? "secondary" : "default"
                 }
-                className="text-xs font-normal !rounded-md"
+                size="sm"
               >
                 {batch.status}
               </Badge>
             </span>
           }
           description={
-            <span className="text-[12px] text-(--muted)">
+            <span className="type-meta">
               Ref:{" "}
-              <code className="text-[11px] bg-(--surface) px-1.5 py-0.5 rounded border border-(--line) text-(--muted)">
+              <code className="text-xs bg-(--surface) px-1.5 py-0.5 rounded text-(--muted)">
                 {batch.referenceId}
               </code>
               {" · "}
@@ -806,15 +798,11 @@ const BatchPreviewPage = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`overflow-hidden rounded-xl border px-5 py-4 sm:px-6 ${
-              canComplete
-                ? "border-(--line) bg-(--surface)"
-                : "border-(--line) bg-(--surface)"
-            }`}
+            className={`overflow-hidden rounded-xl px-5 py-4 sm:px-6 ${ canComplete ? "border-(--line) bg-(--surface)" : "border-(--line) bg-(--surface)" }`}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h3 className={`text-sm font-medium ${
+                <h3 className={`text-sm font-normal ${
                   canComplete ? "text-(--ink)" : "text-(--ink)"
                 }`}>
                   {canComplete ? "✓ Batch Ready" : "⚠ Validation Summary"}
@@ -827,10 +815,10 @@ const BatchPreviewPage = () => {
                   </p>
                   {invalidCount > 0 && (
                     <>
-                      <p className="text-xs text-(--ink)">
+                      <p className="text-[0.8125rem] text-(--ink)">
                         • {orderValidation.filter(v => !v.isValid && v.issues.some(i => i.includes('phone'))).length} invalid phone numbers
                       </p>
-                      <p className="text-xs text-(--ink)">
+                      <p className="text-[0.8125rem] text-(--ink)">
                         • {orderValidation.filter(v => !v.isValid && v.issues.some(i => i.includes('location'))).length} missing delivery locations
                       </p>
                     </>

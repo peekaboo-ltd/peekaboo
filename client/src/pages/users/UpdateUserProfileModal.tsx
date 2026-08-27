@@ -349,7 +349,7 @@ const UpdateUserProfileModal = () => {
       >
         <form onSubmit={onSubmit} className="w-full flex flex-col gap-4">
           <section className="flex flex-col items-start gap-3">
-            <span className="text-sm font-medium text-(--ink)">Profile photo</span>
+            <span className="text-sm font-normal text-(--ink)">Profile photo</span>
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20 rounded-full border-2 border-(--line)">
                 {pendingPhotoPreviewUrl ? (
@@ -360,7 +360,7 @@ const UpdateUserProfileModal = () => {
                     alt="Profile"
                   />
                 ) : null}
-                <AvatarFallback className="rounded-full bg-(--ink) text-lg text-(--ink)">
+                <AvatarFallback className="rounded-full bg-(--ink) text-(--paper)">
                   {selectedUser?.name?.[0]?.toUpperCase() ||
                     selectedUser?.email?.[0]?.toUpperCase() ||
                     selectedUser?.phoneNumber?.[0]?.toUpperCase() ||

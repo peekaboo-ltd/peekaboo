@@ -14,7 +14,7 @@ const statusConfig: Record<UserStatus, {
 }> = {
   [UserStatus.ACTIVE]: {
     label: 'Active',
-    className: 'border-(--ink) bg-(--ink) text-(--paper)',
+    className: 'invert-surface border-transparent',
   },
   [UserStatus.INACTIVE]: {
     label: 'Inactive',

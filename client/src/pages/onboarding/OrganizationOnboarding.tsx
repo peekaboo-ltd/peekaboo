@@ -53,7 +53,7 @@ const StepProgress = ({ currentStep }: { currentStep: 1 | 2 | 3 }) => {
       {[1, 2, 3].map((step) => (
         <div key={step} className="flex items-center">
           <motion.span
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-normal transition-colors ${
               currentStep >= step
                 ? 'bg-(--ink) text-(--paper)'
                 : 'bg-(--surface) text-(--muted)'
@@ -128,10 +128,10 @@ const OrganizationOnboarding = () => {
         </motion.div>
 
         <motion.header variants={itemVariants} className="flex flex-col gap-3">
-          <span className="text-sm font-medium text-(--ink)">
+          <span className="type-eyebrow">
             {t('onboarding.step', { step: 1 })}
           </span>
-          <h1 className="text-3xl sm:text-4xl font-medium text-(--ink)">
+          <h1 className="type-h2 text-(--ink)">
             {t('onboarding.organization.title')}
           </h1>
           <p className="text-(--muted) max-w-2xl">
@@ -139,7 +139,7 @@ const OrganizationOnboarding = () => {
           </p>
           <Link
             to="/auth/login"
-            className="text-sm font-medium text-(--ink) hover:text-(--ink) w-fit transition-colors"
+            className="text-sm font-normal text-(--ink) hover:text-(--ink) w-fit transition-colors"
           >
             {t('onboarding.organization.signIn')}
           </Link>
@@ -148,17 +148,17 @@ const OrganizationOnboarding = () => {
         <motion.form
           variants={cardVariants}
           onSubmit={onSubmit}
-          className="bg-(--paper) border border-(--line) p-6 sm:p-8 space-y-6"
+          className="card-framed space-y-5 p-6 sm:p-8"
         >
           <section className="flex items-center gap-3 text-(--ink)">
             <motion.span
-              className="w-10 h-10 rounded-full bg-(--surface) flex items-center justify-center border border-(--line)"
+              className="w-10 h-10 rounded-full bg-(--surface) flex items-center justify-center"
               transition={{ duration: 0.2 }}
             >
               <FontAwesomeIcon icon={faBuilding} className="text-(--ink)" />
             </motion.span>
             <div>
-              <h2 className="text-lg font-medium">
+              <h2 className="type-card-title">
                 {t('onboarding.organization.detailsTitle')}
               </h2>
               <p className="text-sm text-(--muted)">

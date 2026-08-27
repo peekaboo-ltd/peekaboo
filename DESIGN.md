@@ -248,17 +248,32 @@ on headlines is the other half of the same habit. There is no `tracking-*` utili
 codebase and no `letter-spacing` declaration in `index.css`. Section labels are sentence case at
 normal spacing, or they are deleted.
 
-| Role | Size | Line height | Weight |
-| --- | --- | --- | --- |
-| Display (hero h1) | `clamp(2.25rem, 1.6rem + 2.4vw, 3.25rem)` — 36→52px | 1.08 | 500 |
-| h2 (section) | `clamp(1.75rem, 1.3rem + 1.8vw, 2.25rem)` — 28→36px | 1.15 | 500 |
-| h3 | 1.5rem / 24px | 1.25 | 500 |
-| h4 / card title | 1.125rem / 18px | 1.4 | 500 |
-| Body | 1rem / 16px | 1.6 | 400 |
-| Body small | 0.875rem / 14px | 1.55 | 400 |
-| Label / nav / button | 0.875rem / 14px | 1.2 | 500 |
-| Caption / meta | 0.8125rem / 13px | 1.5 | 400 |
-| Section eyebrow | 0.75rem / 12px | 1.4 | 500, sentence case |
+| Role | Utility | Size | Line height | Weight |
+| --- | --- | --- | --- | --- |
+| Display (marketing h1) | `type-display` | `clamp(2rem, 1.5rem + 2.1vw, 2.875rem)` — 32→46px | 1.08 | 500 |
+| h2 (section) | `type-h2` | `clamp(1.5rem, 1.2rem + 1.4vw, 1.875rem)` — 24→30px | 1.16 | 500 |
+| h3 | `type-h3` | 1.25rem / 20px | 1.3 | 500 |
+| Dashboard page title | `type-page-title` | 1.375rem / 22px | 1.25 | 500 |
+| Card title | `type-card-title` | 1rem / 16px | 1.4 | 500 |
+| Metric / counter | `type-metric` | 1.75rem / 28px, tabular | 1.1 | 500 |
+| Body | `type-body` | 1rem / 16px | 1.6 | 400 |
+| Body small (UI default) | `type-body-sm` | 0.875rem / 14px | 1.55 | 400 |
+| Label / nav / button | `type-label` | 0.875rem / 14px | 1.2 | 500 |
+| Caption / meta | `type-meta` | 0.8125rem / 13px | 1.5 | 400, `--muted` |
+| Section eyebrow | `type-eyebrow` | 0.75rem / 12px | 1.4 | 500, `--muted`, sentence case |
+
+**Compose the utility, never the size.** These are real `@utility` blocks in
+`index.css`. A component writes `type-card-title`, not `text-lg font-normal`, so a
+scale change is one edit rather than three hundred. Ad-hoc `text-[24px]`,
+`text-2xl`, and `text-[11px]` are the thing this table exists to prevent.
+
+**12px is the floor.** Nothing in the UI renders below `text-xs`. A 9, 10, or
+11px label is not a smaller label, it is an unreadable one.
+
+**Buttons and labels are 500.** §6.1's base string says `font-medium`. This
+table is the authority when the two disagree: a 14px control label at 400
+disappears next to 14px body copy, and the whole hierarchy budget is the one
+step from 400 to 500.
 
 Rules:
 - Hierarchy comes from **size, spacing, and color** — never from weight jumps. A 500 heading over
@@ -281,16 +296,25 @@ Rules:
 --radius-control: 8px;   /* buttons, inputs, selects, textareas, menus, popovers */
 --radius-card:    12px;  /* cards, image slots, modal panels */
 --radius-pill:    999px; /* nav items, chips, badges, segmented tabs, avatars */
+
+/* Control heights — one scale for every input, select, and button, so a
+   field and the button beside it always share an edge. */
+--control-sm:  36px;  /* menu rows, table filters, compact toolbars, chips */
+--control-md:  40px;  /* DEFAULT — every input, select, date picker, button */
+--control-lg:  44px;  /* hero and auth primary CTA only */
 ```
 
-Do not introduce a fourth value. `--radius: 0.625rem` (10px) in the current file is replaced.
+Do not introduce a fourth radius or a fourth height. Tailwind maps `rounded-sm`
+and `rounded-md` to `--radius-control`; `rounded-lg` and `rounded-xl` to
+`--radius-card`.
 
 **Container:** `max-width: 1280px`, `margin-inline: auto`, horizontal padding `20px` mobile /
 `32px` sm / `40px` lg. This matches the measured Uber content width.
 
-**Section rhythm:** vertical padding `56px` mobile, `72px` md, `88px` lg. (128px on every section
-in a row reads as padding, not rhythm — the page stops having a shape.) Adjacent sections are
-separated by whitespace or a single `--line` hairline — never by a colored band.
+**Section rhythm:** vertical padding `40px` mobile, `48px` md, `56px` lg. Remember that adjacent
+sections each contribute their own padding, so `56px` is a `112px` gap — at this type scale
+anything larger stops reading as rhythm and starts reading as an unfinished page. Adjacent
+sections are separated by whitespace or a single `--line` hairline — never by a colored band.
 
 **Header:** `64px` tall, `position: sticky`, `top: 0`, `z-index: 50`, background `--ink` with
 `.invert-surface` applied (black bar on the white site; white bar in dark mode). No border, no
@@ -332,7 +356,7 @@ Rewrite `client/src/components/ui/button.tsx`. Base (all variants):
 
 ```
 inline-flex items-center justify-center gap-2 whitespace-nowrap
-rounded-[--radius-control] text-sm font-medium cursor-pointer
+rounded-[--radius-control] text-sm font-normal cursor-pointer
 transition-[background-color,color,border-color,box-shadow]
 duration-200 ease-[cubic-bezier(0,0,1,1)]
 disabled:pointer-events-none disabled:opacity-40
@@ -341,11 +365,26 @@ outline-none
 
 | Variant | Rest | Hover | Active (press) |
 | --- | --- | --- | --- |
-| `primary` (default) | `bg-[--ink] text-[--paper]` | `bg-[color-mix(in_oklab,var(--ink)_88%,var(--paper))]` | inset overlay `--press-on-ink` |
-| `secondary` | `bg-[--surface] text-[--ink]` | `bg-[--surface-hover]` | inset overlay `--press-on-paper` |
-| `outline` | `bg-transparent text-[--ink] border border-[--ink]` | `bg-[--surface]` | inset overlay `--press-on-paper` |
-| `ghost` | `bg-transparent text-[--ink]` | `bg-[--surface]` | inset overlay `--press-on-paper` |
-| `link` | `text-[--ink] p-0 h-auto` + animated underline (§6.4) | underline sweeps to 100% | `color: var(--muted)` |
+| `default` (primary) | `bg-(--ink) text-(--paper)` | `bg-[color-mix(in_oklab,var(--ink)_88%,var(--paper))]` | inset overlay `--press-on-ink` |
+| `secondary` | `bg-(--surface) text-(--ink)`, no border | `bg-(--surface-hover)` | inset overlay `--press-on-paper` |
+| `outline` | `bg-transparent text-(--ink) border border-(--ink)` | `bg-(--surface)` — **border and label keep their colour** | inset overlay `--press-on-paper` |
+| `field` | `border border-(--line) bg-(--paper)`, `justify-start`, weight 400 | `border-(--line-strong)` | focus: `border-(--ink)` + 1px inset ring |
+| `ghost` | `bg-transparent text-(--ink)` | `bg-(--surface)` | inset overlay `--press-on-paper` |
+| `link` | `text-(--ink) p-0 h-auto` + animated underline (§7.4) | underline sweeps to 100% | `color: var(--muted)` |
+
+**A primary button is filled and an outline button is outlined — through every
+state.** An `outline` that flips to a solid ink fill on hover is a primary
+button wearing a disguise, and it takes any child icon with a fixed colour
+(`text-(--muted)` on a date picker's calendar glyph, say) down to invisible on
+the fill it just landed on. Outline hovers to `--surface` and keeps its ink
+border and ink label. If a control needs to be solid, it was always `default`.
+
+**`field` is the trigger shape.** Anything that opens a panel and sits in a form
+row — date picker, combobox, file picker — uses `field`, not `outline`, so it
+lines up with the inputs beside it and reads as a field rather than a button.
+
+**Buttons cast no shadow, ever** (constraint 7). No `hover:shadow-*` on any
+variant; only menus, popovers, and modals get one.
 
 **The press effect — this is the signature move. Copy it exactly:**
 
@@ -369,8 +408,20 @@ A 999px inset spread floods the entire control with a translucent overlay regard
 An inner ring in the ground color and an outer ring in the ink color — legible on any surface,
 in either theme, with zero hue. This replaces the yellow `:focus-visible` outline in `index.css`.
 
-**Sizes:** `sm` 36px / `px-4`; `default` 44px / `px-5`; `lg` 48px / `px-6` `text-base` (the hero
-CTA size — Uber's is 48px tall, `14px 25px`, 16px/500); `icon` square at the matching height.
+**Sizes** — these are the §4 control tokens, not free numbers:
+
+| Size | Height | Padding | Used for |
+| --- | --- | --- | --- |
+| `sm` | `--control-sm` 36px | `px-3.5` | table toolbars, filter chips, inline actions |
+| `default` | `--control-md` 40px | `px-4` | everything else |
+| `lg` | `--control-lg` 44px | `px-6` | hero and auth primary CTA only |
+| `icon` / `icon-sm` | square at 40 / 36px | — | icon-only controls |
+
+Text stays 14px at every size — `lg` is a taller target, not louder type.
+
+**Never `active:scale()`.** A transform press contradicts constraint 6 and
+fights the inset flood; if both are present the scale wins and the flood is
+invisible.
 
 ### 6.2 Nav items and menus
 
@@ -407,35 +458,70 @@ puts the same fields in the hero, in auth, and in twelve dashboard forms, so a h
 treatment reads as two different design systems on one site.
 
 ```
-h-12 (48px) w-full rounded-(--radius-control)
+h-(--control-md) w-full rounded-(--radius-control)
 border border-(--line) bg-(--paper)
-px-3.5 text-base text-(--ink) placeholder:text-(--muted)
+px-3.5 text-sm text-(--ink) placeholder:text-(--muted)
 hover:border-(--line-strong)
 focus-visible:border-(--ink) focus-visible:shadow-[var(--ink)_0_0_0_1px_inset]
 disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--disabled-fg)
 ```
 
-- **48px, every input, every context** — hero, auth, and dense dashboard forms alike. Do not
-  introduce a second height.
+- **`--control-md` (40px), every input, every context** — hero, auth, and dense dashboard forms
+  alike. Do not introduce a second height, and do not write the pixel value: `h-(--control-md)`
+  so the whole app moves together. `--control-sm` exists only for menu rows and table toolbars.
+- **One input treatment, not two.** A borderless field on a `--surface` fill is a second design
+  system; on a screen that also shows the bordered field it reads as a bug. Bordered on paper,
+  everywhere.
 - Labels sit above at 14px/500 (`field-label`), flush with the field's left edge — no indent.
   Helper text below at 13px/400 `--muted`.
 - **Error state without color:** `--ink` border + 1px inset ring, plus a message row with a
   warning icon and 13px `--ink` text. Never a red border.
 - `ui/input.tsx`, `inputs/Input.tsx`, `TelInput`, `PlaceSearch`, `Select`, `Textarea`, and
   `DatePicker` must all render this exact treatment. When you change one, change all seven.
+- **Labels are `field-label` / `type-label`.** Not `text-sm font-normal text-(--ink)` written out
+  at each call site — that spelling drifts and half of them end up at the wrong weight.
+- **No `!important` in a call site's `className`.** An override that has to shout means the
+  component and the call site disagree about the design; fix the component. It also silently
+  kills the `:hover` and `:focus-visible` styles it outranks.
 - The phone field's country prefix is a `--surface` cell with a `--line` right divider and
   `--muted` text. It is not a filled block — never paint it with `--muted` as a background.
 
 ### 6.4 Surfaces
 
-- **Card:** `bg-[--paper]`, `border border-[--line]`, `rounded-[--radius-card]`, padding 24px.
-  Hover (only if interactive): `border-color: var(--ink)`. No lift, no shadow, no scale.
-- **Quiet card:** `bg-[--surface]`, no border — for stats and inert grouping.
+**A card is separated from the page by a surface step OR a hairline — never both.**
+A `--line` border drawn around a `--surface` fill is a box around a box: the fill
+has already done the separating, and the border only adds a second edge for the
+eye to resolve. Three treatments exist and there is no fourth:
+
+| Treatment | Utility / `Card` variant | Ground | Border | Use |
+| --- | --- | --- | --- | --- |
+| Framed | `card-framed` / `variant="framed"` | `--paper` | `1px --line` | default for content |
+| Quiet | `card-quiet` / `variant="quiet"` | `--surface` | **none** | stats, inert grouping |
+| Inverted | `invert-surface` / `variant="inverted"` | `--ink` | none | one per page, §1 |
+
+- **Card padding** is 20px (`p-5`); 16px (`p-4`) for dense dashboard tiles.
+- **Hover, only if interactive:** `card-interactive` darkens the edge to `--ink`
+  (framed) or steps the fill to `--surface-hover` (quiet). No lift, no shadow, no scale.
+- **A hover that changes the ground must change the foreground with it.** An
+  icon chip that goes `group-hover:bg-(--ink)` while its glyph stays `text-(--ink)`
+  renders a black icon on black. Every hover that repaints a background needs the
+  matching `group-hover:text-*` — check both directions, light and dark.
+- **`invert-surface`, not `bg-(--ink) text-(--paper)`.** The utility swaps the
+  tokens locally, so children, focus rings, `--muted` text, and — the reason this
+  matters — `::selection` all keep working inside the black region without
+  special-casing. A hand-painted ink surface leaves `--ink` black, so selecting
+  text on it draws a black highlight on black and the selection is invisible.
+  This applies to chips and badges too: `ui/badge` default, `StatusBadge` active,
+  `UserStatusBadge`, and the tooltip all carry `invert-surface`.
 - **Modal:** panel `--paper`, `rounded-[--radius-card]`, `--shadow-modal`, max-width 560px,
   scrim `--overlay`; enter with opacity + `translateY(8px)` over 200ms.
-- **Table:** header row 13px/500 `--muted` uppercase-free, `--line` bottom border; body rows 14px
-  /400, 56px tall, hover `--surface`, selected row per §1.1; zebra via `--surface-sunken` only in
-  tables over 10 rows. No vertical rules.
+- **Table:** header row 13px/500 `--muted` uppercase-free at `--control-md`, `--line` bottom
+  border; body rows 14px/400, 48px tall, hover `--surface`, selected row per §1.1; zebra via
+  `--surface-sunken` only in tables over 10 rows. No vertical rules.
+- **Menu / popover panel:** `--paper`, `1px --line`, `--shadow-menu`, rows at `--control-sm`.
+  Every panel in the app — select, dropdown, combobox, date picker, place search — is this one
+  treatment. A borderless panel on `--surface` is the same second-design-system problem as the
+  borderless input.
 - **Toast (sonner):** `--paper` panel, `--line` border, `--shadow-menu`, icon + text, no colored
   variants — success/error differ by icon and copy.
 
@@ -576,9 +662,9 @@ ramp, all three `@utility font-ui` blocks, the `*` font-family/font-size rules, 
 
 | Target | Count | Action |
 | --- | --- | --- |
-| `font-semibold` | 129 | → `font-medium` |
-| `font-bold` | 20 | → `font-medium` |
-| `font-extrabold` | 7 | → `font-medium` |
+| `font-semibold` | 129 | → `font-normal` |
+| `font-bold` | 20 | → `font-normal` |
+| `font-extrabold` | 7 | → `font-normal` |
 | `text-secondary` | 24 | → `text-foreground` or `text-[--muted]` |
 | `bg-secondary` | 22 | → `bg-[--surface]`, or inverted fill if it marked selection |
 | `peekaboo-yellow` | 12 | → remove; if it marked state, apply §1.1 |
@@ -605,7 +691,9 @@ grep -rEn '\-\[--[a-z-]+\]' --include='*.tsx' src
 grep -rniE "gradient|\\\\000067" --include='*.tsx' --include='*.css' src
 ```
 ```bash
-grep -rn "tracking-" --include='*.tsx' --include='*.css' src
+# Anchored on the utility values — a bare `tracking-` also matches identifiers
+# like mapId="users-tracking-map".
+grep -rEn 'tracking-(tighter|tight|normal|wide|wider|widest|\[)' --include='*.tsx' --include='*.css' src
 ```
 ```bash
 grep -rEn "font-(semibold|bold|extrabold|black)|font-\[?[6-9]00" --include='*.tsx' src
@@ -642,6 +730,35 @@ on Steps 1–4; the first four greps must be clean before the hero ships.
       fill alone).
 - [ ] `prefers-reduced-motion` kills every transition and transform.
 - [ ] One font family loads in the network panel: DM Sans.
+
+---
+
+## 10.1 Additional greps
+
+```bash
+grep -rEn 'text-\[(9|10|11|12)px\]' --include='*.tsx' src              # below the 12px floor
+```
+```bash
+grep -rEn '\bh-(8|11|12|14)\b' --include='*.tsx' src                    # off the control scale
+```
+```bash
+grep -rn 'active:scale' --include='*.tsx' src                          # transform press
+```
+```bash
+grep -rEn '[a-z-]+-\[(color:)?var\(--[a-z-]+\)\]' --include='*.tsx' src  # verbose token form
+```
+```bash
+# A RESTING --surface fill that also carries a hairline. `hover:bg-(--surface)`
+# and `disabled:bg-(--surface)` are state colours — those elements still need
+# their resting border, so the negative lookbehind matters.
+grep -rEn 'className="[^"]*(^|[^:-])bg-\(--surface\)[^"]*border border-\(--line\)' --include='*.tsx' src --exclude-dir=ui
+```
+```bash
+grep -rn '!border-\|!bg-\|!text-\|!rounded-\|!font-' --include='*.tsx' src   # call-site overrides
+```
+
+Each must return nothing, except the last, where the only survivors may be
+width overrides on a modal panel.
 
 ---
 

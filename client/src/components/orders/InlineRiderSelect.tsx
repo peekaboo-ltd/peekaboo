@@ -99,23 +99,6 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
     return `${name}${phone}`;
   };
 
-  // Get background color based on assignment status
-  const getStatusBackgroundColor = (status?: string) => {
-    let bgColor = 'bg-(--surface) hover:bg-(--surface)';
-
-    switch (status) {
-      case OrderAssignmentStatus.PENDING:
-        bgColor = 'bg-(--surface) text-(--paper)';
-        break;
-      case OrderAssignmentStatus.ACTIVE:
-        bgColor = 'bg-(--surface) text-(--paper)';
-        break;
-      case OrderAssignmentStatus.REJECTED:
-    }
-
-    return bgColor;
-  };
-
   // Render current assignment status
   const renderAssignmentStatus = () => {
     if (isAssigning) {
@@ -147,21 +130,21 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
     isDropdownOpen && dropdownPosition ? (
       <section
         ref={dropdownRef}
-        className="fixed z-10000 overflow-hidden rounded-(--radius-control) border-0 bg-(--surface) shadow-[var(--shadow-menu)]"
+        className="fixed z-[10000] overflow-hidden rounded-(--radius-control) border border-(--line) bg-(--paper) shadow-(--shadow-menu)"
         style={{
           top: `${dropdownPosition.top}px`,
           left: `${dropdownPosition.left}px`,
           width: `${dropdownPosition.width}px`,
         }}
       >
-        <header className="p-2 border-b border-(--line)">
+        <header className="border-b border-(--line) p-2">
           <input
             ref={inputRef}
             type="search"
             placeholder="Search by name or phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-11 w-full rounded-(--radius-control) border-0 bg-(--paper) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+            className="h-(--control-sm) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm outline-none placeholder:text-(--muted) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
             aria-label="Search riders"
           />
         </header>
@@ -180,7 +163,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
               <li key={rider.id} className="list-none">
                 <Link
                   to={`/users/${rider?.id}`}
-                  className="w-full px-3 py-2 text-left hover:bg-(--surface) border-b border-(--line) last:border-b-0 cursor-pointer"
+                  className="block w-full cursor-pointer border-b border-(--line) px-3 py-2 text-left transition-[background-color] duration-200 ease-(--ease-flat) last:border-b-0 hover:bg-(--surface)"
                   onClick={(e) => {
                     e.preventDefault();
                     if (rider?.id) {
@@ -205,9 +188,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
   // If user is a customer, show read-only assignment status
   if (isCustomer) {
     return (
-      <p
-        className={`text-sm text-(--ink) px-4 py-2 rounded-md ${getStatusBackgroundColor(activeAssignment?.status)}`}
-      >
+      <p className="type-body-sm px-1 py-1.5 text-(--ink)">
         {renderAssignmentStatus()}
       </p>
     );
@@ -220,7 +201,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
         type="button"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         disabled={isAssigning}
-        className={`text-sm text-(--ink) px-4 py-2 cursor-pointer rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${getStatusBackgroundColor(activeAssignment?.status)}`}
+        className="inline-flex h-(--control-sm) cursor-pointer items-center rounded-(--radius-control) bg-(--surface) px-3 text-sm text-(--ink) transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface-hover) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Assign rider to order"
         aria-expanded={isDropdownOpen}
         aria-haspopup="true"

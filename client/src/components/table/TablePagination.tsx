@@ -58,7 +58,7 @@ export function DataTablePagination<TData>({
       <article className="flex flex-col gap-1 w-full text-center 
  md:w-auto md:text-left">
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
-          <span className="text-xs text-muted-foreground">
+          <span className="type-meta">
             {table.getFilteredSelectedRowModel().rows.length} of{' '}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </span>
@@ -83,7 +83,7 @@ export function DataTablePagination<TData>({
               }
             }}
           >
-            <SelectTrigger className="h-8 w-[70px] !text-[11px] cursor-pointer">
+            <SelectTrigger size="sm" className="w-[70px] cursor-pointer">
               <SelectValue placeholder={size} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -91,7 +91,7 @@ export function DataTablePagination<TData>({
                 <SelectItem
                   value={`${option.value}`}
                   key={option.value}
-                  className="cursor-pointer !text-[11px] hover:bg-background"
+                  className="cursor-pointer"
                 >
                   {option?.label}
                 </SelectItem>
@@ -109,7 +109,7 @@ export function DataTablePagination<TData>({
             min={1}
             max={totalPages || 1}
             defaultValue={page + 1}
-            className="h-11 w-14 rounded-(--radius-control) border-0 bg-(--surface) px-2 text-center text-xs tabular-nums outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+            className="h-(--control-md) w-14 rounded-(--radius-control) border border-(--line) bg-(--paper) px-2 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
             onChange={(e) => {
               const targetPage = e.target.value ? Number(e.target.value) : 0;
               if (targetPage >= 1 && targetPage <= (totalPages || 1)) {

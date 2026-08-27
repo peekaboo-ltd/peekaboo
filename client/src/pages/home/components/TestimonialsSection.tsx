@@ -43,19 +43,19 @@ const TestimonialsSection = ({
         variants={containerVariants}
       >
         <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
-          <p className="text-[11px] font-medium text-muted-foreground">
+          <p className="type-eyebrow">
             {badgeLabel}
           </p>
-          <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
+          <h2 className="type-h2 mt-2">
             {title}
           </h2>
-          <p className="mt-3 text-[13px] font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
+          <p className="mt-3 text-sm font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
         </motion.header>
 
         <motion.figure className="relative" variants={itemVariants}>
-          <blockquote className="relative overflow-hidden rounded-(--radius-card) border border-(--line) bg-(--paper) p-6 sm:p-8 lg:p-10">
+          <blockquote className="relative overflow-hidden rounded-md border border-(--line) bg-(--paper) p-6 sm:p-8 lg:p-10">
             <Quote
-              className="absolute right-6 top-6 h-10 w-10 text-[var(--surface)]"
+              className="absolute right-6 top-6 h-10 w-10 text-(--surface)"
               aria-hidden="true"
             />
 
@@ -73,14 +73,14 @@ const TestimonialsSection = ({
                 </p>
 
                 <figcaption className="mt-6 flex items-center gap-4">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--ink)] text-[15px] font-medium text-[var(--paper)]">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-(--ink) text-[15px] font-normal text-(--paper)">
                     {current.name.charAt(0)}
                   </span>
                   <cite className="not-italic">
-                    <strong className="block text-[14px] font-medium text-foreground">
+                    <strong className="block text-[14px] font-normal text-foreground">
                       {current.name}
                     </strong>
-                    <span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                    <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                       {current.type === 'business' ? (
                         <Building2 className="h-3 w-3" aria-hidden="true" />
                       ) : (
@@ -121,7 +121,7 @@ const TestimonialsSection = ({
                     (prev) => (prev - 1 + testimonials.length) % testimonials.length
                   )
                 }
-                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--surface)] text-muted-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-[var(--surface-hover)] hover:text-foreground"
+                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-(--surface) text-muted-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-(--surface-hover) hover:text-foreground"
                 aria-label="Previous testimonial"
               >
                 <ChevronLeft className="h-4 w-4 transition-transform duration-200" />
@@ -131,7 +131,7 @@ const TestimonialsSection = ({
                 onClick={() =>
                   setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
                 }
-                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--surface)] text-muted-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-[var(--surface-hover)] hover:text-foreground"
+                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-(--surface) text-muted-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-(--surface-hover) hover:text-foreground"
                 aria-label="Next testimonial"
               >
                 <ChevronRight className="h-4 w-4 transition-transform duration-200" />

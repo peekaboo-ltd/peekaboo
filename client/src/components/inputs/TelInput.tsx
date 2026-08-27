@@ -33,7 +33,7 @@ const PhoneTextField = forwardRef<HTMLInputElement, PhoneTextFieldProps>(
       ref={ref}
       type="tel"
       inputMode="tel"
-      className={cn('peekaboo-tel-number', className)}
+      className={cn('peekaboo-tel-number focus:outline-none focus:ring-0 focus-visible:ring-0', className)}
     />
   ),
 );
@@ -134,7 +134,7 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
         {label ? (
           <label
             htmlFor={inputId}
-            className="flex items-center gap-[5px] text-sm font-medium text-(--ink)"
+            className="type-label flex items-center gap-1.5"
           >
             {label}
             {required ? <span className="text-(--ink)">*</span> : null}
@@ -181,7 +181,7 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
             id={errorId}
             role="status"
             aria-live="polite"
-            className="text-[11px] text-(--ink)"
+            className="text-[0.8125rem] text-(--ink)"
           >
             {resolvedError}
           </span>

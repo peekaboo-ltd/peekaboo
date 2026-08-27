@@ -83,8 +83,8 @@ const LocationField = ({
           </label>
 
           {field.value ? (
-            <div className="flex h-12 items-center gap-3 rounded-(--radius-control) border border-(--line) bg-(--paper) pl-3.5 pr-1.5">
-              <span className="min-w-0 flex-1 truncate text-base text-(--ink)">
+            <div className="flex h-10 items-center gap-3 rounded-(--radius-control) border border-(--line) bg-(--paper) pl-3.5 pr-1.5">
+              <span className="min-w-0 flex-1 truncate text-sm text-(--ink)">
                 {describeLocation(field.value)}
               </span>
               <button
@@ -96,7 +96,7 @@ const LocationField = ({
                 className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) outline-none transition-[background-color,box-shadow] duration-200 ease-(--ease-flat) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
                 aria-label={`Change ${label.toLowerCase()}`}
               >
-                <Pencil className="size-4" aria-hidden="true" />
+                <Pencil className="size-3.5" aria-hidden="true" />
               </button>
             </div>
           ) : (
@@ -154,7 +154,7 @@ const HeroForm = ({ formRef, onSubmit, control, copy, errors }: HeroFormProps) =
       id="hero-delivery-form"
       ref={formRef}
       onSubmit={onSubmit}
-      className="home-scroll-target w-full max-w-[560px]"
+      className="home-scroll-target w-full"
     >
       <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className="sr-only">{copy.formTitle}</legend>

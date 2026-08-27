@@ -1,5 +1,5 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CheckedState } from '@radix-ui/react-checkbox';
 import {
@@ -362,7 +362,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     if (['checkbox', 'radio'].includes(type)) {
       if (['checkbox'].includes(type)) {
         return (
-          <label className="flex w-fit items-center gap-2 text-[13px]">
+          <label className="flex w-fit items-center gap-2 text-sm">
             <Checkbox
               onCheckedChange={
                 onChange as ((checked: CheckedState) => void) | undefined
@@ -380,7 +380,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <p
               className={`${
                 label ? 'flex' : 'hidden'
-              } text-(--muted) text-[13px]`}
+              } text-(--muted) text-sm`}
             >
               {label}
             </p>
@@ -388,7 +388,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         );
       }
       return (
-        <label className="flex items-center gap-2 text-[13px]">
+        <label className="flex items-center gap-2 text-sm">
           <input
             type={type}
             name={name}
@@ -398,7 +398,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             onChange={onChange}
             className={`size-5 cursor-pointer rounded-(--radius-pill) border border-(--ink) accent-(--ink) outline-none duration-100 ${className}`}
           />
-          <p className={`${label ? 'flex' : 'hidden'} text-[13px]`}>{label}</p>
+          <p className={`${label ? 'flex' : 'hidden'} text-sm`}>{label}</p>
         </label>
       );
     }
@@ -412,14 +412,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {isLoading ? (
             <SkeletonLoader type="button" />
           ) : (
-            <menu className="text-[13px] w-fit">
+            <menu className="text-sm w-fit">
               <button
                 type="button"
                 onClick={handleClick}
                 disabled={readOnly}
-                className={`h-11 w-full cursor-pointer rounded-(--radius-control) bg-(--ink) px-5 text-sm font-medium text-(--paper) outline-none transition-[background-color,color,box-shadow] duration-200 ease-[var(--ease-flat)] active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] ${
+                className={`inline-flex h-(--control-md) w-full cursor-pointer items-center justify-center rounded-(--radius-control) bg-(--ink) px-4 text-sm font-medium text-(--paper) outline-none transition-[background-color,color,box-shadow] duration-200 ease-(--ease-flat) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] ${
                   readOnly &&
-                  '!bg-(--surface) hover:!bg-(--surface) !cursor-not-allowed'
+                  'cursor-not-allowed bg-(--surface) text-(--disabled-fg)'
                 } ${className}`}
               >
                 {placeholder || 'Choose file'}
@@ -461,17 +461,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     if (['date'].includes(type)) {
       return (
-        <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
+        <label className={`flex w-full flex-col gap-1.5 ${labelClassName}`}>
           <p
             className={`${
-              label ? 'flex items-center gap-[5px] text-sm font-medium text-(--ink)' : 'hidden'
+              label ? 'type-label flex items-center gap-1.5' : 'hidden'
             }`}
           >
             {label}{' '}
             {required && (
               <CustomTooltip
                 label={required ? `${label} is required` : ''}
-                labelClassName="text-[13px] bg-(--surface)"
+                labelClassName="bg-(--surface) text-sm"
               >
                 <span className="text-(--ink) cursor-pointer">*</span>
               </CustomTooltip>
@@ -502,17 +502,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       (value as string | number | readonly string[] | undefined) ?? undefined;
 
     return (
-      <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
+      <label className={`flex w-full flex-col gap-1.5 ${labelClassName}`}>
         <p
           className={`${
-            label ? 'flex items-center gap-[5px] text-sm font-medium text-(--ink)' : 'hidden'
+            label ? 'type-label flex items-center gap-1.5' : 'hidden'
           }`}
         >
           {label}{' '}
           {required && (
             <CustomTooltip
               label={required ? `${label} is required` : ''}
-              labelClassName="text-[13px] bg-(--surface)"
+              labelClassName="bg-(--surface) text-sm"
             >
               <span className="text-(--ink) cursor-pointer">*</span>
             </CustomTooltip>
@@ -530,7 +530,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 {prefixIcon && (
                   <FontAwesomeIcon className="text-current" icon={prefixIcon} />
                 )}
-                {prefixText && <p className="text-[13px]">{prefixText}</p>}
+                {prefixText && <p className="text-sm">{prefixText}</p>}
               </Link>
             </label>
           ) : null}
@@ -539,10 +539,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <Link
               to={'#'}
               onClick={suffixIconHandler}
-              className={`absolute top-0 end-0 p-2.5 px-3.5 text-sm font-medium h-full rounded-e-lg border focus:outline-none ${
+              className={`absolute inset-y-0 end-0 flex items-center rounded-e-(--radius-control) px-3.5 text-sm outline-none transition-[background-color,color] duration-200 ease-(--ease-flat) ${
                 suffixIconPrimary
-                  ? 'bg-(--ink) text-(--paper) border-(--ink) border-l-none'
-                  : 'border-(--line) border-opacity-50 bg-(--paper) text-(--ink) border-l-none'
+                  ? 'bg-(--ink) text-(--paper) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]'
+                  : 'border-s border-(--line) bg-(--paper) text-(--muted) hover:text-(--ink)'
               }`}
             >
               <FontAwesomeIcon icon={suffixIcon || faSearch} />
@@ -572,28 +572,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               autoCorrect={autoCorrect}
               spellCheck={spellCheck}
               aria-invalid={Boolean(errorMessage)}
-              className={`
-                h-12 px-3.5 py-0
-                font-normal
-                placeholder:text-base
-                placeholder:text-(--muted)
-                text-base text-(--ink)
-                flex items-center w-full
-                rounded-(--radius-control) border border-(--line) bg-(--paper)
-                outline-none focus:outline-none
-                hover:border-(--line-strong)
-                focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]
-                aria-invalid:border-(--ink) aria-invalid:shadow-[var(--ink)_0_0_0_1px_inset]
-                transition-[border-color,box-shadow] duration-200 ease-[var(--ease-flat)]
-                ${className}
-                ${prefixIcon && 'ps-10'}
-                ${prefixText ? 'ps-[3.6rem]' : ''}
-                ${isPasswordWithToggle ? 'pe-10' : ''}
-                ${
-                  readOnly &&
-                  '!border-[.1px] !border-background hover:cursor-default focus:!border-background'
-                }
-              `}
+              className={`h-10 px-3.5 py-0 font-normal placeholder:text-sm placeholder:text-(--muted) text-sm text-(--ink) flex items-center w-full rounded-(--radius-control) border border-(--line) bg-(--paper) outline-none focus:outline-none hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] aria-invalid:border-(--ink) aria-invalid:shadow-[var(--ink)_0_0_0_1px_inset] transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) ${className} ${prefixIcon && 'ps-10'} ${prefixText ? 'ps-[3.6rem]' : ''} ${isPasswordWithToggle ? 'pe-10' : ''} ${ readOnly && 'cursor-default border-transparent bg-(--surface) text-(--disabled-fg) hover:border-transparent focus:border-transparent focus:shadow-none' }`}
             />
           )}
 
@@ -617,14 +596,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               onClick={
                 suffixIconHandler as unknown as MouseEventHandler<HTMLButtonElement>
               }
-              className="absolute top-0 right-0 h-full p-2 px-4 text-xs text-(--paper) rounded-r-md bg-(--ink)"
+              className="absolute top-0 right-0 flex h-full cursor-pointer items-center rounded-r-(--radius-control) bg-(--ink) px-4 text-sm font-medium text-(--paper) transition-[background-color] duration-200 ease-(--ease-flat) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]"
             >
               Search
             </button>
           )}
         </section>
         {errorMessage && (
-          <p className="text-[13px] text-(--ink) before:mr-1 before:content-['—']">{errorMessage}</p>
+          <p className="mt-1.5 flex items-center gap-1.5 text-[0.8125rem] text-(--ink)" role="alert">
+            <FontAwesomeIcon icon={faTriangleExclamation} className="size-3 shrink-0" aria-hidden="true" />
+            {errorMessage}
+          </p>
         )}
       </label>
     );

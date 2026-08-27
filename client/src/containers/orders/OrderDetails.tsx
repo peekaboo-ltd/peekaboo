@@ -15,7 +15,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
   return (
     <>
       <dl className="space-y-2 sm:space-y-2">
-        <dt className="text-xs sm:text-sm font-medium text-(--muted)">Sender</dt>
+        <dt className="text-xs sm:text-sm font-normal text-(--muted)">Sender</dt>
         <dd className="text-xs sm:text-sm font-normal flex items-center gap-1 text-(--ink)">
           <FontAwesomeIcon icon={faUser} />{' '}
           {order?.sender?.name ||
@@ -24,7 +24,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         </dd>
       </dl>
       <dl className="space-y-2 sm:space-y-2">
-        <dt className="text-xs sm:text-sm font-medium text-(--muted)">
+        <dt className="text-xs sm:text-sm font-normal text-(--muted)">
           Recipient
         </dt>
         <dd className="text-xs sm:text-sm font-normal flex items-center gap-1 text-(--ink)">
@@ -35,17 +35,17 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         </dd>
       </dl>
       <dl className="space-y-2 sm:space-y-2">
-        <dt className="text-xs sm:text-sm font-medium text-(--muted)">Fee</dt>
+        <dt className="text-xs sm:text-sm font-normal text-(--muted)">Fee</dt>
         <dd className="text-xs sm:text-sm font-normal text-(--ink)">
           {order?.finalFee ? `${formatCurrency(order.finalFee)}` : 'TBD'}
           {ENVIRONMENTS.isPaymentSimulation && order?.finalFee ? (
-            <p className="mt-1 text-[11px] font-normal leading-snug text-(--ink)">
+            <p className="mt-1 text-xs font-normal leading-snug text-(--ink)">
               Payments are simulated in this environment. No real charge will be
               made.
             </p>
           ) : null}
           {ENVIRONMENTS.isDevPrice && order?.finalFee ? (
-            <p className="mt-1 text-[11px] font-normal leading-snug text-(--ink)">
+            <p className="mt-1 text-xs font-normal leading-snug text-(--ink)">
               Catalog fee shown. You will only be charged{' '}
               {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at checkout.
             </p>
@@ -53,7 +53,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         </dd>
       </dl>
       <dl className="space-y-2 sm:space-y-2">
-        <dt className="text-xs sm:text-sm font-medium text-(--muted)">
+        <dt className="text-xs sm:text-sm font-normal text-(--muted)">
           Last Updated
         </dt>
         <dd className="text-xs sm:text-sm font-normal text-(--ink)">

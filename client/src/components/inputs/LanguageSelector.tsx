@@ -41,18 +41,18 @@ const LanguageSelector = ({ className, menuClassName, dropdownDirection = 'down'
           e.preventDefault();
           setIsOpen((prev) => !prev);
         }}
-        className="inline-flex items-center cursor-pointer justify-between gap-1 px-2 py-1 text-[12px] font-light text-(--ink) uppercase transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-(--ink) hover:text-(--ink)"
+        className="inline-flex items-center cursor-pointer justify-between gap-1 rounded-(--radius-control) border border-transparent px-2 py-1 text-xs font-medium text-(--ink) uppercase transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-(--ink) hover:text-(--ink)"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label="Select language"
       >
-        <span className='flex items-center gap-1 text-(--ink) text-[12px] font-light uppercase'>{currentOption?.shortLabel}</span>
+        <span className='flex items-center gap-1 text-(--ink) text-xs font-medium uppercase'>{currentOption?.shortLabel}</span>
       </Link>
 
       {isOpen && (
         <div
           className={cn(
-            `absolute ${dropdownDirection === 'up' ? 'bottom-full' : 'top-full'} right-[-10px] z-[10001] mt-2 w-[52px] overflow-hidden rounded-(--radius-control) bg-(--surface) p-0.5 shadow-[var(--shadow-menu)]`,
+            `absolute ${dropdownDirection === 'up' ? 'bottom-full' : 'top-full'} right-[-10px] z-[10001] mt-2 w-[52px] overflow-hidden rounded-(--radius-control) bg-(--surface) p-0.5 shadow-(--shadow-menu)`,
             menuClassName
           )}
           role="listbox"
@@ -70,7 +70,7 @@ const LanguageSelector = ({ className, menuClassName, dropdownDirection = 'down'
                   setLanguage(code as Language);
                   setIsOpen(false);
                 }}
-                className={`cursor-pointer ${isActive ? 'text-(--ink)' : 'text-(--muted) hover:bg-[var(--surface)] hover:text-(--ink)'} flex w-full items-center justify-center rounded-md px-2 py-1 text-[12px] font-light uppercase transition-colors duration-100`}
+                className={`cursor-pointer ${isActive ? 'text-(--ink)' : 'text-(--muted) hover:bg-(--surface) hover:text-(--ink)'} flex w-full items-center justify-center rounded-md px-2 py-1 text-xs font-medium uppercase transition-colors duration-100`}
                 role="option"
                 aria-selected={isActive}
                 title={option.label}

@@ -57,14 +57,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   row: {
-    height: 12,
+    height: 10,
     width: '65%',
     borderRadius: 6,
     backgroundColor: `${colors.primary}12`,
     marginBottom: spacing.sm,
   },
   rowWide: {
-    height: 12,
+    height: 10,
     width: '80%',
     borderRadius: 6,
     backgroundColor: `${colors.primary}10`,

@@ -1,9 +1,9 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { type MetricCardData } from '@/types/dashboard.type';
 import { cn } from '@/lib/utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { createSearchParams, Link } from 'react-router-dom';
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight, faArrowTrendDown, faArrowTrendUp } from '@fortawesome/free-solid-svg-icons';
 import {
   LineChart,
   Line,
@@ -12,56 +12,17 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const accentMap = {
-  blue: {
-    icon: 'text-(--ink)',
-    iconBg: 'bg-[var(--surface)]',
-    iconRing: 'ring-(--line)',
-    spark: 'var(--chart-1)',
-    footer: 'text-(--ink)',
-  },
-  teal: {
-    icon: 'text-(--ink)',
-    iconBg: 'bg-[var(--surface)]',
-    iconRing: 'ring-(--line)',
-    spark: 'var(--chart-2)',
-    footer: 'text-(--ink)',
-  },
-  amber: {
-    icon: 'text-(--ink)',
-    iconBg: 'bg-(--surface)',
-    iconRing: 'ring-(--ink)',
-    spark: 'var(--chart-3)',
-    footer: 'text-(--ink)',
-  },
-  emerald: {
-    icon: 'text-(--ink)',
-    iconBg: 'bg-(--surface)',
-    iconRing: 'ring-(--ink)',
-    spark: 'var(--chart-4)',
-    footer: 'text-(--ink)',
-  },
-  violet: {
-    icon: 'text-(--ink)',
-    iconBg: 'bg-[var(--surface)]',
-    iconRing: 'ring-(--line)',
-    spark: 'var(--chart-5)',
-    footer: 'text-(--ink)',
-  },
-  rose: {
-    icon: 'text-(--ink)',
-    iconBg: 'bg-(--surface)',
-    iconRing: 'ring-(--ink)',
-    spark: 'var(--chart-2)',
-    footer: 'text-(--ink)',
-  },
-  slate: {
-    icon: 'text-(--ink)',
-    iconBg: 'bg-[var(--surface)]',
-    iconRing: 'ring-(--line)',
-    spark: 'var(--chart-3)',
-    footer: 'text-(--ink)',
-  },
+// `accent` survives from the pre-monochrome palette. Every card now shares one
+// treatment; the accent only picks a step on the neutral chart ramp so a row of
+// sparklines stays distinguishable from one another.
+const sparkRamp = {
+  blue: 'var(--chart-1)',
+  teal: 'var(--chart-2)',
+  amber: 'var(--chart-3)',
+  emerald: 'var(--chart-4)',
+  violet: 'var(--chart-5)',
+  rose: 'var(--chart-2)',
+  slate: 'var(--chart-3)',
 } as const;
 
 const MetricCard = ({
@@ -89,20 +50,21 @@ const MetricCard = ({
       : undefined);
 
   const chartData = sparklineData?.map((item, index) => ({ value: item, index })) || [];
+  const caption = footerText || note || comparisonLabel;
 
   const renderSparkline = () => {
     if (!sparklineData?.length || !sparklineType) return null;
 
     return (
-      <div className="h-12 w-24">
+      <div className="h-10 w-20" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           {sparklineType === 'line' ? (
             <LineChart data={chartData}>
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={sparkColor || accentMap[accent].spark}
-                strokeWidth={2.4}
+                stroke={sparkColor || sparkRamp[accent]}
+                strokeWidth={2}
                 dot={false}
               />
             </LineChart>
@@ -110,8 +72,8 @@ const MetricCard = ({
             <BarChart data={chartData}>
               <Bar
                 dataKey="value"
-                fill={sparkColor || accentMap[accent].spark}
-                radius={[4, 4, 0, 0]}
+                fill={sparkColor || sparkRamp[accent]}
+                radius={[2, 2, 0, 0]}
               />
             </BarChart>
           )}
@@ -122,105 +84,69 @@ const MetricCard = ({
 
   const cardContent = (
     <Card
+      interactive={Boolean(destination)}
       className={cn(
-        'group relative overflow-hidden rounded-(--radius-card) border border-(--line) bg-(--paper) transition-[border-color,background-color,box-shadow] duration-200 ease-[var(--ease-flat)]',
-        destination
-          ? 'cursor-pointer hover:border-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]'
-          : '',
+        'group h-full gap-3',
+        destination && 'active:shadow-[var(--press-on-paper)_999px_999px_0_inset]',
       )}
     >
-      <CardContent className="relative p-5 sm:p-6">
-        <header className="mb-4 flex items-start justify-between gap-3">
-          <span className="flex min-w-0 items-center gap-3">
-            {icon && (
-              <span
-                className={cn(
-                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-(--radius-control) ring-1',
-                  accentMap[accent].iconBg,
-                  accentMap[accent].iconRing,
-                )}
-                aria-hidden="true"
-              >
-                <FontAwesomeIcon
-                  icon={icon}
-                  className={cn('text-base sm:text-lg', accentMap[accent].icon)}
-                  aria-hidden="true"
-                />
-              </span>
-            )}
-            <span className="min-w-0">
-              <span className="block truncate text-[11px] font-medium text-(--muted)">
-                {label}
-              </span>
-              {(comparisonLabel || note) && (
-                <span className="mt-0.5 block truncate text-xs text-(--muted)">
-                  {comparisonLabel || note}
-                </span>
-              )}
-            </span>
-          </span>
-          {trend && (
+      <header className="flex items-start justify-between gap-3">
+        <span className="flex min-w-0 items-center gap-2.5">
+          {icon && (
             <span
-              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${trend.isPositive
-                  ? 'bg-(--surface) text-(--ink)'
-                  : 'bg-(--surface) text-(--ink)'
-                }`}
-              aria-label={`Trend: ${trend.isPositive ? 'increasing' : 'decreasing'} by ${Math.abs(trend.value)}%`}
+              className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) bg-(--surface) text-(--ink)"
+              aria-hidden="true"
             >
-              {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
+              <FontAwesomeIcon icon={icon} className="text-sm" aria-hidden="true" />
             </span>
           )}
-        </header>
+          <span className="type-body-sm min-w-0 truncate text-(--muted)">{label}</span>
+        </span>
 
-        <section className="flex items-end justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <p
-              className="truncate text-[2rem] font-medium leading-none text-[color:var(--ink)] sm:text-[2.3rem]"
-              aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
-            >
-              {value}
-            </p>
-            <p className="mt-3 max-w-[16rem] text-sm leading-6 text-(--muted)">
-              {footerText || note || comparisonLabel || 'Performance snapshot'}
-            </p>
-          </div>
-
-          <div className="hidden items-center gap-2 sm:flex">
-            {renderSparkline()}
-            {destination && (
-              <span
-                className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                aria-hidden="true"
-              >
-                <FontAwesomeIcon
-                  icon={faArrowRight}
-                  className="text-sm text-(--ink) transition-transform duration-200 group-hover:translate-x-1"
-                  aria-hidden="true"
-                />
-              </span>
-            )}
-          </div>
-        </section>
-
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-[color:var(--line)] pt-4 sm:hidden">
-          <span className={cn('text-xs font-medium', accentMap[accent].footer)}>
-            {footerText || comparisonLabel || 'Live dashboard signal'}
+        {trend && (
+          // Direction reads from the arrow and the label, not from a fill.
+          <span
+            className="type-meta inline-flex shrink-0 items-center gap-1 text-(--ink) tabular"
+            aria-label={`${trend.isPositive ? 'Up' : 'Down'} ${Math.abs(trend.value)} percent`}
+          >
+            <FontAwesomeIcon
+              icon={trend.isPositive ? faArrowTrendUp : faArrowTrendDown}
+              className="size-3"
+              aria-hidden="true"
+            />
+            {Math.abs(trend.value)}%
           </span>
+        )}
+      </header>
+
+      <div className="flex items-end justify-between gap-4">
+        <p
+          className="type-metric truncate"
+          aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
+        >
+          {value}
+        </p>
+        <div className="hidden items-center gap-2 sm:flex">{renderSparkline()}</div>
+      </div>
+
+      {(caption || destination) && (
+        <footer className="flex items-center justify-between gap-3">
+          <span className="type-meta min-w-0 truncate">{caption}</span>
           {destination && (
             <FontAwesomeIcon
               icon={faArrowRight}
-              className="text-sm text-(--muted)"
+              className="size-3 shrink-0 text-(--muted) transition-transform duration-200 ease-(--ease-glide) group-hover:translate-x-1 group-hover:text-(--ink)"
               aria-hidden="true"
             />
           )}
-        </div>
-      </CardContent>
+        </footer>
+      )}
     </Card>
   );
 
   if (destination) {
     return (
-      <Link to={destination} className="block">
+      <Link to={destination} className="block h-full">
         {cardContent}
       </Link>
     );

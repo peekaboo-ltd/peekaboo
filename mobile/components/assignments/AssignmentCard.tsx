@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   },
   locationLine: {
     width: 1,
-    height: 12,
+    height: 10,
     backgroundColor: 'rgba(95, 149, 152, 0.35)',
     marginLeft: 3.5,
     marginVertical: 2,

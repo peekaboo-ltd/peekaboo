@@ -11,7 +11,7 @@ export default function OrderStatusTab({
   activeStatus?: string;
 }) {
   return (
-    <Link className={`${(statusLabel === activeStatus || activeStatus === 'ALL') ? `text-(--paper) bg-(--ink)` : `text-(--ink) bg-(--surface)`} w-full text-center rounded-sm text-[13px] px-4 py-1`} to={`#`} onClick={(e) => {
+    <Link className={`${(statusLabel === activeStatus || activeStatus === 'ALL') ? `text-(--paper) bg-(--ink)` : `text-(--ink) bg-(--surface)`} w-full text-center rounded-sm text-sm px-4 py-1`} to={`#`} onClick={(e) => {
       e.preventDefault();
       onTabChange(statusLabel);
     }}>

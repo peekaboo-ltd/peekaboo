@@ -155,7 +155,7 @@ const BreakdownTable = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="rounded border border-(--line) bg-(--surface) px-4 py-3 text-[13px] text-(--muted)">
+      <div className="rounded bg-(--surface) px-4 py-3 text-sm text-(--muted)">
         Loading billing breakdown...
       </div>
     );
@@ -163,7 +163,7 @@ const BreakdownTable = ({
 
   if (errorMessage) {
     return (
-      <div className="rounded border border-(--line) bg-(--surface) px-4 py-3 text-[13px] text-(--ink)">
+      <div className="rounded bg-(--surface) px-4 py-3 text-sm text-(--ink)">
         {errorMessage}
       </div>
     );
@@ -171,7 +171,7 @@ const BreakdownTable = ({
 
   if (!breakdown?.length) {
     return (
-      <div className="rounded border border-(--line) bg-(--surface) px-4 py-3 text-[13px] text-(--muted)">
+      <div className="rounded bg-(--surface) px-4 py-3 text-sm text-(--muted)">
         {emptyMessage}
       </div>
     );
@@ -180,14 +180,14 @@ const BreakdownTable = ({
   return (
     <div className="overflow-hidden rounded border border-(--line)">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200 text-[13px]">
+        <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-(--surface) text-left text-(--muted)">
             <tr>
-              <th className="px-4 py-3 font-normal text-[12px]">Tier</th>
-              <th className="px-4 py-3 font-normal text-[12px]">Type</th>
-              <th className="px-4 py-3 font-normal text-[12px]">Deliveries</th>
-              <th className="px-4 py-3 font-normal text-[12px]">Unit Price</th>
-              <th className="px-4 py-3 font-normal text-[12px]">Subtotal</th>
+              <th className="px-4 py-3 font-normal text-xs">Tier</th>
+              <th className="px-4 py-3 font-normal text-xs">Type</th>
+              <th className="px-4 py-3 font-normal text-xs">Deliveries</th>
+              <th className="px-4 py-3 font-normal text-xs">Unit Price</th>
+              <th className="px-4 py-3 font-normal text-xs">Subtotal</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-(--paper)">
@@ -195,7 +195,7 @@ const BreakdownTable = ({
               <tr key={`${row.tierLabel}-${index}`}>
                 <td className="px-4 py-3 text-(--ink)">{row.tierLabel}</td>
                 <td className="px-4 py-3">
-                  <span className="inline-flex rounded-full border border-(--line) bg-(--surface) px-2 py-1 text-[11px] text-(--muted)">
+                  <span className="inline-flex rounded-full bg-(--surface) px-2 py-1 text-xs text-(--muted)">
                     {getBreakdownTypeLabel(row.type)}
                   </span>
                 </td>
@@ -203,7 +203,7 @@ const BreakdownTable = ({
                 <td className="px-4 py-3 text-(--ink)">
                   {formatCurrency(row.unitPrice, currency)}
                 </td>
-                <td className="px-4 py-3 font-normal text-[12px] text-(--ink)">
+                <td className="px-4 py-3 font-normal text-xs text-(--ink)">
                   {formatCurrency(row.subtotal, currency)}
                 </td>
               </tr>
@@ -1096,7 +1096,7 @@ const BillingPaymentsPage = () => {
             }
           >
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              <label className="text-[13px] text-(--ink)">
+              <label className="text-sm text-(--ink)">
                 Business
                 <Select
                   className="mt-1"
@@ -1109,29 +1109,29 @@ const BillingPaymentsPage = () => {
                 />
               </label>
 
-              <label className="text-[13px] text-(--ink)">
+              <label className="text-sm text-(--ink)">
                 Start date
                 <input
                   type="date"
-                  className="mt-1 h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-[13px] outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="mt-1 h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                   value={reportStartDate}
                   onChange={(event) => setReportStartDate(event.target.value)}
                 />
               </label>
 
-              <label className="text-[13px] text-(--ink)">
+              <label className="text-sm text-(--ink)">
                 End date
                 <input
                   type="date"
-                  className="mt-1 h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-[13px] outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="mt-1 h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                   value={reportEndDate}
                   onChange={(event) => setReportEndDate(event.target.value)}
                 />
               </label>
             </div>
-            <p className="mt-3 text-[13px] text-(--muted)">
+            <p className="mt-3 text-sm text-(--muted)">
               Selected:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {selectedOrganization?.name || "N/A"}
               </span>{" "}
               | {reportStartDate} to {reportEndDate}
@@ -1200,7 +1200,7 @@ const BillingPaymentsPage = () => {
                 } cycle`
           }
         >
-          <p className="text-[13px] text-(--muted)">
+          <p className="text-sm text-(--muted)">
             {isAdmin
               ? "Highlighted plan is based on the currently selected business."
               : "This plan card reflects the active business plan tied to the current billing cycle."}
@@ -1218,7 +1218,7 @@ const BillingPaymentsPage = () => {
             title="Select Business"
             description="Choose a business to load deliveries and billing details for that organization."
           >
-            <label className="block max-w-md text-[13px] text-(--ink)">
+            <label className="block max-w-md text-sm text-(--ink)">
               Business
               <Select
                 className="mt-1"
@@ -1260,16 +1260,16 @@ const BillingPaymentsPage = () => {
           >
             {selectedOrganizationDue ? (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-3 rounded border border-(--line) bg-(--surface) p-4 text-[13px] text-(--ink) md:grid-cols-2">
-                  <p className="text-[12px] font-medium text-(--ink)">
+                <div className="grid grid-cols-1 gap-3 rounded bg-(--surface) p-4 text-sm text-(--ink) md:grid-cols-2">
+                  <p className="text-[0.8125rem] text-(--ink)">
                     Invoice:{" "}
-                    <span className="font-normal text-[12px] text-(--ink)">
+                    <span className="text-[0.8125rem] text-(--ink)">
                       {resolveInvoiceIdentifier(selectedOrganizationDue)}
                     </span>
                   </p>
-                  <p className="text-[12px] font-medium text-(--ink)">
+                  <p className="text-[0.8125rem] text-(--ink)">
                     Billing period:{" "}
-                    <span className="font-normal text-[12px] text-(--ink)">
+                    <span className="text-[0.8125rem] text-(--ink)">
                       {formatBillingPeriodRange(
                         currentBreakdown?.periodStart ||
                           selectedOrganizationDue.periodStart,
@@ -1278,15 +1278,15 @@ const BillingPaymentsPage = () => {
                       )}
                     </span>
                   </p>
-                  <p className="text-[12px] font-medium text-(--ink)">
+                  <p className="text-[0.8125rem] text-(--ink)">
                     Deliveries so far:{" "}
-                    <span className="font-normal text-[12px] text-(--ink)">
+                    <span className="text-[0.8125rem] text-(--ink)">
                       {currentTotalOrders}
                     </span>
                   </p>
-                  <p className="text-[12px] font-medium text-(--ink)">
+                  <p className="text-[0.8125rem] text-(--ink)">
                     Outstanding across unpaid billings:{" "}
-                    <span className="font-normal text-[12px] text-(--ink)">
+                    <span className="text-[0.8125rem] text-(--ink)">
                       {formatCurrency(
                         pendingAmountAdminSelectedOrganization,
                         currentBillingCurrency,
@@ -1297,10 +1297,10 @@ const BillingPaymentsPage = () => {
 
                 <div className="space-y-2">
                   <div>
-                    <h3 className="text-[13px] font-medium text-(--ink)">
+                    <h3 className="type-label">
                       Billing Breakdown
                     </h3>
-                    <p className="text-[13px] text-(--muted)">
+                    <p className="text-sm text-(--muted)">
                       Invoice totals come from the billing record and its
                       pricing breakdown, not by summing delivery fees.
                     </p>
@@ -1319,13 +1319,13 @@ const BillingPaymentsPage = () => {
                 </div>
 
                 {currentEstimate?.note ? (
-                  <p className="text-[13px] text-(--muted)">
+                  <p className="text-sm text-(--muted)">
                     {currentEstimate.note}
                   </p>
                 ) : null}
               </div>
             ) : (
-              <p className="text-[13px] text-(--muted)">
+              <p className="text-sm text-(--muted)">
                 No unpaid billing at the moment for this business.
               </p>
             )}
@@ -1347,8 +1347,8 @@ const BillingPaymentsPage = () => {
               isLoading={adminOrdersLoading}
               noDataMessage="No deliveries found for the selected business."
             />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13px] text-(--muted)">
-              <p className="text-[12px] font-medium text-(--ink)">Showing up to 10 deliveries per page.</p>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-(--muted)">
+              <p className="text-[0.8125rem] text-(--ink)">Showing up to 10 deliveries per page.</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -1383,7 +1383,7 @@ const BillingPaymentsPage = () => {
                 </button>
               </div>
             </div>
-            <div className="mt-4 rounded border border-(--line) bg-(--surface) p-3 text-[13px] text-(--muted)">
+            <div className="mt-4 rounded bg-(--surface) p-3 text-sm text-(--muted)">
               Delivery fees shown below are operational records. Invoice totals
               come from the billing breakdown above.
             </div>
@@ -1413,7 +1413,7 @@ const BillingPaymentsPage = () => {
                   isLoading={adminPaidBillingsLoading}
                   noDataMessage="No payment history for this business yet."
                 />
-                <div className="flex items-center justify-end gap-2 text-[13px] text-(--muted)">
+                <div className="flex items-center justify-end gap-2 text-sm text-(--muted)">
                   <button
                     type="button"
                     className="rounded border border-(--line) px-3 py-1 disabled:opacity-50"
@@ -1452,7 +1452,7 @@ const BillingPaymentsPage = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-[13px] text-(--muted)">
+              <p className="text-sm text-(--muted)">
                 History is hidden. Toggle to view.
               </p>
             )}
@@ -1485,16 +1485,16 @@ const BillingPaymentsPage = () => {
             }
           >
             <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-3 rounded border border-(--line) bg-(--surface) p-4 text-[13px] text-(--ink) md:grid-cols-2">
-                <p className="text-[12px] font-medium text-(--ink)">
+              <div className="grid grid-cols-1 gap-3 rounded bg-(--surface) p-4 text-sm text-(--ink) md:grid-cols-2">
+                <p className="text-[0.8125rem] text-(--ink)">
                   Current plan:{" "}
-                  <span className="font-normal text-[12px] text-(--ink)">
+                  <span className="text-[0.8125rem] text-(--ink)">
                     {currentPlanName}
                   </span>
                 </p>
-                <p className="text-[12px] font-medium text-(--ink)">
+                <p className="text-[0.8125rem] text-(--ink)">
                   Billing period:{" "}
-                  <span className="font-normal text-[12px] text-(--ink)">
+                  <span className="text-[0.8125rem] text-(--ink)">
                     {formatBillingPeriodRange(
                       currentBreakdown?.periodStart ||
                         myCurrentDue?.periodStart,
@@ -1502,15 +1502,15 @@ const BillingPaymentsPage = () => {
                     )}
                   </span>
                 </p>
-                <p className="text-[12px] font-medium text-(--ink)">
+                <p className="text-[0.8125rem] text-(--ink)">
                   Deliveries so far:{" "}
-                  <span className="font-normal text-[12px] text-(--ink)">
+                  <span className="text-[0.8125rem] text-(--ink)">
                     {currentTotalOrders}
                   </span>
                 </p>
-                <p className="text-[12px] font-medium text-(--ink)">
+                <p className="text-[0.8125rem] text-(--ink)">
                   Current estimated amount due:{" "}
-                  <span className="font-normal text-[12px] text-(--ink)">
+                  <span className="text-[0.8125rem] text-(--ink)">
                     {formatCurrency(
                       currentEstimateAmount,
                       currentBillingCurrency,
@@ -1519,8 +1519,8 @@ const BillingPaymentsPage = () => {
                 </p>
               </div>
 
-              <div className="rounded border border-(--line) bg-(--surface) p-4 text-[13px] text-(--ink)">
-                <p className="font-normal text-[12px]">How this estimate works</p>
+              <div className="rounded bg-(--surface) p-4 text-sm text-(--ink)">
+                <p className="font-normal text-xs">How this estimate works</p>
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   <li>
                     Final billing is calculated per billing period, not by
@@ -1547,10 +1547,10 @@ const BillingPaymentsPage = () => {
 
               <div className="space-y-2">
                 <div>
-                  <h3 className="text-[13px] font-medium text-(--ink)">
+                  <h3 className="type-label">
                     Billing Breakdown
                   </h3>
-                  <p className="text-[13px] text-(--muted)">
+                  <p className="text-sm text-(--muted)">
                     This table reflects the current billing estimate from the
                     server.
                   </p>
@@ -1569,17 +1569,17 @@ const BillingPaymentsPage = () => {
               </div>
 
               {currentEstimate?.note ? (
-                <p className="text-[13px] text-(--muted)">
+                <p className="text-sm text-(--muted)">
                   {currentEstimate.note}
                 </p>
               ) : null}
 
               {businessPayDisabledReason ? (
-                <p className="text-[13px] text-(--ink)">
+                <p className="text-sm text-(--ink)">
                   {businessPayDisabledReason}
                 </p>
               ) : (
-                <p className="text-[13px] text-(--ink)">
+                <p className="text-sm text-(--ink)">
                   Payment is active. After payment, new deliveries continue on a
                   new billing record.
                 </p>
@@ -1598,8 +1598,8 @@ const BillingPaymentsPage = () => {
               showPagination={false}
               noDataMessage="No deliveries in current billing cycle."
             />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13px] text-(--muted)">
-              <p className="text-[12px] font-medium text-(--ink)">Showing up to 10 deliveries per page.</p>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-(--muted)">
+              <p className="text-[0.8125rem] text-(--ink)">Showing up to 10 deliveries per page.</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -1635,7 +1635,7 @@ const BillingPaymentsPage = () => {
                 </button>
               </div>
             </div>
-            <div className="mt-4 rounded border border-(--line) bg-(--surface) p-3 text-[13px] text-(--muted)">
+            <div className="mt-4 rounded bg-(--surface) p-3 text-sm text-(--muted)">
               Delivery fees shown below are operational records. Invoice totals
               come from the billing breakdown above.
             </div>
@@ -1665,7 +1665,7 @@ const BillingPaymentsPage = () => {
                   isLoading={myPaidBillingsLoading}
                   noDataMessage="No payment history yet."
                 />
-                <div className="flex items-center justify-end gap-2 text-[13px] text-(--muted)">
+                <div className="flex items-center justify-end gap-2 text-sm text-(--muted)">
                   <button
                     type="button"
                     className="rounded border border-(--line) px-3 py-1 disabled:opacity-50"
@@ -1700,7 +1700,7 @@ const BillingPaymentsPage = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-[13px] text-(--muted)">
+              <p className="text-sm text-(--muted)">
                 History is hidden. Toggle to view.
               </p>
             )}
@@ -1719,28 +1719,28 @@ const BillingPaymentsPage = () => {
         description="Please confirm the selected business and report time range."
       >
         <section className="space-y-4">
-          <div className="space-y-2 rounded border border-(--line) bg-(--surface) p-3 text-[13px]">
-            <p className="text-[12px] font-medium text-(--ink)">
+          <div className="space-y-2 rounded bg-(--surface) p-3 text-sm">
+            <p className="text-[0.8125rem] text-(--ink)">
               Business:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {selectedOrganization?.name || "Not selected"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Start date:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {reportStartDate || "Not selected"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               End date:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {reportEndDate || "Not selected"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Action:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {adminReportAction === "download"
                   ? "Download report"
                   : "Request report by email"}
@@ -1748,7 +1748,7 @@ const BillingPaymentsPage = () => {
             </p>
           </div>
 
-          <p className="text-[13px] text-(--ink)">
+          <p className="text-sm text-(--ink)">
             Is this the correct business and time range for your report?
           </p>
 
@@ -1783,28 +1783,28 @@ const BillingPaymentsPage = () => {
         description="Review the current server-calculated estimate before paying early."
       >
         <section className="space-y-4">
-          <div className="space-y-2 rounded border border-(--line) bg-(--surface) p-3 text-[13px]">
-            <p className="text-[12px] font-medium text-(--ink)">
+          <div className="space-y-2 rounded bg-(--surface) p-3 text-sm">
+            <p className="text-[0.8125rem] text-(--ink)">
               Current business plan:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {currentPlanName}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Amount to pay now:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {formatCurrency(currentEstimateAmount, currentBillingCurrency)}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Deliveries so far:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {currentTotalOrders}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Billing period:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {formatBillingPeriodRange(
                   currentBreakdown?.periodStart || myCurrentDue?.periodStart,
                   currentBreakdown?.periodEnd || myCurrentDue?.periodEnd,
@@ -1826,7 +1826,7 @@ const BillingPaymentsPage = () => {
           />
 
           {currentEstimate?.note ? (
-            <p className="text-[13px] text-(--muted)">{currentEstimate.note}</p>
+            <p className="text-sm text-(--muted)">{currentEstimate.note}</p>
           ) : null}
 
           <div>
@@ -1839,14 +1839,14 @@ const BillingPaymentsPage = () => {
             />
           </div>
 
-          <div className="rounded border border-(--line) bg-(--surface) p-3 text-[13px] text-(--ink)">
+          <div className="rounded bg-(--surface) p-3 text-sm text-(--ink)">
             Early payment settles the server estimate shown above. Package,
             fallback, and overflow rows can still change if more deliveries are
             added before the billing period closes.
           </div>
 
           {!canBusinessPay ? (
-            <p className="text-[13px] text-(--ink)">
+            <p className="text-sm text-(--ink)">
               {businessPayDisabledReason}
             </p>
           ) : null}
@@ -1879,30 +1879,30 @@ const BillingPaymentsPage = () => {
         }
       >
         <section className="space-y-4">
-          <div className="grid grid-cols-1 gap-3 rounded border border-(--line) bg-(--surface) p-4 text-[13px] text-(--ink) md:grid-cols-2">
-            <p className="text-[12px] font-medium text-(--ink)">
+          <div className="grid grid-cols-1 gap-3 rounded bg-(--surface) p-4 text-sm text-(--ink) md:grid-cols-2">
+            <p className="text-[0.8125rem] text-(--ink)">
               Invoice:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {resolveInvoiceIdentifier(selectedHistoryBilling)}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Status:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {selectedHistoryBilling?.status || "N/A"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Paid date:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {selectedHistoryBilling?.paidAt
                   ? formatDate(selectedHistoryBilling.paidAt, "YYYY-MM-DD")
                   : "N/A"}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Billing period:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {formatBillingPeriodRange(
                   historyBreakdown?.periodStart ||
                     selectedHistoryBilling?.periodStart,
@@ -1911,17 +1911,17 @@ const BillingPaymentsPage = () => {
                 )}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Deliveries:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {historyBreakdown?.totalOrders ||
                   selectedHistoryBilling?.totalOrders ||
                   0}
               </span>
             </p>
-            <p className="text-[12px] font-medium text-(--ink)">
+            <p className="text-[0.8125rem] text-(--ink)">
               Total amount:{" "}
-              <span className="font-normal text-[12px] text-(--ink)">
+              <span className="text-[0.8125rem] text-(--ink)">
                 {formatCurrency(
                   historyBreakdown?.totalAmount ||
                     selectedHistoryBilling?.totalAmount ||
@@ -1934,10 +1934,10 @@ const BillingPaymentsPage = () => {
 
           <div className="space-y-2">
             <div>
-              <h3 className="text-[13px] font-medium text-(--ink)">
+              <h3 className="type-label">
                 Billing Breakdown
               </h3>
-              <p className="text-[13px] text-(--muted)">
+              <p className="text-sm text-(--muted)">
                 Invoice totals are calculated from the billing breakdown first.
                 Linked deliveries are shown below for auditability.
               </p>
@@ -1955,7 +1955,7 @@ const BillingPaymentsPage = () => {
             />
           </div>
 
-          <div className="rounded border border-(--line) bg-(--surface) p-3 text-[13px] text-(--muted)">
+          <div className="rounded bg-(--surface) p-3 text-sm text-(--muted)">
             Delivery fees shown below are operational records. Invoice totals
             come from the billing breakdown above.
           </div>

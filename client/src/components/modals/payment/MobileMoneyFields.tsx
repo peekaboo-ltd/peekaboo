@@ -59,7 +59,7 @@ const MobileMoneyFields = ({
         control={control}
         render={({ field }) => (
           <fieldset className="flex flex-col gap-3">
-            <legend className="text-sm font-medium">Who is paying?</legend>
+            <legend className="text-sm font-normal">Who is paying?</legend>
             {payerOptions.map((option) => (
               <label
                 key={option.value}

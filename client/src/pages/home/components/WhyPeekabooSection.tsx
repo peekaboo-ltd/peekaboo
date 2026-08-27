@@ -36,14 +36,14 @@ const WhyPeekabooSection = ({
   ].filter((stat): stat is { value: string; label: string } => stat !== null);
 
   return (
-    <section className="section-rhythm w-full border-t border-(--line) bg-(--paper)">
+    <section className="section-rhythm w-full border-(--line) bg-(--paper)">
       <article className="app-container">
         <header className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <hgroup>
-            <p className="text-[11px] font-medium text-muted-foreground">
+            <p className="type-eyebrow">
               Why Peekaboo
             </p>
-            <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
+            <h2 className="type-h2 mt-2">
               The trusted way
               <br />
               to send.
@@ -53,10 +53,10 @@ const WhyPeekabooSection = ({
             <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-muted-foreground">
               {stats.map((stat) => (
                 <div key={stat.label}>
-                  <dt className="text-[11px] font-medium">
+                  <dt className="text-xs font-normal">
                     {stat.label}
                   </dt>
-                  <dd className="mt-1 text-[18px] font-medium text-foreground">
+                  <dd className="mt-1 text-[18px] font-normal text-foreground">
                     {stat.value}
                   </dd>
                 </div>
@@ -69,14 +69,14 @@ const WhyPeekabooSection = ({
           {items.map((item) => {
             const Icon = item.icon;
             return (
-              <li key={item.title} className="rounded-(--radius-card) border border-(--line) p-6">
+              <li key={item.title} className="rounded-md border border-(--line) p-6">
                 <span className="flex h-9 w-9 items-center justify-center rounded-(--radius-control) border border-(--ink) text-(--ink)">
                   <Icon className="h-4 w-4 transition-transform duration-200" aria-hidden="true" />
                 </span>
-                <h3 className="mt-3 text-[14px] font-medium text-foreground">
+                <h3 className="type-label mt-3">
                   {item.title}
                 </h3>
-                <p className="mt-1.5 text-[13px] font-normal leading-relaxed text-muted-foreground">
+                <p className="mt-1.5 text-sm font-normal leading-relaxed text-muted-foreground">
                   {item.description}
                 </p>
               </li>

@@ -109,7 +109,7 @@ const CreateBusinessPlanPage = () => {
         <form onSubmit={onSubmit} className="flex flex-col gap-6">
           {/* Basic Info */}
           <div>
-            <h3 className="text-sm font-medium text-(--ink) mb-3">
+            <h3 className="type-label mb-3">
               Basic Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -195,7 +195,7 @@ const CreateBusinessPlanPage = () => {
             control={control}
             render={({ field }) => (
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-(--ink)">
+                <label className="text-[0.8125rem] text-(--ink)">
                   Description
                 </label>
                 <textarea
@@ -211,7 +211,7 @@ const CreateBusinessPlanPage = () => {
           {/* Features */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-(--ink)">Features</h3>
+              <h3 className="type-label">Features</h3>
               <button
                 type="button"
                 onClick={() => appendFeature({ value: '' })}
@@ -223,7 +223,7 @@ const CreateBusinessPlanPage = () => {
             </div>
             <div className="flex flex-col gap-2">
               {featureFields.length === 0 && (
-                <p className="text-xs text-(--muted) italic">
+                <p className="type-meta italic">
                   No features added yet. Click "Add Feature" to add bullet points.
                 </p>
               )}
@@ -236,7 +236,7 @@ const CreateBusinessPlanPage = () => {
                       <input
                         {...inputField}
                         placeholder={`Feature ${index + 1}...`}
-                        className="h-11 flex-1 rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm text-(--ink) outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                        className="h-(--control-md) flex-1 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
                       />
                     )}
                   />
@@ -266,7 +266,7 @@ const CreateBusinessPlanPage = () => {
                 />
                 <span className="text-sm text-(--ink)">
                   Custom pricing
-                  <span className="ml-1 text-xs text-(--muted)">
+                  <span className="type-meta ml-1">
                     (negotiated pricing — hides tier configuration)
                   </span>
                 </span>
@@ -278,7 +278,7 @@ const CreateBusinessPlanPage = () => {
           {!isCustomPricing && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-(--ink)">
+                <h3 className="type-label">
                   Pricing Tiers
                 </h3>
                 <button
@@ -301,7 +301,7 @@ const CreateBusinessPlanPage = () => {
               </div>
 
               {tierFields.length === 0 && (
-                <p className="text-xs text-(--muted) italic">
+                <p className="type-meta italic">
                   No pricing tiers defined. Click "Add Tier" to configure
                   volume-based pricing.
                 </p>
@@ -311,10 +311,10 @@ const CreateBusinessPlanPage = () => {
                 {tierFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="border border-(--line) rounded-lg p-4 bg-(--surface)"
+                    className="rounded-lg p-4 bg-(--surface)"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-(--muted)">
+                      <span className="type-meta">
                         Tier {index + 1}
                       </span>
                       <button
@@ -437,7 +437,7 @@ const CreateBusinessPlanPage = () => {
                             }
                             className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                           />
-                          <span className="text-xs text-(--muted)">
+                          <span className="type-meta">
                             Custom / contact us tier
                           </span>
                         </label>
@@ -508,7 +508,7 @@ const CreateBusinessPlanPage = () => {
                 />
                 <span className="text-sm text-(--ink)">
                   Set as default plan
-                  <span className="ml-1 text-xs text-(--muted)">
+                  <span className="type-meta ml-1">
                     (assigned to organizations with no plan)
                   </span>
                 </span>
