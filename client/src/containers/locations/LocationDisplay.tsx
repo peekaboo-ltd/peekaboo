@@ -24,18 +24,18 @@ const LocationDisplay = ({ location }: { location?: Coordinate | null }) => {
   }, [lat, lng, getAdministrativeDivisions]);
 
   if (!location || typeof lat !== 'number' || typeof lng !== 'number') {
-    return <span className="text-[--muted]">No location</span>;
+    return <span className="text-(--muted)">No location</span>;
   }
 
   if (isLoading) {
     return (
-      <span className="inline-block h-3 w-32 rounded-full bg-[--surface] animate-pulse" />
+      <span className="inline-block h-3 w-32 rounded-full bg-(--surface) animate-pulse" />
     );
   }
 
   if (!administrativeDivisions) {
     return (
-      <span className="text-[--muted] text-sm">
+      <span className="text-(--muted) text-sm">
         {lat.toFixed(5)}, {lng.toFixed(5)}
       </span>
     );
@@ -45,7 +45,7 @@ const LocationDisplay = ({ location }: { location?: Coordinate | null }) => {
   const label = [cell, sector, district].filter(Boolean).join(', ');
 
   return (
-    <span className="text-sm text-[--ink]" title={`${lat.toFixed(6)}, ${lng.toFixed(6)}`}>
+    <span className="text-sm text-(--ink)" title={`${lat.toFixed(6)}, ${lng.toFixed(6)}`}>
       {label || `${lat.toFixed(5)}, ${lng.toFixed(5)}`}
     </span>
   );

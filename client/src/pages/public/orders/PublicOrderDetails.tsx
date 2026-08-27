@@ -72,7 +72,7 @@ const LocationCard = ({
 }: LocationCardProps) => (
   <article className="relative min-w-0">
     <header className="mb-4 flex items-start justify-between gap-3">
-      <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--muted)]">
+      <p className="text-[10px] font-medium text-[var(--muted)]">
         {label}
       </p>
       {location ? (
@@ -83,7 +83,7 @@ const LocationCard = ({
             onEdit();
           }}
           aria-label={`Edit ${label.toLowerCase()} location`}
-          className="flex size-9 items-center justify-center rounded-[--radius-control] border border-[--line] text-[--muted] outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-[--ink] hover:text-[--ink] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+          className="flex size-9 items-center justify-center rounded-(--radius-control) border border-(--line) text-(--muted) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-(--ink) hover:text-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
         >
           <FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4" />
         </button>
@@ -397,7 +397,7 @@ const PublicOrderDetails = () => {
           </div>
 
           {isSameLocation ? (
-            <p className="mt-6 rounded-[--radius-control] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--ink)]">
+            <p className="mt-6 rounded-(--radius-control) bg-[var(--surface)] px-4 py-3 text-sm text-[var(--ink)]">
               Pickup and destination are the same place. Choose a different
               destination to continue.
             </p>
@@ -406,7 +406,7 @@ const PublicOrderDetails = () => {
           {locationsReady ? (
             <div className="mt-8 border-t border-[var(--line)] pt-6">
               <div className="mb-5">
-                <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--muted)]">
+                <p className="text-[10px] font-medium text-[var(--muted)]">
                   Route summary
                 </p>
                 <h3 className="mt-1 text-base font-medium text-[var(--ink)]">
@@ -428,7 +428,7 @@ const PublicOrderDetails = () => {
                 <>
                   <div className="grid gap-6 md:grid-cols-3 md:divide-x md:divide-[var(--line)] [&>div:not(:first-child)]:md:pl-6">
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
+                      <p className="text-[10px] text-[var(--muted)]">
                         Distance
                       </p>
                       <p className="mt-2 text-2xl font-medium text-[var(--ink)]">{distance.toFixed(2)}</p>
@@ -436,7 +436,7 @@ const PublicOrderDetails = () => {
                     </div>
 
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
+                      <p className="text-[10px] text-[var(--muted)]">
                         Delivery time
                       </p>
                       <p className="mt-2 text-2xl font-medium text-[var(--ink)]">{renderDeliveryTime()}</p>
@@ -444,7 +444,7 @@ const PublicOrderDetails = () => {
                     </div>
 
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)]">
+                      <p className="text-[10px] text-[var(--muted)]">
                         Delivery fee
                       </p>
                       {(orderFee !== undefined && orderFee > 0) ||

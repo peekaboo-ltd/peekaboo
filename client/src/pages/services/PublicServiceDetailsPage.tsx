@@ -148,18 +148,18 @@ const PublicServiceDetailsPage = () => {
     return (
       <PublicPage className="bg-[var(--surface)]">
         <section className="grid gap-4">
-          <div className="h-64 animate-pulse rounded-[--radius-card] border border-[--line] bg-[--paper]" />
+          <div className="h-64 animate-pulse rounded-(--radius-card) border border-(--line) bg-(--paper)" />
           <div className="grid gap-4 md:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
-                className="h-32 animate-pulse rounded-[--radius-card] border border-[--line] bg-[--paper]"
+                className="h-32 animate-pulse rounded-(--radius-card) border border-(--line) bg-(--paper)"
               />
             ))}
           </div>
           <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="h-96 animate-pulse rounded-[--radius-card] border border-[--line] bg-[--paper]" />
-            <div className="h-96 animate-pulse rounded-[--radius-card] border border-[--line] bg-[--paper]" />
+            <div className="h-96 animate-pulse rounded-(--radius-card) border border-(--line) bg-(--paper)" />
+            <div className="h-96 animate-pulse rounded-(--radius-card) border border-(--line) bg-(--paper)" />
           </div>
         </section>
       </PublicPage>
@@ -173,11 +173,11 @@ const PublicServiceDetailsPage = () => {
           eyebrow="Service details"
           title="We couldn’t find that delivery plan"
           description="The plan may have moved, been archived, or the link may be incomplete."
-          className="border-[--line] bg-[--paper]"
+          className="border-(--line) bg-(--paper)"
           actions={
             <Link
               to="/services"
-              className="inline-flex items-center gap-2 rounded-[--radius-control] border border-[--line] px-4 py-2 text-[13px] font-medium text-[--muted] transition-colors duration-200 hover:bg-[--surface]"
+              className="inline-flex items-center gap-2 rounded-(--radius-control) border border-(--line) px-4 py-2 text-[13px] font-medium text-(--muted) transition-colors duration-200 hover:bg-(--surface)"
             >
               <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
               Back to services
@@ -188,7 +188,7 @@ const PublicServiceDetailsPage = () => {
           eyebrow="Next step"
           title="Explore active services"
           description="Browse our current delivery plans or reach out directly for a tailored setup."
-          className="rounded-[--radius-card] border-[--line]"
+          className="rounded-(--radius-card) border-(--line)"
         >
           <div className="flex flex-wrap gap-3">
             <Button route="/services" className="w-fit" primary>
@@ -231,22 +231,22 @@ const PublicServiceDetailsPage = () => {
                 <div className="flex flex-wrap items-center gap-3">
                   <span>{plan.name}</span>
                   {plan.badge ? (
-                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-[--radius-pill] bg-[--ink] px-3 text-xs font-medium text-[--paper]">
+                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-(--radius-pill) bg-(--ink) px-3 text-xs font-medium text-(--paper)">
                       <FontAwesomeIcon icon={faStar} className="text-[10px]" />
                       {plan.badge}
                     </span>
                   ) : null}
                   {plan.isDefault ? (
-                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-[--radius-pill] border border-[--ink] px-3 text-xs font-medium text-[--ink]">
+                    <span className="inline-flex h-6 w-fit items-center gap-2 rounded-(--radius-pill) border border-(--ink) px-3 text-xs font-medium text-(--ink)">
                       Preferred plan
                     </span>
                   ) : null}
                 </div>
                 <div className="flex flex-col gap-2">
-                  <span className="text-[1.05rem] font-normal text-[--muted] sm:text-[1.2rem]">
+                  <span className="text-[1.05rem] font-normal text-(--muted) sm:text-[1.2rem]">
                     {headlinePrice}
                   </span>
-                  <span className="max-w-3xl text-sm leading-6 text-[--muted]">
+                  <span className="max-w-3xl text-sm leading-6 text-(--muted)">
                     {plan.description || 'A flexible business delivery plan built around your operational rhythm and shipment volume.'}
                   </span>
                 </div>
@@ -257,12 +257,12 @@ const PublicServiceDetailsPage = () => {
               <div className="flex flex-wrap gap-2">
                 <Link
                   to="/services"
-                  className="inline-flex items-center gap-2 rounded-[--radius-control] border border-[--line] bg-[--paper] px-4 py-2 text-[13px] font-medium text-[--muted] transition-colors duration-200 hover:bg-[--surface]"
+                  className="inline-flex items-center gap-2 rounded-(--radius-control) border border-(--line) bg-(--paper) px-4 py-2 text-[13px] font-medium text-(--muted) transition-colors duration-200 hover:bg-(--surface)"
                 >
                   <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
                   Back to services
                 </Link>
-                <Button route="/contact" primary className="rounded-[--radius-control] px-6!">
+                <Button route="/contact" primary className="rounded-(--radius-control) px-6!">
                   Talk to our team
                   <FontAwesomeIcon icon={faArrowRight} className="text-[11px]" />
                 </Button>
@@ -278,25 +278,25 @@ const PublicServiceDetailsPage = () => {
           <PublicStatCard
             label="Billing rhythm"
             value={getBillingPeriodLabel(plan.billingPeriod)}
-            className="border-[--line]"
+            className="border-(--line)"
             icon={<FontAwesomeIcon icon={faClock} />}
           />
           <PublicStatCard
             label="Pricing mode"
             value={plan.isCustomPricing ? 'Custom agreement' : 'Structured tiers'}
-            className="border-[--line]"
+            className="border-(--line)"
             icon={<FontAwesomeIcon icon={faLayerGroup} />}
           />
           <PublicStatCard
             label="Currency"
             value={plan.currency || 'RWF'}
-            className="border-[--line]"
+            className="border-(--line)"
             icon={<FontAwesomeIcon icon={faCoins} />}
           />
           <PublicStatCard
             label="Positioning"
             value={plan.badge || (plan.isDefault ? 'Recommended' : 'Active plan')}
-            className="border-[--line]"
+            className="border-(--line)"
             icon={<FontAwesomeIcon icon={faStar} />}
           />
         </motion.section>
@@ -307,22 +307,22 @@ const PublicServiceDetailsPage = () => {
               eyebrow="Overview"
               title="What this plan is built for"
               description="Designed for teams that want transparent pricing and dependable delivery operations."
-              className="border-[--line]"
+              className="border-(--line)"
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <article className="rounded-[--radius-control] border border-[--line] bg-[--surface] p-5">
-                  <p className="text-[11px] font-medium uppercase text-[--muted]">
+                <article className="rounded-(--radius-control) border border-(--line) bg-(--surface) p-5">
+                  <p className="text-[11px] font-medium text-(--muted)">
                     Headline pricing
                   </p>
-                  <p className="mt-3 text-2xl font-medium text-[--ink]">
+                  <p className="mt-3 text-2xl font-medium text-(--ink)">
                     {headlinePrice}
                   </p>
                 </article>
-                <article className="rounded-[--radius-control] border border-[--line] bg-[--surface] p-5">
-                  <p className="text-[11px] font-medium uppercase text-[--muted]">
+                <article className="rounded-(--radius-control) border border-(--line) bg-(--surface) p-5">
+                  <p className="text-[11px] font-medium text-(--muted)">
                     Ideal usage
                   </p>
-                  <p className="mt-3 text-sm leading-6 text-[--muted]">
+                  <p className="mt-3 text-sm leading-6 text-(--muted)">
                     {plan.isCustomPricing
                       ? 'Best for businesses that need a dedicated operational setup and negotiated service design.'
                       : `Best for teams running ${getBillingPeriodLabel(plan.billingPeriod).toLowerCase()} delivery cycles and wanting predictable cost control.`}
@@ -335,18 +335,18 @@ const PublicServiceDetailsPage = () => {
               eyebrow="Included"
               title="Features and benefits"
               description="Every plan includes the operational essentials listed below."
-              className="border-[--line]"
+              className="border-(--line)"
             >
               <ul className="grid gap-3 md:grid-cols-2">
                 {featureList.map((feature) => (
                   <li
                     key={feature}
-                    className="flex items-start gap-3 rounded-[--radius-control] border border-[--line] bg-[--paper] p-4"
+                    className="flex items-start gap-3 rounded-(--radius-control) border border-(--line) bg-(--paper) p-4"
                   >
-                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[--radius-control] bg-[--surface] text-[--muted]">
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-(--radius-control) bg-(--surface) text-(--muted)">
                       <FontAwesomeIcon icon={faCheck} className="text-xs" />
                     </span>
-                    <span className="text-sm leading-6 text-[--muted]">{feature}</span>
+                    <span className="text-sm leading-6 text-(--muted)">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -358,30 +358,30 @@ const PublicServiceDetailsPage = () => {
               eyebrow="Pricing structure"
               title="Tier details"
               description="A breakdown of volume bands, fallback rates, and overflow charges."
-              className="border-[--line]"
+              className="border-(--line)"
             >
               <div className="space-y-3">
                 {pricingRows.length > 0 ? (
                   pricingRows.map((row) => (
                     <article
                       key={`${row.label}-${row.priceLabel}`}
-                      className="rounded-[--radius-control] border border-[--line] bg-[--surface] p-4"
+                      className="rounded-(--radius-control) border border-(--line) bg-(--surface) p-4"
                     >
-                      <p className="text-sm font-medium text-[--ink]">{row.label}</p>
-                      <p className="mt-1 text-sm text-[--muted]">{row.priceLabel}</p>
+                      <p className="text-sm font-medium text-(--ink)">{row.label}</p>
+                      <p className="mt-1 text-sm text-(--muted)">{row.priceLabel}</p>
                     </article>
                   ))
                 ) : (
-                  <article className="rounded-[--radius-control] border border-[--line] bg-[--surface] p-4">
-                    <p className="text-sm text-[--muted]">
+                  <article className="rounded-(--radius-control) border border-(--line) bg-(--surface) p-4">
+                    <p className="text-sm text-(--muted)">
                       Pricing is tailored with our team based on your exact operational needs.
                     </p>
                   </article>
                 )}
 
                 {overflowRate ? (
-                  <article className="rounded-[--radius-control] border border-[--line] p-4">
-                    <p className="text-[11px] font-normal uppercase text-muted-foreground">
+                  <article className="rounded-(--radius-control) border border-(--line) p-4">
+                    <p className="text-[11px] font-normal text-muted-foreground">
                       Overflow rate
                     </p>
                     <p className="mt-2 text-sm text-foreground">
@@ -391,8 +391,8 @@ const PublicServiceDetailsPage = () => {
                 ) : null}
 
                 {hasPackageTiers && fallbackRate ? (
-                  <article className="rounded-[--radius-control] border p-4">
-                    <p className="text-[11px] font-normal uppercase">
+                  <article className="rounded-(--radius-control) border p-4">
+                    <p className="text-[11px] font-normal">
                       Fallback rate
                     </p>
                     <p className="mt-2 text-sm">
@@ -407,18 +407,18 @@ const PublicServiceDetailsPage = () => {
               eyebrow="Next step"
               title="Talk through your rollout"
               description="We’ll help match this plan to your volumes, locations, and operating model."
-              className="border-[--line]"
+              className="border-(--line)"
             >
               <div className="space-y-4">
-                <p className="text-sm leading-6 text-[--muted]">
+                <p className="text-sm leading-6 text-(--muted)">
                   Tell us about your expected delivery volume and service area, and we’ll confirm the best plan setup for your team.
                 </p>
                 <div className="flex flex-col gap-3">
-                  <Button route="/contact" primary className="w-full rounded-[--radius-control]">
+                  <Button route="/contact" primary className="w-full rounded-(--radius-control)">
                     Talk to our team
                     <FontAwesomeIcon icon={faArrowRight} className="text-[11px]" />
                   </Button>
-                  <Button route="/services" className="w-full rounded-[--radius-control]">
+                  <Button route="/services" className="w-full rounded-(--radius-control)">
                     Explore all services
                   </Button>
                 </div>

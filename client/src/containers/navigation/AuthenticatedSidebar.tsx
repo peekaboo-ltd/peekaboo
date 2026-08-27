@@ -58,7 +58,7 @@ const AuthenticatedSidebar = () => {
 
   return (
     <aside
-      className={`invert-surface fixed bottom-0 left-0 top-16 z-40 flex flex-col border-r border-[--line] ${
+      className={`fixed bottom-0 left-0 top-16 z-40 flex flex-col border-r border-(--line) bg-(--paper) ${
         sidebarOpen ? 'w-[240px]' : 'w-[72px]'
       }`}
     >
@@ -66,7 +66,7 @@ const AuthenticatedSidebar = () => {
         <button
           type="button"
           onClick={() => dispatch(setIsOpen(!sidebarOpen))}
-          className="flex size-10 items-center justify-center rounded-[--radius-control] outline-none transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface] active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+          className="flex size-10 items-center justify-center rounded-(--radius-control) text-(--muted) outline-none transition-[background-color,color,box-shadow] duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
           aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           <FontAwesomeIcon icon={sidebarOpen ? faAnglesLeft : faBars} />
@@ -87,7 +87,7 @@ const AuthenticatedSidebar = () => {
                 <Link
                   to={nav.path}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`flex min-h-11 items-center gap-3 rounded-[--radius-control] text-sm font-medium outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface] active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] ${
+                  className={`flex min-h-11 items-center gap-3 rounded-(--radius-control) text-sm font-medium text-(--muted) outline-none transition-[background-color,color,box-shadow] duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] ${
                     sidebarOpen ? 'px-3' : 'justify-center px-0'
                   }`}
                   onClick={(event) => {
@@ -110,7 +110,7 @@ const AuthenticatedSidebar = () => {
                 </Link>
 
                 {hasSubcategories && isSubcategoriesOpen && sidebarOpen ? (
-                  <ul className="ml-5 mt-2 space-y-1 border-l border-[--line] pl-3">
+                  <ul className="ml-5 mt-2 space-y-1 border-l border-(--line) pl-3">
                     {nav.allowedSubCategories.map((subCategory) => {
                       const isSubActive = pathname.startsWith(subCategory.path);
                       return (
@@ -118,7 +118,7 @@ const AuthenticatedSidebar = () => {
                           <Link
                             to={subCategory.path}
                             aria-current={isSubActive ? 'page' : undefined}
-                            className="flex min-h-10 items-center gap-3 rounded-[--radius-control] px-3 text-sm outline-none transition-[background-color,color] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface]"
+                            className="flex min-h-10 items-center gap-3 rounded-(--radius-control) px-3 text-sm text-(--muted) outline-none transition-[background-color,color] duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink)"
                           >
                             <FontAwesomeIcon icon={subCategory.icon} className="size-3 shrink-0" />
                             <span className="truncate">{subCategory.label}</span>
@@ -134,7 +134,7 @@ const AuthenticatedSidebar = () => {
         </ul>
       </nav>
 
-      {sidebarOpen ? <p className="px-4 py-6 text-center text-xs text-[--muted]">Peekaboo</p> : null}
+      {sidebarOpen ? <p className="px-4 py-6 text-center text-xs text-(--muted)">Peekaboo</p> : null}
     </aside>
   );
 };

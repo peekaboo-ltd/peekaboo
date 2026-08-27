@@ -9,7 +9,7 @@ export const AuthenticatedLayout = () => {
   useInactivityTimeout();
 
   return (
-    <div className="min-h-screen bg-[--paper] text-[--ink]">
+    <div className="min-h-screen bg-(--paper) text-(--ink)">
       <AuthenticatedNavbar />
       <AuthenticatedSidebar />
       <main className={sidebarOpen ? 'ml-[240px]' : 'ml-[72px]'}>

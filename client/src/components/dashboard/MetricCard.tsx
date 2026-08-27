@@ -14,53 +14,53 @@ import {
 
 const accentMap = {
   blue: {
-    icon: 'text-[--ink]',
+    icon: 'text-(--ink)',
     iconBg: 'bg-[var(--surface)]',
-    iconRing: 'ring-[--line]',
+    iconRing: 'ring-(--line)',
     spark: 'var(--chart-1)',
-    footer: 'text-[--ink]',
+    footer: 'text-(--ink)',
   },
   teal: {
-    icon: 'text-[--ink]',
+    icon: 'text-(--ink)',
     iconBg: 'bg-[var(--surface)]',
-    iconRing: 'ring-[--line]',
+    iconRing: 'ring-(--line)',
     spark: 'var(--chart-2)',
-    footer: 'text-[--ink]',
+    footer: 'text-(--ink)',
   },
   amber: {
-    icon: 'text-[--ink]',
-    iconBg: 'bg-[--surface]',
-    iconRing: 'ring-[--ink]',
+    icon: 'text-(--ink)',
+    iconBg: 'bg-(--surface)',
+    iconRing: 'ring-(--ink)',
     spark: 'var(--chart-3)',
-    footer: 'text-[--ink]',
+    footer: 'text-(--ink)',
   },
   emerald: {
-    icon: 'text-[--ink]',
-    iconBg: 'bg-[--surface]',
-    iconRing: 'ring-[--ink]',
+    icon: 'text-(--ink)',
+    iconBg: 'bg-(--surface)',
+    iconRing: 'ring-(--ink)',
     spark: 'var(--chart-4)',
-    footer: 'text-[--ink]',
+    footer: 'text-(--ink)',
   },
   violet: {
-    icon: 'text-[--ink]',
+    icon: 'text-(--ink)',
     iconBg: 'bg-[var(--surface)]',
-    iconRing: 'ring-[--line]',
+    iconRing: 'ring-(--line)',
     spark: 'var(--chart-5)',
-    footer: 'text-[--ink]',
+    footer: 'text-(--ink)',
   },
   rose: {
-    icon: 'text-[--ink]',
-    iconBg: 'bg-[--surface]',
-    iconRing: 'ring-[--ink]',
+    icon: 'text-(--ink)',
+    iconBg: 'bg-(--surface)',
+    iconRing: 'ring-(--ink)',
     spark: 'var(--chart-2)',
-    footer: 'text-[--ink]',
+    footer: 'text-(--ink)',
   },
   slate: {
-    icon: 'text-[--ink]',
+    icon: 'text-(--ink)',
     iconBg: 'bg-[var(--surface)]',
-    iconRing: 'ring-[--line]',
+    iconRing: 'ring-(--line)',
     spark: 'var(--chart-3)',
-    footer: 'text-[--ink]',
+    footer: 'text-(--ink)',
   },
 } as const;
 
@@ -123,9 +123,9 @@ const MetricCard = ({
   const cardContent = (
     <Card
       className={cn(
-        'group relative overflow-hidden rounded-[--radius-card] border border-[--line] bg-[--paper] transition-[border-color,background-color,transform] duration-200 ease-[var(--ease-flat)]',
+        'group relative overflow-hidden rounded-(--radius-card) border border-(--line) bg-(--paper) transition-[border-color,background-color,box-shadow] duration-200 ease-[var(--ease-flat)]',
         destination
-          ? 'cursor-pointer hover:border-[--ink] active:translate-y-px active:scale-[0.99]'
+          ? 'cursor-pointer hover:border-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]'
           : '',
       )}
     >
@@ -135,7 +135,7 @@ const MetricCard = ({
             {icon && (
               <span
                 className={cn(
-                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-[--radius-control] ring-1',
+                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-(--radius-control) ring-1',
                   accentMap[accent].iconBg,
                   accentMap[accent].iconRing,
                 )}
@@ -149,11 +149,11 @@ const MetricCard = ({
               </span>
             )}
             <span className="min-w-0">
-              <span className="block truncate text-[11px] font-medium uppercase text-[--muted]">
+              <span className="block truncate text-[11px] font-medium text-(--muted)">
                 {label}
               </span>
               {(comparisonLabel || note) && (
-                <span className="mt-0.5 block truncate text-xs text-[--muted]">
+                <span className="mt-0.5 block truncate text-xs text-(--muted)">
                   {comparisonLabel || note}
                 </span>
               )}
@@ -162,8 +162,8 @@ const MetricCard = ({
           {trend && (
             <span
               className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${trend.isPositive
-                  ? 'bg-[--surface] text-[--ink]'
-                  : 'bg-[--surface] text-[--ink]'
+                  ? 'bg-(--surface) text-(--ink)'
+                  : 'bg-(--surface) text-(--ink)'
                 }`}
               aria-label={`Trend: ${trend.isPositive ? 'increasing' : 'decreasing'} by ${Math.abs(trend.value)}%`}
             >
@@ -180,7 +180,7 @@ const MetricCard = ({
             >
               {value}
             </p>
-            <p className="mt-3 max-w-[16rem] text-sm leading-6 text-[--muted]">
+            <p className="mt-3 max-w-[16rem] text-sm leading-6 text-(--muted)">
               {footerText || note || comparisonLabel || 'Performance snapshot'}
             </p>
           </div>
@@ -194,7 +194,7 @@ const MetricCard = ({
               >
                 <FontAwesomeIcon
                   icon={faArrowRight}
-                  className="text-sm text-[--ink] transition-transform duration-200 group-hover:translate-x-1"
+                  className="text-sm text-(--ink) transition-transform duration-200 group-hover:translate-x-1"
                   aria-hidden="true"
                 />
               </span>
@@ -209,7 +209,7 @@ const MetricCard = ({
           {destination && (
             <FontAwesomeIcon
               icon={faArrowRight}
-              className="text-sm text-[--muted]"
+              className="text-sm text-(--muted)"
               aria-hidden="true"
             />
           )}

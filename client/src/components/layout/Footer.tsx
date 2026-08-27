@@ -65,7 +65,7 @@ const Footer = () => {
     <ul className="space-y-3">
       {links.map((link) => (
         <li key={link.to}>
-          <Link to={link.to} className="link-sweep text-sm text-[--muted] hover:text-[--ink]">
+          <Link to={link.to} className="link-sweep text-sm text-(--muted) hover:text-(--ink)">
             {t(link.labelKey)}
           </Link>
         </li>
@@ -74,12 +74,12 @@ const Footer = () => {
   );
 
   return (
-    <footer className="invert-surface border-t border-[--line]">
+    <footer className="invert-surface border-t border-(--line)">
       <div className="app-container py-16">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-12">
           <section className="lg:col-span-5">
-            <h2 className="text-2xl font-medium tracking-[-0.015em]">Peekaboo</h2>
-            <p className="mt-4 max-w-[46ch] text-sm leading-[1.6] text-[--muted]">
+            <h2 className="text-2xl font-medium">Peekaboo</h2>
+            <p className="mt-4 max-w-[46ch] text-sm leading-[1.6] text-(--muted)">
               {t('footer.description')}
             </p>
             <nav className="mt-6 flex items-center gap-2" aria-label="Social media links">
@@ -90,7 +90,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="flex size-10 items-center justify-center rounded-[--radius-control] border border-[--line] transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-[--ink] active:shadow-[var(--press-on-ink)_999px_999px_0_inset]"
+                  className="flex size-10 items-center justify-center rounded-(--radius-control) border border-(--line) transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-(--ink) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]"
                 >
                   <FontAwesomeIcon icon={social.icon} className="size-4" />
                 </a>
@@ -99,24 +99,24 @@ const Footer = () => {
           </section>
 
           <nav className="lg:col-span-3" aria-label="Footer links">
-            <h3 className="mb-4 text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">{t('footer.quickLinks')}</h3>
+            <h3 className="mb-4 text-xs font-medium text-(--muted)">{t('footer.quickLinks')}</h3>
             {renderLinks(quickLinks)}
-            <h3 className="mb-4 mt-8 text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">{t('footer.legal')}</h3>
+            <h3 className="mb-4 mt-8 text-xs font-medium text-(--muted)">{t('footer.legal')}</h3>
             {renderLinks(legalLinks)}
           </nav>
 
           <address className="not-italic lg:col-span-4">
-            <h3 className="mb-4 text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">{t('footer.contactUs')}</h3>
+            <h3 className="mb-4 text-xs font-medium text-(--muted)">{t('footer.contactUs')}</h3>
             <ul className="space-y-4">
               {contactInfo.map((contact) => (
                 <li key={contact.text}>
                   {contact.href ? (
-                    <a href={contact.href} className="link-sweep flex items-center gap-3 text-sm text-[--muted] hover:text-[--ink]">
+                    <a href={contact.href} className="link-sweep flex items-center gap-3 text-sm text-(--muted) hover:text-(--ink)">
                       <FontAwesomeIcon icon={contact.icon} className="size-4" />
                       {contact.text}
                     </a>
                   ) : (
-                    <p className="flex items-center gap-3 text-sm text-[--muted]">
+                    <p className="flex items-center gap-3 text-sm text-(--muted)">
                       <FontAwesomeIcon icon={contact.icon} className="size-4" />
                       {contact.text}
                     </p>
@@ -127,8 +127,8 @@ const Footer = () => {
           </address>
         </div>
 
-        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-[--line] pt-6 sm:flex-row sm:items-center">
-          <p className="text-xs text-[--muted]">
+        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-(--line) pt-6 sm:flex-row sm:items-center">
+          <p className="text-xs text-(--muted)">
             &copy; {new Date().getFullYear()} Peekaboo. {t('footer.copyright')}
           </p>
           <LanguageSelector dropdownDirection="up" />

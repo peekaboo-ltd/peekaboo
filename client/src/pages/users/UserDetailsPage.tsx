@@ -117,7 +117,7 @@ const UserDetailsPage = () => {
   if (isFetching && !currentUser) {
     return (
       <main className="w-full flex flex-col gap-6 mx-auto">
-        <section className="border border-[--line] bg-[--paper] p-6">
+        <section className="border border-(--line) bg-(--paper) p-6">
           <header className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <section className="flex items-center gap-5">
               <SkeletonLoader width="4rem" height="4rem" />
@@ -138,7 +138,7 @@ const UserDetailsPage = () => {
           {Array.from({ length: 3 }).map((_, index) => (
             <article
               key={`stat-skeleton-${index}`}
-              className="rounded-[--radius-card] border border-[--line] bg-[--paper] p-5"
+              className="rounded-(--radius-card) border border-(--line) bg-(--paper) p-5"
             >
               <section className="flex flex-col gap-3">
                 <SkeletonLoader type="text" width="8rem" height="0.75rem" />
@@ -149,7 +149,7 @@ const UserDetailsPage = () => {
         </section>
 
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <article className="lg:col-span-2 rounded-[--radius-card] border border-[--line] bg-[--paper] p-6">
+          <article className="lg:col-span-2 rounded-(--radius-card) border border-(--line) bg-(--paper) p-6">
             <section className="flex items-center justify-between gap-4">
               <section className="flex flex-col gap-2">
                 <SkeletonLoader type="text" width="10rem" height="0.75rem" />
@@ -161,7 +161,7 @@ const UserDetailsPage = () => {
               {Array.from({ length: 6 }).map((_, index) => (
                 <section
                   key={`detail-skeleton-${index}`}
-                  className="rounded-xl border border-[--line] bg-[--surface] p-4 flex items-center gap-3"
+                  className="rounded-xl border border-(--line) bg-(--surface) p-4 flex items-center gap-3"
                 >
                   <SkeletonLoader width="2.25rem" height="2.25rem" />
                   <section className="flex flex-col gap-2 w-full">
@@ -173,7 +173,7 @@ const UserDetailsPage = () => {
             </section>
           </article>
 
-          <article className="rounded-[--radius-card] border border-[--line] bg-[--paper] p-6">
+          <article className="rounded-(--radius-card) border border-(--line) bg-(--paper) p-6">
             <section className="flex flex-col gap-2">
               <SkeletonLoader type="text" width="8rem" height="0.75rem" />
               <SkeletonLoader type="text" width="12rem" height="1.25rem" />
@@ -196,19 +196,19 @@ const UserDetailsPage = () => {
   if (!isFetching && !currentUser) {
     return (
       <main className="w-full max-w-4xl mx-auto px-4 sm:px-6">
-        <section className="rounded-[--radius-card] border border-[--line] bg-[--paper] p-8 text-center">
-          <p className="text-sm uppercase text-[--muted]">
+        <section className="rounded-(--radius-card) border border-(--line) bg-(--paper) p-8 text-center">
+          <p className="text-sm text-(--muted)">
             User Details
           </p>
-          <h1 className="mt-2 text-2xl font-medium text-[--ink]">
+          <h1 className="mt-2 text-2xl font-medium text-(--ink)">
             User not found
           </h1>
-          <p className="mt-3 text-sm text-[--muted]">
+          <p className="mt-3 text-sm text-(--muted)">
             The selected user could not be loaded.
           </p>
           <Link
             to="/users"
-            className="inline-flex items-center gap-2 mt-6 rounded-lg border border-[--line] px-4 py-2 text-sm text-[--ink] hover:bg-[--surface]"
+            className="inline-flex items-center gap-2 mt-6 rounded-lg border border-(--line) px-4 py-2 text-sm text-(--ink) hover:bg-(--surface)"
           >
             <FontAwesomeIcon icon={faArrowLeft} />
             Back to users
@@ -226,29 +226,29 @@ const UserDetailsPage = () => {
       animate="visible"
     >
       <motion.section
-        className="border border-[--line] bg-[--paper] p-6"
+        className="border border-(--line) bg-(--paper) p-6"
         variants={itemVariants}
       >
         <header className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <section className="flex items-center gap-5">
-            <figure className="h-16 w-16 rounded-full border border-[--line] bg-[--surface] text-[--ink] flex items-center justify-center text-2xl font-medium">
+            <figure className="h-16 w-16 rounded-full border border-(--line) bg-(--surface) text-(--ink) flex items-center justify-center text-2xl font-medium">
               <FontAwesomeIcon icon={faUser} />
             </figure>
             <section>
-              <p className="text-xs uppercase text-[--muted]">
+              <p className="text-xs text-(--muted)">
                 User Profile
               </p>
-              <h1 className="mt-2 text-2xl font-medium text-[--ink] sm:text-3xl">
+              <h1 className="mt-2 text-2xl font-medium text-(--ink) sm:text-3xl">
                 {currentUser?.name ?? 'Unnamed user'}
               </h1>
-              <p className="mt-2 text-sm text-[--muted] sm:text-base">
+              <p className="mt-2 text-sm text-(--muted) sm:text-base">
                 View personal details, access roles, and organization
                 memberships.
               </p>
             </section>
           </section>
           <aside className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full border border-[--line] bg-[--paper] px-3 py-1 text-xs font-medium uppercase text-[--muted]">
+            <span className="rounded-full border border-(--line) bg-(--paper) px-3 py-1 text-xs font-medium text-(--muted)">
               {currentUser?.status ?? 'Status Unavailable'}
             </span>
             {(['ADMIN', 'BUSINESS'].some((role) =>
@@ -280,18 +280,18 @@ const UserDetailsPage = () => {
         {stats?.map((stat) => (
           <article
             key={stat?.label}
-            className="border border-[--line] bg-[--paper] p-5"
+            className="border border-(--line) bg-(--paper) p-5"
           >
             <header className="flex items-center justify-between">
               <section>
-                <p className="text-xs uppercase text-[--muted]">
+                <p className="text-xs text-(--muted)">
                   {stat?.label}
                 </p>
-                <p className="mt-3 text-xl font-medium text-[--ink]">
+                <p className="mt-3 text-xl font-medium text-(--ink)">
                   {stat?.value}
                 </p>
               </section>
-              <span className="h-11 w-11 rounded-full border border-[--line] bg-[--surface] text-[--ink] flex items-center justify-center">
+              <span className="h-11 w-11 rounded-full border border-(--line) bg-(--surface) text-(--ink) flex items-center justify-center">
                 <FontAwesomeIcon icon={stat?.icon} />
               </span>
             </header>
@@ -303,17 +303,17 @@ const UserDetailsPage = () => {
         className="grid grid-cols-1 gap-6 lg:grid-cols-3"
         variants={itemVariants}
       >
-        <article className="lg:col-span-2 border border-[--line] bg-[--paper] p-6">
+        <article className="lg:col-span-2 border border-(--line) bg-(--paper) p-6">
           <header className="flex items-center justify-between gap-4">
             <section>
-              <p className="text-xs uppercase text-[--muted]">
+              <p className="text-xs text-(--muted)">
                 Personal Details
               </p>
-              <h2 className="mt-2 text-lg font-medium text-[--ink]">
+              <h2 className="mt-2 text-lg font-medium text-(--ink)">
                 User Information
               </h2>
             </section>
-            <span className="text-xs uppercase text-[--muted]">
+            <span className="text-xs text-(--muted)">
               Updated {formatDateLabel(currentUser?.updatedAt)}
             </span>
           </header>
@@ -353,17 +353,17 @@ const UserDetailsPage = () => {
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-lg border border-[--line] bg-[--surface] p-4"
+                className="rounded-lg border border-(--line) bg-(--surface) p-4"
               >
                 <header className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase text-[--muted]">
+                    <p className="text-xs text-(--muted)">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-[--ink]">
+                    <p className="mt-1 text-sm font-medium text-(--ink)">
                       {item.value}
                     </p>
                   </section>
@@ -373,38 +373,38 @@ const UserDetailsPage = () => {
           </ul>
         </article>
 
-        <article className="border border-[--line] bg-[--paper] p-6">
+        <article className="border border-(--line) bg-(--paper) p-6">
           <header>
-            <p className="text-xs uppercase text-[--muted]">
+            <p className="text-xs text-(--muted)">
               Access & Membership
             </p>
-            <h2 className="mt-2 text-lg font-medium text-[--ink]">
+            <h2 className="mt-2 text-lg font-medium text-(--ink)">
               Roles & Organizations
             </h2>
           </header>
 
           <section className="mt-6 flex flex-col gap-5">
             <section>
-              <p className="text-xs uppercase text-[--muted]">
+              <p className="text-xs text-(--muted)">
                 Assigned Roles
               </p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
-                      <span className="rounded-full border border-[--line] bg-[--paper] px-3 py-1 text-xs font-medium uppercase text-[--ink]">
+                      <span className="rounded-full border border-(--line) bg-(--paper) px-3 py-1 text-xs font-medium text-(--ink)">
                         {role}
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-[--muted]">No roles assigned.</li>
+                  <li className="text-sm text-(--muted)">No roles assigned.</li>
                 )}
               </ul>
             </section>
 
             <section>
-              <p className="text-xs uppercase text-[--muted]">
+              <p className="text-xs text-(--muted)">
                 Organizations
               </p>
               <ul className="mt-3 flex flex-col gap-2">
@@ -412,38 +412,38 @@ const UserDetailsPage = () => {
                   organizations.map((org) => (
                     <li
                       key={org}
-                      className="flex items-center justify-between rounded-lg border border-[--line] bg-[--surface] px-4 py-3"
+                      className="flex items-center justify-between rounded-lg border border-(--line) bg-(--surface) px-4 py-3"
                     >
                       <section>
-                        <p className="text-sm font-medium text-[--ink]">
+                        <p className="text-sm font-medium text-(--ink)">
                           {org}
                         </p>
-                        <p className="text-xs text-[--muted]">
+                        <p className="text-xs text-(--muted)">
                           Active membership
                         </p>
                       </section>
-                      <span className="rounded-full border border-[--line] bg-[--paper] px-2.5 py-1 text-[11px] font-medium uppercase text-[--ink]">
+                      <span className="rounded-full border border-(--line) bg-(--paper) px-2.5 py-1 text-[11px] font-medium text-(--ink)">
                         Active
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-[--muted]">
+                  <li className="text-sm text-(--muted)">
                     No organization memberships.
                   </li>
                 )}
               </ul>
             </section>
 
-            <section className="rounded-lg border border-[--line] bg-[--surface] p-4 flex items-center gap-3">
-              <span className="h-9 w-9 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center">
+            <section className="rounded-lg border border-(--line) bg-(--surface) p-4 flex items-center gap-3">
+              <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                 <FontAwesomeIcon icon={faBuilding} />
               </span>
               <section>
-                <p className="text-xs uppercase text-[--muted]">
+                <p className="text-xs text-(--muted)">
                   User ID
                 </p>
-                <p className="text-sm font-medium text-[--ink] break-all">
+                <p className="text-sm font-medium text-(--ink) break-all">
                   {currentUser?.id ?? '—'}{' '}
                   <FontAwesomeIcon
                     className="cursor-pointer"

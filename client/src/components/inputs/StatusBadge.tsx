@@ -18,11 +18,11 @@ const getMeaning = (status?: string): StatusMeaning => {
 };
 
 const treatments = {
-  active: { icon: LoaderCircle, className: 'border-transparent bg-[--ink] text-[--paper]' },
-  completed: { icon: Check, className: 'border-[--ink] bg-transparent text-[--ink]' },
-  pending: { icon: Clock3, className: 'border-dashed border-[--line-strong] bg-transparent text-[--muted]' },
-  failed: { icon: X, className: 'border-[--ink] bg-transparent text-[--ink] line-through' },
-  inactive: { icon: Circle, className: 'border-transparent bg-[--surface] text-[--muted]' },
+  active: { icon: LoaderCircle, className: 'border-transparent bg-(--ink) text-(--paper)' },
+  completed: { icon: Check, className: 'border-(--ink) bg-transparent text-(--ink)' },
+  pending: { icon: Clock3, className: 'border-dashed border-(--line-strong) bg-transparent text-(--muted)' },
+  failed: { icon: X, className: 'border-(--ink) bg-transparent text-(--ink) line-through' },
+  inactive: { icon: Circle, className: 'border-transparent bg-(--surface) text-(--muted)' },
 };
 
 export const StatusBadge = ({ status }: { status?: string }) => {
@@ -31,7 +31,7 @@ export const StatusBadge = ({ status }: { status?: string }) => {
   const Icon = treatment.icon;
 
   return (
-    <span className={`inline-flex h-6 w-fit items-center gap-1.5 rounded-[--radius-pill] border px-2.5 text-xs font-medium ${treatment.className}`}>
+    <span className={`inline-flex h-6 w-fit items-center gap-1.5 rounded-(--radius-pill) border px-2.5 text-xs font-medium ${treatment.className}`}>
       <Icon className="size-3" aria-hidden="true" />
       {capitalizeString(status || 'inactive')}
     </span>

@@ -224,7 +224,7 @@ const PlaceSearch = ({
     <ul
       ref={dropdownRef}
       data-place-search-dropdown
-      className="pointer-events-auto fixed z-[10000] max-h-60 overflow-auto rounded-[--radius-control] border-0 bg-[--surface] shadow-[var(--shadow-menu)]"
+      className="pointer-events-auto fixed z-[10000] max-h-60 overflow-auto rounded-(--radius-control) border border-(--line) bg-(--paper) py-1 shadow-[var(--shadow-menu)]"
       role="listbox"
       style={{
         top: `${dropdownPosition.top}px`,
@@ -240,14 +240,14 @@ const PlaceSearch = ({
       {predictions.map((prediction) => (
         <li
           key={prediction.place_id}
-          className="px-3 py-2 cursor-pointer hover:bg-[--surface] border-b border-[--line] last:border-b-0"
+          className="cursor-pointer px-4 py-2.5 transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface)"
           onMouseDown={(e) => handleSuggestionClick(prediction, e)}
           role="option"
         >
-          <strong className="font-medium text-[--ink] text-[13px]">
+          <strong className="block text-sm font-medium text-(--ink)">
             {prediction.structured_formatting?.main_text}
           </strong>
-          <address className="text-sm text-[--muted] not-italic text-[13px]">
+          <address className="mt-0.5 block text-[0.8125rem] not-italic text-(--muted)">
             {prediction.structured_formatting?.secondary_text}
           </address>
         </li>
@@ -268,10 +268,10 @@ const PlaceSearch = ({
           placeholder={placeholder}
           disabled={disabled}
           autoComplete="off"
-          className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-[13px] outline-none placeholder:text-[--muted] focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+          className="h-12 w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-base text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--disabled-fg)"
         />
         {isMapsUnavailable && (
-          <p className="mt-1 text-xs text-[--ink]">Maps failed to load.</p>
+          <p className="mt-1 text-xs text-(--ink)">Maps failed to load.</p>
         )}
       </section>
       {dropdownContent && createPortal(dropdownContent, document.body)}

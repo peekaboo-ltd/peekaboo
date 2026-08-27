@@ -342,14 +342,14 @@ const UserLocationHistoryPage = () => {
     <main className="w-full flex flex-col gap-6">
       <header className="flex items-center justify-between gap-3 flex-wrap">
         <article>
-          <h1 className="text-2xl font-medium text-[--ink]">
+          <h1 className="text-2xl font-medium text-(--ink)">
             User location history
           </h1>
           <p className="text-sm text-muted-foreground">
             Paginated timeline of the user&apos;s latest tracked locations.
           </p>
         </article>
-        <Link className="text-sm underline text-[--ink]" to="/users/tracking">
+        <Link className="text-sm underline text-(--ink)" to="/users/tracking">
           Back to users tracking
         </Link>
       </header>
@@ -357,7 +357,7 @@ const UserLocationHistoryPage = () => {
       <section className="border rounded-md p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-medium uppercase text-[--muted]"
+            className="text-xs font-medium text-(--muted)"
             htmlFor="assigned-order"
           >
             Assigned orders (last 7 days)
@@ -375,7 +375,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-medium uppercase text-[--muted]"
+            className="text-xs font-medium text-(--muted)"
             htmlFor="order-search"
           >
             Search order (reference id or tracking id)
@@ -383,14 +383,14 @@ const UserLocationHistoryPage = () => {
           <div className="flex gap-2">
             <input
               id="order-search"
-              className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+              className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
               placeholder="Type reference id or tracking id"
               value={orderSearchTerm}
               onChange={(event) => setOrderSearchTerm(event.target.value)}
             />
             <Button
               type="button"
-              className="px-3 py-2 rounded bg-[--ink] text-[--paper] text-sm"
+              className="px-3 py-2 rounded bg-(--ink) text-(--paper) text-sm"
               onClick={onSearchOrders}
               disabled={isSearchingOrders}
             >
@@ -412,7 +412,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-medium uppercase text-[--muted]"
+            className="text-xs font-medium text-(--muted)"
             htmlFor="start-time"
           >
             Start time (local)
@@ -420,7 +420,7 @@ const UserLocationHistoryPage = () => {
           <input
             id="start-time"
             type="datetime-local"
-            className="h-11 rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+            className="h-11 rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
             value={dateRange.startTime}
             onChange={(event) =>
               setDateRange((prev) => ({
@@ -433,7 +433,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-medium uppercase text-[--muted]"
+            className="text-xs font-medium text-(--muted)"
             htmlFor="end-time"
           >
             End time (local)
@@ -441,7 +441,7 @@ const UserLocationHistoryPage = () => {
           <input
             id="end-time"
             type="datetime-local"
-            className="h-11 rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+            className="h-11 rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
             value={dateRange.endTime}
             onChange={(event) =>
               setDateRange((prev) => ({ ...prev, endTime: event.target.value }))

@@ -18,9 +18,9 @@ export default function OrdersBarChart({
   title?: string;
 }) {
   return (
-    <Card className="border-[--line] bg-[--paper] shadow-none">
+    <Card className="border-(--line) bg-(--paper) shadow-none">
       <CardHeader className="px-4 pt-4 pb-2">
-        <CardTitle className="text-sm font-medium text-[--ink]">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-(--ink)">{title}</CardTitle>
       </CardHeader>
       <CardContent className="h-56 sm:h-72 px-4 pb-4">
         <ResponsiveContainer width="100%" height="100%">

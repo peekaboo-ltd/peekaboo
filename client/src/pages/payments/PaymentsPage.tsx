@@ -286,7 +286,7 @@ const PaymentsPage = () => {
       <header className="flex flex-col gap-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-medium text-[--ink]">Payments</h1>
+            <h1 className="text-2xl font-medium text-(--ink)">Payments</h1>
             <p className="text-sm text-muted-foreground">
               View and manage all payments across the platform.
             </p>
@@ -313,12 +313,12 @@ const PaymentsPage = () => {
           </menu>
         </section>
 
-        <section className="bg-[--paper] border border-[--line] rounded-xl p-4">
+        <section className="bg-(--paper) border border-(--line) rounded-xl p-4">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-3">
             <div className="relative">
               <FontAwesomeIcon
                 icon={faSearch}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[--muted] text-xs"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted) text-xs"
               />
               <input
                 type="text"
@@ -328,7 +328,7 @@ const PaymentsPage = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleApplyFilters();
                 }}
-                className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] pl-8 pr-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) pl-8 pr-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
               />
             </div>
             <input
@@ -337,7 +337,7 @@ const PaymentsPage = () => {
               value={startDate}
               max={endDate || undefined}
               onChange={(e) => handleStartDateChange(e.target.value)}
-              className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset] md:w-[170px]"
+              className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset] md:w-[170px]"
             />
             <input
               type="date"
@@ -345,7 +345,7 @@ const PaymentsPage = () => {
               value={endDate}
               min={startDate || undefined}
               onChange={(e) => handleEndDateChange(e.target.value)}
-              className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset] md:w-[170px]"
+              className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset] md:w-[170px]"
             />
             <Button primary type="button" onClick={handleApplyFilters}>
               Apply
@@ -360,49 +360,49 @@ const PaymentsPage = () => {
               label: 'Total Revenue',
               value: formatCurrency(stats?.totalRevenue || 0),
               icon: faMoneyBillWave,
-              bgColor: 'bg-[--ink]',
+              bgColor: 'bg-(--ink)',
             },
             {
               label: 'Successful',
               value: `${stats?.successfulCount || 0}`,
               subtitle: formatCurrency(stats?.successfulAmount || 0),
               icon: faCheckCircle,
-              bgColor: 'bg-[--surface]',
+              bgColor: 'bg-(--surface)',
             },
             {
               label: 'Pending',
               value: `${stats?.pendingCount || 0}`,
               subtitle: formatCurrency(stats?.pendingAmount || 0),
               icon: faClock,
-              bgColor: 'bg-[--surface]',
+              bgColor: 'bg-(--surface)',
             },
             {
               label: 'Failed',
               value: `${stats?.failedCount || 0}`,
               subtitle: formatCurrency(stats?.failedAmount || 0),
               icon: faTimesCircle,
-              bgColor: 'bg-[--surface]',
+              bgColor: 'bg-(--surface)',
             },
           ].map((card) => (
             <article
               key={card.label}
-              className="bg-[--paper] border border-[--line] rounded-xl p-4 flex items-center justify-between"
+              className="bg-(--paper) border border-(--line) rounded-xl p-4 flex items-center justify-between"
             >
               <div>
-                <p className="text-xs uppercase text-[--muted]">
+                <p className="text-xs text-(--muted)">
                   {card.label}
                 </p>
-                <p className="text-lg font-medium text-[--ink] mt-1">
+                <p className="text-lg font-medium text-(--ink) mt-1">
                   {card.value}
                 </p>
                 {card.subtitle && (
-                  <p className="text-xs text-[--muted] mt-0.5">
+                  <p className="text-xs text-(--muted) mt-0.5">
                     {card.subtitle}
                   </p>
                 )}
               </div>
               <span
-                className={`w-10 h-10 rounded-lg ${card.bgColor} flex items-center justify-center text-[--ink]`}
+                className={`w-10 h-10 rounded-lg ${card.bgColor} flex items-center justify-center text-(--ink)`}
               >
                 <FontAwesomeIcon icon={card.icon} />
               </span>
@@ -412,17 +412,17 @@ const PaymentsPage = () => {
 
         {/* Filters */}
         {showFilters && (
-          <section className="bg-[--paper] border border-[--line] rounded-xl p-4 flex flex-col gap-4">
+          <section className="bg-(--paper) border border-(--line) rounded-xl p-4 flex flex-col gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Search */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-[--muted]">
+                <label className="text-xs font-medium text-(--muted)">
                   Search
                 </label>
                 <div className="relative">
                   <FontAwesomeIcon
                     icon={faSearch}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[--muted] text-xs"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted) text-xs"
                   />
                   <input
                     type="text"
@@ -432,14 +432,14 @@ const PaymentsPage = () => {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleApplyFilters();
                     }}
-                    className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] pl-8 pr-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                    className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) pl-8 pr-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                   />
                 </div>
               </div>
 
               {/* Status */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-[--muted]">
+                <label className="text-xs font-medium text-(--muted)">
                   Status
                 </label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -458,7 +458,7 @@ const PaymentsPage = () => {
 
               {/* Currency */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-[--muted]">
+                <label className="text-xs font-medium text-(--muted)">
                   Currency
                 </label>
                 <Select
@@ -480,7 +480,7 @@ const PaymentsPage = () => {
 
               {/* Payment Method */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-[--muted]">
+                <label className="text-xs font-medium text-(--muted)">
                   Payment Method
                 </label>
                 <Select value={methodFilter} onValueChange={setMethodFilter}>
@@ -499,7 +499,7 @@ const PaymentsPage = () => {
 
               {/* Start Date */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-[--muted]">
+                <label className="text-xs font-medium text-(--muted)">
                   From Date
                 </label>
                 <input
@@ -507,13 +507,13 @@ const PaymentsPage = () => {
                   value={startDate}
                   max={endDate || undefined}
                   onChange={(e) => handleStartDateChange(e.target.value)}
-                  className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                 />
               </div>
 
               {/* End Date */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-[--muted]">
+                <label className="text-xs font-medium text-(--muted)">
                   To Date
                 </label>
                 <input
@@ -521,13 +521,13 @@ const PaymentsPage = () => {
                   value={endDate}
                   min={startDate || undefined}
                   onChange={(e) => handleEndDateChange(e.target.value)}
-                  className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                 />
               </div>
 
               {/* Min Amount */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-[--muted]">
+                <label className="text-xs font-medium text-(--muted)">
                   Min Amount
                 </label>
                 <input
@@ -535,13 +535,13 @@ const PaymentsPage = () => {
                   placeholder="0"
                   value={minAmount}
                   onChange={(e) => setMinAmount(e.target.value)}
-                  className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                 />
               </div>
 
               {/* Max Amount */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-[--muted]">
+                <label className="text-xs font-medium text-(--muted)">
                   Max Amount
                 </label>
                 <input
@@ -549,7 +549,7 @@ const PaymentsPage = () => {
                   placeholder="0"
                   value={maxAmount}
                   onChange={(e) => setMaxAmount(e.target.value)}
-                  className="h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                  className="h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                 />
               </div>
             </div>

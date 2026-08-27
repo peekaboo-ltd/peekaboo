@@ -55,8 +55,8 @@ const StepProgress = ({ currentStep }: { currentStep: 1 | 2 | 3 }) => {
           <motion.span
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
               currentStep >= step
-                ? 'bg-[--ink] text-[--paper]'
-                : 'bg-[--surface] text-[--muted]'
+                ? 'bg-(--ink) text-(--paper)'
+                : 'bg-(--surface) text-(--muted)'
             }`}
             transition={{ duration: 0.2 }}
           >
@@ -69,7 +69,7 @@ const StepProgress = ({ currentStep }: { currentStep: 1 | 2 | 3 }) => {
           {step < 3 && (
             <div
               className={`w-12 h-0.5 mx-1 transition-colors ${
-                currentStep > step ? 'bg-[--ink]' : 'bg-[--surface]'
+                currentStep > step ? 'bg-(--ink)' : 'bg-(--surface)'
               }`}
             />
           )}
@@ -117,7 +117,7 @@ const OrganizationOnboarding = () => {
 
   return (
     <motion.main
-      className="min-h-screen bg-[--surface] py-10 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen bg-(--surface) py-10 px-4 sm:px-6 lg:px-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -128,18 +128,18 @@ const OrganizationOnboarding = () => {
         </motion.div>
 
         <motion.header variants={itemVariants} className="flex flex-col gap-3">
-          <span className="text-sm font-medium text-[--ink]">
+          <span className="text-sm font-medium text-(--ink)">
             {t('onboarding.step', { step: 1 })}
           </span>
-          <h1 className="text-3xl sm:text-4xl font-medium text-[--ink]">
+          <h1 className="text-3xl sm:text-4xl font-medium text-(--ink)">
             {t('onboarding.organization.title')}
           </h1>
-          <p className="text-[--muted] max-w-2xl">
+          <p className="text-(--muted) max-w-2xl">
             {t('onboarding.organization.subtitle')}
           </p>
           <Link
             to="/auth/login"
-            className="text-sm font-medium text-[--ink] hover:text-[--ink] w-fit transition-colors"
+            className="text-sm font-medium text-(--ink) hover:text-(--ink) w-fit transition-colors"
           >
             {t('onboarding.organization.signIn')}
           </Link>
@@ -148,20 +148,20 @@ const OrganizationOnboarding = () => {
         <motion.form
           variants={cardVariants}
           onSubmit={onSubmit}
-          className="bg-[--paper] border border-[--line] p-6 sm:p-8 space-y-6"
+          className="bg-(--paper) border border-(--line) p-6 sm:p-8 space-y-6"
         >
-          <section className="flex items-center gap-3 text-[--ink]">
+          <section className="flex items-center gap-3 text-(--ink)">
             <motion.span
-              className="w-10 h-10 rounded-full bg-[--surface] flex items-center justify-center border border-[--line]"
+              className="w-10 h-10 rounded-full bg-(--surface) flex items-center justify-center border border-(--line)"
               transition={{ duration: 0.2 }}
             >
-              <FontAwesomeIcon icon={faBuilding} className="text-[--ink]" />
+              <FontAwesomeIcon icon={faBuilding} className="text-(--ink)" />
             </motion.span>
             <div>
               <h2 className="text-lg font-medium">
                 {t('onboarding.organization.detailsTitle')}
               </h2>
-              <p className="text-sm text-[--muted]">
+              <p className="text-sm text-(--muted)">
                 {t('onboarding.organization.detailsSubtitle')}
               </p>
             </div>
@@ -289,10 +289,10 @@ const OrganizationOnboarding = () => {
             />
           </div>
 
-          <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[--line] pt-4">
+          <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-(--line) pt-4">
             <Link
               to="/"
-              className="text-sm text-[--muted] hover:text-[--ink] transition-colors"
+              className="text-sm text-(--muted) hover:text-(--ink) transition-colors"
             >
               {t('onboarding.organization.backHome')}
             </Link>

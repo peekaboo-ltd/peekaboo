@@ -12,9 +12,9 @@ interface DashboardDispatchStripProps {
 }
 
 const toneByStatus: Record<DispatchStripItem['status'], string> = {
-  up: 'bg-[--ink]',
-  watch: 'border border-[--ink] bg-transparent',
-  down: 'rotate-45 bg-[--ink]',
+  up: 'bg-(--ink)',
+  watch: 'border border-(--ink) bg-transparent',
+  down: 'rotate-45 bg-(--ink)',
 };
 
 const DashboardDispatchStrip = ({ items, variants }: DashboardDispatchStripProps) => {
@@ -24,7 +24,7 @@ const DashboardDispatchStrip = ({ items, variants }: DashboardDispatchStripProps
     <motion.section
       variants={variants}
       aria-label="Dispatch strip"
-      className="overflow-x-auto rounded-[--radius-card] border border-[--line] bg-[--paper] px-3 py-3 sm:px-4"
+      className="overflow-x-auto rounded-(--radius-card) border border-(--line) bg-(--paper) px-3 py-3 sm:px-4"
     >
       <div className="flex min-w-full gap-3">
         {items.map((item) => (
@@ -34,7 +34,7 @@ const DashboardDispatchStrip = ({ items, variants }: DashboardDispatchStripProps
           >
             <div className="flex items-center gap-2">
               <span className={`h-2 w-2 shrink-0 rounded-full ${toneByStatus[item.status]}`} aria-hidden="true" />
-              <p className="truncate text-[11px] font-medium uppercase text-[--muted]">
+              <p className="truncate text-[11px] font-medium text-(--muted)">
                 {item.label}
               </p>
             </div>

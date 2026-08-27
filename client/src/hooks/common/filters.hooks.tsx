@@ -166,7 +166,7 @@ export const useStatusFilter = ({
         trigger={
           <Button
             variant="outline"
-            className="cursor-pointer font-normal text-[--ink] !justify-start bg-[--paper] flex !w-full items-center gap-2 !h-[38px] text-[13px]"
+            className="cursor-pointer font-normal text-(--ink) !justify-start bg-(--paper) flex !w-full items-center gap-2 !h-[38px] text-[13px]"
           >
             <FontAwesomeIcon icon={labelIcon} />
             <p className="text-[13px]">{label}</p>
@@ -186,7 +186,7 @@ export const useStatusFilter = ({
 
           {/* Scrollable container for statuses and action buttons */}
           <nav
-            className="flex flex-col w-full overflow-y-auto bg-[--paper] rounded-md p-2"
+            className="flex flex-col w-full overflow-y-auto bg-(--paper) rounded-md p-2"
             style={{ maxHeight: 'calc(55vh - 50px)' }}
             aria-label="Status Filter List"
           >
@@ -216,11 +216,11 @@ export const useStatusFilter = ({
                               aria-checked={isSelected}
                               className={
                                 isSelected
-                                  ? 'bg-[--ink] w-4.5 h-4.5 rounded-md cursor-pointer'
+                                  ? 'bg-(--ink) w-4.5 h-4.5 rounded-md cursor-pointer'
                                   : 'w-4.5 h-4.5'
                               }
                             />
-                            <p className="text-[13px] text-[--ink]">
+                            <p className="text-[13px] text-(--ink)">
                               {capitalizeString(status)}
                             </p>
                           </Link>
@@ -230,7 +230,7 @@ export const useStatusFilter = ({
                   );
                 })
               ) : (
-                <p className="text-[13px] text-[--muted] text-center py-2">
+                <p className="text-[13px] text-(--muted) text-center py-2">
                   No statuses found
                 </p>
               )}
@@ -238,7 +238,7 @@ export const useStatusFilter = ({
             <ul className="flex items-center justify-between w-full gap-2 mt-4">
               <li>
                 <Link
-                  className="text-center text-[--ink] text-[13px] p-1 px-3 border hover:!border-[--ink] hover:!bg-[--ink] hover:!text-[--paper] font-normal rounded-sm"
+                  className="text-center text-(--ink) text-[13px] p-1 px-3 border hover:!border-(--ink) hover:!bg-(--ink) hover:!text-(--paper) font-normal rounded-sm"
                   to={`#`}
                   onClick={handleClear}
                 >
@@ -247,7 +247,7 @@ export const useStatusFilter = ({
               </li>
               <li>
                 <Link
-                  className="text-center text-[--ink] text-[13px] p-1 px-3 border hover:!border-[--ink] hover:!bg-[--ink] hover:!text-[--paper] font-normal rounded-sm"
+                  className="text-center text-(--ink) text-[13px] p-1 px-3 border hover:!border-(--ink) hover:!bg-(--ink) hover:!text-(--paper) font-normal rounded-sm"
                   to={`#`}
                   onClick={handleSelectAll}
                 >

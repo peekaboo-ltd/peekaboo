@@ -147,10 +147,10 @@ const PublicOrderPaymentPending = () => {
         }
         actions={
           <span
-            className={`inline-flex h-6 items-center gap-2 rounded-[--radius-pill] border px-2.5 text-xs font-medium ${
+            className={`inline-flex h-6 items-center gap-2 rounded-(--radius-pill) border px-2.5 text-xs font-medium ${
               isFailed
-                ? 'border-[--ink] text-[--ink] line-through'
-                : 'border-dashed border-[--line-strong] text-[--muted]'
+                ? 'border-(--ink) text-(--ink) line-through'
+                : 'border-dashed border-(--line-strong) text-(--muted)'
             }`}
           >
             <FontAwesomeIcon
@@ -190,10 +190,10 @@ const PublicOrderPaymentPending = () => {
             ) : null}
 
             <li className="relative">
-              <span className="flex h-7 w-7 items-center justify-center rounded-[--radius-pill] border border-[--ink] bg-[--paper] text-[--ink]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-(--radius-pill) border border-(--ink) bg-(--paper) text-(--ink)">
                 <FontAwesomeIcon icon={faCircleCheck} className="h-3 w-3" />
               </span>
-              <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--ink)]">
+              <p className="mt-3 text-[10px] font-medium text-[var(--ink)]">
                 Initiated
               </p>
               <p className="mt-1 text-xs text-[var(--muted)]">
@@ -205,8 +205,8 @@ const PublicOrderPaymentPending = () => {
               <span
                 className={`ml-auto flex h-7 w-7 items-center justify-center rounded-full border border-[var(--line)] ${
                   isFailed
-                    ? 'border-[--ink] bg-[--paper] text-[--ink]'
-                    : 'border-[--ink] bg-[--ink] text-[--paper]'
+                    ? 'border-(--ink) bg-(--paper) text-(--ink)'
+                    : 'border-(--ink) bg-(--ink) text-(--paper)'
                 }`}
               >
                 <FontAwesomeIcon
@@ -218,7 +218,7 @@ const PublicOrderPaymentPending = () => {
                   }`}
                 />
               </span>
-              <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--ink)]">
+              <p className="mt-3 text-[10px] font-medium text-[var(--ink)]">
                 {isFailed ? 'Not completed' : 'Confirmation'}
               </p>
               <p className="mt-1 text-xs text-[var(--muted)]">
@@ -228,10 +228,10 @@ const PublicOrderPaymentPending = () => {
           </ol>
 
           <div
-            className={`mt-7 flex items-start gap-3 rounded-[--radius-control] px-4 py-3 text-sm leading-6 ${
+            className={`mt-7 flex items-start gap-3 rounded-(--radius-control) px-4 py-3 text-sm leading-6 ${
               isFailed
-                ? 'border border-[--ink] bg-[--paper] text-[--ink]'
-                : 'border border-dashed border-[--line-strong] bg-[--surface] text-[--ink]'
+                ? 'border border-(--ink) bg-(--paper) text-(--ink)'
+                : 'border border-dashed border-(--line-strong) bg-(--surface) text-(--ink)'
             }`}
             role="status"
             aria-live="polite"

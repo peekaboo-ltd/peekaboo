@@ -36,7 +36,7 @@ export const OrderMap: React.FC<OrderMapProps> = ({ order, riderLocation }) => {
 
   if (!hasValidCoordinates) {
     return (
-      <div className="flex items-center justify-center h-96 bg-[--surface] rounded-lg">
+      <div className="flex items-center justify-center h-96 bg-(--surface) rounded-lg">
         <p className="text-muted-foreground">No location coordinates available</p>
       </div>
     );

@@ -119,7 +119,7 @@ const UsersPage = () => {
       <header className="flex flex-col gap-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-medium text-[--ink]">
+            <h1 className="text-2xl font-medium text-(--ink)">
               {hasOrganizationMembership
                 ? t('organization.users.title')
                 : 'User management'}
@@ -168,24 +168,24 @@ const UsersPage = () => {
           ].map((card) => (
             <article
               key={card.label}
-              className="bg-[--paper] border border-[--line] rounded-xl p-4 flex items-center justify-between"
+              className="bg-(--paper) border border-(--line) rounded-xl p-4 flex items-center justify-between"
             >
               <div>
-                <p className="text-xs uppercase text-[--muted]">
+                <p className="text-xs text-(--muted)">
                   {card.label}
                 </p>
-                <p className="text-lg font-medium text-[--ink] mt-1">
+                <p className="text-lg font-medium text-(--ink) mt-1">
                   {card.value}
                 </p>
               </div>
-              <span className="w-10 h-10 rounded-lg bg-[--ink] flex items-center justify-center text-[--ink]">
+              <span className="w-10 h-10 rounded-lg bg-(--ink) flex items-center justify-center text-(--ink)">
                 <FontAwesomeIcon icon={card.icon} />
               </span>
             </article>
           ))}
         </section>
 
-        <section className="bg-[--paper] border border-[--line] rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <section className="bg-(--paper) border border-(--line) rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <Input
             label="Search user"
             placeholder="Search with: Name, email, phone..."

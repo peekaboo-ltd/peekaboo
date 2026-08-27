@@ -21,7 +21,7 @@ import {
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>{children}</TooltipTrigger>
-          <TooltipContent className={`bg-[--ink] text-[--paper] shadow-[var(--shadow-menu)] text-[13px] ${labelClassName}`}>
+          <TooltipContent className={`bg-(--ink) text-(--paper) shadow-[var(--shadow-menu)] text-[13px] ${labelClassName}`}>
             <>{label}</>
           </TooltipContent>
         </Tooltip>

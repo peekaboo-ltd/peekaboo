@@ -14,17 +14,17 @@ const statusTone = (status?: string) => {
     case 'DELIVERED':
     case 'RECEIVED':
     case 'ACTIVE':
-      return 'bg-[--surface] text-[--ink] border-[--line]';
+      return 'bg-(--surface) text-(--ink) border-(--line)';
     case 'PENDING':
     case 'ACTION_REQUIRED':
     case 'SUBMITTED':
-      return 'bg-[--surface] text-[--ink] border-[--line]';
+      return 'bg-(--surface) text-(--ink) border-(--line)';
     case 'CANCELLED':
     case 'REJECTED':
     case 'INACTIVE':
-      return 'bg-[--surface] text-[--ink] border-[--line]';
+      return 'bg-(--surface) text-(--ink) border-(--line)';
     default:
-      return 'bg-[var(--surface)] text-[--ink] border-[--line]';
+      return 'bg-[var(--surface)] text-(--ink) border-(--line)';
   }
 };
 
@@ -41,7 +41,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
       >
         {rows.length > 0 ? (
           <div className="overflow-hidden rounded-md border border-[color:var(--line)] bg-[var(--surface)]">
-            <div className="hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--line)] px-5 py-3 text-[11px] font-medium uppercase text-[--muted] sm:grid">
+            <div className="hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-[color:var(--line)] px-5 py-3 text-[11px] font-medium text-(--muted) sm:grid">
               <span>Activity</span>
               <span>Status</span>
               <span>Updated</span>
@@ -53,16 +53,16 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
                   className="grid gap-3 border-b border-[color:var(--line)] px-5 py-4 last:border-b-0 sm:grid-cols-[1.2fr_1fr_auto] sm:items-center"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-normal text-[--ink]">
+                    <p className="truncate text-sm font-normal text-(--ink)">
                       {item.title}
                     </p>
-                    <p className="mt-1 truncate text-sm text-[--muted]">
+                    <p className="mt-1 truncate text-sm text-(--muted)">
                       {item.description}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-[--line] bg-[var(--surface)] px-2.5 py-1 text-[11px] font-normal uppercase text-[--muted]">
+                    <span className="rounded-full border border-(--line) bg-[var(--surface)] px-2.5 py-1 text-[11px] font-normal text-(--muted)">
                       {item.type}
                     </span>
                     <span
@@ -72,7 +72,7 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
                     </span>
                   </div>
 
-                  <time className="text-sm text-[--muted]">
+                  <time className="text-sm text-(--muted)">
                     {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
                   </time>
                 </li>
@@ -81,8 +81,8 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
           </div>
         ) : (
           <div className="rounded-md border border-dashed border-[color:var(--line)] bg-[var(--surface)] px-5 py-12 text-center">
-            <p className="text-base font-normal text-[--ink]">No recent activity yet</p>
-            <p className="mt-2 text-sm text-[--muted]">
+            <p className="text-base font-normal text-(--ink)">No recent activity yet</p>
+            <p className="mt-2 text-sm text-(--muted)">
               As new orders or assignments land, they will appear here.
             </p>
           </div>

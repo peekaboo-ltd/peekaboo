@@ -42,7 +42,7 @@ export const useOrderAssignmentsColumns = () => {
                         e.stopPropagation();
                         dispatch(setReassignOrderAssignmentModal(true));
                         dispatch(setSelectedOrderAssignment(row.original));
-                    }} className="text-[--ink] cursor-pointer" /></CustomTooltip>}</menu>)
+                    }} className="text-(--ink) cursor-pointer" /></CustomTooltip>}</menu>)
             },
         },
         {

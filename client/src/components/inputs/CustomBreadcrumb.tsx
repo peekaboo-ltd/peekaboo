@@ -51,7 +51,7 @@ const CustomBreadcrumb = ({ navigationLinks }: CustomBreadcrumbProps) => {
                       to={link.route || "#"}
                       onClick={link?.onClick}
                       key={index}
-                      className="text-[13px] w-full hover:text-[--ink] transition-[background-color,color,border-color,box-shadow] ease-in-out duration-200 flex items-center gap-2 hover:bg-background rounded-md p-1 px-2"
+                      className="text-[13px] w-full hover:text-(--ink) transition-[background-color,color,border-color,box-shadow] ease-in-out duration-200 flex items-center gap-2 hover:bg-background rounded-md p-1 px-2"
                     >
                       {link.icon && <FontAwesomeIcon icon={link.icon} />}
                       {link.label}
@@ -76,7 +76,7 @@ const CustomBreadcrumb = ({ navigationLinks }: CustomBreadcrumbProps) => {
                     }
                   }
                 }}
-                className="text-[13px] w-full hover:text-[--ink] transition-[background-color,color,border-color,box-shadow] ease-in-out duration-200 flex items-center gap-2 hover:bg-background rounded-md p-1 px-2"
+                className="text-[13px] w-full hover:text-(--ink) transition-[background-color,color,border-color,box-shadow] ease-in-out duration-200 flex items-center gap-2 hover:bg-background rounded-md p-1 px-2"
               >
                 {link?.isLoading ? (
                   <figure>

@@ -21,7 +21,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-[9998] bg-[--overlay] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200 ease-[cubic-bezier(0,0,1,1)]",
+      "fixed inset-0 z-[9998] bg-(--overlay) data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200 ease-[cubic-bezier(0,0,1,1)]",
       className
     )}
     {...props}
@@ -43,13 +43,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed top-1/2 left-1/2 z-[9999] grid w-[calc(100%-40px)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-[--radius-card] border-0 bg-[--paper] p-6 text-[--ink] shadow-[var(--shadow-modal)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-2 duration-200 ease-[cubic-bezier(0,0,1,1)]",
+        "fixed top-1/2 left-1/2 z-[9999] grid w-[calc(100%-40px)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-(--radius-card) border-0 bg-(--paper) p-6 text-(--ink) shadow-[var(--shadow-modal)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-2 duration-200 ease-[cubic-bezier(0,0,1,1)]",
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute top-4 right-4 flex size-9 items-center justify-center rounded-[--radius-control] outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] disabled:pointer-events-none">
+      <DialogPrimitive.Close className="absolute top-4 right-4 flex size-9 items-center justify-center rounded-(--radius-control) outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] disabled:pointer-events-none">
         <X className="h-4 w-4 cursor-pointer" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -93,7 +93,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-medium leading-[1.4] tracking-[-0.01em]",
+      "text-lg font-medium leading-[1.4]",
       className
     )}
     {...props}

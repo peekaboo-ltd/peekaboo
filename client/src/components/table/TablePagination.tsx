@@ -54,9 +54,9 @@ export function DataTablePagination<TData>({
 
   return (
     <footer className="flex flex-col items-center gap-4 px-2 mt-4 
-                   md:flex-row md:justify-between">
+ md:flex-row md:justify-between">
       <article className="flex flex-col gap-1 w-full text-center 
-                      md:w-auto md:text-left">
+ md:w-auto md:text-left">
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <span className="text-xs text-muted-foreground">
             {table.getFilteredSelectedRowModel().rows.length} of{' '}
@@ -71,7 +71,7 @@ export function DataTablePagination<TData>({
       </article>
 
       <menu className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 
-                     md:justify-end md:gap-x-6">
+ md:justify-end md:gap-x-6">
         <section className="flex items-center space-x-2">
           <span className="hidden text-sm font-normal sm:block">Rows per page</span>
           <Select
@@ -109,7 +109,7 @@ export function DataTablePagination<TData>({
             min={1}
             max={totalPages || 1}
             defaultValue={page + 1}
-            className="h-11 w-14 rounded-[--radius-control] border-0 bg-[--surface] px-2 text-center text-xs tabular-nums outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+            className="h-11 w-14 rounded-(--radius-control) border-0 bg-(--surface) px-2 text-center text-xs tabular-nums outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
             onChange={(e) => {
               const targetPage = e.target.value ? Number(e.target.value) : 0;
               if (targetPage >= 1 && targetPage <= (totalPages || 1)) {

@@ -38,19 +38,19 @@ const services = [
 
 const toneClasses = {
   black: {
-    card: 'group border-transparent bg-[var(--ink)] text-[--paper] transition-[background-color,color,border-color,box-shadow] duration-200',
+    card: 'group border-transparent bg-[var(--ink)] text-(--paper) transition-[background-color,color,border-color,box-shadow] duration-200',
     chip: 'bg-[var(--ink)] text-[var(--paper)]',
-    body: 'text-[--paper]',
-    arrow: 'bg-[--paper]/[0.06] text-[--paper] transition-[background-color,color,border-color,box-shadow] duration-200 group-hover:bg-[--paper]',
+    body: 'text-(--paper)',
+    arrow: 'bg-(--paper)/[0.06] text-(--paper) transition-[background-color,color,border-color,box-shadow] duration-200 group-hover:bg-(--paper)',
   },
   inverted: {
     card: 'group border-transparent bg-[var(--ink)] text-[var(--paper)] transition-[background-color,color,border-color,box-shadow] duration-200',
-    chip: 'bg-[var(--ink)] text-[--paper]',
-    body: 'text-[--paper]',
-    arrow: 'bg-[var(--ink)] text-[--paper] transition-[background-color,color,border-color,box-shadow] duration-200 group-hover:bg-[--ink]',
+    chip: 'bg-[var(--ink)] text-(--paper)',
+    body: 'text-(--paper)',
+    arrow: 'bg-[var(--ink)] text-(--paper) transition-[background-color,color,border-color,box-shadow] duration-200 group-hover:bg-(--ink)',
   },
   white: {
-    card: 'border border-[--line] transition-[border-color] duration-200 hover:border-[--ink] group bg-[var(--surface)] text-foreground',
+    card: 'border border-(--line) transition-[border-color] duration-200 hover:border-(--ink) group bg-[var(--surface)] text-foreground',
     chip: 'bg-[var(--surface)] text-[var(--muted)]',
     body: 'text-muted-foreground',
     arrow: 'bg-[var(--surface)] text-foreground transition-[background-color,color,border-color,box-shadow] duration-200 group-hover:bg-[var(--ink)]',
@@ -58,11 +58,11 @@ const toneClasses = {
 } as const;
 
 const ServicesSection = () => (
-  <section id="services" className="section-rhythm w-full border-t border-[--line] bg-[--paper]">
+  <section id="services" className="section-rhythm w-full border-t border-(--line) bg-(--paper)">
     <article className="app-container">
       <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <hgroup className="max-w-[660px]">
-          <p className="text-[11px] font-medium uppercase text-muted-foreground">
+          <p className="text-[11px] font-medium text-muted-foreground">
             Top solutions
           </p>
           <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
@@ -83,14 +83,14 @@ const ServicesSection = () => (
           return (
             <li key={service.title} className={service.featured ? 'lg:row-span-2' : undefined}>
               <article
-                className={`flex h-full min-h-[178px] flex-col justify-between rounded-[--radius-card] border p-6 ${tone.card} ${
+                className={`flex h-full min-h-[178px] flex-col justify-between rounded-(--radius-card) border p-6 ${tone.card} ${
                   service.featured ? 'lg:min-h-[300px]' : ''
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-4">
                     <span
-                      className={`inline-flex h-6 items-center rounded-[--radius-pill] px-2.5 text-xs font-medium ${tone.chip}`}
+                      className={`inline-flex h-6 items-center rounded-(--radius-pill) px-2.5 text-xs font-medium ${tone.chip}`}
                     >
                       {service.tag}
                     </span>
@@ -113,12 +113,12 @@ const ServicesSection = () => (
                 </div>
 
                 {service.featured && (
-                  <footer className="mt-6 flex flex-col gap-4 border-t border-[--line] pt-5 sm:flex-row sm:items-end sm:justify-between">
+                  <footer className="mt-6 flex flex-col gap-4 border-t border-(--line) pt-5 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <p className="text-[15px] font-medium">
                         Live tracking, end to end
                       </p>
-                      <p className="mt-1 text-[11px] font-medium uppercase text-[--paper]">
+                      <p className="mt-1 text-[11px] font-medium text-(--paper)">
                         pickup to drop-off
                       </p>
                     </div>

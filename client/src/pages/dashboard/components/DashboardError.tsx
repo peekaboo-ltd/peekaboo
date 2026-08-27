@@ -5,8 +5,8 @@ const DashboardError = () => {
 
   return (
     <main className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
-      <article className="relative overflow-hidden rounded-[--radius-card] border border-[--line] bg-[var(--surface)] px-4 py-10 text-center sm:px-8 sm:py-12">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[--surface] text-[--ink]">
+      <article className="relative overflow-hidden rounded-(--radius-card) border border-(--line) bg-[var(--surface)] px-4 py-10 text-center sm:px-8 sm:py-12">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-(--surface) text-(--ink)">
           <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
@@ -16,8 +16,8 @@ const DashboardError = () => {
             />
           </svg>
         </div>
-        <h2 className="text-xl font-medium text-[--ink]">{t('dashboard.failedToLoad')}</h2>
-        <p className="mt-2 text-sm text-[--muted]">{t('dashboard.tryRefreshing')}</p>
+        <h2 className="text-xl font-medium text-(--ink)">{t('dashboard.failedToLoad')}</h2>
+        <p className="mt-2 text-sm text-(--muted)">{t('dashboard.tryRefreshing')}</p>
       </article>
     </main>
   );

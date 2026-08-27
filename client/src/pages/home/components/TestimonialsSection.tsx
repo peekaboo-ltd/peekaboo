@@ -34,7 +34,7 @@ const TestimonialsSection = ({
   const current = testimonials[activeTestimonial];
 
   return (
-    <section className="section-rhythm w-full border-t border-[--line] bg-[--paper]">
+    <section className="section-rhythm w-full border-t border-(--line) bg-(--paper)">
       <motion.article
         className="app-container"
         initial="hidden"
@@ -43,7 +43,7 @@ const TestimonialsSection = ({
         variants={containerVariants}
       >
         <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
-          <p className="text-[11px] font-medium uppercase text-muted-foreground">
+          <p className="text-[11px] font-medium text-muted-foreground">
             {badgeLabel}
           </p>
           <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
@@ -53,7 +53,7 @@ const TestimonialsSection = ({
         </motion.header>
 
         <motion.figure className="relative" variants={itemVariants}>
-          <blockquote className="relative overflow-hidden rounded-[--radius-card] border border-[--line] bg-[--paper] p-6 sm:p-8 lg:p-10">
+          <blockquote className="relative overflow-hidden rounded-(--radius-card) border border-(--line) bg-(--paper) p-6 sm:p-8 lg:p-10">
             <Quote
               className="absolute right-6 top-6 h-10 w-10 text-[var(--surface)]"
               aria-hidden="true"
@@ -103,7 +103,7 @@ const TestimonialsSection = ({
                   type="button"
                   onClick={() => setActiveTestimonial(index)}
                   aria-selected={index === activeTestimonial}
-                  className="flex size-6 items-center justify-center rounded-[--radius-pill] border border-[--line] text-xs text-[--muted] outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] aria-selected:border-[--ink] aria-selected:bg-[--ink] aria-selected:text-[--paper] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+                  className="flex size-6 items-center justify-center rounded-(--radius-pill) border border-(--line) text-xs text-(--muted) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] aria-selected:border-(--ink) aria-selected:bg-(--ink) aria-selected:text-(--paper) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
                   aria-label={`Go to testimonial ${index + 1}`}
                 >
                   {index + 1}

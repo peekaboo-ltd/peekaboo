@@ -42,7 +42,7 @@ export const useUsersColumns = () => {
             .map((userRole: UserRole) => capitalizeString(userRole?.role?.name))
             .filter(Boolean) as RoleTypes[];
           if (roleNames.length === 0) {
-            return <span className="text-[--muted]">-</span>;
+            return <span className="text-(--muted)">-</span>;
           }
           return <p>{roleNames.join(', ')}</p>;
         },

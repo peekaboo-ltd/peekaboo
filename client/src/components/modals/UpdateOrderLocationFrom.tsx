@@ -61,8 +61,8 @@ const UpdateOrderLocationFrom = () => {
       <article className="space-y-6">
         <section className="space-y-4">
           <header>
-            <h4 className="text-lg font-medium text-[--ink]">Search Location</h4>
-            <p className="text-sm text-[--muted]">
+            <h4 className="text-lg font-medium text-(--ink)">Search Location</h4>
+            <p className="text-sm text-(--muted)">
               Enter the address or location name where the package should be picked up
             </p>
           </header>
@@ -76,9 +76,9 @@ const UpdateOrderLocationFrom = () => {
         </section>
 
         {selectedLocation && (
-          <aside className="p-4 bg-[--surface] rounded-lg border">
-            <h5 className="text-sm font-medium text-[--ink] mb-2">Selected Location:</h5>
-            <address className="text-sm text-[--ink] not-italic">
+          <aside className="p-4 bg-(--surface) rounded-lg border">
+            <h5 className="text-sm font-medium text-(--ink) mb-2">Selected Location:</h5>
+            <address className="text-sm text-(--ink) not-italic">
               <strong>{selectedLocation.name}</strong>
               <br />
               {selectedLocation.formattedAddress}

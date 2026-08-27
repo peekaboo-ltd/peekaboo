@@ -22,18 +22,13 @@ const HeroHeadline = ({
   const isPersonal = activeTab === 'personal';
 
   return (
-    <hgroup className="space-y-4">
-      <p className="text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">
-        {isPersonal
-          ? 'Same-day delivery in Kigali'
-          : 'Delivery built for Kigali teams'}
-      </p>
-      <h1 className="max-w-[12ch] text-[clamp(2.5rem,1.6rem+3.6vw,3.75rem)] font-medium leading-[1.06] tracking-[-0.03em] text-[--ink]">
+    <hgroup className="space-y-3">
+      <h1 className="max-w-[14ch] text-[clamp(2.25rem,1.6rem+2.4vw,3.25rem)] font-medium leading-[1.08] text-(--ink)">
         {isPersonal ? personalTitle1 : businessTitle1}
         <br />
         {isPersonal ? personalTitle2 : businessTitle2} in Kigali.
       </h1>
-      <p className="max-w-[46ch] text-base font-normal leading-[1.6] text-[--muted]">
+      <p className="max-w-[46ch] text-base leading-[1.6] text-(--muted)">
         {isPersonal ? personalSubtitle : businessSubtitle}
       </p>
     </hgroup>

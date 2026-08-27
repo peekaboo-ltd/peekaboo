@@ -11,18 +11,18 @@ const getPerformanceLabel = (rider: RiderPerformanceItem) => {
     rider.failedDeliveries <= 1 &&
     rider.canceledDeliveries <= 2
   ) {
-    return { text: "Top Performer", className: "bg-[--surface] text-[--ink]" };
+    return { text: "Top Performer", className: "bg-(--surface) text-(--ink)" };
   }
 
   if (rider.totalDeliveriesCompleted >= 8 && rider.failedDeliveries <= 3) {
-    return { text: "Doing Well", className: "bg-[--surface] text-[--ink]" };
+    return { text: "Doing Well", className: "bg-(--surface) text-(--ink)" };
   }
 
   if (rider.totalDeliveriesCompleted === 0 || rider.failedDeliveries >= 4) {
-    return { text: "Needs Support", className: "bg-[--surface] text-[--ink]" };
+    return { text: "Needs Support", className: "bg-(--surface) text-(--ink)" };
   }
 
-  return { text: "Average", className: "bg-[--surface] text-[--ink]" };
+  return { text: "Average", className: "bg-(--surface) text-(--ink)" };
 };
 
 export const useRiderManagementColumns = (
@@ -43,7 +43,7 @@ export const useRiderManagementColumns = (
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-medium">{row.original.riderName || "-"}</span>
-            <span className="text-xs text-[--muted]">
+            <span className="text-xs text-(--muted)">
               {row.original.riderEmail || "-"}
             </span>
           </div>
@@ -83,7 +83,7 @@ export const useRiderManagementColumns = (
               e.preventDefault();
               onViewDetails(row.original);
             }}
-            className="text-[--ink] underline text-[11px] underline-offset-2"
+            className="text-(--ink) underline text-[11px] underline-offset-2"
           >
             View details
           </Link>

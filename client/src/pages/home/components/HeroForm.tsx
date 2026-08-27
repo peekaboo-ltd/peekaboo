@@ -5,7 +5,7 @@ import {
   type Control,
   type FieldErrors,
 } from 'react-hook-form';
-import { Check, Pencil, TriangleAlert } from 'lucide-react';
+import { Pencil, TriangleAlert } from 'lucide-react';
 import type { HomeFormValues } from '../home.types';
 import type { OrderLocation } from '@/types/order.type';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
@@ -39,6 +39,17 @@ const validateRwandanPhone = (value: string | undefined) => {
   return result.isValid ? true : (result.error ?? 'Invalid phone number');
 };
 
+const FieldError = ({ message }: { message?: string }) =>
+  message ? (
+    <span
+      className="mt-1.5 flex items-center gap-1.5 text-[0.8125rem] text-(--ink)"
+      role="alert"
+    >
+      <TriangleAlert className="size-3.5 shrink-0" aria-hidden="true" />
+      {message}
+    </span>
+  ) : null;
+
 interface LocationFieldProps {
   name: 'locationFrom' | 'locationTo';
   control: Control<HomeFormValues>;
@@ -47,7 +58,6 @@ interface LocationFieldProps {
   requiredMessage: string;
   errorMessage?: string;
   validate?: (value: OrderLocation | undefined) => true | string;
-  destination?: boolean;
 }
 
 const LocationField = ({
@@ -58,7 +68,6 @@ const LocationField = ({
   requiredMessage,
   errorMessage,
   validate,
-  destination = false,
 }: LocationFieldProps) => {
   const [searchText, setSearchText] = useState('');
 
@@ -68,18 +77,14 @@ const LocationField = ({
       control={control}
       rules={{ required: requiredMessage, validate }}
       render={({ field }) => (
-        <div className="relative pl-12">
-          <span
-            className={`absolute left-[18px] top-[26px] z-10 block size-2 bg-[--ink] ${
-              destination ? 'rounded-none' : 'rounded-[--radius-pill]'
-            }`}
-            aria-hidden="true"
-          />
-          <span className="sr-only">{label}</span>
+        <div>
+          <label className="field-label" htmlFor={`hero-${name}`}>
+            {label}
+          </label>
+
           {field.value ? (
-            <div className="flex h-14 items-center gap-3 pr-4">
-              <Check className="size-4 shrink-0" aria-hidden="true" />
-              <span className="min-w-0 flex-1 truncate text-base">
+            <div className="flex h-12 items-center gap-3 rounded-(--radius-control) border border-(--line) bg-(--paper) pl-3.5 pr-1.5">
+              <span className="min-w-0 flex-1 truncate text-base text-(--ink)">
                 {describeLocation(field.value)}
               </span>
               <button
@@ -88,8 +93,8 @@ const LocationField = ({
                   setSearchText(describeLocation(field.value));
                   field.onChange(undefined);
                 }}
-                className="flex size-9 items-center justify-center rounded-[--radius-control] outline-none transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface-hover] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
-                aria-label={`Edit ${label.toLowerCase()}`}
+                className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) outline-none transition-[background-color,box-shadow] duration-200 ease-(--ease-flat) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+                aria-label={`Change ${label.toLowerCase()}`}
               >
                 <Pencil className="size-4" aria-hidden="true" />
               </button>
@@ -104,15 +109,10 @@ const LocationField = ({
               }}
               placeholder={placeholder}
               country="rw"
-              className="[&_input]:h-14 [&_input]:rounded-none [&_input]:border-0 [&_input]:bg-transparent [&_input]:px-0 [&_input]:text-base [&_input]:shadow-none [&_input]:focus:shadow-none"
             />
           )}
-          {errorMessage ? (
-            <span className="flex items-center gap-2 pb-3 text-[0.8125rem] text-[--ink]" role="alert">
-              <TriangleAlert className="size-4 shrink-0" aria-hidden="true" />
-              {errorMessage}
-            </span>
-          ) : null}
+
+          <FieldError message={errorMessage} />
         </div>
       )}
     />
@@ -154,76 +154,58 @@ const HeroForm = ({ formRef, onSubmit, control, copy, errors }: HeroFormProps) =
       id="hero-delivery-form"
       ref={formRef}
       onSubmit={onSubmit}
-      className="home-scroll-target w-full max-w-[620px] space-y-4"
+      className="home-scroll-target w-full max-w-[560px]"
     >
-      <fieldset>
-        <legend className="sr-only">Delivery route</legend>
-        <div className="relative overflow-hidden rounded-[--radius-control] bg-[--surface]">
-          <span
-            className="absolute left-[21px] top-7 bottom-7 w-px bg-[--line-strong]"
-            aria-hidden="true"
-          />
-          <div className="border-b border-[--line]">
-            <LocationField
-              name="locationFrom"
-              control={control}
-              label="Pickup location"
-              placeholder="Pickup location"
-              requiredMessage="Select a pickup location from the suggestions"
-              errorMessage={errors.locationFrom?.message}
-            />
-          </div>
-          <LocationField
-            name="locationTo"
-            control={control}
-            label="Drop-off location"
-            placeholder="Drop-off location"
-            requiredMessage="Select a drop-off location from the suggestions"
-            errorMessage={errors.locationTo?.message}
-            validate={validateDistinctLocation}
-            destination
-          />
-        </div>
-      </fieldset>
+      <fieldset className="grid gap-4 sm:grid-cols-2">
+        <legend className="sr-only">{copy.formTitle}</legend>
 
-      <details open className="rounded-[--radius-control] border border-[--line] px-4 py-3 open:pb-4">
-        <summary className="cursor-pointer text-sm font-medium">
-          {copy.formTitle}
-          <span className="ml-2 font-normal text-[--muted]">{copy.formSubtitle}</span>
-        </summary>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Controller
-            name="senderPhoneNumber"
-            control={control}
-            rules={{ validate: validateRwandanPhone }}
-            render={({ field }) => (
-              <TelInput
-                {...field}
-                label={copy.senderLabel}
-                required
-                placeholder={copy.senderPlaceholder}
-                errorMessage={errors.senderPhoneNumber?.message}
-                className="!min-h-14"
-              />
-            )}
-          />
-          <Controller
-            name="recipientPhoneNumber"
-            control={control}
-            rules={{ validate: validateRecipientPhone }}
-            render={({ field }) => (
-              <TelInput
-                {...field}
-                label={copy.recipientLabel}
-                required
-                placeholder={copy.recipientPlaceholder}
-                errorMessage={errors.recipientPhoneNumber?.message}
-                className="!min-h-14"
-              />
-            )}
-          />
-        </div>
-      </details>
+        <LocationField
+          name="locationFrom"
+          control={control}
+          label="Pickup location"
+          placeholder="Where should we collect?"
+          requiredMessage="Select a pickup location from the suggestions"
+          errorMessage={errors.locationFrom?.message}
+        />
+        <LocationField
+          name="locationTo"
+          control={control}
+          label="Drop-off location"
+          placeholder="Where is it going?"
+          requiredMessage="Select a drop-off location from the suggestions"
+          errorMessage={errors.locationTo?.message}
+          validate={validateDistinctLocation}
+        />
+
+        <Controller
+          name="senderPhoneNumber"
+          control={control}
+          rules={{ validate: validateRwandanPhone }}
+          render={({ field }) => (
+            <TelInput
+              {...field}
+              label={copy.senderLabel}
+              required
+              placeholder={copy.senderPlaceholder}
+              errorMessage={errors.senderPhoneNumber?.message}
+            />
+          )}
+        />
+        <Controller
+          name="recipientPhoneNumber"
+          control={control}
+          rules={{ validate: validateRecipientPhone }}
+          render={({ field }) => (
+            <TelInput
+              {...field}
+              label={copy.recipientLabel}
+              required
+              placeholder={copy.recipientPlaceholder}
+              errorMessage={errors.recipientPhoneNumber?.message}
+            />
+          )}
+        />
+      </fieldset>
     </form>
   );
 };

@@ -82,9 +82,9 @@ const DashboardChartsSection = ({
                   const width = total > 0 ? (item.value / total) * 100 : 0;
                   return (
                     <div key={item.label}>
-                      <div className="mb-1.5 flex items-center justify-between text-sm text-[--muted]">
+                      <div className="mb-1.5 flex items-center justify-between text-sm text-(--muted)">
                         <span>{item.label}</span>
-                        <span className="font-medium text-[--ink]">{formatNumbers(item.value)}</span>
+                        <span className="font-medium text-(--ink)">{formatNumbers(item.value)}</span>
                       </div>
                       <div className="h-2 rounded-full bg-[var(--surface)]">
                         <div
@@ -97,7 +97,7 @@ const DashboardChartsSection = ({
                 })}
               </div>
             ) : (
-              <p className="mt-4 text-sm leading-6 text-[--muted]">
+              <p className="mt-4 text-sm leading-6 text-(--muted)">
                 {widget.subtitle}
               </p>
             )}

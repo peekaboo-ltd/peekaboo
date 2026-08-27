@@ -14,15 +14,15 @@ const statusConfig: Record<UserStatus, {
 }> = {
   [UserStatus.ACTIVE]: {
     label: 'Active',
-    className: 'border-[--ink] bg-[--ink] text-[--paper]',
+    className: 'border-(--ink) bg-(--ink) text-(--paper)',
   },
   [UserStatus.INACTIVE]: {
     label: 'Inactive',
-    className: 'border-[--line] bg-transparent text-[--muted]',
+    className: 'border-(--line) bg-transparent text-(--muted)',
   },
   [UserStatus.SUSPENDED]: {
     label: 'Suspended',
-    className: 'border-[--ink] bg-transparent text-[--ink] line-through',
+    className: 'border-(--ink) bg-transparent text-(--ink) line-through',
   },
 };
 

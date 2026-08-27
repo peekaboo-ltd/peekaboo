@@ -129,12 +129,12 @@ const DatePicker = ({
         <Button
           variant={'outline'}
           className={cn(
-            'h-11 w-full justify-start rounded-[--radius-control] border-0 bg-[--surface] px-4 text-left text-sm font-normal text-[--ink] hover:bg-[--surface-hover] focus-visible:shadow-[var(--ink)_0_0_0_2px_inset]',
-            !normalizedValue && 'text-[--muted]',
+            'h-12 w-full justify-start rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-left text-base font-normal text-(--ink) hover:border-(--line-strong) focus-visible:border-(--ink) focus-visible:shadow-[var(--ink)_0_0_0_1px_inset]',
+            !normalizedValue && 'text-(--muted)',
           )}
           onClick={() => setOpen(!open)}
         >
-          <CalendarIcon className="w-4 h-4 mr-3 text-[--muted]" />
+          <CalendarIcon className="w-4 h-4 mr-3 text-(--muted)" />
           {normalizedValue ? (
             selectionType === 'recurringDate' ? (
               moment(normalizedValue).format('MMMM DD')
@@ -144,14 +144,14 @@ const DatePicker = ({
               moment(normalizedValue).format('MMMM DD')
             )
           ) : (
-            <span className="text-sm text-[--muted] font-light">
+            <span className="text-sm text-(--muted) font-light">
               {placeholder}
             </span>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-full rounded-[--radius-control] border-0 bg-[--surface] p-0 shadow-[var(--shadow-popover)]"
+        className="w-full rounded-(--radius-control) border-0 bg-(--surface) p-0 shadow-[var(--shadow-popover)]"
         align="start"
       >
         <menu className="flex flex-col w-full gap-3 p-4">

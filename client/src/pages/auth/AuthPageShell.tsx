@@ -20,16 +20,16 @@ interface AuthNoticeProps {
 const trustMarks = ['Businesses', 'Families', 'Riders', 'Teams', 'Kigali'];
 
 export const authInputClassName =
-  'h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-[--ink]';
+  'h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-(--ink)';
 
 export const authPrimaryButtonClassName =
-  'mt-2 w-full !rounded-md !bg-[--ink] !font-normal hover:!bg-[--ink]';
+  'mt-2 w-full !rounded-md !bg-(--ink) !font-normal hover:!bg-(--ink)';
 
 export const authSecondaryButtonClassName =
-  'w-full !rounded-md !border-border !bg-card !font-normal !text-[--ink] hover:!bg-accent';
+  'w-full !rounded-md !border-border !bg-card !font-normal !text-(--ink) hover:!bg-accent';
 
 export const GoogleIcon = () => (
-  <svg className="h-4 w-4 text-[--ink]" viewBox="0 0 24 24" aria-hidden="true">
+  <svg className="h-4 w-4 text-(--ink)" viewBox="0 0 24 24" aria-hidden="true">
     <path
       fill="currentColor"
       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -71,7 +71,7 @@ export const AuthCard = ({ title, subtitle, children }: AuthCardProps) => (
 export const AuthNotice = ({ children, tone = 'default' }: AuthNoticeProps) => {
   const toneClassName =
     tone === 'success'
-      ? 'border-[--line] bg-[--surface] text-[--muted]'
+      ? 'border-(--line) bg-(--surface) text-(--muted)'
       : tone === 'error'
         ? 'border-destructive/30 bg-destructive/10 text-destructive'
         : 'border-border bg-accent text-foreground';
@@ -84,7 +84,7 @@ export const AuthNotice = ({ children, tone = 'default' }: AuthNoticeProps) => {
 };
 
 export const AuthPageShell = ({ children }: AuthPageShellProps) => (
-  <main className="min-h-screen overflow-x-hidden bg-[--paper] text-[--ink]">
+  <main className="min-h-screen overflow-x-hidden bg-(--paper) text-(--ink)">
     <section className="flex min-h-screen flex-col px-5 py-9">
       <header className="flex justify-center">
         <Link

@@ -59,7 +59,7 @@ function NavigationMenuItem({
 }
 
 const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-11 w-max items-center justify-center rounded-[--radius-pill] bg-transparent px-3 text-sm font-medium text-[--ink] outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface] focus:bg-[--surface] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] disabled:pointer-events-none disabled:opacity-40 focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+  "group inline-flex h-11 w-max items-center justify-center rounded-(--radius-pill) bg-transparent px-3 text-sm font-medium text-(--ink) outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) focus:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] disabled:pointer-events-none disabled:opacity-40 focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
 )
 
 function NavigationMenuTrigger({
@@ -91,7 +91,7 @@ function NavigationMenuContent({
       data-slot="navigation-menu-content"
       className={cn(
         "top-0 left-0 w-full p-2 md:absolute md:w-auto",
-        "group-data-[viewport=false]/navigation-menu:top-full group-data-[viewport=false]/navigation-menu:mt-1 group-data-[viewport=false]/navigation-menu:overflow-hidden group-data-[viewport=false]/navigation-menu:rounded-[--radius-control] group-data-[viewport=false]/navigation-menu:border-0 group-data-[viewport=false]/navigation-menu:bg-[--surface] group-data-[viewport=false]/navigation-menu:text-[--ink] group-data-[viewport=false]/navigation-menu:shadow-[var(--shadow-menu)] group-data-[viewport=false]/navigation-menu:data-[state=open]:animate-in group-data-[viewport=false]/navigation-menu:data-[state=closed]:animate-out group-data-[viewport=false]/navigation-menu:data-[state=closed]:fade-out-0 group-data-[viewport=false]/navigation-menu:data-[state=open]:fade-in-0 group-data-[viewport=false]/navigation-menu:data-[state=open]:slide-in-from-top-1 group-data-[viewport=false]/navigation-menu:duration-100 group-data-[viewport=false]/navigation-menu:ease-[cubic-bezier(0.2,0.8,0.4,1)]",
+        "group-data-[viewport=false]/navigation-menu:top-full group-data-[viewport=false]/navigation-menu:mt-1 group-data-[viewport=false]/navigation-menu:overflow-hidden group-data-[viewport=false]/navigation-menu:rounded-(--radius-control) group-data-[viewport=false]/navigation-menu:border group-data-[viewport=false]/navigation-menu:border-(--line) group-data-[viewport=false]/navigation-menu:bg-(--paper) group-data-[viewport=false]/navigation-menu:text-(--ink) group-data-[viewport=false]/navigation-menu:shadow-[var(--shadow-menu)] group-data-[viewport=false]/navigation-menu:data-[state=open]:animate-in group-data-[viewport=false]/navigation-menu:data-[state=closed]:animate-out group-data-[viewport=false]/navigation-menu:data-[state=closed]:fade-out-0 group-data-[viewport=false]/navigation-menu:data-[state=open]:fade-in-0 group-data-[viewport=false]/navigation-menu:data-[state=open]:slide-in-from-top-1 group-data-[viewport=false]/navigation-menu:duration-100 group-data-[viewport=false]/navigation-menu:ease-[cubic-bezier(0.2,0.8,0.4,1)]",
         className
       )}
       {...props}
@@ -112,7 +112,7 @@ function NavigationMenuViewport({
       <NavigationMenuPrimitive.Viewport
         data-slot="navigation-menu-viewport"
         className={cn(
-          "relative mt-1 h-[var(--radix-navigation-menu-viewport-height)] w-full origin-top-center overflow-hidden rounded-[--radius-control] border-0 bg-[--surface] text-[--ink] shadow-[var(--shadow-menu)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-1 duration-100 ease-[cubic-bezier(0.2,0.8,0.4,1)] md:w-[var(--radix-navigation-menu-viewport-width)]",
+          "relative mt-1 h-[var(--radix-navigation-menu-viewport-height)] w-full origin-top-center overflow-hidden rounded-(--radius-control) border border-(--line) bg-(--paper) text-(--ink) shadow-[var(--shadow-menu)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-1 duration-100 ease-[cubic-bezier(0.2,0.8,0.4,1)] md:w-[var(--radix-navigation-menu-viewport-width)]",
           className
         )}
         {...props}
@@ -129,7 +129,7 @@ function NavigationMenuLink({
     <NavigationMenuPrimitive.Link
       data-slot="navigation-menu-link"
       className={cn(
-        "flex min-h-11 flex-col justify-center gap-1 px-4 py-2 text-sm font-normal text-[--ink] outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface-hover] focus:bg-[--surface-hover] data-[active=true]:bg-[--ink] data-[active=true]:text-[--paper] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] [&_svg:not([class*='size-'])]:size-4",
+        "flex min-h-11 flex-col justify-center gap-1 px-4 py-2 text-sm font-normal text-(--ink) outline-none transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface-hover) focus:bg-(--surface-hover) data-[active=true]:bg-(--ink) data-[active=true]:text-(--paper) focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
@@ -150,7 +150,7 @@ function NavigationMenuIndicator({
       )}
       {...props}
     >
-      <div className="relative top-[60%] h-2 w-2 rotate-45 bg-[--surface]" />
+      <div className="relative top-[60%] h-2 w-2 rotate-45 border-r border-b border-(--line) bg-(--paper)" />
     </NavigationMenuPrimitive.Indicator>
   )
 }

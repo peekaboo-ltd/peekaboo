@@ -20,7 +20,7 @@ const ContactUsPage = () => {
       />
 
       <PublicSectionCard
-        className="mx-auto w-full max-w-3xl border-[--line]"
+        className="mx-auto w-full max-w-3xl border-(--line)"
         title="Send us a message"
         description="Tell us about your business or delivery needs."
       >

@@ -18,9 +18,9 @@ const defaultServices: ServiceStatus[] = [
 ];
 
 const dotColor: Record<ServiceStatus['status'], string> = {
-  operational: 'bg-[--ink]',
-  degraded: 'border border-[--ink] bg-transparent',
-  outage: 'rotate-45 bg-[--ink]',
+  operational: 'bg-(--ink)',
+  degraded: 'border border-(--ink) bg-transparent',
+  outage: 'rotate-45 bg-(--ink)',
 };
 
 const DashboardSystemStatus = ({
@@ -36,10 +36,10 @@ const DashboardSystemStatus = ({
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-2 w-2 shrink-0">
             <span
-              className={`relative inline-flex h-2 w-2 ${allOperational ? 'rounded-full bg-[--ink]' : 'rotate-45 bg-[--ink]'}`}
+              className={`relative inline-flex h-2 w-2 ${allOperational ? 'rounded-full bg-(--ink)' : 'rotate-45 bg-(--ink)'}`}
             />
           </span>
-          <span className="text-xs font-medium uppercase text-[--muted]">
+          <span className="text-xs font-medium text-(--muted)">
             {allOperational ? 'All Systems Operational' : 'Partial Disruption'}
           </span>
         </div>
@@ -49,7 +49,7 @@ const DashboardSystemStatus = ({
           {services.map((service, i) => (
             <span
               key={service.name}
-              className="flex items-center gap-1.5 text-xs text-[--muted]"
+              className="flex items-center gap-1.5 text-xs text-(--muted)"
             >
               <span
                 className={`h-1.5 w-1.5 rounded-full shrink-0 ${dotColor[service.status]}`}
@@ -57,7 +57,7 @@ const DashboardSystemStatus = ({
               />
               {service.name}
               {i < services.length - 1 && (
-                <span className="ml-5 hidden sm:inline text-[--muted]" aria-hidden="true">
+                <span className="ml-5 hidden sm:inline text-(--muted)" aria-hidden="true">
                   ·
                 </span>
               )}

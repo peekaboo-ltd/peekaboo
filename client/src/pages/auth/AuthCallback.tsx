@@ -172,7 +172,7 @@ const AuthCallback = () => {
       <AuthPageShell>
         <AuthCard title="Completing sign in" subtitle="We are securing your session.">
           <div className="flex justify-center py-4">
-            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-[--ink]" />
+            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-(--ink)" />
           </div>
         </AuthCard>
       </AuthPageShell>

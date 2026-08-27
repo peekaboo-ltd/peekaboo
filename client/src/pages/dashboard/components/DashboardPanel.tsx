@@ -19,13 +19,13 @@ const DashboardPanel = ({
   return (
     <div
       className={cn(
-        'rounded-[--radius-card] border border-[--line] bg-[--paper] p-0',
+        'rounded-(--radius-card) border border-(--line) bg-(--paper) p-0',
         className,
       )}
     >
       <header className="border-b border-[color:var(--line)] px-4 py-4 sm:px-6">
         {eyebrow && (
-          <p className="mb-1 text-[11px] font-medium uppercase text-[--muted]">
+          <p className="mb-1 text-[11px] font-medium text-(--muted)">
             {eyebrow}
           </p>
         )}
@@ -33,7 +33,7 @@ const DashboardPanel = ({
           {title}
         </h2>
         {description && (
-          <p className="mt-0.5 max-w-[56ch] text-sm text-[--muted]">{description}</p>
+          <p className="mt-0.5 max-w-[56ch] text-sm text-(--muted)">{description}</p>
         )}
       </header>
       <div className="px-4 py-4 sm:px-6 sm:py-5">{children}</div>

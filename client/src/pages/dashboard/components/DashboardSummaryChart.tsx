@@ -96,13 +96,13 @@ const DashboardSummaryChart = ({
   return (
     <motion.section
       aria-label="Summary chart"
-      className="overflow-hidden rounded-[--radius-card] border border-[--line] bg-[--paper] p-5 sm:p-6"
+      className="overflow-hidden rounded-(--radius-card) border border-(--line) bg-(--paper) p-5 sm:p-6"
       variants={containerVariants}
     >
       <motion.div variants={itemVariants}>
         <header className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase text-[--muted]">
+            <p className="text-[11px] font-medium text-(--muted)">
               Primary insight
             </p>
             {data.length > 0 ? (
@@ -110,22 +110,22 @@ const DashboardSummaryChart = ({
                 {formattedTotal}
               </p>
             ) : (
-              <p className="mt-2 text-[2.25rem] font-medium leading-none text-[--muted] sm:text-[3rem]">
+              <p className="mt-2 text-[2.25rem] font-medium leading-none text-(--muted) sm:text-[3rem]">
                 —
               </p>
             )}
-            <p className="mt-2 text-sm text-[--muted]">
+            <p className="mt-2 text-sm text-(--muted)">
               {capitalizeString(metric.toLowerCase())} across the selected period with a single high-signal trend line.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-full border border-[--line] bg-[var(--surface)] px-3 py-1 text-xs font-normal text-[--ink]">
+              <span className="rounded-full border border-(--line) bg-[var(--surface)] px-3 py-1 text-xs font-normal text-(--ink)">
                 {range.toUpperCase()} view
               </span>
-              <span className="rounded-full border border-[--line] bg-[var(--surface)] px-3 py-1 text-xs font-normal text-[--muted]">
+              <span className="rounded-full border border-(--line) bg-[var(--surface)] px-3 py-1 text-xs font-normal text-(--muted)">
                 {data.length} data points
               </span>
               {peakPoint && (
-                <span className="rounded-full border border-[--line] bg-[--surface] px-3 py-1 text-xs font-medium text-[--ink]">
+                <span className="rounded-full border border-(--line) bg-(--surface) px-3 py-1 text-xs font-medium text-(--ink)">
                   Peak {formatLabel(peakPoint.name)}
                 </span>
               )}
@@ -140,8 +140,8 @@ const DashboardSummaryChart = ({
                 onClick={() => onRangeChange(key)}
                 className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-normal transition ${
                   range === key
-                    ? 'border-[--ink] bg-[--ink] text-[--paper]'
-                    : 'border-[--line] text-[--muted] hover:border-[--line]'
+                    ? 'border-(--ink) bg-(--ink) text-(--paper)'
+                    : 'border-(--line) text-(--muted) hover:border-(--line)'
                 }`}
               >
                 {key.toUpperCase()}
@@ -169,7 +169,7 @@ const DashboardSummaryChart = ({
         <section className="relative mt-8 h-64 sm:h-72">
           {isLoading && (
             <figure className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-[var(--surface)]">
-              <figure className="h-5 w-5 animate-spin rounded-full border-2 border-[--line] border-t-[--ink]" />
+              <figure className="h-5 w-5 animate-spin rounded-full border-2 border-(--line) border-t-(--ink)" />
             </figure>
           )}
           <ResponsiveContainer width="100%" height="100%">
@@ -226,7 +226,7 @@ const DashboardSummaryChart = ({
                 key={item.label}
                 className="rounded-md border border-[color:var(--line)] bg-[var(--surface)] px-4 py-3"
               >
-                <p className="text-[11px] font-medium uppercase text-[--muted]">
+                <p className="text-[11px] font-medium text-(--muted)">
                   {item.label}
                 </p>
                 <p className="mt-2 text-2xl font-medium text-[color:var(--ink)]">

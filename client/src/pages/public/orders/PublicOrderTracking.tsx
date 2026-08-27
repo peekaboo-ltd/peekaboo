@@ -163,7 +163,7 @@ const PublicOrderTracking = () => {
                   setIsCopied(true);
                   setTimeout(() => setIsCopied(false), 2000);
                 }}
-                className="flex size-9 items-center justify-center rounded-[--radius-control] border border-[--line] bg-[--paper] text-[--muted] outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-[--ink] hover:text-[--ink] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+                className="flex size-9 items-center justify-center rounded-(--radius-control) border border-(--line) bg-(--paper) text-(--muted) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-(--ink) hover:text-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
                 aria-label="Copy reference ID"
               >
                 <FontAwesomeIcon
@@ -214,10 +214,10 @@ const PublicOrderTracking = () => {
                   <span
                     className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm transition-colors ${
                       isCurrent
-                        ? 'border-[--ink] bg-[--ink] text-[--paper]'
+                        ? 'border-(--ink) bg-(--ink) text-(--paper)'
                         : isCompleted || hasActivity
-                          ? 'border-[--ink] bg-[--paper] text-[--ink]'
-                          : 'border-dashed border-[--line-strong] bg-[--paper] text-[--muted]'
+                          ? 'border-(--ink) bg-(--paper) text-(--ink)'
+                          : 'border-dashed border-(--line-strong) bg-(--paper) text-(--muted)'
                     }`}
                   >
                     <FontAwesomeIcon
@@ -236,7 +236,7 @@ const PublicOrderTracking = () => {
                       </div>
                       <aside className="shrink-0 text-right">
                         {isCurrent ? (
-                          <span className="inline-flex h-6 items-center rounded-[--radius-pill] bg-[--ink] px-2.5 text-xs font-medium text-[--paper]">
+                          <span className="inline-flex h-6 items-center rounded-(--radius-pill) bg-(--ink) px-2.5 text-xs font-medium text-(--paper)">
                             Current
                           </span>
                         ) : null}
@@ -288,10 +288,10 @@ const PublicOrderTracking = () => {
                     <span
                       className={`relative z-10 flex h-10 w-10 items-center justify-center rounded-full border text-sm transition-colors ${
                         isCurrent
-                          ? 'border-[--ink] bg-[--ink] text-[--paper]'
+                          ? 'border-(--ink) bg-(--ink) text-(--paper)'
                           : isCompleted || hasActivity
-                            ? 'border-[--ink] bg-[--paper] text-[--ink]'
-                            : 'border-dashed border-[--line-strong] bg-[--paper] text-[--muted]'
+                            ? 'border-(--ink) bg-(--paper) text-(--ink)'
+                            : 'border-dashed border-(--line-strong) bg-(--paper) text-(--muted)'
                       }`}
                     >
                       <FontAwesomeIcon
@@ -309,7 +309,7 @@ const PublicOrderTracking = () => {
                       </p>
 
                       {isCurrent ? (
-                        <span className="mt-2 inline-flex h-6 items-center rounded-[--radius-pill] bg-[--ink] px-2.5 text-xs font-medium text-[--paper]">
+                        <span className="mt-2 inline-flex h-6 items-center rounded-(--radius-pill) bg-(--ink) px-2.5 text-xs font-medium text-(--paper)">
                           Current
                         </span>
                       ) : null}
@@ -365,7 +365,7 @@ const PublicOrderTracking = () => {
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[9px] uppercase tracking-[0.08em] text-[var(--muted)]">
+                  <p className="text-[9px] text-[var(--muted)]">
                     {item.label}
                   </p>
                   <p className="mt-1 break-all text-xs text-[var(--ink)]">
@@ -400,7 +400,7 @@ const PublicOrderTracking = () => {
               key={contact.title}
               className="py-1"
             >
-              <p className="text-[10px] uppercase tracking-[0.08em] text-[var(--muted)]">
+              <p className="text-[10px] text-[var(--muted)]">
                 {contact.title}
               </p>
               <div className="mt-3 space-y-2">

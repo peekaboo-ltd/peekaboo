@@ -25,13 +25,13 @@ const FinalCtaSection = ({
       variants={containerVariants}
     >
       <motion.header variants={itemVariants}>
-        <p className="text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">
+        <p className="text-xs font-medium text-(--muted)">
           Get started
         </p>
         <h2 className="mt-3 text-[28px] font-medium leading-[1.05] sm:text-[36px]">
           {title}
         </h2>
-        <p className="mx-auto mt-4 max-w-[46ch] text-base font-normal leading-[1.6] text-[--muted]">
+        <p className="mx-auto mt-4 max-w-[46ch] text-base font-normal leading-[1.6] text-(--muted)">
           {subtitle}
         </p>
 
@@ -39,7 +39,7 @@ const FinalCtaSection = ({
           type="button"
           primary
           onClick={onScrollToForm}
-          className="mt-6 rounded-[--radius-control] bg-[var(--ink)] px-6 font-normal text-[var(--paper)] hover:bg-[var(--surface-hover)]"
+          className="mt-6 rounded-(--radius-control) bg-[var(--ink)] px-6 font-normal text-[var(--paper)] hover:bg-[var(--surface-hover)]"
         >
           {buttonLabel}
           <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

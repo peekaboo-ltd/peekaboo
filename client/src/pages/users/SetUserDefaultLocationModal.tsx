@@ -55,8 +55,8 @@ const SetUserDefaultLocationModal = () => {
       <article className="space-y-6">
         <section className="space-y-4">
           <header>
-            <h4 className="text-lg font-medium text-[--ink]">Search Location</h4>
-            <p className="text-sm text-[--muted]">
+            <h4 className="text-lg font-medium text-(--ink)">Search Location</h4>
+            <p className="text-sm text-(--muted)">
               Enter an address or place name to use as your default pickup point
             </p>
           </header>
@@ -70,11 +70,11 @@ const SetUserDefaultLocationModal = () => {
         </section>
 
         {selectedLocation && (
-          <aside className="p-4 bg-[--surface] rounded-lg border">
-            <h5 className="text-sm font-medium text-[--ink] mb-2">
+          <aside className="p-4 bg-(--surface) rounded-lg border">
+            <h5 className="text-sm font-medium text-(--ink) mb-2">
               Selected Location:
             </h5>
-            <address className="text-sm text-[--ink] not-italic">
+            <address className="text-sm text-(--ink) not-italic">
               <strong>{selectedLocation.name}</strong>
               <br />
               {selectedLocation.formattedAddress}

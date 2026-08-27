@@ -27,7 +27,7 @@ const HeroTrustIndicators = ({
   ];
 
   return (
-    <p className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] font-normal text-[--muted]">
+    <p className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] font-normal text-(--muted)">
       {items.map((item, index) => (
         <span key={item} className="inline-flex items-center gap-x-2">
           {index > 0 ? <span aria-hidden="true">·</span> : null}

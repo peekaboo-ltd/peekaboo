@@ -55,36 +55,36 @@ const About = () => {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[--paper] text-[--ink]">
-      <section className="invert-surface section-rhythm">
+    <main className="min-h-screen bg-(--paper) text-(--ink)">
+      <section className="section-rhythm border-b border-(--line)">
         <div className="app-container">
-          <p className="text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">About Peekaboo</p>
-          <h1 className="mt-4 max-w-[18ch] text-[clamp(2.5rem,1.6rem+3.6vw,3.75rem)] font-medium leading-[1.06] tracking-[-0.03em]">
+          <p className="text-xs font-medium text-(--muted)">About Peekaboo</p>
+          <h1 className="mt-4 max-w-[18ch] text-[clamp(2.5rem,1.6rem+3.6vw,3.75rem)] font-medium leading-[1.06]">
             Kigali moves quickly. Delivery should too.
           </h1>
-          <p className="mt-6 max-w-[46ch] text-base leading-[1.6] text-[--muted]">
+          <p className="mt-6 max-w-[46ch] text-base leading-[1.6] text-(--muted)">
             We connect people and businesses with verified riders, clear pricing, and live progress from pickup to handoff.
           </p>
         </div>
       </section>
 
-      <section className="section-rhythm border-b border-[--line]">
+      <section className="section-rhythm border-b border-(--line)">
         <div className="app-container grid gap-12 lg:grid-cols-2">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">Our story</p>
-            <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15] tracking-[-0.02em]">
+            <p className="text-xs font-medium text-(--muted)">Our story</p>
+            <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15]">
               Built in Kigali, for Kigali.
             </h2>
-            <div className="mt-6 max-w-[68ch] space-y-4 text-base leading-[1.6] text-[--muted]">
+            <div className="mt-6 max-w-[68ch] space-y-4 text-base leading-[1.6] text-(--muted)">
               <p>Peekaboo started with a simple idea: city delivery should feel dependable, not uncertain.</p>
               <p>Today we help families, merchants, and growing teams move everyday orders with one accountable delivery partner.</p>
             </div>
           </div>
-          <ol className="border-l border-[--line] pl-8">
+          <ol className="border-l border-(--line) pl-8">
             {milestones.map((milestone) => (
               <li key={milestone.year} className="relative pb-8 last:pb-0">
-                <span className="absolute -left-[37px] top-1 size-4 rounded-[--radius-pill] bg-[--ink]" aria-hidden="true" />
-                <time className="text-xs font-medium text-[--muted]">{milestone.year}</time>
+                <span className="absolute -left-[37px] top-1 size-4 rounded-(--radius-pill) bg-(--ink)" aria-hidden="true" />
+                <time className="text-xs font-medium text-(--muted)">{milestone.year}</time>
                 <p className="mt-1 text-sm leading-[1.55]">{milestone.label}</p>
               </li>
             ))}
@@ -100,27 +100,27 @@ const About = () => {
             ['Businesses served', stats.businessPartners],
           ].map(([label, value]) => (
             <div key={label}>
-              <dt className="text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">{label}</dt>
-              <dd className="mt-2 text-5xl font-light leading-none tracking-[-0.03em] tabular-nums">{Number(value).toLocaleString()}</dd>
+              <dt className="text-xs font-medium text-(--muted)">{label}</dt>
+              <dd className="mt-2 text-5xl font-light leading-none tabular-nums">{Number(value).toLocaleString()}</dd>
             </div>
           ))}
         </dl>
       </section>
 
-      <section className="section-rhythm border-b border-[--line]">
+      <section className="section-rhythm border-b border-(--line)">
         <div className="app-container">
-          <p className="text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">Core values</p>
-          <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15] tracking-[-0.02em]">What we stand for.</h2>
+          <p className="text-xs font-medium text-(--muted)">Core values</p>
+          <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15]">What we stand for.</h2>
           <ul className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {coreValues.map((value) => {
               const Icon = value.icon;
               return (
-                <li key={value.title} className="rounded-[--radius-card] border border-[--line] p-6">
-                  <span className="flex size-10 items-center justify-center rounded-[--radius-control] border border-[--ink]">
+                <li key={value.title} className="rounded-(--radius-card) border border-(--line) p-6">
+                  <span className="flex size-10 items-center justify-center rounded-(--radius-control) border border-(--ink)">
                     <Icon className="size-4" aria-hidden="true" />
                   </span>
                   <h3 className="mt-6 text-lg font-medium">{value.title}</h3>
-                  <p className="mt-2 text-sm leading-[1.55] text-[--muted]">{value.description}</p>
+                  <p className="mt-2 text-sm leading-[1.55] text-(--muted)">{value.description}</p>
                 </li>
               );
             })}
@@ -131,8 +131,8 @@ const About = () => {
       <section className="section-rhythm">
         <div className="app-container flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.08em] text-[--muted]">Ready when you are</p>
-            <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15] tracking-[-0.02em]">Move something across Kigali.</h2>
+            <p className="text-xs font-medium text-(--muted)">Ready when you are</p>
+            <h2 className="mt-3 text-[clamp(1.75rem,1.3rem+1.8vw,2.25rem)] font-medium leading-[1.15]">Move something across Kigali.</h2>
           </div>
           <Button asChild size="lg" className="link-arrow">
             <Link to="/contact">

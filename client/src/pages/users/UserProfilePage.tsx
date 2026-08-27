@@ -85,19 +85,19 @@ const UserProfilePage = () => {
       label: 'Account Status',
       value: selectedUser?.status ?? '—',
       icon: faShieldHalved,
-      iconBg: 'bg-[--ink] text-[--ink]',
+      iconBg: 'bg-(--ink) text-(--ink)',
     },
     {
       label: 'Active Roles',
       value: roles.length ? roles.length.toString() : '—',
       icon: faIdBadge,
-      iconBg: 'bg-[--surface] text-[--muted]',
+      iconBg: 'bg-(--surface) text-(--muted)',
     },
     {
       label: 'Orders',
       value: selectedUser?.orders?.length?.toString() ?? '—',
       icon: faChartLine,
-      iconBg: 'bg-[--ink] text-[--ink]',
+      iconBg: 'bg-(--ink) text-(--ink)',
     },
   ];
 
@@ -110,7 +110,7 @@ const UserProfilePage = () => {
           description="Keep your personal details, roles, and contact information current."
           actions={
             <>
-              <span className="rounded-full border border-[--line] bg-[--paper] px-3 py-1 text-xs font-medium uppercase text-[--muted]">
+              <span className="rounded-full border border-(--line) bg-(--paper) px-3 py-1 text-xs font-medium text-(--muted)">
                 {selectedUser?.status ?? 'Status Unavailable'}
               </span>
               <Button
@@ -156,7 +156,7 @@ const UserProfilePage = () => {
           eyebrow="Personal Details"
           title="Profile Information"
           actions={
-            <span className="text-xs uppercase text-[--muted]">
+            <span className="text-xs text-(--muted)">
               Updated {formatDateLabel(selectedUser?.updatedAt)}
             </span>
           }
@@ -172,17 +172,17 @@ const UserProfilePage = () => {
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-lg border border-[--line] bg-[--surface] p-4"
+                className="rounded-lg border border-(--line) bg-(--surface) p-4"
               >
                 <header className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase text-[--muted]">
+                    <p className="text-xs text-(--muted)">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-[--ink]">
+                    <p className="mt-1 text-sm font-medium text-(--ink)">
                       {item.value}
                     </p>
                   </section>
@@ -190,17 +190,17 @@ const UserProfilePage = () => {
               </li>
             ))}
 
-            <li className="rounded-lg border border-[--line] bg-[--surface] p-4 sm:col-span-2">
+            <li className="rounded-lg border border-(--line) bg-(--surface) p-4 sm:col-span-2">
               <header className="flex items-center justify-between gap-3">
                 <section className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                     <FontAwesomeIcon icon={faLocationDot} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase text-[--muted]">
+                    <p className="text-xs text-(--muted)">
                       Default Pickup Location
                     </p>
-                    <p className="mt-1 text-sm font-medium text-[--ink]">
+                    <p className="mt-1 text-sm font-medium text-(--ink)">
                       {selectedUser?.defaultLocation
                         ? `${selectedUser.defaultLocation.latitude.toFixed(5)}, ${selectedUser.defaultLocation.longitude.toFixed(5)}`
                         : '—'}
@@ -213,7 +213,7 @@ const UserProfilePage = () => {
                     e.preventDefault();
                     dispatch(setUserDefaultLocationModal(true));
                   }}
-                  className="text-xs font-medium text-[--muted] hover:underline underline-offset-2 shrink-0"
+                  className="text-xs font-medium text-(--muted) hover:underline underline-offset-2 shrink-0"
                 >
                   {selectedUser?.defaultLocation ? 'Update' : 'Set Location'}
                 </Link>
@@ -228,26 +228,26 @@ const UserProfilePage = () => {
         >
           <section className="mt-6 flex flex-col gap-5">
             <section>
-              <p className="text-xs uppercase text-[--muted]">
+              <p className="text-xs text-(--muted)">
                 Assigned Roles
               </p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
-                      <span className="rounded-full border border-[--line] bg-[--surface] px-3 py-1 text-xs font-medium uppercase text-[--muted]">
+                      <span className="rounded-full border border-(--line) bg-(--surface) px-3 py-1 text-xs font-medium text-(--muted)">
                         {role}
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-[--muted]">No roles assigned.</li>
+                  <li className="text-sm text-(--muted)">No roles assigned.</li>
                 )}
               </ul>
             </section>
 
             <section>
-              <p className="text-xs uppercase text-[--muted]">
+              <p className="text-xs text-(--muted)">
                 Organizations
               </p>
               <ul className="mt-3 flex flex-col gap-2">
@@ -255,19 +255,19 @@ const UserProfilePage = () => {
                   organizations.map((org) => (
                     <li
                       key={org}
-                      className="flex items-center justify-between rounded-lg border border-[--line] bg-[--surface] px-4 py-3"
+                      className="flex items-center justify-between rounded-lg border border-(--line) bg-(--surface) px-4 py-3"
                     >
                       <section>
-                        <p className="text-sm font-medium text-[--ink]">{org}</p>
-                        <p className="text-xs text-[--muted]">Active membership</p>
+                        <p className="text-sm font-medium text-(--ink)">{org}</p>
+                        <p className="text-xs text-(--muted)">Active membership</p>
                       </section>
-                      <span className="rounded-full bg-[--surface] px-2.5 py-1 text-[11px] font-medium uppercase text-[--muted]">
+                      <span className="rounded-full bg-(--surface) px-2.5 py-1 text-[11px] font-medium text-(--muted)">
                         Active
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-[--muted]">No organization memberships.</li>
+                  <li className="text-sm text-(--muted)">No organization memberships.</li>
                 )}
               </ul>
             </section>

@@ -349,9 +349,9 @@ const UpdateUserProfileModal = () => {
       >
         <form onSubmit={onSubmit} className="w-full flex flex-col gap-4">
           <section className="flex flex-col items-start gap-3">
-            <span className="text-sm font-medium text-[--ink]">Profile photo</span>
+            <span className="text-sm font-medium text-(--ink)">Profile photo</span>
             <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20 rounded-full border-2 border-[--line]">
+              <Avatar className="h-20 w-20 rounded-full border-2 border-(--line)">
                 {pendingPhotoPreviewUrl ? (
                   <AvatarImage src={pendingPhotoPreviewUrl} alt="New profile" />
                 ) : !removePhotoRequested && selectedUser?.profilePhotoUrl ? (
@@ -360,7 +360,7 @@ const UpdateUserProfileModal = () => {
                     alt="Profile"
                   />
                 ) : null}
-                <AvatarFallback className="rounded-full bg-[--ink] text-lg text-[--ink]">
+                <AvatarFallback className="rounded-full bg-(--ink) text-lg text-(--ink)">
                   {selectedUser?.name?.[0]?.toUpperCase() ||
                     selectedUser?.email?.[0]?.toUpperCase() ||
                     selectedUser?.phoneNumber?.[0]?.toUpperCase() ||
@@ -379,14 +379,14 @@ const UpdateUserProfileModal = () => {
                 <Button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="bg-[--surface] text-[--ink]"
+                  className="bg-(--surface) text-(--ink)"
                 >
                   Change photo
                 </Button>
                 <Button
                   type="button"
                   onClick={openRemoveConfirm}
-                  className="bg-[--surface] text-[--ink]"
+                  className="bg-(--surface) text-(--ink)"
                   disabled={!selectedUser?.profilePhotoUrl && !pendingPhotoFile}
                 >
                   Remove photo
@@ -477,12 +477,12 @@ const UpdateUserProfileModal = () => {
             
           </fieldset>
 
-          <footer className="flex flex-wrap justify-between gap-3 pt-4 border-t border-[--line]">
+          <footer className="flex flex-wrap justify-between gap-3 pt-4 border-t border-(--line)">
 
           <Button
               type="button"
               onClick={() => setIsChangePasswordOpen(true)}
-              className=" paddind-top-10px bg-[--paper] text-[--ink]"
+              className="paddind-top-10px bg-(--paper) text-(--ink)"
             >
               Change Password
             </Button>
@@ -491,7 +491,7 @@ const UpdateUserProfileModal = () => {
               <Button
                 type="button"
                 onClick={closeModal}
-                className="bg-[--surface] text-[--ink]"
+                className="bg-(--surface) text-(--ink)"
               >
                 Cancel
               </Button>
@@ -520,7 +520,7 @@ const UpdateUserProfileModal = () => {
           <Button
             type="button"
             onClick={() => setRemoveConfirmOpen(false)}
-            className="bg-[--surface] text-[--ink]"
+            className="bg-(--surface) text-(--ink)"
           >
             Cancel
           </Button>
@@ -543,7 +543,7 @@ const UpdateUserProfileModal = () => {
       >
         <div className="flex flex-col gap-4">
           {imageSrcForCrop && (
-            <div className="flex justify-center overflow-hidden rounded-lg bg-[--surface]">
+            <div className="flex justify-center overflow-hidden rounded-lg bg-(--surface)">
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
@@ -568,7 +568,7 @@ const UpdateUserProfileModal = () => {
                 setImageSrcForCrop(null);
                 setCropModalOpen(false);
               }}
-              className="bg-[--surface] text-[--ink]"
+              className="bg-(--surface) text-(--ink)"
             >
               Cancel
             </Button>
@@ -622,7 +622,7 @@ const UpdateUserProfileModal = () => {
               )}
             />
 
-            <p className="text-xs text-[--muted] -mt-2">{passwordHelpText}</p>
+            <p className="text-xs text-(--muted) -mt-2">{passwordHelpText}</p>
 
             <Controller
               name="confirmPassword"
@@ -644,11 +644,11 @@ const UpdateUserProfileModal = () => {
             />
           </fieldset>
 
-          <footer className="flex flex-wrap justify-end gap-3 pt-4 border-t border-[--line]">
+          <footer className="flex flex-wrap justify-end gap-3 pt-4 border-t border-(--line)">
             <Button
               type="button"
               onClick={closeChangePasswordModal}
-              className="bg-[--surface] text-[--ink]"
+              className="bg-(--surface) text-(--ink)"
             >
               Cancel
             </Button>

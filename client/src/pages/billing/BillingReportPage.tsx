@@ -144,26 +144,26 @@ const BillingReportPage = () => {
           }
         >
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <label className="text-sm text-[--ink]">
+            <label className="text-sm text-(--ink)">
               Start date
               <input
                 type="date"
-                className="mt-1 h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                className="mt-1 h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
               />
             </label>
-            <label className="text-sm text-[--ink]">
+            <label className="text-sm text-(--ink)">
               End date
               <input
                 type="date"
-                className="mt-1 h-11 w-full rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                className="mt-1 h-11 w-full rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                 value={endDate}
                 onChange={(event) => setEndDate(event.target.value)}
               />
             </label>
           </div>
-          <div className="mt-4 rounded border border-[--line] bg-[--surface] p-4 text-sm text-[--ink]">
+          <div className="mt-4 rounded border border-(--line) bg-(--surface) p-4 text-sm text-(--ink)">
             <p className="font-medium">What the report includes</p>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               <li>Current billing breakdown details from the server for the active billing record.</li>
@@ -171,7 +171,7 @@ const BillingReportPage = () => {
               <li>Early-period billing totals that may still change until the billing cycle ends.</li>
             </ul>
           </div>
-          <p className="mt-3 text-sm text-[--muted]">
+          <p className="mt-3 text-sm text-(--muted)">
             Provided by Peekaboo. Any enquiry: +250 788 000 000 | info@peekaboo.co.rw
           </p>
         </InternalSectionCard>

@@ -63,7 +63,7 @@ const OrderAssignmentDetails = () => {
   if (isFetching && !orderAssignment) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-[--muted]">Loading assignment details…</p>
+        <p className="text-sm text-(--muted)">Loading assignment details…</p>
       </main>
     );
   }
@@ -71,7 +71,7 @@ const OrderAssignmentDetails = () => {
   if (!orderAssignment) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-[--muted]">Assignment not found.</p>
+        <p className="text-sm text-(--muted)">Assignment not found.</p>
         <menu className="w-full flex items-center gap-3">
           <Button type="button" onClick={(e) => { e.preventDefault(); navigate(-1); }}>
             Back
@@ -106,19 +106,19 @@ const OrderAssignmentDetails = () => {
       label: 'Assignment Status',
       value: orderAssignment?.status || '—',
       icon: faCircleCheck,
-      iconBg: 'bg-[--surface] text-[--muted]',
+      iconBg: 'bg-(--surface) text-(--muted)',
     },
     {
       label: 'Order Status',
       value: orderAssignment?.order?.status || '—',
       icon: faTruckFast,
-      iconBg: 'bg-[--ink] text-[--ink]',
+      iconBg: 'bg-(--ink) text-(--ink)',
     },
     {
       label: 'Last Updated',
       value: formatDateLabel(orderAssignment?.updatedAt),
       icon: faClockRotateLeft,
-      iconBg: 'bg-[--surface] text-[--muted]',
+      iconBg: 'bg-(--surface) text-(--muted)',
     },
   ];
 
@@ -157,7 +157,7 @@ const OrderAssignmentDetails = () => {
           eyebrow="Assignment Details"
           title="Core Information"
           actions={
-            <span className="text-xs uppercase text-[--muted]">
+            <span className="text-xs text-(--muted)">
               Created {formatDateLabel(orderAssignment.createdAt)}
             </span>
           }
@@ -172,17 +172,17 @@ const OrderAssignmentDetails = () => {
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-lg border border-[--line] bg-[--surface] p-4"
+                className="rounded-lg border border-(--line) bg-(--surface) p-4"
               >
                 <header className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase text-[--muted]">
+                    <p className="text-xs text-(--muted)">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-[--ink] break-all">
+                    <p className="mt-1 text-sm font-medium text-(--ink) break-all">
                       {item.value || '—'}
                     </p>
                   </section>
@@ -190,16 +190,16 @@ const OrderAssignmentDetails = () => {
               </li>
             ))}
 
-            <li className="rounded-lg border border-[--line] bg-[--surface] p-4 sm:col-span-2">
+            <li className="rounded-lg border border-(--line) bg-(--surface) p-4 sm:col-span-2">
               <header className="flex items-center gap-3">
-                <span className="h-9 w-9 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center">
+                <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                   <FontAwesomeIcon icon={faLocationDot} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase text-[--muted]">
+                  <p className="text-xs text-(--muted)">
                     Delivery Notes / Destination
                   </p>
-                  <p className="mt-1 text-sm font-medium text-[--ink]">
+                  <p className="mt-1 text-sm font-medium text-(--ink)">
                     {orderAssignment?.order?.notes || 'No destination notes available.'}
                   </p>
                 </section>
@@ -222,16 +222,16 @@ const OrderAssignmentDetails = () => {
             ].map((item) => (
               <article
                 key={item.label}
-                className="flex items-start gap-3 rounded-lg border border-[--line] bg-[--surface] px-4 py-3"
+                className="flex items-start gap-3 rounded-lg border border-(--line) bg-(--surface) px-4 py-3"
               >
-                <span className="mt-0.5 h-8 w-8 rounded-full border border-[--line] bg-[--paper] text-[--ink] flex items-center justify-center shrink-0">
+                <span className="mt-0.5 h-8 w-8 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center shrink-0">
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase text-[--muted]">
+                  <p className="text-xs text-(--muted)">
                     {item.label}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-[--ink] break-all">
+                  <p className="mt-1 text-sm font-medium text-(--ink) break-all">
                     {item.value || '—'}
                   </p>
                 </section>

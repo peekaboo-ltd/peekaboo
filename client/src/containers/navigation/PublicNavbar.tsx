@@ -33,7 +33,7 @@ const PublicNavbar = () => {
       <nav className="app-container flex h-16 items-center justify-between" aria-label="Primary navigation">
         <Link
           to="/"
-          className="flex h-12 shrink-0 items-center rounded-[--radius-control] px-2 outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+          className="flex h-12 shrink-0 items-center rounded-(--radius-control) px-2 outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
           aria-label="Peekaboo home"
         >
           <img
@@ -49,7 +49,7 @@ const PublicNavbar = () => {
               <Link
                 to={link}
                 aria-current={pathname === link ? 'page' : undefined}
-                className="inline-flex min-h-10 items-center rounded-[--radius-pill] px-3 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface] active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+                className="inline-flex min-h-10 items-center rounded-(--radius-pill) px-3 text-sm font-medium transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
               >
                 {capitalizeString(label)}
               </Link>
@@ -60,7 +60,7 @@ const PublicNavbar = () => {
         <div className="flex items-center gap-2">
           <div className="hidden items-center gap-2 lg:flex">
             <LanguageSelector />
-            <Button asChild size="sm" className="bg-[--ink] text-[--paper]">
+            <Button asChild size="sm" className="bg-(--ink) text-(--paper)">
               <Link to={NAVIGATION_LINKS.MY_ACCOUNT}>
                 {capitalizeString('MY_ACCOUNT')}
               </Link>
@@ -69,7 +69,7 @@ const PublicNavbar = () => {
           <button
             type="button"
             onClick={toggleMobileMenu}
-            className="relative z-50 flex size-11 items-center justify-center rounded-[--radius-control] outline-none transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface] active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] lg:hidden"
+            className="relative z-50 flex size-11 items-center justify-center rounded-(--radius-control) outline-none transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] lg:hidden"
             aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={isMobileMenuOpen}
           >
@@ -79,15 +79,15 @@ const PublicNavbar = () => {
       </nav>
 
       {isMobileMenuOpen ? (
-        <div className="fixed inset-x-0 bottom-0 top-16 z-40 bg-[--paper] text-[--ink] lg:hidden">
+        <div className="fixed inset-x-0 bottom-0 top-16 z-40 bg-(--paper) text-(--ink) lg:hidden">
           <nav className="flex h-full flex-col overflow-y-auto px-5 py-6" aria-label="Mobile navigation">
-            <ul className="border-t border-[--line]">
+            <ul className="border-t border-(--line)">
               {publicLinks.map(([label, link]) => (
-                <li key={label} className="border-b border-[--line]">
+                <li key={label} className="border-b border-(--line)">
                   <Link
                     to={link}
                     aria-current={pathname === link ? 'page' : undefined}
-                    className="flex min-h-16 items-center px-3 text-lg font-normal outline-none transition-[background-color,color] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-[--surface]"
+                    className="flex min-h-16 items-center px-3 text-lg font-normal outline-none transition-[background-color,color] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface)"
                   >
                     {capitalizeString(label)}
                   </Link>

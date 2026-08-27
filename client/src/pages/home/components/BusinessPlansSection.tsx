@@ -30,7 +30,7 @@ const BusinessPlansSection = ({
   const hasPlans = !isLoading && plans.length > 0;
 
   return (
-    <section id="business-plans" className="section-rhythm w-full border-t border-[--line] bg-[--paper]">
+    <section id="business-plans" className="section-rhythm w-full border-t border-(--line) bg-(--paper)">
       <motion.article
         className="app-container"
         initial="hidden"
@@ -39,7 +39,7 @@ const BusinessPlansSection = ({
         variants={containerVariants}
       >
         <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
-          <p className="text-[11px] font-normal uppercase text-muted-foreground">
+          <p className="text-[11px] font-normal text-muted-foreground">
             {badgeLabel}
           </p>
           <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
@@ -53,7 +53,7 @@ const BusinessPlansSection = ({
             {Array.from({ length: 3 }).map((_, index) => (
               <li
                 key={index}
-                className="h-[420px] animate-pulse rounded-[--radius-control] border border-border bg-[var(--surface)]"
+                className="h-[420px] animate-pulse rounded-(--radius-control) border border-border bg-[var(--surface)]"
               />
             ))}
           </ul>
@@ -68,9 +68,9 @@ const BusinessPlansSection = ({
                 variants={itemVariants}
               >
                 <article
-                  className={`group relative flex h-full flex-col rounded-[--radius-card] border p-6 transition-[background-color,color,border-color] duration-200 ${
+                  className={`group relative flex h-full flex-col rounded-(--radius-card) border p-6 transition-[background-color,color,border-color] duration-200 ${
                     plan.isPopular
-                      ? 'bg-[--paper]'
+                      ? 'bg-(--paper)'
                       : 'border-border bg-[var(--surface)]'
                   }`}
                 >
@@ -84,7 +84,7 @@ const BusinessPlansSection = ({
                       </p>
                     </hgroup>
                     {plan.isPopular ? (
-                      <span className="rounded-full bg-[var(--ink)] px-2.5 py-1 text-[11px] font-normal uppercase tracking-[0.04em] text-[var(--paper)]">
+                      <span className="rounded-full bg-[var(--ink)] px-2.5 py-1 text-[11px] font-normal text-[var(--paper)]">
                         {popularLabel}
                       </span>
                     ) : null}
@@ -94,7 +94,7 @@ const BusinessPlansSection = ({
                     <p className="text-[22px] font-medium text-foreground">
                       {plan.price}
                     </p>
-                    <p className="mt-1 text-[11px] font-normal uppercase text-muted-foreground">
+                    <p className="mt-1 text-[11px] font-normal text-muted-foreground">
                       {perMonthLabel}
                     </p>
                   </section>
@@ -117,9 +117,9 @@ const BusinessPlansSection = ({
                   <div className="mt-6 flex flex-col gap-2">
                     <Link
                       to="/contact"
-                      className={`group/link inline-flex items-center justify-center gap-2 rounded-[--radius-control] px-4 py-2.5 text-[13px] font-normal transition-[background-color,color,border-color,box-shadow] duration-200 ${
+                      className={`group/link inline-flex items-center justify-center gap-2 rounded-(--radius-control) px-4 py-2.5 text-[13px] font-normal transition-[background-color,color,border-color,box-shadow] duration-200 ${
                         plan.isPopular
-                          ? 'bg-[var(--ink)] text-[--paper] hover:bg-[var(--surface-hover)]'
+                          ? 'bg-[var(--ink)] text-(--paper) hover:bg-[var(--surface-hover)]'
                           : 'bg-[var(--ink)] text-[var(--paper)] hover:bg-[var(--surface-hover)]'
                       }`}
                     >
@@ -130,7 +130,7 @@ const BusinessPlansSection = ({
                     {plan.detailsTo ? (
                       <Link
                         to={plan.detailsTo}
-                        className="inline-flex items-center justify-center rounded-[--radius-control] border border-border bg-[var(--surface)] px-4 py-2 text-[12px] font-normal text-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:bg-[var(--surface)] hover:border-border"
+                        className="inline-flex items-center justify-center rounded-(--radius-control) border border-border bg-[var(--surface)] px-4 py-2 text-[12px] font-normal text-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:bg-[var(--surface)] hover:border-border"
                       >
                         {detailsCtaLabel}
                       </Link>
@@ -141,7 +141,7 @@ const BusinessPlansSection = ({
             ))}
           </motion.ul>
         ) : (
-          <p className="rounded-[--radius-control] border border-border bg-[var(--surface)] px-5 py-8 text-[13px] font-normal text-muted-foreground">
+          <p className="rounded-(--radius-control) border border-border bg-[var(--surface)] px-5 py-8 text-[13px] font-normal text-muted-foreground">
             Business plans are being updated. Contact our team for current pricing.
           </p>
         )}

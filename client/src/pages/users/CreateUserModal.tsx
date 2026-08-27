@@ -108,7 +108,7 @@ const CreateUserModal = () => {
             rules={{ required: 'Name is required' }}
             render={({ field }) => (
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-[--ink]">
+                <span className="text-sm font-medium text-(--ink)">
                   Name *
                 </span>
                 <Input
@@ -148,7 +148,7 @@ const CreateUserModal = () => {
             control={control}
             render={({ field }) => (
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-[--ink]">Email</span>
+                <span className="text-sm font-medium text-(--ink)">Email</span>
                 <Input
                   {...field}
                   type="email"
@@ -160,7 +160,7 @@ const CreateUserModal = () => {
         </fieldset>
 
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-medium text-[--ink] mb-2">
+          <legend className="text-sm font-medium text-(--ink) mb-2">
             Assign Roles
           </legend>
           <menu className="flex flex-wrap gap-2">
@@ -171,8 +171,8 @@ const CreateUserModal = () => {
                   onClick={() => handleRoleToggle(role)}
                   className={`px-3 py-1.5 rounded text-sm font-medium transition-colors cursor-pointer ${
                     selectedRoles.includes(role)
-                      ? 'bg-[--ink] text-[--paper]'
-                      : 'bg-[--surface] text-[--ink] hover:bg-[--surface]'
+                      ? 'bg-(--ink) text-(--paper)'
+                      : 'bg-(--surface) text-(--ink) hover:bg-(--surface)'
                   }`}
                 >
                   {role}
@@ -181,7 +181,7 @@ const CreateUserModal = () => {
             ))}
           </menu>
           {selectedRoles.length === 0 && (
-            <p className="text-xs text-[--muted]">
+            <p className="text-xs text-(--muted)">
               No roles selected. Customer role will be assigned by default.
             </p>
           )}
@@ -191,7 +191,7 @@ const CreateUserModal = () => {
           <Button
             type="button"
             onClick={closeModal}
-            className="bg-[--surface] text-[--ink]"
+            className="bg-(--surface) text-(--ink)"
           >
             Cancel
           </Button>

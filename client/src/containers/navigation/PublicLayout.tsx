@@ -15,7 +15,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
   const isAuthPage = pathname.startsWith('/auth/');
 
   return (
-    <div className="flex min-h-screen flex-col bg-[--paper] text-[--ink]">
+    <div className="flex min-h-screen flex-col bg-(--paper) text-(--ink)">
       {!isAuthPage &&
         (isAuthenticated ? <AuthenticatedNavbar /> : <PublicNavbar />)}
       <div className="flex-1">{children || <Outlet />}</div>

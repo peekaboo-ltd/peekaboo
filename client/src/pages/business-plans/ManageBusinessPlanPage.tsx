@@ -232,7 +232,7 @@ const ManageBusinessPlanPage = () => {
   if (isFetchingPlan && !plan) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-[--muted]">Loading business plan…</p>
+        <p className="text-sm text-(--muted)">Loading business plan…</p>
       </main>
     );
   }
@@ -240,7 +240,7 @@ const ManageBusinessPlanPage = () => {
   if (!plan && !isFetchingPlan) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-[--muted]">Business plan not found.</p>
+        <p className="text-sm text-(--muted)">Business plan not found.</p>
         <Button type="button" onClick={() => navigate(-1)}>Back</Button>
       </main>
     );
@@ -280,10 +280,10 @@ const ManageBusinessPlanPage = () => {
         variants={itemVariants}
       >
         {/* Left: Edit form */}
-        <article className="lg:col-span-2 border border-[--line] bg-[--paper] p-6">
+        <article className="lg:col-span-2 border border-(--line) bg-(--paper) p-6">
           <header className="mb-6">
-            <p className="text-xs uppercase text-[--muted]">Plan Details</p>
-            <h2 className="mt-2 text-lg font-medium text-[--ink]">Edit Information</h2>
+            <p className="text-xs text-(--muted)">Plan Details</p>
+            <h2 className="mt-2 text-lg font-medium text-(--ink)">Edit Information</h2>
           </header>
 
           <form onSubmit={onSubmit} className="flex flex-col gap-5">
@@ -368,14 +368,14 @@ const ManageBusinessPlanPage = () => {
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-[--ink] uppercase ">
+                  <label className="text-xs font-medium text-(--ink)">
                     Description
                   </label>
                   <textarea
                     {...field}
                     rows={3}
                     placeholder="Brief description of this plan..."
-                    className="rounded-lg border border-[--line] bg-[--paper] px-3 py-2 text-sm text-[--ink] resize-none focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                    className="rounded-lg border border-(--line) bg-(--paper) px-3 py-2 text-sm text-(--ink) resize-none focus:outline-none focus:ring-2 focus:ring-(--ink)"
                   />
                 </div>
               )}
@@ -384,13 +384,13 @@ const ManageBusinessPlanPage = () => {
             {/* Features */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="text-xs font-medium text-[--ink] uppercase ">
+                <label className="text-xs font-medium text-(--ink)">
                   Features
                 </label>
                 <button
                   type="button"
                   onClick={() => appendFeature({ value: '' })}
-                  className="text-xs text-[--ink] hover:text-[--ink] flex items-center gap-1"
+                  className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
                 >
                   <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
                   Add Feature
@@ -398,7 +398,7 @@ const ManageBusinessPlanPage = () => {
               </div>
               <div className="flex flex-col gap-2">
                 {featureFields.length === 0 && (
-                  <p className="text-xs text-[--muted] italic">No features added.</p>
+                  <p className="text-xs text-(--muted) italic">No features added.</p>
                 )}
                 {featureFields.map((field, index) => (
                   <div key={field.id} className="flex items-center gap-2">
@@ -409,14 +409,14 @@ const ManageBusinessPlanPage = () => {
                         <input
                           {...inputField}
                           placeholder={`Feature ${index + 1}...`}
-                          className="h-11 flex-1 rounded-[--radius-control] border-0 bg-[--surface] px-3 text-sm text-[--ink] outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
+                          className="h-11 flex-1 rounded-(--radius-control) border-0 bg-(--surface) px-3 text-sm text-(--ink) outline-none focus:shadow-[var(--ink)_0_0_0_2px_inset]"
                         />
                       )}
                     />
                     <button
                       type="button"
                       onClick={() => removeFeature(index)}
-                      className="p-2 text-[--muted] hover:text-[--ink] transition-colors"
+                      className="p-2 text-(--muted) hover:text-(--ink) transition-colors"
                     >
                       <FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5" />
                     </button>
@@ -435,11 +435,11 @@ const ManageBusinessPlanPage = () => {
                     type="checkbox"
                     checked={field.value}
                     onChange={(e) => field.onChange(e.target.checked)}
-                    className="size-5 rounded-[--radius-control] border border-[--ink] accent-[--ink]"
+                    className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                   />
-                  <span className="text-sm text-[--ink]">
+                  <span className="text-sm text-(--ink)">
                     Custom pricing
-                    <span className="ml-1 text-xs text-[--muted]">
+                    <span className="ml-1 text-xs text-(--muted)">
                       (negotiated pricing — hides tier configuration)
                     </span>
                   </span>
@@ -451,7 +451,7 @@ const ManageBusinessPlanPage = () => {
             {!isCustomPricing && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-xs font-medium text-[--ink] uppercase ">
+                  <label className="text-xs font-medium text-(--ink)">
                     Pricing Tiers
                   </label>
                   <button
@@ -466,7 +466,7 @@ const ManageBusinessPlanPage = () => {
                         isCustom: false,
                       })
                     }
-                    className="text-xs text-[--ink] hover:text-[--ink] flex items-center gap-1"
+                    className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
                   >
                     <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
                     Add Tier
@@ -474,7 +474,7 @@ const ManageBusinessPlanPage = () => {
                 </div>
 
                 {tierFields.length === 0 && (
-                  <p className="text-xs text-[--muted] italic">
+                  <p className="text-xs text-(--muted) italic">
                     No pricing tiers defined.
                   </p>
                 )}
@@ -483,16 +483,16 @@ const ManageBusinessPlanPage = () => {
                   {tierFields.map((field, index) => (
                     <div
                       key={field.id}
-                      className="border border-[--line] rounded-lg p-4 bg-[--surface]"
+                      className="border border-(--line) rounded-lg p-4 bg-(--surface)"
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium text-[--muted] uppercase">
+                        <span className="text-xs font-medium text-(--muted)">
                           Tier {index + 1}
                         </span>
                         <button
                           type="button"
                           onClick={() => removeTier(index)}
-                          className="p-1 text-[--muted] hover:text-[--ink] transition-colors"
+                          className="p-1 text-(--muted) hover:text-(--ink) transition-colors"
                         >
                           <FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5" />
                         </button>
@@ -590,9 +590,9 @@ const ManageBusinessPlanPage = () => {
                               type="checkbox"
                               checked={checkboxField.value || false}
                               onChange={(e) => checkboxField.onChange(e.target.checked)}
-                              className="size-5 rounded-[--radius-control] border border-[--ink] accent-[--ink]"
+                              className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                             />
-                            <span className="text-xs text-[--muted]">
+                            <span className="text-xs text-(--muted)">
                               Custom / contact us tier
                             </span>
                           </label>
@@ -650,11 +650,11 @@ const ManageBusinessPlanPage = () => {
                     type="checkbox"
                     checked={field.value}
                     onChange={(e) => field.onChange(e.target.checked)}
-                    className="size-5 rounded-[--radius-control] border border-[--ink] accent-[--ink]"
+                    className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                   />
-                  <span className="text-sm text-[--ink]">
+                  <span className="text-sm text-(--ink)">
                     Set as default plan
-                    <span className="ml-1 text-xs text-[--muted]">
+                    <span className="ml-1 text-xs text-(--muted)">
                       (assigned to organizations with no plan)
                     </span>
                   </span>
@@ -672,31 +672,31 @@ const ManageBusinessPlanPage = () => {
 
         {/* Right: Organizations on this plan */}
         <aside className="flex flex-col gap-6">
-          <article className="border border-[--line] bg-[--paper] p-6">
+          <article className="border border-(--line) bg-(--paper) p-6">
             <header className="mb-4">
-              <p className="text-xs uppercase text-[--muted]">Assigned To</p>
-              <h2 className="mt-2 text-lg font-medium text-[--ink]">
+              <p className="text-xs text-(--muted)">Assigned To</p>
+              <h2 className="mt-2 text-lg font-medium text-(--ink)">
                 Organizations
-                <span className="ml-2 text-sm font-normal text-[--muted]">
+                <span className="ml-2 text-sm font-normal text-(--muted)">
                   ({orgCount})
                 </span>
               </h2>
             </header>
 
             {isFetchingOrgs ? (
-              <p className="text-sm text-[--muted]">Loading organizations…</p>
+              <p className="text-sm text-(--muted)">Loading organizations…</p>
             ) : orgsOnPlan.length === 0 ? (
-              <p className="text-sm text-[--muted]">No organizations on this plan.</p>
+              <p className="text-sm text-(--muted)">No organizations on this plan.</p>
             ) : (
               <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
                 {orgsOnPlan.map((org) => (
                   <li
                     key={org.id}
-                    className="flex items-center justify-between rounded-lg border border-[--line] bg-[--surface] px-3 py-2"
+                    className="flex items-center justify-between rounded-lg border border-(--line) bg-(--surface) px-3 py-2"
                   >
                     <section>
-                      <p className="text-sm font-medium text-[--ink]">{org.name}</p>
-                      <p className="text-xs text-[--muted]">{org.email || '—'}</p>
+                      <p className="text-sm font-medium text-(--ink)">{org.name}</p>
+                      <p className="text-xs text-(--muted)">{org.email || '—'}</p>
                     </section>
                     <StatusBadge status={org.status} />
                   </li>
@@ -706,12 +706,12 @@ const ManageBusinessPlanPage = () => {
           </article>
 
           {/* Danger zone */}
-          <article className="border border-[--line] bg-[--surface] p-6">
+          <article className="border border-(--line) bg-(--surface) p-6">
             <header className="mb-4">
-              <p className="text-xs uppercase text-[--ink]">Danger Zone</p>
-              <h2 className="mt-2 text-lg font-medium text-[--ink]">Delete Plan</h2>
+              <p className="text-xs text-(--ink)">Danger Zone</p>
+              <h2 className="mt-2 text-lg font-medium text-(--ink)">Delete Plan</h2>
             </header>
-            <p className="text-xs text-[--ink] mb-4">
+            <p className="text-xs text-(--ink) mb-4">
               {orgCount > 0
                 ? `This plan has ${orgCount} organization(s). Reassign them before deleting.`
                 : 'Moves this plan to deactivated plans. You can restore it there or permanently delete it.'}

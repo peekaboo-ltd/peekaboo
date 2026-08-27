@@ -78,7 +78,7 @@ const VehiclesStatusChart = ({
     if (active && payload && payload.length) {
       const item = payload[0].payload;
       return (
-        <div className="rounded-[--radius-control] border border-[--line] bg-[--paper] px-3 py-2 shadow-[var(--shadow-popover)]">
+        <div className="rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 py-2 shadow-[var(--shadow-popover)]">
           <p className="text-sm font-medium text-foreground">
             {item.translatedName}
           </p>
@@ -127,7 +127,7 @@ const VehiclesStatusChart = ({
   };
 
   return (
-    <Card className="h-full border-[--line] bg-[--paper]">
+    <Card className="h-full border-(--line) bg-(--paper)">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-medium">
           {title || t('dashboard.vehiclesOnRoad')}

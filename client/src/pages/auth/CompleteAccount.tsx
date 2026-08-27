@@ -117,7 +117,7 @@ const CompleteAccount = () => {
       <AuthPageShell>
         <AuthCard title="Checking your account" subtitle="We are preparing your setup.">
           <div className="flex justify-center py-4">
-            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-[--ink]" />
+            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-(--ink)" />
           </div>
         </AuthCard>
       </AuthPageShell>
@@ -226,7 +226,7 @@ const CompleteAccount = () => {
         <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
           <Link
             to="/auth/login"
-            className="font-normal text-[--ink] hover:text-[--muted] underline underline-offset-2"
+            className="font-normal text-(--ink) hover:text-(--muted) underline underline-offset-2"
           >
             Sign in with a different account
           </Link>

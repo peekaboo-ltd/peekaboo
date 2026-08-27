@@ -162,20 +162,20 @@ const ManageOrganizationPage = () => {
       label: 'Status',
       value: organization?.status ?? '—',
       icon: faShieldHalved,
-      iconBg: 'bg-[--ink] text-[--ink]',
+      iconBg: 'bg-(--ink) text-(--ink)',
     },
     {
       label: 'Business Plan',
       value: currentBusinessPlan?.name ?? 'No plan assigned',
       icon: faCreditCard,
-      iconBg: 'bg-[--surface] text-[--ink]',
+      iconBg: 'bg-(--surface) text-(--ink)',
     },
   ];
 
   if (organizationIsFetching && !organization) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-[--muted]">Loading organization…</p>
+        <p className="text-sm text-(--muted)">Loading organization…</p>
       </main>
     );
   }
@@ -183,7 +183,7 @@ const ManageOrganizationPage = () => {
   if (!organization && !organizationIsFetching) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-[--muted]">Organization not found.</p>
+        <p className="text-sm text-(--muted)">Organization not found.</p>
         <Button type="button" onClick={() => navigate(-1)}>Back</Button>
       </main>
     );
@@ -225,10 +225,10 @@ const ManageOrganizationPage = () => {
         variants={itemVariants}
       >
         {/* Left: Edit form */}
-        <article className="lg:col-span-2 border border-[--line] bg-[--paper] p-6">
+        <article className="lg:col-span-2 border border-(--line) bg-(--paper) p-6">
           <header className="mb-6">
-            <p className="text-xs uppercase text-[--muted]">Organization Details</p>
-            <h2 className="mt-2 text-lg font-medium text-[--ink]">Edit Information</h2>
+            <p className="text-xs text-(--muted)">Organization Details</p>
+            <h2 className="mt-2 text-lg font-medium text-(--ink)">Edit Information</h2>
           </header>
 
           <form onSubmit={onSubmitOrgInfo} className="flex flex-col gap-5">
@@ -352,14 +352,14 @@ const ManageOrganizationPage = () => {
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-[--ink] uppercase ">
+                  <label className="text-xs font-medium text-(--ink)">
                     Description
                   </label>
                   <textarea
                     {...field}
                     rows={3}
                     placeholder="Brief description of the organization..."
-                    className="rounded-lg border border-[--line] bg-[--paper] px-3 py-2 text-sm text-[--ink] resize-none focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                    className="rounded-lg border border-(--line) bg-(--paper) px-3 py-2 text-sm text-(--ink) resize-none focus:outline-none focus:ring-2 focus:ring-(--ink)"
                   />
                 </div>
               )}
@@ -376,19 +376,19 @@ const ManageOrganizationPage = () => {
         {/* Right: Plan + Members */}
         <aside className="flex flex-col gap-6">
           {/* Business Plan */}
-          <article className="border border-[--line] bg-[--paper] p-6">
+          <article className="border border-(--line) bg-(--paper) p-6">
             <header className="mb-4">
-              <p className="text-xs uppercase text-[--muted]">Billing</p>
-              <h2 className="mt-2 text-lg font-medium text-[--ink]">Business Plan</h2>
+              <p className="text-xs text-(--muted)">Billing</p>
+              <h2 className="mt-2 text-lg font-medium text-(--ink)">Business Plan</h2>
             </header>
 
             {currentBusinessPlan && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg border border-[--line] bg-[--surface] px-4 py-3">
-                <FontAwesomeIcon icon={faTag} className="text-[--ink]" />
+              <div className="mb-4 flex items-center gap-2 rounded-lg border border-(--line) bg-(--surface) px-4 py-3">
+                <FontAwesomeIcon icon={faTag} className="text-(--ink)" />
                 <section>
-                  <p className="text-xs text-[--muted] uppercase ">Current Plan</p>
-                  <p className="text-sm font-medium text-[--ink]">{currentBusinessPlan.name}</p>
-                  <p className="text-xs text-[--muted]">
+                  <p className="text-xs text-(--muted)">Current Plan</p>
+                  <p className="text-sm font-medium text-(--ink)">{currentBusinessPlan.name}</p>
+                  <p className="text-xs text-(--muted)">
                     {currentBusinessPlan.isCustomPricing
                       ? 'Custom pricing'
                       : currentBusinessPlan.pricePerOrder != null

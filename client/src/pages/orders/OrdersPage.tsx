@@ -120,10 +120,10 @@ const OrdersPage = () => {
       <header className="mb-5 flex w-full flex-col gap-5 border-b border-[var(--line)] pb-5">
         <section className="flex flex-wrap items-start justify-between gap-4">
           <article>
-            <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--muted)]">
+            <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium text-[var(--muted)]">
               Delivery operations
             </p>
-            <h1 className="mt-1 text-2xl font-medium tracking-[-0.03em] text-[var(--ink)]">
+            <h1 className="mt-1 text-2xl font-medium text-[var(--ink)]">
               Orders
             </h1>
             <p className="mt-1 text-sm text-[var(--muted)]">
@@ -157,7 +157,7 @@ const OrdersPage = () => {
           </nav>
         </section>
 
-        <fieldset className="grid w-full grid-cols-4 gap-4 rounded-[var(--radius)] border border-[var(--line)] bg-[--paper] p-3 max-md:grid-cols-3 max-sm:grid-cols-2">
+        <fieldset className="grid w-full grid-cols-4 gap-4 rounded-[var(--radius)] border border-[var(--line)] bg-(--paper) p-3 max-md:grid-cols-3 max-sm:grid-cols-2">
           {statusFilter}
         </fieldset>
       </header>

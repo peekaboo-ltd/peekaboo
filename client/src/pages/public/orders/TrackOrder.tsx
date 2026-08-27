@@ -100,14 +100,14 @@ const TrackOrder = () => {
                 setErrorMessage('');
               }}
               placeholder={t('trackOrder.orderIdPlaceholder')}
-              className="h-14 rounded-[--radius-control] border-0 bg-[--surface] pl-10 pr-4 uppercase tabular-nums"
+              className="h-14 rounded-(--radius-control) border-0 bg-(--surface) pl-10 pr-4 tabular-nums"
             />
           </div>
           <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
             {t('trackOrder.hint')}
           </p>
           {errorMessage ? (
-            <p className="mt-3 rounded-[--radius-control] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)]">
+            <p className="mt-3 rounded-(--radius-control) bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)]">
               {errorMessage}
             </p>
           ) : null}

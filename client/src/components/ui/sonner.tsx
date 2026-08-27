@@ -32,7 +32,7 @@ const Toaster = ({ className, style, toastOptions, ...props }: ToasterProps) => 
       toastOptions={{
         ...toastOptions,
         classNames: {
-          toast: "!border-[--line] !shadow-[var(--shadow-menu)]",
+          toast: "!border-(--line) !shadow-[var(--shadow-menu)]",
           ...toastOptions?.classNames,
         },
       }}

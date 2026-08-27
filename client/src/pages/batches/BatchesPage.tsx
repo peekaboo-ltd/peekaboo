@@ -90,7 +90,7 @@ const BatchesPage = () => {
       >
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-medium text-[--ink]">Batches</h1>
+            <h1 className="text-2xl font-medium text-(--ink)">Batches</h1>
             <p className="text-sm text-muted-foreground">
               Manage imports, review draft records, and track batch progress.
             </p>
@@ -122,17 +122,17 @@ const BatchesPage = () => {
           ].map((card) => (
             <article
               key={card.label}
-              className="bg-[--paper] border border-[--line] rounded-xl p-4 flex items-center justify-between"
+              className="bg-(--paper) border border-(--line) rounded-xl p-4 flex items-center justify-between"
             >
               <div>
-                <p className="text-xs uppercase text-[--muted]">
+                <p className="text-xs text-(--muted)">
                   {card.label}
                 </p>
-                <p className="text-lg font-medium text-[--ink] mt-1">
+                <p className="text-lg font-medium text-(--ink) mt-1">
                   {card.value}
                 </p>
               </div>
-              <span className="w-10 h-10 rounded-lg bg-[--ink] flex items-center justify-center text-[--ink]">
+              <span className="w-10 h-10 rounded-lg bg-(--ink) flex items-center justify-center text-(--ink)">
                 <FontAwesomeIcon icon={card.icon} />
               </span>
             </article>
@@ -145,7 +145,7 @@ const BatchesPage = () => {
             value={referenceFilter}
             onChange={(e) => setReferenceFilter(e.target.value)}
             placeholder="Search by batch reference"
-            className="bg-[--paper]"
+            className="bg-(--paper)"
           />
         </fieldset>
       </motion.header>

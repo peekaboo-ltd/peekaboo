@@ -1,16 +1,21 @@
 .PhoneInput.peekaboo-tel-input {
   display: flex;
   width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   overflow: hidden;
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--surface);
-  transition: background-color var(--dur-state) var(--ease-flat), box-shadow var(--dur-state) var(--ease-flat);
+  background: var(--paper);
+  transition: border-color var(--dur-state) var(--ease-flat), box-shadow var(--dur-state) var(--ease-flat);
+}
+
+.peekaboo-tel-input:hover {
+  border-color: var(--line-strong);
 }
 
 .peekaboo-tel-input:focus-within {
-  box-shadow: inset 0 0 0 2px var(--ink);
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
 
 .peekaboo-tel-country {
@@ -22,13 +27,13 @@
   cursor: pointer;
   border-right: 1px solid var(--line);
   border-radius: 0;
-  background: var(--muted);
+  background: var(--surface);
   padding: 0 12px;
-  color: var(--ink);
-  font-size: 12px !important;
+  color: var(--muted);
+  font-size: 13px !important;
   font-weight: 400;
   opacity: 1;
-  -webkit-text-fill-color: var(--ink);
+  -webkit-text-fill-color: var(--muted);
 }
 
 .peekaboo-tel-number {
@@ -36,9 +41,9 @@
   flex: 1;
   border: 0;
   background: transparent;
-  padding: 7px 16px;
+  padding: 7px 14px;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 400;
   outline: none;
 }
@@ -49,16 +54,14 @@
 
 .peekaboo-tel-number::placeholder {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 400;
 }
 
-.peekaboo-tel-input--invalid {
-  box-shadow: inset 0 0 0 2px var(--ink);
-}
-
+.peekaboo-tel-input--invalid,
 .peekaboo-tel-input--invalid:focus-within {
-  box-shadow: inset 0 0 0 2px var(--ink);
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
 
 .peekaboo-tel-input--disabled {

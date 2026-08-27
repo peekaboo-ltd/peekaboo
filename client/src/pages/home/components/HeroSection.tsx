@@ -1,5 +1,6 @@
 import type { RefObject } from 'react';
 import { useState } from 'react';
+import { MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { useCreateOrder, useCreatePublicOrder } from '@/hooks/orders/orders.hooks';
@@ -13,6 +14,7 @@ import HeroHeadline from './HeroHeadline';
 import HeroTrustIndicators from './HeroTrustIndicators';
 import HeroBusinessCta from './HeroBusinessCta';
 import HeroForm from './HeroForm';
+import HeroRouteCard from './HeroRouteCard';
 
 interface HeroSectionProps {
   formRef: RefObject<HTMLFormElement | null>;
@@ -67,9 +69,9 @@ const HeroSection = ({
   });
 
   return (
-    <section className="w-full bg-[--paper] text-[--ink]">
-      <div className="app-container pb-24 pt-[72px]">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
+    <section className="w-full bg-(--paper) text-(--ink)">
+      <div className="app-container pb-14 pt-10 lg:pb-20 lg:pt-14">
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-16">
           <motion.div
             className="flex flex-col items-start gap-6"
             variants={entranceVariants}
@@ -83,12 +85,14 @@ const HeroSection = ({
               businessLabel={heroCopy.businessTabLabel}
             />
 
-            <p className="text-sm text-[--muted]">
-              Kigali, RW <span aria-hidden="true">·</span>{' '}
+            <p className="flex items-center gap-1.5 text-sm text-(--muted)">
+              <MapPin className="size-4 shrink-0" aria-hidden="true" />
+              Kigali, RW
+              <span aria-hidden="true">·</span>
               <button
                 type="button"
                 onClick={onContactClick}
-                className="link-sweep text-[--ink] outline-none"
+                className="link-sweep text-(--ink) outline-none"
               >
                 Change city
               </button>
@@ -137,16 +141,9 @@ const HeroSection = ({
             />
           </motion.div>
 
-          <figure className="relative aspect-[4/3] w-full overflow-hidden rounded-[--radius-card] bg-[--surface] max-sm:hidden">
-            <img
-              src="/peekaboo.jpg"
-              alt="Peekaboo delivery across Kigali"
-              className="size-full object-cover"
-            />
-            <figcaption className="absolute right-4 bottom-4 rounded-[--radius-pill] bg-[--ink] px-4 py-2 text-sm font-medium text-[--paper]">
-              Kigali-wide delivery
-            </figcaption>
-          </figure>
+          <div className="max-lg:hidden">
+            <HeroRouteCard />
+          </div>
         </div>
       </div>
     </section>
