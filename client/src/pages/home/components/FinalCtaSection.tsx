@@ -6,6 +6,7 @@ interface FinalCtaSectionProps {
   title: string;
   subtitle: string;
   buttonLabel: string;
+  onScrollToForm?: () => void;
 }
 
 const FinalCtaSection = ({
