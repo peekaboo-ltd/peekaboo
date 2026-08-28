@@ -13,6 +13,7 @@ import PhoneInput, {
   type Value,
 } from 'react-phone-number-input/max';
 import { cn } from '@/lib/utils';
+import { FieldShell } from './Field';
 import {
   RWANDA_COUNTRY,
   SUPPORTED_PHONE_COUNTRY,
@@ -79,6 +80,8 @@ export interface TelInputProps {
   className?: string;
   labelClassName?: string;
   errorMessage?: string;
+  /** Helper text under the control. An error message replaces it. */
+  description?: ReactNode;
   onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
@@ -99,6 +102,7 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
       className,
       labelClassName,
       errorMessage,
+      description,
       onBlur,
       onKeyDown,
     },
@@ -130,17 +134,15 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
     };
 
     return (
-      <div className={cn('flex w-full flex-col gap-1.5', labelClassName)}>
-        {label ? (
-          <label
-            htmlFor={inputId}
-            className="type-label flex items-center gap-1.5"
-          >
-            {label}
-            {required ? <span className="text-(--ink)">*</span> : null}
-          </label>
-        ) : null}
-
+      <FieldShell
+        label={label}
+        required={required}
+        description={description}
+        errorMessage={resolvedError}
+        htmlFor={inputId}
+        messageId={errorId}
+        className={labelClassName}
+      >
         <PhoneInput
           // The package forwards this ref to its input at runtime, but its
           // country-select TypeScript declaration still describes a class ref.
@@ -166,7 +168,7 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
           required={required}
           autoComplete={autoComplete}
           aria-invalid={Boolean(resolvedError)}
-          aria-describedby={resolvedError ? errorId : undefined}
+          aria-describedby={resolvedError || description ? errorId : undefined}
           className={cn(
             'peekaboo-tel-input',
             resolvedError && 'peekaboo-tel-input--invalid',
@@ -175,18 +177,7 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
             className,
           )}
         />
-
-        {resolvedError ? (
-          <span
-            id={errorId}
-            role="status"
-            aria-live="polite"
-            className="text-[0.8125rem] text-(--ink)"
-          >
-            {resolvedError}
-          </span>
-        ) : null}
-      </div>
+      </FieldShell>
     );
   },
 );

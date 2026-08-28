@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
@@ -11,6 +11,8 @@ import { useLazyCheckAccountQuery } from '@/api/queries/auth.queries';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
   AuthCard,
+  AuthFooterNote,
+  AuthLink,
   AuthPageShell,
   authInputClassName,
   authPrimaryButtonClassName,
@@ -223,14 +225,9 @@ const CompleteAccount = () => {
           </form>
         )}
 
-        <div className="mt-6 text-center text-sm">
-          <Link
-            to="/auth/login"
-            className="link-sweep text-(--ink)"
-          >
-            Sign in with a different account
-          </Link>
-        </div>
+        <AuthFooterNote>
+          <AuthLink to="/auth/login">Sign in with a different account</AuthLink>
+        </AuthFooterNote>
       </AuthCard>
     </AuthPageShell>
   );

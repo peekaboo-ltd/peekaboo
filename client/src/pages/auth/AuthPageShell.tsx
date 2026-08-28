@@ -52,6 +52,25 @@ export const AuthSocialButton = ({
   </Button>
 );
 
+/** The line under the card that hands the reader to the other auth screen.
+    Six screens had six copies of this markup; they are now one. */
+export const AuthFooterNote = ({ children }: { children: ReactNode }) => (
+  <p className="type-body-sm mt-6 text-center">{children}</p>
+);
+
+/** The one link style used inside auth copy. A link sitting inside a sentence
+    carries a standing underline rather than the app's hover sweep — with no
+    color to spend, a sweep that only appears on hover leaves "Sign up" looking
+    exactly like the words around it. */
+export const AuthLink = ({ to, children }: { to: string; children: ReactNode }) => (
+  <Link
+    to={to}
+    className="font-medium text-(--ink) underline decoration-(--line-strong) underline-offset-[3px] transition-colors duration-200 ease-(--ease-flat) hover:decoration-(--ink)"
+  >
+    {children}
+  </Link>
+);
+
 export const AuthCard = ({ title, subtitle, children }: AuthCardProps) => (
   <section className="card-framed w-full max-w-[440px] px-8 py-8 max-sm:px-5 max-sm:py-6">
     <header className="mb-6 text-center">

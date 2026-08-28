@@ -20,6 +20,8 @@ import LocationDisplay from "@/containers/locations/LocationDisplay";
 import { UUID } from "@/types";
 import Select from "@/components/inputs/Select";
 import Button from "@/components/inputs/Button";
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 type CoordinateRecord = {
   id: string;
@@ -383,7 +385,7 @@ const UserLocationHistoryPage = () => {
           <div className="flex gap-2">
             <input
               id="order-search"
-              className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+              className={cn(controlClassName, 'px-3')}
               placeholder="Type reference id or tracking id"
               value={orderSearchTerm}
               onChange={(event) => setOrderSearchTerm(event.target.value)}
@@ -420,7 +422,7 @@ const UserLocationHistoryPage = () => {
           <input
             id="start-time"
             type="datetime-local"
-            className="h-(--control-md) rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+            className={cn(controlClassName, 'px-3')}
             value={dateRange.startTime}
             onChange={(event) =>
               setDateRange((prev) => ({
@@ -441,7 +443,7 @@ const UserLocationHistoryPage = () => {
           <input
             id="end-time"
             type="datetime-local"
-            className="h-(--control-md) rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+            className={cn(controlClassName, 'px-3')}
             value={dateRange.endTime}
             onChange={(event) =>
               setDateRange((prev) => ({ ...prev, endTime: event.target.value }))

@@ -78,17 +78,12 @@ const HeroSection = ({
             initial="hidden"
             animate="visible"
           >
-            <HeroTabs
+            {/* <HeroTabs
               activeTab={activeTab}
               onTabChange={setActiveTab}
               personalLabel={heroCopy.personalTabLabel}
               businessLabel={heroCopy.businessTabLabel}
-            />
-
-            <p className="type-meta flex items-center gap-1.5">
-              <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-              Kigali, RW
-            </p>
+            /> */}
 
             <HeroHeadline
               activeTab={activeTab}

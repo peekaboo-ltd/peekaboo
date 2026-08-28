@@ -79,7 +79,7 @@ const TrackOrder = () => {
         >
           <label
             htmlFor="reference-id"
-            className="field-label"
+            className="type-label mb-1.5 block"
           >
             {t('trackOrder.orderIdLabel')}
           </label>

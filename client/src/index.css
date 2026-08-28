@@ -284,14 +284,6 @@ button[aria-current='page'],
   font-variant-numeric: tabular-nums;
 }
 
-@utility field-label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--ink);
-}
-
 @utility home-scroll-target {
   scroll-margin-top: 96px;
 }

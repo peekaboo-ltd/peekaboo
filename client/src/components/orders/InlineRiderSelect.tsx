@@ -5,9 +5,10 @@ import type { User } from '@/types/user.type';
 import { useInlineRiderAssignment } from '@/hooks/orders/useInlineRiderAssignment.hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { OrderAssignmentStatus } from '@/types/orderAssignment.type';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import { Link } from 'react-router-dom';
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 interface InlineRiderSelectProps {
   order: Order;
@@ -144,7 +145,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
             placeholder="Search by name or phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-(--control-sm) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm outline-none placeholder:text-(--muted) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+            className={cn(controlClassName, 'h-(--control-sm) px-3')}
             aria-label="Search riders"
           />
         </header>

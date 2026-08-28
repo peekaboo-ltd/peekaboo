@@ -29,6 +29,8 @@ import {
   InternalStatCard,
 } from '@/components/layout/InternalPage';
 import { UUID } from '@/types';
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -409,7 +411,7 @@ const ManageBusinessPlanPage = () => {
                         <input
                           {...inputField}
                           placeholder={`Feature ${index + 1}...`}
-                          className="h-(--control-md) flex-1 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                          className={cn(controlClassName, 'flex-1 px-3')}
                         />
                       )}
                     />

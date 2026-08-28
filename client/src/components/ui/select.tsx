@@ -3,6 +3,7 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { controlClassName } from "../inputs/control"
 
 function Select({
   ...props
@@ -35,7 +36,10 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-full cursor-pointer items-center justify-between gap-2 whitespace-nowrap rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] data-[placeholder]:text-(--muted) hover:border-(--line-strong) focus-visible:border-(--ink) focus-visible:shadow-[var(--ink)_0_0_0_1px_inset] aria-invalid:border-(--ink) aria-invalid:shadow-[var(--ink)_0_0_0_1px_inset] disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--disabled-fg) data-[size=default]:h-(--control-md) data-[size=sm]:h-(--control-sm) data-[size=sm]:px-3 text-sm *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // The trigger is the shared control with a value and a chevron inside
+        // it, so it can never drift from the input it sits next to.
+        controlClassName,
+        "flex cursor-pointer items-center justify-between gap-2 whitespace-nowrap data-[placeholder]:text-(--muted) data-[size=sm]:h-(--control-sm) data-[size=sm]:px-3 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}

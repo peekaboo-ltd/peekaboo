@@ -31,6 +31,8 @@ import { KpayPaymentStatus, Payment } from '@/types/payment.types';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { AdminPaymentsQueryParams } from '@/api/queries/payments.queries';
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 const PAYMENT_STATUS_OPTIONS = [
   { value: 'all', label: 'All Statuses' },
@@ -328,7 +330,7 @@ const PaymentsPage = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleApplyFilters();
                 }}
-                className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) pl-8 pr-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                className={cn(controlClassName, 'pl-8 pr-3')}
               />
             </div>
             <input
@@ -337,7 +339,7 @@ const PaymentsPage = () => {
               value={startDate}
               max={endDate || undefined}
               onChange={(e) => handleStartDateChange(e.target.value)}
-              className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] md:w-[170px]"
+              className={cn(controlClassName, 'px-3 md:w-[170px]')}
             />
             <input
               type="date"
@@ -345,7 +347,7 @@ const PaymentsPage = () => {
               value={endDate}
               min={startDate || undefined}
               onChange={(e) => handleEndDateChange(e.target.value)}
-              className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] md:w-[170px]"
+              className={cn(controlClassName, 'px-3 md:w-[170px]')}
             />
             <Button primary type="button" onClick={handleApplyFilters}>
               Apply
@@ -432,7 +434,7 @@ const PaymentsPage = () => {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleApplyFilters();
                     }}
-                    className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) pl-8 pr-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                    className={cn(controlClassName, 'pl-8 pr-3')}
                   />
                 </div>
               </div>
@@ -507,7 +509,7 @@ const PaymentsPage = () => {
                   value={startDate}
                   max={endDate || undefined}
                   onChange={(e) => handleStartDateChange(e.target.value)}
-                  className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                  className={cn(controlClassName, 'px-3')}
                 />
               </div>
 
@@ -521,7 +523,7 @@ const PaymentsPage = () => {
                   value={endDate}
                   min={startDate || undefined}
                   onChange={(e) => handleEndDateChange(e.target.value)}
-                  className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                  className={cn(controlClassName, 'px-3')}
                 />
               </div>
 
@@ -535,7 +537,7 @@ const PaymentsPage = () => {
                   placeholder="0"
                   value={minAmount}
                   onChange={(e) => setMinAmount(e.target.value)}
-                  className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                  className={cn(controlClassName, 'px-3')}
                 />
               </div>
 
@@ -549,7 +551,7 @@ const PaymentsPage = () => {
                   placeholder="0"
                   value={maxAmount}
                   onChange={(e) => setMaxAmount(e.target.value)}
-                  className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                  className={cn(controlClassName, 'px-3')}
                 />
               </div>
             </div>

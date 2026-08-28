@@ -78,7 +78,7 @@ const LocationField = ({
       rules={{ required: requiredMessage, validate }}
       render={({ field }) => (
         <div>
-          <label className="field-label" htmlFor={`hero-${name}`}>
+          <label className="type-label mb-1.5 block" htmlFor={`hero-${name}`}>
             {label}
           </label>
 

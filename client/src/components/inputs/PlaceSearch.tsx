@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
+import { controlClassName } from './control';
 
 export interface PlaceSearchResult {
   place: google.maps.places.PlaceResult;
@@ -268,7 +269,7 @@ const PlaceSearch = ({
           placeholder={placeholder}
           disabled={disabled}
           autoComplete="off"
-          className="h-10 w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--disabled-fg)"
+          className={controlClassName}
         />
         {isMapsUnavailable && (
           <p className="mt-1 text-xs text-(--ink)">Maps failed to load.</p>

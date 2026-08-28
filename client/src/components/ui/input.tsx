@@ -1,6 +1,7 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { controlClassName } from "../inputs/control"
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
@@ -8,12 +9,9 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       type={type}
       data-slot="input"
       className={cn(
-        "h-(--control-md) w-full min-w-0 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted)",
+        controlClassName,
         "file:mr-3 file:inline-flex file:h-8 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-(--ink)",
-        "hover:border-(--line-strong)",
-        "focus-visible:border-(--ink) focus-visible:shadow-[var(--ink)_0_0_0_1px_inset]",
-        "aria-invalid:border-(--ink) aria-invalid:shadow-[var(--ink)_0_0_0_1px_inset]",
-        "disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--disabled-fg)",
+        "disabled:pointer-events-none",
         className
       )}
       {...props}

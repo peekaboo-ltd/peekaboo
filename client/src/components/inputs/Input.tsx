@@ -1,5 +1,5 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faSearch, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CheckedState } from '@radix-ui/react-checkbox';
 import {
@@ -13,8 +13,10 @@ import {
 } from 'react';
 import { FieldValues, SetFieldValue } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
-import CustomTooltip from './CustomTooltip';
+import { controlClassName, readOnlyControlClassName } from './control';
+import { FieldShell } from './Field';
 import DatePicker from './DatePicker';
 import { SkeletonLoader } from './Loader';
 import { toast } from 'sonner';
@@ -281,6 +283,12 @@ export interface InputProps {
   errorMessage?: string;
 
   /**
+   * Helper text under the control. An error message replaces it.
+   * @property {string | ReactNode} [description]
+   */
+  description?: string | ReactNode;
+
+  /**
    * When true and type is "password", shows a toggle to reveal/hide the password
    * @property {boolean} [showPasswordToggle]
    */
@@ -327,6 +335,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       autoCorrect,
       spellCheck,
       errorMessage,
+      description,
       showPasswordToggle = false,
     },
     ref,
@@ -461,22 +470,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     if (['date'].includes(type)) {
       return (
-        <label className={`flex w-full flex-col gap-1.5 ${labelClassName}`}>
-          <p
-            className={`${
-              label ? 'type-label flex items-center gap-1.5' : 'hidden'
-            }`}
-          >
-            {label}{' '}
-            {required && (
-              <CustomTooltip
-                label={required ? `${label} is required` : ''}
-                labelClassName="bg-(--surface) text-sm"
-              >
-                <span className="text-(--ink) cursor-pointer">*</span>
-              </CustomTooltip>
-            )}
-          </p>
+        <FieldShell
+          label={label}
+          required={required}
+          description={description}
+          errorMessage={errorMessage}
+          className={labelClassName}
+        >
           {isLoading ? (
             <SkeletonLoader type="input" />
           ) : (
@@ -494,34 +494,26 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               value={(value || defaultValue) as Date | undefined}
             />
           )}
-        </label>
+        </FieldShell>
       );
     }
 
     const resolvedValue =
       (value as string | number | readonly string[] | undefined) ?? undefined;
+    const messageId = id && (errorMessage || description) ? `${id}-message` : undefined;
 
     return (
-      <label className={`flex w-full flex-col gap-1.5 ${labelClassName}`}>
-        <p
-          className={`${
-            label ? 'type-label flex items-center gap-1.5' : 'hidden'
-          }`}
-        >
-          {label}{' '}
-          {required && (
-            <CustomTooltip
-              label={required ? `${label} is required` : ''}
-              labelClassName="bg-(--surface) text-sm"
-            >
-              <span className="text-(--ink) cursor-pointer">*</span>
-            </CustomTooltip>
-          )}
-        </p>
-
+      <FieldShell
+        label={label}
+        required={required}
+        description={description}
+        errorMessage={errorMessage}
+        messageId={messageId}
+        className={labelClassName}
+      >
         <section className="relative w-full">
           {prefixIcon || prefixText ? (
-            <label className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+            <span className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
               <Link
                 to={'#'}
                 onClick={prefixIconHandler}
@@ -532,7 +524,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 )}
                 {prefixText && <p className="text-sm">{prefixText}</p>}
               </Link>
-            </label>
+            </span>
           ) : null}
 
           {(suffixIcon || showSearchSuffix) && (
@@ -572,7 +564,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               autoCorrect={autoCorrect}
               spellCheck={spellCheck}
               aria-invalid={Boolean(errorMessage)}
-              className={`h-10 px-3.5 py-0 font-normal placeholder:text-sm placeholder:text-(--muted) text-sm text-(--ink) flex items-center w-full rounded-(--radius-control) border border-(--line) bg-(--paper) outline-none focus:outline-none hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] aria-invalid:border-(--ink) aria-invalid:shadow-[var(--ink)_0_0_0_1px_inset] transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) ${className} ${prefixIcon && 'ps-10'} ${prefixText ? 'ps-[3.6rem]' : ''} ${isPasswordWithToggle ? 'pe-10' : ''} ${ readOnly && 'cursor-default border-transparent bg-(--surface) text-(--disabled-fg) hover:border-transparent focus:border-transparent focus:shadow-none' }`}
+              aria-describedby={messageId}
+              className={cn(
+                controlClassName,
+                prefixIcon && 'ps-10',
+                prefixText && 'ps-[3.6rem]',
+                isPasswordWithToggle && 'pe-10',
+                readOnly && readOnlyControlClassName,
+                className,
+              )}
             />
           )}
 
@@ -602,13 +602,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             </button>
           )}
         </section>
-        {errorMessage && (
-          <p className="mt-1.5 flex items-center gap-1.5 text-[0.8125rem] text-(--ink)" role="alert">
-            <FontAwesomeIcon icon={faTriangleExclamation} className="size-3 shrink-0" aria-hidden="true" />
-            {errorMessage}
-          </p>
-        )}
-      </label>
+      </FieldShell>
     );
   },
 );

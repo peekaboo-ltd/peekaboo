@@ -10,6 +10,8 @@ import type { User } from '@/types/user.type';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner, faUser, faCheck, faArrowLeft, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/components/inputs/Button';
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 const ReassignOrderAssignment = () => {
     // STATE VARIABLES
@@ -135,7 +137,7 @@ const ReassignOrderAssignment = () => {
                                 placeholder="Search by name or phone..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                                className={cn(controlClassName, 'px-3')}
                                 aria-label="Search riders"
                                 disabled={isAssigning}
                             />

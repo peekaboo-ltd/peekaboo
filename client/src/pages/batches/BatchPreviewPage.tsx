@@ -34,6 +34,8 @@ import { BatchStatus } from "@/types/batch.type";
 import { OrderStatus } from "@/types/order.type";
 import { User } from "@/types/user.type";
 import { ReferenceIdInput } from "@/components/inputs/TableInputs";
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 interface InlinePhoneEditorProps {
   order: Order;
@@ -381,7 +383,7 @@ const InlineTextEditor = ({
           onKeyDown={handleKeyDown}
           onBlur={handleSave}
           disabled={isSaving || localSaving}
-          className="h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] disabled:opacity-50"
+          className={cn(controlClassName, 'px-3 disabled:opacity-50')}
           placeholder={placeholder}
         />
         {(isSaving || localSaving) && (

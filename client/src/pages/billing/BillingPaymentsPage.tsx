@@ -55,6 +55,8 @@ import { Link } from "react-router-dom";
 import { tableActionClassName } from "@/constants/inputs.constants";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons";
 import { validateAndFormatPhoneNumber } from "@/utils/phone.util";
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 interface OrganizationRow {
   id: UUID;
@@ -1113,7 +1115,7 @@ const BillingPaymentsPage = () => {
                 Start date
                 <input
                   type="date"
-                  className="mt-1 h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                  className={cn(controlClassName, 'mt-1 px-3')}
                   value={reportStartDate}
                   onChange={(event) => setReportStartDate(event.target.value)}
                 />
@@ -1123,7 +1125,7 @@ const BillingPaymentsPage = () => {
                 End date
                 <input
                   type="date"
-                  className="mt-1 h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                  className={cn(controlClassName, 'mt-1 px-3')}
                   value={reportEndDate}
                   onChange={(event) => setReportEndDate(event.target.value)}
                 />

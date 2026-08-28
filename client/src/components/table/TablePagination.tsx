@@ -6,6 +6,8 @@ import { UnknownAction } from "@reduxjs/toolkit";
 import { Table } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { formatNumbers } from "@/utils/strings.util";
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -109,7 +111,7 @@ export function DataTablePagination<TData>({
             min={1}
             max={totalPages || 1}
             defaultValue={page + 1}
-            className="h-(--control-md) w-14 rounded-(--radius-control) border border-(--line) bg-(--paper) px-2 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+            className={cn(controlClassName, 'w-14 px-2')}
             onChange={(e) => {
               const targetPage = e.target.value ? Number(e.target.value) : 0;
               if (targetPage >= 1 && targetPage <= (totalPages || 1)) {

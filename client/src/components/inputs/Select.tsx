@@ -8,10 +8,11 @@ import {
 } from '@/components/ui/select';
 import { UUID } from 'crypto';
 import { useState, useRef, useEffect, forwardRef } from 'react';
-import CustomTooltip from './CustomTooltip';
 import useDebounce from '@/hooks/common/debounce.hooks';
 import { SkeletonLoader } from './Loader';
 import { cn } from '@/lib/utils';
+import { controlClassName } from './control';
+import { FieldShell } from './Field';
 
 const RADIX_NAVIGATION_KEYS = new Set([
   'ArrowDown',
@@ -41,6 +42,9 @@ interface SelectProps {
   searchable?: boolean;
   readOnly?: boolean;
   isLoading?: boolean;
+  /** Helper text under the control. An error message replaces it. */
+  description?: string;
+  errorMessage?: string;
 }
 
 const Select = forwardRef<HTMLInputElement, SelectProps>(
@@ -59,6 +63,8 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       value = '',
       onChange,
       isLoading = false,
+      description,
+      errorMessage,
     },
     ref
   ) => {
@@ -92,16 +98,13 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
     }, [debouncedSearchTerm, isOpen, searchable]);
 
     return (
-      <label className={cn('flex w-full flex-col gap-1.5', labelClassName)}>
-        <p className={label ? 'type-label flex items-center gap-1' : 'hidden'}>
-          {label}{' '}
-          <CustomTooltip
-            label={required ? `${label} is required` : ''}
-            labelClassName="bg-(--surface) text-sm"
-          >
-            <span className={required ? `text-(--ink) cursor-pointer` : 'hidden'}>*</span>
-          </CustomTooltip>
-        </p>
+      <FieldShell
+        label={label}
+        required={required}
+        description={description}
+        errorMessage={errorMessage}
+        className={labelClassName}
+      >
         {isLoading ? (
           <SkeletonLoader type="input" />
         ) : (
@@ -115,7 +118,10 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
             value={value}
             name={name}
           >
-            <SelectTrigger className={cn('w-full', className)}>
+            <SelectTrigger
+              aria-invalid={Boolean(errorMessage)}
+              className={cn('w-full', className)}
+            >
               <SelectValue className="truncate" placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>
@@ -137,7 +143,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                     placeholder="Search..."
                     aria-label={label ? `Search ${label}` : 'Search options'}
                     autoComplete="off"
-                    className="h-(--control-sm) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm outline-none placeholder:text-(--muted) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                    className={cn(controlClassName, 'h-(--control-sm) px-3')}
                   />
                 </search>
               ) : null}
@@ -165,7 +171,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
             </SelectContent>
           </SelectComponent>
         )}
-      </label>
+      </FieldShell>
     );
   }
 );

@@ -1,4 +1,4 @@
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import Input from '@/components/inputs/Input';
 import TelInput from '@/components/inputs/TelInput';
@@ -15,8 +15,12 @@ import { ENVIRONMENTS } from '@/constants/environments.constants';
 import {
   AuthCard,
   AuthDivider,
+  AuthFooterNote,
+  AuthLink,
   AuthPageShell,
   AuthSocialButton,
+  authInputClassName,
+  authPrimaryButtonClassName,
 } from './AuthPageShell';
 
 interface RegisterFormData {
@@ -99,26 +103,24 @@ export const RegisterPage = () => {
         <AuthDivider />
 
         <form className="flex flex-col gap-4" onSubmit={onRegisterSubmit}>
-          <div>
-            <Controller
-              name="phoneNumber"
-              control={control}
-              rules={{
-                required: 'Phone number is required',
-                validate: (value) => validateRwandanPhoneNumber(value),
-              }}
-              render={({ field }) => (
-                <TelInput
-                  {...field}
-                  label="Phone number"
-                  placeholder="7XXXXXXXX"
-                  required
-                  className="w-full"
-                  errorMessage={errors?.phoneNumber?.message}
-                />
-              )}
-            />
-          </div>
+          <Controller
+            name="phoneNumber"
+            control={control}
+            rules={{
+              required: 'Phone number is required',
+              validate: (value) => validateRwandanPhoneNumber(value),
+            }}
+            render={({ field }) => (
+              <TelInput
+                {...field}
+                label="Phone number"
+                placeholder="7XXXXXXXX"
+                required
+                className={authInputClassName}
+                errorMessage={errors?.phoneNumber?.message}
+              />
+            )}
+          />
 
           <Controller
             name="password"
@@ -139,6 +141,7 @@ export const RegisterPage = () => {
                 autoComplete="new-password"
                 required
                 showPasswordToggle
+                className={authInputClassName}
                 errorMessage={errors?.password?.message}
               />
             )}
@@ -161,6 +164,7 @@ export const RegisterPage = () => {
                 autoComplete="new-password"
                 required
                 showPasswordToggle
+                className={authInputClassName}
                 errorMessage={errors?.confirmPassword?.message}
               />
             )}
@@ -175,7 +179,7 @@ export const RegisterPage = () => {
                   {...field}
                   label="Name"
                   placeholder="Your name"
-                  className="w-full"
+                  className={authInputClassName}
                   errorMessage={errors?.name?.message}
                 />
               )}
@@ -191,7 +195,7 @@ export const RegisterPage = () => {
                   type="email"
                   placeholder="you@company.com"
                   autoComplete="email"
-                  className="w-full"
+                  className={authInputClassName}
                   errorMessage={errors?.email?.message}
                 />
               )}
@@ -201,22 +205,16 @@ export const RegisterPage = () => {
           <Button
             type="submit"
             primary
+            className={authPrimaryButtonClassName}
             isLoading={isLoading}
-            className="mt-2 w-full"
           >
             Sign up
           </Button>
         </form>
 
-        <div className="mt-6 text-center text-sm">
-          <span>Already have an account? </span>
-          <Link
-            to="/auth/login"
-            className="link-sweep text-(--ink)"
-          >
-            Log in
-          </Link>
-        </div>
+        <AuthFooterNote>
+          Already have an account? <AuthLink to="/auth/login">Log in</AuthLink>
+        </AuthFooterNote>
       </AuthCard>
     </AuthPageShell>
   );

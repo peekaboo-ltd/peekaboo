@@ -10,6 +10,8 @@ import {
   InternalPageHeader,
   InternalSectionCard,
 } from '@/components/layout/InternalPage';
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -148,7 +150,7 @@ const BillingReportPage = () => {
               Start date
               <input
                 type="date"
-                className="mt-1 h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                className={cn(controlClassName, 'mt-1 px-3')}
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
               />
@@ -157,7 +159,7 @@ const BillingReportPage = () => {
               End date
               <input
                 type="date"
-                className="mt-1 h-(--control-md) w-full rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset]"
+                className={cn(controlClassName, 'mt-1 px-3')}
                 value={endDate}
                 onChange={(event) => setEndDate(event.target.value)}
               />
