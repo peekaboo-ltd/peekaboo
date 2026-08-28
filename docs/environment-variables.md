@@ -189,12 +189,13 @@ ${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/reversal
 
 ## Client (`client/.env`)
 
-Vite only exposes variables prefixed with `VITE_` to the browser; they are read at **build time** through `import.meta.env`. There is **no committed `.env.example`** for the client.
+Vite only exposes variables prefixed with `VITE_` to the browser; they are read at **build time** through `import.meta.env`. Copy `client/.env.example` to `client/.env` for local development. Preview and production hosts must set these variables before the client build starts; runtime-only changes do not affect an already-built bundle.
 
 | Variable | Default | Required | Purpose & behavior | Read at |
 | --- | --- | --- | --- | --- |
 | `VITE_API_BASE_URL` | `http://localhost:8080/api/v1` | Yes (outside local dev) | Base URL of the backend API. Every axios request targets this. | `constants/environments.constants.ts:5` |
-| `VITE_GOOGLE_MAPS_API_KEY` | — | Only for map features | Google Maps key for the admin dashboard maps (`@vis.gl/react-google-maps`). | `constants/environments.constants.ts:6` |
+| `VITE_GOOGLE_MAPS_API_KEY` | — | Only for map and place-search features | Browser key for Maps JavaScript, Places, and Geocoding. Before launch, restrict it by HTTP referrer and to exactly those APIs, and configure a Cloud billing budget alert. | `constants/environments.constants.ts` |
+| `VITE_GOOGLE_MAPS_MAP_ID` | `DEMO_MAP_ID` | Required for production map markers | JavaScript vector Map ID used by `AdvancedMarker`, including the public home hero. Create it without an attached style to retain Google’s full-colour default basemap; disable tilt and rotation. | `constants/environments.constants.ts` |
 | `VITE_INACTIVITY_TIMEOUT` | `5` | Optional | Session inactivity timeout in **minutes** before the session-expired modal fires. | `constants/environments.constants.ts:7` |
 | `VITE_NODE_ENVIRONMENT` | falls back to Vite `MODE` | Optional | Overrides the client's detected `NODE_ENVIRONMENT` label. | `constants/environments.constants.ts` |
 | `VITE_PAYMENT_MODE` | `simulate` (non-production Vite MODE) / `live` (production) | Optional | UI payment mode aligned with server: `simulate`, `dev_price`, or `live`. Drives checkout disclaimers (`isPaymentSimulation` / `isDevPrice`). | `constants/environments.constants.ts` |

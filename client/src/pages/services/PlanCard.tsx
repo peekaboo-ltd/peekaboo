@@ -1,5 +1,5 @@
-import { Check } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { cn } from '@/lib/utils';
 import type { BusinessPlan } from '@/types/businessPlan.type';
 import {
@@ -79,13 +79,13 @@ const PlanCard = ({
   return (
     <article
       className={cn(
-        'card-framed !cursor-default card-interactive group relative flex h-full flex-col',
+        'card-framed relative flex h-full flex-col',
         // The recommended plan is distinguished by the weight of its edge, in
         // the same ink-ring idiom the focused controls use. It used to be the
         // only white card among grey ones, which made the plan being
         // recommended the most recessive thing on the row.
         isRecommended &&
-          'border-(--ink) shadow-[var(--ink)_0_0_0_1px_inset] hover:!border-(--surface-hover)',
+          'border-(--ink) shadow-[var(--ink)_0_0_0_1px_inset]',
       )}
     >
       {isRecommended ? (
@@ -95,11 +95,7 @@ const PlanCard = ({
       ) : null}
 
       <section className="flex flex-1 flex-col p-6">
-        <h3 className="type-card-title">
-          <Link to={to} className="outline-none after:absolute after:inset-0">
-            {plan.name}
-          </Link>
-        </h3>
+        <h3 className="type-card-title">{plan.name}</h3>
         <p className="type-meta mt-1.5 min-h-[2.25rem]">
           {plan.description || 'Flexible pricing for growing teams.'}
         </p>
@@ -142,7 +138,10 @@ const PlanCard = ({
           <ul className="mt-5 flex-1 space-y-2 border-t border-(--line) pt-4">
             {plan.features.slice(0, 5).map((feature) => (
               <li key={feature} className="type-body-sm flex items-start gap-2">
-                <Check className="mt-1 size-3.5 shrink-0 text-(--ink)" aria-hidden="true" />
+                <FontAwesomeIcon
+                  icon={faCheck}
+                  className="mt-1 size-3.5 shrink-0 text-(--ink)"
+                />
                 <span>{feature}</span>
               </li>
             ))}
@@ -151,7 +150,7 @@ const PlanCard = ({
           <div className="flex-1" />
         )}
 
-        <Button route={to} className='mt-6 hover:bg-(--surface-hover) border-surface-hover'>
+        <Button route={to} variant="secondary" className="mt-6 w-full">
           {ctaLabel}
         </Button>
       </section>

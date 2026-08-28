@@ -49,7 +49,7 @@ const PublicNavbar = () => {
               <Link
                 to={link}
                 aria-current={pathname === link ? 'page' : undefined}
-                className="inline-flex min-h-10 items-center rounded-(--radius-pill) px-3 text-sm font-normal transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+                className="inline-flex min-h-10 items-center rounded-lg px-3 text-sm font-normal transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
               >
                 {capitalizeString(label)}
               </Link>

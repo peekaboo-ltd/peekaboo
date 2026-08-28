@@ -56,8 +56,8 @@
   --muted: #6e6e6e;
   --muted-weak: #757575;
   --disabled-fg: #afafaf;
-  --press-on-ink: rgba(255, 255, 255, 0.2);
-  --press-on-paper: rgba(0, 0, 0, 0.08);
+  --press-on-ink: rgba(255, 255, 255, 0.22);
+  --press-on-paper: rgba(0, 0, 0, 0.1);
   --overlay: rgba(0, 0, 0, 0.6);
   --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.16);
   --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.24);
@@ -117,8 +117,8 @@
   --brand-x-twitter: #ffffff;
   --brand-mastercard: #f79e1b;
   --disabled-fg: #5e5e5e;
-  --press-on-ink: rgba(255, 255, 255, 0.2);
-  --press-on-paper: rgba(0, 0, 0, 0.08);
+  --press-on-ink: rgba(255, 255, 255, 0.22);
+  --press-on-paper: rgba(0, 0, 0, 0.1);
   --overlay: rgba(0, 0, 0, 0.72);
   --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.55);
   --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.7);
@@ -199,6 +199,7 @@
   }
 
   html {
+    position: relative;
     font-family: var(--font-family-sans);
     font-size: 16px;
     scroll-behavior: smooth;

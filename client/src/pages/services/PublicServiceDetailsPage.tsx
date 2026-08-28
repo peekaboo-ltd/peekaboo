@@ -106,7 +106,7 @@ const PublicServiceDetailsPage = () => {
         <motion.div variants={fadeInUp}>
           <Link
             to="/services"
-            className="type-body-sm inline-flex items-center gap-2 text-(--muted) hover:text-(--ink) p-2 px-4 rounded-(--radius-control) hover:bg-(--surface-hover)"
+            className="type-body-sm inline-flex items-center gap-2 text-(--ink) bg-(--surface) hover:text-(--ink) p-2 px-4 rounded-(--radius-control) hover:bg-(--surface-hover)"
           >
             <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
             All plans

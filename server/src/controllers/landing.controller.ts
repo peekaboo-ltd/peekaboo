@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { OrderStatus } from '../constants/order.constants';
 import { ValidationError } from '../helpers/errors.helper';
 import { LandingService } from '../services/landing.service';
+import { parseCoordinateQuery } from '../helpers/riderSuggestion.helper';
 
 const landingService = new LandingService();
 
@@ -27,5 +28,21 @@ export const LandingController = {
       next(error);
     }
   },
-};
 
+  async getSuggestedRider(req: Request, res: Response, next: NextFunction) {
+    try {
+      const pickup = parseCoordinateQuery(
+        req.query.latitude,
+        req.query.longitude
+      );
+      const rider = await landingService.getSuggestedRider(pickup);
+
+      return res.status(200).json({
+        message: 'Suggested rider fetched successfully',
+        data: rider,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+};

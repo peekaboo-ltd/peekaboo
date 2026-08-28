@@ -1,4 +1,4 @@
-# DESIGN.md — Peekaboo Web Design System (Uber-derived, strict monochrome)
+# DESIGN.md — Peekaboo Web Design System (Uber-derived, monochrome structure)
 
 > **This is a prompt document.** It is written to be handed to an implementing agent as the
 > single source of truth for the visual redesign of the Peekaboo web client. Every rule here is
@@ -10,8 +10,9 @@ authenticated dashboard (tables, modals, charts, sidebars).
 **Out of scope:** `mobile/` (React Native) and `server/`. Do not touch them.
 
 **Reference:** interaction and layout behaviour is modelled on `uber.com` (values below were
-measured from the live site, not guessed). Peekaboo is **not** a clone — the palette is stricter
-(no Uber green/blue/brand colors) and the typography is a different face at lighter weights.
+measured from the live site, not guessed). Peekaboo is **not** a clone — its own structural palette
+is monochrome and its typography is a different face at lighter weights. The narrow identity, map,
+and consequence exceptions below do not become general-purpose accent colors.
 
 ---
 
@@ -34,9 +35,9 @@ Verify with: `grep -rE '\-\[--[a-z-]+\]' --include='*.tsx' src` — must return 
 
 Every change MUST satisfy all seven. If a proposed change breaks one, the change is wrong.
 
-1. **Monochrome only.** White and black and the neutral ramp between them. No hue anywhere —
-   no yellow, no blue, no red, no green. Zero exceptions, including charts, status badges,
-   focus rings, logo, toasts, and error states.
+1. **Monochrome structure.** Layout, navigation, selection, charts, focus, and decorative UI use
+   white, black, and the neutral ramp between them. Hue is reserved for the explicit exceptions
+   below and MUST NOT be reused as a general accent.
 2. **Highlight = inversion ("vice versa").** The only way to mark something as selected, active,
    current, or checked is to swap ink and paper: the element takes the foreground color as its
    background and the background color as its text. Never a tint, never an accent bar in color.
@@ -60,6 +61,19 @@ the app. Reserve full-bleed `--ink` surfaces for the navigation bar, the footer,
 one** closing call-to-action per page. Page heroes, sidebars, cards, and section bands stay on
 paper with a `--line` hairline. Two black slabs stacked — a black bar above a black hero, or a
 black nav beside a black sidebar — is the failure mode this rule exists to prevent.
+
+### 1.1 Deliberate colour exceptions
+
+- **Third-party brand marks preserve their official colours.** A partner or platform mark is
+  someone else’s identity; recolouring it makes the mark less accurate. The colour stays confined
+  to the mark and never decorates nearby UI.
+- **Geographic basemaps retain the provider’s full default colours.** A basemap is a readable
+  depiction of the world, closer to a photograph than a branded surface. Peekaboo-owned overlays,
+  pins, controls, and legends remain in the monochrome system and distinguish meaning by shape,
+  glyph, and copy rather than colour alone.
+- **Consequence states may use the `--danger` and `--approve` families.** Red makes failure or a
+  destructive commitment immediately legible; green marks a resolved or approved outcome. Copy,
+  icons, and shape remain mandatory, so colour is never the only carrier of meaning.
 
 ---
 

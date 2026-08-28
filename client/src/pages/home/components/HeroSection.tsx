@@ -13,7 +13,8 @@ import HeroHeadline from './HeroHeadline';
 import HeroTrustIndicators from './HeroTrustIndicators';
 import HeroBusinessCta from './HeroBusinessCta';
 import HeroForm from './HeroForm';
-import HeroRouteCard from './HeroRouteCard';
+import HeroLiveMap from './HeroLiveMap';
+import { useGeolocationPickup } from '@/hooks/locations/useGeolocationPickup';
 
 interface HeroSectionProps {
   formRef: RefObject<HTMLFormElement | null>;
@@ -35,6 +36,7 @@ const HeroSection = ({
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<HomeFormValues>({
     mode: 'onChange',
@@ -43,8 +45,10 @@ const HeroSection = ({
       recipientPhoneNumber: '',
       locationFrom: undefined,
       locationTo: undefined,
+      pickupSource: 'search',
     },
   });
+  const geolocation = useGeolocationPickup(control, setValue);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const { createOrder, isLoading: isCreatingOrder } = useCreateOrder();
   const { createPublicOrder, isLoading: isCreatingPublicOrder } =
@@ -99,6 +103,7 @@ const HeroSection = ({
               onSubmit={onSubmit}
               control={control}
               errors={errors}
+              geolocation={geolocation}
               copy={{
                 formTitle: heroCopy.formTitle,
                 formSubtitle: heroCopy.formSubtitle,
@@ -128,7 +133,7 @@ const HeroSection = ({
           </motion.div>
 
           <div className="max-lg:hidden">
-            <HeroRouteCard />
+            <HeroLiveMap control={control} geolocation={geolocation} />
           </div>
         </div>
       </div>

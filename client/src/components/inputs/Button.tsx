@@ -33,6 +33,8 @@ interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchor
   children?: ReactNode;
   variant?: ButtonVariant;
   size?: 'sm' | 'default' | 'lg';
+  /** Associates a submit button with a form by id when rendered outside it. */
+  form?: string;
 }
 
 // This wrapper adds routing, loading, and a FontAwesome icon slot. Everything

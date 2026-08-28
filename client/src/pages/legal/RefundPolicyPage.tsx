@@ -11,12 +11,7 @@ const RefundPolicyPage = () => {
 
   return (
     <PublicPage className="">
-      <LegalBreadcrumb
-        currentPage={{
-          labelKey: 'legal.refund.title',
-          path: '/legal/refund-policy',
-        }}
-      />
+      <LegalBreadcrumb parent="legal" />
 
       <PublicPageHero
         eyebrow={t('legal.eyebrow')}

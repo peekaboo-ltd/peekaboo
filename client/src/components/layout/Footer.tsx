@@ -138,7 +138,7 @@ const Footer = () => {
           <p className="type-meta">
             &copy; {new Date().getFullYear()} Peekaboo. {t('footer.copyright')}
           </p>
-          <LanguageSelector dropdownDirection="up" />
+          <LanguageSelector />
         </div>
       </div>
     </footer>

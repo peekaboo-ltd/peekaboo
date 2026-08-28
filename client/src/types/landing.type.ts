@@ -4,3 +4,11 @@ export interface LandingStats {
   orderStatus: string;
 }
 
+export interface SuggestedRider {
+  latitude: number;
+  longitude: number;
+  distanceKm: number;
+  etaMinutes: number;
+  isLive: boolean;
+  updatedAt: string | null;
+}

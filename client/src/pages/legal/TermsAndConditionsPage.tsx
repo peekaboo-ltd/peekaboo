@@ -11,12 +11,7 @@ const TermsAndConditionsPage = () => {
 
   return (
     <PublicPage className="">
-      <LegalBreadcrumb
-        currentPage={{
-          labelKey: 'legal.terms.title',
-          path: '/legal/terms-and-conditions',
-        }}
-      />
+      <LegalBreadcrumb parent="legal" />
 
       <PublicPageHero
         eyebrow={t('legal.eyebrow')}

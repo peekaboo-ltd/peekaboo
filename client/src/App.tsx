@@ -6,15 +6,28 @@ import { I18nProvider } from './i18n/i18n';
 import { messages } from './i18n/messages';
 
 const App = () => {
+  const appContent = (
+    <>
+      <Toaster
+        toastOptions={{ style: { fontSize: '11px', fontWeight: '100' } }}
+        duration={2000}
+      />
+      <Router />
+    </>
+  );
+
   return (
     <I18nProvider messages={messages}>
-      <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY || ''}>
-        <Toaster
-          toastOptions={{ style: { fontSize: '11px', fontWeight: '100' } }}
-          duration={2000}
-        />
-        <Router />
-      </APIProvider>
+      {ENVIRONMENTS.GOOGLE_MAPS_API_KEY ? (
+        <APIProvider
+          apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY}
+          onError={() => undefined}
+        >
+          {appContent}
+        </APIProvider>
+      ) : (
+        appContent
+      )}
     </I18nProvider>
   );
 };

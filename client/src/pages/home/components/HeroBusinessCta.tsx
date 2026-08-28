@@ -1,5 +1,6 @@
 import Button from "@/components/inputs/Button";
 import { Link } from "react-router-dom";
+import { HERO_DELIVERY_FORM_ID } from "./HeroForm";
 
 interface HeroBusinessCtaProps {
   isActive: boolean;
@@ -24,8 +25,9 @@ const HeroBusinessCta = ({
     aria-label="Delivery actions"
   >
     <Button
-      onClick={isActive ? onContactClick : onTrackClick}
-      type="submit"
+      onClick={isActive ? onContactClick : undefined}
+      type={isActive ? 'button' : 'submit'}
+      form={isActive ? undefined : HERO_DELIVERY_FORM_ID}
       variant="primary"
       size="lg"
       disabled={isLoading}
@@ -33,13 +35,15 @@ const HeroBusinessCta = ({
     >
       {isLoading ? 'Booking…' : isActive ? accountLabel : primaryLabel}
     </Button>
-    {!isActive && <Link
-      onClick={isActive ? onContactClick : onTrackClick}
-      to={isActive ? '/contact' : '/track'}
-      className="link-sweep text-sm text-(--ink) max-sm:text-center"
-    >
-      {isActive ? accountLabel : 'Track an order'}
-    </Link>}
+    {!isActive ? (
+      <Link
+        onClick={onTrackClick}
+        to="/track"
+        className="link-sweep text-sm text-(--ink) max-sm:text-center"
+      >
+        Track an order
+      </Link>
+    ) : null}
   </nav>
 );
 
