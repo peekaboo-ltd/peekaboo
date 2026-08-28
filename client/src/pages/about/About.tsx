@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   AnimatePresence,
   motion,
@@ -220,7 +219,6 @@ const StoryTimeline = () => {
 };
 
 const About = () => {
-  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>(fallbackStats);
   const { data: landingStats } = useGetLandingStatsQuery();
   const { heroCopy } = useHomeContent();
@@ -246,10 +244,6 @@ const About = () => {
       window.clearInterval(interval);
     };
   }, []);
-
-  const handleContactNavigation = () => {
-    navigate('/contact');
-  };
 
   return (
     <main className="home-page relative min-h-screen w-full overflow-x-clip bg-(--paper)">
@@ -353,7 +347,7 @@ const About = () => {
                 className="rounded-md border border-(--line) p-6"
               >
                 <ValueCharacter variant={value.variant} />
-                <h3 className="type-h3 mt-8">{value.title}</h3>
+                <h3 className="type-h3 mt-6">{value.title}</h3>
                 <p className="mt-3 text-sm leading-[1.55] text-(--muted)">
                   {value.description}
                 </p>
@@ -367,7 +361,6 @@ const About = () => {
         title="Move something across Kigali."
         subtitle="Talk to our team about personal deliveries, business logistics, or becoming a rider."
         buttonLabel="Talk to our team"
-        onScrollToForm={handleContactNavigation}
       />
     </main>
   );

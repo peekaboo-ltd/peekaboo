@@ -115,7 +115,7 @@ const ValueCharacter = ({ variant, className = '' }: ValueCharacterProps) => {
 
   return (
     <span
-      className={`flex size-16 items-center justify-center rounded-(--radius-control) bg-(--paper) p-2 ${className}`}
+      className={`flex size-10 items-center justify-center rounded-(--radius-control) bg-(--paper) p-1 ${className}`}
       style={{ boxShadow: `inset 0 0 0 1px ${accent}` }}
       role="img"
       aria-label={label}

@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
 import { containerVariants, itemVariants } from '../home.animations';
 import Button from '@/components/inputs/Button';
 
@@ -7,14 +6,12 @@ interface FinalCtaSectionProps {
   title: string;
   subtitle: string;
   buttonLabel: string;
-  onScrollToForm: () => void;
 }
 
 const FinalCtaSection = ({
   title,
   subtitle,
   buttonLabel,
-  onScrollToForm,
 }: FinalCtaSectionProps) => (
   <section className="section-rhythm relative w-full">
     <motion.article
@@ -36,13 +33,11 @@ const FinalCtaSection = ({
         </p>
 
         <Button
-          type="button"
-          primary
-          onClick={onScrollToForm}
+          variant="primary"
+          route="/contact"
           className="mt-6"
         >
           {buttonLabel}
-          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
         </Button>
       </motion.header>
     </motion.article>

@@ -1,5 +1,4 @@
 import { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ContactUsForm from '@/pages/home/components/ContactUsForm';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
@@ -10,7 +9,6 @@ import SupportSection from '@/pages/home/components/SupportSection';
 import FinalCtaSection from '@/pages/home/components/FinalCtaSection';
 import { useHomeContent } from '@/pages/home/useHomeContent';
 import { entranceVariants } from '@/pages/home/home.animations';
-import { HERO_DELIVERY_FORM_ID } from '@/pages/home/components/HeroForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
@@ -79,7 +77,6 @@ const ContactChannelsPanel = ({
 
 const ContactUsPage = () => {
   const { t } = useI18n();
-  const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
   const { data: landingStats } = useGetLandingStatsQuery();
   const { heroCopy, supportContacts } = useHomeContent();
@@ -88,10 +85,6 @@ const ContactUsPage = () => {
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const handleBookDelivery = () => {
-    navigate(`/#${HERO_DELIVERY_FORM_ID}`);
   };
 
   return (
@@ -191,7 +184,6 @@ const ContactUsPage = () => {
         title="Need to send something now?"
         subtitle="Book a verified rider in under a minute. Pay when it arrives."
         buttonLabel="Book delivery"
-        onScrollToForm={handleBookDelivery}
       />
     </main>
   );
