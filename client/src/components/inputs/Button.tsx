@@ -6,7 +6,14 @@ import { Loader } from './Loader.tsx';
 import { Button as ButtonUI } from '../ui/button';
 import { cn } from '@/lib/utils';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'link' | 'danger';
+type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'link'
+  | 'danger'
+  | 'approve';
 
 interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchorElement>, 'onClick'> {
   route?: string;
@@ -19,6 +26,8 @@ interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchor
   submit?: boolean;
   /** Shorthand for variant="danger". */
   danger?: boolean;
+  /** Shorthand for variant="approve". */
+  approve?: boolean;
   icon?: IconProp;
   isLoading?: boolean;
   children?: ReactNode;
@@ -35,10 +44,8 @@ const uiVariant = {
   outline: 'outline',
   ghost: 'ghost',
   link: 'link',
-  // Destructive reads from the copy and the icon, not from hue. It is an
-  // outline button whose label is struck through on hover, so it is
-  // distinguishable in a grayscale screenshot and to a screen reader.
-  danger: 'outline',
+  danger: 'destructive',
+  approve: 'approve',
 } as const;
 
 const Button: FC<ButtonProps> = ({
@@ -51,6 +58,7 @@ const Button: FC<ButtonProps> = ({
   className,
   submit = false,
   danger = false,
+  approve = false,
   icon,
   isLoading = false,
   children,
@@ -59,12 +67,10 @@ const Button: FC<ButtonProps> = ({
   ...rest
 }) => {
   const resolved: ButtonVariant =
-    variant ?? (danger ? 'danger' : primary ? 'primary' : 'outline');
+    variant ??
+    (danger ? 'danger' : approve ? 'approve' : primary ? 'primary' : 'outline');
 
-  const classes = cn(
-    resolved === 'danger' && 'border-(--line-strong) hover:line-through',
-    className
-  );
+  const classes = cn(className);
 
   const content = isLoading ? (
     <Loader className="text-current" />

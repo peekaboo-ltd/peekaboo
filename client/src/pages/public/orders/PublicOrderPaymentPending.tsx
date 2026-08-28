@@ -149,7 +149,7 @@ const PublicOrderPaymentPending = () => {
           <span
             className={`inline-flex h-6 items-center gap-2 rounded-(--radius-pill) border px-2.5 text-xs font-normal ${
               isFailed
-                ? 'border-(--ink) text-(--ink) line-through'
+                ? 'border-(--danger-line) bg-(--danger-surface) text-(--danger)'
                 : 'border-dashed border-(--line-strong) text-(--muted)'
             }`}
           >
@@ -228,7 +228,7 @@ const PublicOrderPaymentPending = () => {
           </ol>
 
           <div
-            className={`mt-7 flex items-start gap-3 rounded-(--radius-control) px-4 py-3 text-sm leading-6 ${ isFailed ? ' border-(--ink) bg-(--paper) text-(--ink)' : ' border-dashed border-(--line-strong) bg-(--surface) text-(--ink)' }`}
+            className={`mt-7 flex items-start gap-3 rounded-(--radius-control) border px-4 py-3 text-sm leading-6 ${ isFailed ? 'border-(--danger-line) bg-(--danger-surface) text-(--danger)' : 'border-dashed border-(--line-strong) bg-(--surface) text-(--ink)' }`}
             role="status"
             aria-live="polite"
           >

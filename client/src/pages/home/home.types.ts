@@ -72,12 +72,3 @@ export interface Testimonial {
   content: string;
   type: TestimonialType;
 }
-
-export interface BusinessPlan {
-  name: string;
-  description: string;
-  price: string;
-  features: string[];
-  isPopular?: boolean;
-  detailsTo?: string;
-}

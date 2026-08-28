@@ -1,34 +1,43 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Check } from 'lucide-react';
-import type { BusinessPlan } from '../home.types';
+import type { BusinessPlan } from '@/types/businessPlan.type';
 import { containerVariants, itemVariants } from '../home.animations';
-import Button from '@/components/inputs/Button';
+import PlanCard from '@/pages/services/PlanCard';
 
 interface BusinessPlansSectionProps {
-  badgeLabel: string;
+  badgeLabel?: string;
   title: string;
   subtitle: string;
-  popularLabel: string;
-  ctaLabel: string;
-  detailsCtaLabel?: string;
+  popularLabel?: string;
+  ctaLabel?: string;
   plans: BusinessPlan[];
   isLoading?: boolean;
+  /** Set when the section stands alone and the page has no hero above it. */
+  showHeader?: boolean;
 }
 
+/**
+ * The plan row. Cards sit on the grey surface rather than on paper, so a white
+ * card reads as raised — previously the recommended plan was the only white
+ * card among grey ones, which made the one plan being recommended the least
+ * prominent thing in the row.
+ */
 const BusinessPlansSection = ({
   badgeLabel,
   title,
   subtitle,
-  popularLabel,
-  ctaLabel,
-  detailsCtaLabel = 'View plan details',
+  popularLabel = 'Most popular',
+  ctaLabel = 'See full pricing',
   plans,
   isLoading,
+  showHeader = true,
 }: BusinessPlansSectionProps) => {
   const hasPlans = !isLoading && plans.length > 0;
 
   return (
-    <section id="business-plans" className="section-rhythm w-full border-(--line) bg-(--paper)">
+    <section
+      id="business-plans"
+      className="section-rhythm w-full border-y border-(--line) bg-(--surface)"
+    >
       <motion.article
         className="app-container"
         initial="hidden"
@@ -36,22 +45,20 @@ const BusinessPlansSection = ({
         viewport={{ once: true, margin: '-80px' }}
         variants={containerVariants}
       >
-        <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
-          <p className="type-eyebrow">
-            {badgeLabel}
-          </p>
-          <h2 className="type-h2 mt-2">
-            {title}
-          </h2>
-          <p className="mt-3 text-sm font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
-        </motion.header>
+        {showHeader ? (
+          <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
+            {badgeLabel ? <p className="type-eyebrow">{badgeLabel}</p> : null}
+            <h2 className="type-h2 mt-2">{title}</h2>
+            <p className="type-body mt-3 text-(--muted)">{subtitle}</p>
+          </motion.header>
+        ) : null}
 
         {isLoading ? (
           <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
               <li
                 key={index}
-                className="h-[420px] animate-pulse rounded-(--radius-control) border border-border bg-(--surface)"
+                className="h-[420px] animate-pulse rounded-(--radius-card) border border-(--line) bg-(--paper)"
               />
             ))}
           </ul>
@@ -61,77 +68,16 @@ const BusinessPlansSection = ({
             variants={containerVariants}
           >
             {plans.map((plan) => (
-              <motion.li
-                key={plan.name}
-                variants={itemVariants}
-              >
-                <article
-                  className={`group relative flex h-full flex-col p-6 ${
-                    plan.isPopular ? 'card-framed border-(--ink)' : 'card-quiet'
-                  }`}
-                >
-                  <header className="flex items-start justify-between gap-4">
-                    <hgroup>
-                      <h3 className="type-card-title">
-                        {plan.name}
-                      </h3>
-                      <p className="type-meta mt-1.5">
-                        {plan.description}
-                      </p>
-                    </hgroup>
-                    {plan.isPopular ? (
-                      <span className="invert-surface inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-(--radius-pill) px-2.5 text-xs font-medium">
-                        {popularLabel}
-                      </span>
-                    ) : null}
-                  </header>
-
-                  <section className="mt-4">
-                    <p className="type-metric">
-                      {plan.price}
-                    </p>
-                  </section>
-
-                  <ul className="mt-4 flex-1 space-y-2">
-                    {plan.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="type-meta flex items-start gap-2"
-                      >
-                        <Check
-                          className="mt-0.5 size-3.5 shrink-0 text-(--ink)"
-                          aria-hidden="true"
-                        />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-5 flex flex-col gap-2">
-                    <Button
-                      route="/contact"
-                      variant='primary'
-                    >
-                      {ctaLabel}
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/link:translate-x-1" aria-hidden="true" />
-                    </Button>
-
-                    {plan.detailsTo ? (
-                      <Button
-                      variant='outline'
-                        route={plan.detailsTo}
-                      >
-                        {detailsCtaLabel}
-                      </Button>
-                    ) : null}
-                  </div>
-                </article>
-              </motion.li>
+                <PlanCard
+                  plan={plan}
+                  recommendedLabel={popularLabel}
+                  ctaLabel={ctaLabel}
+                />
             ))}
           </motion.ul>
         ) : (
-          <p className="rounded-(--radius-control) border border-border bg-(--surface) px-5 py-8 text-sm font-normal text-muted-foreground">
-            Business plans are being updated. Contact our team for current pricing.
+          <p className="card-framed type-body-sm px-5 py-8 text-(--muted)">
+            Plans are being updated. Talk to our team for current pricing.
           </p>
         )}
       </motion.article>

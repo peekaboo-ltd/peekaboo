@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Button from '@/components/inputs/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useGetOrderByReferenceId } from '@/hooks/orders/orders.hooks';
 import { useI18n } from '@/i18n/i18n';
@@ -77,29 +76,22 @@ const TrackOrder = () => {
           }}
           className="flex flex-col"
         >
-          <label
-            htmlFor="reference-id"
-            className="type-label mb-1.5 block"
-          >
-            {t('trackOrder.orderIdLabel')}
-          </label>
-          <div className="relative">
-            <span className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-(--muted)">
-              <FontAwesomeIcon icon={faMagnifyingGlass} />
-            </span>
-            <Input
-              id="reference-id"
-              value={referenceId}
-              onChange={(e) => {
-                setReferenceId(e.target.value.toUpperCase());
-                setErrorMessage('');
-              }}
-              placeholder={t('trackOrder.orderIdPlaceholder')}
-              className="ps-10"
-              errorMessage={errorMessage}
-            />
-          </div>
-          <p className="type-meta mt-1.5">{t('trackOrder.hint')}</p>
+          {/* Label, icon, hint, and error are all the field's own slots. Hand
+              -positioning the icon over the control centred it on the whole
+              stack, so it slid down as soon as an error appeared below. */}
+          <Input
+            id="reference-id"
+            label={t('trackOrder.orderIdLabel')}
+            value={referenceId}
+            onChange={(e) => {
+              setReferenceId(e.target.value.toUpperCase());
+              setErrorMessage('');
+            }}
+            placeholder={t('trackOrder.orderIdPlaceholder')}
+            prefixIcon={faMagnifyingGlass}
+            description={t('trackOrder.hint')}
+            errorMessage={errorMessage}
+          />
 
           <Button
             type="submit"

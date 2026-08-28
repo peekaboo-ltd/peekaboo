@@ -18,6 +18,7 @@ import {
 import {
   ellipsisHClassName,
   tableActionClassName,
+  tableDangerActionClassName,
 } from '@/constants/inputs.constants';
 import { Link } from 'react-router-dom';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
@@ -118,7 +119,7 @@ export const useOrdersColumns = () => {
                       Resume
                     </Link>
                     <Link
-                      className={tableActionClassName}
+                      className={tableDangerActionClassName}
                       to={`#`}
                       onClick={(e) => {
                         e.preventDefault();

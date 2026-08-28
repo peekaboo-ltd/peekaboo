@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faTiktok, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
-import type { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core';
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { useI18n } from '@/i18n/i18n';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
 
@@ -19,7 +19,7 @@ interface ContactInfo {
 }
 
 interface SocialMedia {
-  icon: IconProp | IconDefinition;
+  icon: IconDefinition;
   url: string;
   label: string;
 }
@@ -111,14 +111,20 @@ const Footer = () => {
               {contactInfo.map((contact) => (
                 <li key={contact.text}>
                   {contact.href ? (
-                    <a href={contact.href} className="link-sweep flex items-center gap-3 text-sm text-(--muted) hover:text-(--ink)">
-                      <FontAwesomeIcon icon={contact.icon} className="size-4" />
-                      {contact.text}
+                    <a
+                      href={contact.href}
+                      className="flex items-center gap-3 text-sm text-(--muted) hover:text-(--ink)"
+                      style={{ width: 'fit-content', maxWidth: '100%' }}
+                    >
+                      <span className="inline-flex items-center">
+                        <FontAwesomeIcon icon={contact.icon} className="size-4" />
+                        <span className="link-sweep ml-3">{contact.text}</span>
+                      </span>
                     </a>
                   ) : (
                     <p className="flex items-center gap-3 text-sm text-(--muted)">
-                      <FontAwesomeIcon icon={contact.icon} className="size-4" />
-                      {contact.text}
+                      <FontAwesomeIcon icon={contact?.icon} className="size-4" />
+                      {contact?.text}
                     </p>
                   )}
                 </li>
@@ -126,6 +132,7 @@ const Footer = () => {
             </ul>
           </address>
         </div>
+   
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-(--line) pt-6 sm:flex-row sm:items-center">
           <p className="type-meta">

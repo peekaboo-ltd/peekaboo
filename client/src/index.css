@@ -81,6 +81,24 @@
   --chart-3: #757575;
   --chart-4: #a3a3a3;
   --chart-5: #d4d4d4;
+
+  /* ── Consequence ─────────────────────────────────────────────────────────
+     The only two hues in the system. Structure — cards, tables, navigation,
+     labels, the primary action — stays black and white; color is spent only
+     where something has failed, is about to be destroyed, or has been
+     resolved. Because nothing decorative is ever colored, any color at all
+     reads as "this one matters."
+     Red 700 and green 700, as specified. */
+  --danger: #b91c1c;
+  --danger-strong: #991b1b;
+  --danger-surface: #fef2f2;
+  --danger-line: #fecaca;
+  --approve: #15803d;
+  --approve-strong: #166534;
+  --approve-surface: #f0fdf4;
+  --approve-line: #bbf7d0;
+  /* Text that sits on a filled danger or approve ground. */
+  --on-consequence: #ffffff;
 }
 
 .dark {
@@ -94,6 +112,10 @@
   --line-strong: #5e5e5e;
   --muted: #a3a3a3;
   --muted-weak: #8f8f8f;
+  --brand-whatsapp: #25d366;
+  --brand-tiktok: #ffffff;
+  --brand-x-twitter: #ffffff;
+  --brand-mastercard: #f79e1b;
   --disabled-fg: #5e5e5e;
   --press-on-ink: rgba(255, 255, 255, 0.2);
   --press-on-paper: rgba(0, 0, 0, 0.08);
@@ -105,6 +127,18 @@
   --chart-3: #757575;
   --chart-4: #4b4b4b;
   --chart-5: #ffffff;
+
+  /* The 700s read at 3.4:1 on black — below the floor. Dark mode keeps the
+     same two meanings and lifts them to the 400s to hold contrast. */
+  --danger: #f87171;
+  --danger-strong: #fca5a5;
+  --danger-surface: #1c1011;
+  --danger-line: #4c1d1d;
+  --approve: #4ade80;
+  --approve-strong: #86efac;
+  --approve-surface: #0c1a10;
+  --approve-line: #14532d;
+  --on-consequence: #000000;
 }
 
 :root,
@@ -122,7 +156,7 @@
   --muted-foreground: var(--muted);
   --accent: var(--surface);
   --accent-foreground: var(--ink);
-  --destructive: var(--ink);
+  --destructive: var(--danger);
   --border: var(--line);
   --input: var(--line);
   --ring: var(--ink);
@@ -347,6 +381,17 @@ button[aria-current='page'],
   line-height: 1.5;
   font-weight: 400;
   color: var(--muted);
+}
+
+/* A price. Larger than a metric and tightened, because the numeral is the
+   content on a pricing card — its currency and cadence are set small beside it
+   so the numbers line up across cards regardless of how long the words are. */
+@utility type-price {
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem); /* 28 → 36px */
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Big numbers: counters, metric cards, totals. Tabular so columns align. */

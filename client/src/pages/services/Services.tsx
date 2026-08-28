@@ -1,53 +1,79 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BusinessPlansSection from '@/pages/home/components/BusinessPlansSection';
-import { mapApiPlanToCard } from '@/pages/home/home.utils';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { Button } from '@/components/ui/button';
 import { useFetchPublicBusinessPlansQuery } from '@/api/queries/businessPlan.queries';
+import { billingPeriodLabel } from './plan-pricing';
 
 const Services = () => {
   useDocumentTitle('Services');
   const { data, isFetching } = useFetchPublicBusinessPlansQuery(undefined);
-  const businessPlans = (data?.data || []).map(mapApiPlanToCard);
+  const plans = data?.data || [];
+
+  // The page's own summary of the range on offer, drawn from the plans
+  // themselves rather than asserted in copy that goes stale.
+  const cadences = Array.from(
+    new Set(plans.map((plan) => billingPeriodLabel(plan.billingPeriod))),
+  );
 
   return (
     <main className="min-h-screen bg-(--paper) text-(--ink)">
-      <section className="section-rhythm border-b border-(--line)">
+      <section className="section-rhythm">
         <div className="app-container">
           <p className="type-eyebrow">Pricing</p>
           <h1 className="type-display mt-3 max-w-[16ch]">
-            Business delivery plans
+            Pay for the volume you actually send
           </h1>
-          <p className="mt-4 max-w-[46ch] text-base leading-[1.6] text-(--muted)">
-            Choose the package that matches your growth: monthly, weekly, daily, or a dedicated rider fully committed to your operations.
+          <p className="type-body mt-4 max-w-[52ch] text-(--muted)">
+            Every plan is priced in volume bands. Find the band you operate in,
+            and that is your cost — no seat counts, no minimum commitment.
           </p>
+
+          {!isFetching && plans.length ? (
+            <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4 border-t border-(--line) pt-6">
+              <div>
+                <dt className="type-eyebrow">Plans</dt>
+                <dd className="type-card-title mt-2">{plans.length}</dd>
+              </div>
+              <div>
+                <dt className="type-eyebrow">Billing cadences</dt>
+                <dd className="type-card-title mt-2">{cadences.join(' · ')}</dd>
+              </div>
+              <div>
+                <dt className="type-eyebrow">Commitment</dt>
+                <dd className="type-card-title mt-2">None</dd>
+              </div>
+            </dl>
+          ) : null}
         </div>
       </section>
 
+      {/* The hero above already introduces the range, so the row of cards
+          carries no second header repeating it. */}
       <BusinessPlansSection
-        badgeLabel="Business packages"
-        title="Business Growth Plans"
-        subtitle="Scale your deliveries with flexible monthly, weekly, and daily bundles—or unlock a dedicated rider for high and consistent demand."
+        title="Business delivery plans"
+        subtitle=""
+        showHeader={false}
         popularLabel="Most popular"
-        ctaLabel="Talk to our team"
-        detailsCtaLabel="View more details"
-        plans={businessPlans}
+        ctaLabel="See full pricing"
+        plans={plans}
         isLoading={isFetching}
       />
 
-      <section className="invert-surface section-rhythm border-t border-(--line)">
+      <section className="invert-surface section-rhythm">
         <div className="app-container text-center">
           <p className="type-eyebrow">Get started</p>
           <h2 className="type-h2 mx-auto mt-2 max-w-[22ch]">
-            Ready to streamline your deliveries?
+            Not sure which band you land in?
           </h2>
-          <p className="mx-auto mt-4 max-w-[46ch] text-base leading-[1.6] text-(--muted)">
-            Get in touch with our team to find the plan that fits your operating rhythm.
+          <p className="type-body mx-auto mt-4 max-w-[46ch] text-(--muted)">
+            Tell us roughly how much you send in a month and we will confirm the
+            plan that costs you least.
           </p>
           <Button asChild size="lg" className="link-arrow mt-8">
             <Link to="/contact">
-              Contact our team
+              Talk to our team
               <ArrowRight data-slot="icon" className="size-4" aria-hidden="true" />
             </Link>
           </Button>

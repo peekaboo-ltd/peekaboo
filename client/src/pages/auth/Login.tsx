@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import Input from '@/components/inputs/Input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,12 +11,8 @@ import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
   AuthCard,
   AuthDivider,
-  AuthFooterNote,
-  AuthLink,
   AuthPageShell,
   AuthSocialButton,
-  authInputClassName,
-  authPrimaryButtonClassName,
 } from './AuthPageShell';
 
 interface LoginFormData {
@@ -72,13 +68,12 @@ export const Login = () => {
               <Input
                 {...field}
                 label="Email or phone"
-                placeholder="name@example.com or 7XXXXXXXX"
+                placeholder="Enter your email or phone..."
                 autoComplete="username"
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
                 required
-                className={authInputClassName}
                 errorMessage={errors?.username?.message}
               />
             )}
@@ -100,7 +95,6 @@ export const Login = () => {
                 spellCheck={false}
                 required
                 showPasswordToggle
-                className={authInputClassName}
                 errorMessage={errors?.password?.message}
               />
             )}
@@ -111,7 +105,7 @@ export const Login = () => {
               name="rememberMe"
               control={control}
               render={({ field }) => (
-                <label className="type-body-sm flex cursor-pointer items-center gap-2 text-(--muted)">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-(--muted)">
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -121,24 +115,32 @@ export const Login = () => {
                 </label>
               )}
             />
-            <span className="type-body-sm">
-              <AuthLink to="/auth/forgot-password">Forgot password?</AuthLink>
-            </span>
+            <Link
+              to="/auth/forgot-password"
+              className="link-sweep text-sm text-(--ink)"
+            >
+              Forgot password?
+            </Link>
           </div>
 
           <Button
             type="submit"
-            primary
-            className={authPrimaryButtonClassName}
+            variant="primary"
             isLoading={isLoading}
           >
             Log in
           </Button>
         </form>
 
-        <AuthFooterNote>
-          Don&apos;t have an account? <AuthLink to="/auth/register">Sign up</AuthLink>
-        </AuthFooterNote>
+        <div className="mt-6 text-center text-sm">
+          <span>Don&apos;t have an account? </span>
+          <Link
+            to="/auth/register"
+            className="link-sweep text-(--ink)"
+          >
+            Sign up
+          </Link>
+        </div>
       </AuthCard>
     </AuthPageShell>
   );

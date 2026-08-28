@@ -512,19 +512,36 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         className={labelClassName}
       >
         <section className="relative w-full">
+          {/* The prefix sits inside this wrapper, which is the input's own box
+              — not the field's. Positioning it against the field made it drift
+              downward the moment an error message grew underneath. An
+              un-handled prefix is decoration and renders inert; it used to be
+              an anchor to "#", which put a dead stop in the tab order. */}
           {prefixIcon || prefixText ? (
-            <span className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-              <Link
-                to={'#'}
-                onClick={prefixIconHandler}
-                className="text-(--muted)"
+            prefixIconHandler ? (
+              <button
+                type="button"
+                onClick={
+                  prefixIconHandler as unknown as MouseEventHandler<HTMLButtonElement>
+                }
+                className="absolute inset-y-0 start-0 flex items-center ps-3.5 text-(--muted) outline-none transition-colors duration-200 ease-(--ease-flat) hover:text-(--ink)"
               >
                 {prefixIcon && (
                   <FontAwesomeIcon className="text-current" icon={prefixIcon} />
                 )}
-                {prefixText && <p className="text-sm">{prefixText}</p>}
-              </Link>
-            </span>
+                {prefixText && <span className="text-sm">{prefixText}</span>}
+              </button>
+            ) : (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3.5 text-(--muted)"
+              >
+                {prefixIcon && (
+                  <FontAwesomeIcon className="text-current" icon={prefixIcon} />
+                )}
+                {prefixText && <span className="text-sm">{prefixText}</span>}
+              </span>
+            )
           ) : null}
 
           {(suffixIcon || showSearchSuffix) && (

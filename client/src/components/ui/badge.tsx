@@ -14,7 +14,9 @@ const badgeVariants = cva(
         secondary:
           "border border-transparent bg-(--surface) text-(--muted)",
         destructive:
-          "border border-(--ink) bg-transparent text-(--ink) line-through",
+          "border border-(--danger-line) bg-(--danger-surface) text-(--danger)",
+        approve:
+          "border border-(--approve-line) bg-(--approve-surface) text-(--approve)",
         outline:
           "border border-(--ink) bg-transparent text-(--ink)",
       },

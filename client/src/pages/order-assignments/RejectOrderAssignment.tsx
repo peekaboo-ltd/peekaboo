@@ -37,7 +37,7 @@ const RejectOrderAssignment = () => {
                 <p className='text-sm'>
                     Are you sure you want to reject this assignment?
                 </p>
-                <Button className='self-end' danger onClick={(e) => {
+                <Button danger primary className='self-end' onClick={(e) => {
                     e.preventDefault();
                     if (!selectedOrderAssignment?.id) return;
                     rejectOrderAssignment({ id: selectedOrderAssignment?.id });

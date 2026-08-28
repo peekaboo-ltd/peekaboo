@@ -165,7 +165,6 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
           placeholder={readOnly ? '' : placeholder}
           disabled={disabled}
           readOnly={readOnly}
-          required={required}
           autoComplete={autoComplete}
           aria-invalid={Boolean(resolvedError)}
           aria-describedby={resolvedError || description ? errorId : undefined}

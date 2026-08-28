@@ -130,11 +130,12 @@ const PaymentDetailsPage = () => {
           : payment.status === KpayPaymentStatus.FAILED
             ? faXmarkCircle
             : faClockRotateLeft,
+      // Settled payments carry their outcome; one still in flight stays grey.
       iconBg: payment.status === KpayPaymentStatus.SUCCESSFUL
-        ? 'bg-(--surface) text-(--muted)'
+        ? 'bg-(--approve-surface) text-(--approve)'
         : payment.status === KpayPaymentStatus.FAILED
-          ? 'bg-(--surface) text-(--ink)'
-          : 'bg-(--surface) text-(--ink)',
+          ? 'bg-(--danger-surface) text-(--danger)'
+          : 'bg-(--surface) text-(--muted)',
     },
     {
       label: 'Amount',

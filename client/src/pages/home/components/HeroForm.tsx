@@ -15,6 +15,7 @@ import {
 } from '@/utils/locations.util';
 import PlaceSearch from '@/components/inputs/PlaceSearch';
 import TelInput from '@/components/inputs/TelInput';
+import { fieldErrorClassName } from '@/components/inputs/control';
 
 interface HeroFormCopy {
   formTitle: string;
@@ -41,11 +42,8 @@ const validateRwandanPhone = (value: string | undefined) => {
 
 const FieldError = ({ message }: { message?: string }) =>
   message ? (
-    <span
-      className="mt-1.5 flex items-center gap-1.5 text-[0.8125rem] text-(--ink)"
-      role="alert"
-    >
-      <TriangleAlert className="size-3.5 shrink-0" aria-hidden="true" />
+    <span className={`mt-1.5 ${fieldErrorClassName}`} role="alert">
+      <TriangleAlert className="mt-[0.15em] size-3.5 shrink-0" aria-hidden="true" />
       {message}
     </span>
   ) : null;

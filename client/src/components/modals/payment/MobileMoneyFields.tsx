@@ -6,6 +6,7 @@ import {
 } from '@/utils/phone.util';
 import { PaymentChannel } from '@/types/payment.types';
 import type { PaymentFormValues, PayerType } from './payment.types';
+import { FieldMessage } from '@/components/inputs/Field';
 
 interface MobileMoneyFieldsProps {
   control: Control<PaymentFormValues>;
@@ -82,7 +83,7 @@ const MobileMoneyFields = ({
       />
 
       {payerType !== 'other' && payerPhoneError ? (
-        <p className="text-sm text-(--ink)">{payerPhoneError}</p>
+        <FieldMessage errorMessage={payerPhoneError} />
       ) : null}
 
       {payerType === 'other' && (

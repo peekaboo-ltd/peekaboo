@@ -20,9 +20,11 @@ const statusConfig: Record<UserStatus, {
     label: 'Inactive',
     className: 'border-(--line) bg-transparent text-(--muted)',
   },
+  // Active is the ordinary state and stays ink; only the one that is a
+  // consequence takes color.
   [UserStatus.SUSPENDED]: {
     label: 'Suspended',
-    className: 'border-(--ink) bg-transparent text-(--ink) line-through',
+    className: 'border-(--danger-line) bg-(--danger-surface) text-(--danger)',
   },
 };
 

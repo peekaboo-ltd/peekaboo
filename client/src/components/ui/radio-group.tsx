@@ -27,7 +27,7 @@ function RadioGroupItem({
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"
       className={cn(
-        "aspect-square size-5 shrink-0 rounded-(--radius-pill) border border-(--ink) bg-transparent text-(--ink) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] data-[state=checked]:bg-(--ink) data-[state=checked]:text-(--paper) focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] aria-invalid:shadow-[var(--ink)_0_0_0_2px_inset] disabled:cursor-not-allowed disabled:opacity-40",
+        "aspect-square size-5 shrink-0 rounded-(--radius-pill) border border-(--ink) bg-transparent text-(--ink) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] data-[state=checked]:bg-(--ink) data-[state=checked]:text-(--paper) focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] aria-invalid:border-(--danger) aria-invalid:shadow-[var(--danger)_0_0_0_2px_inset] disabled:cursor-not-allowed disabled:opacity-40",
         className
       )}
       {...props}

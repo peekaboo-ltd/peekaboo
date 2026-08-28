@@ -186,7 +186,7 @@ export const useStatusFilter = ({
 
           {/* Scrollable container for statuses and action buttons */}
           <nav
-            className="flex flex-col w-full overflow-y-auto bg-(--paper) rounded-md p-2"
+            className="flex flex-col w-full overflow-y-auto bg-(--paper) rounded-md py-2"
             style={{ maxHeight: 'calc(55vh - 50px)' }}
             aria-label="Status Filter List"
           >

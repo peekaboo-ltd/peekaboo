@@ -272,7 +272,7 @@ const PlaceSearch = ({
           className={controlClassName}
         />
         {isMapsUnavailable && (
-          <p className="mt-1 text-xs text-(--ink)">Maps failed to load.</p>
+          <p className="mt-1 text-xs text-(--danger)">Maps failed to load.</p>
         )}
       </section>
       {dropdownContent && createPortal(dropdownContent, document.body)}

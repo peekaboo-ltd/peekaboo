@@ -27,6 +27,16 @@ const buttonVariants = cva(
         // combobox) and must line up with the inputs beside it.
         field:
           "justify-start border border-(--line) bg-(--paper) text-(--ink) font-normal hover:border-(--line-strong) focus-visible:border-(--ink) focus-visible:shadow-[var(--ink)_0_0_0_1px_inset] data-[state=open]:border-(--ink)",
+        // Destructive: an outline that states its consequence in red, and
+        // floods to a solid red on hover so the commit is unmistakable. This
+        // replaces a strike-through-on-hover trick that existed only because
+        // the system had no red to spend.
+        destructive:
+          "border border-(--danger) bg-transparent text-(--danger) hover:bg-(--danger) hover:text-(--on-consequence) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]",
+        // Approve: the same shape in green. Used where an action resolves
+        // something — accepting, approving, confirming a request.
+        approve:
+          "border border-(--approve) bg-transparent text-(--approve) hover:bg-(--approve) hover:text-(--on-consequence) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]",
         ghost:
           "border border-transparent bg-transparent text-(--ink) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]",
         link: "link-sweep h-auto border-transparent bg-transparent p-0 text-(--ink) active:text-(--muted)",

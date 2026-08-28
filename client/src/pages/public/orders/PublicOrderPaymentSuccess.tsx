@@ -165,7 +165,7 @@ const PublicOrderPaymentSuccess = () => {
         title="Payment confirmed"
         description="Your order is paid and ready for rider assignment. Keep the references below for your records."
         actions={
-          <span className="inline-flex h-6 items-center gap-2 rounded-(--radius-pill) border border-(--ink) px-2.5 text-xs font-normal text-(--ink)">
+          <span className="inline-flex h-6 items-center gap-2 rounded-(--radius-pill) border border-(--approve-line) bg-(--approve-surface) px-2.5 text-xs font-normal text-(--approve)">
             <FontAwesomeIcon icon={faCheckCircle} aria-hidden="true" />
             Confirmed
           </span>

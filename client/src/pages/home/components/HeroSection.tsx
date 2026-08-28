@@ -1,6 +1,5 @@
 import type { RefObject } from 'react';
 import { useState } from 'react';
-import { MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { useCreateOrder, useCreatePublicOrder } from '@/hooks/orders/orders.hooks';
@@ -78,12 +77,12 @@ const HeroSection = ({
             initial="hidden"
             animate="visible"
           >
-            {/* <HeroTabs
+            <HeroTabs
               activeTab={activeTab}
               onTabChange={setActiveTab}
               personalLabel={heroCopy.personalTabLabel}
               businessLabel={heroCopy.businessTabLabel}
-            /> */}
+            />
 
             <HeroHeadline
               activeTab={activeTab}
@@ -95,7 +94,7 @@ const HeroSection = ({
               businessSubtitle={heroCopy.businessSubtitle}
             />
 
-            <HeroForm
+            {activeTab === 'personal' && <HeroForm
               formRef={formRef}
               onSubmit={onSubmit}
               control={control}
@@ -108,7 +107,7 @@ const HeroSection = ({
                 recipientLabel: heroCopy.recipientLabel,
                 recipientPlaceholder: heroCopy.recipientPlaceholder,
               }}
-            />
+            />}
 
             <HeroBusinessCta
               isActive={activeTab === 'business'}

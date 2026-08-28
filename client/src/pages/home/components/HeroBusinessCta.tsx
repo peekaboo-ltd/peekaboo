@@ -16,12 +16,11 @@ const HeroBusinessCta = ({
   isLoading,
   accountLabel,
   primaryLabel,
-  tryQuickDeliveryLabel,
   onContactClick,
   onTrackClick,
 }: HeroBusinessCtaProps) => (
   <nav
-    className="flex w-full flex-wrap items-center gap-4 max-sm:flex-col max-sm:items-stretch"
+    className={`flex ${isActive ? `flex` : `flex-row-reverse`} w-full flex-wrap justify-between items-center gap-4 max-sm:flex-col max-sm:items-stretch`}
     aria-label="Delivery actions"
   >
     <Button
@@ -32,16 +31,15 @@ const HeroBusinessCta = ({
       disabled={isLoading}
       className="max-sm:w-full"
     >
-      {isLoading ? 'Booking…' : isActive ? tryQuickDeliveryLabel : primaryLabel}
+      {isLoading ? 'Booking…' : isActive ? accountLabel : primaryLabel}
     </Button>
-    <span className="h-6 w-px bg-(--line) max-sm:hidden" aria-hidden="true" />
-    <Link
+    {!isActive && <Link
       onClick={isActive ? onContactClick : onTrackClick}
       to={isActive ? '/contact' : '/track'}
       className="link-sweep text-sm text-(--ink) max-sm:text-center"
     >
       {isActive ? accountLabel : 'Track an order'}
-    </Link>
+    </Link>}
   </nav>
 );
 

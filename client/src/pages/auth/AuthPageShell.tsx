@@ -8,6 +8,12 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 interface AuthPageShellProps {
   children: ReactNode;
+  /**
+   * How wide the column may grow. The card fills it, so the width lives in one
+   * place instead of being declared on both the column and the card — where
+   * the two could disagree and silently clamp each other.
+   */
+  maxWidthClassName?: string;
 }
 
 interface AuthCardProps {
@@ -72,7 +78,7 @@ export const AuthLink = ({ to, children }: { to: string; children: ReactNode }) 
 );
 
 export const AuthCard = ({ title, subtitle, children }: AuthCardProps) => (
-  <section className="card-framed w-full max-w-[440px] px-8 py-8 max-sm:px-5 max-sm:py-6">
+  <section className="card-framed w-full px-8 py-8 max-sm:px-5 max-sm:py-6">
     <header className="mb-6 text-center">
       <h1 className="type-h3">{title}</h1>
       <p className="type-body-sm mt-1 text-(--muted)">{subtitle}</p>
@@ -83,19 +89,22 @@ export const AuthCard = ({ title, subtitle, children }: AuthCardProps) => (
 );
 
 export const AuthNotice = ({ children, tone = 'default' }: AuthNoticeProps) => {
-  // Tone is carried by the border treatment, not by hue: a solid ink edge for
-  // something that needs attention, a quiet fill for something that does not.
+  // A notice states an outcome, so it takes the outcome colors. The neutral
+  // tone stays a quiet grey fill — it is information, not a verdict.
   const toneClassName =
     tone === 'error'
-      ? 'card-framed border-(--ink) p-4'
+      ? 'card-framed border-(--danger-line) bg-(--danger-surface) p-4 text-(--danger)'
       : tone === 'success'
-        ? 'card-quiet p-4'
+        ? 'card-framed border-(--approve-line) bg-(--approve-surface) p-4 text-(--approve)'
         : 'card-quiet p-4 text-(--muted)';
 
   return <div className={`type-body-sm ${toneClassName}`}>{children}</div>;
 };
 
-export const AuthPageShell = ({ children }: AuthPageShellProps) => (
+export const AuthPageShell = ({
+  children,
+  maxWidthClassName = 'max-w-[440px]',
+}: AuthPageShellProps) => (
   <main className="grid h-screen max-h-screen grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-(--paper) px-5 py-6 text-(--ink)">
     <header className="flex justify-center">
       <Link
@@ -114,7 +123,7 @@ export const AuthPageShell = ({ children }: AuthPageShellProps) => (
     {/* The form column is the only scroller: a long form (Complete account)
         scrolls inside the viewport instead of pushing the trust row off it. */}
     <div className="flex items-start justify-center overflow-y-auto py-5 max-sm:py-3">
-      <div className="my-auto w-full max-w-[440px]">{children}</div>
+      <div className={`my-auto w-full ${maxWidthClassName}`}>{children}</div>
     </div>
   </main>
 );

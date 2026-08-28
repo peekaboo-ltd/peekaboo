@@ -3,7 +3,7 @@ import CustomTooltip from "@/components/inputs/CustomTooltip";
 import { StatusBadge } from "@/components/inputs/StatusBadge";
 import { ReferenceIdInput } from "@/components/inputs/TableInputs";
 import TableUserLabel from "@/components/users/TableUserLabel";
-import { ellipsisHClassName, tableActionClassName } from "@/constants/inputs.constants";
+import { ellipsisHClassName, tableActionClassName, tableApproveActionClassName, tableDangerActionClassName } from "@/constants/inputs.constants";
 import { useAppDispatch } from "@/states/hooks";
 import { setAcceptOrderAssignmentModal, setReassignOrderAssignmentModal, setRejectOrderAssignmentModal, setSelectedOrderAssignment } from "@/states/slices/orderAssignment.slice";
 import { OrderAssignment } from "@/types/orderAssignment.type";
@@ -67,7 +67,7 @@ export const useOrderAssignmentsColumns = () => {
                                     e.preventDefault();
                                     dispatch(setAcceptOrderAssignmentModal(true));
                                     dispatch(setSelectedOrderAssignment(row.original));
-                                }} className={tableActionClassName} to={`#`}>
+                                }} className={tableApproveActionClassName} to={`#`}>
                                     <FontAwesomeIcon icon={faCircleCheck} />
                                     Accept
                                 </Link>
@@ -75,7 +75,7 @@ export const useOrderAssignmentsColumns = () => {
                                     e.preventDefault();
                                     dispatch(setRejectOrderAssignmentModal(true));
                                     dispatch(setSelectedOrderAssignment(row.original));
-                                }} className={tableActionClassName} to={`#`}>
+                                }} className={tableDangerActionClassName} to={`#`}>
                                     <FontAwesomeIcon icon={faCircleXmark} />
                                     Reject
                                 </Link>

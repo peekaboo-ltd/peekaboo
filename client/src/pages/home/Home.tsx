@@ -5,7 +5,6 @@ import { useFetchPublicBusinessPlansQuery } from '@/api/queries/businessPlan.que
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useI18n } from '@/i18n/i18n';
 import { useHomeContent } from './useHomeContent';
-import { mapApiPlanToCard } from './home.utils';
 import HeroSection from './components/HeroSection';
 import FeaturesSection from './components/FeaturesSection';
 import ServicesSection from './components/ServicesSection';
@@ -34,7 +33,7 @@ const Home = () => {
 
   useDocumentTitle('Home');
 
-  const businessPlans = (businessPlansData?.data || []).map(mapApiPlanToCard);
+  const businessPlans = businessPlansData?.data || [];
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -107,7 +106,7 @@ const Home = () => {
         title={t('home.b2b.pricing.title')}
         subtitle={t('home.b2b.pricing.subtitle')}
         popularLabel="Most popular"
-        ctaLabel={t('home.b2b.cta.contact')}
+        ctaLabel="See full pricing"
         plans={businessPlans}
         isLoading={isLoadingPlans}
       />

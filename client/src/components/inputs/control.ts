@@ -11,7 +11,7 @@
 
 /** Height, radius, type size, and the four-state edge every control shares. */
 export const controlClassName =
-  'h-(--control-md) w-full min-w-0 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-sm font-normal text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-sm placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] focus-visible:border-(--ink) focus-visible:shadow-[var(--ink)_0_0_0_1px_inset] aria-invalid:border-(--ink) aria-invalid:shadow-[var(--ink)_0_0_0_1px_inset] disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--disabled-fg)';
+  'h-(--control-md) w-full min-w-0 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-sm font-normal text-(--ink) outline-none transition-[border-color,box-shadow] duration-200 ease-(--ease-flat) placeholder:text-sm placeholder:text-(--muted) hover:border-(--line-strong) focus:border-(--ink) focus:shadow-[var(--ink)_0_0_0_1px_inset] focus-visible:border-(--ink) focus-visible:shadow-[var(--ink)_0_0_0_1px_inset] aria-invalid:border-(--danger) aria-invalid:shadow-[var(--danger)_0_0_0_1px_inset] disabled:cursor-not-allowed disabled:border-(--line) disabled:bg-(--surface) disabled:text-(--disabled-fg)';
 
 /**
  * A field that only reports a value drops its edge entirely rather than
@@ -29,8 +29,9 @@ export const fieldLabelClassName = 'type-label flex items-center gap-1';
 export const fieldHelpClassName = 'type-meta';
 
 /**
- * Invalid cannot be a hue here, so it is the ink edge plus this line — and the
- * line always carries its icon. Without it a monochrome error is just prose.
+ * Invalid is the one place a field is allowed color. The icon stays anyway:
+ * color alone must never be the only carrier of a message, and a red edge on
+ * its own says something is wrong without saying what.
  */
 export const fieldErrorClassName =
-  'flex items-start gap-1.5 text-[0.8125rem] leading-[1.4] text-(--ink)';
+  'flex items-start gap-1.5 text-[0.8125rem] leading-[1.4] text-(--danger)';
