@@ -89,7 +89,33 @@ const LocationField = ({
 
   const handleUseMyLocation = async () => {
     setConfirmGeoOpen(false);
-    await requestMyLocation?.();
+    await requestMyLocation?.(name);
+  };
+
+  const isPickupField = name === 'locationFrom';
+  const useCurrentLocationLabel = isPickupField
+    ? 'Set your device location as pickup'
+    : 'Set your device location as drop-off';
+
+  const renderSelectedLocation = (location: OrderLocation) => {
+    if (
+      isPickupField &&
+      pickupSource === 'geolocation' &&
+      !location.name?.trim() &&
+      !location.formattedAddress?.trim()
+    ) {
+      return 'Your location';
+    }
+
+    if (
+      !isPickupField &&
+      !location.name?.trim() &&
+      !location.formattedAddress?.trim()
+    ) {
+      return 'Your location';
+    }
+
+    return describeLocation(location);
   };
 
   return (
@@ -106,11 +132,7 @@ const LocationField = ({
           {field.value ? (
             <div className="flex h-10 items-center gap-3 rounded-(--radius-control) border border-(--line) bg-(--paper) pl-3.5 pr-1.5">
               <span className="min-w-0 flex-1 truncate text-sm text-(--ink)">
-                {pickupSource === 'geolocation' && name === 'locationFrom'
-                  ? field.value.name ||
-                    field.value.formattedAddress ||
-                    'Your location'
-                  : describeLocation(field.value)}
+                {renderSelectedLocation(field.value)}
               </span>
               <button
                 type="button"
@@ -146,7 +168,7 @@ const LocationField = ({
                         label: isLocating
                           ? 'Finding your current location…'
                           : 'Use current location',
-                        description: 'Set your device location as pickup',
+                        description: useCurrentLocationLabel,
                         icon: (
                           <LocateFixed
                             className={`size-4 ${isLocating ? 'animate-pulse' : ''}`}
@@ -184,8 +206,16 @@ const LocationField = ({
             <Modal
               isOpen={confirmGeoOpen}
               onClose={() => setConfirmGeoOpen(false)}
-              heading="Use your current location?"
-              description="We'll set where you are now as the pickup point. You can change it anytime."
+              heading={
+                isPickupField
+                  ? 'Use your current location?'
+                  : 'Use your current location for drop-off?'
+              }
+              description={
+                isPickupField
+                  ? "We'll set where you are now as the pickup point. You can change it anytime."
+                  : "We'll set where you are now as the drop-off point. You can change it anytime."
+              }
             >
               <div className="flex flex-wrap justify-end gap-2 pt-2">
                 <Button
@@ -276,6 +306,7 @@ const HeroForm = ({
           requiredMessage="Select a drop-off location from the suggestions"
           errorMessage={errors.locationTo?.message}
           validate={validateDistinctLocation}
+          geolocation={geolocation}
         />
 
         <Controller

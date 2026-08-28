@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import { ArrowRight, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/inputs/Button';
+import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
 
 interface SupportContact {
   icon: LucideIcon;
@@ -42,13 +43,11 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
           Talk to a real person, anytime. Our Kigali team replies in under 90 seconds.
         </p>
         <ul className="mt-5 grid gap-2">
-          {contacts.map((contact) => {
+          {contacts.map((contact, index) => {
             const Icon = contact.icon;
             const content = (
               <>
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-(--radius-control) border border-(--ink) text-(--ink)">
-                  <Icon className="h-4 w-4 transition-transform duration-200" aria-hidden="true" />
-                </span>
+                <PublicIconBadge icon={Icon} tone={publicAccentAt(index)} />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-normal text-foreground">
                     {contact.title}
@@ -95,12 +94,12 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
       </header>
 
       <aside>
-        <label className="flex items-center gap-3 rounded-(--radius-control) border border-border bg-(--surface) p-3.5">
+        <label className="flex items-center gap-3 rounded-(--radius-control) border border-border bg-(--surface) px-3.5">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <input
             type="search"
             placeholder="Search help topics — billing, tracking, coverage..."
-            className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            className="min-w-0 focus:border-none focus:ring-0 py-2 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
         </label>
 

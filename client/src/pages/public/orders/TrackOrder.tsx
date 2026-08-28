@@ -9,7 +9,7 @@ import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
 import { useI18n } from '@/i18n/i18n';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import Input from '@/components/inputs/Input';
-import HeroRouteCard from '@/pages/home/components/HeroRouteCard';
+import PublicApproximateMap from '@/components/maps/PublicApproximateMap';
 import HeroTrustIndicators from '@/pages/home/components/HeroTrustIndicators';
 import SupportSection from '@/pages/home/components/SupportSection';
 import FinalCtaSection from '@/pages/home/components/FinalCtaSection';
@@ -166,7 +166,10 @@ const TrackOrder = () => {
             </motion.div>
 
             <div className="max-lg:hidden">
-              <HeroRouteCard />
+              <PublicApproximateMap
+                statusLabel="Live tracking"
+                etaLabel="Kigali-wide"
+              />
             </div>
           </div>
         </div>

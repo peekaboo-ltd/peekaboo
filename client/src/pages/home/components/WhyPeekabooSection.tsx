@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import type { LandingStats } from '@/types/landing.type';
+import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
 
 interface WhyItem {
   icon: LucideIcon;
@@ -66,13 +67,11 @@ const WhyPeekabooSection = ({
         </header>
 
         <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => {
+          {items.map((item, index) => {
             const Icon = item.icon;
             return (
               <li key={item.title} className="rounded-md border border-(--line) p-6">
-                <span className="flex h-9 w-9 items-center justify-center rounded-(--radius-control) border border-(--ink) text-(--ink)">
-                  <Icon className="h-4 w-4 transition-transform duration-200" aria-hidden="true" />
-                </span>
+                <PublicIconBadge icon={Icon} tone={publicAccentAt(index)} />
                 <h3 className="type-label mt-3">
                   {item.title}
                 </h3>

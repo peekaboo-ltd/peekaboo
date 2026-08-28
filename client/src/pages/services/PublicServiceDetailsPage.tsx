@@ -1,21 +1,19 @@
 import { motion } from 'framer-motion';
-import { Link, useParams } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowLeft,
-  faArrowRight,
-  faCheck,
-} from '@fortawesome/free-solid-svg-icons';
-import {
-  PublicPage,
-  PublicPageHero,
-  PublicSectionCard,
-} from '@/components/layout/PublicPage';
+import { ArrowRight, Check } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/inputs/Button';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useFetchPublicBusinessPlanBySlugQuery } from '@/api/queries/businessPlan.queries';
+import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
+import FinalCtaSection from '@/pages/home/components/FinalCtaSection';
+import HeroTrustIndicators from '@/pages/home/components/HeroTrustIndicators';
+import SupportSection from '@/pages/home/components/SupportSection';
+import { useHomeContent } from '@/pages/home/useHomeContent';
+import { entranceVariants } from '@/pages/home/home.animations';
 import PlanVolumeCalculator from './PlanVolumeCalculator';
 import { PriceLockup } from './PlanCard';
+import ServicesVolumeVisual from './components/ServicesVolumeVisual';
+import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
 import {
   billingPeriodLabel,
   formatCurrency,
@@ -23,24 +21,9 @@ import {
   periodNoun,
   resolvePrice,
 } from './plan-pricing';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 
-const fadeInUp = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.2, ease: [0, 0, 1, 1] as const },
-  },
-};
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.2, ease: [0, 0, 1, 1] as const },
-  },
-};
-
-/** One plain fact about the plan. Facts only — no positioning, no filler. */
 const PlanFact = ({ label, value }: { label: string; value: string }) => (
   <div className="min-w-0">
     <dt className="type-eyebrow">{label}</dt>
@@ -48,42 +31,79 @@ const PlanFact = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const ServiceDetailsShell = ({ children }: { children: React.ReactNode }) => (
+  <main className="home-page relative min-h-screen w-full overflow-x-clip bg-(--paper)">
+    {children}
+  </main>
+);
+
+const ServiceDetailsLoading = () => (
+  <ServiceDetailsShell>
+    <section className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center">
+      <div className="app-container pb-10 pt-8 lg:pb-14 lg:pt-10">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-14">
+          <div className="space-y-5">
+            <div className="h-4 w-24 animate-pulse rounded bg-(--surface)" />
+            <div className="h-12 w-3/4 animate-pulse rounded bg-(--surface)" />
+            <div className="h-20 w-full max-w-md animate-pulse rounded bg-(--surface)" />
+            <div className="h-32 w-full max-w-md animate-pulse rounded bg-(--surface)" />
+          </div>
+          <div className="hidden aspect-[4/3] animate-pulse rounded-md bg-(--surface) lg:block" />
+        </div>
+      </div>
+    </section>
+  </ServiceDetailsShell>
+);
+
 const PublicServiceDetailsPage = () => {
+  const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const { data, isFetching, error } = useFetchPublicBusinessPlanBySlugQuery(
     slug || '',
     { skip: !slug },
   );
+  const { data: landingStats } = useGetLandingStatsQuery();
+  const { heroCopy, supportContacts } = useHomeContent();
   const plan = data?.data;
 
   useDocumentTitle(plan ? `${plan.name} | Services` : 'Service Details');
 
+  const handleContactNavigation = () => {
+    navigate('/contact');
+  };
+
   if (isFetching) {
-    return (
-      <PublicPage>
-        <section className="grid gap-4">
-          <div className="h-56 animate-pulse rounded-(--radius-card) bg-(--surface)" />
-          <div className="h-80 animate-pulse rounded-(--radius-card) bg-(--surface)" />
-        </section>
-      </PublicPage>
-    );
+    return <ServiceDetailsLoading />;
   }
 
   if (error || !plan) {
     return (
-      <PublicPage>
-        <PublicPageHero
-          eyebrow="Service details"
-          title="We couldn't find that plan"
-          description="The plan may have been archived, or the link may be incomplete."
-          actions={
-            <Button route="/services" primary>
-              Browse all plans
-              <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
-            </Button>
-          }
-        />
-      </PublicPage>
+      <ServiceDetailsShell>
+        <section className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center bg-(--paper) text-(--ink)">
+          <div className="app-container pb-10 pt-8 lg:pb-14 lg:pt-10">
+            <motion.div
+              className="mx-auto flex max-w-xl flex-col items-start gap-5"
+              variants={entranceVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <hgroup className="space-y-3">
+                <p className="type-eyebrow">Service details</p>
+                <h1 className="type-display max-w-[16ch] text-(--ink)">
+                  We couldn&apos;t find that plan
+                </h1>
+                <p className="type-body max-w-[46ch] text-(--muted)">
+                  The plan may have been archived, or the link may be incomplete.
+                </p>
+              </hgroup>
+              <Button route="/services" primary>
+                Browse all plans
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Button>
+            </motion.div>
+          </div>
+        </section>
+      </ServiceDetailsShell>
     );
   }
 
@@ -94,141 +114,178 @@ const PublicServiceDetailsPage = () => {
   const entryVolume = quotableRows[0]?.tier.minQuantity;
   const topBand = quotableRows[quotableRows.length - 1]?.tier;
   const featureList = plan.features ?? [];
+  const cadenceLabel = billingPeriodLabel(plan.billingPeriod);
 
   return (
-    <PublicPage>
-      <motion.section
-        className="grid gap-6"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <motion.div variants={fadeInUp}>
-          <Link
-            to="/services"
-            className="type-body-sm inline-flex items-center gap-2 text-(--ink) bg-(--surface) hover:text-(--ink) p-2 px-4 rounded-(--radius-control) hover:bg-(--surface-hover)"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} className="text-xs" />
-            All plans
-          </Link>
+    <ServiceDetailsShell>
+      <section className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center bg-(--paper) text-(--ink)">
+        <div className="app-container pb-10 pt-8 lg:pb-14 lg:pt-10">
+          <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-14">
+            <motion.div
+              className="flex flex-col items-start gap-5"
+              variants={entranceVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <Link
+                to="/services"
+                className="p-2 px-4 bg-(--surface) hover:bg-(--surface-hover) active:bg-(--surface-active) rounded-md inline-flex items-center gap-2 text-sm text-(--ink)"
+              >
+                <FontAwesomeIcon icon={faChevronLeft} className="size-4" aria-hidden="true" />
+                All plans
+              </Link>
 
-          <header className="mt-5 border-b border-(--line) pb-8">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="min-w-0">
+              <hgroup className="space-y-3">
                 <div className="flex flex-wrap items-center gap-3">
-                  <p className="type-eyebrow">
-                    {billingPeriodLabel(plan.billingPeriod)} plan
-                  </p>
+                  <p className="type-eyebrow">{cadenceLabel} plan</p>
                   {plan.badge ? (
                     <span className="inline-flex h-5 items-center rounded-(--radius-pill) bg-(--ink) px-2.5 text-[0.6875rem] font-medium uppercase text-(--paper)">
                       {plan.badge}
                     </span>
                   ) : null}
                 </div>
-                <h1 className="type-display mt-3">{plan.name}</h1>
-                <p className="type-body mt-4 max-w-[56ch] text-(--muted)">
+                <h1 className="type-display max-w-[16ch] text-(--ink)">{plan.name}</h1>
+                <p className="type-body max-w-[52ch] text-(--muted)">
                   {plan.description ||
                     'A business delivery plan priced in volume bands, so your cost follows what you actually send.'}
                 </p>
-              </div>
+              </hgroup>
 
-              {/* The price appears once, here. It used to be restated in the
-                  hero, a stat card, and an overview panel. */}
-              <div className="card-quiet shrink-0 p-5 lg:min-w-[15rem]">
-                {/* The lockup says "from" itself; an eyebrow reading
-                    "Starting at" above it said the same thing twice. */}
+              <div className="w-full max-w-md border-t border-(--line) pt-6">
                 <p className="type-eyebrow">Price</p>
                 <PriceLockup price={price} className="mt-2" />
               </div>
+
+              <dl className="flex w-full max-w-md flex-wrap gap-x-10 gap-y-4 border-t border-(--line) pt-6">
+                <PlanFact label="Billed" value={cadenceLabel} />
+                <PlanFact
+                  label="Volume bands"
+                  value={rows.length ? String(rows.length) : 'Quoted'}
+                />
+                <PlanFact
+                  label="Starts from"
+                  value={
+                    entryVolume != null
+                      ? `${entryVolume} per ${unit}`
+                      : 'Any volume'
+                  }
+                />
+                <PlanFact
+                  label="Upper limit"
+                  value={
+                    plan.isCustomPricing
+                      ? 'Negotiated'
+                      : topBand?.maxQuantity == null
+                        ? 'None'
+                        : `${topBand.maxQuantity} per ${unit}`
+                  }
+                />
+              </dl>
+
+              <Link
+                to="/services"
+                className="link-arrow p-1.5 px-3 bg-(--surface) hover:bg-(--surface-hover) active:bg-(--surface-active) rounded-md inline-flex items-center gap-1.5 text-sm text-(--ink)"
+              >
+                <FontAwesomeIcon icon={faChevronLeft} className="size-4" aria-hidden="true" />
+                Compare plans
+              </Link>
+
+              <HeroTrustIndicators
+                landingStats={landingStats}
+                activeCustomersLabel={heroCopy.activeCustomersLabel}
+                completedOrdersLabel={heroCopy.completedOrdersLabel}
+                fallbackLabel={heroCopy.growingCommunityLabel}
+              />
+            </motion.div>
+
+            <div className="max-lg:hidden">
+              <ServicesVolumeVisual
+                planCount={rows.length || 2}
+                cadenceLabel={cadenceLabel}
+              />
             </div>
-          </header>
-        </motion.div>
-
-        <motion.dl
-          variants={fadeInUp}
-          className="grid grid-cols-2 gap-x-6 gap-y-6 border-b border-(--line) pb-8 md:grid-cols-4"
-        >
-          <PlanFact
-            label="Billed"
-            value={billingPeriodLabel(plan.billingPeriod)}
-          />
-          <PlanFact
-            label="Volume bands"
-            value={rows.length ? String(rows.length) : 'Quoted'}
-          />
-          <PlanFact
-            label="Starts from"
-            value={
-              entryVolume != null
-                ? `${entryVolume} per ${unit}`
-                : 'Any volume'
-            }
-          />
-          <PlanFact
-            label="Upper limit"
-            value={
-              plan.isCustomPricing
-                ? 'Negotiated'
-                : topBand?.maxQuantity == null
-                  ? 'None'
-                  : `${topBand.maxQuantity} per ${unit}`
-            }
-          />
-        </motion.dl>
-
-        {rows.length ? (
-          <motion.div variants={fadeInUp}>
-            <PublicSectionCard
-              eyebrow="Pricing"
-              title="Find your band"
-              description={`Enter what you send in a typical ${unit}. The band you land in is highlighted below.`}
-            >
-              <PlanVolumeCalculator plan={plan} />
-            </PublicSectionCard>
-          </motion.div>
-        ) : null}
-
-        {featureList.length ? (
-          <motion.div variants={fadeInUp}>
-            <PublicSectionCard eyebrow="Included" title="What every band includes">
-              <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
-                {featureList.map((feature) => (
-                  <li key={feature} className="type-body-sm flex items-start gap-3">
-                    <FontAwesomeIcon
-                      icon={faCheck}
-                      className="mt-1 shrink-0 text-xs text-(--ink)"
-                      aria-hidden="true"
-                    />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </PublicSectionCard>
-          </motion.div>
-        ) : null}
-
-        {/* One ask, at the end. */}
-        <motion.section
-          variants={fadeInUp}
-          className="card-framed flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div className="min-w-0">
-            <h2 className="type-card-title">Ready to start on {plan.name}?</h2>
-            <p className="type-meta mt-1.5 max-w-[52ch]">
-              Tell us your volume and service area and we will confirm the setup
-              {plan.pricingTiers?.overflowRate
-                ? `, including how overflow past a band is billed at ${formatCurrency(plan.pricingTiers.overflowRate, plan.currency)} each`
-                : ''}
-              .
-            </p>
           </div>
-          <Button route="/contact" primary className="shrink-0">
-            Talk to our team
-            <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
-          </Button>
-        </motion.section>
-      </motion.section>
-    </PublicPage>
+        </div>
+      </section>
+
+      {rows.length ? (
+        <section className="section-rhythm w-full border-(--line) bg-(--paper)">
+          <div className="app-container">
+            <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <hgroup>
+                <p className="type-eyebrow">Pricing</p>
+                <h2 className="type-h2 mt-2">
+                  Find your
+                  <br />
+                  volume band.
+                </h2>
+              </hgroup>
+              <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
+                Enter what you send in a typical {unit}. The band you land in is
+                highlighted below.
+              </p>
+            </header>
+
+            <div className="rounded-md border border-(--line) p-6">
+              <PlanVolumeCalculator plan={plan} />
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {featureList.length ? (
+        <section className="section-rhythm w-full border-(--line) bg-(--paper)">
+          <div className="app-container">
+            <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <hgroup>
+                <p className="type-eyebrow">Included</p>
+                <h2 className="type-h2 mt-2">
+                  What every
+                  <br />
+                  band includes.
+                </h2>
+              </hgroup>
+              <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
+                Every volume band on {plan.name} ships with the same operational
+                support and delivery tooling.
+              </p>
+            </header>
+
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {featureList.map((feature, index) => (
+                <li
+                  key={feature}
+                  className="flex items-start gap-3 rounded-md border border-(--line) p-4"
+                >
+                  <PublicIconBadge
+                    icon={Check}
+                    tone={publicAccentAt(index)}
+                    size="xs"
+                    className="mt-0.5"
+                  />
+                  <span className="text-sm leading-[1.55] text-(--ink) mt-2">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
+
+      <SupportSection
+        contacts={supportContacts}
+        onContactClick={handleContactNavigation}
+      />
+
+      <FinalCtaSection
+        title={`Ready to start on ${plan.name}?`}
+        subtitle={`Tell us your volume and service area and we will confirm the setup${plan.pricingTiers?.overflowRate
+          ? `, including how overflow past a band is billed at ${formatCurrency(plan.pricingTiers.overflowRate, plan.currency)} each`
+          : ''
+          }.`}
+        buttonLabel="Talk to our team"
+        onScrollToForm={handleContactNavigation}
+      />
+    </ServiceDetailsShell>
   );
 };
 

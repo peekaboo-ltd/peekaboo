@@ -1,4 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
+import { publicAccentAt, publicAccentSoftClass } from '@/components/public/PublicIconBadge';
 import RoutePreviewMap from './RoutePreviewMap';
 
 const services = [
@@ -44,13 +45,11 @@ const toneClasses = {
     card: 'invert-surface group',
     chip: 'bg-(--surface) text-(--muted)',
     body: 'text-(--muted)',
-    arrow: 'bg-(--surface) text-(--ink) transition-[background-color,color] duration-200 group-hover:bg-(--ink) group-hover:text-(--paper)',
   },
   quiet: {
     card: 'card-quiet group',
     chip: 'bg-(--paper) text-(--muted)',
     body: 'text-(--muted)',
-    arrow: 'bg-(--paper) text-(--ink) transition-[background-color,color] duration-200 group-hover:bg-(--ink) group-hover:text-(--paper)',
   },
 } as const;
 
@@ -75,8 +74,9 @@ const ServicesSection = () => (
       </header>
 
       <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
-        {services.map((service) => {
+        {services.map((service, index) => {
           const tone = toneClasses[service.tone as keyof typeof toneClasses];
+          const arrowAccent = publicAccentSoftClass[publicAccentAt(index)];
           return (
             <li key={service.title} className={service.featured ? 'lg:row-span-2' : undefined}>
               <article
@@ -92,7 +92,7 @@ const ServicesSection = () => (
                       {service.tag}
                     </span>
                     <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full ${tone.arrow}`}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full transition-[background-color,color] duration-200 ${arrowAccent}`}
                     >
                       <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-200" aria-hidden="true" />
                     </span>

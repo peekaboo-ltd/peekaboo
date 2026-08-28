@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 import type { HowItWorksStep } from '../home.types';
 import { Button } from '@/components/ui/button';
+import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
 
 interface HowItWorksSectionProps {
   steps: HowItWorksStep[];
@@ -38,9 +39,11 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
             <li key={step.step} className="relative rounded-md border border-(--line) p-6">
               <div className="flex items-center justify-between gap-4">
                 <span className="type-meta">0{index + 1}</span>
-                <span className="flex size-10 items-center justify-center rounded-(--radius-control) border border-(--ink)">
-                  <Icon className="size-4" aria-hidden={true} />
-                </span>
+                <PublicIconBadge
+                  icon={Icon}
+                  tone={publicAccentAt(index)}
+                  size="md"
+                />
               </div>
               <h3 className="type-h3 mt-8">{step.title}</h3>
               <p className="mt-3 text-sm leading-[1.55] text-(--muted)">{step.description}</p>

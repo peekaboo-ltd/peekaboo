@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
 
 interface QuickAction {
   icon: LucideIcon;
@@ -18,8 +19,9 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
 <section className="section-rhythm w-full border-(--line) bg-(--paper)">
   <article className="app-container">
     <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      {actions.map((action) => {
+      {actions.map((action, index) => {
         const Icon = action.icon;
+        const tone = publicAccentAt(index);
         return (
           <li key={action.title}>
             <Link
@@ -31,15 +33,7 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
               }}
               className="group relative flex h-full min-h-[150px] w-full flex-col items-start rounded-md border border-(--line) p-6 text-left transition-[border-color] duration-200 hover:border-(--ink)"
             >
-              <span
-                className={`flex h-9 w-9 items-center justify-center rounded-(--radius-control) transition-[background-color,color,border-color,box-shadow] duration-200 ${
-                  action.accent
-                    ? 'bg-(--ink) text-(--paper)'
-                    : 'bg-(--surface) text-(--ink)'
-                }`}
-              >
-                <Icon className="h-4 w-4 transition-transform duration-200" aria-hidden="true" />
-              </span>
+              <PublicIconBadge icon={Icon} tone={tone} />
               <span
                 className={`mt-4 block text-[14px] font-normal ${
                   !action.accent ? 'group-hover:text-foreground' : ''

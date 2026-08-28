@@ -11,12 +11,14 @@ import {
   type LocationError,
 } from '@/utils/locations.util';
 
+export type GeolocationTarget = 'locationFrom' | 'locationTo';
+
 export interface GeolocationPickupState {
   pickupSource: PickupSource;
   setPickupSource: (source: PickupSource) => void;
   locationError: string | null;
   isLocating: boolean;
-  useMyLocation: () => Promise<void>;
+  useMyLocation: (target?: GeolocationTarget) => Promise<void>;
   clearLocationError: () => void;
 }
 
@@ -25,6 +27,7 @@ export const useGeolocationPickup = (
   setValue: UseFormSetValue<HomeFormValues>,
 ): GeolocationPickupState => {
   const locationFrom = useWatch({ control, name: 'locationFrom' });
+  const locationTo = useWatch({ control, name: 'locationTo' });
   const pickupSource = useWatch({ control, name: 'pickupSource' }) ?? 'search';
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -52,8 +55,8 @@ export const useGeolocationPickup = (
     ) {
       setValue('pickupSource', 'search', { shouldDirty: true });
     }
-    if (locationFrom) setLocationError(null);
-  }, [locationFrom, pickupSource, setValue]);
+    if (locationFrom || locationTo) setLocationError(null);
+  }, [locationFrom, locationTo, pickupSource, setValue]);
 
   useEffect(() => {
     if (
@@ -80,7 +83,39 @@ export const useGeolocationPickup = (
     );
   }, [locationFrom, nearestPlace, pickupSource, setValue]);
 
-  const useMyLocation = async () => {
+  const locationForDropoffLookup =
+    locationTo &&
+    !locationTo.name?.trim() &&
+    !locationTo.formattedAddress?.trim()
+      ? locationTo
+      : null;
+  const nearestDropoff = useNearestPlace(locationForDropoffLookup);
+
+  useEffect(() => {
+    if (
+      !locationTo ||
+      locationTo.name?.trim() ||
+      locationTo.formattedAddress?.trim() ||
+      nearestDropoff.isLoading ||
+      (!nearestDropoff.placeName && !nearestDropoff.address)
+    ) {
+      return;
+    }
+
+    setValue(
+      'locationTo',
+      {
+        ...locationTo,
+        ...(nearestDropoff.placeName ? { name: nearestDropoff.placeName } : {}),
+        ...(nearestDropoff.address
+          ? { formattedAddress: nearestDropoff.address }
+          : {}),
+      },
+      { shouldDirty: true, shouldValidate: true },
+    );
+  }, [locationTo, nearestDropoff, setValue]);
+
+  const useMyLocation = async (target: GeolocationTarget = 'locationFrom') => {
     setIsLocating(true);
     setLocationError(null);
 
@@ -98,6 +133,16 @@ export const useGeolocationPickup = (
         latitude: location.latitude,
         longitude: location.longitude,
       };
+
+      if (target === 'locationTo') {
+        setValue('locationTo', nextLocation, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        });
+        return;
+      }
+
       geolocationKey.current = coordinateKey(nextLocation);
       setValue('pickupSource', 'geolocation', { shouldDirty: true });
       setValue('locationFrom', nextLocation, {

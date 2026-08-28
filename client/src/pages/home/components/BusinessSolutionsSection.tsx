@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
 import Button from '@/components/inputs/Button';
+import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
 
 interface BusinessFeature {
   icon: LucideIcon;
@@ -58,14 +59,12 @@ const BusinessSolutionsSection = ({
       </header>
 
       <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {features.map((feature) => {
+        {features.map((feature, index) => {
           const Icon = feature.icon;
           return (
             <li key={feature.title}>
               <article className="group h-full rounded-md border border-(--line) bg-(--paper) p-6 transition-[border-color] duration-200 hover:border-(--ink)">
-                <span className="flex h-9 w-9 items-center justify-center rounded-(--radius-control) bg-(--ink) text-(--paper)">
-                  <Icon className="h-4 w-4 transition-transform duration-200" aria-hidden="true" />
-                </span>
+                <PublicIconBadge icon={Icon} tone={publicAccentAt(index)} />
                 <h3 className="type-label mt-4">
                   {feature.title}
                 </h3>

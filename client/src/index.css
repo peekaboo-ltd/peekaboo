@@ -99,6 +99,22 @@
   --approve-line: #bbf7d0;
   /* Text that sits on a filled danger or approve ground. */
   --on-consequence: #ffffff;
+
+  /* Public marketing pages — subtle warmth without touching app semantics. */
+  --public-sky: #6ba3c7;
+  --public-sky-soft: #e8f3fa;
+  --public-sage: #6f9b7a;
+  --public-sage-soft: #eaf4ec;
+  --public-clay: #c9925a;
+  --public-clay-soft: #f8efe4;
+  --public-rose: #d48484;
+  --public-rose-soft: #faecec;
+  --public-plum: #9b87c4;
+  --public-plum-soft: #f0ebf8;
+  --public-band-1: #6ba3c7;
+  --public-band-2: #6f9b7a;
+  --public-band-3: #c9925a;
+  --public-band-4: #9b87c4;
 }
 
 .dark {
@@ -139,6 +155,21 @@
   --approve-surface: #0c1a10;
   --approve-line: #14532d;
   --on-consequence: #000000;
+
+  --public-sky: #8ec0e4;
+  --public-sky-soft: #142028;
+  --public-sage: #8fbf9f;
+  --public-sage-soft: #152018;
+  --public-clay: #d4a574;
+  --public-clay-soft: #221a12;
+  --public-rose: #e8a4a4;
+  --public-rose-soft: #241414;
+  --public-plum: #b8a4d4;
+  --public-plum-soft: #1c1824;
+  --public-band-1: #8ec0e4;
+  --public-band-2: #8fbf9f;
+  --public-band-3: #d4a574;
+  --public-band-4: #b8a4d4;
 }
 
 :root,

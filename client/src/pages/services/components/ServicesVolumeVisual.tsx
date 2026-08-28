@@ -3,9 +3,16 @@ interface ServicesVolumeVisualProps {
   cadenceLabel?: string;
 }
 
+const volumeBands = [
+  { x: 72, height: 72, label: 'Starter', fill: 'var(--public-band-1)', soft: 'var(--public-sky-soft)' },
+  { x: 168, height: 120, label: 'Growth', fill: 'var(--public-band-2)', soft: 'var(--public-sage-soft)' },
+  { x: 264, height: 168, label: 'Scale', fill: 'var(--public-band-3)', soft: 'var(--public-clay-soft)' },
+  { x: 360, height: 216, label: 'Enterprise', fill: 'var(--public-band-4)', soft: 'var(--public-plum-soft)' },
+] as const;
+
 /**
- * Pricing hero visual: volume bands as a rising staircase, not a generic chart.
- * Monochrome like HeroRouteCard so it reads at a glance without decoration.
+ * Pricing hero visual: volume bands as a rising staircase with soft public
+ * accents so each tier reads as distinct without overpowering the page.
  */
 const ServicesVolumeVisual = ({
   planCount = 3,
@@ -28,27 +35,31 @@ const ServicesVolumeVisual = ({
         ))}
       </g>
 
-      {[
-        { x: 72, height: 72, label: 'Starter' },
-        { x: 168, height: 120, label: 'Growth' },
-        { x: 264, height: 168, label: 'Scale' },
-        { x: 360, height: 216, label: 'Enterprise' },
-      ].slice(0, Math.max(2, Math.min(planCount, 4))).map((band) => (
+      {volumeBands.slice(0, Math.max(2, Math.min(planCount, 4))).map((band) => (
         <g key={band.label}>
           <rect
             x={band.x}
             y={320 - band.height}
             width="72"
             height={band.height}
-            fill="var(--paper)"
-            stroke="var(--ink)"
+            fill={band.soft}
+            stroke={band.fill}
             strokeWidth="2"
+          />
+          <rect
+            x={band.x + 6}
+            y={320 - band.height + 8}
+            width="60"
+            height={Math.max(band.height - 16, 12)}
+            fill={band.fill}
+            opacity="0.22"
+            rx="2"
           />
           <text
             x={band.x + 36}
             y={320 - band.height - 10}
             textAnchor="middle"
-            fill="var(--muted)"
+            fill={band.fill}
             fontSize="11"
             fontFamily="inherit"
           >
@@ -57,13 +68,20 @@ const ServicesVolumeVisual = ({
         </g>
       ))}
 
+      <defs>
+        <linearGradient id="volume-trend" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="var(--public-band-1)" stopOpacity="0.5" />
+          <stop offset="50%" stopColor="var(--public-band-2)" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="var(--public-band-4)" stopOpacity="0.4" />
+        </linearGradient>
+      </defs>
+
       <path
         d="M 48 300 L 432 108"
         fill="none"
-        stroke="var(--ink)"
-        strokeWidth="1.5"
-        strokeDasharray="5 5"
-        opacity="0.35"
+        stroke="url(#volume-trend)"
+        strokeWidth="2"
+        strokeDasharray="6 5"
       />
     </svg>
 

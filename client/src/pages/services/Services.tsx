@@ -12,6 +12,7 @@ import { useHomeContent } from '@/pages/home/useHomeContent';
 import { entranceVariants } from '@/pages/home/home.animations';
 import { billingPeriodLabel } from './plan-pricing';
 import ServicesVolumeVisual from './components/ServicesVolumeVisual';
+import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
@@ -144,13 +145,11 @@ const Services = () => {
           </header>
 
           <ol className="grid gap-6 md:grid-cols-3">
-            {pricingPrinciples.map((principle) => {
+            {pricingPrinciples.map((principle, index) => {
               const Icon = principle.icon;
               return (
                 <li key={principle.title} className="relative rounded-md border border-(--line) p-6">
-                  <span className="flex size-10 items-center justify-center rounded-(--radius-control) border border-(--ink)">
-                    <Icon className="size-4" aria-hidden="true" />
-                  </span>
+                  <PublicIconBadge icon={Icon} tone={publicAccentAt(index)} size="md" />
                   <h3 className="type-h3 mt-8">{principle.title}</h3>
                   <p className="mt-3 text-sm leading-[1.55] text-(--muted)">
                     {principle.description}
