@@ -559,6 +559,7 @@ npm install
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api
 VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
+VITE_GOOGLE_MAPS_MAP_ID=your_map_id_here
 ```
 
 3. **Install shadcn components:**

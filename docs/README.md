@@ -66,12 +66,12 @@ npm run dev                 # http://localhost:8080 (TypeORM syncs the schema on
 ```bash
 cd client
 npm install
-# create client/.env (no committed .env.example):
-#   VITE_API_BASE_URL=http://localhost:8080/api/v1
+cp .env.example .env
+# Set VITE_API_BASE_URL plus the Google Maps key and Map ID when using maps.
 npm run dev                 # Vite dev server (default http://localhost:5173)
 ```
 
-Client env vars: `VITE_API_BASE_URL`, `VITE_GOOGLE_MAPS_API_KEY`, `VITE_INACTIVITY_TIMEOUT`, `VITE_NODE_ENVIRONMENT`. See [environment-variables.md](environment-variables.md).
+Client env vars include `VITE_API_BASE_URL`, `VITE_GOOGLE_MAPS_API_KEY`, `VITE_GOOGLE_MAPS_MAP_ID`, `VITE_INACTIVITY_TIMEOUT`, `VITE_NODE_ENVIRONMENT`, and `VITE_PAYMENT_MODE`. See [environment-variables.md](environment-variables.md).
 
 ### 3. Mobile app — `mobile/`
 

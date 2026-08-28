@@ -13,6 +13,10 @@ import { SkeletonLoader } from './Loader';
 import { cn } from '@/lib/utils';
 import { controlClassName } from './control';
 import { FieldShell } from './Field';
+import {
+  selectEmptyClassName,
+  selectListItemHintClassName,
+} from '@/components/ui/select-options';
 
 const RADIX_NAVIGATION_KEYS = new Set([
   'ArrowDown',
@@ -30,6 +34,7 @@ interface SelectProps {
     label: string | undefined;
     value: string | UUID;
     disabled?: boolean;
+    hint?: string;
   }>;
   defaultValue?: string | undefined;
   placeholder?: string;
@@ -149,9 +154,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
               ) : null}
               <SelectGroup>
                 {filteredOptions.length === 0 ? (
-                  <p className="px-2 py-3 text-center text-sm text-(--muted)">
-                    No matches found
-                  </p>
+                  <p className={selectEmptyClassName}>No matches found</p>
                 ) : (
                   filteredOptions.map((option, index: number) => {
                     return (
@@ -160,9 +163,13 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                         key={index}
                         value={option.value}
                         disabled={option?.disabled || readOnly}
-                        className="cursor-pointer"
                       >
                         <span className="truncate">{option?.label}</span>
+                        {option.hint ? (
+                          <span className={selectListItemHintClassName}>
+                            {option.hint}
+                          </span>
+                        ) : null}
                       </SelectItem>
                     );
                   })

@@ -2,7 +2,7 @@
 
 React 19 + Vite + TypeScript + Tailwind CSS web application (admin dashboard, public marketing site, and public order-tracking pages). Full feature/setup docs live in [client/README.md](../client/README.md); this file maps the directory layout.
 
-> **Configuration:** client env vars (`VITE_API_BASE_URL`, `VITE_GOOGLE_MAPS_API_KEY`, `VITE_INACTIVITY_TIMEOUT`, `VITE_NODE_ENVIRONMENT`) are documented in [environment-variables.md](environment-variables.md). Create `client/.env` manually — there is no committed `.env.example`.
+> **Configuration:** client env vars are documented in [environment-variables.md](environment-variables.md). Copy `client/.env.example` to `client/.env`, then replace the placeholders needed by the features you run.
 
 ## Data flow
 
@@ -118,6 +118,7 @@ Small shared utilities (e.g. `utils.ts` — `cn()` class-merge helper).
 ```env
 VITE_API_BASE_URL=http://localhost:8080/api/v1
 VITE_GOOGLE_MAPS_API_KEY=...
+VITE_GOOGLE_MAPS_MAP_ID=...
 VITE_INACTIVITY_TIMEOUT=5            # minutes before session-expired modal
 VITE_NODE_ENVIRONMENT=development    # optional override; drives dev pricing UI disclaimer
 ```

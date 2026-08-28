@@ -4,6 +4,10 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { controlClassName } from "../inputs/control"
+import {
+  selectListItemCheckClassName,
+  selectListItemClassName,
+} from "./select-options"
 
 function Select({
   ...props
@@ -111,17 +115,22 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex h-(--control-sm) w-full cursor-default items-center gap-2 px-3 pr-9 text-sm font-normal text-(--ink) outline-hidden transition-[background-color,color] duration-200 ease-[cubic-bezier(0,0,1,1)] select-none focus:bg-(--surface-hover) data-[disabled]:pointer-events-none data-[disabled]:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        selectListItemClassName,
+        "data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
         className
       )}
       {...props}
     >
-      <span className="absolute right-3 flex size-4 items-center justify-center">
+      <span className="flex size-3.5 shrink-0 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-4" />
+          <CheckIcon className={selectListItemCheckClassName} />
         </SelectPrimitive.ItemIndicator>
       </span>
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+      <SelectPrimitive.ItemText asChild>
+        <span className="flex min-w-0 flex-1 items-center gap-2">
+          {children}
+        </span>
+      </SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   )
 }

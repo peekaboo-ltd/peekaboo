@@ -4,6 +4,7 @@ import { useWatch } from 'react-hook-form';
 import { skipToken } from '@reduxjs/toolkit/query';
 import {
   AdvancedMarker,
+  APIProvider,
   APILoadingStatus,
   Map,
   Pin,
@@ -15,6 +16,9 @@ import { FieldMessage } from '@/components/inputs/Field';
 import { Button } from '@/components/ui/button';
 import { ENVIRONMENTS } from '@/constants/environments.constants';
 import type { GeolocationPickupState } from '@/hooks/locations/useGeolocationPickup';
+import useApproximateLocation, {
+  type ApproximateMapLocation,
+} from '@/hooks/locations/useApproximateLocation';
 import useDebounce from '@/hooks/common/debounce.hooks';
 import useMediaQuery from '@/hooks/common/useMediaQuery';
 import type { OrderLocation } from '@/types/order.type';
@@ -28,7 +32,19 @@ interface HeroLiveMapProps {
   geolocation: GeolocationPickupState;
 }
 
+interface HeroLiveMapContentProps extends HeroLiveMapProps {
+  approximateLocation: ApproximateMapLocation | null;
+}
+
 const KIGALI_CENTER = { lat: -1.9441, lng: 30.0619 };
+
+const getApproximateZoom = (accuracyKm: number | null): number => {
+  if (accuracyKm === null) return 11;
+  if (accuracyKm <= 5) return 13;
+  if (accuracyKm <= 25) return 12;
+  if (accuracyKm <= 100) return 10;
+  return 8;
+};
 
 const toPosition = (
   location?: OrderLocation | null,
@@ -62,7 +78,11 @@ const MapLegendItem = ({
   </li>
 );
 
-const HeroLiveMapContent = ({ control, geolocation }: HeroLiveMapProps) => {
+const HeroLiveMapContent = ({
+  control,
+  geolocation,
+  approximateLocation,
+}: HeroLiveMapContentProps) => {
   const apiStatus = useApiLoadingStatus();
   const locationFrom = useWatch({ control, name: 'locationFrom' });
   const locationTo = useWatch({ control, name: 'locationTo' });
@@ -123,7 +143,15 @@ const HeroLiveMapContent = ({ control, geolocation }: HeroLiveMapProps) => {
           clickableIcons={false}
           reuseMaps
         >
-          <HeroMapViewport positions={positions} />
+          <HeroMapViewport
+            positions={positions}
+            emptyCenter={approximateLocation?.position ?? KIGALI_CENTER}
+            emptyZoom={
+              approximateLocation
+                ? getApproximateZoom(approximateLocation.accuracyKm)
+                : 12
+            }
+          />
 
           {origin ? (
             <AdvancedMarker position={origin} title={originLabel}>
@@ -180,6 +208,10 @@ const HeroLiveMapContent = ({ control, geolocation }: HeroLiveMapProps) => {
               ) : null}
             </ul>
           </figcaption>
+        ) : approximateLocation ? (
+          <figcaption className="absolute left-3 top-3 z-10 rounded-(--radius-control) bg-(--paper) px-3 py-2 text-xs text-(--ink)">
+            Approximate area · {approximateLocation.label}
+          </figcaption>
         ) : null}
 
         {!locationFrom && pickupSource !== 'geolocation' ? (
@@ -204,8 +236,23 @@ const HeroLiveMapContent = ({ control, geolocation }: HeroLiveMapProps) => {
 
 const HeroLiveMap = (props: HeroLiveMapProps) => {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const approximateLocation = useApproximateLocation(
+    isDesktop && Boolean(ENVIRONMENTS.GOOGLE_MAPS_API_KEY),
+  );
   if (!isDesktop) return null;
-  return <HeroLiveMapContent {...props} />;
+  if (!ENVIRONMENTS.GOOGLE_MAPS_API_KEY) return <HeroRouteCard />;
+
+  return (
+    <APIProvider
+      apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY}
+      onError={() => undefined}
+    >
+      <HeroLiveMapContent
+        {...props}
+        approximateLocation={approximateLocation}
+      />
+    </APIProvider>
+  );
 };
 
 export default HeroLiveMap;

@@ -140,6 +140,23 @@ const LocationField = ({
                 placeholder={placeholder}
                 country="rw"
                 className={geolocation ? '[&_input]:pr-10' : undefined}
+                emptyOption={
+                  geolocation
+                    ? {
+                        label: isLocating
+                          ? 'Finding your current location…'
+                          : 'Use current location',
+                        description: 'Set your device location as pickup',
+                        icon: (
+                          <LocateFixed
+                            className={`size-4 ${isLocating ? 'animate-pulse' : ''}`}
+                          />
+                        ),
+                        disabled: isLocating,
+                        onSelect: handleUseMyLocation,
+                      }
+                    : undefined
+                }
               />
               {geolocation ? (
                 <button
