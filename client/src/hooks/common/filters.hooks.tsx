@@ -166,7 +166,7 @@ export const useStatusFilter = ({
         trigger={
           <Button
             variant="outline"
-            className="w-full justify-start gap-2"
+            className="w-full justify-start gap-2 !border-(--line)"
           >
             <FontAwesomeIcon icon={labelIcon} />
             <p className="text-sm">{label}</p>
@@ -190,7 +190,7 @@ export const useStatusFilter = ({
             style={{ maxHeight: 'calc(55vh - 50px)' }}
             aria-label="Status Filter List"
           >
-            <menu className="flex flex-col w-full min-w-[17vw] gap-3">
+            <menu className="flex flex-col w-full min-w-[17vw] gap-1">
               {filteredStatuses.length > 0 ? (
                 filteredStatuses.map((status, index) => {
                   return (
@@ -208,7 +208,7 @@ export const useStatusFilter = ({
                               e.preventDefault();
                               handleStatusToggle(status);
                             }}
-                            className="flex items-center w-full cursor-pointer gap-2"
+                            className="flex items-center w-full cursor-pointer gap-2 hover:bg-(--surface) p-2 rounded-md"
                           >
                             <Checkbox
                               id={status}
@@ -238,7 +238,7 @@ export const useStatusFilter = ({
             <ul className="flex items-center justify-between w-full gap-2 mt-4">
               <li>
                 <Link
-                  className="h-(--control-sm) rounded-(--radius-control) border border-(--line) px-3 text-sm transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:border-(--ink) hover:bg-(--surface)"
+                  className="h-(--control-sm) px-3 py-2 rounded-(--radius-control) border border-(--line) text-sm transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:border-(--ink) hover:bg-(--surface)"
                   to={`#`}
                   onClick={handleClear}
                 >
@@ -247,7 +247,7 @@ export const useStatusFilter = ({
               </li>
               <li>
                 <Link
-                  className="h-(--control-sm) rounded-(--radius-control) border border-(--line) px-3 text-sm transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:border-(--ink) hover:bg-(--surface)"
+                  className="h-(--control-sm) px-3 py-2 rounded-(--radius-control) border border-(--line) text-sm transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:border-(--ink) hover:bg-(--surface)"
                   to={`#`}
                   onClick={handleSelectAll}
                 >
