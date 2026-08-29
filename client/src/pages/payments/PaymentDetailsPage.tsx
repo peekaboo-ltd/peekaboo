@@ -5,6 +5,7 @@ import { useGetOrder } from '@/hooks/orders/orders.hooks';
 import { useGetPayment } from '@/hooks/payments/payment.hooks';
 import { useAppSelector } from '@/states/hooks';
 import { UUID } from '@/types';
+import { PREFERRED_CONTACT_METHOD_LABELS } from '@/types/order.type';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,6 +22,7 @@ import {
   faTruckFast,
   faUser,
   faUserGear,
+  faComments,
   faXmarkCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { motion, Variants } from 'framer-motion';
@@ -254,6 +256,20 @@ const PaymentDetailsPage = () => {
               { label: 'Customer Email', value: payment.customerEmail, icon: faEnvelope },
               { label: 'Customer Phone', value: payment.customerPhone, icon: faPhone },
               { label: 'Created By', value: payment.createdBy?.email, icon: faUserGear },
+              {
+                label: 'Contact Via',
+                value:
+                  payment.type === PaymentType.ORDER
+                    ? isFetchingOrder
+                      ? 'Loading order…'
+                      : linkedOrder?.preferredContactMethod
+                        ? PREFERRED_CONTACT_METHOD_LABELS[
+                            linkedOrder.preferredContactMethod
+                          ]
+                        : 'Not set'
+                    : 'N/A',
+                icon: faComments,
+              },
               {
                 label: 'Linked Order Ref',
                 value: payment.type === PaymentType.ORDER

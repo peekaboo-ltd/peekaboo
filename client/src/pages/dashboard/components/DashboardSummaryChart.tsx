@@ -1,26 +1,12 @@
 import { useMemo } from 'react';
 import { motion, type Variants } from 'framer-motion';
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import type { DashboardStatusBreakdownItem } from '@/types/dashboard.type';
+import SeriesChart from '@/components/charts/SeriesChart';
+import Sparkline from '@/components/charts/Sparkline';
+import type { DashboardSupportCardData } from '@/types/dashboard.type';
 import { capitalizeString, formatCurrency, formatNumbers } from '@/utils/strings.util';
 import { RoleTypes } from '@/types/auth.type';
-
-const chartStroke = 'var(--chart-2)';
+import Select from '@/components/inputs/Select';
 
 const getMetricOptionsForRole = (role?: RoleTypes): string[] => {
   switch (role) {
@@ -58,6 +44,8 @@ interface DashboardSummaryChartProps {
   data: Array<{ name: string; value: number }>;
   role?: RoleTypes;
   isLoading?: boolean;
+  /** Secondary readings, shown as this panel's footer. */
+  widgets?: DashboardSupportCardData[];
   breakdown?: DashboardStatusBreakdownItem[];
   containerVariants?: Variants;
   itemVariants?: Variants;
@@ -71,6 +59,7 @@ const DashboardSummaryChart = ({
   data,
   role,
   isLoading,
+  widgets = [],
   breakdown = [],
   containerVariants,
   itemVariants,
@@ -106,11 +95,11 @@ const DashboardSummaryChart = ({
               Primary insight
             </p>
             {data.length > 0 ? (
-              <p className="mt-2 text-[2.25rem] font-normal leading-none text-(--ink) sm:text-[3rem]">
+              <p className="type-metric mt-2 text-[2rem] sm:text-[2.5rem]">
                 {formattedTotal}
               </p>
             ) : (
-              <p className="mt-2 text-[2.25rem] font-normal leading-none text-(--muted) sm:text-[3rem]">
+              <p className="type-metric mt-2 text-[2rem] text-(--muted) sm:text-[2.5rem]">
                 —
               </p>
             )}
@@ -132,110 +121,81 @@ const DashboardSummaryChart = ({
             </div>
           </div>
 
-          <ul className="flex flex-wrap items-center gap-2 xl:shrink-0">
+          <ul className="flex items-center gap-1 rounded-(--radius-pill) xl:shrink-0">
             {(['7d', '30d', '90d'] as const).map((key) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => onRangeChange(key)}
-                className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-normal transition ${
+                aria-pressed={range === key}
+                className={`h-8 cursor-pointer rounded-(--radius-pill) px-3 text-xs font-medium transition-[background-color,color] duration-200 ease-(--ease-flat) ${
                   range === key
-                    ? 'border-(--ink) bg-(--ink) text-(--paper)'
-                    : 'border-(--line) text-(--muted) hover:border-(--line)'
+                    ? 'bg-(--ink) text-(--paper)'
+                    : 'text-(--muted) hover:bg-(--surface)'
                 }`}
               >
                 {key.toUpperCase()}
               </button>
             ))}
-            <Select value={metric} onValueChange={(value) => onMetricChange(value)}>
-              <SelectTrigger size="sm" className="w-[140px] cursor-pointer">
-                <SelectValue placeholder="Metric" />
-              </SelectTrigger>
-              <SelectContent>
-                {metricOptions.map((option) => (
-                  <SelectItem
-                    className="cursor-pointer"
-                    key={option}
-                    value={option}
-                  >
-                    {capitalizeString(option)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Select
+              value={metric}
+              onChange={(value) => onMetricChange(value)}
+              options={metricOptions.map((option) => ({
+                label: capitalizeString(option),
+                value: option,
+              }))}
+              placeholder="Metric"
+              className="w-[140px] cursor-pointer inline-flex items-center gap-2"
+            />
           </ul>
         </header>
 
         <section className="relative mt-8 h-64 sm:h-72">
           {isLoading && (
-            <figure className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-(--surface)">
+            <figure className="absolute inset-0 z-10 flex items-center justify-center rounded-(--radius-card) bg-(--surface)">
               <figure className="h-5 w-5 animate-spin rounded-full border-2 border-(--line) border-t-(--ink)" />
             </figure>
           )}
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ left: -12, right: 8, top: 20, bottom: 6 }}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                vertical={false}
-                stroke="var(--line)"
-                strokeOpacity={0.9}
-              />
-              <XAxis
-                dataKey="name"
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 11, fill: 'var(--muted)' }}
-                minTickGap={20}
-                tickFormatter={formatLabel}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 11, fill: 'var(--muted)' }}
-                width={36}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--line)',
-                  borderRadius: 'var(--radius-control)',
-                  boxShadow: 'var(--shadow-menu)',
-                  fontSize: 13,
-                }}
-                labelStyle={{ color: 'var(--ink)', fontWeight: 500 }}
-                labelFormatter={formatLabel}
-                cursor={{ stroke: chartStroke, strokeWidth: 1, strokeDasharray: '4 4' }}
-              />
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke={chartStroke}
-                strokeWidth={2.8}
-                fill="transparent"
-                dot={false}
-                activeDot={{ r: 5, fill: chartStroke, stroke: 'var(--paper)', strokeWidth: 2 }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <SeriesChart
+            data={data}
+            kind="area"
+            series={1}
+            height={272}
+            ariaLabel={`${capitalizeString(metric.toLowerCase())} over the last ${range}`}
+          />
         </section>
 
-        {breakdown.length > 0 && (
-          <section className="mt-6 grid gap-3 sm:grid-cols-3">
-            {breakdown.slice(0, 3).map((item) => (
-              <article
-                key={item.label}
-                className="rounded-md bg-(--surface) px-4 py-3"
-              >
-                <p className="type-eyebrow">
-                  {item.label}
-                </p>
-                <p className="type-metric mt-2">
-                  {formatNumbers(item.value)}
-                </p>
+        {widgets.length > 0 ? (
+          <section className="mt-5 grid gap-3 border-t border-(--line) pt-4 sm:grid-cols-3">
+            {widgets.slice(0, 3).map((widget) => (
+              <article key={widget.title} className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="type-meta truncate">{widget.title}</p>
+                  <p className="mt-1 text-lg font-medium tabular">{widget.value}</p>
+                </div>
+                {widget.data && widget.data.length > 0 && (
+                  <Sparkline
+                    values={widget.data.map((point) => point.value)}
+                    kind={widget.chartType === 'bar' ? 'bar' : 'line'}
+                    series={2}
+                    width={64}
+                    height={32}
+                    ariaLabel={`${widget.title} trend`}
+                  />
+                )}
               </article>
             ))}
           </section>
-        )}
+        ) : breakdown.length > 0 ? (
+          <section className="mt-5 grid gap-3 border-t border-(--line) pt-4 sm:grid-cols-3">
+            {breakdown.slice(0, 3).map((item) => (
+              <article key={item.label}>
+                <p className="type-meta">{item.label}</p>
+                <p className="mt-1 text-lg font-medium tabular">{formatNumbers(item.value)}</p>
+              </article>
+            ))}
+          </section>
+        ) : null}
       </motion.div>
     </motion.section>
   );

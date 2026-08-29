@@ -17,14 +17,15 @@ const getMeaning = (status?: string): StatusMeaning => {
   return 'inactive';
 };
 
-// Only the two terminal states are colored. In-flight and pending work has not
-// resolved into anything yet, so it stays monochrome — that is what makes a
-// green or red row in a long table worth looking at. Every treatment keeps its
-// icon: color is never the only thing carrying the meaning.
+// Color marks the three states a reader might have to act on: it resolved
+// well, it failed, or it is waiting on someone. `active` stays ink because
+// work in flight needs no decision — if every row were colored, none of them
+// would stand out. Every treatment keeps its icon and its label, so color is
+// never the only thing carrying the meaning.
 const treatments = {
   active: { icon: LoaderCircle, className: 'invert-surface border-transparent' },
   completed: { icon: Check, className: 'border-(--approve-line) bg-(--approve-surface) text-(--approve)' },
-  pending: { icon: Clock3, className: 'border-dashed border-(--line-strong) bg-transparent text-(--muted)' },
+  pending: { icon: Clock3, className: 'border-dashed border-(--warning-line) bg-(--warning-surface) text-(--warning)' },
   failed: { icon: X, className: 'border-(--danger-line) bg-(--danger-surface) text-(--danger)' },
   inactive: { icon: Circle, className: 'border-transparent bg-(--surface) text-(--muted)' },
 };

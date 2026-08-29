@@ -38,6 +38,7 @@ interface SelectProps {
   }>;
   defaultValue?: string | undefined;
   placeholder?: string;
+  searchPlaceholder?: string;
   className?: string;
   onChange?: ((value: string) => void) | undefined;
   value?: string | undefined;
@@ -64,6 +65,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       options = [],
       defaultValue = undefined,
       placeholder = 'Select here...',
+      searchPlaceholder = 'Search...',
       className = undefined,
       value = '',
       onChange,
@@ -73,7 +75,6 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
     },
     ref
   ) => {
-
     const [searchTerm, setSearchTerm] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -88,9 +89,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       : options;
 
     const handleValueChange = (selectedValue: string) => {
-      if (onChange) {
-        onChange(selectedValue);
-      }
+      onChange?.(selectedValue);
       setSearchTerm('');
     };
 
@@ -125,56 +124,61 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
           >
             <SelectTrigger
               aria-invalid={Boolean(errorMessage)}
-              className={cn('w-full', className)}
+              className={cn('w-full justify-between text-left', className)}
             >
               <SelectValue className="truncate" placeholder={placeholder} />
             </SelectTrigger>
-            <SelectContent>
-              {searchable ? (
-                <search className="sticky top-0 z-10 border-b border-(--line) bg-(--paper) p-2">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    // Radix runs its own typeahead on keydown and would swallow
-                    // the keystrokes, but it still owns list navigation and
-                    // closing, so those keys are left to bubble.
-                    onKeyDown={(e) => {
-                      if (!RADIX_NAVIGATION_KEYS.has(e.key)) {
-                        e.stopPropagation();
-                      }
-                    }}
-                    placeholder="Search..."
-                    aria-label={label ? `Search ${label}` : 'Search options'}
-                    autoComplete="off"
-                    className={cn(controlClassName, 'h-(--control-sm) px-3')}
-                  />
-                </search>
-              ) : null}
-              <SelectGroup>
-                {filteredOptions.length === 0 ? (
-                  <p className={selectEmptyClassName}>No matches found</p>
-                ) : (
-                  filteredOptions.map((option, index: number) => {
-                    return (
-                      <SelectItem
-                        ref={ref}
-                        key={index}
-                        value={option.value}
-                        disabled={option?.disabled || readOnly}
-                      >
-                        <span className="truncate">{option?.label}</span>
-                        {option.hint ? (
-                          <span className={selectListItemHintClassName}>
-                            {option.hint}
-                          </span>
-                        ) : null}
-                      </SelectItem>
-                    );
-                  })
-                )}
-              </SelectGroup>
+
+            <SelectContent className="p-0">
+              <section className="flex w-full min-w-[14rem] max-h-[75vh] flex-col gap-2">
+                {searchable ? (
+                  <fieldset className="w-full shrink-0">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (!RADIX_NAVIGATION_KEYS.has(event.key)) {
+                          event.stopPropagation();
+                        }
+                      }}
+                      placeholder={searchPlaceholder}
+                      aria-label={label ? `Search ${label}` : 'Search options'}
+                      autoComplete="off"
+                    className={cn(controlClassName, 'h-(--control-sm) border-none !border-b border-(--line) focus:!outline-none focus:ring-0 focus:!border-b-ink w-full text-sm')}
+                    />
+                  </fieldset>
+                ) : null}
+
+                <nav
+                  className="flex w-full flex-col overflow-y-auto rounded-md bg-(--paper) py-2"
+                  style={{ maxHeight: searchable ? 'calc(55vh - 50px)' : 'calc(55vh - 12px)' }}
+                  aria-label={label ? `${label} options` : 'Select options'}
+                >
+                  <SelectGroup className="flex flex-col gap-1">
+                    {filteredOptions.length === 0 ? (
+                      <p className={selectEmptyClassName}>No matches found</p>
+                    ) : (
+                      filteredOptions.map((option, index) => (
+                        <SelectItem
+                          ref={ref}
+                          key={`${option.value}-${index}`}
+                          value={option.value}
+                          disabled={option?.disabled || readOnly}
+                        >
+                          <span className="truncate">{option?.label}</span>
+                          {option.hint ? (
+                            <span className={selectListItemHintClassName}>
+                              {option.hint}
+                            </span>
+                          ) : null}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectGroup>
+                </nav>
+              </section>
             </SelectContent>
           </SelectComponent>
         )}

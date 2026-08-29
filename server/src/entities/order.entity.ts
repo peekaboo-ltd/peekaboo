@@ -6,6 +6,7 @@ import {
   OrderPaymentStatus,
   OrderStatus,
   OrderType,
+  PreferredContactMethod,
 } from '../constants/order.constants';
 import { Conversation } from './conversation.entity';
 import { OrderAssignment } from './orderAssignment.entity';
@@ -93,6 +94,22 @@ export class Order extends AbstractEntity {
     nullable: true,
   })
   paymentStatus?: OrderPaymentStatus | null;
+
+  // PREFERRED CONTACT METHOD
+  @Column({
+    name: 'preferred_contact_method',
+    type: 'enum',
+    enum: PreferredContactMethod,
+    nullable: true,
+  })
+  preferredContactMethod?: PreferredContactMethod | null;
+
+  // CONTACT EMAIL
+  // The order carries its own address rather than writing to the linked User:
+  // the public order endpoint is unauthenticated, so it must not be able to
+  // mutate a user record. Only meaningful when preferredContactMethod is EMAIL.
+  @Column({ name: 'contact_email', type: 'varchar', length: 255, nullable: true })
+  contactEmail?: string | null;
 
   // CONVERSATION ID
   @Column({ name: 'conversation_id', type: 'uuid', nullable: true })

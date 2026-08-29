@@ -35,7 +35,7 @@ const LanguageSelector = ({ className }: LanguageSelectorProps) => {
         type="button"
         onClick={() => setIsOpen(true)}
         className={cn(
-          'inline-flex h-(--control-lg) min-h-11 cursor-pointer items-center justify-center gap-2 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-sm font-medium text-(--ink) shadow-[0_1px_0_rgba(0,0,0,0.04)] transition-[background-color,color,border-color,box-shadow,transform] duration-200 ease-(--ease-flat) hover:border-(--line-strong) hover:bg-(--surface) active:scale-[0.98] active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]',
+          'inline-flex h-(--control-lg) min-h-11 cursor-pointer items-center justify-center gap-2 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-sm font-medium text-(--ink) transition-[background-color,color,border-color,box-shadow] duration-200 ease-(--ease-flat) hover:border-(--line-strong) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]',
           className,
         )}
         aria-haspopup="dialog"

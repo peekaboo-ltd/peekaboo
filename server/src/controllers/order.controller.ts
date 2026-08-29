@@ -10,6 +10,7 @@ import {
   ValidationError,
 } from '../helpers/errors.helper';
 import { RoleTypes } from '../constants/role.constants';
+import { PreferredContactMethod } from '../constants/order.constants';
 
 const orderService = new OrderService();
 const userService = new UserService();
@@ -27,6 +28,53 @@ const normalizeLocationLabel = (value: unknown): string | undefined => {
   }
   const trimmed = value.trim().slice(0, LOCATION_LABEL_MAX_LENGTH);
   return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CONTACT_EMAIL_MAX_LENGTH = 255;
+
+const normalizePreferredContactMethod = (
+  value: unknown
+): PreferredContactMethod | null | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  if (
+    typeof value !== 'string' ||
+    !Object.values(PreferredContactMethod).includes(
+      value as PreferredContactMethod
+    )
+  ) {
+    throw new ValidationError(
+      `preferredContactMethod must be one of ${Object.values(
+        PreferredContactMethod
+      ).join(', ')}`
+    );
+  }
+  return value as PreferredContactMethod;
+};
+
+const normalizeContactEmail = (value: unknown): string | null | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  if (typeof value !== 'string') {
+    throw new ValidationError('contactEmail must be a string');
+  }
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+  if (trimmed.length > CONTACT_EMAIL_MAX_LENGTH || !EMAIL_PATTERN.test(trimmed)) {
+    throw new ValidationError('contactEmail must be a valid email address');
+  }
+  return trimmed;
 };
 
 const normalizeOrderLocation = (
@@ -266,11 +314,14 @@ export const OrderController = {
 
       const existingOrder = await orderService.getOrderById(id as UUID);
 
-      // Only allow updating location and fee fields for public orders
+      // Only allow updating location, fee, and contact-preference fields for
+      // public orders
       const allowedFields: (keyof Order)[] = [
         'locationFrom',
         'locationTo',
         'finalFee',
+        'preferredContactMethod',
+        'contactEmail',
       ];
       const sanitized: Partial<Order> = {};
       for (const key of allowedFields) {
@@ -292,6 +343,31 @@ export const OrderController = {
           sanitized.locationTo,
           'locationTo'
         );
+      }
+
+      // There is no schema layer on this route, so the enum and the address are
+      // checked here rather than persisted as whatever was sent.
+      if (sanitized.preferredContactMethod !== undefined) {
+        sanitized.preferredContactMethod = normalizePreferredContactMethod(
+          sanitized.preferredContactMethod
+        );
+      }
+      if (sanitized.contactEmail !== undefined) {
+        sanitized.contactEmail = normalizeContactEmail(sanitized.contactEmail);
+      }
+
+      // A stored preference we cannot act on is worse than none: EMAIL needs an
+      // address, either arriving in this request or already on the order.
+      if (sanitized.preferredContactMethod === PreferredContactMethod.EMAIL) {
+        const resolvedEmail =
+          sanitized.contactEmail !== undefined
+            ? sanitized.contactEmail
+            : existingOrder.contactEmail;
+        if (!resolvedEmail) {
+          throw new ValidationError(
+            'contactEmail is required when preferredContactMethod is EMAIL'
+          );
+        }
       }
 
       const updatedOrder = await orderService.updateOrder(id as UUID, sanitized, {

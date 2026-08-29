@@ -1,7 +1,11 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
 import type { UUID } from '@/types';
-import type { Order, OrderLocation } from '@/types/order.type';
+import type {
+  Order,
+  OrderLocation,
+  PreferredContactMethod,
+} from '@/types/order.type';
 import type { ImportTemplateRow } from '@/types/orderImport.type';
 
 interface CreateOrderArgs {
@@ -9,6 +13,8 @@ interface CreateOrderArgs {
   recipientPhoneNumber: string;
   locationFrom?: OrderLocation;
   locationTo?: OrderLocation;
+  preferredContactMethod?: PreferredContactMethod;
+  contactEmail?: string;
 }
 
 export const ordersMutationApiSlice = createApi({
@@ -22,12 +28,16 @@ export const ordersMutationApiSlice = createApi({
         recipientPhoneNumber,
         locationFrom,
         locationTo,
+        preferredContactMethod,
+        contactEmail,
       }: CreateOrderArgs) => ({
         url: '/orders',
         method: 'POST',
         body: {
           senderPhoneNumber,
           recipientPhoneNumber,
+          ...(preferredContactMethod ? { preferredContactMethod } : {}),
+          ...(contactEmail ? { contactEmail } : {}),
           ...(locationFrom ? { locationFrom } : {}),
           ...(locationTo ? { locationTo } : {}),
         },

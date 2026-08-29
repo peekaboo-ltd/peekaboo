@@ -8,7 +8,7 @@ export interface SelectOption {
 
 /** Shared list-row styles for combobox and select menus. */
 export const selectListItemClassName =
-  'flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-(--ink) outline-none transition-colors duration-200 ease-(--ease-flat) data-[highlighted]:bg-(--surface-hover) data-[selected=true]:bg-(--surface-hover)';
+  'mx-1 flex cursor-pointer select-none items-center gap-2 rounded-md p-2 text-sm text-(--ink) outline-none transition-[background-color] duration-200 ease-(--ease-flat) data-[highlighted]:bg-(--surface) data-[state=checked]:bg-(--surface)';
 
 export const selectListItemCheckClassName = 'size-3.5 shrink-0 text-(--ink)';
 
@@ -16,7 +16,7 @@ export const selectListItemHintClassName =
   'ml-auto shrink-0 tabular-nums text-(--muted)';
 
 export const selectEmptyClassName =
-  'px-2 py-5 text-center text-sm text-(--muted)';
+  'px-2 py-2 text-center text-sm text-(--muted)';
 
 export const selectSearchRowClassName =
   'mb-1 flex items-center gap-2 border-b border-(--line) px-2 pb-2 pt-1';

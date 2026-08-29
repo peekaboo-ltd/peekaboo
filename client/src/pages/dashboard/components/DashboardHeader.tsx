@@ -1,12 +1,11 @@
 import { motion, type Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
 import { RoleTypes } from '@/types/auth.type';
 import { useI18n } from '@/i18n/i18n';
-import { Button } from '@/components/ui/button';
 import DatePicker from '@/components/inputs/DatePicker';
 import type { DashboardActionLink } from '@/types/dashboard.type';
 import { faFileLines } from '@fortawesome/free-regular-svg-icons';
+import Button from '@/components/inputs/Button';
 
 interface DashboardHeaderProps {
   userName?: string | null;
@@ -61,14 +60,14 @@ const DashboardHeader = ({
             {actions.length > 0 && (
               <div className="flex flex-wrap gap-2 xl:max-w-[28rem] xl:justify-end">
                 {actions.slice(0, 3).map((action) => (
-                  <Link
+                  <Button
                     key={action.label}
-                    to={action.to}
-                    className="inline-flex items-center gap-2 rounded-md bg-(--surface) px-4 py-2 text-sm font-normal text-(--ink) transition-colors duration-200 hover:bg-(--surface)"
+                    variant='outline'
+                    className='border-(--line) bg-(--surface) hover:bg-(--surface-hover)'
                   >
                     <FontAwesomeIcon icon={action.icon} className="type-meta" />
                     {action.label}
-                  </Link>
+                  </Button>
                 ))}
               </div>
             )}
@@ -101,10 +100,9 @@ const DashboardHeader = ({
           <div className="flex flex-wrap items-center justify-start gap-2 xl:justify-end">
             <Button
               variant="outline"
-              size="sm"
-              className="h-10 gap-2 rounded-md border-(--line) bg-(--surface) px-4 hover:bg-(--surface)"
+              className='border-(--line) bg-(--surface) hover:bg-(--surface-hover)'
             >
-              <FontAwesomeIcon icon={faFileLines} className="text-xs" />
+              <FontAwesomeIcon icon={faFileLines} className="type-meta" />
               Export
             </Button>
           </div>

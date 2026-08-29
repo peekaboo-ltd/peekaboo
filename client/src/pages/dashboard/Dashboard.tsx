@@ -40,12 +40,11 @@ import {
 import DashboardHeader from './components/DashboardHeader';
 import DashboardMetricsSection from './components/DashboardMetricsSection';
 import DashboardSummaryChart from './components/DashboardSummaryChart';
-import DashboardChartsSection from './components/DashboardChartsSection';
 import DashboardLoading from './components/DashboardLoading';
 import DashboardError from './components/DashboardError';
 import DashboardActivityPanel from './components/DashboardActivityPanel';
 import DashboardContextPanel from './components/DashboardContextPanel';
-import DashboardDispatchStrip, { type DispatchStripItem } from './components/DashboardDispatchStrip';
+import type { DispatchStripItem } from './components/DashboardDispatchStrip';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { formatCurrency, formatNumbers } from '@/utils/strings.util';
 
@@ -483,16 +482,18 @@ const Dashboard = () => {
         onEndDateChange={setEndDate}
       />
 
-      <DashboardDispatchStrip items={dispatchStripItems} variants={itemVariants} />
-
+      {/* Zone 2 — what is true right now. Headline metrics and live dispatch
+          readings, previously two separate full-width rows of numbers. */}
       <DashboardMetricsSection
         cards={metricCards}
+        dispatch={dispatchStripItems}
         containerVariants={containerVariants}
         itemVariants={itemVariants}
       />
 
+      {/* Zone 3 — what is happening over time, beside what just happened. */}
       <section className="grid grid-cols-12 gap-4">
-        <section className="col-span-12 xl:col-span-8">
+        <div className="col-span-12 xl:col-span-8">
           <DashboardSummaryChart
             range={range}
             metric={metric}
@@ -501,31 +502,26 @@ const Dashboard = () => {
             data={summaryData}
             role={role}
             breakdown={statusBreakdown}
+            widgets={supportWidgets}
             isLoading={summaryChartFetching}
             containerVariants={containerVariants}
             itemVariants={itemVariants}
           />
-        </section>
-
-        <section className="col-span-12 xl:col-span-4">
-          <DashboardChartsSection widgets={supportWidgets} itemVariants={itemVariants} />
-        </section>
-      </section>
-
-      <section className="grid grid-cols-12 gap-4">
-        <section className="col-span-12 xl:col-span-8">
+        </div>
+        <div className="col-span-12 xl:col-span-4">
           <DashboardActivityPanel items={recentActivity} variants={itemVariants} />
-        </section>
-        <section className="col-span-12 xl:col-span-4">
-          <DashboardContextPanel
-            title={contextCopy.title}
-            description={contextCopy.description}
-            highlights={spotlightCards}
-            actions={quickActions}
-            variants={itemVariants}
-          />
-        </section>
+        </div>
       </section>
+
+      {/* Zone 4 — where to go next. */}
+      <DashboardContextPanel
+        title={contextCopy.title}
+        description={contextCopy.description}
+        highlights={spotlightCards}
+        actions={quickActions}
+        variants={itemVariants}
+      />
+
     </motion.main>
   );
 };

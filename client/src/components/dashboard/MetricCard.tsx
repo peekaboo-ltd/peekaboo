@@ -1,29 +1,26 @@
 import { Card } from '@/components/ui/card';
 import { type MetricCardData } from '@/types/dashboard.type';
 import { cn } from '@/lib/utils';
+import Sparkline from '@/components/charts/Sparkline';
+import type { ChartSeriesIndex } from '@/components/charts/chart.tokens';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { createSearchParams, Link } from 'react-router-dom';
 import { faArrowRight, faArrowTrendDown, faArrowTrendUp } from '@fortawesome/free-solid-svg-icons';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  ResponsiveContainer,
-} from 'recharts';
 
 // `accent` survives from the pre-monochrome palette. Every card now shares one
 // treatment; the accent only picks a step on the neutral chart ramp so a row of
 // sparklines stays distinguishable from one another.
-const sparkRamp = {
-  blue: 'var(--chart-1)',
-  teal: 'var(--chart-2)',
-  amber: 'var(--chart-3)',
-  emerald: 'var(--chart-4)',
-  violet: 'var(--chart-5)',
-  rose: 'var(--chart-2)',
-  slate: 'var(--chart-3)',
-} as const;
+// `accent` is a leftover name from the old palette. It now selects a step on
+// the shared series ramp so a column of metric cards stays tellable apart.
+const accentSeries = {
+  blue: 1,
+  teal: 2,
+  amber: 3,
+  emerald: 4,
+  violet: 5,
+  rose: 2,
+  slate: 3,
+} as const satisfies Record<string, ChartSeriesIndex>;
 
 const MetricCard = ({
   label,
@@ -35,7 +32,6 @@ const MetricCard = ({
   icon,
   sparklineData,
   sparklineType,
-  sparkColor,
   accent = 'slate',
   comparisonLabel,
   note,
@@ -49,38 +45,7 @@ const MetricCard = ({
         : href
       : undefined);
 
-  const chartData = sparklineData?.map((item, index) => ({ value: item, index })) || [];
   const caption = footerText || note || comparisonLabel;
-
-  const renderSparkline = () => {
-    if (!sparklineData?.length || !sparklineType) return null;
-
-    return (
-      <div className="h-10 w-20" aria-hidden="true">
-        <ResponsiveContainer width="100%" height="100%">
-          {sparklineType === 'line' ? (
-            <LineChart data={chartData}>
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={sparkColor || sparkRamp[accent]}
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          ) : (
-            <BarChart data={chartData}>
-              <Bar
-                dataKey="value"
-                fill={sparkColor || sparkRamp[accent]}
-                radius={[2, 2, 0, 0]}
-              />
-            </BarChart>
-          )}
-        </ResponsiveContainer>
-      </div>
-    );
-  };
 
   const cardContent = (
     <Card
@@ -106,7 +71,10 @@ const MetricCard = ({
         {trend && (
           // Direction reads from the arrow and the label, not from a fill.
           <span
-            className="type-meta inline-flex shrink-0 items-center gap-1 text-(--ink) tabular"
+            className={cn(
+              'type-meta inline-flex shrink-0 items-center gap-1 tabular',
+              trend.isPositive ? 'text-(--approve)' : 'text-(--danger)'
+            )}
             aria-label={`${trend.isPositive ? 'Up' : 'Down'} ${Math.abs(trend.value)} percent`}
           >
             <FontAwesomeIcon
@@ -126,7 +94,16 @@ const MetricCard = ({
         >
           {value}
         </p>
-        <div className="hidden items-center gap-2 sm:flex">{renderSparkline()}</div>
+        {sparklineData && sparklineData.length > 0 && (
+          <div className="hidden shrink-0 sm:block">
+            <Sparkline
+              values={sparklineData}
+              kind={sparklineType === 'bar' ? 'bar' : 'line'}
+              series={accentSeries[accent]}
+              ariaLabel={`${label} trend`}
+            />
+          </div>
+        )}
       </div>
 
       {(caption || destination) && (

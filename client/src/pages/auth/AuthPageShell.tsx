@@ -78,7 +78,7 @@ export const AuthLink = ({ to, children }: { to: string; children: ReactNode }) 
 );
 
 export const AuthCard = ({ title, subtitle, children }: AuthCardProps) => (
-  <section className="card-framed w-full px-8 py-8 max-sm:px-5 max-sm:py-6">
+  <section className="shadow-xl rounded-(--radius-control) bg-white w-full px-8 py-8 max-sm:px-5 max-sm:py-6">
     <header className="mb-6 text-center">
       <h1 className="type-h3">{title}</h1>
       <p className="type-body-sm mt-1 text-(--muted)">{subtitle}</p>
@@ -105,7 +105,7 @@ export const AuthPageShell = ({
   children,
   maxWidthClassName = 'max-w-[440px]',
 }: AuthPageShellProps) => (
-  <main className="grid h-screen max-h-screen grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-(--paper) px-5 py-6 text-(--ink)">
+  <main className="grid h-screen max-h-screen grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-(--surface) px-5 py-6 text-(--ink)">
     <header className="flex justify-center">
       <Link
         to="/"

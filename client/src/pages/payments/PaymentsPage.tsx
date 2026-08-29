@@ -32,7 +32,16 @@ import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { AdminPaymentsQueryParams } from '@/api/queries/payments.queries';
 import { controlClassName } from '@/components/inputs/control';
+import DatePicker from '@/components/inputs/DatePicker';
 import { cn } from '@/lib/utils';
+
+const formatDateParam = (date?: Date) => {
+  if (!date) return undefined;
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate(),
+  ).padStart(2, '0')}`;
+};
 
 const PAYMENT_STATUS_OPTIONS = [
   { value: 'all', label: 'All Statuses' },
@@ -67,8 +76,8 @@ const PaymentsPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currencyFilter, setCurrencyFilter] = useState<string>('all');
   const [methodFilter, setMethodFilter] = useState<string>('all');
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
   const [minAmount, setMinAmount] = useState<string>('');
   const [maxAmount, setMaxAmount] = useState<string>('');
   const [searchKey, setSearchKey] = useState<string>('');
@@ -108,8 +117,8 @@ const PaymentsPage = () => {
     if (currencyFilter && currencyFilter !== 'all')
       params.currency = currencyFilter;
     if (methodFilter && methodFilter !== 'all') params.method = methodFilter;
-    if (startDate) params.startDate = startDate;
-    if (endDate) params.endDate = endDate;
+    if (startDate) params.startDate = formatDateParam(startDate);
+    if (endDate) params.endDate = formatDateParam(endDate);
     if (minAmount) params.minAmount = Number(minAmount);
     if (maxAmount) params.maxAmount = Number(maxAmount);
     if (searchKey.trim()) params.searchKey = searchKey.trim();
@@ -161,8 +170,8 @@ const PaymentsPage = () => {
 
   useEffect(() => {
     fetchPaymentStats({
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
+      startDate: formatDateParam(startDate),
+      endDate: formatDateParam(endDate),
       currency: currencyFilter !== 'all' ? currencyFilter : undefined,
     });
   }, [startDate, endDate, currencyFilter, fetchPaymentStats]);
@@ -172,21 +181,19 @@ const PaymentsPage = () => {
     fetchAdminPayments(buildFilterParams({ page: 0 }));
   };
 
-  const handleStartDateChange = (value: string) => {
-    setStartDate(value);
+  const handleStartDateChange = (date?: Date) => {
+    setStartDate(date);
 
-    // Keep a valid range: startDate must be <= endDate
-    if (endDate && value && value > endDate) {
-      setEndDate(value);
+    if (endDate && date && date > endDate) {
+      setEndDate(date);
     }
   };
 
-  const handleEndDateChange = (value: string) => {
-    setEndDate(value);
+  const handleEndDateChange = (date?: Date) => {
+    setEndDate(date);
 
-    // Keep a valid range: endDate must be >= startDate
-    if (startDate && value && value < startDate) {
-      setStartDate(value);
+    if (startDate && date && date < startDate) {
+      setStartDate(date);
     }
   };
 
@@ -194,8 +201,8 @@ const PaymentsPage = () => {
     setStatusFilter('all');
     setCurrencyFilter('all');
     setMethodFilter('all');
-    setStartDate('');
-    setEndDate('');
+    setStartDate(undefined);
+    setEndDate(undefined);
     setMinAmount('');
     setMaxAmount('');
     setSearchKey('');
@@ -333,22 +340,26 @@ const PaymentsPage = () => {
                 className={cn(controlClassName, 'pl-8 pr-3')}
               />
             </div>
-            <input
-              type="date"
-              aria-label="From date"
-              value={startDate}
-              max={endDate || undefined}
-              onChange={(e) => handleStartDateChange(e.target.value)}
-              className={cn(controlClassName, 'px-3 md:w-[170px]')}
-            />
-            <input
-              type="date"
-              aria-label="To date"
-              value={endDate}
-              min={startDate || undefined}
-              onChange={(e) => handleEndDateChange(e.target.value)}
-              className={cn(controlClassName, 'px-3 md:w-[170px]')}
-            />
+            <div className="md:w-[170px]">
+              <DatePicker
+                value={startDate}
+                onChange={(event) =>
+                  handleStartDateChange(event as unknown as Date | undefined)
+                }
+                placeholder="From date"
+                toDate={endDate}
+              />
+            </div>
+            <div className="md:w-[170px]">
+              <DatePicker
+                value={endDate}
+                onChange={(event) =>
+                  handleEndDateChange(event as unknown as Date | undefined)
+                }
+                placeholder="To date"
+                fromDate={startDate}
+              />
+            </div>
             <Button primary type="button" onClick={handleApplyFilters}>
               Apply
             </Button>
@@ -499,17 +510,17 @@ const PaymentsPage = () => {
                 </Select>
               </div>
 
-              {/* Start Date */}
               <div className="flex flex-col gap-1.5">
                 <label className="type-meta">
                   From Date
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={startDate}
-                  max={endDate || undefined}
-                  onChange={(e) => handleStartDateChange(e.target.value)}
-                  className={cn(controlClassName, 'px-3')}
+                  onChange={(event) =>
+                    handleStartDateChange(event as unknown as Date | undefined)
+                  }
+                  placeholder="From date"
+                  toDate={endDate}
                 />
               </div>
 
@@ -518,12 +529,13 @@ const PaymentsPage = () => {
                 <label className="type-meta">
                   To Date
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={endDate}
-                  min={startDate || undefined}
-                  onChange={(e) => handleEndDateChange(e.target.value)}
-                  className={cn(controlClassName, 'px-3')}
+                  onChange={(event) =>
+                    handleEndDateChange(event as unknown as Date | undefined)
+                  }
+                  placeholder="To date"
+                  fromDate={startDate}
                 />
               </div>
 

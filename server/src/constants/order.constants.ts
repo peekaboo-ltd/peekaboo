@@ -38,6 +38,16 @@ export enum OrderPaymentStatus {
   COMPLETED = "COMPLETED",
 }
 
+// How the sender wants Peekaboo to reach them about this delivery. Deliberately
+// separate from MessageChannel, which describes the transport an existing
+// conversation message arrived on and backs a non-nullable column on `messages`.
+export enum PreferredContactMethod {
+  WHATSAPP = "WHATSAPP",
+  PHONE = "PHONE",
+  SMS = "SMS",
+  EMAIL = "EMAIL",
+}
+
 export enum OrderAssignmentStatus {
   ACTIVE = "ACTIVE",
   COMPLETED = "COMPLETED",

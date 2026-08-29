@@ -4,6 +4,20 @@ import { cn } from '@/lib/utils';
 interface PublicPageProps {
   children: ReactNode;
   className?: string;
+  /**
+   * Lock the page to one screen instead of letting it grow.
+   *
+   * The default stack is a floor (`min-h-screen` + `section-rhythm`), which is
+   * right for a page that scrolls. A page whose brief is "everything visible at
+   * once" needs a ceiling, and `section-rhythm` is a custom utility, so its
+   * 112px of padding-block cannot be overridden from a className.
+   *
+   * 64px is the sticky header (DESIGN.md §4). The single `overflow-y-auto`
+   * child is the AuthPageShell pattern: below the guaranteed height the content
+   * column scrolls inside the viewport rather than pushing anything off it.
+   */
+  viewport?: boolean;
+  contentClassName?: string;
 }
 
 interface PublicPageHeroProps {
@@ -31,21 +45,32 @@ interface PublicStatCardProps {
   className?: string;
 }
 
-type OrderStage = 'locations' | 'payment' | 'tracking';
-
-interface OrderStageRailProps {
-  currentStage: OrderStage;
-}
-
-const orderStages: Array<{ key: OrderStage; label: string }> = [
-  { key: 'locations', label: 'Locations' },
-  { key: 'payment', label: 'Payment' },
-  { key: 'tracking', label: 'Tracking' },
-];
-
-export const PublicPage = ({ children, className }: PublicPageProps) => (
-  <main className={cn('min-h-screen bg-(--paper) text-(--ink)', className)}>
-    <div className="app-container section-rhythm flex flex-col gap-6">{children}</div>
+export const PublicPage = ({
+  children,
+  className,
+  viewport = false,
+  contentClassName,
+}: PublicPageProps) => (
+  <main
+    className={cn(
+      'bg-(--paper) text-(--ink)',
+      viewport
+        ? 'h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] overflow-hidden max-lg:h-auto max-lg:max-h-none max-lg:overflow-visible'
+        : 'min-h-screen',
+      className,
+    )}
+  >
+    <div
+      className={cn(
+        'app-container flex flex-col',
+        viewport
+          ? 'h-full min-h-0 gap-4 py-5 max-lg:h-auto max-lg:py-8'
+          : 'section-rhythm gap-6',
+        contentClassName,
+      )}
+    >
+      {children}
+    </div>
   </main>
 );
 
@@ -149,54 +174,3 @@ export const PublicStatCard = ({
     </div>
   </article>
 );
-
-export const OrderStageRail = ({ currentStage }: OrderStageRailProps) => {
-  const currentIndex = orderStages.findIndex((stage) => stage.key === currentStage);
-
-  return (
-    <nav aria-label="Order steps" className="card-framed p-5">
-      <ol className="grid grid-cols-3">
-        {orderStages.map((stage, index) => {
-          const isReached = index <= currentIndex;
-          const isCurrent = index === currentIndex;
-
-          return (
-            <li
-              key={stage.key}
-              className="relative min-w-0"
-              aria-current={isCurrent ? 'step' : undefined}
-            >
-              {index > 0 ? (
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    'absolute right-1/2 top-3 h-px w-full',
-                    isReached ? 'bg-(--ink)' : 'bg-(--line)',
-                  )}
-                />
-              ) : null}
-              <div className="relative flex flex-col items-center text-center">
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    'flex size-6 items-center justify-center rounded-(--radius-pill) border text-xs',
-                    isCurrent
-                      ? 'border-(--ink) bg-(--ink) text-(--paper)'
-                      : isReached
-                        ? 'border-(--ink) bg-(--paper) text-(--ink)'
-                        : 'border-dashed border-(--line-strong) text-(--muted)',
-                  )}
-                >
-                  {index + 1}
-                </span>
-                <span className={cn('mt-2 text-xs', isCurrent ? 'font-medium text-(--ink)' : 'text-(--muted)')}>
-                  {stage.label}
-                </span>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-    </nav>
-  );
-};

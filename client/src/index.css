@@ -76,11 +76,11 @@
   --dur-menu: 100ms;
   --dur-state: 200ms;
   --dur-sweep: 500ms;
-  --chart-1: #000000;
-  --chart-2: #4b4b4b;
-  --chart-3: #757575;
-  --chart-4: #a3a3a3;
-  --chart-5: #d4d4d4;
+  --chart-1: #1d4ed8;
+  --chart-2: #15803d;
+  --chart-3: #b45309;
+  --chart-4: #6d28d9;
+  --chart-5: #b91c1c;
 
   /* ── Consequence ─────────────────────────────────────────────────────────
      The only two hues in the system. Structure — cards, tables, navigation,
@@ -97,8 +97,22 @@
   --approve-strong: #166534;
   --approve-surface: #f0fdf4;
   --approve-line: #bbf7d0;
-  /* Text that sits on a filled danger or approve ground. */
+  /* Text that sits on a filled danger, approve, warning, or info ground. */
   --on-consequence: #ffffff;
+
+  /* Two more meanings, same shape, authenticated app only. `warning` is a
+     state that needs attention but has not failed — pending payment, an order
+     past its window. `info` is a neutral fact the reader did not ask for —
+     a trend direction, a comparison, a system note. Both stay at the dense
+     end of the ramp so they hold 4.5:1 with white on the fill. */
+  --warning: #b45309;
+  --warning-strong: #92400e;
+  --warning-surface: #fffbeb;
+  --warning-line: #fde68a;
+  --info: #1d4ed8;
+  --info-strong: #1e40af;
+  --info-surface: #eff6ff;
+  --info-line: #bfdbfe;
 
   /* Public marketing pages — subtle warmth without touching app semantics. */
   --public-sky: #6ba3c7;
@@ -138,11 +152,11 @@
   --overlay: rgba(0, 0, 0, 0.72);
   --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.55);
   --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.7);
-  --chart-1: #d4d4d4;
-  --chart-2: #a3a3a3;
-  --chart-3: #757575;
-  --chart-4: #4b4b4b;
-  --chart-5: #ffffff;
+  --chart-1: #60a5fa;
+  --chart-2: #4ade80;
+  --chart-3: #fbbf24;
+  --chart-4: #c4b5fd;
+  --chart-5: #f87171;
 
   /* The 700s read at 3.4:1 on black — below the floor. Dark mode keeps the
      same two meanings and lifts them to the 400s to hold contrast. */
@@ -154,6 +168,14 @@
   --approve-strong: #86efac;
   --approve-surface: #0c1a10;
   --approve-line: #14532d;
+  --warning: #fbbf24;
+  --warning-strong: #fcd34d;
+  --warning-surface: #1f1608;
+  --warning-line: #573b0c;
+  --info: #60a5fa;
+  --info-strong: #93c5fd;
+  --info-surface: #0d1526;
+  --info-line: #1e3a5f;
   --on-consequence: #000000;
 
   --public-sky: #8ec0e4;

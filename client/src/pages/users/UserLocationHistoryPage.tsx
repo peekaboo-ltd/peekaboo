@@ -20,6 +20,7 @@ import LocationDisplay from "@/containers/locations/LocationDisplay";
 import { UUID } from "@/types";
 import Select from "@/components/inputs/Select";
 import Button from "@/components/inputs/Button";
+import DatePicker from "@/components/inputs/DatePicker";
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
 
@@ -57,6 +58,13 @@ const getCoordinates = (item: CoordinateRecord) => {
 
 const toInputDateTime = (isoString: string) =>
   moment(isoString).format("YYYY-MM-DDTHH:mm");
+
+const toInputTime = (value: string) => moment(value).format("HH:mm");
+
+const mergeDateAndTime = (date: Date, time: string) =>
+  moment(`${moment(date).format("YYYY-MM-DD")} ${time}`, "YYYY-MM-DD HH:mm").format(
+    "YYYY-MM-DDTHH:mm",
+  );
 
 const toUtcIsoString = (value: string) => {
   if (!value) return undefined;
@@ -419,18 +427,37 @@ const UserLocationHistoryPage = () => {
           >
             Start time (local)
           </label>
-          <input
-            id="start-time"
-            type="datetime-local"
-            className={cn(controlClassName, 'px-3')}
-            value={dateRange.startTime}
-            onChange={(event) =>
-              setDateRange((prev) => ({
-                ...prev,
-                startTime: event.target.value,
-              }))
-            }
-          />
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+            <DatePicker
+              value={moment(dateRange.startTime).toDate()}
+              onChange={(event) => {
+                const nextDate = event as unknown as Date | undefined;
+                if (!nextDate) return;
+
+                setDateRange((prev) => ({
+                  ...prev,
+                  startTime: mergeDateAndTime(nextDate, toInputTime(prev.startTime)),
+                }));
+              }}
+              placeholder="Start date"
+              toDate={moment(dateRange.endTime).toDate()}
+            />
+            <input
+              id="start-time"
+              type="time"
+              className={cn(controlClassName, 'w-full px-3 sm:w-[140px]')}
+              value={toInputTime(dateRange.startTime)}
+              onChange={(event) =>
+                setDateRange((prev) => ({
+                  ...prev,
+                  startTime: mergeDateAndTime(
+                    moment(prev.startTime).toDate(),
+                    event.target.value,
+                  ),
+                }))
+              }
+            />
+          </div>
         </article>
 
         <article className="flex flex-col gap-2">
@@ -440,15 +467,37 @@ const UserLocationHistoryPage = () => {
           >
             End time (local)
           </label>
-          <input
-            id="end-time"
-            type="datetime-local"
-            className={cn(controlClassName, 'px-3')}
-            value={dateRange.endTime}
-            onChange={(event) =>
-              setDateRange((prev) => ({ ...prev, endTime: event.target.value }))
-            }
-          />
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+            <DatePicker
+              value={moment(dateRange.endTime).toDate()}
+              onChange={(event) => {
+                const nextDate = event as unknown as Date | undefined;
+                if (!nextDate) return;
+
+                setDateRange((prev) => ({
+                  ...prev,
+                  endTime: mergeDateAndTime(nextDate, toInputTime(prev.endTime)),
+                }));
+              }}
+              placeholder="End date"
+              fromDate={moment(dateRange.startTime).toDate()}
+            />
+            <input
+              id="end-time"
+              type="time"
+              className={cn(controlClassName, 'w-full px-3 sm:w-[140px]')}
+              value={toInputTime(dateRange.endTime)}
+              onChange={(event) =>
+                setDateRange((prev) => ({
+                  ...prev,
+                  endTime: mergeDateAndTime(
+                    moment(prev.endTime).toDate(),
+                    event.target.value,
+                  ),
+                }))
+              }
+            />
+          </div>
         </article>
 
         <article className="lg:col-span-2 flex justify-end">

@@ -13,7 +13,6 @@ import { toast } from 'sonner';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useGetPublicPaymentStatusQuery } from '@/api/queries/payments.queries';
 import {
-  OrderStageRail,
   PublicPage,
   PublicPageHero,
   PublicSectionCard,
@@ -171,8 +170,6 @@ const PublicOrderPaymentSuccess = () => {
           </span>
         }
       />
-
-      <OrderStageRail currentStage="payment" />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(17rem,0.8fr)] lg:items-start">
         <div className="space-y-5">

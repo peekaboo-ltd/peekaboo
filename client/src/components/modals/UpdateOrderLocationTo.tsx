@@ -58,14 +58,7 @@ const UpdateOrderLocationTo = () => {
       heading="Update Delivery Location"
       description="Search and select the delivery location for your order"
     >
-      <article className="space-y-6">
-        <section className="space-y-4">
-          <header>
-            <h4 className="type-card-title">Search Destination</h4>
-            <p className="text-sm text-(--muted)">
-              Enter the address or location name where the package should be delivered
-            </p>
-          </header>
+      <article className="flex flex-col gap-6">
 
           <PlaceSearch
             onLocationSelect={handleLocationSelect}
@@ -73,8 +66,6 @@ const UpdateOrderLocationTo = () => {
             className="relative"
             country="rw"
           />
-        </section>
-
         {selectedLocation && (
           <aside className="p-4 bg-(--surface) rounded-lg border">
             <h5 className="text-sm font-normal text-(--ink) mb-2">Selected Destination:</h5>
@@ -86,17 +77,15 @@ const UpdateOrderLocationTo = () => {
           </aside>
         )}
 
-        <footer className="flex items-center justify-end gap-3 pt-4 border-t">
           <Button
             onClick={handleSaveLocation}
             disabled={!selectedLocation || isLoading}
             isLoading={isLoading}
             primary
-            className="px-6 py-2"
+            className="px-6 py-2 self-end"
           >
             Save Destination
           </Button>
-        </footer>
       </article>
     </Modal>
   );

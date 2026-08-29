@@ -35,9 +35,9 @@ Verify with: `grep -rE '\-\[--[a-z-]+\]' --include='*.tsx' src` — must return 
 
 Every change MUST satisfy all seven. If a proposed change breaks one, the change is wrong.
 
-1. **Monochrome structure.** Layout, navigation, selection, charts, focus, and decorative UI use
-   white, black, and the neutral ramp between them. Hue is reserved for the explicit exceptions
-   below and MUST NOT be reused as a general accent.
+1. **Monochrome structure.** Layout, navigation, selection, focus, and decorative UI use white,
+   black, and the neutral ramp between them. Hue is reserved for the explicit exceptions below
+   and MUST NOT be reused as a general accent.
 2. **Highlight = inversion ("vice versa").** The only way to mark something as selected, active,
    current, or checked is to swap ink and paper: the element takes the foreground color as its
    background and the background color as its text. Never a tint, never an accent bar in color.
@@ -74,6 +74,19 @@ black nav beside a black sidebar — is the failure mode this rule exists to pre
 - **Consequence states may use the `--danger` and `--approve` families.** Red makes failure or a
   destructive commitment immediately legible; green marks a resolved or approved outcome. Copy,
   icons, and shape remain mandatory, so colour is never the only carrier of meaning.
+- **Two more meanings exist inside the authenticated app: `--warning` and `--info`.** `warning`
+  is a state that needs attention but has not failed — a pending payment, an order past its
+  window. `info` is a neutral fact the reader did not ask for — a trend direction, a comparison.
+  The same rule applies: icon and label first, colour second.
+- **Chart series carry real hue.** This is the one place colour is not reinforcement but the
+  label itself: four grey strokes on one axis are not tellable apart, and no icon can be attached
+  to a line. `--chart-1..5` are therefore genuine hues. Multi-series charts MUST still vary
+  `strokeDasharray` (see `CHART_DASH`) so the reading survives greyscale and colour-blindness.
+
+**Scope.** The four semantic families and the chart ramp are for the **authenticated app**.
+Public marketing pages, auth screens, and public order screens carry no functional hue — their
+states are expressed by fill, border style, glyph, and copy. Primary actions stay `--ink`
+everywhere; colour never marks "this is the main button", only "this is what will happen".
 
 ---
 
@@ -220,11 +233,22 @@ only reinforces.
 | Failed / cancelled | Outlined chip, ink border, **strikethrough label**, x icon | `border border-[--ink] line-through` |
 | Draft / inactive | Filled quiet chip on `--surface`, muted text | `bg-[--surface] text-[--muted]` |
 
-**Charts (recharts).** Series colors come from a five-step ramp —
-`#000000, #4b4b4b, #757575, #a3a3a3, #d4d4d4` in light mode, reversed in dark. Multi-line charts
-MUST additionally differentiate by `strokeDasharray` (`0`, `6 3`, `2 3`, `10 4`, `1 3`) because
-the ramp alone fails for colorblind and low-contrast displays. Grid lines use `--line`, axis text
-uses `--muted` at 12px/400.
+**Charts (`@tanstack/charts`).** Series colours come from `--chart-1..5`. Multi-series charts MUST
+additionally differentiate by `strokeDasharray` (`CHART_DASH`) because hue alone fails for
+colour-blind readers and low-contrast displays. Grid lines use `--line`; axis text uses `--muted`
+at 12px/400.
+
+Three components cover every chart in the app, and a new chart SHOULD be one of them rather than
+a fourth bespoke file:
+
+| Component | Use |
+| --- | --- |
+| `components/charts/SeriesChart` | Any cartesian chart. `kind` is `line`, `bar`, or `area` — these differ by one mark, so they are a prop, not three files. |
+| `components/charts/DonutChart` | Part-to-whole. Renders its legend as real text beside the arcs, so categories stay selectable and translatable. |
+| `components/charts/Sparkline` | A trend shape beside a number that already states the value. No axes, no grid, no tooltip. |
+
+Every chart takes a required `ariaLabel`: marks carry no text, so without it the chart is invisible
+to a screen reader.
 
 ---
 

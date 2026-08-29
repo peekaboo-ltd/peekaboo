@@ -1,8 +1,9 @@
 import { motion, type Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
 import type { DashboardActionLink, MetricCardData } from '@/types/dashboard.type';
 import DashboardPanel from './DashboardPanel';
+import Button from '@/components/inputs/Button';
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 interface DashboardContextPanelProps {
   title: string;
@@ -58,17 +59,17 @@ const DashboardContextPanel = ({
               </p>
               <div className="mt-3 grid grid-cols-1 gap-2">
                 {actions.slice(0, 4).map((action) => (
-                  <Link
+                  <Button
                     key={action.label}
-                    to={action.to}
-                    className="flex items-center justify-between rounded-md bg-(--surface) px-4 py-3 text-sm font-normal text-(--ink) transition-colors duration-200 hover:bg-(--surface)"
+                    variant='outline'
+                    className='border border-(--line) bg-(--surface) hover:bg-(--surface-hover)'
                   >
-                    <span className="flex items-center gap-2">
+                      <span className='w-full flex items-center justify-start gap-2'>
                       <FontAwesomeIcon icon={action.icon} className="type-meta" />
                       {action.label}
-                    </span>
-                    <span className="text-(--muted)">→</span>
-                  </Link>
+                      </span>
+                      <FontAwesomeIcon icon={faChevronRight} className="type-meta" />
+                  </Button>
                 ))}
               </div>
             </div>
