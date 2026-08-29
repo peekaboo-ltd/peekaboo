@@ -1,6 +1,8 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { StatusBadge } from '../components/status-badge';
+import { emailStyles } from '../components/styles';
 import { PaymentSuccessfulEmailData } from '../../types/email.types';
 
 export const PaymentSuccessfulEmail = ({
@@ -12,59 +14,31 @@ export const PaymentSuccessfulEmail = ({
 }: PaymentSuccessfulEmailData) => {
   return (
     <EmailLayout preview={`Payment confirmed for order ${orderReference}`}>
-      <Text style={styles.heading}>Payment Successful</Text>
-      <Text style={styles.text}>Hi {customerName || 'there'},</Text>
-      <Text style={styles.text}>
+      <Text style={emailStyles.heading}>Payment successful</Text>
+      <Text style={emailStyles.text}>Hi {customerName || 'there'},</Text>
+      <Text style={emailStyles.text}>
         Your payment has been successfully processed. Here are the details:
       </Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.detailRow}>
-          Order Reference: {orderReference}
+      <Section style={emailStyles.statusContainer}>
+        <StatusBadge status="SUCCESSFUL" />
+      </Section>
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.detailRow}>
+          Order reference: {orderReference}
         </Text>
-        <Text style={styles.detailRow}>
-          Amount Paid: {currency} {amount?.toLocaleString()}
+        <Text style={emailStyles.detailRow}>
+          Amount paid: {currency} {amount?.toLocaleString()}
         </Text>
-        <Text style={styles.detailRow}>
+        <Text style={emailStyles.detailRow}>
           Transaction ID: {transactionId}
         </Text>
       </Section>
-      <Text style={styles.successText}>
+      <Text style={emailStyles.textInk}>
         A rider will be assigned to your order shortly. You'll receive
         notifications as your delivery progresses.
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#2e7d32',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  detailsBox: {
-    backgroundColor: '#e8f5e9',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
-  successText: {
-    fontSize: '14px',
-    color: '#2e7d32',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
 };
 
 export default PaymentSuccessfulEmail;

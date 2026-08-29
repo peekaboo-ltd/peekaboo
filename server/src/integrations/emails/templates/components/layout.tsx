@@ -4,12 +4,11 @@ import {
   Body,
   Container,
   Section,
-  Img,
   Text,
-  Hr,
   Link,
 } from '@react-email/components';
 import * as React from 'react';
+import { emailFontFamily, emailFontUrl, emailTokens } from './tokens';
 
 interface EmailLayoutProps {
   children: React.ReactNode;
@@ -19,7 +18,9 @@ interface EmailLayoutProps {
 export const EmailLayout = ({ children, preview }: EmailLayoutProps) => {
   return (
     <Html>
-      <Head />
+      <Head>
+        <link href={emailFontUrl} rel="stylesheet" />
+      </Head>
       {preview && (
         <span style={{ display: 'none', maxHeight: 0, overflow: 'hidden' }}>
           {preview}
@@ -27,16 +28,13 @@ export const EmailLayout = ({ children, preview }: EmailLayoutProps) => {
       )}
       <Body style={styles.body}>
         <Container style={styles.container}>
-          {/* Header */}
           <Section style={styles.header}>
             <Text style={styles.logo}>Peekaboo</Text>
           </Section>
 
-          {/* Content */}
           <Section style={styles.content}>{children}</Section>
 
-          {/* Footer */}
-          <Hr style={styles.divider} />
+          <Section style={styles.footerDivider} />
           <Section style={styles.footer}>
             <Text style={styles.footerText}>
               &copy; {new Date().getFullYear()} Peekaboo. All rights reserved.
@@ -50,6 +48,10 @@ export const EmailLayout = ({ children, preview }: EmailLayoutProps) => {
               <Link href="mailto:support@peekaboo.co.rw" style={styles.footerLink}>
                 Support
               </Link>
+              {' | '}
+              <Link href="https://peekaboo.co.rw/track" style={styles.footerLink}>
+                Track order
+              </Link>
             </Text>
           </Section>
         </Container>
@@ -60,9 +62,8 @@ export const EmailLayout = ({ children, preview }: EmailLayoutProps) => {
 
 const styles = {
   body: {
-    backgroundColor: '#f6f9fc',
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    backgroundColor: emailTokens.surfaceSunken,
+    fontFamily: emailFontFamily,
     margin: '0',
     padding: '0',
   },
@@ -72,44 +73,46 @@ const styles = {
     maxWidth: '600px',
   },
   header: {
-    backgroundColor: '#1a1a2e',
-    padding: '24px',
+    backgroundColor: emailTokens.ink,
+    padding: '20px 24px',
     textAlign: 'center' as const,
   },
   logo: {
-    color: '#ffffff',
-    fontSize: '28px',
+    color: emailTokens.paper,
+    fontSize: '20px',
     fontWeight: '500' as const,
     margin: '0',
-    letterSpacing: '1px',
+    fontFamily: emailFontFamily,
   },
   content: {
-    backgroundColor: '#ffffff',
+    backgroundColor: emailTokens.paper,
     padding: '32px 24px',
   },
-  divider: {
-    backgroundColor: '#e6ebf1',
-    color: '#e6ebf1',
-    height: '1px',
+  footerDivider: {
+    borderTop: `1px solid ${emailTokens.line}`,
     margin: '0',
   },
   footer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: emailTokens.ink,
     padding: '24px',
     textAlign: 'center' as const,
   },
   footerText: {
-    color: '#8898aa',
+    color: emailTokens.muted,
     fontSize: '12px',
+    lineHeight: '1.4',
     margin: '4px 0',
+    fontFamily: emailFontFamily,
   },
   footerLinks: {
-    color: '#8898aa',
+    color: emailTokens.muted,
     fontSize: '12px',
+    lineHeight: '1.4',
     margin: '8px 0 0',
+    fontFamily: emailFontFamily,
   },
   footerLink: {
-    color: '#1a1a2e',
-    textDecoration: 'none' as const,
+    color: emailTokens.paper,
+    textDecoration: 'underline' as const,
   },
 };

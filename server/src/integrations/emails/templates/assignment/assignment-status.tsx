@@ -1,6 +1,8 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { StatusBadge } from '../components/status-badge';
+import { emailStyles } from '../components/styles';
 import { AssignmentStatusEmailData } from '../../types/email.types';
 
 export const AssignmentStatusEmail = ({
@@ -15,42 +17,29 @@ export const AssignmentStatusEmail = ({
     <EmailLayout
       preview={`Rider ${isAccepted ? 'accepted' : 'declined'} order ${orderReference}`}
     >
-      <Text style={styles.heading}>
-        Assignment {isAccepted ? 'Accepted' : 'Update'}
-      </Text>
-      <Text style={styles.text}>Hi {userName || 'there'},</Text>
+      <Text style={emailStyles.eyebrow}>Assignment update</Text>
+      <Text style={emailStyles.heading}>{orderReference}</Text>
+      <Text style={emailStyles.text}>Hi {userName || 'there'},</Text>
+      <Section style={emailStyles.statusContainer}>
+        <StatusBadge status={isAccepted ? 'ACCEPTED' : 'REJECTED'} />
+      </Section>
       {isAccepted ? (
-        <Text style={styles.text}>
+        <Text style={emailStyles.text}>
           {riderName} has accepted the delivery assignment for
           order {orderReference}. Your delivery is being
           processed.
         </Text>
       ) : (
-        <Text style={styles.text}>
+        <Text style={emailStyles.text}>
           The rider for order {orderReference} was unable to
           accept the assignment. A new rider is being assigned automatically.
         </Text>
       )}
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         You'll receive updates as the delivery progresses.
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
 };
 
 export default AssignmentStatusEmail;

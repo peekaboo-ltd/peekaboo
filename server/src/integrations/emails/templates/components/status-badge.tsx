@@ -1,47 +1,113 @@
 import { Text } from '@react-email/components';
 import * as React from 'react';
+import { emailFontFamily, emailTokens } from './tokens';
+
+type StatusMeaning = 'active' | 'completed' | 'pending' | 'failed' | 'inactive';
+
+const completed = new Set([
+  'COMPLETED',
+  'ACCEPTED',
+  'DELIVERED',
+  'PAID',
+  'PAYMENT_DEFERRED',
+  'SUCCESSFUL',
+  'ACTIVATED',
+]);
+const pending = new Set([
+  'CONFIRMED',
+  'PENDING',
+  'WAITING',
+  'PROCESSING',
+  'INVOICED',
+  'CREATED',
+]);
+const active = new Set(['IN_TRANSIT', 'IN_PROGRESS', 'ASSIGNED', 'ACTIVE']);
+const failed = new Set([
+  'CANCELLED',
+  'REJECTED',
+  'FAILED',
+  'OVERDUE',
+  'SUSPENDED',
+]);
+
+const getMeaning = (status?: string): StatusMeaning => {
+  if (!status) return 'inactive';
+  const normalized = status.toUpperCase();
+  if (completed.has(normalized)) return 'completed';
+  if (pending.has(normalized)) return 'pending';
+  if (active.has(normalized)) return 'active';
+  if (failed.has(normalized)) return 'failed';
+  return 'inactive';
+};
+
+const treatments: Record<
+  StatusMeaning,
+  {
+    prefix: string;
+    backgroundColor: string;
+    color: string;
+    border: string;
+    textDecoration?: 'line-through';
+  }
+> = {
+  active: {
+    prefix: '● ',
+    backgroundColor: emailTokens.ink,
+    color: emailTokens.paper,
+    border: `1px solid ${emailTokens.ink}`,
+  },
+  completed: {
+    prefix: '✓ ',
+    backgroundColor: emailTokens.paper,
+    color: emailTokens.ink,
+    border: `1px solid ${emailTokens.ink}`,
+  },
+  pending: {
+    prefix: '◷ ',
+    backgroundColor: emailTokens.warningSurface,
+    color: emailTokens.muted,
+    border: `1px dashed ${emailTokens.lineStrong}`,
+  },
+  failed: {
+    prefix: '✕ ',
+    backgroundColor: emailTokens.dangerSurface,
+    color: emailTokens.danger,
+    border: `1px solid ${emailTokens.dangerLine}`,
+    textDecoration: 'line-through',
+  },
+  inactive: {
+    prefix: '○ ',
+    backgroundColor: emailTokens.surface,
+    color: emailTokens.muted,
+    border: `1px solid ${emailTokens.surface}`,
+  },
+};
 
 interface StatusBadgeProps {
   status: string;
 }
 
-const statusColors: Record<string, { bg: string; text: string }> = {
-  CREATED: { bg: '#e3f2fd', text: '#1565c0' },
-  PENDING: { bg: '#fff3e0', text: '#e65100' },
-  CONFIRMED: { bg: '#e8f5e9', text: '#2e7d32' },
-  ACCEPTED: { bg: '#e8f5e9', text: '#2e7d32' },
-  PAID: { bg: '#e8f5e9', text: '#2e7d32' },
-  ACTIVE: { bg: '#e3f2fd', text: '#1565c0' },
-  IN_TRANSIT: { bg: '#fff3e0', text: '#e65100' },
-  DELIVERED: { bg: '#e8f5e9', text: '#2e7d32' },
-  COMPLETED: { bg: '#e8f5e9', text: '#2e7d32' },
-  CANCELLED: { bg: '#ffebee', text: '#c62828' },
-  FAILED: { bg: '#ffebee', text: '#c62828' },
-  SUCCESSFUL: { bg: '#e8f5e9', text: '#2e7d32' },
-  INVOICED: { bg: '#fff3e0', text: '#e65100' },
-  OVERDUE: { bg: '#ffebee', text: '#c62828' },
-  SUSPENDED: { bg: '#ffebee', text: '#c62828' },
-  ACTIVATED: { bg: '#e8f5e9', text: '#2e7d32' },
-};
-
 export const StatusBadge = ({ status }: StatusBadgeProps) => {
-  const colors = statusColors[status.toUpperCase()] || {
-    bg: '#f5f5f5',
-    text: '#616161',
-  };
+  const meaning = getMeaning(status);
+  const treatment = treatments[meaning];
 
   return (
     <Text
       style={{
-        backgroundColor: colors.bg,
-        color: colors.text,
-        padding: '4px 12px',
+        backgroundColor: treatment.backgroundColor,
+        color: treatment.color,
+        border: treatment.border,
+        borderRadius: emailTokens.radiusPill,
+        padding: '4px 10px',
         fontSize: '12px',
         fontWeight: '500' as const,
+        fontFamily: emailFontFamily,
         display: 'inline-block',
         margin: '0',
+        textDecoration: treatment.textDecoration,
       }}
     >
+      {treatment.prefix}
       {status}
     </Text>
   );

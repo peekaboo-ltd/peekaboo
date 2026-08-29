@@ -1,6 +1,8 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { StatusBadge } from '../components/status-badge';
+import { emailStyles } from '../components/styles';
 import { PaymentFailedEmailData } from '../../types/email.types';
 
 export const PaymentFailedEmail = ({
@@ -11,59 +13,33 @@ export const PaymentFailedEmail = ({
 }: PaymentFailedEmailData) => {
   return (
     <EmailLayout preview={`Payment failed for order ${orderReference}`}>
-      <Text style={styles.heading}>Payment Failed</Text>
-      <Text style={styles.text}>Hi {customerName || 'there'},</Text>
-      <Text style={styles.text}>
+      <Text style={emailStyles.heading}>Payment failed</Text>
+      <Text style={emailStyles.text}>Hi {customerName || 'there'},</Text>
+      <Text style={emailStyles.text}>
         Unfortunately, your payment could not be processed. Here are the
         details:
       </Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.detailRow}>
-          Order Reference: {orderReference}
+      <Section style={emailStyles.statusContainer}>
+        <StatusBadge status="FAILED" />
+      </Section>
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.detailRow}>
+          Order reference: {orderReference}
         </Text>
-        <Text style={styles.detailRow}>
+        <Text style={emailStyles.amountRow}>
           Amount: {currency} {amount?.toLocaleString()}
         </Text>
       </Section>
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         Please try again or use a different payment method. If the issue
         persists, contact our support team at{' '}
-        <a href="mailto:support@peekaboo.co.rw" style={styles.link}>
+        <a href="mailto:support@peekaboo.co.rw" style={emailStyles.link}>
           support@peekaboo.co.rw
         </a>
         .
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#c62828',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  detailsBox: {
-    backgroundColor: '#ffebee',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
-  link: {
-    color: '#1a1a2e',
-    textDecoration: 'underline' as const,
-  },
 };
 
 export default PaymentFailedEmail;

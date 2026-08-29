@@ -1,6 +1,7 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { emailStyles } from '../components/styles';
 import { InvoiceGeneratedEmailData } from '../../types/email.types';
 
 export const InvoiceGeneratedEmail = ({
@@ -22,57 +23,57 @@ export const InvoiceGeneratedEmail = ({
 
   return (
     <EmailLayout preview={`Invoice ${invoiceNumber} generated for ${organizationName}`}>
-      <Text style={styles.heading}>Invoice Generated</Text>
-      <Text style={styles.text}>Hi,</Text>
-      <Text style={styles.text}>
+      <Text style={emailStyles.heading}>Invoice generated</Text>
+      <Text style={emailStyles.text}>Hi,</Text>
+      <Text style={emailStyles.text}>
         A new invoice has been generated for {organizationName}.
       </Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.detailRow}>
-          Invoice Number: {invoiceNumber}
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.detailRow}>
+          Invoice number: {invoiceNumber}
         </Text>
-        <Text style={styles.detailRow}>
-          Billing Period: {formatDate(periodStart)} -{' '}
+        <Text style={emailStyles.detailRow}>
+          Billing period: {formatDate(periodStart)} -{' '}
           {formatDate(periodEnd)}
         </Text>
-        <Text style={styles.detailRow}>
-          Total Orders: {totalOrders}
+        <Text style={emailStyles.detailRow}>
+          Total orders: {totalOrders}
         </Text>
-        <Text style={styles.amountRow}>
-          Total Amount: {currency}{' '}
+        <Text style={emailStyles.amountRow}>
+          Total amount: {currency}{' '}
           {totalAmount?.toLocaleString()}
         </Text>
       </Section>
       {tierBreakdown && tierBreakdown.length > 0 && (
-        <Section style={styles.breakdownBox}>
-          <Text style={styles.breakdownHeading}>Cost Breakdown</Text>
-          <table style={styles.table}>
+        <Section style={emailStyles.breakdownBox}>
+          <Text style={emailStyles.breakdownHeading}>Cost breakdown</Text>
+          <table style={emailStyles.table}>
             <thead>
               <tr>
-                <th style={styles.tableHeader}>Tier</th>
-                <th style={styles.tableHeader}>Deliveries</th>
-                <th style={styles.tableHeader}>Unit Price</th>
-                <th style={styles.tableHeader}>Subtotal</th>
+                <th style={emailStyles.tableHeader}>Tier</th>
+                <th style={emailStyles.tableHeader}>Deliveries</th>
+                <th style={emailStyles.tableHeaderRight}>Unit price</th>
+                <th style={emailStyles.tableHeaderRight}>Subtotal</th>
               </tr>
             </thead>
             <tbody>
               {tierBreakdown.map((tier, index) => (
-                <tr key={index}>
-                  <td style={styles.tableCell}>{tier.tierLabel}</td>
-                  <td style={styles.tableCellRight}>{tier.quantity}</td>
-                  <td style={styles.tableCellRight}>
+                <tr key={index} style={index % 2 === 1 ? emailStyles.tableRowEven : undefined}>
+                  <td style={emailStyles.tableCell}>{tier.tierLabel}</td>
+                  <td style={emailStyles.tableCell}>{tier.quantity}</td>
+                  <td style={emailStyles.tableCellRight}>
                     {currency} {tier.unitPrice?.toLocaleString()}
                   </td>
-                  <td style={styles.tableCellRight}>
+                  <td style={emailStyles.tableCellRight}>
                     {currency} {tier.subtotal?.toLocaleString()}
                   </td>
                 </tr>
               ))}
               <tr>
-                <td style={styles.tableCellBold}>Total</td>
-                <td style={styles.tableCellRight}>{totalOrders}</td>
-                <td style={styles.tableCell}></td>
-                <td style={{ ...styles.tableCellRight, fontWeight: '500' }}>
+                <td style={emailStyles.tableCellBold}>Total</td>
+                <td style={emailStyles.tableCell}>{totalOrders}</td>
+                <td style={emailStyles.tableCell}></td>
+                <td style={{ ...emailStyles.tableCellRight, fontWeight: '500' }}>
                   {currency} {totalAmount?.toLocaleString()}
                 </td>
               </tr>
@@ -80,77 +81,12 @@ export const InvoiceGeneratedEmail = ({
           </table>
         </Section>
       )}
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         Please review the invoice and process the payment at your earliest
         convenience.
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  detailsBox: {
-    backgroundColor: '#f7f7f7',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
-  amountRow: {
-    fontSize: '16px',
-    color: '#1a1a2e',
-    fontWeight: '500' as const,
-    margin: '8px 0 0',
-  },
-  breakdownBox: {
-    margin: '16px 0',
-  },
-  breakdownHeading: {
-    fontSize: '16px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 8px',
-  },
-  table: {
-    width: '100%' as const,
-    fontSize: '13px',
-  },
-  tableHeader: {
-    backgroundColor: '#f7f7f7',
-    padding: '8px 12px',
-    textAlign: 'left' as const,
-    fontSize: '12px',
-    color: '#4a5568',
-  },
-  tableCell: {
-    padding: '8px 12px',
-    color: '#4a5568',
-  },
-  tableCellRight: {
-    padding: '8px 12px',
-    textAlign: 'right' as const,
-    color: '#4a5568',
-  },
-  tableCellBold: {
-    padding: '8px 12px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-  },
 };
 
 export default InvoiceGeneratedEmail;

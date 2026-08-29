@@ -1,6 +1,7 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { emailStyles } from '../components/styles';
 import { MemberRoleChangedEmailData } from '../../types/email.types';
 
 export const MemberRoleChangedEmail = ({
@@ -12,53 +13,28 @@ export const MemberRoleChangedEmail = ({
 }: MemberRoleChangedEmailData) => {
   return (
     <EmailLayout preview={`Your role in ${organizationName} has been updated`}>
-      <Text style={styles.heading}>Role Updated</Text>
-      <Text style={styles.text}>Hi {memberName || 'there'},</Text>
-      <Text style={styles.text}>
+      <Text style={emailStyles.heading}>Role updated</Text>
+      <Text style={emailStyles.text}>Hi {memberName || 'there'},</Text>
+      <Text style={emailStyles.text}>
         Your role in {organizationName} has been changed:
       </Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.detailRow}>
-          Previous Role: {oldRole}
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.detailRow}>
+          Previous role: {oldRole}
         </Text>
-        <Text style={styles.detailRow}>
-          New Role: {newRole}
+        <Text style={emailStyles.detailRow}>
+          New role: {newRole}
         </Text>
-        <Text style={styles.detailRow}>
-          Changed By: {changedBy}
+        <Text style={emailStyles.detailRow}>
+          Changed by: {changedBy}
         </Text>
       </Section>
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         If you have questions about this change, please contact your
         organization administrator.
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  detailsBox: {
-    backgroundColor: '#f7f7f7',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
 };
 
 export default MemberRoleChangedEmail;

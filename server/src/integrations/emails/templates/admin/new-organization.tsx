@@ -1,6 +1,7 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { emailStyles } from '../components/styles';
 import { NewOrganizationAdminEmailData } from '../../types/email.types';
 
 export const NewOrganizationEmail = ({
@@ -21,59 +22,34 @@ export const NewOrganizationEmail = ({
 
   return (
     <EmailLayout preview={`New organization registered: ${organizationName}`}>
-      <Text style={styles.heading}>New Organization Registered</Text>
-      <Text style={styles.text}>
+      <Text style={emailStyles.heading}>New organization registered</Text>
+      <Text style={emailStyles.text}>
         A new organization has been registered on Peekaboo.
       </Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.detailRow}>
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.detailRow}>
           Organization: {organizationName}
         </Text>
-        <Text style={styles.detailRow}>
-          Admin Name: {adminName}
+        <Text style={emailStyles.detailRow}>
+          Admin name: {adminName}
         </Text>
-        <Text style={styles.detailRow}>
+        <Text style={emailStyles.detailRow}>
           Email: {email}
         </Text>
         {phoneNumber && (
-          <Text style={styles.detailRow}>
+          <Text style={emailStyles.detailRow}>
             Phone: {phoneNumber}
           </Text>
         )}
-        <Text style={styles.detailRow}>
-          Registered At: {formatDate(createdAt)}
+        <Text style={emailStyles.detailRow}>
+          Registered at: {formatDate(createdAt)}
         </Text>
       </Section>
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         Please review and approve this organization in the admin dashboard.
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  detailsBox: {
-    backgroundColor: '#f7f7f7',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
 };
 
 export default NewOrganizationEmail;

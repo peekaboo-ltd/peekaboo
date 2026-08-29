@@ -2,6 +2,7 @@ import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
 import { StatusBadge } from '../components/status-badge';
+import { emailStyles } from '../components/styles';
 import { AccountStatusEmailData } from '../../types/email.types';
 
 export const AccountStatusEmail = ({
@@ -26,62 +27,31 @@ export const AccountStatusEmail = ({
 
   return (
     <EmailLayout preview={`Your Peekaboo account has been ${status}`}>
-      <Text style={styles.heading}>Account {status.charAt(0).toUpperCase() + status.slice(1)}</Text>
-      <Text style={styles.text}>Hi {name || 'there'},</Text>
-      <Section style={styles.statusContainer}>
+      <Text style={emailStyles.heading}>
+        Account {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Text>
+      <Text style={emailStyles.text}>Hi {name || 'there'},</Text>
+      <Section style={emailStyles.statusContainer}>
         <StatusBadge status={badgeStatus[status]} />
       </Section>
-      <Text style={styles.text}>{statusMessages[status]}</Text>
+      <Text style={emailStyles.text}>{statusMessages[status]}</Text>
       {reason && (
-        <Section style={styles.detailsBox}>
-          <Text style={styles.detailRow}>
+        <Section style={emailStyles.framedCard}>
+          <Text style={emailStyles.detailRow}>
             Reason: {reason}
           </Text>
         </Section>
       )}
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         If you have questions about this change, please contact our support team
         at{' '}
-        <a href="mailto:support@peekaboo.co.rw" style={styles.link}>
+        <a href="mailto:support@peekaboo.co.rw" style={emailStyles.link}>
           support@peekaboo.co.rw
         </a>
         .
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  statusContainer: {
-    textAlign: 'center' as const,
-    margin: '16px 0',
-  },
-  detailsBox: {
-    backgroundColor: '#f7f7f7',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
-  link: {
-    color: '#1a1a2e',
-    textDecoration: 'underline' as const,
-  },
 };
 
 export default AccountStatusEmail;

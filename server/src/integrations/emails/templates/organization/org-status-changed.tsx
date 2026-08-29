@@ -2,6 +2,7 @@ import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
 import { StatusBadge } from '../components/status-badge';
+import { emailStyles } from '../components/styles';
 import { OrganizationStatusEmailData } from '../../types/email.types';
 
 export const OrgStatusChangedEmail = ({
@@ -16,65 +17,36 @@ export const OrgStatusChangedEmail = ({
     <EmailLayout
       preview={`${organizationName} has been ${isActive ? 'activated' : 'suspended'}`}
     >
-      <Text style={styles.heading}>
-        Organization {isActive ? 'Activated' : 'Suspended'}
+      <Text style={emailStyles.heading}>
+        Organization {isActive ? 'activated' : 'suspended'}
       </Text>
-      <Text style={styles.text}>Hi {adminName},</Text>
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>Hi {adminName},</Text>
+      <Text style={emailStyles.text}>
         Your organization {organizationName} has been{' '}
         {isActive ? 'activated' : 'suspended'} on Peekaboo.
       </Text>
-      <Section style={styles.statusContainer}>
+      <Section style={emailStyles.statusContainer}>
         <StatusBadge status={isActive ? 'ACTIVATED' : 'SUSPENDED'} />
       </Section>
       {reason && (
-        <Section style={styles.detailsBox}>
-          <Text style={styles.detailRow}>
+        <Section style={emailStyles.framedCard}>
+          <Text style={emailStyles.detailRow}>
             Reason: {reason}
           </Text>
         </Section>
       )}
       {isActive ? (
-        <Text style={styles.text}>
+        <Text style={emailStyles.text}>
           You can now resume using all Peekaboo services for your organization.
         </Text>
       ) : (
-        <Text style={styles.text}>
+        <Text style={emailStyles.text}>
           While suspended, your organization members will not be able to create
           new orders. Please contact our support team for more information.
         </Text>
       )}
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  statusContainer: {
-    textAlign: 'center' as const,
-    margin: '16px 0',
-  },
-  detailsBox: {
-    backgroundColor: '#f7f7f7',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
 };
 
 export default OrgStatusChangedEmail;

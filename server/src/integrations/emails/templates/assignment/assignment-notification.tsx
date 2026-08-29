@@ -1,6 +1,7 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { emailStyles } from '../components/styles';
 import { AssignmentNotificationEmailData } from '../../types/email.types';
 
 export const AssignmentNotificationEmail = ({
@@ -13,52 +14,28 @@ export const AssignmentNotificationEmail = ({
     <EmailLayout
       preview={`Rider assigned to your order ${orderReference}`}
     >
-      <Text style={styles.heading}>Rider Assigned</Text>
-      <Text style={styles.text}>Hi {userName || 'there'},</Text>
-      <Text style={styles.text}>
-        A rider has been assigned to your order{' '}
-        {orderReference}.
+      <Text style={emailStyles.eyebrow}>Rider assigned</Text>
+      <Text style={emailStyles.heading}>{orderReference}</Text>
+      <Text style={emailStyles.text}>Hi {userName || 'there'},</Text>
+      <Text style={emailStyles.text}>
+        A rider has been assigned to your order.
       </Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.detailRow}>
-          Rider Name: {riderName}
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.subheading}>Rider information</Text>
+        <Text style={emailStyles.detailRow}>
+          Rider name: {riderName}
         </Text>
         {riderPhone && (
-          <Text style={styles.detailRow}>
-            Rider Phone: {riderPhone}
+          <Text style={emailStyles.detailRow}>
+            Rider phone: {riderPhone}
           </Text>
         )}
       </Section>
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         You'll receive further updates as the delivery progresses.
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  detailsBox: {
-    backgroundColor: '#e3f2fd',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
 };
 
 export default AssignmentNotificationEmail;

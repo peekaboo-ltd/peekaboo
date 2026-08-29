@@ -1,6 +1,8 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { StatusBadge } from '../components/status-badge';
+import { emailStyles } from '../components/styles';
 import { CriticalAlertEmailData } from '../../types/email.types';
 
 export const CriticalAlertEmail = ({
@@ -20,65 +22,25 @@ export const CriticalAlertEmail = ({
 
   return (
     <EmailLayout preview={`Critical Alert: ${alertType}`}>
-      <Text style={styles.heading}>Critical Alert</Text>
-      <Section style={styles.alertBox}>
-        <Text style={styles.alertType}>{alertType}</Text>
-        <Text style={styles.alertMessage}>{message}</Text>
+      <Text style={emailStyles.heading}>Critical alert</Text>
+      <Section style={emailStyles.framedCard}>
+        <Section style={emailStyles.statusContainer}>
+          <StatusBadge status="FAILED" />
+        </Section>
+        <Text style={emailStyles.alertType}>{alertType}</Text>
+        <Text style={emailStyles.alertMessage}>{message}</Text>
         {details && (
-          <Text style={styles.alertDetails}>{details}</Text>
+          <Text style={emailStyles.alertDetails}>{details}</Text>
         )}
-        <Text style={styles.timestamp}>
+        <Text style={emailStyles.timestamp}>
           {formatDate(timestamp)}
         </Text>
       </Section>
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         Please investigate this issue immediately via the admin dashboard.
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#c62828',
-    margin: '0 0 16px',
-  },
-  alertBox: {
-    backgroundColor: '#ffebee',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  alertType: {
-    fontSize: '14px',
-    fontWeight: '500' as const,
-    color: '#c62828',
-    textTransform: 'uppercase' as const,
-    margin: '0 0 8px',
-  },
-  alertMessage: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '0 0 8px',
-  },
-  alertDetails: {
-    fontSize: '13px',
-    color: '#718096',
-    margin: '0 0 8px',
-    fontFamily: 'monospace',
-  },
-  timestamp: {
-    fontSize: '12px',
-    color: '#8898aa',
-    margin: '8px 0 0',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
 };
 
 export default CriticalAlertEmail;

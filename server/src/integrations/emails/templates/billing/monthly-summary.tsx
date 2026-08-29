@@ -1,6 +1,7 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { emailStyles } from '../components/styles';
 import { MonthlyBillingSummaryEmailData } from '../../types/email.types';
 
 export const MonthlyBillingSummaryEmail = ({
@@ -15,60 +16,29 @@ export const MonthlyBillingSummaryEmail = ({
     <EmailLayout
       preview={`${month} ${year} billing summary for ${organizationName}`}
     >
-      <Text style={styles.heading}>Monthly Billing Summary</Text>
-      <Text style={styles.text}>Hi,</Text>
-      <Text style={styles.text}>
+      <Text style={emailStyles.heading}>Monthly billing summary</Text>
+      <Text style={emailStyles.text}>Hi,</Text>
+      <Text style={emailStyles.text}>
         Here's the billing summary for {organizationName} for{' '}
         {month} {year}.
       </Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.detailRow}>
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.detailRow}>
           Month: {month} {year}
         </Text>
-        <Text style={styles.detailRow}>
-          Total Orders: {totalOrders}
+        <Text style={emailStyles.detailRow}>
+          Total orders: {totalOrders}
         </Text>
-        <Text style={styles.amountRow}>
-          Total Amount: {currency}{' '}
+        <Text style={emailStyles.amountRow}>
+          Total amount: {currency}{' '}
           {totalAmount?.toLocaleString()}
         </Text>
       </Section>
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         For detailed billing information, please visit your dashboard.
       </Text>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  detailsBox: {
-    backgroundColor: '#f7f7f7',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
-  amountRow: {
-    fontSize: '16px',
-    color: '#1a1a2e',
-    fontWeight: '500' as const,
-    margin: '8px 0 0',
-  },
 };
 
 export default MonthlyBillingSummaryEmail;

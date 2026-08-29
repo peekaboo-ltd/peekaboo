@@ -2,6 +2,7 @@ import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
 import { EmailButton } from '../components/button';
+import { emailStyles } from '../components/styles';
 import { OrderDispatchedEmailData } from '../../types/email.types';
 
 export const OrderDispatchedEmail = ({
@@ -11,56 +12,28 @@ export const OrderDispatchedEmail = ({
 }: OrderDispatchedEmailData) => {
   return (
     <EmailLayout preview={`Order ${orderReference} sent successfully`}>
-      <Text style={styles.heading}>Order Sent Successfully</Text>
-      <Text style={styles.text}>Hi {userName || 'there'},</Text>
-      <Text style={styles.text}>
-        Your delivery order {orderReference} has been sent successfully.
+      <Text style={emailStyles.eyebrow}>Order sent</Text>
+      <Text style={emailStyles.heading}>{orderReference}</Text>
+      <Text style={emailStyles.text}>Hi {userName || 'there'},</Text>
+      <Text style={emailStyles.text}>
+        Your delivery order has been sent successfully.
       </Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.detailRow}>
-          Order Reference: {orderReference}
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.detailRow}>
+          Order reference: {orderReference}
         </Text>
-        <Text style={styles.detailRow}>
+        <Text style={emailStyles.detailRow}>
           OTP: {trackingId}
         </Text>
       </Section>
-      <Text style={styles.text}>
+      <Text style={emailStyles.text}>
         Please keep your OTP safe and share it only with trusted parties.
       </Text>
-      <Section style={styles.buttonContainer}>
-        <EmailButton href="https://peekaboo.co.rw">Visit Peekaboo</EmailButton>
+      <Section style={emailStyles.buttonContainer}>
+        <EmailButton href="https://peekaboo.co.rw/track">Track your order</EmailButton>
       </Section>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  detailsBox: {
-    backgroundColor: '#f7f7f7',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
-  buttonContainer: {
-    textAlign: 'center' as const,
-    margin: '24px 0 12px',
-  },
 };
 
 export default OrderDispatchedEmail;

@@ -1,6 +1,7 @@
 import { Link, Section, Text } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { emailStyles } from '../components/styles';
 import { ProblemReportAdminEmailData } from '../../types/email.types';
 
 export const ProblemReportNotificationEmail = ({
@@ -25,48 +26,25 @@ export const ProblemReportNotificationEmail = ({
 
   return (
     <EmailLayout preview={`New rider problem report from ${riderName}`}>
-      <Text style={styles.heading}>New Rider Problem Report</Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.row}>Submission type: {submissionType}</Text>
-        <Text style={styles.row}>Rider: {riderName}</Text>
-        <Text style={styles.row}>Rider ID: {riderId}</Text>
-        <Text style={styles.row}>Phone: {riderPhoneNumber || 'N/A'}</Text>
-        <Text style={styles.row}>Captured at: {fmt(capturedAt)}</Text>
-        <Text style={styles.row}>Submitted at: {fmt(submittedAt)}</Text>
-        <Text style={styles.row}>Location: {locationLabel || 'Location unavailable'}</Text>
-        <Text style={styles.row}>Description: {description}</Text>
-        <Text style={styles.row}>
+      <Text style={emailStyles.heading}>New rider problem report</Text>
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.detailRow}>Submission type: {submissionType}</Text>
+        <Text style={emailStyles.detailRow}>Rider: {riderName}</Text>
+        <Text style={emailStyles.detailRow}>Rider ID: {riderId}</Text>
+        <Text style={emailStyles.detailRow}>Phone: {riderPhoneNumber || 'N/A'}</Text>
+        <Text style={emailStyles.detailRow}>Captured at: {fmt(capturedAt)}</Text>
+        <Text style={emailStyles.detailRow}>Submitted at: {fmt(submittedAt)}</Text>
+        <Text style={emailStyles.detailRow}>Location: {locationLabel || 'Location unavailable'}</Text>
+        <Text style={emailStyles.detailRow}>Description: {description}</Text>
+        <Text style={emailStyles.detailRow}>
           Evidence URL:{' '}
-          <Link href={evidenceUrl} style={styles.link}>
+          <Link href={evidenceUrl} style={emailStyles.link}>
             Open media
           </Link>
         </Text>
       </Section>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#1a1a2e',
-    margin: '0 0 16px',
-  },
-  detailsBox: {
-    backgroundColor: '#f7f7f7',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  row: {
-    fontSize: '14px',
-    color: '#334155',
-    lineHeight: '22px',
-    margin: '0 0 8px',
-  },
-  link: {
-    color: '#0f766e',
-  },
 };
 
 export default ProblemReportNotificationEmail;

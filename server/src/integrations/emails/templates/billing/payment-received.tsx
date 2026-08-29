@@ -1,6 +1,8 @@
 import { Text, Section } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from '../components/layout';
+import { StatusBadge } from '../components/status-badge';
+import { emailStyles } from '../components/styles';
 import { PaymentReceivedEmailData } from '../../types/email.types';
 
 export const BillingPaymentReceivedEmail = ({
@@ -19,50 +21,28 @@ export const BillingPaymentReceivedEmail = ({
 
   return (
     <EmailLayout preview={`Payment received for invoice ${invoiceNumber}`}>
-      <Text style={styles.heading}>Payment Received</Text>
-      <Text style={styles.text}>Hi,</Text>
-      <Text style={styles.text}>
+      <Text style={emailStyles.heading}>Payment received</Text>
+      <Text style={emailStyles.text}>Hi,</Text>
+      <Text style={emailStyles.text}>
         We've received your payment for {organizationName}.
         Thank you!
       </Text>
-      <Section style={styles.detailsBox}>
-        <Text style={styles.detailRow}>
-          Invoice Number: {invoiceNumber}
+      <Section style={emailStyles.statusContainer}>
+        <StatusBadge status="PAID" />
+      </Section>
+      <Section style={emailStyles.framedCard}>
+        <Text style={emailStyles.detailRow}>
+          Invoice number: {invoiceNumber}
         </Text>
-        <Text style={styles.detailRow}>
-          Amount Paid: {currency} {amount?.toLocaleString()}
+        <Text style={emailStyles.amountRow}>
+          Amount paid: {currency} {amount?.toLocaleString()}
         </Text>
-        <Text style={styles.detailRow}>
-          Payment Date: {formatDate(paymentDate)}
+        <Text style={emailStyles.detailRow}>
+          Payment date: {formatDate(paymentDate)}
         </Text>
       </Section>
     </EmailLayout>
   );
-};
-
-const styles = {
-  heading: {
-    fontSize: '24px',
-    fontWeight: '500' as const,
-    color: '#2e7d32',
-    margin: '0 0 16px',
-  },
-  text: {
-    fontSize: '14px',
-    color: '#4a5568',
-    lineHeight: '24px',
-    margin: '0 0 12px',
-  },
-  detailsBox: {
-    backgroundColor: '#e8f5e9',
-    padding: '16px',
-    margin: '16px 0',
-  },
-  detailRow: {
-    fontSize: '14px',
-    color: '#4a5568',
-    margin: '4px 0',
-  },
 };
 
 export default BillingPaymentReceivedEmail;
