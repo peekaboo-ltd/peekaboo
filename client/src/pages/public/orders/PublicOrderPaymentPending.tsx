@@ -26,11 +26,13 @@ import {
 } from '@/types/payment.types';
 import type { UUID } from '@/types';
 import { formatCurrency } from '@/utils/strings.util';
+import { useI18n } from '@/i18n/i18n';
 
 const POLLING_INTERVAL_MS = 3000;
 
 const PublicOrderPaymentPending = () => {
-  useDocumentTitle('Confirming Payment');
+  const { t } = useI18n();
+  useDocumentTitle(t('payment.pending.docTitle'));
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -91,12 +93,12 @@ const PublicOrderPaymentPending = () => {
   }, [id, isSuccessful, navigate, paymentId]);
 
   const channelLabel = useMemo(() => {
-    if (!payment?.method) return 'Payment';
+    if (!payment?.method) return t('payment.label');
     return (
       PAYMENT_CHANNEL_LABELS[payment.method as PaymentChannel] ||
       payment.method.replaceAll('_', ' ')
     );
-  }, [payment?.method]);
+  }, [payment?.method, t]);
   const isMobilePayment =
     payment?.method === PaymentChannel.MOMO ||
     payment?.method === PaymentChannel.AIRTEL_MONEY;
@@ -112,15 +114,14 @@ const PublicOrderPaymentPending = () => {
               className="mb-4 h-5 w-5 text-(--destructive)"
             />
             <h1 className="type-h3">
-              Payment reference missing
+              {t('payment.pending.missingTitle')}
             </h1>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--muted)">
-              Return to the order and start payment again so we can track its
-              confirmation.
+              {t('payment.pending.missingDescription')}
             </p>
             {id ? (
               <Button primary route={`/p/orders/${id}`} className="mt-6">
-                Return to order
+                {t('payment.returnOrder')}
               </Button>
             ) : null}
           </div>
@@ -132,60 +133,60 @@ const PublicOrderPaymentPending = () => {
   return (
     <PublicPage>
       <PublicPageHero
-        eyebrow={isFailed ? 'Payment stopped' : 'Payment in progress'}
+        eyebrow={isFailed ? t('payment.pending.stopped') : t('payment.pending.inProgress')}
         title={
           isFailed
-            ? 'The payment was not completed'
-            : 'Confirm the payment on your phone'
+            ? t('payment.pending.failedTitle')
+            : t('payment.pending.phoneTitle')
         }
         description={
           isFailed
-            ? 'No charge was confirmed. Check the payer details or choose another payment method.'
+            ? t('payment.pending.failedDescription')
             : isMobilePayment
-              ? 'Approve the mobile money prompt. This page will move forward automatically when the payment is confirmed.'
-              : 'Complete the provider checkout. This page will move forward automatically when the payment is confirmed.'
+              ? t('payment.pending.mobileDescription')
+              : t('payment.pending.checkoutDescription')
         }
         actions={
           <span
             className={`inline-flex h-6 items-center gap-2 rounded-(--radius-pill) border px-2.5 text-xs font-normal ${
               isFailed
                 ? 'border-(--danger-line) bg-(--danger-surface) text-(--danger)'
-                : 'border-dashed border-(--line-strong) text-(--muted)'
+                : 'border border-(--line-strong) text-(--muted)'
             }`}
           >
             <FontAwesomeIcon
               icon={isFailed ? faTriangleExclamation : faShieldHalved}
               aria-hidden="true"
             />
-            {isFailed ? 'Not completed' : 'Secure checkout'}
+            {isFailed ? t('payment.notCompleted') : t('payment.secureCheckout')}
           </span>
         }
       />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(17rem,0.7fr)] lg:items-start">
         <PublicSectionCard
-          eyebrow="Confirmation"
-          title={isFailed ? 'Payment needs attention' : 'Waiting for approval'}
+          eyebrow={t('payment.confirmation')}
+          title={isFailed ? t('payment.pending.attention') : t('payment.pending.waitingApproval')}
           description={
             isFailed
-              ? 'This attempt has ended. Return to the order to try again.'
-              : 'Keep this page open while the provider confirms the charge.'
+              ? t('payment.pending.attemptEnded')
+              : t('payment.pending.keepOpen')
           }
         >
           <StepTrail
-            label="Payment confirmation progress"
+            label={t('payment.pending.progress')}
             steps={[
               {
                 key: 'initiated',
-                label: 'Initiated',
-                description: 'Request sent',
+                label: t('payment.pending.initiated'),
+                description: t('payment.pending.requestSent'),
                 icon: faCircleCheck,
                 state: 'done',
               },
               {
                 key: 'confirmation',
-                label: isFailed ? 'Not completed' : 'Confirmation',
-                description: isFailed ? 'Try again' : 'Waiting securely',
+                label: isFailed ? t('payment.notCompleted') : t('payment.confirmation'),
+                description: isFailed ? t('payment.pending.tryAgain') : t('payment.pending.waitingSecurely'),
                 icon: isFailed ? faTriangleExclamation : faArrowsRotate,
                 state: isFailed ? 'upcoming' : 'current',
               },
@@ -193,7 +194,7 @@ const PublicOrderPaymentPending = () => {
           />
 
           <div
-            className={`mt-7 flex items-start gap-3 rounded-(--radius-control) border px-4 py-3 text-sm leading-6 ${ isFailed ? 'border-(--danger-line) bg-(--danger-surface) text-(--danger)' : 'border-dashed border-(--line-strong) bg-(--surface) text-(--ink)' }`}
+            className={`mt-7 flex items-start gap-3 rounded-(--radius-control) border px-4 py-3 text-sm leading-6 ${ isFailed ? 'border-(--danger-line) bg-(--danger-surface) text-(--danger)' : 'border border-(--line-strong) bg-(--surface) text-(--ink)' }`}
             role="status"
             aria-live="polite"
           >
@@ -209,55 +210,55 @@ const PublicOrderPaymentPending = () => {
             />
             <span>
               {isFailed
-                ? 'UrubutoPay reported that this attempt failed or was cancelled.'
+                ? t('payment.pending.providerFailed')
                 : statusQuery.error
-                  ? 'Connection interrupted. We are still checking automatically.'
+                  ? t('payment.pending.connection')
                   : statusQuery.isLoading || hasTrackingError
-                    ? 'Finding your payment status…'
-                    : 'Waiting for UrubutoPay to confirm the payment.'}
+                    ? t('payment.pending.finding')
+                    : t('payment.pending.waitingProvider')}
             </span>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
             {isFailed ? (
               <Button primary route={`/p/orders/${id}`}>
-                Return to order
+                {t('payment.returnOrder')}
               </Button>
             ) : (
               <Button
                 type="button"
                 onClick={() => void refetchPaymentStatus()}
               >
-                Check again
+                {t('payment.pending.checkAgain')}
               </Button>
             )}
-            <Button route={`/p/orders/${id}`}>View order</Button>
+            <Button route={`/p/orders/${id}`}>{t('payment.viewOrder')}</Button>
           </div>
         </PublicSectionCard>
 
-        <PublicSectionCard eyebrow="Payment" title="Attempt details">
+        <PublicSectionCard eyebrow={t('payment.label')} title={t('payment.pending.attemptDetails')}>
           <dl className="divide-y divide-(--line) text-sm">
             <div className="pb-4">
-              <dt className="type-meta">Method</dt>
+              <dt className="type-meta">{t('payment.method')}</dt>
               <dd className="mt-1 font-normal text-(--ink)">
-                {payment ? channelLabel : 'Loading…'}
+                {payment ? channelLabel : t('common.loading')}
               </dd>
             </div>
             <div className="py-4">
               <dt className="type-meta">
-                Order reference
+                {t('payment.orderReference')}
               </dt>
               <dd className="mt-1 break-all text-xs text-(--ink)">
-                {orderLoading ? 'Loading…' : currentOrder?.referenceId || '—'}
+                {orderLoading ? t('common.loading') : currentOrder?.referenceId || '—'}
               </dd>
             </div>
             <div className="pt-4">
-              <dt className="type-meta">Amount</dt>
+              <dt className="type-meta">{t('payment.amount')}</dt>
               <dd className="type-metric mt-1">
                 {payment
                   ? formatCurrency(payment.amount)
                   : orderLoading
-                    ? 'Loading…'
+                    ? t('common.loading')
                     : formatCurrency(
                         currentOrder?.finalFee ?? currentOrder?.initialFee ?? 0,
                       )}
@@ -265,8 +266,7 @@ const PublicOrderPaymentPending = () => {
             </div>
           </dl>
           <p className="mt-6 border-t border-(--line) pt-4 text-xs leading-5 text-(--muted)">
-            Closing this page doesn’t cancel the payment. You can return using
-            the same link.
+            {t('payment.pending.closeNote')}
           </p>
         </PublicSectionCard>
       </div>

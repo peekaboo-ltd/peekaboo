@@ -5,6 +5,7 @@ import Button from '@/components/inputs/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { useI18n } from '@/i18n/i18n';
 
 interface AuthPageShellProps {
   children: ReactNode;
@@ -36,13 +37,16 @@ export const authPrimaryButtonClassName = 'mt-2 w-full';
 
 export const authSecondaryButtonClassName = 'w-full';
 
-export const AuthDivider = () => (
-  <div className="relative my-5 flex items-center" aria-hidden="true">
-    <div className="h-px flex-1 bg-(--line)" />
-    <span className="type-meta px-3">or</span>
-    <div className="h-px flex-1 bg-(--line)" />
-  </div>
-);
+export const AuthDivider = () => {
+  const { t } = useI18n();
+  return (
+    <div className="relative my-5 flex items-center" aria-hidden="true">
+      <div className="h-px flex-1 bg-(--line)" />
+      <span className="type-meta px-3">{t('auth.or')}</span>
+      <div className="h-px flex-1 bg-(--line)" />
+    </div>
+  );
+};
 
 /** Continue-with-Google. One definition, used by every auth screen that offers it. */
 export const AuthSocialButton = ({
@@ -104,13 +108,14 @@ export const AuthNotice = ({ children, tone = 'default' }: AuthNoticeProps) => {
 export const AuthPageShell = ({
   children,
   maxWidthClassName = 'max-w-[440px]',
-}: AuthPageShellProps) => (
-  <main className="grid h-screen max-h-screen grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-(--surface) px-5 py-6 text-(--ink)">
+}: AuthPageShellProps) => {
+  const { t } = useI18n();
+  return <main className="grid h-screen max-h-screen grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-(--surface) px-5 py-6 text-(--ink)">
     <header className="flex justify-center">
       <Link
         to="/"
         className="inline-flex items-center justify-center rounded-(--radius-control) px-3 py-1 transition-opacity duration-200 hover:opacity-70"
-        aria-label="Peekaboo home"
+        aria-label={t('nav.homeLabel')}
       >
         <img
           src={peekabooLogo}
@@ -125,5 +130,5 @@ export const AuthPageShell = ({
     <div className="flex items-start justify-center overflow-y-auto py-5 max-sm:py-3">
       <div className={`my-auto w-full ${maxWidthClassName}`}>{children}</div>
     </div>
-  </main>
-);
+  </main>;
+};

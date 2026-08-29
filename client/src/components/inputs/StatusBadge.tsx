@@ -1,5 +1,5 @@
 import { Check, Circle, Clock3, LoaderCircle, X } from 'lucide-react';
-import { capitalizeString } from '@/utils/strings.util';
+import { useI18n } from '@/i18n/i18n';
 
 type StatusMeaning = 'active' | 'completed' | 'pending' | 'failed' | 'inactive';
 
@@ -25,12 +25,13 @@ const getMeaning = (status?: string): StatusMeaning => {
 const treatments = {
   active: { icon: LoaderCircle, className: 'invert-surface border-transparent' },
   completed: { icon: Check, className: 'border-(--approve-line) bg-(--approve-surface) text-(--approve)' },
-  pending: { icon: Clock3, className: 'border-dashed border-(--warning-line) bg-(--warning-surface) text-(--warning)' },
+  pending: { icon: Clock3, className: 'border border-(--warning-line) bg-(--warning-surface) text-(--warning)' },
   failed: { icon: X, className: 'border-(--danger-line) bg-(--danger-surface) text-(--danger)' },
   inactive: { icon: Circle, className: 'border-transparent bg-(--surface) text-(--muted)' },
 };
 
 export const StatusBadge = ({ status }: { status?: string }) => {
+  const { t } = useI18n();
   const meaning = getMeaning(status);
   const treatment = treatments[meaning];
   const Icon = treatment.icon;
@@ -38,7 +39,7 @@ export const StatusBadge = ({ status }: { status?: string }) => {
   return (
     <span className={`inline-flex h-6 w-fit items-center gap-1.5 rounded-(--radius-pill) border px-2.5 text-xs font-medium ${treatment.className}`}>
       <Icon className="size-3" aria-hidden="true" />
-      {capitalizeString(status || 'inactive')}
+      {t(`status.${(status || 'inactive').toLowerCase()}`)}
     </span>
   );
 };

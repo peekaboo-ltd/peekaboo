@@ -3,6 +3,7 @@ import AdministrativeLocation from '@/containers/locations/AdministrativeLocatio
 import NearestPlace from '@/containers/locations/NearestPlace';
 import LocationMiniMap from '@/components/orders/LocationMiniMap';
 import type { OrderLocation } from '@/types/order.type';
+import { useI18n } from '@/i18n/i18n';
 
 export interface LocationDetail {
   label: string;
@@ -26,24 +27,26 @@ interface LocationDetailModalProps {
  * Held in local state rather than an order.slice boolean because it carries a
  * payload — which of the two locations — that a bare flag cannot express.
  */
-const LocationDetailModal = ({ detail, onClose }: LocationDetailModalProps) => (
+const LocationDetailModal = ({ detail, onClose }: LocationDetailModalProps) => {
+  const { t } = useI18n();
+  return (
   <Modal
     isOpen={Boolean(detail)}
     onClose={onClose}
-    heading={detail ? `${detail.label} address` : ''}
-    description="Where the rider is sent, and the closest landmark we could match."
+    heading={detail ? t('publicOrder.location.addressTitle', { location: detail.label }) : ''}
+    description={t('publicOrder.location.description')}
   >
     {detail ? (
       <div className="flex flex-col gap-5">
         <LocationMiniMap location={detail.location} label={detail.label} />
 
         <section className="flex flex-col gap-2">
-          <h3 className="type-eyebrow">Closest landmark</h3>
+          <h3 className="type-eyebrow">{t('publicOrder.location.landmark')}</h3>
           <NearestPlace location={detail.location} />
         </section>
 
         <section className="flex flex-col gap-2">
-          <h3 className="type-eyebrow">Administrative area</h3>
+          <h3 className="type-eyebrow">{t('publicOrder.location.adminArea')}</h3>
           <ul className='w-full grid grid-cols-2 gap-2'>
           <AdministrativeLocation location={detail.location} />
           </ul>
@@ -51,6 +54,7 @@ const LocationDetailModal = ({ detail, onClose }: LocationDetailModalProps) => (
       </div>
     ) : null}
   </Modal>
-);
+  );
+};
 
 export default LocationDetailModal;

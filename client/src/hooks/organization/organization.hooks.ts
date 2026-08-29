@@ -13,6 +13,7 @@ import type { CreateOrganizationPayload, Organization } from '@/types/organizati
 import { useLazyFetchOrganizationByIdQuery, useLazyFetchOrganizationsQuery } from '@/api/queries/organization.queries';
 import { setOrganization, setOrganizationsList } from '@/states/slices/organization.slice';
 import { usePagination } from '../common/pagination.hooks';
+import { useI18n } from '@/i18n/i18n';
 
 /**
  * Hook for creating an organization (B2B registration)
@@ -27,6 +28,7 @@ import { usePagination } from '../common/pagination.hooks';
  * @property {Function} reset - Reset mutation state
  */
 export const useCreateOrganization = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -50,7 +52,7 @@ export const useCreateOrganization = () => {
       dispatch(resetOnboarding());
 
       // Show success toast
-      toast.success('Organization created successfully!');
+      toast.success(t('organization.createdSuccess'));
 
       // Reset mutation state and navigate to dashboard
       reset();
@@ -64,12 +66,12 @@ export const useCreateOrganization = () => {
         (error &&
           'message' in error &&
           (error as { message: string }).message) ||
-        'Something went wrong. Please try again.';
+        t('organization.genericError');
 
       toast.error(errorMessage);
       reset();
     }
-  }, [isSuccess, isError, data, error, dispatch, navigate, reset]);
+  }, [isSuccess, isError, data, error, dispatch, navigate, reset, t]);
 
   const createOrganization = (payload: CreateOrganizationPayload) => {
     createOrganizationMutation(payload);
@@ -86,24 +88,25 @@ export const useCreateOrganization = () => {
 };
 
 export const useUpdateMyOrganization = () => {
+  const { t } = useI18n();
   const [updateMyOrganizationMutation, { data, error, isLoading, isSuccess, reset }] =
     useUpdateMyOrganizationMutation();
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success('Organization updated successfully');
+      toast.success(t('organization.updated'));
       reset();
     }
-  }, [isSuccess, reset]);
+  }, [isSuccess, reset, t]);
 
   useEffect(() => {
     if (error) {
       const errorMessage =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to update organization';
+        t('organization.updateError');
       toast.error(errorMessage);
     }
-  }, [error]);
+  }, [error, t]);
 
   const updateMyOrganization = (data: Partial<Organization>) => {
     updateMyOrganizationMutation(data);

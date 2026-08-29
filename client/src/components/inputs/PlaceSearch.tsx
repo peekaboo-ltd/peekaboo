@@ -8,6 +8,7 @@ import {
 import { createPortal } from 'react-dom';
 import { controlClassName } from './control';
 import { loadGoogleMapsLibrary } from '@/utils/googleMapsApi.util';
+import { useI18n } from '@/i18n/i18n';
 
 export interface PlaceSearchResult {
   place: google.maps.places.PlaceResult;
@@ -39,7 +40,7 @@ interface PlaceSearchProps {
 
 const PlaceSearch = ({
   onLocationSelect,
-  placeholder = 'Search for a location...',
+  placeholder,
   className = '',
   disabled = false,
   value,
@@ -47,6 +48,8 @@ const PlaceSearch = ({
   country,
   emptyOption,
 }: PlaceSearchProps) => {
+  const { t } = useI18n();
+  const resolvedPlaceholder = placeholder ?? t('common.searchLocation');
   const [inputValue, setInputValue] = useState(value || '');
   const [predictions, setPredictions] = useState<
     google.maps.places.AutocompletePrediction[]
@@ -362,13 +365,13 @@ const PlaceSearch = ({
             updateDropdownPosition();
           }}
           onBlur={handleInputBlur}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           disabled={disabled}
           autoComplete="off"
           className={controlClassName}
         />
         {isMapsUnavailable && (
-          <p className="mt-1 text-xs text-(--danger)">Maps failed to load.</p>
+          <p className="mt-1 text-xs text-(--danger)">{t('common.mapsLoadFailed')}</p>
         )}
       </section>
       {dropdownContent && createPortal(dropdownContent, document.body)}

@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import { APIProvider, AdvancedMarker, Map, Pin } from '@vis.gl/react-google-maps';
 import Table from '@/components/table/Table';
@@ -9,6 +8,8 @@ import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useAppSelector } from '@/states/hooks';
 import { RoleTypes } from '@/types/auth.type';
 import LocationDisplay from '@/containers/locations/LocationDisplay';
+import { useI18n } from '@/i18n/i18n';
+import Button from '@/components/inputs/Button';
 
 type Coordinate = {
   latitude?: number | null;
@@ -45,7 +46,8 @@ const getCoordinates = (location?: Coordinate | null) => {
 };
 
 const UsersTrackingPage = () => {
-  useDocumentTitle('Users Tracking');
+  const { t } = useI18n();
+  useDocumentTitle(t('trackingUsers.docTitle'));
 
   const { user } = useAppSelector((state) => state.auth);
 
@@ -108,7 +110,7 @@ const UsersTrackingPage = () => {
     () => [
       {
         accessorKey: 'name',
-        header: 'Name',
+        header: t('users.name'),
         cell: ({ row }) => {
           const color = riderColorMap[row.original.id];
           return (
@@ -124,17 +126,17 @@ const UsersTrackingPage = () => {
       },
       {
         accessorKey: 'email',
-        header: 'Email',
+        header: t('users.email'),
         cell: ({ row }) => row.original.email || '—',
       },
       {
         accessorKey: 'phoneNumber',
-        header: 'Phone',
+        header: t('users.phone'),
         cell: ({ row }) => row.original.phoneNumber || '—',
       },
       {
         id: 'currentLocation',
-        header: 'Current location',
+        header: t('trackingUsers.current'),
         cell: ({ row }) => {
           return (
           <LocationDisplay location={row.original.currentLocation} />
@@ -142,23 +144,23 @@ const UsersTrackingPage = () => {
       },
       {
         id: 'locationHistory',
-        header: 'History',
+        header: t('trackingUsers.history'),
         cell: ({ row }) => (
-          <Link className="text-(--ink) underline" to={`/users/${row.original.id}/location-history`}>
-            View history
-          </Link>
+          <Button variant="outline" route={`/users/${row.original.id}/location-history`}>
+            {t('trackingUsers.viewHistory')}
+          </Button>
         ),
       },
     ],
-    [riderColorMap],
+    [riderColorMap, t],
   );
 
   return (
     <main className="w-full flex flex-col gap-6">
       <header>
-        <h1 className="type-page-title">Users tracking</h1>
+        <h1 className="type-page-title">{t('trackingUsers.title')}</h1>
         <p className="text-sm text-muted-foreground">
-          Live map and latest known location for trackable users.
+          {t('trackingUsers.description')}
         </p>
       </header>
 
@@ -193,7 +195,7 @@ const UsersTrackingPage = () => {
         totalPages={totalPages}
         totalCount={totalCount}
         isLoading={isFetching}
-        noDataMessage="No tracked users found."
+        noDataMessage={t('trackingUsers.empty')}
       />
     </main>
   );

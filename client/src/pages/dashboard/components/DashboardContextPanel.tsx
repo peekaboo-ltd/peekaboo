@@ -4,6 +4,7 @@ import type { DashboardActionLink, MetricCardData } from '@/types/dashboard.type
 import DashboardPanel from './DashboardPanel';
 import Button from '@/components/inputs/Button';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { useI18n } from '@/i18n/i18n';
 
 interface DashboardContextPanelProps {
   title: string;
@@ -20,10 +21,11 @@ const DashboardContextPanel = ({
   actions,
   variants,
 }: DashboardContextPanelProps) => {
+  const { t } = useI18n();
   return (
     <motion.div variants={variants}>
       <DashboardPanel
-        eyebrow="Context"
+        eyebrow={t('dashboard.context.eyebrow')}
         title={title}
         description={description}
         className="h-full rounded-lg"
@@ -55,7 +57,7 @@ const DashboardContextPanel = ({
           {actions.length > 0 && (
             <div className="rounded-md bg-(--surface) p-4">
               <p className="type-eyebrow">
-                Quick actions
+                {t('dashboard.context.quickActions')}
               </p>
               <div className="mt-3 grid grid-cols-1 gap-2">
                 {actions.slice(0, 4).map((action) => (
@@ -76,9 +78,9 @@ const DashboardContextPanel = ({
           )}
 
           <div className="rounded-md bg-(--surface) px-4 py-5">
-            <p className="text-sm font-normal text-(--ink)">Focused workspace</p>
+            <p className="text-sm font-normal text-(--ink)">{t('dashboard.context.focused')}</p>
             <p className="mt-2 text-sm leading-6 text-(--muted)">
-              Use the signals on the left to spot movement, then jump into one of the shortcuts here to act on it without leaving the dashboard flow.
+              {t('dashboard.context.focusedDescription')}
             </p>
           </div>
         </div>

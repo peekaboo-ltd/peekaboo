@@ -22,6 +22,7 @@ import {
 import { usePagination } from '../common/pagination.hooks';
 import { UUID } from '@/types';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n/i18n';
 
 // FETCH USERS
 export const useFetchUsers = () => {
@@ -69,6 +70,7 @@ export const useFetchUsers = () => {
 
 // CREATE USER
 export const useCreateUser = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
 
   const [createUser, { data, error, isLoading, isSuccess, reset }] =
@@ -78,19 +80,19 @@ export const useCreateUser = () => {
     if (isSuccess) {
       dispatch(setUser(data?.data));
       dispatch(setCreateUserModal(false));
-      toast.success('User created successfully');
+      toast.success(t('users.createdSuccess'));
       reset();
     }
-  }, [data, isSuccess, dispatch, reset]);
+  }, [data, isSuccess, dispatch, reset, t]);
 
   useEffect(() => {
     if (error) {
       const errorMessage =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to create user';
+        t('users.createFailed');
       toast.error(errorMessage);
     }
-  }, [error]);
+  }, [error, t]);
 
   const handleCreateUser = (userData: CreateUserRequest) => {
     createUser(userData);
@@ -101,6 +103,7 @@ export const useCreateUser = () => {
 
 // UPDATE USER
 export const useUpdateUser = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
 
   const [updateUser, { data, error, isLoading, isSuccess, reset }] =
@@ -109,19 +112,19 @@ export const useUpdateUser = () => {
   useEffect(() => {
     if (isSuccess) {
       dispatch(setUser(data?.data));
-      toast.success('User updated successfully');
+      toast.success(t('users.updatedSuccess'));
       reset();
     }
-  }, [data, isSuccess, dispatch, reset]);
+  }, [data, isSuccess, dispatch, reset, t]);
 
   useEffect(() => {
     if (error) {
       const errorMessage =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to update user';
+        t('users.updateFailed');
       toast.error(errorMessage);
     }
-  }, [error]);
+  }, [error, t]);
 
   const handleUpdateUser = (userData: UpdateUserRequest) => {
     updateUser(userData);
@@ -132,6 +135,7 @@ export const useUpdateUser = () => {
 
 // UPDATE USER STATUS
 export const useUpdateUserStatus = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
 
   const [updateUserStatus, { data, error, isLoading, isSuccess, reset }] =
@@ -140,19 +144,19 @@ export const useUpdateUserStatus = () => {
   useEffect(() => {
     if (isSuccess) {
       dispatch(setUser(data?.data));
-      toast.success('User status updated successfully');
+      toast.success(t('users.statusSuccess'));
       reset();
     }
-  }, [data, isSuccess, dispatch, reset]);
+  }, [data, isSuccess, dispatch, reset, t]);
 
   useEffect(() => {
     if (error) {
       const errorMessage =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to update user status';
+        t('users.statusFailed');
       toast.error(errorMessage);
     }
-  }, [error]);
+  }, [error, t]);
 
   const handleUpdateUserStatus = (userData: UpdateUserStatusRequest) => {
     updateUserStatus(userData);
@@ -170,24 +174,25 @@ export const useUpdateUserStatus = () => {
 
 // DELETE USER
 export const useDeleteUser = () => {
+  const { t } = useI18n();
   const [deleteUser, { data, error, isLoading, isSuccess, reset }] =
     useDeleteUserMutation();
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success('User deleted successfully');
+      toast.success(t('users.deletedSuccess'));
       reset();
     }
-  }, [isSuccess, reset]);
+  }, [isSuccess, reset, t]);
 
   useEffect(() => {
     if (error) {
       const errorMessage =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to delete user';
+        t('users.deleteFailed');
       toast.error(errorMessage);
     }
-  }, [error]);
+  }, [error, t]);
 
   const handleDeleteUser = (id: UUID) => {
     deleteUser(id);

@@ -1,81 +1,81 @@
-import { StatusBadge } from "@/components/inputs/StatusBadge";
-import { RiderPerformanceItem } from "@/types/user.type";
-import { ColumnDef } from "@tanstack/react-table";
-import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { StatusBadge } from '@/components/inputs/StatusBadge';
+import { useI18n } from '@/i18n/i18n';
+import { RiderPerformanceItem } from '@/types/user.type';
+import { ColumnDef } from '@tanstack/react-table';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 
-const getPerformanceLabel = (rider: RiderPerformanceItem) => {
+const getPerformanceLabelKey = (rider: RiderPerformanceItem) => {
   if (
     rider.rank <= 3 &&
     rider.totalDeliveriesCompleted > 0 &&
     rider.failedDeliveries <= 1 &&
     rider.canceledDeliveries <= 2
   ) {
-    return { text: "Top Performer", className: "bg-(--surface) text-(--ink)" };
+    return 'riderManagement.topPerformer';
   }
 
   if (rider.totalDeliveriesCompleted >= 8 && rider.failedDeliveries <= 3) {
-    return { text: "Doing Well", className: "bg-(--surface) text-(--ink)" };
+    return 'riderManagement.doingWell';
   }
 
   if (rider.totalDeliveriesCompleted === 0 || rider.failedDeliveries >= 4) {
-    return { text: "Needs Support", className: "bg-(--surface) text-(--ink)" };
+    return 'riderManagement.needsSupport';
   }
 
-  return { text: "Average", className: "bg-(--surface) text-(--ink)" };
+  return 'riderManagement.average';
 };
 
 export const useRiderManagementColumns = (
   onViewDetails: (rider: RiderPerformanceItem) => void,
 ) => {
+  const { t } = useI18n();
   const riderManagementColumns: ColumnDef<RiderPerformanceItem>[] = useMemo(
     () => [
       {
-        header: "#",
-        accessorKey: "rank",
+        header: '#',
+        accessorKey: 'rank',
         cell: ({ row }) => (
           <span className="font-normal">#{row.original.rank}</span>
         ),
       },
       {
-        header: "Rider",
-        accessorKey: "riderName",
+        header: t('riderManagement.rider'),
+        accessorKey: 'riderName',
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <span className="font-normal">{row.original.riderName || "-"}</span>
+            <span className="font-normal">{row.original.riderName || '-'}</span>
             <span className="type-meta">
-              {row.original.riderEmail || "-"}
+              {row.original.riderEmail || '-'}
             </span>
           </div>
         ),
       },
       {
-        header: "Phone",
-        accessorKey: "riderPhoneNumber",
-        cell: ({ row }) => row.original.riderPhoneNumber || "-",
+        header: t('riderManagement.phone'),
+        accessorKey: 'riderPhoneNumber',
+        cell: ({ row }) => row.original.riderPhoneNumber || '-',
       },
       {
-        header: "Status",
-        accessorKey: "riderStatus",
+        header: t('common.status'),
+        accessorKey: 'riderStatus',
         cell: ({ row }) => <StatusBadge status={row.original.riderStatus} />,
       },
       {
-        header: "Performance",
-        accessorKey: "performance",
+        header: t('riderManagement.performance'),
+        accessorKey: 'performance',
         cell: ({ row }) => {
-          const performance = getPerformanceLabel(row.original);
+          const performanceKey = getPerformanceLabelKey(row.original);
           return (
-            <span
-              className={`px-2 py-1 rounded-md text-xs font-normal ${performance.className}`}
-            >
-              {performance.text}
+            <span className="px-2 py-1 rounded-md text-xs font-normal bg-(--surface) text-(--ink)">
+              {t(performanceKey)}
             </span>
           );
         },
       },
       {
-        header: "Actions",
-        id: "actions",
+        header: t('common.actions'),
+        id: 'actions',
         cell: ({ row }) => (
           <Link
             to={`/users/${row?.original?.riderId}`}
@@ -85,12 +85,12 @@ export const useRiderManagementColumns = (
             }}
             className="text-(--ink) underline text-xs underline-offset-2"
           >
-            View details
+            {t('riderManagement.viewDetails')}
           </Link>
         ),
       },
     ],
-    [onViewDetails],
+    [onViewDetails, t],
   );
 
   return { riderManagementColumns };

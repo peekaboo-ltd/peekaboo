@@ -2,28 +2,29 @@ import React from 'react';
 import { Badge } from '../ui/badge';
 import { UserStatus } from '../../constants/user.constants';
 import { cn } from '../../lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 interface UserStatusBadgeProps {
   status: UserStatus;
   className?: string;
 }
 
-const statusConfig: Record<UserStatus, { 
-  label: string; 
+const statusConfig: Record<UserStatus, {
+  labelKey: string;
   className: string;
 }> = {
   [UserStatus.ACTIVE]: {
-    label: 'Active',
+    labelKey: 'status.active',
     className: 'invert-surface border-transparent',
   },
   [UserStatus.INACTIVE]: {
-    label: 'Inactive',
+    labelKey: 'status.inactive',
     className: 'border-(--line) bg-transparent text-(--muted)',
   },
   // Active is the ordinary state and stays ink; only the one that is a
   // consequence takes color.
   [UserStatus.SUSPENDED]: {
-    label: 'Suspended',
+    labelKey: 'status.suspended',
     className: 'border-(--danger-line) bg-(--danger-surface) text-(--danger)',
   },
 };
@@ -32,6 +33,7 @@ export const UserStatusBadge: React.FC<UserStatusBadgeProps> = ({
   status, 
   className 
 }) => {
+  const { t } = useI18n();
   const config = statusConfig[status];
 
   if (!config) {
@@ -47,7 +49,7 @@ export const UserStatusBadge: React.FC<UserStatusBadgeProps> = ({
       className={cn(config.className, className)}
       variant="outline"
     >
-      {config.label}
+      {t(config.labelKey)}
     </Badge>
   );
 };

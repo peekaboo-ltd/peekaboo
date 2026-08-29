@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/i18n/i18n';
 
 const GEOJS_LOCATION_URL = 'https://get.geojs.io/v1/ip/geo.json';
 const LOOKUP_TIMEOUT_MS = 3_000;
@@ -34,6 +35,7 @@ const asTrimmedString = (value: unknown): string | null =>
 
 export const parseApproximateLocation = (
   value: unknown,
+  nearYouLabel = 'Near you',
 ): ApproximateMapLocation | null => {
   const response = asRecord(value);
   if (!response) return null;
@@ -55,7 +57,7 @@ export const parseApproximateLocation = (
   const region = asTrimmedString(response.region);
   const country = asTrimmedString(response.country);
   const countryCode = asTrimmedString(response.country_code)?.toUpperCase();
-  const locality = city ?? region ?? country ?? 'Near you';
+  const locality = city ?? region ?? country ?? nearYouLabel;
   const label = countryCode ? `${locality}, ${countryCode}` : locality;
   const accuracy = asFiniteNumber(response.accuracy);
 
@@ -66,7 +68,9 @@ export const parseApproximateLocation = (
   };
 };
 
-const fetchApproximateLocation = async (): Promise<ApproximateMapLocation | null> => {
+const fetchApproximateLocation = async (
+  nearYouLabel: string,
+): Promise<ApproximateMapLocation | null> => {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), LOOKUP_TIMEOUT_MS);
 
@@ -77,7 +81,7 @@ const fetchApproximateLocation = async (): Promise<ApproximateMapLocation | null
     });
     if (!response.ok) return null;
 
-    return parseApproximateLocation(await response.json());
+    return parseApproximateLocation(await response.json(), nearYouLabel);
   } catch {
     return null;
   } finally {
@@ -86,19 +90,25 @@ const fetchApproximateLocation = async (): Promise<ApproximateMapLocation | null
 };
 
 let locationRequest: Promise<ApproximateMapLocation | null> | null = null;
+let locationRequestLabel: string | null = null;
 
 /**
  * Looks up only a coarse, public-IP-derived viewport hint. The response is kept
  * in memory for this page session and is never written into an order location.
  */
 const useApproximateLocation = (enabled: boolean): ApproximateMapLocation | null => {
+  const { t } = useI18n();
   const [location, setLocation] = useState<ApproximateMapLocation | null>(null);
+  const nearYouLabel = t('location.nearYou');
 
   useEffect(() => {
     if (!enabled) return;
 
     let isCurrent = true;
-    locationRequest ??= fetchApproximateLocation();
+    if (!locationRequest || locationRequestLabel !== nearYouLabel) {
+      locationRequestLabel = nearYouLabel;
+      locationRequest = fetchApproximateLocation(nearYouLabel);
+    }
     void locationRequest.then((nextLocation) => {
       if (isCurrent) setLocation(nextLocation);
     });
@@ -106,7 +116,7 @@ const useApproximateLocation = (enabled: boolean): ApproximateMapLocation | null
     return () => {
       isCurrent = false;
     };
-  }, [enabled]);
+  }, [enabled, nearYouLabel]);
 
   return location;
 };

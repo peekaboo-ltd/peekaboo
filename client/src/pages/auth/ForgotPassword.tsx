@@ -13,9 +13,11 @@ import {
   authInputClassName,
   authPrimaryButtonClassName,
 } from './AuthPageShell';
+import { useI18n } from '@/i18n/i18n';
 
 const ForgotPassword = () => {
-  useDocumentTitle('Forgot Password');
+  const { t } = useI18n();
+  useDocumentTitle(t('auth.forgot.docTitle'));
   const [identifier, setIdentifier] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
@@ -24,12 +26,12 @@ const ForgotPassword = () => {
     event.preventDefault();
     try {
       const response = await forgotPassword({ identifier }).unwrap();
-      toast.success(response?.message || 'Password reset instructions sent');
+      toast.success(response?.message || t('auth.forgot.sent'));
       setIsSubmitted(true);
     } catch (error) {
       toast.error(
         (error as { data?: { message?: string } })?.data?.message ||
-          'Unable to submit request. Please try again.'
+          t('auth.forgot.error')
       );
     }
   };
@@ -37,18 +39,18 @@ const ForgotPassword = () => {
   return (
     <AuthPageShell>
       <AuthCard
-        title="Reset your password"
-        subtitle="Enter your email or phone number and we will send reset instructions."
+        title={t('auth.forgot.title')}
+        subtitle={t('auth.forgot.subtitle')}
       >
         {isSubmitted ? (
           <AuthNotice tone="success">
-            If your account exists, reset instructions have been sent. Please check your inbox.
+            {t('auth.forgot.success')}
           </AuthNotice>
         ) : (
           <form className="flex flex-col gap-4" onSubmit={onSubmit}>
             <Input
-              label="Email or phone"
-              placeholder="name@example.com or 7XXXXXXXX"
+              label={t('auth.emailOrPhone')}
+              placeholder={t('auth.forgot.placeholder')}
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
@@ -60,14 +62,14 @@ const ForgotPassword = () => {
               className={authPrimaryButtonClassName}
               isLoading={isLoading}
             >
-              Send reset instructions
+              {t('auth.forgot.submit')}
             </Button>
           </form>
         )}
 
         <AuthFooterNote>
-          Remembered your password?{' '}
-          <AuthLink to="/auth/login">Back to sign in</AuthLink>
+          {t('auth.forgot.remembered')}{' '}
+          <AuthLink to="/auth/login">{t('auth.forgot.back')}</AuthLink>
         </AuthFooterNote>
       </AuthCard>
     </AuthPageShell>

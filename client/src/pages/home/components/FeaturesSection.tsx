@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
+import { useI18n } from '@/i18n/i18n';
 
 interface QuickAction {
   icon: LucideIcon;
@@ -15,7 +16,9 @@ interface FeaturesSectionProps {
   actions: QuickAction[];
 }
 
-const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
+const FeaturesSection = ({ actions }: FeaturesSectionProps) => {
+const { t } = useI18n();
+return (
 <section className="section-rhythm w-full border-(--line) bg-(--paper)">
   <article className="app-container">
     <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -51,7 +54,7 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
                     : 'text-foreground group-hover:text-(--muted)'
                 }`}
               >
-                Open
+                {t('home.features.open')}
                 <ArrowRight className="h-3 w-3 transition-transform duration-200" />
               </span>
             </Link>
@@ -62,5 +65,6 @@ const FeaturesSection = ({ actions }: FeaturesSectionProps) => (
   </article>
 </section>
 );
+};
 
 export default FeaturesSection;

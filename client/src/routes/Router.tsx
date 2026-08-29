@@ -59,15 +59,27 @@ import BatchDetailsPage from '@/pages/batches/BatchDetailsPage';
 import BatchPreviewPage from '@/pages/batches/BatchPreviewPage';
 import OrderAssignmentDetails from '@/pages/order-assignments/OrderAssignmentDetails';
 import PaymentDetailsPage from '@/pages/payments/PaymentDetailsPage';
-import SEO, { SEOProps } from '@/components/seo/SEO';
+import LocalizedSEO from '@/components/seo/LocalizedSEO';
 
 const allRoles = ['ADMIN', 'STAFF', 'BUSINESS', 'RIDER', 'CUSTOMER'] as const;
 const batchRoles = ['ADMIN', 'STAFF', 'BUSINESS', 'CUSTOMER'] as const;
 const userManagementRoles = ['ADMIN', 'STAFF', 'BUSINESS'] as const;
 
-const withSEO = (seo: SEOProps, element: ReactElement) => (
+type LocalizedSEOConfig = {
+  seoKey: string;
+  path?: string;
+  noindex?: boolean;
+  keywords?: string;
+};
+
+const withLocalizedSEO = (config: LocalizedSEOConfig, element: ReactElement) => (
   <>
-    <SEO {...seo} />
+    <LocalizedSEO
+      seoKey={config.seoKey}
+      path={config.path}
+      noindex={config.noindex}
+      keywords={config.keywords}
+    />
     {element}
   </>
 );
@@ -80,11 +92,9 @@ const Router = () => {
         <Route path="/" element={<PublicLayout />}>
           <Route
             index
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Peekaboo | Smart Delivery & Fleet Management Platform',
-                description:
-                  'Peekaboo helps businesses manage deliveries, track riders in real time, automate assignments, and optimize fleet operations from one dashboard.',
+                seoKey: 'home',
                 keywords:
                   'delivery management, fleet management, logistics software, real-time tracking, route optimization, last-mile delivery',
                 path: '/',
@@ -96,11 +106,9 @@ const Router = () => {
           <Route path="auth">
             <Route
               path="login"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Login | Peekaboo',
-                  description:
-                    'Sign in to your Peekaboo account to manage deliveries, teams, and logistics operations in one place.',
+                  seoKey: 'authLogin',
                   keywords: 'peekaboo login, delivery platform login, logistics dashboard access',
                   path: '/auth/login',
                 },
@@ -109,11 +117,9 @@ const Router = () => {
             />
             <Route
               path="register"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Create Account | Peekaboo',
-                  description:
-                    'Create a Peekaboo account to place deliveries, track orders, and manage logistics operations.',
+                  seoKey: 'authRegister',
                   keywords: 'peekaboo signup, delivery account, logistics platform signup',
                   path: '/auth/register',
                 },
@@ -122,10 +128,9 @@ const Router = () => {
             />
             <Route
               path="callback"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Authenticating | Peekaboo',
-                  description: 'Securely signing you into Peekaboo.',
+                  seoKey: 'authCallback',
                   path: '/auth/callback',
                   noindex: true,
                 },
@@ -134,10 +139,9 @@ const Router = () => {
             />
             <Route
               path="forgot-password"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Forgot Password | Peekaboo',
-                  description: 'Reset your Peekaboo account password securely.',
+                  seoKey: 'authForgot',
                   path: '/auth/forgot-password',
                   noindex: true,
                 },
@@ -146,10 +150,9 @@ const Router = () => {
             />
             <Route
               path="reset-password"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Reset Password | Peekaboo',
-                  description: 'Create a new secure password for your Peekaboo account.',
+                  seoKey: 'authReset',
                   path: '/auth/reset-password',
                   noindex: true,
                 },
@@ -158,10 +161,9 @@ const Router = () => {
             />
             <Route
               path="complete"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Complete Account Setup | Peekaboo',
-                  description: 'Finish setting up your Peekaboo account to start managing operations.',
+                  seoKey: 'authComplete',
                   path: '/auth/complete',
                   noindex: true,
                 },
@@ -173,10 +175,9 @@ const Router = () => {
           <Route path="onboarding">
             <Route
               path="organization"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Organization Onboarding | Peekaboo',
-                  description: 'Set up your organization profile and delivery workflow in Peekaboo.',
+                  seoKey: 'onboardingOrganization',
                   path: '/onboarding/organization',
                   noindex: true,
                 },
@@ -185,10 +186,9 @@ const Router = () => {
             />
             <Route
               path="admin"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Admin Onboarding | Peekaboo',
-                  description: 'Configure admin access and permissions for your Peekaboo workspace.',
+                  seoKey: 'onboardingAdmin',
                   path: '/onboarding/admin',
                   noindex: true,
                 },
@@ -197,10 +197,9 @@ const Router = () => {
             />
             <Route
               path="users"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'User Management Onboarding | Peekaboo',
-                  description: 'Invite and organize team members during Peekaboo onboarding.',
+                  seoKey: 'onboardingUsers',
                   path: '/onboarding/users',
                   noindex: true,
                 },
@@ -209,10 +208,9 @@ const Router = () => {
             />
             <Route
               path="complete"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Onboarding Complete | Peekaboo',
-                  description: 'Your Peekaboo onboarding is complete and your workspace is ready.',
+                  seoKey: 'onboardingComplete',
                   path: '/onboarding/complete',
                   noindex: true,
                 },
@@ -223,11 +221,9 @@ const Router = () => {
 
           <Route
             path="about"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'About Peekaboo | Delivery Technology Built for Growth',
-                description:
-                  'Learn about Peekaboo’s mission to simplify logistics through smarter dispatching, live tracking, and actionable delivery insights.',
+                seoKey: 'about',
                 keywords: 'about peekaboo, logistics technology company, delivery software platform',
                 path: '/about',
               },
@@ -237,10 +233,9 @@ const Router = () => {
 
           <Route
             path="about/orders/fees"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Order Fees | Peekaboo',
-                description: 'Explore transparent order fee structure and delivery pricing on Peekaboo.',
+                seoKey: 'orderFees',
                 keywords: 'delivery fees, order pricing, logistics costs',
                 path: '/about/orders/fees',
               },
@@ -250,11 +245,9 @@ const Router = () => {
 
           <Route
             path="services"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Services | Peekaboo',
-                description:
-                  'Discover Peekaboo services including delivery management, rider tracking, route planning, and business analytics.',
+                seoKey: 'services',
                 keywords: 'delivery services, fleet services, route planning, logistics analytics',
                 path: '/services',
               },
@@ -263,11 +256,9 @@ const Router = () => {
           />
           <Route
             path="services/:slug"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Service Details | Peekaboo',
-                description:
-                  'Explore detailed pricing, features, and delivery plan information for Peekaboo business services.',
+                seoKey: 'serviceDetails',
                 keywords: 'business plan details, delivery pricing, dedicated rider plan, logistics pricing',
                 path: '/services',
               },
@@ -277,10 +268,9 @@ const Router = () => {
 
           <Route
             path="contact"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Contact Us | Peekaboo',
-                description: 'Get in touch with Peekaboo for product support, onboarding, and partnership inquiries.',
+                seoKey: 'contact',
                 keywords: 'contact peekaboo, logistics support, delivery software help',
                 path: '/contact',
               },
@@ -290,11 +280,9 @@ const Router = () => {
 
           <Route
             path="legal"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Legal | Peekaboo',
-                description:
-                  'Peekaboo legal hub: terms and conditions, refund policy, and cancellation policy.',
+                seoKey: 'legalHub',
                 keywords: 'peekaboo legal, terms of service, refund policy, cancellation policy',
                 path: '/legal',
               },
@@ -303,11 +291,9 @@ const Router = () => {
           />
           <Route
             path="legal/terms-and-conditions"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Terms & Conditions | Peekaboo',
-                description:
-                  'Read Peekaboo’s terms and conditions for using our delivery and logistics services.',
+                seoKey: 'legalTerms',
                 keywords: 'peekaboo terms, terms of service, delivery platform terms',
                 path: '/legal/terms-and-conditions',
               },
@@ -316,10 +302,9 @@ const Router = () => {
           />
           <Route
             path="legal/refund-policy"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Refund Policy | Peekaboo',
-                description: 'Peekaboo refund policy for deliveries and related services.',
+                seoKey: 'legalRefund',
                 keywords: 'peekaboo refunds, delivery refund policy',
                 path: '/legal/refund-policy',
               },
@@ -328,10 +313,9 @@ const Router = () => {
           />
           <Route
             path="legal/cancellation-policy"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Cancellation Policy | Peekaboo',
-                description: 'Peekaboo cancellation policy for orders and services.',
+                seoKey: 'legalCancellation',
                 keywords: 'peekaboo cancellation, order cancellation policy',
                 path: '/legal/cancellation-policy',
               },
@@ -341,10 +325,9 @@ const Router = () => {
 
           <Route
             path="track"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Track Order | Peekaboo',
-                description: 'Track your delivery status in real time with Peekaboo public order tracking.',
+                seoKey: 'track',
                 keywords: 'track order, delivery tracking, real-time shipment tracking',
                 path: '/track',
               },
@@ -357,10 +340,9 @@ const Router = () => {
         <Route path="/p" element={<PublicLayout />}>
           <Route
             path="orders/:id"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Public Order Details | Peekaboo',
-                description: 'View public details and current status of your delivery order.',
+                seoKey: 'publicOrder',
                 path: '/p/orders',
               },
               <PublicOrderDetails />,
@@ -368,10 +350,9 @@ const Router = () => {
           />
           <Route
             path="orders/:id/payment-pending"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Payment Pending | Peekaboo',
-                description: 'Confirming your order payment securely.',
+                seoKey: 'paymentPending',
                 path: '/p/orders/payment-pending',
                 noindex: true,
               },
@@ -380,10 +361,9 @@ const Router = () => {
           />
           <Route
             path="orders/:id/payment-success"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Payment Successful | Peekaboo',
-                description: 'Your order payment has been processed successfully on Peekaboo.',
+                seoKey: 'paymentSuccess',
                 path: '/p/orders/payment-success',
                 noindex: true,
               },
@@ -392,10 +372,9 @@ const Router = () => {
           />
           <Route
             path="orders/:id/tracking"
-            element={withSEO(
+            element={withLocalizedSEO(
               {
-                title: 'Live Order Tracking | Peekaboo',
-                description: 'Follow your order progress and estimated delivery updates in real time.',
+                seoKey: 'orderTracking',
                 path: '/p/orders/tracking',
               },
               <PublicOrderTracking />,
@@ -409,10 +388,9 @@ const Router = () => {
             path="dashboard"
             element={
               <ProtectedRoute allowedRoles={[...allRoles]}>
-                {withSEO(
+                {withLocalizedSEO(
                   {
-                    title: 'Dashboard | Peekaboo',
-                    description: 'Monitor key delivery metrics, fleet activity, and operational performance.',
+                    seoKey: 'dashboard',
                     path: '/dashboard',
                     noindex: true,
                   },
@@ -427,10 +405,9 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={[...allRoles]}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Orders | Peekaboo',
-                      description: 'Manage, filter, and track all delivery orders from a single workspace.',
+                      seoKey: 'orders',
                       path: '/orders',
                       noindex: true,
                     },
@@ -443,10 +420,9 @@ const Router = () => {
               path=":id"
               element={
                 <ProtectedRoute allowedRoles={[...allRoles]}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Order Tracking | Peekaboo',
-                      description: 'View detailed status and location updates for a specific order.',
+                      seoKey: 'orderDetail',
                       path: '/orders',
                       noindex: true,
                     },
@@ -462,10 +438,9 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={[...batchRoles]}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Batches | Peekaboo',
-                      description: 'Create and manage batched deliveries for efficient dispatching.',
+                      seoKey: 'batches',
                       path: '/batches',
                       noindex: true,
                     },
@@ -478,10 +453,9 @@ const Router = () => {
               path=":id"
               element={
                 <ProtectedRoute allowedRoles={[...batchRoles]}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Batch Details | Peekaboo',
-                      description: 'Review orders, riders, and progress for a delivery batch.',
+                      seoKey: 'batchDetail',
                       path: '/batches',
                       noindex: true,
                     },
@@ -494,10 +468,9 @@ const Router = () => {
               path=":id/preview"
               element={
                 <ProtectedRoute allowedRoles={[...batchRoles]}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Batch Preview | Peekaboo',
-                      description: 'Preview batch assignment and route details before publishing.',
+                      seoKey: 'batchPreview',
                       path: '/batches/preview',
                       noindex: true,
                     },
@@ -513,10 +486,9 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={['ADMIN', 'RIDER']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Order Assignments | Peekaboo',
-                      description: 'Manage rider assignments and monitor assignment progress.',
+                      seoKey: 'assignments',
                       path: '/assignments',
                       noindex: true,
                     },
@@ -529,10 +501,9 @@ const Router = () => {
               path=":id"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN', 'RIDER']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Assignment Details | Peekaboo',
-                      description: 'View complete information for a specific order assignment.',
+                      seoKey: 'assignmentDetail',
                       path: '/assignments',
                       noindex: true,
                     },
@@ -548,10 +519,9 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={[...userManagementRoles]}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Users | Peekaboo',
-                      description: 'Manage users, roles, and access permissions across your organization.',
+                      seoKey: 'users',
                       path: '/users',
                       noindex: true,
                     },
@@ -564,10 +534,9 @@ const Router = () => {
               path="tracking"
               element={
                 <ProtectedRoute allowedRoles={[...userManagementRoles]}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'User Tracking | Peekaboo',
-                      description: 'Track live user and rider locations to improve operations.',
+                      seoKey: 'usersTracking',
                       path: '/users/tracking',
                       noindex: true,
                     },
@@ -580,10 +549,9 @@ const Router = () => {
               path=":id/location-history"
               element={
                 <ProtectedRoute allowedRoles={[...userManagementRoles]}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'User Location History | Peekaboo',
-                      description: 'Review historical movement and location records for a user.',
+                      seoKey: 'userLocationHistory',
                       path: '/users/location-history',
                       noindex: true,
                     },
@@ -596,10 +564,9 @@ const Router = () => {
               path=":id"
               element={
                 <ProtectedRoute allowedRoles={[...userManagementRoles]}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'User Details | Peekaboo',
-                      description: 'View profile, role, and operational details of a team member.',
+                      seoKey: 'userDetail',
                       path: '/users',
                       noindex: true,
                     },
@@ -614,11 +581,9 @@ const Router = () => {
             path="rider-management"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
-                {withSEO(
+                {withLocalizedSEO(
                   {
-                    title: 'Rider Management | Peekaboo',
-                    description:
-                      'Admin dashboard for rider deliveries, earnings, reliability, and activity ranking.',
+                    seoKey: 'riderManagement',
                     path: '/rider-management',
                     noindex: true,
                   },
@@ -632,10 +597,9 @@ const Router = () => {
             path="user-profile"
             element={
               <ProtectedRoute allowedRoles={[...allRoles]}>
-                {withSEO(
+                {withLocalizedSEO(
                   {
-                    title: 'My Profile | Peekaboo',
-                    description: 'Update personal details, preferences, and account settings.',
+                    seoKey: 'userProfile',
                     path: '/user-profile',
                     noindex: true,
                   },
@@ -650,10 +614,9 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Payments | Peekaboo',
-                      description: 'Track transactions, payment statuses, and financial records.',
+                      seoKey: 'payments',
                       path: '/payments',
                       noindex: true,
                     },
@@ -664,10 +627,9 @@ const Router = () => {
             />
             <Route
               path=":id"
-              element={withSEO(
+              element={withLocalizedSEO(
                 {
-                  title: 'Payment Details | Peekaboo',
-                  description: 'View complete payment details for a selected transaction.',
+                  seoKey: 'paymentDetail',
                   path: '/payments',
                   noindex: true,
                 },
@@ -680,10 +642,9 @@ const Router = () => {
             path="billing-payments"
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'BUSINESS']}>
-                {withSEO(
+                {withLocalizedSEO(
                   {
-                    title: 'Billing & Payments | Peekaboo',
-                    description: 'Track delivery billings, payment status, and organization plan costs.',
+                    seoKey: 'billingPayments',
                     path: '/billing-payments',
                     noindex: true,
                   },
@@ -696,11 +657,9 @@ const Router = () => {
             path="billing-payments/report"
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'BUSINESS']}>
-                {withSEO(
+                {withLocalizedSEO(
                   {
-                    title: 'Billing Report | Peekaboo',
-                    description:
-                      'Generate and send business billing and delivery reports.',
+                    seoKey: 'billingReport',
                     path: '/billing-payments/report',
                     noindex: true,
                   },
@@ -715,10 +674,9 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Organizations | Peekaboo',
-                      description: 'Manage client organizations and workspace configurations.',
+                      seoKey: 'organizations',
                       path: '/organizations',
                       noindex: true,
                     },
@@ -731,10 +689,9 @@ const Router = () => {
               path=":id/manage"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Manage Organization | Peekaboo',
-                      description: 'Update organization details, billing, and operational settings.',
+                      seoKey: 'organizationManage',
                       path: '/organizations/manage',
                       noindex: true,
                     },
@@ -747,10 +704,9 @@ const Router = () => {
               path="invite"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Invite Organization | Peekaboo',
-                      description: 'Invite a new organization to your Peekaboo platform instance.',
+                      seoKey: 'organizationInvite',
                       path: '/organizations/invite',
                       noindex: true,
                     },
@@ -763,10 +719,9 @@ const Router = () => {
               path="settings"
               element={
                 <ProtectedRoute allowedRoles={['BUSINESS']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Organization Settings | Peekaboo',
-                      description: 'Configure organization-level preferences and profile settings.',
+                      seoKey: 'organizationSettings',
                       path: '/organizations/settings',
                       noindex: true,
                     },
@@ -782,10 +737,9 @@ const Router = () => {
               index
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Business Plans | Peekaboo',
-                      description: 'Manage subscription plans, features, and pricing models.',
+                      seoKey: 'businessPlans',
                       path: '/business-plans',
                       noindex: true,
                     },
@@ -798,10 +752,9 @@ const Router = () => {
               path="create"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Create Business Plan | Peekaboo',
-                      description: 'Create a new business plan with custom pricing and capabilities.',
+                      seoKey: 'businessPlanCreate',
                       path: '/business-plans/create',
                       noindex: true,
                     },
@@ -814,10 +767,9 @@ const Router = () => {
               path=":id/manage"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  {withSEO(
+                  {withLocalizedSEO(
                     {
-                      title: 'Manage Business Plan | Peekaboo',
-                      description: 'Edit and optimize an existing business plan configuration.',
+                      seoKey: 'businessPlanManage',
                       path: '/business-plans/manage',
                       noindex: true,
                     },
@@ -832,10 +784,9 @@ const Router = () => {
         {/* ─── Standalone pages ─────────────────────────────────────────────── */}
         <Route
           path="/unauthorized"
-          element={withSEO(
+          element={withLocalizedSEO(
             {
-              title: 'Unauthorized Access | Peekaboo',
-              description: 'You do not have permission to access this page.',
+              seoKey: 'unauthorized',
               path: '/unauthorized',
               noindex: true,
             },
@@ -844,10 +795,9 @@ const Router = () => {
         />
         <Route
           path="*"
-          element={withSEO(
+          element={withLocalizedSEO(
             {
-              title: 'Page Not Found | Peekaboo',
-              description: 'The page you are looking for does not exist or has been moved.',
+              seoKey: 'notFound',
               noindex: true,
             },
             <NotFoundPage />,

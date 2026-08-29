@@ -1,5 +1,6 @@
 import { useGetAdministrativeDivisions } from '@/hooks/locations/location.hooks';
 import { useEffect } from 'react';
+import { useI18n } from '@/i18n/i18n';
 
 type Coordinate = {
   latitude?: number | null;
@@ -9,6 +10,7 @@ type Coordinate = {
 };
 
 const LocationDisplay = ({ location }: { location?: Coordinate | null }) => {
+  const { t } = useI18n();
   const lat = location?.latitude ?? location?.lat ?? null;
   const lng = location?.longitude ?? location?.lng ?? null;
 
@@ -24,7 +26,7 @@ const LocationDisplay = ({ location }: { location?: Coordinate | null }) => {
   }, [lat, lng, getAdministrativeDivisions]);
 
   if (!location || typeof lat !== 'number' || typeof lng !== 'number') {
-    return <span className="text-(--muted)">No location</span>;
+    return <span className="text-(--muted)">{t('location.none')}</span>;
   }
 
   if (isLoading) {

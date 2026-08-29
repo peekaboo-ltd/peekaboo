@@ -18,11 +18,13 @@ const ContactChannelsPanel = ({
 }: {
   contacts: ReturnType<typeof useHomeContent>['supportContacts'];
   onFormClick: () => void;
-}) => (
+}) => {
+  const { t } = useI18n();
+  return (
   <aside className="rounded-md border border-(--line) bg-(--surface) p-6">
-    <p className="type-eyebrow">Reach us directly</p>
+    <p className="type-eyebrow">{t('contact.reachDirectly')}</p>
     <p className="type-body-sm mt-2 max-w-[32ch] text-(--muted)">
-      Our Kigali team replies in under 90 seconds on WhatsApp and phone.
+      {t('contact.reachDescription')}
     </p>
     <ul className="mt-5 grid gap-2">
       {contacts.map((contact) => {
@@ -73,7 +75,8 @@ const ContactChannelsPanel = ({
       })}
     </ul>
   </aside>
-);
+  );
+};
 
 const ContactUsPage = () => {
   const { t } = useI18n();
@@ -81,7 +84,7 @@ const ContactUsPage = () => {
   const { data: landingStats } = useGetLandingStatsQuery();
   const { heroCopy, supportContacts } = useHomeContent();
 
-  useDocumentTitle('Contact Us');
+  useDocumentTitle(t('contact.docTitle'));
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -99,7 +102,7 @@ const ContactUsPage = () => {
               animate="visible"
             >
               <hgroup className="space-y-3">
-                <p className="type-eyebrow">Contact</p>
+                <p className="type-eyebrow">{t('contact.eyebrow')}</p>
                 <h1 className="type-display max-w-[14ch] text-(--ink)">
                   {t('contact.title')}
                 </h1>
@@ -110,16 +113,16 @@ const ContactUsPage = () => {
 
               <dl className="flex w-full max-w-md flex-wrap gap-x-10 gap-y-4 border-t border-(--line) pt-6">
                 <div>
-                  <dt className="type-eyebrow">Response time</dt>
-                  <dd className="type-card-title mt-2">Under 90 seconds</dd>
+                  <dt className="type-eyebrow">{t('contact.responseTime')}</dt>
+                  <dd className="type-card-title mt-2">{t('contact.under90Seconds')}</dd>
                 </div>
                 <div>
-                  <dt className="type-eyebrow">Channels</dt>
-                  <dd className="type-card-title mt-2">WhatsApp · Phone · Email</dd>
+                  <dt className="type-eyebrow">{t('contact.channels')}</dt>
+                  <dd className="type-card-title mt-2">{t('contact.channelList')}</dd>
                 </div>
                 <div>
-                  <dt className="type-eyebrow">Coverage</dt>
-                  <dd className="type-card-title mt-2">Kigali-wide</dd>
+                  <dt className="type-eyebrow">{t('contact.coverage')}</dt>
+                  <dd className="type-card-title mt-2">{t('contact.kigaliWide')}</dd>
                 </div>
               </dl>
 
@@ -128,7 +131,7 @@ const ContactUsPage = () => {
                 onClick={scrollToForm}
                 className="link-sweep inline-flex items-center gap-1.5 text-sm text-(--ink)"
               >
-                Send a message
+                {t('contact.sendMessage')}
                 <FontAwesomeIcon icon={faChevronDown} className="size-4" aria-hidden="true" />
               </button>
 
@@ -154,15 +157,14 @@ const ContactUsPage = () => {
         <div className="app-container">
           <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <hgroup>
-              <p className="type-eyebrow">Inquiry</p>
+              <p className="type-eyebrow">{t('contact.inquiry')}</p>
               <h2 className="type-h2 mt-2">
-                Send us
-                <br />a message.
+                {t('contact.messageTitle1')}
+                <br />{t('contact.messageTitle2')}
               </h2>
             </hgroup>
             <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
-              Tell us about your business or delivery needs. Our Kigali team
-              replies within one business day.
+              {t('contact.messageDescription')}
             </p>
           </header>
 
@@ -181,9 +183,9 @@ const ContactUsPage = () => {
       />
 
       <FinalCtaSection
-        title="Need to send something now?"
-        subtitle="Book a verified rider in under a minute. Pay when it arrives."
-        buttonLabel="Book delivery"
+        title={t('contact.ctaTitle')}
+        subtitle={t('contact.ctaSubtitle')}
+        buttonLabel={t('contact.ctaButton')}
       />
     </main>
   );

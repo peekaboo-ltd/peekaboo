@@ -22,10 +22,8 @@ import useDebounce from '@/hooks/common/debounce.hooks';
 
 const ALL_ROLES_VALUE = 'ALL';
 
-const formatRoleLabel = (role: RoleTypes) =>
-  role.charAt(0) + role.slice(1).toLowerCase();
-
 const UsersPage = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const { usersList, createUserModal } = useAppSelector((state) => state.user);
   const { user } = useAppSelector((state) => state.auth);
@@ -37,7 +35,7 @@ const UsersPage = () => {
   const organizationId = hasOrganizationMembership
     ? user?.organizationMembership?.[0]?.organization?.id
     : undefined;
-  useDocumentTitle('Users');
+  useDocumentTitle(t('users.docTitle'));
 
   const {
     fetchUsers,
@@ -52,15 +50,15 @@ const UsersPage = () => {
 
   const roleOptions = useMemo(
     () => [
-      { label: 'All roles', value: ALL_ROLES_VALUE },
+      { label: t('users.allRoles'), value: ALL_ROLES_VALUE },
       ...Object.values(RoleTypes)
         .filter((role) => role !== RoleTypes.GUEST)
         .map((role) => ({
-          label: formatRoleLabel(role),
+          label: t(`role.${role.toLowerCase()}`),
           value: role,
         })),
     ],
-    [],
+    [t],
   );
 
   useEffect(() => {
@@ -95,8 +93,6 @@ const UsersPage = () => {
   ]);
 
   const { usersColumns } = useUsersColumns();
-  const { t } = useI18n();
-
   const { activeUsers, adminCount, teamMemberCount } = usersList.reduce(
     (acc, user) => {
       if (user.status === 'ACTIVE') acc.activeUsers += 1;
@@ -122,12 +118,12 @@ const UsersPage = () => {
             <h1 className="type-page-title">
               {hasOrganizationMembership
                 ? t('organization.users.title')
-                : 'User management'}
+                : t('users.title')}
             </h1>
             <p className="text-sm text-muted-foreground">
               {hasOrganizationMembership
-                ? 'Manage team access, roles, and status for your organization.'
-                : 'Manage users, roles, and account status across all organizations.'}
+                ? t('users.orgDescription')
+                : t('users.description')}
             </p>
           </article>
           <menu className="flex items-center gap-2 flex-wrap">
@@ -137,7 +133,7 @@ const UsersPage = () => {
               className="flex items-center gap-2"
             >
               <FontAwesomeIcon icon={faPlus} />
-              Add User
+              {t('users.add')}
             </Button>
           </menu>
         </section>
@@ -147,21 +143,21 @@ const UsersPage = () => {
             {
               label: hasOrganizationMembership
                 ? t('organization.users.active')
-                : 'Active users',
+                : t('users.active'),
               value: activeUsers.toString(),
               icon: faUsersGear,
             },
             {
               label: hasOrganizationMembership
                 ? t('organization.users.admins')
-                : 'Admin users',
+                : t('users.admins'),
               value: adminCount.toString(),
               icon: faUserTie,
             },
             {
               label: hasOrganizationMembership
                 ? t('organization.users.members')
-                : 'Staff & business users',
+                : t('users.team'),
               value: teamMemberCount.toString(),
               icon: faBuilding,
             },
@@ -187,13 +183,13 @@ const UsersPage = () => {
 
         <section className="bg-(--paper) border border-(--line) rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <Input
-            label="Search user"
-            placeholder="Search with: Name, email, phone..."
+            label={t('users.search')}
+            placeholder={t('users.searchPlaceholder')}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
           <Select
-            label="Role"
+            label={t('users.role')}
             value={selectedRole}
             onChange={setSelectedRole}
             options={roleOptions}

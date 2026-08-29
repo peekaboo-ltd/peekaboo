@@ -2,6 +2,7 @@ import type { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 export type StepState = 'done' | 'current' | 'upcoming';
 
@@ -35,8 +36,10 @@ interface StepTrailProps {
  * State is carried by fill, by border style, and by the glyph — never by
  * colour alone — so it reads the same in greyscale.
  */
-const StepTrail = ({ steps, label, className }: StepTrailProps) => (
-  <ol className={cn('relative flex flex-col', className)} aria-label={label}>
+const StepTrail = ({ steps, label, className }: StepTrailProps) => {
+  const { t } = useI18n();
+
+  return <ol className={cn('relative flex flex-col', className)} aria-label={label}>
     {steps.map((step, index) => {
       const isLast = index === steps.length - 1;
       const done = step.state === 'done';
@@ -61,7 +64,7 @@ const StepTrail = ({ steps, label, className }: StepTrailProps) => (
               'relative z-10 flex size-8 shrink-0 items-center justify-center rounded-(--radius-pill) border bg-(--paper)',
               current && 'border-(--ink) bg-(--ink) text-(--paper)',
               done && 'border-(--ink) text-(--ink)',
-              !done && !current && 'border-dashed border-(--line-strong) text-(--muted)'
+              !done && !current && 'border border-(--line-strong) text-(--muted)'
             )}
           >
             {/* A check on a step that has not happened yet reads as done.
@@ -90,7 +93,7 @@ const StepTrail = ({ steps, label, className }: StepTrailProps) => (
             <div className="shrink-0 text-right">
               {current && (
                 <span className="invert-surface inline-flex h-6 items-center rounded-(--radius-pill) px-2.5 text-xs font-medium">
-                  Now
+                  {t('common.now')}
                 </span>
               )}
               {step.timestamp && (
@@ -101,7 +104,7 @@ const StepTrail = ({ steps, label, className }: StepTrailProps) => (
         </li>
       );
     })}
-  </ol>
-);
+  </ol>;
+};
 
 export default StepTrail;

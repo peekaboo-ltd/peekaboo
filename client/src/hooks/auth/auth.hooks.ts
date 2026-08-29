@@ -6,6 +6,7 @@ import { localStorageUtil } from '@/utils/localStorage.util';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n/i18n';
 import { useAppDispatch } from '@/states/hooks';
 import { setToken, setUser, setIsAuthenticated } from '@/states/slices/auth.slice';
 
@@ -63,6 +64,7 @@ export const useLogin = () => {
  * @property {Function} reset - Reset register state
  */
 export const useRegister = () => {
+  const { t } = useI18n();
   // NAVIGATION
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -98,7 +100,7 @@ export const useRegister = () => {
               message: string;
             }
           ).message) ||
-        'An error occurred';
+        t('common.genericError');
       toast.error(errorMessage);
       reset();
     }
@@ -111,6 +113,7 @@ export const useRegister = () => {
     reset,
     error,
     isError,
+    t,
   ]);
 
   return { register, data, error, isLoading, isSuccess, reset };

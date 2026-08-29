@@ -7,8 +7,10 @@ import PlaceSearch, { type PlaceSearchResult } from '../inputs/PlaceSearch';
 import Button from '../inputs/Button';
 import { placeSearchResultToOrderLocation } from '@/utils/locations.util';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n/i18n';
 
 const UpdateOrderLocationTo = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const { updateOrderLocationToModal, order } = useAppSelector((state) => state.order);
   const { token } = useAppSelector((state) => state.auth);
@@ -45,30 +47,30 @@ const UpdateOrderLocationTo = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success('Destination location updated successfully');
+      toast.success(t('location.dropoff.updated'));
       handleClose();
     }
-  }, [isSuccess, handleClose]);
+  }, [isSuccess, handleClose, t]);
 
   return (
     <Modal
       isOpen={updateOrderLocationToModal}
       onClose={handleClose}
       className="top-[42%] translate-y-[-42%] sm:top-[50%] sm:translate-y-[-50%]"
-      heading="Update Delivery Location"
-      description="Search and select the delivery location for your order"
+      heading={t('location.dropoff.updateTitle')}
+      description={t('location.dropoff.updateDescription')}
     >
       <article className="flex flex-col gap-6">
 
           <PlaceSearch
             onLocationSelect={handleLocationSelect}
-            placeholder="Search for delivery destination..."
+            placeholder={t('location.dropoff.searchPlaceholder')}
             className="relative"
             country="rw"
           />
         {selectedLocation && (
           <aside className="p-4 bg-(--surface) rounded-lg border">
-            <h5 className="text-sm font-normal text-(--ink) mb-2">Selected Destination:</h5>
+            <h5 className="text-sm font-normal text-(--ink) mb-2">{t('location.selectedDestination')}:</h5>
             <address className="text-sm text-(--ink) not-italic">
               <strong>{selectedLocation.name}</strong>
               <br />
@@ -84,7 +86,7 @@ const UpdateOrderLocationTo = () => {
             primary
             className="px-6 py-2 self-end"
           >
-            Save Destination
+            {t('location.saveDestination')}
           </Button>
       </article>
     </Modal>

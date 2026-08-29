@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Fragment, MouseEventHandler } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { SkeletonLoader } from "@/components/inputs/Loader";
+import { useI18n } from '@/i18n/i18n';
 
 type CustomBreadcrumbProps = {
   navigationLinks: {
@@ -27,6 +28,7 @@ type CustomBreadcrumbProps = {
 };
 
 const CustomBreadcrumb = ({ navigationLinks }: CustomBreadcrumbProps) => {
+  const { t } = useI18n();
   const visibleLinks = navigationLinks?.slice(-3);
   const hiddenLinks = navigationLinks?.slice(0, -3);
 
@@ -43,7 +45,7 @@ const CustomBreadcrumb = ({ navigationLinks }: CustomBreadcrumbProps) => {
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1">
                   <BreadcrumbEllipsis className="h-4 w-4" />
-                  <span className="sr-only">Toggle menu</span>
+                  <span className="sr-only">{t('common.toggleMenu')}</span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                   {hiddenLinks?.map((link, index) => (

@@ -6,6 +6,7 @@ import Button from '@/components/inputs/Button';
 import { useCallback } from 'react';
 import { setLogout, setSessionExpiredModal } from '@/states/slices/auth.slice';
 import { localStorageUtil } from '@/utils/localStorage.util';
+import { useI18n } from '@/i18n/i18n';
 
 const SessionExpiredModal = () => {
   // STATE VARIABLES
@@ -13,6 +14,7 @@ const SessionExpiredModal = () => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { sessionExpiredModal } = useSelector((state: RootState) => state.auth);
+  const { t } = useI18n();
 
   // HANDLE LOGOUT
   const closeModal = useCallback(() => {
@@ -30,14 +32,14 @@ const SessionExpiredModal = () => {
     <Modal
       isOpen={sessionExpiredModal}
       onClose={() => {}}
-      heading={`Session Expired`}
+      heading={t('session.expired.title')}
     >
       <article className="flex flex-col gap-6">
-        <p className="text-(--ink) text-sm">{`Your session has expired due to inactivity. Please log in again.`}</p>
+        <p className="text-(--ink) text-sm">{t('session.expired.description')}</p>
         <menu className="flex items-center justify-end gap-3">
           <Button
             primary
-            value={`Login`}
+            value={t('common.actions.login')}
             onClick={(e) => {
               e.preventDefault();
               closeModal();

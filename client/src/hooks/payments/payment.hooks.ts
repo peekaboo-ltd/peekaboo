@@ -22,6 +22,7 @@ import {
 import { usePagination } from '../common/pagination.hooks';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n/i18n';
 
 /**
  * @returns {Object} - The fetch public payments hook (no auth required)
@@ -202,6 +203,7 @@ export const useExportPayments = () => {
  */
 export const useAdminUpdatePaymentStatus = () => {
   const dispatch = useAppDispatch();
+  const { t } = useI18n();
 
   const [updatePaymentStatus, { data, error, isLoading, isSuccess, reset }] =
     useAdminUpdatePaymentStatusMutation();
@@ -209,19 +211,19 @@ export const useAdminUpdatePaymentStatus = () => {
   useEffect(() => {
     if (isSuccess) {
       dispatch(setUpdateStatusModal(false));
-      toast.success('Payment status updated successfully');
+      toast.success(t('paymentStatus.updated'));
       reset();
     }
-  }, [isSuccess, dispatch, reset]);
+  }, [isSuccess, dispatch, reset, t]);
 
   useEffect(() => {
     if (error) {
       const errorMessage =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to update payment status';
+        t('paymentStatus.updateError');
       toast.error(errorMessage);
     }
-  }, [error]);
+  }, [error, t]);
 
   return {
     updatePaymentStatus,

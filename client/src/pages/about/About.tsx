@@ -18,6 +18,7 @@ import { useHomeContent } from '@/pages/home/useHomeContent';
 import { entranceVariants } from '@/pages/home/home.animations';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { useI18n } from '@/i18n/i18n';
 
 type Stats = {
   deliveriesToday: number;
@@ -30,60 +31,6 @@ const fallbackStats: Stats = {
   activeRiders: 42,
   businessPartners: 65,
 };
-
-const milestones = [
-  {
-    year: '2022',
-    title: 'The first route',
-    description:
-      'Peekaboo started in Kigali with a small team of riders and one promise: every handoff should feel accountable.',
-  },
-  {
-    year: '2023',
-    title: 'Built for local business',
-    description:
-      'We introduced business logistics for merchants who needed repeatable dispatch, clear records, and a dependable partner.',
-  },
-  {
-    year: '2024',
-    title: 'Kigali-wide coverage',
-    description:
-      'Our rider network expanded across the city, connecting more neighbourhoods without losing live visibility.',
-  },
-  {
-    year: '2025',
-    title: 'A daily delivery network',
-    description:
-      'Hundreds of businesses and individuals now rely on Peekaboo to move everyday orders across Kigali.',
-  },
-];
-
-const coreValues: Array<{
-  variant: ValueCharacterVariant;
-  title: string;
-  description: string;
-}> = [
-  {
-    variant: 'speed',
-    title: 'Speed',
-    description: 'Every delivery is optimised for the fastest possible route and pickup.',
-  },
-  {
-    variant: 'trust',
-    title: 'Trust',
-    description: 'Verified riders, proof of delivery, and transparent tracking at every step.',
-  },
-  {
-    variant: 'partnership',
-    title: 'Partnership',
-    description: 'We grow with the businesses and people we serve across Kigali.',
-  },
-  {
-    variant: 'simplicity',
-    title: 'Simplicity',
-    description: 'A straightforward experience from order to drop-off.',
-  },
-];
 
 const timelineCardVariants = {
   enter: (direction: number) => ({
@@ -100,6 +47,12 @@ const timelineCardVariants = {
 };
 
 const StoryTimeline = () => {
+  const { t } = useI18n();
+  const milestones = ['2022', '2023', '2024', '2025'].map((year) => ({
+    year,
+    title: t(`about.milestone.${year}.title`),
+    description: t(`about.milestone.${year}.description`),
+  }));
   const timelineRef = useRef<HTMLElement>(null);
   const activeMilestoneRef = useRef(0);
   const reduceMotion = useReducedMotion();
@@ -153,7 +106,7 @@ const StoryTimeline = () => {
               >
                 <header className="flex items-start justify-between gap-6 border-b border-(--line) pb-6">
                   <div>
-                    <span className="type-eyebrow block">Milestone</span>
+                    <span className="type-eyebrow block">{t('about.milestone')}</span>
                     <time className="mt-2 block text-4xl font-medium tabular-nums tracking-[-0.045em] text-(--ink) sm:text-5xl">
                       {milestone.year}
                     </time>
@@ -186,22 +139,20 @@ const StoryTimeline = () => {
           </div>
 
           <header className="order-1 lg:order-2">
-            <p className="type-eyebrow">Our story</p>
+            <p className="type-eyebrow">{t('about.storyEyebrow')}</p>
             <h2 id="story-timeline-title" className="type-h2 mt-2 max-w-[14ch]">
-              Built in Kigali, one dependable route at a time.
+              {t('about.storyTitle')}
             </h2>
             <div className="mt-5 max-w-[48ch] space-y-3 text-sm leading-[1.6] text-(--muted) sm:text-base">
               <p>
-                Peekaboo started with a simple idea: city delivery should feel
-                dependable, not uncertain.
+                {t('about.storyP1')}
               </p>
               <p>
-                Each chapter strengthened the same promise — clear progress,
-                accountable handoffs, and a delivery partner Kigali can rely on.
+                {t('about.storyP2')}
               </p>
             </div>
             <p className="type-meta mt-7 text-xs">
-              Continue down the page to move through the story.
+              {t('about.storyScroll')}
             </p>
           </header>
 
@@ -219,11 +170,18 @@ const StoryTimeline = () => {
 };
 
 const About = () => {
+  const { t } = useI18n();
   const [stats, setStats] = useState<Stats>(fallbackStats);
   const { data: landingStats } = useGetLandingStatsQuery();
   const { heroCopy } = useHomeContent();
 
-  useDocumentTitle('About');
+  useDocumentTitle(t('about.docTitle'));
+  const coreValues: Array<{ variant: ValueCharacterVariant; title: string; description: string }> =
+    (['speed', 'trust', 'partnership', 'simplicity'] as ValueCharacterVariant[]).map((variant) => ({
+      variant,
+      title: t(`about.values.${variant}.title`),
+      description: t(`about.values.${variant}.description`),
+    }));
 
   useEffect(() => {
     let active = true;
@@ -257,31 +215,30 @@ const About = () => {
               animate="visible"
             >
               <hgroup className="space-y-3">
-                <p className="type-eyebrow">About Peekaboo</p>
+                <p className="type-eyebrow">{t('about.eyebrow')}</p>
                 <h1 className="type-display max-w-[16ch] text-(--ink)">
-                  Kigali moves quickly. Delivery should too.
+                  {t('about.heroTitle')}
                 </h1>
                 <p className="type-body max-w-[52ch] text-(--muted)">
-                  We connect people and businesses with verified riders, clear
-                  pricing, and live progress from pickup to handoff.
+                  {t('about.heroDescription')}
                 </p>
               </hgroup>
 
               <dl className="flex w-full max-w-md flex-wrap gap-x-10 gap-y-4 border-t border-(--line) pt-6">
                 <div>
-                  <dt className="type-eyebrow">Deliveries today</dt>
+                  <dt className="type-eyebrow">{t('about.deliveriesToday')}</dt>
                   <dd className="type-card-title mt-2 tabular-nums">
                     {stats.deliveriesToday.toLocaleString()}
                   </dd>
                 </div>
                 <div>
-                  <dt className="type-eyebrow">Active riders</dt>
+                  <dt className="type-eyebrow">{t('about.activeRiders')}</dt>
                   <dd className="type-card-title mt-2 tabular-nums">
                     {stats.activeRiders.toLocaleString()}
                   </dd>
                 </div>
                 <div>
-                  <dt className="type-eyebrow">Businesses served</dt>
+                  <dt className="type-eyebrow">{t('about.businessesServed')}</dt>
                   <dd className="type-card-title mt-2 tabular-nums">
                     {stats.businessPartners.toLocaleString()}
                   </dd>
@@ -298,7 +255,7 @@ const About = () => {
                 }}
                 className="link-sweep inline-flex items-center gap-1.5 text-sm text-(--ink)"
               >
-                Read our story
+                {t('about.readStory')}
                 <FontAwesomeIcon icon={faChevronDown} className="size-4" aria-hidden="true" />
               </button>
 
@@ -312,7 +269,7 @@ const About = () => {
 
             <div className="max-lg:hidden">
               <PublicHeadquartersMap
-                ridersLabel={`${stats.activeRiders} riders active`}
+                ridersLabel={t('about.ridersActive', { count: stats.activeRiders })}
               />
             </div>
           </div>
@@ -327,16 +284,15 @@ const About = () => {
         <div className="app-container">
           <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <hgroup>
-              <p className="type-eyebrow">Core values</p>
+              <p className="type-eyebrow">{t('about.values.eyebrow')}</p>
               <h2 className="type-h2 mt-2">
-                What we
+                {t('about.values.title1')}
                 <br />
-                stand for.
+                {t('about.values.title2')}
               </h2>
             </hgroup>
             <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
-              Every route we run is shaped by the same commitments — to the
-              people sending, the riders delivering, and the city we operate in.
+              {t('about.values.description')}
             </p>
           </header>
 
@@ -358,9 +314,9 @@ const About = () => {
       </section>
 
       <FinalCtaSection
-        title="Move something across Kigali."
-        subtitle="Talk to our team about personal deliveries, business logistics, or becoming a rider."
-        buttonLabel="Talk to our team"
+        title={t('about.ctaTitle')}
+        subtitle={t('about.ctaSubtitle')}
+        buttonLabel={t('about.ctaButton')}
       />
     </main>
   );

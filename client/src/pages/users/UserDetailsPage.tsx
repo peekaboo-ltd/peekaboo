@@ -31,6 +31,7 @@ import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useFetchUserById } from '@/hooks/users/users.hooks';
 import { toast } from 'sonner';
 import { SkeletonLoader } from '@/components/inputs/Loader';
+import { useI18n, type Language } from '@/i18n/i18n';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -48,11 +49,11 @@ const itemVariants: Variants = {
   },
 };
 
-const formatDateLabel = (value?: string | Date) => {
+const formatDateLabel = (value: string | Date | undefined, language: Language) => {
   if (!value) return '—';
   const date = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(language === 'fr' ? 'fr-RW' : language === 'rw' ? 'rw-RW' : 'en-RW', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -60,6 +61,7 @@ const formatDateLabel = (value?: string | Date) => {
 };
 
 const UserDetailsPage = () => {
+  const { t, language } = useI18n();
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
   const { user: currentUser, updateUserModal } = useAppSelector(
@@ -67,7 +69,7 @@ const UserDetailsPage = () => {
   );
   const { user } = useAppSelector((state) => state.auth);
   const [isCopied, setIsCopied] = useState(false);
-  useDocumentTitle('User Details');
+  useDocumentTitle(t('userDetails.docTitle'));
 
   // NAVIGATION
   const navigate = useNavigate();
@@ -98,17 +100,17 @@ const UserDetailsPage = () => {
 
   const stats = [
     {
-      label: 'Account Status',
-      value: currentUser?.status ?? '—',
+      label: t('profile.accountStatus'),
+      value: currentUser?.status ? t(`status.${currentUser.status.toLowerCase()}`) : '—',
       icon: faShieldHalved,
     },
     {
-      label: 'Active Roles',
+      label: t('profile.activeRoles'),
       value: roles.length ? roles.length.toString() : '—',
       icon: faIdBadge,
     },
     {
-      label: 'Orders',
+      label: t('profile.orders'),
       value: currentUser?.orders?.length?.toString() ?? '—',
       icon: faChartLine,
     },
@@ -198,20 +200,20 @@ const UserDetailsPage = () => {
       <main className="w-full max-w-4xl mx-auto px-4 sm:px-6">
         <section className="rounded-md border border-(--line) bg-(--paper) p-8 text-center">
           <p className="text-sm text-(--muted)">
-            User Details
+            {t('userDetails.docTitle')}
           </p>
           <h1 className="type-page-title mt-2">
-            User not found
+            {t('userDetails.notFound')}
           </h1>
           <p className="mt-3 text-sm text-(--muted)">
-            The selected user could not be loaded.
+            {t('userDetails.notFoundDescription')}
           </p>
           <Link
             to="/users"
             className="inline-flex items-center gap-2 mt-6 rounded-md px-4 py-2 text-sm text-(--ink) hover:bg-(--surface)"
           >
             <FontAwesomeIcon icon={faArrowLeft} />
-            Back to users
+            {t('userDetails.backUsers')}
           </Link>
         </section>
       </main>
@@ -236,20 +238,21 @@ const UserDetailsPage = () => {
             </figure>
             <section>
               <p className="type-meta">
-                User Profile
+                {t('userDetails.profile')}
               </p>
               <h1 className="type-page-title mt-2 text-(--ink)">
-                {currentUser?.name ?? 'Unnamed user'}
+                {currentUser?.name ?? t('userDetails.unnamed')}
               </h1>
               <p className="mt-2 text-sm text-(--muted) sm:text-base">
-                View personal details, access roles, and organization
-                memberships.
+                {t('userDetails.description')}
               </p>
             </section>
           </section>
           <aside className="flex flex-wrap items-center gap-3">
             <span className="rounded-full border border-(--line) bg-(--paper) px-3 py-1 text-xs font-normal text-(--muted)">
-              {currentUser?.status ?? 'Status Unavailable'}
+              {currentUser?.status
+                ? t(`status.${currentUser.status.toLowerCase()}`)
+                : t('userDetails.statusUnavailable')}
             </span>
             {(['ADMIN', 'BUSINESS'].some((role) =>
               user?.userRoles?.some((userRole) => userRole.role.name === role),
@@ -265,7 +268,7 @@ const UserDetailsPage = () => {
                 }}
               >
                 <FontAwesomeIcon icon={faPenToSquare} />
-                Edit User
+                {t('userDetails.edit')}
               </Button>
             )}
           </aside>
@@ -306,47 +309,47 @@ const UserDetailsPage = () => {
           <header className="flex items-center justify-between gap-4">
             <section>
               <p className="type-meta">
-                Personal Details
+                {t('profile.personalDetails')}
               </p>
               <h2 className="type-card-title mt-2">
-                User Information
+                {t('profile.information')}
               </h2>
             </section>
             <span className="type-meta">
-              Updated {formatDateLabel(currentUser?.updatedAt)}
+              {t('profile.updated', { date: formatDateLabel(currentUser?.updatedAt, language) })}
             </span>
           </header>
 
           <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {[
               {
-                label: 'Full Name',
+                label: t('profile.fullName'),
                 value: currentUser?.name ?? '—',
                 icon: faIdBadge,
               },
               {
-                label: 'Email Address',
+                label: t('profile.email'),
                 value: currentUser?.email ?? '—',
                 icon: faEnvelope,
               },
               {
-                label: 'Phone Number',
+                label: t('profile.phone'),
                 value: currentUser?.phoneNumber ?? '—',
                 icon: faPhone,
               },
               {
-                label: 'Date of Birth',
-                value: formatDateLabel(currentUser?.dateOfBirth),
+                label: t('profile.birthDate'),
+                value: formatDateLabel(currentUser?.dateOfBirth, language),
                 icon: faCalendarDay,
               },
               {
-                label: 'Nationality',
+                label: t('profile.nationality'),
                 value: currentUser?.nationality ?? '—',
                 icon: faFlag,
               },
               {
-                label: 'Member Since',
-                value: formatDateLabel(currentUser?.createdAt),
+                label: t('profile.memberSince'),
+                value: formatDateLabel(currentUser?.createdAt, language),
                 icon: faBriefcase,
               },
             ].map((item) => (
@@ -375,36 +378,36 @@ const UserDetailsPage = () => {
         <article className="rounded-md border border-(--line) bg-(--paper) p-6">
           <header>
             <p className="type-meta">
-              Access & Membership
+              {t('profile.access')}
             </p>
             <h2 className="type-card-title mt-2">
-              Roles & Organizations
+              {t('profile.rolesOrganizations')}
             </h2>
           </header>
 
           <section className="mt-6 flex flex-col gap-5">
             <section>
               <p className="type-meta">
-                Assigned Roles
+                {t('profile.assignedRoles')}
               </p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
                       <span className="rounded-full border border-(--line) bg-(--paper) px-3 py-1 text-xs font-normal text-(--ink)">
-                        {role}
+                        {t(`role.${role.toLowerCase()}`)}
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-(--muted)">No roles assigned.</li>
+                  <li className="text-sm text-(--muted)">{t('profile.noRoles')}</li>
                 )}
               </ul>
             </section>
 
             <section>
               <p className="type-meta">
-                Organizations
+                {t('profile.organizations')}
               </p>
               <ul className="mt-3 flex flex-col gap-2">
                 {organizations.length ? (
@@ -418,17 +421,17 @@ const UserDetailsPage = () => {
                           {org}
                         </p>
                         <p className="type-meta">
-                          Active membership
+                          {t('profile.activeMembership')}
                         </p>
                       </section>
                       <span className="rounded-full border border-(--line) bg-(--paper) px-2.5 py-1 text-xs font-normal text-(--ink)">
-                        Active
+                        {t('status.active')}
                       </span>
                     </li>
                   ))
                 ) : (
                   <li className="text-sm text-(--muted)">
-                    No organization memberships.
+                    {t('profile.noOrganizations')}
                   </li>
                 )}
               </ul>
@@ -440,7 +443,7 @@ const UserDetailsPage = () => {
               </span>
               <section>
                 <p className="type-meta">
-                  User ID
+                  {t('profile.userId')}
                 </p>
                 <p className="text-sm font-normal text-(--ink) break-all">
                   {currentUser?.id ?? '—'}{' '}
@@ -453,8 +456,8 @@ const UserDetailsPage = () => {
                         setIsCopied(false);
                       }, 1000);
                       setIsCopied(true);
-                      toast.success('User ID copied to clipboard');
-                      navigator.clipboard.writeText(currentUser?.id || '');
+                      toast.success(t('profile.userIdCopied'));
+                      void navigator.clipboard.writeText(currentUser?.id || '');
                     }}
                   />
                 </p>
@@ -467,7 +470,7 @@ const UserDetailsPage = () => {
             e.preventDefault();
             navigate(-1);
           }}>
-            Back
+            {t('common.actions.back')}
           </Button>
         </menu>
       </motion.section>

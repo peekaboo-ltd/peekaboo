@@ -1,13 +1,17 @@
+import { useI18n } from "@/i18n/i18n";
+
 interface RoutePreviewMapProps {
   className?: string;
   dark?: boolean;
 }
 
-const RoutePreviewMap = ({ className = '', dark = false }: RoutePreviewMapProps) => (
+const RoutePreviewMap = ({ className = '', dark = false }: RoutePreviewMapProps) => {
+  const { t } = useI18n();
+  return (
   <svg
     viewBox="0 0 160 72"
     role="img"
-    aria-label="Live delivery route preview from Kacyiru to Nyamirambo"
+    aria-label={t('home.map.previewLabel')}
     className={className}
     preserveAspectRatio="xMidYMid meet"
   >
@@ -92,6 +96,7 @@ const RoutePreviewMap = ({ className = '', dark = false }: RoutePreviewMapProps)
     {/* Rider dot */}
     <circle cx="88" cy="26" r="3.5" fill={dark ? 'var(--paper)' : 'var(--ink)'} />
   </svg>
-);
+  );
+};
 
 export default RoutePreviewMap;

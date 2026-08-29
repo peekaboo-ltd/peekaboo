@@ -3,7 +3,7 @@ import { useAppSelector } from '@/states/hooks';
 import type { UUID } from '@/types';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { OrderStatus, PREFERRED_CONTACT_METHOD_LABELS } from '@/types/order.type';
+import { OrderStatus, PreferredContactMethod } from '@/types/order.type';
 import { useGetPublicOrder } from '@/hooks/orders/orders.hooks';
 import { faCopy, faCheckCircle } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -24,8 +24,9 @@ import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { faPhone, faUser } from '@fortawesome/free-solid-svg-icons';
 import { PublicPage } from '@/components/layout/PublicPage';
 import OrderSetupHeroMap from './components/OrderSetupHeroMap';
+import { useI18n, type Language } from '@/i18n/i18n';
 
-const formatTimestamp = (date?: Date | string) => {
+const formatTimestamp = (date: Date | string | undefined, language: Language) => {
   if (!date) return '—';
   const activityDate = new Date(date);
   if (Number.isNaN(activityDate.getTime())) return '—';
@@ -34,24 +35,29 @@ const formatTimestamp = (date?: Date | string) => {
   const isToday = activityDate.toDateString() === today.toDateString();
 
   if (isToday) {
-    return activityDate.toLocaleTimeString('en-US', {
+    return activityDate.toLocaleTimeString(
+      language === 'fr' ? 'fr-RW' : language === 'rw' ? 'rw-RW' : 'en-RW', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-    });
+      },
+    );
   }
 
-  return activityDate.toLocaleString('en-US', {
+  return activityDate.toLocaleString(
+    language === 'fr' ? 'fr-RW' : language === 'rw' ? 'rw-RW' : 'en-RW', {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  });
+    },
+  );
 };
 
 const PublicOrderTracking = () => {
-  useDocumentTitle('Order Tracking');
+  const { t, language } = useI18n();
+  useDocumentTitle(t('tracking.docTitle'));
 
   const { orderActivitiesList } = useAppSelector((state) => state.orderActivity);
   const { order } = useAppSelector((state) => state.order);
@@ -123,11 +129,11 @@ const PublicOrderTracking = () => {
         const activity = statusActivityMap.get(status.key);
         return {
           key: status.key,
-          label: status.label,
-          description: status.description,
+          label: t(`order.status.${status.key.toLowerCase()}.label`),
+          description: t(`order.status.${status.key.toLowerCase()}.description`),
           icon: status.icon,
           timestamp: activity?.createdAt
-            ? formatTimestamp(activity.createdAt)
+            ? formatTimestamp(activity.createdAt, language)
             : undefined,
           state:
             index === currentStepIndex
@@ -137,7 +143,7 @@ const PublicOrderTracking = () => {
                 : 'upcoming',
         };
       }),
-    [statusActivityMap, currentStepIndex],
+    [statusActivityMap, currentStepIndex, language, t],
   );
 
   // The page answers one question — where is it now? Seven milestones is the
@@ -151,19 +157,22 @@ const PublicOrderTracking = () => {
 
   const contacts = [
     {
-      title: 'Sender',
+      title: t('tracking.sender'),
       name: order?.sender?.name || order?.senderName || '—',
       phone: order?.sender?.phoneNumber || order?.senderPhoneNumber || '—',
     },
     {
-      title: 'Receiver',
+      title: t('tracking.recipient'),
       name: order?.recipient?.name || order?.recipientName || '—',
       phone: order?.recipient?.phoneNumber || order?.recipientPhoneNumber || '—',
     },
   ];
 
-  const contactMethodLabel = order?.preferredContactMethod
-    ? PREFERRED_CONTACT_METHOD_LABELS[order.preferredContactMethod]
+  const contactMethodKey = order?.preferredContactMethod === PreferredContactMethod.PHONE
+    ? 'call'
+    : order?.preferredContactMethod?.toLowerCase();
+  const contactMethodLabel = contactMethodKey
+    ? t(`tracking.contact.${contactMethodKey}`)
     : undefined;
 
   const hasRoute = Boolean(order?.locationFrom && order?.locationTo);
@@ -188,9 +197,9 @@ const PublicOrderTracking = () => {
       ) : null}
       <header className="flex flex-wrap items-start justify-between gap-3">
         <hgroup className="min-w-0">
-          <p className="type-eyebrow">Tracking</p>
+          <p className="type-eyebrow">{t('tracking.eyebrow')}</p>
           <h1 className="type-page-title truncate">
-            {order?.referenceId || 'Follow your delivery'}
+            {order?.referenceId || t('tracking.fallbackTitle')}
           </h1>
         </hgroup>
 
@@ -200,14 +209,14 @@ const PublicOrderTracking = () => {
             onClick={() => setShowDetails(true)}
             className="type-meta cursor-pointer text-(--ink) underline underline-offset-2"
           >
-            Order details
+            {t('tracking.orderDetails')}
           </button>
           {order?.referenceId ? (
             <button
               type="button"
               onClick={() => {
                 navigator.clipboard.writeText(order.referenceId);
-                toast.success('Reference ID copied to clipboard');
+                toast.success(t('tracking.referenceCopied'));
                 setIsCopied(true);
                 setTimeout(() => setIsCopied(false), 2000);
               }}
@@ -215,7 +224,7 @@ const PublicOrderTracking = () => {
                 buttonVariants({ variant: 'field', size: 'icon-sm' }),
                 'justify-center',
               )}
-              aria-label="Copy reference ID"
+              aria-label={t('tracking.copyReference')}
             >
               <FontAwesomeIcon
                 icon={isCopied ? faCheckCircle : faCopy}
@@ -230,16 +239,17 @@ const PublicOrderTracking = () => {
         <div className="flex min-h-0 flex-col gap-4 overflow-y-auto lg:pr-1">
           {/* The answer, stated once and large. */}
           <section className="card-framed p-5" aria-live="polite">
-            <p className="type-eyebrow">Right now</p>
+            <p className="type-eyebrow">{t('tracking.now')}</p>
             <h2 className="type-h3 mt-1">
-              {orderLoading ? 'Loading…' : (currentStep?.label ?? '—')}
+              {orderLoading ? t('common.loading') : (currentStep?.label ?? '—')}
             </h2>
             <p className="type-meta mt-1">
-              {currentStep?.description ?? 'Waiting for the first update.'}
+              {currentStep?.description ?? t('tracking.waitingUpdate')}
             </p>
             <p className="type-meta mt-3 tabular">
-              Updated{' '}
-              {formatTimestamp(currentStatus?.createdAt || order?.updatedAt)}
+              {t('tracking.updated', {
+                time: formatTimestamp(currentStatus?.createdAt || order?.updatedAt, language),
+              })}
             </p>
           </section>
 
@@ -248,21 +258,26 @@ const PublicOrderTracking = () => {
               distance={distance}
               estimatedTime={estimatedTime}
               fee={order?.finalFee ?? order?.initialFee}
-              feeLabel="Total"
+              feeLabel={t('tracking.total')}
             />
           ) : null}
 
           <div className="flex items-center justify-between gap-3">
             <p className="type-meta min-w-0 truncate">
-              {previousStep ? `Before: ${previousStep.label}` : 'This is the first step'}
-              {nextStep ? ` · Next: ${nextStep.label}` : ' · Final step'}
+              {previousStep
+                ? t('tracking.before', { step: previousStep.label })
+                : t('tracking.firstStep')}
+              {' · '}
+              {nextStep
+                ? t('tracking.next', { step: nextStep.label })
+                : t('tracking.finalStep')}
             </p>
             <button
               type="button"
               onClick={() => setShowAllSteps(true)}
               className="type-meta shrink-0 cursor-pointer text-(--ink) underline underline-offset-2"
             >
-              All {steps.length} steps
+              {t('tracking.allSteps', { count: steps.length })}
             </button>
           </div>
 
@@ -273,13 +288,13 @@ const PublicOrderTracking = () => {
                 <p className="mt-2 flex items-center gap-2 text-sm text-(--ink)">
                   <FontAwesomeIcon icon={faUser} className="size-3.5 text-(--muted)" />
                   <span className="truncate">
-                    {orderLoading ? 'Loading…' : contact.name}
+                    {orderLoading ? t('common.loading') : contact.name}
                   </span>
                 </p>
                 <p className="mt-1 flex items-center gap-2 text-sm text-(--ink)">
                   <FontAwesomeIcon icon={faPhone} className="size-3.5 text-(--muted)" />
                   <span className="truncate tabular">
-                    {orderLoading ? 'Loading…' : contact.phone}
+                    {orderLoading ? t('common.loading') : contact.phone}
                   </span>
                 </p>
               </article>
@@ -288,7 +303,7 @@ const PublicOrderTracking = () => {
 
           {contactMethodLabel ? (
             <p className="type-meta">
-              Updates go to the sender by {contactMethodLabel}.
+              {t('tracking.updatesMethod', { method: contactMethodLabel })}
             </p>
           ) : null}
 
@@ -300,11 +315,11 @@ const PublicOrderTracking = () => {
                 navigate(-1);
               }}
             >
-              Back
+              {t('tracking.back')}
             </Button>
             {pathname.includes(`/p/orders/${id}/tracking`) ? (
               <Button route="/dashboard" variant="primary">
-                Continue to dashboard
+                {t('tracking.dashboard')}
               </Button>
             ) : null}
           </footer>
@@ -322,24 +337,24 @@ const PublicOrderTracking = () => {
       <Modal
         isOpen={showAllSteps}
         onClose={() => setShowAllSteps(false)}
-        heading="Delivery milestones"
-        description="Every step of this delivery, and when it happened."
+        heading={t('tracking.milestonesTitle')}
+        description={t('tracking.milestonesDescription')}
       >
-        <StepTrail label="Order progress" steps={steps} />
+        <StepTrail label={t('tracking.progress')} steps={steps} />
       </Modal>
 
       <Modal
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
-        heading="Order details"
-        description="Reference codes for this delivery."
+        heading={t('tracking.orderDetails')}
+        description={t('tracking.detailsDescription')}
       >
         <dl className="divide-y divide-(--line) text-sm">
           {[
-            { label: 'Order reference', value: order?.referenceId },
-            { label: 'Tracking code', value: order?.trackingId },
-            { label: 'Last activity', value: currentStatus?.status || order?.status },
-            { label: 'Preferred contact', value: contactMethodLabel },
+            { label: t('tracking.orderReference'), value: order?.referenceId },
+            { label: t('tracking.trackingCode'), value: order?.trackingId },
+            { label: t('tracking.lastActivity'), value: currentStatus?.status || order?.status },
+            { label: t('tracking.preferredContact'), value: contactMethodLabel },
           ].map((item) => (
             <div key={item.label} className="flex justify-between gap-4 py-3 first:pt-0">
               <dt className="type-meta">{item.label}</dt>

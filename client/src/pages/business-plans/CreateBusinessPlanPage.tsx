@@ -16,6 +16,7 @@ import {
 } from '@/components/layout/InternalPage';
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 interface FormValues extends Omit<CreateBusinessPlanPayload, 'features' | 'pricingTiers'> {
   features: { value: string }[];
@@ -25,7 +26,8 @@ interface FormValues extends Omit<CreateBusinessPlanPayload, 'features' | 'prici
 }
 
 const CreateBusinessPlanPage = () => {
-  useDocumentTitle('Create Business Plan');
+  const { t } = useI18n();
+  useDocumentTitle(t('businessPlan.createDocTitle'));
   const navigate = useNavigate();
 
   const [createBusinessPlan, { isLoading }] = useCreateBusinessPlanMutation();
@@ -89,12 +91,12 @@ const CreateBusinessPlanPage = () => {
       };
 
       await createBusinessPlan(payload).unwrap();
-      toast.success('Business plan created successfully.');
+      toast.success(t('businessPlan.created'));
       navigate('/business-plans');
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to create business plan.';
+        t('businessPlan.createError');
       toast.error(message);
     }
   });
@@ -102,9 +104,9 @@ const CreateBusinessPlanPage = () => {
   return (
     <InternalPage>
       <InternalPageHeader
-        eyebrow="Business Plans"
-        title="Create Business Plan"
-        description="Define a new pricing plan to assign to organizations."
+        eyebrow={t('businessPlans.title')}
+        title={t('businessPlan.createTitle')}
+        description={t('businessPlan.createDescription')}
       />
 
       <section className="bg-(--paper) border border-(--line) rounded-xl p-6">
@@ -112,18 +114,18 @@ const CreateBusinessPlanPage = () => {
           {/* Basic Info */}
           <div>
             <h3 className="type-label mb-3">
-              Basic Information
+              {t('businessPlan.basicInformation')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
                 name="name"
                 control={control}
-                rules={{ required: 'Plan name is required.' }}
+                rules={{ required: t('validation.required') }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Plan Name"
-                    placeholder="Business Growth Plan"
+                    label={t('businessPlan.name')}
+                    placeholder={t('businessPlan.namePlaceholder')}
                     required
                     errorMessage={errors.name?.message}
                   />
@@ -132,11 +134,11 @@ const CreateBusinessPlanPage = () => {
               <Controller
                 name="currency"
                 control={control}
-                rules={{ required: 'Currency is required.' }}
+                rules={{ required: t('validation.required') }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Currency"
+                    label={t('businessPlan.currency')}
                     placeholder="RWF"
                     required
                     errorMessage={errors.currency?.message}
@@ -148,15 +150,15 @@ const CreateBusinessPlanPage = () => {
                 control={control}
                 render={({ field }) => (
                   <Select
-                    label="Billing Period"
+                    label={t('businessPlan.billingPeriod')}
                     value={field.value}
                     onChange={field.onChange}
                     options={[
-                      { label: 'Monthly', value: BillingPeriod.MONTHLY },
-                      { label: 'Weekly', value: BillingPeriod.WEEKLY },
-                      { label: 'Daily', value: BillingPeriod.DAILY },
+                      { label: t('businessPlan.monthly'), value: BillingPeriod.MONTHLY },
+                      { label: t('businessPlan.weekly'), value: BillingPeriod.WEEKLY },
+                      { label: t('businessPlan.daily'), value: BillingPeriod.DAILY },
                     ]}
-                    placeholder="Select billing period"
+                    placeholder={t('businessPlan.selectBillingPeriod')}
                   />
                 )}
               />
@@ -165,14 +167,14 @@ const CreateBusinessPlanPage = () => {
                 control={control}
                 render={({ field }) => (
                   <Select
-                    label="Status"
+                    label={t('common.status')}
                     value={field.value}
                     onChange={field.onChange}
                     options={[
-                      { label: 'Active', value: BusinessPlanStatus.ACTIVE },
-                      { label: 'Inactive', value: BusinessPlanStatus.INACTIVE },
+                      { label: t('status.active'), value: BusinessPlanStatus.ACTIVE },
+                      { label: t('status.inactive'), value: BusinessPlanStatus.INACTIVE },
                     ]}
-                    placeholder="Select status"
+                    placeholder={t('businessPlan.selectStatus')}
                   />
                 )}
               />
@@ -182,8 +184,8 @@ const CreateBusinessPlanPage = () => {
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Badge"
-                    placeholder="MOST POPULAR"
+                    label={t('businessPlan.badge')}
+                    placeholder={t('businessPlan.badgePlaceholder')}
                     value={field.value || ''}
                   />
                 )}
@@ -198,12 +200,12 @@ const CreateBusinessPlanPage = () => {
             render={({ field }) => (
               <div className="flex flex-col gap-1">
                 <label className="text-[0.8125rem] text-(--ink)">
-                  Description
+                  {t('businessPlan.descriptionLabel')}
                 </label>
                 <textarea
                   {...field}
                   rows={3}
-                  placeholder="Brief description of this plan..."
+                  placeholder={t('businessPlan.descriptionPlaceholder')}
                   className="rounded-lg border border-(--line) bg-(--paper) px-3 py-2 text-sm text-(--ink) resize-none focus:outline-none focus:ring-2 focus:ring-(--ink)"
                 />
               </div>
@@ -213,20 +215,20 @@ const CreateBusinessPlanPage = () => {
           {/* Features */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="type-label">Features</h3>
+              <h3 className="type-label">{t('businessPlan.features')}</h3>
               <button
                 type="button"
                 onClick={() => appendFeature({ value: '' })}
                 className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
               >
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                Add Feature
+                {t('businessPlan.addFeature')}
               </button>
             </div>
             <div className="flex flex-col gap-2">
               {featureFields.length === 0 && (
                 <p className="type-meta italic">
-                  No features added yet. Click "Add Feature" to add bullet points.
+                  {t('businessPlan.noFeaturesCreate')}
                 </p>
               )}
               {featureFields.map((field, index) => (
@@ -237,7 +239,7 @@ const CreateBusinessPlanPage = () => {
                     render={({ field: inputField }) => (
                       <input
                         {...inputField}
-                        placeholder={`Feature ${index + 1}...`}
+                        placeholder={t('businessPlan.featurePlaceholder', { number: index + 1 })}
                         className={cn(controlClassName, 'flex-1 px-3')}
                       />
                     )}
@@ -267,9 +269,9 @@ const CreateBusinessPlanPage = () => {
                   className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                 />
                 <span className="text-sm text-(--ink)">
-                  Custom pricing
+                  {t('businessPlan.customPricing')}
                   <span className="type-meta ml-1">
-                    (negotiated pricing — hides tier configuration)
+                    {t('businessPlan.customPricingHint')}
                   </span>
                 </span>
               </label>
@@ -281,7 +283,7 @@ const CreateBusinessPlanPage = () => {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="type-label">
-                  Pricing Tiers
+                  {t('businessPlan.pricingTiers')}
                 </h3>
                 <button
                   type="button"
@@ -298,14 +300,13 @@ const CreateBusinessPlanPage = () => {
                   className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
                 >
                   <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                  Add Tier
+                  {t('businessPlan.addTier')}
                 </button>
               </div>
 
               {tierFields.length === 0 && (
                 <p className="type-meta italic">
-                  No pricing tiers defined. Click "Add Tier" to configure
-                  volume-based pricing.
+                  {t('businessPlan.noTiersCreate')}
                 </p>
               )}
 
@@ -317,7 +318,7 @@ const CreateBusinessPlanPage = () => {
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span className="type-meta">
-                        Tier {index + 1}
+                        {t('businessPlan.tier', { number: index + 1 })}
                       </span>
                       <button
                         type="button"
@@ -338,8 +339,8 @@ const CreateBusinessPlanPage = () => {
                         render={({ field: inputField }) => (
                           <Input
                             {...inputField}
-                            label="Label"
-                            placeholder="0 – 150 deliveries per month"
+                            label={t('businessPlan.tierLabel')}
+                            placeholder={t('businessPlan.tierLabelPlaceholder')}
                             value={inputField.value || ''}
                           />
                         )}
@@ -348,13 +349,13 @@ const CreateBusinessPlanPage = () => {
                         name={`pricingTiers.${index}.minQuantity`}
                         control={control}
                         rules={{
-                          required: 'Min quantity is required.',
-                          min: { value: 0, message: 'Must be >= 0' },
+                          required: t('validation.required'),
+                          min: { value: 0, message: t('businessPlan.minimumZero') },
                         }}
                         render={({ field: inputField }) => (
                           <Input
                             {...inputField}
-                            label="Min Quantity"
+                            label={t('businessPlan.minQuantity')}
                             placeholder="0"
                             type="number"
                             required
@@ -370,8 +371,8 @@ const CreateBusinessPlanPage = () => {
                         render={({ field: inputField }) => (
                           <Input
                             {...inputField}
-                            label="Max Quantity"
-                            placeholder="Leave empty for unlimited"
+                            label={t('businessPlan.maxQuantity')}
+                            placeholder={t('businessPlan.unlimitedPlaceholder')}
                             type="number"
                             value={inputField.value ?? ''}
                             onChange={(e) =>
@@ -390,7 +391,7 @@ const CreateBusinessPlanPage = () => {
                         render={({ field: inputField }) => (
                           <Input
                             {...inputField}
-                            label="Price Per Unit"
+                            label={t('businessPlan.pricePerUnit')}
                             placeholder="1500"
                             type="number"
                             value={inputField.value ?? ''}
@@ -410,7 +411,7 @@ const CreateBusinessPlanPage = () => {
                         render={({ field: inputField }) => (
                           <Input
                             {...inputField}
-                            label="Total Price (Package)"
+                            label={t('businessPlan.packageTotal')}
                             placeholder="48000"
                             type="number"
                             value={inputField.value ?? ''}
@@ -440,7 +441,7 @@ const CreateBusinessPlanPage = () => {
                             className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                           />
                           <span className="type-meta">
-                            Custom / contact us tier
+                            {t('businessPlan.customTier')}
                           </span>
                         </label>
                       )}
@@ -457,7 +458,7 @@ const CreateBusinessPlanPage = () => {
                     render={({ field }) => (
                       <Input
                         {...field}
-                        label="Overflow Rate (per extra delivery)"
+                        label={t('businessPlan.overflowRate')}
                         placeholder="1500"
                         type="number"
                         value={field.value ?? ''}
@@ -477,7 +478,7 @@ const CreateBusinessPlanPage = () => {
                     render={({ field }) => (
                       <Input
                         {...field}
-                        label="Fallback Rate (partial package delivery)"
+                        label={t('businessPlan.fallbackRate')}
                         placeholder="1600"
                         type="number"
                         value={field.value ?? ''}
@@ -509,9 +510,9 @@ const CreateBusinessPlanPage = () => {
                   className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                 />
                 <span className="text-sm text-(--ink)">
-                  Set as default plan
+                  {t('businessPlan.setDefault')}
                   <span className="type-meta ml-1">
-                    (assigned to organizations with no plan)
+                    {t('businessPlan.defaultHint')}
                   </span>
                 </span>
               </label>
@@ -525,10 +526,10 @@ const CreateBusinessPlanPage = () => {
               isLoading={isLoading}
               disabled={isLoading}
             >
-              Create Plan
+              {t('businessPlans.create')}
             </Button>
             <Button type="button" onClick={() => navigate(-1)}>
-              Back
+              {t('businessPlan.back')}
             </Button>
           </div>
         </form>

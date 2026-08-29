@@ -2,14 +2,22 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { NAVIGATION_LINKS } from '@/constants/navigation.constants';
-import { capitalizeString } from '@/utils/strings.util';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
 import peekabooLogo from '/peekaboo.png';
 import Button from '@/components/inputs/Button';
+import { useI18n } from '@/i18n/i18n';
+
+const publicLabelKeys: Record<string, string> = {
+  HOME: 'nav.home',
+  SERVICES: 'nav.services',
+  ABOUT: 'nav.about',
+  TRACK_ORDER: 'nav.trackOrder',
+};
 
 const PublicNavbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { pathname } = useLocation();
+  const { t } = useI18n();
 
   const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen((previous) => !previous);
@@ -30,11 +38,11 @@ const PublicNavbar = () => {
 
   return (
     <header className="invert-surface sticky top-0 z-50 h-16">
-      <nav className="app-container flex h-16 items-center justify-between" aria-label="Primary navigation">
+      <nav className="app-container flex h-16 items-center justify-between" aria-label={t('nav.primary')}>
         <Link
           to="/"
           className="flex h-(--control-lg) shrink-0 items-center rounded-(--radius-control) px-2 outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
-          aria-label="Peekaboo home"
+          aria-label={t('nav.homeLabel')}
         >
           <img
             src={peekabooLogo}
@@ -51,7 +59,7 @@ const PublicNavbar = () => {
                 aria-current={pathname === link ? 'page' : undefined}
                 className="inline-flex min-h-10 items-center rounded-lg px-3 text-sm font-normal transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
               >
-                {capitalizeString(label)}
+                {t(publicLabelKeys[label])}
               </Link>
             </li>
           ))}
@@ -61,14 +69,14 @@ const PublicNavbar = () => {
           <div className="hidden items-center gap-2 lg:flex">
             <LanguageSelector />
             <Button variant="primary" className="flex-1" route={NAVIGATION_LINKS.MY_ACCOUNT}>
-              {capitalizeString('MY_ACCOUNT')}
+              {t('nav.myAccount')}
             </Button>
           </div>
           <button
             type="button"
             onClick={toggleMobileMenu}
             className="relative z-50 flex size-11 items-center justify-center rounded-(--radius-control) outline-none transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] lg:hidden"
-            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-label={isMobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
             aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -78,7 +86,7 @@ const PublicNavbar = () => {
 
       {isMobileMenuOpen ? (
         <div className="fixed inset-x-0 bottom-0 top-16 z-40 bg-(--paper) text-(--ink) lg:hidden">
-          <nav className="flex h-full flex-col overflow-y-auto px-5 py-6" aria-label="Mobile navigation">
+          <nav className="flex h-full flex-col overflow-y-auto px-5 py-6" aria-label={t('nav.mobile')}>
             <ul className="border-t border-(--line)">
               {publicLinks.map(([label, link]) => (
                 <li key={label} className="border-b border-(--line)">
@@ -87,7 +95,7 @@ const PublicNavbar = () => {
                     aria-current={pathname === link ? 'page' : undefined}
                     className="flex min-h-16 items-center px-3 text-lg font-normal outline-none transition-[background-color,color] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface)"
                   >
-                    {capitalizeString(label)}
+                    {t(publicLabelKeys[label])}
                   </Link>
                 </li>
               ))}
@@ -95,7 +103,7 @@ const PublicNavbar = () => {
             <div className="mt-auto flex items-center gap-3 pt-8">
               <LanguageSelector />
               <Button variant="primary" className="flex-1" route={NAVIGATION_LINKS.MY_ACCOUNT}>
-                {capitalizeString('MY_ACCOUNT')}
+                {t('nav.myAccount')}
               </Button>
             </div>
           </nav>

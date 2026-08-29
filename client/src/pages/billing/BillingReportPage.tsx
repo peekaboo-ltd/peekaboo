@@ -12,6 +12,7 @@ import {
 } from '@/components/layout/InternalPage';
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -24,7 +25,8 @@ const itemVariants: Variants = {
 const formatDateInput = (date: Date) => date.toISOString().slice(0, 10);
 
 const BillingReportPage = () => {
-  useDocumentTitle('Billing Report');
+  const { t } = useI18n();
+  useDocumentTitle(t('billing.reportDocTitle'));
 
   const today = useMemo(() => new Date(), []);
   const defaultStart = useMemo(() => {
@@ -40,7 +42,7 @@ const BillingReportPage = () => {
   const handleDownloadReport = async () => {
     const token = localStorageUtil.getItem('token');
     if (!token) {
-      toast.error('Please sign in again to download report.');
+      toast.error(t('billing.signInDownload'));
       return;
     }
 
@@ -56,7 +58,7 @@ const BillingReportPage = () => {
       );
 
       if (!response.ok) {
-        throw new Error('Unable to download report');
+        throw new Error(t('billing.reportDownloadError'));
       }
 
       const blob = await response.blob();
@@ -68,9 +70,9 @@ const BillingReportPage = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(objectUrl);
-      toast.success('Business report downloaded.');
+      toast.success(t('billing.reportDownloaded'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to download report.');
+      toast.error(error instanceof Error ? error.message : t('billing.reportDownloadError'));
     } finally {
       setIsBusy(false);
     }
@@ -79,7 +81,7 @@ const BillingReportPage = () => {
   const handleEmailReport = async () => {
     const token = localStorageUtil.getItem('token');
     if (!token) {
-      toast.error('Please sign in again to email report.');
+      toast.error(t('billing.signInEmail'));
       return;
     }
 
@@ -95,12 +97,12 @@ const BillingReportPage = () => {
       );
 
       if (!response.ok) {
-        throw new Error('Unable to email report');
+        throw new Error(t('billing.reportEmailError'));
       }
 
-      toast.success('Business report sent to your email.');
+      toast.success(t('billing.reportEmailed'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to email report.');
+      toast.error(error instanceof Error ? error.message : t('billing.reportEmailError'));
     } finally {
       setIsBusy(false);
     }
@@ -110,17 +112,17 @@ const BillingReportPage = () => {
     <InternalPage>
       <motion.section variants={itemVariants}>
         <InternalPageHeader
-          eyebrow="Billing & Payments"
-          title="Report"
-          description="Generate a business report that includes delivery activity and the current billing breakdown for your organization."
+          eyebrow={t('billing.title')}
+          title={t('billing.report')}
+          description={t('billing.reportPageDescription')}
         />
       </motion.section>
 
       <motion.section variants={itemVariants}>
         <InternalSectionCard
-          eyebrow="Report Range"
-          title="Business Report"
-          description="Monthly reports are also sent automatically on the 1st, and current-period billing totals remain estimates until the cycle closes."
+          eyebrow={t('billing.reportRange')}
+          title={t('billing.businessReport')}
+          description={t('billing.reportSchedule')}
           actions={
             <div className="flex flex-wrap gap-2">
               <Button
@@ -131,7 +133,7 @@ const BillingReportPage = () => {
                 isLoading={isBusy}
                 onClick={handleDownloadReport}
               >
-                Download Report
+                {t('billing.downloadReport')}
               </Button>
               <Button
                 type="button"
@@ -140,14 +142,14 @@ const BillingReportPage = () => {
                 isLoading={isBusy}
                 onClick={handleEmailReport}
               >
-                Email Report
+                {t('billing.emailReport')}
               </Button>
             </div>
           }
         >
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label className="text-sm text-(--ink)">
-              Start date
+              {t('billing.startDate')}
               <input
                 type="date"
                 className={cn(controlClassName, 'mt-1 px-3')}
@@ -156,7 +158,7 @@ const BillingReportPage = () => {
               />
             </label>
             <label className="text-sm text-(--ink)">
-              End date
+              {t('billing.endDate')}
               <input
                 type="date"
                 className={cn(controlClassName, 'mt-1 px-3')}
@@ -166,15 +168,15 @@ const BillingReportPage = () => {
             </label>
           </div>
           <div className="mt-4 rounded bg-(--surface) p-4 text-sm text-(--ink)">
-            <p className="font-normal">What the report includes</p>
+            <p className="font-normal">{t('billing.reportIncludes')}</p>
             <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>Current billing breakdown details from the server for the active billing record.</li>
-              <li>Delivery activity for the selected report period.</li>
-              <li>Early-period billing totals that may still change until the billing cycle ends.</li>
+              <li>{t('billing.reportIncludesBreakdown')}</li>
+              <li>{t('billing.reportIncludesActivity')}</li>
+              <li>{t('billing.reportIncludesEstimate')}</li>
             </ul>
           </div>
           <p className="mt-3 text-sm text-(--muted)">
-            Provided by Peekaboo. Any enquiry: +250 788 000 000 | info@peekaboo.co.rw
+            {t('billing.reportContact')}
           </p>
         </InternalSectionCard>
       </motion.section>

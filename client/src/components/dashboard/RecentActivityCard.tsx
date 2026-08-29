@@ -1,21 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge } from '@/components/inputs/StatusBadge';
 import { RecentActivity } from '@/types/dashboard.type';
-import { formatDistanceToNow } from 'date-fns';
+import { useI18n } from '@/i18n/i18n';
 
 interface RecentActivityCardProps {
   activities: RecentActivity[];
 }
 
 const RecentActivityCard = ({ activities }: RecentActivityCardProps) => {
+  const { t, language } = useI18n();
   if (!activities || activities.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle>{t('dashboard.activity.title')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No recent activity</p>
+          <p className="text-sm text-muted-foreground">{t('dashboard.activity.empty')}</p>
         </CardContent>
       </Card>
     );
@@ -24,7 +25,7 @@ const RecentActivityCard = ({ activities }: RecentActivityCardProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
+        <CardTitle>{t('dashboard.activity.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">
@@ -42,9 +43,7 @@ const RecentActivityCard = ({ activities }: RecentActivityCardProps) => {
               <aside className="flex flex-col items-end gap-1">
                 <StatusBadge status={activity.status} />
                 <time className="type-meta">
-                  {formatDistanceToNow(new Date(activity.timestamp), {
-                    addSuffix: true,
-                  })}
+                  {new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(activity.timestamp))}
                 </time>
               </aside>
             </li>

@@ -1,4 +1,5 @@
 import type { LandingStats } from '@/types/landing.type';
+import { useI18n } from '@/i18n/i18n';
 
 interface HeroTrustIndicatorsProps {
   landingStats?: LandingStats;
@@ -13,6 +14,7 @@ const HeroTrustIndicators = ({
   completedOrdersLabel,
   fallbackLabel,
 }: HeroTrustIndicatorsProps) => {
+  const { t } = useI18n();
   const activeCustomers = landingStats?.activeCustomers;
   const completedOrders = landingStats?.customersWithOrders;
 
@@ -22,8 +24,8 @@ const HeroTrustIndicators = ({
       : fallbackLabel,
     typeof completedOrders === 'number' && completedOrders > 0
       ? `${completedOrders.toLocaleString()} ${completedOrdersLabel}`
-      : 'Verified riders',
-    'Kigali-wide',
+      : t('home.hero.verifiedRiders'),
+    t('home.trust.kigaliWide'),
   ];
 
   return (

@@ -3,7 +3,6 @@ import { ReferenceIdInput } from '@/components/inputs/TableInputs';
 import TableUserLabel from '@/components/users/TableUserLabel';
 import InlineRiderSelect from '@/components/orders/InlineRiderSelect';
 import {
-  PREFERRED_CONTACT_METHOD_LABELS,
   type Order,
 } from '@/types/order.type';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
@@ -29,8 +28,10 @@ import {
   setDeleteOrderModal,
   setSelectedOrder,
 } from '@/states/slices/order.slice';
+import { useI18n } from '@/i18n/i18n';
 
 export const useOrdersColumns = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
 
@@ -42,21 +43,21 @@ export const useOrdersColumns = () => {
   const ordersColumns: ColumnDef<Order>[] = useMemo(() => {
     const columns: ColumnDef<Order>[] = [
       {
-        header: 'Reference ID',
+        header: t('common.referenceId'),
         accessorKey: 'referenceId',
         cell: ({ row }) => (
           <ReferenceIdInput label={row.original.referenceId} />
         ),
       },
       {
-        header: 'Status',
+        header: t('common.status'),
         accessorKey: 'status',
         cell: ({ row }) => {
           return <StatusBadge status={row?.original?.status ?? ''} />;
         },
       },
       {
-        header: 'Fee',
+        header: t('common.fee'),
         accessorKey: 'finalFee',
         cell: ({ row }) => formatCurrency(row.original?.finalFee ?? 0),
       },
@@ -65,7 +66,7 @@ export const useOrdersColumns = () => {
     // Only show 'Created By' column if user is not a customer
     if (!isCustomer) {
       columns.push({
-        header: 'Created By',
+        header: t('common.createdBy'),
         accessorKey: 'createdById',
         cell: ({ row }) => <TableUserLabel user={row.original?.createdBy} />,
       });
@@ -73,38 +74,38 @@ export const useOrdersColumns = () => {
 
     columns.push(
       {
-        header: 'Contact via',
+        header: t('common.contactVia'),
         accessorKey: 'preferredContactMethod',
         cell: ({ row }) => {
           const method = row.original.preferredContactMethod;
           return (
             <p className="text-sm text-(--ink)">
-              {method ? PREFERRED_CONTACT_METHOD_LABELS[method] : '—'}
+              {method ? t(`publicOrder.contact.${method.toLowerCase()}`) : '—'}
             </p>
           );
         },
       },
       {
-        header: 'Assigned To',
+        header: t('common.assignedTo'),
         accessorKey: 'assignments',
         cell: ({ row }) => (
           <InlineRiderSelect order={row.original} isCustomer={isCustomer} />
         ),
       },
       {
-        header: 'Date added',
+        header: t('common.dateAdded'),
         accessorKey: 'createdAt',
         cell: ({ row }) =>
           formatDate(row.original.createdAt, 'DD/MM/YYYY HH:mm'),
       },
       {
-        header: 'Last updated',
+        header: t('common.lastUpdated'),
         accessorKey: 'updatedAt',
         cell: ({ row }) =>
           formatDate(row.original.updatedAt, 'DD/MM/YYYY HH:mm'),
       },
       {
-        header: 'Actions',
+        header: t('common.actions'),
         id: 'actions',
         cell: ({ row }) => {
           return (
@@ -122,7 +123,7 @@ export const useOrdersColumns = () => {
                   to={`/orders/${row.original.id}`}
                 >
                   <FontAwesomeIcon icon={faCircleInfo} />
-                  View details
+                  {t('common.actions.view')}
                 </Link>
                 {['CREATED', 'PENDING'].includes(row.original.status) && (
                   <>
@@ -131,7 +132,7 @@ export const useOrdersColumns = () => {
                       to={`/p/orders/${row.original.id}`}
                     >
                       <FontAwesomeIcon icon={faPenToSquare} />
-                      Resume
+                      {t('common.actions.resume')}
                     </Link>
                     <Link
                       className={tableDangerActionClassName}
@@ -143,7 +144,7 @@ export const useOrdersColumns = () => {
                       }}
                     >
                       <FontAwesomeIcon icon={faTrash} />
-                      Delete
+                      {t('common.actions.delete')}
                     </Link>
                   </>
                 )}
@@ -155,7 +156,7 @@ export const useOrdersColumns = () => {
     );
 
     return columns;
-  }, [dispatch, isCustomer]);
+  }, [dispatch, isCustomer, t]);
 
   return { ordersColumns };
 };

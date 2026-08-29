@@ -6,16 +6,19 @@ import type { Order } from '@/types/order.type';
 import { formatCurrency, formatDate, formatPhone } from '@/utils/strings.util';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useI18n } from '@/i18n/i18n';
 
 export interface OrderDetailsProps {
   order?: Order;
 }
 
 const OrderDetails = ({ order }: OrderDetailsProps) => {
+  const { t } = useI18n();
+
   return (
     <>
       <dl className="space-y-2 sm:space-y-2">
-        <dt className="text-xs sm:text-sm font-normal text-(--muted)">Sender</dt>
+        <dt className="text-xs sm:text-sm font-normal text-(--muted)">{t('orderDetails.sender')}</dt>
         <dd className="text-xs sm:text-sm font-normal flex items-center gap-1 text-(--ink)">
           <FontAwesomeIcon icon={faUser} />{' '}
           {order?.sender?.name ||
@@ -25,7 +28,7 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
       </dl>
       <dl className="space-y-2 sm:space-y-2">
         <dt className="text-xs sm:text-sm font-normal text-(--muted)">
-          Recipient
+          {t('orderDetails.recipient')}
         </dt>
         <dd className="text-xs sm:text-sm font-normal flex items-center gap-1 text-(--ink)">
           <FontAwesomeIcon icon={faUser} />{' '}
@@ -35,26 +38,26 @@ const OrderDetails = ({ order }: OrderDetailsProps) => {
         </dd>
       </dl>
       <dl className="space-y-2 sm:space-y-2">
-        <dt className="text-xs sm:text-sm font-normal text-(--muted)">Fee</dt>
+        <dt className="text-xs sm:text-sm font-normal text-(--muted)">{t('common.fee')}</dt>
         <dd className="text-xs sm:text-sm font-normal text-(--ink)">
           {order?.finalFee ? `${formatCurrency(order.finalFee)}` : 'TBD'}
           {ENVIRONMENTS.isPaymentSimulation && order?.finalFee ? (
             <p className="mt-1 text-xs font-normal leading-snug text-(--ink)">
-              Payments are simulated in this environment. No real charge will be
-              made.
+              {t('orderPayment.simulation')}
             </p>
           ) : null}
           {ENVIRONMENTS.isDevPrice && order?.finalFee ? (
             <p className="mt-1 text-xs font-normal leading-snug text-(--ink)">
-              Catalog fee shown. You will only be charged{' '}
-              {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at checkout.
+              {t('orderDetails.catalogFee', {
+                amount: formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF),
+              })}
             </p>
           ) : null}
         </dd>
       </dl>
       <dl className="space-y-2 sm:space-y-2">
         <dt className="text-xs sm:text-sm font-normal text-(--muted)">
-          Last Updated
+          {t('common.lastUpdated')}
         </dt>
         <dd className="text-xs sm:text-sm font-normal text-(--ink)">
           {formatDate(order?.updatedAt, 'DD/MM/YYYY HH:mm')}

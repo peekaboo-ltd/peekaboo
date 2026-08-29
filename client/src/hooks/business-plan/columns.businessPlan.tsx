@@ -12,6 +12,7 @@ import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
 import Button from "@/components/inputs/Button";
 import { BusinessPlanStatus } from "@/types/businessPlan.type";
 import { faRotateLeft, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { useI18n } from '@/i18n/i18n';
 
 interface UseBusinessPlansColumnsParams {
   onRestorePlan?: (id: string, name: string) => void;
@@ -26,9 +27,10 @@ export const useBusinessPlansColumns = ({
   isActionLoading = false,
   actionPlanId,
 }: UseBusinessPlansColumnsParams = {}) => {
+  const { t } = useI18n();
   const businessPlansColumns: ColumnDef<BusinessPlan>[] = useMemo(() => [
     {
-      header: 'Name',
+      header: t('businessPlan.nameColumn'),
       accessorKey: 'name',
       cell: ({ row }) => (
         <article className="flex items-center gap-2">
@@ -42,16 +44,16 @@ export const useBusinessPlansColumns = ({
       ),
     },
     {
-      header: 'Pricing',
+      header: t('businessPlan.pricingColumn'),
       id: 'pricing',
       cell: ({ row }) => {
         const plan = row.original;
         if (plan.isCustomPricing)
-          return <span className="text-(--muted) text-sm">Custom</span>;
+          return <span className="text-(--muted) text-sm">{t('businessPlan.custom')}</span>;
         if (plan.pricingTiers?.tiers?.length) {
           const tiers = plan.pricingTiers.tiers.filter((t) => !t.isCustom);
           if (tiers.length === 0)
-            return <span className="text-(--muted) text-sm">Custom</span>;
+            return <span className="text-(--muted) text-sm">{t('businessPlan.custom')}</span>;
           const prices = tiers
             .map((t) => t.pricePerUnit ?? t.totalPrice)
             .filter((p): p is number => p != null);
@@ -59,28 +61,26 @@ export const useBusinessPlansColumns = ({
           return `${plan.currency} ${Math.min(...prices).toLocaleString()} – ${Math.max(...prices).toLocaleString()}`;
         }
         if (plan.pricePerOrder != null) {
-          return `${plan.currency} ${Number(plan.pricePerOrder).toLocaleString()} / order`;
+          return t('businessPlan.perOrder', { currency: plan.currency, price: Number(plan.pricePerOrder).toLocaleString() });
         }
         return <span className="text-(--muted) text-sm">—</span>;
       },
     },
     {
-      header: 'Period',
+      header: t('businessPlan.periodColumn'),
       accessorKey: 'billingPeriod',
       cell: ({ row }) => {
         const period = row.original.billingPeriod;
-        return period
-          ? period.charAt(0) + period.slice(1).toLowerCase()
-          : '—';
+        return period ? t(`businessPlan.${period.toLowerCase()}`) : '—';
       },
     },
     {
-      header: 'Status',
+      header: t('common.status'),
       accessorKey: 'status',
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
     },
     {
-      header: 'Default',
+      header: t('businessPlan.defaultColumn'),
       accessorKey: 'isDefault',
       cell: ({ row }) =>
         row.original.isDefault ? (
@@ -93,13 +93,13 @@ export const useBusinessPlansColumns = ({
         ),
     },
     {
-      header: 'Created',
+      header: t('businessPlan.createdColumn'),
       accessorKey: 'createdAt',
       cell: ({ row }) =>
         formatDate(row.original.createdAt, 'DD/MM/YYYY HH:mm'),
     },
     {
-      header: 'Actions',
+      header: t('common.actions'),
       id: 'actions',
       cell: ({ row }) => {
         const plan = row.original;
@@ -121,7 +121,7 @@ export const useBusinessPlansColumns = ({
                 className="h-8 px-3 text-xs"
               >
                 <FontAwesomeIcon icon={faRotateLeft} className="mr-1.5" />
-                Restore
+                {t('businessPlan.restore')}
               </Button>
               <Button
                 type="button"
@@ -132,7 +132,7 @@ export const useBusinessPlansColumns = ({
                 className="h-8 px-3 text-xs"
               >
                 <FontAwesomeIcon icon={faTrashCan} className="mr-1.5" />
-                Delete Forever
+                {t('businessPlan.deleteForever')}
               </Button>
             </menu>
           );
@@ -153,13 +153,13 @@ export const useBusinessPlansColumns = ({
                 to={`/business-plans/${planId}/manage`}
               >
                 <FontAwesomeIcon icon={faPenToSquare} />
-                Manage
+                {t('businessPlan.manage')}
               </Link>
             </menu>
           </CustomPopover>
         );
       },
     },
-  ], [onRestorePlan, onPermanentlyDeletePlan, isActionLoading, actionPlanId]);
+  ], [onRestorePlan, onPermanentlyDeletePlan, isActionLoading, actionPlanId, t]);
   return { businessPlansColumns };
 };

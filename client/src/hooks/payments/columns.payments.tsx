@@ -20,6 +20,7 @@ import {
 } from '@/states/slices/payment.slice';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import { Link } from 'react-router-dom';
+import { useI18n } from '@/i18n/i18n';
 
 const PAYMENT_STATUS_LABELS: Record<string, string> = {
   [KpayPaymentStatus.PENDING]: 'PENDING',
@@ -27,21 +28,22 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
   [KpayPaymentStatus.FAILED]: 'CANCELLED',
 };
 
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  momo: 'Mobile Money',
-  cc: 'Credit Card',
-  bank: 'Bank',
-  spenn: 'Spenn',
-  smartcash: 'SmartCash',
-};
-
 export const useAdminPaymentsColumns = () => {
   const dispatch = useAppDispatch();
+  const { t } = useI18n();
 
   const adminPaymentsColumns: ColumnDef<Payment>[] = useMemo(() => {
+    const paymentMethodLabels: Record<string, string> = {
+      momo: t('payments.mobileMoney'),
+      cc: t('payments.creditCard'),
+      bank: t('payments.bank'),
+      spenn: 'Spenn',
+      smartcash: 'SmartCash',
+    };
+
     return [
       {
-        header: 'Reference',
+        header: t('payments.reference'),
         accessorKey: 'internalReferenceId',
         cell: ({ row }) => (
           <span className="text-xs truncate max-w-[120px] block" title={row.original.internalReferenceId}>
@@ -50,7 +52,7 @@ export const useAdminPaymentsColumns = () => {
         ),
       },
       {
-        header: 'Status',
+        header: t('common.status'),
         accessorKey: 'status',
         cell: ({ row }) => (
           <StatusBadge
@@ -59,25 +61,25 @@ export const useAdminPaymentsColumns = () => {
         ),
       },
       {
-        header: 'Amount',
+        header: t('paymentDetails.amount'),
         accessorKey: 'amount',
         cell: ({ row }) =>
           formatCurrency(row.original.amount, row.original.currency),
       },
       {
-        header: 'Currency',
+        header: t('paymentDetails.currency'),
         accessorKey: 'currency',
         cell: ({ row }) => row.original.currency,
       },
       {
-        header: 'Method',
+        header: t('paymentDetails.method'),
         accessorKey: 'method',
         cell: ({ row }) =>
-          PAYMENT_METHOD_LABELS[row.original.method] ||
+          paymentMethodLabels[row.original.method] ||
           capitalizeString(row.original.method),
       },
       {
-        header: 'Customer',
+        header: t('payments.customer'),
         accessorKey: 'customerName',
         cell: ({ row }) => (
           <div className="flex flex-col">
@@ -91,13 +93,13 @@ export const useAdminPaymentsColumns = () => {
         ),
       },
       {
-        header: 'Date',
+        header: t('payments.date'),
         accessorKey: 'createdAt',
         cell: ({ row }) =>
           formatDate(row.original.createdAt, 'DD/MM/YYYY HH:mm'),
       },
       {
-        header: 'Actions',
+        header: t('common.actions'),
         id: 'actions',
         cell: ({ row }) => {
           return (
@@ -115,7 +117,7 @@ export const useAdminPaymentsColumns = () => {
                   className={tableActionClassName}
                 >
                   <FontAwesomeIcon icon={faCircleInfo} />
-                  View details
+                  {t('paymentStatus.viewDetails')}
                 </Link>
                 <Link
                   to={`#`}
@@ -126,7 +128,7 @@ export const useAdminPaymentsColumns = () => {
                   }}
                 >
                   <FontAwesomeIcon icon={faPenToSquare} />
-                  Update Status
+                  {t('paymentStatus.update')}
                 </Link>
               </menu>
             </CustomPopover>
@@ -134,7 +136,7 @@ export const useAdminPaymentsColumns = () => {
         },
       },
     ];
-  }, [dispatch]);
+  }, [dispatch, t]);
 
   return { adminPaymentsColumns };
 };

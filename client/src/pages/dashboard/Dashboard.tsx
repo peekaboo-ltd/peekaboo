@@ -47,6 +47,9 @@ import DashboardContextPanel from './components/DashboardContextPanel';
 import type { DispatchStripItem } from './components/DashboardDispatchStrip';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { formatCurrency, formatNumbers } from '@/utils/strings.util';
+import { useI18n, type I18nContextValue } from '@/i18n/i18n';
+
+type Translate = I18nContextValue['t'];
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -108,24 +111,24 @@ const selectSeriesForCard = ({
   ordersSeries,
   revenueSeries,
   deliveriesSeries,
+  t,
 }: {
   cardLabel: string;
   role?: RoleTypes;
   ordersSeries: number[];
   revenueSeries: number[];
   deliveriesSeries: number[];
+  t: Translate;
 }) => {
-  const label = cardLabel.toLowerCase();
-
   if (role === RoleTypes.RIDER) {
     return deliveriesSeries.length ? deliveriesSeries : ordersSeries;
   }
 
-  if (label.includes('billing') || label.includes('payment') || label.includes('revenue')) {
+  if ([t('dashboard.metric.billingPayments'), t('dashboard.metric.totalRevenue'), t('dashboard.metric.totalEarnings'), t('dashboard.metric.totalSpent'), t('dashboard.metric.pendingPayments')].includes(cardLabel)) {
     return revenueSeries.length ? revenueSeries : ordersSeries;
   }
 
-  if (label.includes('assignment') || label.includes('deliver')) {
+  if ([t('dashboard.metric.activeAssignments'), t('dashboard.metric.pendingAssignments'), t('dashboard.metric.cancelledAssignments'), t('dashboard.metric.completedDeliveries'), t('dashboard.metric.deliveriesThisMonth'), t('dashboard.metric.deliverySuccessRate')].includes(cardLabel)) {
     return deliveriesSeries.length ? deliveriesSeries : ordersSeries;
   }
 
@@ -140,6 +143,7 @@ const buildMetricCards = (
     revenue: number[];
     deliveries: number[];
   },
+  t: Translate,
 ): MetricCardData[] => {
   if (!role || !metrics) return [];
   const isAdminMetrics = (value: typeof metrics): value is AdminMetrics =>
@@ -156,17 +160,17 @@ const buildMetricCards = (
   switch (role) {
     case RoleTypes.ADMIN:
     case RoleTypes.STAFF:
-      baseCards = isAdminMetrics(metrics) ? getAdminMetricCards(metrics) : [];
+      baseCards = isAdminMetrics(metrics) ? getAdminMetricCards(metrics, t) : [];
       break;
     case RoleTypes.BUSINESS:
-      baseCards = isBusinessMetrics(metrics) ? getBusinessMetricCards(metrics) : [];
+      baseCards = isBusinessMetrics(metrics) ? getBusinessMetricCards(metrics, t) : [];
       break;
     case RoleTypes.RIDER:
-      baseCards = isRiderMetrics(metrics) ? getRiderMetricCards(metrics) : [];
+      baseCards = isRiderMetrics(metrics) ? getRiderMetricCards(metrics, t) : [];
       break;
     case RoleTypes.CUSTOMER:
     default:
-      baseCards = isCustomerMetrics(metrics) ? getCustomerMetricCards(metrics) : [];
+      baseCards = isCustomerMetrics(metrics) ? getCustomerMetricCards(metrics, t) : [];
       break;
   }
 
@@ -177,6 +181,7 @@ const buildMetricCards = (
       ordersSeries: seriesByCategory.orders,
       revenueSeries: seriesByCategory.revenue,
       deliveriesSeries: seriesByCategory.deliveries,
+      t,
     });
     const trend = card.trend ?? calculateTrendFromSeries(selectedSeries);
 
@@ -202,42 +207,42 @@ const normalizeChartData = (
     .filter((point) => point.name);
 };
 
-const getQuickActionsForRole = (role?: RoleTypes): DashboardActionLink[] => {
+const getQuickActionsForRole = (role: RoleTypes | undefined, t: Translate): DashboardActionLink[] => {
   switch (role) {
     case RoleTypes.ADMIN:
     case RoleTypes.STAFF:
       return [
-        { label: 'New Order', to: '/orders', icon: faPlus },
-        { label: 'Orders', to: '/orders', icon: faShoppingCart },
-        { label: 'Assignments', to: '/assignments', icon: faClipboardList },
-        { label: 'Billing & Payments', to: '/billing-payments', icon: faCreditCard },
-        { label: 'Users', to: '/users', icon: faUsers },
+        { label: t('dashboard.action.newOrder'), to: '/orders', icon: faPlus },
+        { label: t('dashboard.action.orders'), to: '/orders', icon: faShoppingCart },
+        { label: t('dashboard.action.assignments'), to: '/assignments', icon: faClipboardList },
+        { label: t('dashboard.metric.billingPayments'), to: '/billing-payments', icon: faCreditCard },
+        { label: t('dashboard.action.users'), to: '/users', icon: faUsers },
       ];
     case RoleTypes.BUSINESS:
       return [
-        { label: 'New Order', to: '/orders', icon: faPlus },
-        { label: 'My Orders', to: '/orders', icon: faShoppingCart },
-        { label: 'Billing & Payments', to: '/billing-payments', icon: faCreditCard },
-        { label: 'Request a Report', to: '/billing-payments', icon: faFileLines },
-        { label: 'Team', to: '/users', icon: faUserGroup },
+        { label: t('dashboard.action.newOrder'), to: '/orders', icon: faPlus },
+        { label: t('dashboard.action.myOrders'), to: '/orders', icon: faShoppingCart },
+        { label: t('dashboard.metric.billingPayments'), to: '/billing-payments', icon: faCreditCard },
+        { label: t('dashboard.action.requestReport'), to: '/billing-payments', icon: faFileLines },
+        { label: t('dashboard.action.team'), to: '/users', icon: faUserGroup },
       ];
     case RoleTypes.RIDER:
       return [
-        { label: 'Assignments', to: '/assignments', icon: faClipboardList },
-        { label: 'My Deliveries', to: '/assignments', icon: faMotorcycle },
+        { label: t('dashboard.action.assignments'), to: '/assignments', icon: faClipboardList },
+        { label: t('dashboard.action.myDeliveries'), to: '/assignments', icon: faMotorcycle },
       ];
     case RoleTypes.CUSTOMER:
     default:
       return [
-        { label: 'New Order', to: '/orders', icon: faPlus },
-        { label: 'My Orders', to: '/orders', icon: faShoppingCart },
+        { label: t('dashboard.action.newOrder'), to: '/orders', icon: faPlus },
+        { label: t('dashboard.action.myOrders'), to: '/orders', icon: faShoppingCart },
       ];
   }
 };
 
-const getWidgetSummary = (data: ChartDataPoint[], prefix?: 'currency') => {
+const getWidgetSummary = (data: ChartDataPoint[], t: Translate, prefix?: 'currency') => {
   if (!data.length) {
-    return 'No data';
+    return t('dashboard.noData');
   }
 
   const total = data.reduce((sum, point) => sum + point.value, 0);
@@ -250,6 +255,7 @@ const buildSupportWidgets = (
   revenueData: ChartDataPoint[],
   deliveriesData: ChartDataPoint[],
   statusBreakdown: ReturnType<typeof getDashboardStatusBreakdown>,
+  t: Translate,
 ): DashboardSupportCardData[] => {
   const primarySeries =
     role === RoleTypes.RIDER
@@ -262,26 +268,26 @@ const buildSupportWidgets = (
     {
       title:
         role === RoleTypes.RIDER
-          ? 'Delivery cadence'
+          ? t('dashboard.deliveryCadence')
           : role === RoleTypes.ADMIN || role === RoleTypes.STAFF
-            ? 'Revenue pulse'
-            : 'Order cadence',
+            ? t('dashboard.revenuePulse')
+            : t('dashboard.orderCadence'),
       value:
         role === RoleTypes.ADMIN || role === RoleTypes.STAFF
-          ? getWidgetSummary(primarySeries, 'currency')
-          : getWidgetSummary(primarySeries),
+          ? getWidgetSummary(primarySeries, t, 'currency')
+          : getWidgetSummary(primarySeries, t),
       subtitle:
         role === RoleTypes.RIDER
-          ? 'Rolling activity pulled from the delivery trend feed.'
-          : 'Compact pulse of the most recent trend series.',
+          ? t('dashboard.deliveryTrendSubtitle')
+          : t('dashboard.trendSubtitle'),
       chartType: role === RoleTypes.ADMIN || role === RoleTypes.STAFF ? 'line' : 'bar',
       accent: role === RoleTypes.ADMIN || role === RoleTypes.STAFF ? 'teal' : 'blue',
       data: primarySeries,
     },
     {
-      title: role === RoleTypes.RIDER ? 'Assignment mix' : 'Status mix',
+      title: role === RoleTypes.RIDER ? t('dashboard.assignmentMix') : t('dashboard.statusMix'),
       value: formatNumbers(statusBreakdown.reduce((sum, item) => sum + item.value, 0)),
-      subtitle: 'Distribution of the most recent status buckets.',
+      subtitle: t('dashboard.statusDistribution'),
       chartType: 'status',
       accent: 'blue',
       breakdown: statusBreakdown.slice(0, 4),
@@ -297,29 +303,29 @@ const formatDateParam = (date?: Date) => {
   ).padStart(2, '0')}`;
 };
 
-const getContextCopy = (role: RoleTypes | undefined) => {
+const getContextCopy = (role: RoleTypes | undefined, t: Translate) => {
   switch (role) {
     case RoleTypes.ADMIN:
     case RoleTypes.STAFF:
       return {
-        title: 'Operational pulse',
-        description: 'Secondary KPIs and shortcuts to move from insight to action quickly.',
+        title: t('dashboard.context.operationalTitle'),
+        description: t('dashboard.context.operationalDescription'),
       };
     case RoleTypes.BUSINESS:
       return {
-        title: 'Business pulse',
-        description: 'Track fulfillment quality and move directly into account workflows.',
+        title: t('dashboard.context.businessTitle'),
+        description: t('dashboard.context.businessDescription'),
       };
     case RoleTypes.RIDER:
       return {
-        title: 'Driver focus',
-        description: 'Keep your queue, rates, and delivery momentum visible at a glance.',
+        title: t('dashboard.context.riderTitle'),
+        description: t('dashboard.context.riderDescription'),
       };
     case RoleTypes.CUSTOMER:
     default:
       return {
-        title: 'Account pulse',
-        description: 'See supporting order metrics and jump to the actions you use most.',
+        title: t('dashboard.context.customerTitle'),
+        description: t('dashboard.context.customerDescription'),
       };
   }
 };
@@ -341,6 +347,7 @@ const getDispatchStatus = (label: string): DispatchStripItem['status'] => {
 };
 
 const Dashboard = () => {
+  const { t } = useI18n();
   const { user } = useAppSelector((state) => state.auth);
   const [range, setRange] = useState<'7d' | '30d' | '90d'>('30d');
   const [metric, setMetric] = useState<string>('ORDERS');
@@ -360,7 +367,7 @@ const Dashboard = () => {
     [endDate, startDate],
   );
   const { data, isLoading, error } = useGetDashboardMetricsQuery(dateRangeParams);
-  useDocumentTitle('Dashboard');
+  useDocumentTitle(t('nav.dashboard'));
 
   const dashboardData = data?.data;
   const role = dashboardData?.role as RoleTypes | undefined;
@@ -386,10 +393,10 @@ const Dashboard = () => {
     { skip: !role },
   );
 
-  const quickActions = useMemo(() => getQuickActionsForRole(role), [role]);
+  const quickActions = useMemo(() => getQuickActionsForRole(role, t), [role, t]);
   const statusBreakdown = useMemo(
-    () => getDashboardStatusBreakdown(role, dashboardData?.metrics),
-    [dashboardData?.metrics, role],
+    () => getDashboardStatusBreakdown(role, dashboardData?.metrics, t),
+    [dashboardData?.metrics, role, t],
   );
   const recentActivity = useMemo(
     () => getDashboardRecentActivity(dashboardData?.metrics),
@@ -425,8 +432,8 @@ const Dashboard = () => {
         orders: ordersSeries,
         revenue: revenueSeries,
         deliveries: deliveriesSeries,
-      }),
-    [dashboardData?.metrics, dashboardData?.role, deliveriesSeries, ordersSeries, revenueSeries],
+      }, t),
+    [dashboardData?.metrics, dashboardData?.role, deliveriesSeries, ordersSeries, revenueSeries, t],
   );
 
   const summaryData = useMemo(() => {
@@ -437,12 +444,12 @@ const Dashboard = () => {
   }, [deliveriesChartData, isAdminOrStaff, isRider, ordersChartData, revenueChartData, summaryChartData]);
 
   const supportWidgets = useMemo(
-    () => buildSupportWidgets(role, ordersChartData, revenueChartData, deliveriesChartData, statusBreakdown),
-    [deliveriesChartData, ordersChartData, revenueChartData, role, statusBreakdown],
+    () => buildSupportWidgets(role, ordersChartData, revenueChartData, deliveriesChartData, statusBreakdown, t),
+    [deliveriesChartData, ordersChartData, revenueChartData, role, statusBreakdown, t],
   );
 
   const spotlightCards = useMemo(() => metricCards.slice(4, 8), [metricCards]);
-  const contextCopy = useMemo(() => getContextCopy(role), [role]);
+  const contextCopy = useMemo(() => getContextCopy(role, t), [role, t]);
   const dispatchStripItems = useMemo<DispatchStripItem[]>(
     () =>
       statusBreakdown.slice(0, 4).map((item) => ({

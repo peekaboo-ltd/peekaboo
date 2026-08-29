@@ -9,11 +9,13 @@ import type { InviteOrganizationPayload } from '@/types/organization.type';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useNavigate } from 'react-router-dom';
 import { validateRwandanPhoneNumber } from '@/utils/phone.util';
+import { useI18n } from '@/i18n/i18n';
 
 const InviteOrganization = () => {
+  const { t } = useI18n();
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [inviteOrganization, { isLoading }] = useInviteOrganizationMutation();
-  useDocumentTitle('Invite Organization');
+  useDocumentTitle(t('organization.inviteDocTitle'));
 
   const navigate = useNavigate();
 
@@ -37,15 +39,15 @@ const InviteOrganization = () => {
     try {
       await inviteOrganization(data).unwrap();
       setStatusMessage(
-        `Invite sent! An onboarding email was sent to ${data.adminEmail}.`
+        t('organization.inviteSentTo', { email: data.adminEmail })
       );
-      toast.success('Invite sent. Onboarding email delivered.');
+      toast.success(t('organization.inviteSent'));
       navigate(-1);
       reset();
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Unable to send invite. Please try again.';
+        t('organization.inviteError');
       setStatusMessage(message);
       toast.error(message);
     }
@@ -55,10 +57,10 @@ const InviteOrganization = () => {
     <main className="w-full flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <h1 className="type-page-title">
-          Invite an organization
+          {t('organization.inviteTitle')}
         </h1>
         <p className="text-sm text-muted-foreground max-w-2xl">
-          Send an onboarding invite to a new organization and their admin contact.
+          {t('organization.inviteDescription')}
         </p>
       </header>
 
@@ -66,18 +68,18 @@ const InviteOrganization = () => {
         <form onSubmit={onSubmit} className="flex flex-col gap-5">
           <div>
             <h2 className="type-label mb-3">
-              Organization details
+              {t('organization.details')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
                 name="name"
                 control={control}
-                rules={{ required: 'Organization name is required.' }}
+                rules={{ required: t('validation.required') }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Organization name"
-                    placeholder="Acme Logistics"
+                    label={t('organization.name')}
+                    placeholder={t('organization.namePlaceholder')}
                     required
                     errorMessage={errors?.name?.message}
                   />
@@ -87,17 +89,17 @@ const InviteOrganization = () => {
                 name="email"
                 control={control}
                 rules={{
-                  required: 'Organization email is required.',
+                  required: t('validation.required'),
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: 'Enter a valid email address.',
+                    message: t('validation.invalidEmail'),
                   },
                 }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Organization email"
-                    placeholder="ops@acme.com"
+                    label={t('organization.email')}
+                    placeholder={t('organization.emailPlaceholder')}
                     type="email"
                     required
                     errorMessage={errors?.email?.message}
@@ -108,14 +110,14 @@ const InviteOrganization = () => {
                 name="phoneNumber"
                 control={control}
                 rules={{
-                  required: 'Organization phone number is required.',
+                  required: t('validation.required'),
                   validate: (value) => validateRwandanPhoneNumber(value),
                 }}
                 render={({ field }) => (
                   <TelInput
                     {...field}
-                    label="Phone number"
-                    placeholder="0788 123 456"
+                    label={t('organization.phone')}
+                    placeholder={t('organization.phonePlaceholder')}
                     required
                     errorMessage={errors?.phoneNumber?.message}
                   />
@@ -124,12 +126,12 @@ const InviteOrganization = () => {
               <Controller
                 name="address"
                 control={control}
-                rules={{ required: 'Address is required.' }}
+                rules={{ required: t('validation.required') }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Address"
-                    placeholder="123 Market St, San Francisco, CA"
+                    label={t('organization.address')}
+                    placeholder={t('organization.addressPlaceholder')}
                     required
                     errorMessage={errors?.address?.message}
                   />
@@ -140,18 +142,18 @@ const InviteOrganization = () => {
 
           <div>
             <h2 className="type-label mb-3">
-              Admin contact
+              {t('organization.adminContact')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
                 name="adminName"
                 control={control}
-                rules={{ required: 'Admin name is required.' }}
+                rules={{ required: t('validation.required') }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Admin name"
-                    placeholder="Jordan Smith"
+                    label={t('organization.adminName')}
+                    placeholder={t('organization.adminNamePlaceholder')}
                     required
                     errorMessage={errors?.adminName?.message}
                   />
@@ -161,17 +163,17 @@ const InviteOrganization = () => {
                 name="adminEmail"
                 control={control}
                 rules={{
-                  required: 'Admin email is required.',
+                  required: t('validation.required'),
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: 'Enter a valid email address.',
+                    message: t('validation.invalidEmail'),
                   },
                 }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Admin email"
-                    placeholder="jordan@acme.com"
+                    label={t('organization.adminEmail')}
+                    placeholder={t('organization.adminEmailPlaceholder')}
                     type="email"
                     required
                     errorMessage={errors?.adminEmail?.message}
@@ -192,7 +194,7 @@ const InviteOrganization = () => {
               e.preventDefault();
               navigate(-1);
             }}>
-              Back
+              {t('organization.back')}
             </Button>
             <Button
               type="submit"
@@ -200,7 +202,7 @@ const InviteOrganization = () => {
               isLoading={isLoading}
               disabled={isLoading}
             >
-              Send invite
+              {t('organization.sendInvite')}
             </Button>
           </footer>
         </form>

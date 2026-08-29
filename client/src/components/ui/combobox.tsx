@@ -3,6 +3,7 @@ import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 import {
   controlClassName,
   readOnlyControlClassName,
@@ -22,9 +23,9 @@ export function Combobox({
   value,
   onValueChange,
   options,
-  placeholder = 'Select an option',
-  searchPlaceholder = 'Search options',
-  emptyText = 'No matching options',
+  placeholder,
+  searchPlaceholder,
+  emptyText,
   id,
   invalid,
   disabled,
@@ -50,6 +51,10 @@ export function Combobox({
   triggerClassName?: string;
   contentClassName?: string;
 }) {
+  const { t } = useI18n();
+  const resolvedPlaceholder = placeholder ?? t('common.select');
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t('common.searchOptions');
+  const resolvedEmptyText = emptyText ?? t('common.noMatchingOptions');
   const [open, setOpen] = useState(false);
   const selected = options.find((option) => option.value === value);
   const isLocked = disabled || readOnly;
@@ -81,7 +86,7 @@ export function Combobox({
           )}
         >
           <span className="truncate">
-            {triggerLabel ?? selected?.label ?? placeholder}
+            {triggerLabel ?? selected?.label ?? resolvedPlaceholder}
           </span>
           <ChevronsUpDown className="size-4 shrink-0 text-(--muted)" />
         </button>
@@ -108,13 +113,13 @@ export function Combobox({
               />
               <Command.Input
                 autoFocus
-                placeholder={searchPlaceholder}
+                placeholder={resolvedSearchPlaceholder}
                 className={selectSearchInputClassName}
               />
             </div>
             <Command.List className="max-h-60 overflow-y-auto overscroll-contain">
               <Command.Empty className={selectEmptyClassName}>
-                {emptyText}
+                {resolvedEmptyText}
               </Command.Empty>
               {options.map((option) => (
                 <Command.Item

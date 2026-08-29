@@ -15,6 +15,7 @@ import {
   getApproximateZoom,
   KIGALI_CENTER,
 } from './publicMap.utils';
+import { useI18n } from '@/i18n/i18n';
 
 interface PublicApproximateMapProps {
   statusLabel?: string;
@@ -22,9 +23,12 @@ interface PublicApproximateMapProps {
 }
 
 const PublicApproximateMapContent = ({
-  statusLabel = 'Tracking coverage',
-  etaLabel = 'Kigali-wide',
+  statusLabel,
+  etaLabel,
 }: PublicApproximateMapProps) => {
+  const { t } = useI18n();
+  const resolvedStatus = statusLabel ?? t('track.liveTracking');
+  const resolvedEta = etaLabel ?? t('home.trust.kigaliWide');
   const apiStatus = useApiLoadingStatus();
   const approximateLocation = useApproximateLocation(
     Boolean(ENVIRONMENTS.GOOGLE_MAPS_API_KEY),
@@ -34,14 +38,14 @@ const PublicApproximateMapContent = ({
     apiStatus === APILoadingStatus.FAILED ||
     apiStatus === APILoadingStatus.AUTH_FAILURE
   ) {
-    return <HeroRouteCard statusLabel={statusLabel} etaLabel={etaLabel} />;
+    return <HeroRouteCard statusLabel={resolvedStatus} etaLabel={resolvedEta} />;
   }
 
   if (apiStatus !== APILoadingStatus.LOADED) {
     return (
       <div
         className="aspect-[4/3] w-full animate-pulse rounded-md bg-(--surface)"
-        aria-label="Loading map"
+        aria-label={t('home.map.loading')}
       />
     );
   }
@@ -76,7 +80,7 @@ const PublicApproximateMapContent = ({
           strokeColor="var(--public-sky)"
         />
 
-        <AdvancedMarker position={center} title="Approximate area">
+        <AdvancedMarker position={center} title={t('home.map.approximateArea', { area: approximateLocation?.label ?? '' })}>
           <Pin
             background="var(--public-sky-soft)"
             borderColor="var(--public-sky)"
@@ -93,12 +97,12 @@ const PublicApproximateMapContent = ({
           />
           <span className="truncate text-sm text-(--ink)">
             {approximateLocation
-              ? `Approximate area · ${approximateLocation.label}`
-              : statusLabel}
+              ? t('home.map.approximateArea', { area: approximateLocation.label })
+              : resolvedStatus}
           </span>
         </span>
         <span className="shrink-0 text-sm text-(--muted) tabular-nums">
-          {etaLabel}
+          {resolvedEta}
         </span>
       </figcaption>
     </figure>

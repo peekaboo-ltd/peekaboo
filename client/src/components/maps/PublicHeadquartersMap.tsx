@@ -10,14 +10,17 @@ import useMediaQuery from '@/hooks/common/useMediaQuery';
 import HeroMapViewport from '@/pages/home/components/HeroMapViewport';
 import HeroRouteCard from '@/pages/home/components/HeroRouteCard';
 import { DOWNTOWN_KIGALI_HQ, KIGALI_CENTER } from './publicMap.utils';
+import { useI18n } from '@/i18n/i18n';
 
 interface PublicHeadquartersMapProps {
   ridersLabel?: string;
 }
 
 const PublicHeadquartersMapContent = ({
-  ridersLabel = 'Kigali-wide',
+  ridersLabel,
 }: PublicHeadquartersMapProps) => {
+  const { t } = useI18n();
+  const resolvedRidersLabel = ridersLabel ?? t('map.kigaliWide');
   const apiStatus = useApiLoadingStatus();
 
   if (
@@ -26,8 +29,8 @@ const PublicHeadquartersMapContent = ({
   ) {
     return (
       <HeroRouteCard
-        statusLabel="Downtown Kigali · Headquarters"
-        etaLabel={ridersLabel}
+        statusLabel={t('map.headquarters.label')}
+        etaLabel={resolvedRidersLabel}
       />
     );
   }
@@ -36,7 +39,7 @@ const PublicHeadquartersMapContent = ({
     return (
       <div
         className="aspect-[4/3] w-full animate-pulse rounded-md bg-(--surface)"
-        aria-label="Loading headquarters map"
+        aria-label={t('map.headquarters.loading')}
       />
     );
   }
@@ -57,7 +60,7 @@ const PublicHeadquartersMapContent = ({
 
         <AdvancedMarker
           position={DOWNTOWN_KIGALI_HQ}
-          title="Peekaboo headquarters — Downtown Kigali"
+          title={t('map.headquarters.marker')}
         >
           <Pin
             background="var(--public-clay-soft)"
@@ -68,7 +71,7 @@ const PublicHeadquartersMapContent = ({
       </Map>
 
       <figcaption className="absolute left-3 top-3 z-10 rounded-(--radius-control) bg-(--paper) px-3 py-2 text-xs text-(--ink)">
-        Downtown Kigali · Headquarters
+        {t('map.headquarters.label')}
       </figcaption>
 
       <figcaption className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-(--radius-control) bg-(--paper) px-4 py-3">
@@ -78,11 +81,11 @@ const PublicHeadquartersMapContent = ({
             aria-hidden="true"
           />
           <span className="truncate text-sm text-(--ink)">
-            Serving Kigali daily
+            {t('map.headquarters.serving')}
           </span>
         </span>
         <span className="shrink-0 text-sm text-(--muted) tabular-nums">
-          {ridersLabel}
+          {resolvedRidersLabel}
         </span>
       </figcaption>
     </figure>
@@ -91,13 +94,14 @@ const PublicHeadquartersMapContent = ({
 
 const PublicHeadquartersMap = ({ ridersLabel }: PublicHeadquartersMapProps) => {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const { t } = useI18n();
 
   if (!isDesktop) return null;
   if (!ENVIRONMENTS.GOOGLE_MAPS_API_KEY) {
     return (
       <HeroRouteCard
-        statusLabel="Downtown Kigali · Headquarters"
-        etaLabel={ridersLabel ?? 'Kigali-wide'}
+        statusLabel={t('map.headquarters.label')}
+        etaLabel={ridersLabel ?? t('map.kigaliWide')}
       />
     );
   }

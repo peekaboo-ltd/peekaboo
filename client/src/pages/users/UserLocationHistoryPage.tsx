@@ -23,6 +23,7 @@ import Button from "@/components/inputs/Button";
 import DatePicker from "@/components/inputs/DatePicker";
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 type CoordinateRecord = {
   id: string;
@@ -118,7 +119,8 @@ const TrajectoryPolyline = ({
 };
 
 const UserLocationHistoryPage = () => {
-  useDocumentTitle("User Location History");
+  const { t, language } = useI18n();
+  useDocumentTitle(t('locationHistory.docTitle'));
 
   // NAVIGATION
   const { id } = useParams<{ id: UUID }>();
@@ -268,19 +270,19 @@ const UserLocationHistoryPage = () => {
     () => [
       {
         id: "timestamp",
-        header: "Timestamp",
+        header: t('locationHistory.timestamp'),
         cell: ({ row }) => {
           if (!row.original.timestamp) return "—";
-          return moment(row.original.timestamp).local().format("lll");
+          return moment(row.original.timestamp).locale(language).local().format("lll");
         },
       },
       {
         id: "location",
-        header: "Location",
+        header: t('locationHistory.location'),
         cell: ({ row }) => <LocationDisplay location={row.original} />,
       },
     ],
-    [],
+    [language, t],
   );
 
   // FIRST AND LAST RECORDS
@@ -290,7 +292,7 @@ const UserLocationHistoryPage = () => {
   // HANDLERS
   const onSearchOrders = async () => {
     if (!orderSearchTerm.trim()) {
-      toast.error("Enter an order reference id or tracking id first");
+      toast.error(t('locationHistory.searchFirst'));
       return;
     }
 
@@ -333,12 +335,12 @@ const UserLocationHistoryPage = () => {
     const normalizedEnd = toUtcIsoString(nextEnd);
 
     if (!normalizedStart || !normalizedEnd) {
-      toast.error("Please provide a valid date range");
+      toast.error(t('locationHistory.invalidRange'));
       return;
     }
 
     if (moment(normalizedStart).isAfter(moment(normalizedEnd))) {
-      toast.error("Start time must be before end time");
+      toast.error(t('locationHistory.rangeOrder'));
       return;
     }
 
@@ -353,14 +355,14 @@ const UserLocationHistoryPage = () => {
       <header className="flex items-center justify-between gap-3 flex-wrap">
         <article>
           <h1 className="type-page-title">
-            User location history
+            {t('locationHistory.title')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Paginated timeline of the user&apos;s latest tracked locations.
+            {t('locationHistory.description')}
           </p>
         </article>
         <Link className="text-sm underline text-(--ink)" to="/users/tracking">
-          Back to users tracking
+          {t('locationHistory.backTracking')}
         </Link>
       </header>
 
@@ -370,11 +372,11 @@ const UserLocationHistoryPage = () => {
             className="type-meta"
             htmlFor="assigned-order"
           >
-            Assigned orders (last 7 days)
+            {t('locationHistory.assignedOrders')}
           </label>
           <Select
             options={assignedOrderOptions.map((order) => ({
-              label: `${order?.referenceId || order?.id} · ${order?.trackingId || "No OTP"}`,
+              label: `${order?.referenceId || order?.id} · ${order?.trackingId || t('locationHistory.noOtp')}`,
               value: order?.id,
             }))}
             isLoading={isFetchingAssignments}
@@ -388,13 +390,13 @@ const UserLocationHistoryPage = () => {
             className="type-meta"
             htmlFor="order-search"
           >
-            Search order (reference id or tracking id)
+            {t('locationHistory.searchOrder')}
           </label>
           <div className="flex gap-2">
             <input
               id="order-search"
               className={cn(controlClassName, 'px-3')}
-              placeholder="Type reference id or tracking id"
+              placeholder={t('locationHistory.searchPlaceholder')}
               value={orderSearchTerm}
               onChange={(event) => setOrderSearchTerm(event.target.value)}
             />
@@ -404,13 +406,13 @@ const UserLocationHistoryPage = () => {
               onClick={onSearchOrders}
               disabled={isSearchingOrders}
             >
-              Search
+              {t('common.search')}
             </Button>
           </div>
           {hasSearchedOrder && (
             <Select
               options={searchedOrders.map((order) => ({
-                label: `${order?.referenceId || order?.id} · ${order?.trackingId || "No OTP"}`,
+                label: `${order?.referenceId || order?.id} · ${order?.trackingId || t('locationHistory.noOtp')}`,
                 value: order?.id,
               }))}
               value={selectedSearchedOrderId}
@@ -425,7 +427,7 @@ const UserLocationHistoryPage = () => {
             className="type-meta"
             htmlFor="start-time"
           >
-            Start time (local)
+            {t('locationHistory.startTime')}
           </label>
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
             <DatePicker
@@ -439,7 +441,7 @@ const UserLocationHistoryPage = () => {
                   startTime: mergeDateAndTime(nextDate, toInputTime(prev.startTime)),
                 }));
               }}
-              placeholder="Start date"
+              placeholder={t('locationHistory.startDate')}
               toDate={moment(dateRange.endTime).toDate()}
             />
             <input
@@ -465,7 +467,7 @@ const UserLocationHistoryPage = () => {
             className="type-meta"
             htmlFor="end-time"
           >
-            End time (local)
+            {t('locationHistory.endTime')}
           </label>
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
             <DatePicker
@@ -479,7 +481,7 @@ const UserLocationHistoryPage = () => {
                   endTime: mergeDateAndTime(nextDate, toInputTime(prev.endTime)),
                 }));
               }}
-              placeholder="End date"
+              placeholder={t('locationHistory.endDate')}
               fromDate={moment(dateRange.startTime).toDate()}
             />
             <input
@@ -502,7 +504,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="lg:col-span-2 flex justify-end">
           <Button primary onClick={onApplyFilters} submit>
-            Apply
+            {t('locationHistory.apply')}
           </Button>
         </article>
       </section>
@@ -517,7 +519,7 @@ const UserLocationHistoryPage = () => {
             <TrajectoryPolyline path={path} />
 
             {first && (
-              <AdvancedMarker position={first.coordinates} title="Start">
+              <AdvancedMarker position={first.coordinates} title={t('locationHistory.start')}>
                 <Pin
                   background="var(--ink)"
                   borderColor="var(--ink)"
@@ -527,7 +529,7 @@ const UserLocationHistoryPage = () => {
             )}
 
             {last && last.entry.id !== first?.entry.id && (
-              <AdvancedMarker position={last.coordinates} title="Latest">
+              <AdvancedMarker position={last.coordinates} title={t('locationHistory.latest')}>
                 <Pin
                   background="var(--chart-3)"
                   borderColor="var(--ink)"
@@ -550,7 +552,7 @@ const UserLocationHistoryPage = () => {
         totalPages={totalPages}
         totalCount={totalCount}
         isLoading={isFetching}
-        noDataMessage="No location history records found."
+        noDataMessage={t('locationHistory.empty')}
       />
       <footer className="w-full flex items-center justify-between">
         <Button
@@ -559,7 +561,7 @@ const UserLocationHistoryPage = () => {
             navigate(-1);
           }}
         >
-          Back
+          {t('common.actions.back')}
         </Button>
       </footer>
     </main>

@@ -14,6 +14,7 @@ import {
   AuthPageShell,
   AuthSocialButton,
 } from './AuthPageShell';
+import { useI18n } from '@/i18n/i18n';
 
 interface LoginFormData {
   username: string;
@@ -24,7 +25,8 @@ interface LoginFormData {
 export const Login = () => {
   const location = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  useDocumentTitle('Sign In');
+  const { t } = useI18n();
+  useDocumentTitle(t('auth.login.docTitle'));
 
   const {
     control,
@@ -54,8 +56,8 @@ export const Login = () => {
 
   return (
     <AuthPageShell>
-      <AuthCard title="Welcome back" subtitle="Log in to your account">
-        <AuthSocialButton onClick={handleGoogleSignIn}>Log in with Google</AuthSocialButton>
+      <AuthCard title={t('auth.login.title')} subtitle={t('auth.login.subtitle')}>
+        <AuthSocialButton onClick={handleGoogleSignIn}>{t('auth.login.google')}</AuthSocialButton>
 
         <AuthDivider />
 
@@ -63,12 +65,12 @@ export const Login = () => {
           <Controller
             name="username"
             control={control}
-            rules={{ required: 'Phone number or email is required' }}
+            rules={{ required: t('auth.emailOrPhoneRequired') }}
             render={({ field }) => (
               <Input
                 {...field}
-                label="Email or phone"
-                placeholder="Enter your email or phone..."
+                label={t('auth.emailOrPhone')}
+                placeholder={t('auth.emailOrPhonePlaceholder')}
                 autoComplete="username"
                 autoCapitalize="none"
                 autoCorrect="off"
@@ -82,13 +84,13 @@ export const Login = () => {
           <Controller
             name="password"
             control={control}
-            rules={{ required: 'Password is required' }}
+            rules={{ required: t('auth.passwordRequired') }}
             render={({ field }) => (
               <Input
                 {...field}
-                label="Password"
+                label={t('auth.password')}
                 type="password"
-                placeholder="Enter your password"
+                placeholder={t('auth.passwordPlaceholder')}
                 autoComplete="current-password"
                 autoCapitalize="none"
                 autoCorrect="off"
@@ -111,7 +113,7 @@ export const Login = () => {
                     onCheckedChange={field.onChange}
                     className="cursor-pointer"
                   />
-                  <span>Remember me</span>
+                  <span>{t('auth.rememberMe')}</span>
                 </label>
               )}
             />
@@ -119,7 +121,7 @@ export const Login = () => {
               to="/auth/forgot-password"
               className="link-sweep text-sm text-(--ink)"
             >
-              Forgot password?
+              {t('auth.forgotPasswordLink')}
             </Link>
           </div>
 
@@ -128,17 +130,17 @@ export const Login = () => {
             variant="primary"
             isLoading={isLoading}
           >
-            Log in
+            {t('auth.login.submit')}
           </Button>
         </form>
 
         <div className="mt-6 text-center text-sm">
-          <span>Don&apos;t have an account? </span>
+          <span>{t('auth.login.noAccount')} </span>
           <Link
             to="/auth/register"
             className="link-sweep text-(--ink)"
           >
-            Sign up
+            {t('auth.login.signUp')}
           </Link>
         </div>
       </AuthCard>

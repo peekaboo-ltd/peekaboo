@@ -1,5 +1,6 @@
 import { formatCurrency } from '@/utils/strings.util';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 interface RouteSummaryProps {
   /** Kilometres, or null while the route is still resolving. */
@@ -26,20 +27,20 @@ interface RouteSummaryProps {
  */
 
 /** A quoted window, not a point estimate: base time, and base + 15 as the ceiling. */
-const deliveryWindow = (minutes: number) => {
+const deliveryWindow = (minutes: number, minuteLabel: string, hourLabel: string) => {
   const base = Math.max(Math.round(minutes), 20);
   const ceiling = Math.max(Math.round(minutes) + 15, 30);
 
   if (ceiling < 60) {
-    return { value: `${base}–${ceiling}`, unit: 'minutes' };
+    return { value: `${base}–${ceiling}`, unit: minuteLabel };
   }
 
   const asHours = (total: number) =>
     `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 
   return base < 60
-    ? { value: `${base} min – ${asHours(ceiling)}`, unit: 'hours' }
-    : { value: `${asHours(base)} – ${asHours(ceiling)}`, unit: 'hours' };
+    ? { value: `${base} min – ${asHours(ceiling)}`, unit: hourLabel }
+    : { value: `${asHours(base)} – ${asHours(ceiling)}`, unit: hourLabel };
 };
 
 const Figure = ({
@@ -62,11 +63,12 @@ const RouteSummary = ({
   distance,
   estimatedTime,
   fee,
-  feeLabel = 'Total to pay',
+  feeLabel,
   className,
 }: RouteSummaryProps) => {
+  const { t } = useI18n();
   const resolved = distance !== null && estimatedTime !== null;
-  const window = resolved ? deliveryWindow(estimatedTime) : null;
+  const window = resolved ? deliveryWindow(estimatedTime, t('route.minutes'), t('route.hours')) : null;
   const feeValue = Number(fee ?? 0);
 
   return (
@@ -75,22 +77,22 @@ const RouteSummary = ({
         'card-framed grid grid-cols-3 divide-x divide-(--line) overflow-hidden',
         className,
       )}
-      aria-label="Route summary"
+      aria-label={t('route.summary')}
     >
       <Figure
-        label="Distance"
+        label={t('route.distance')}
         value={resolved ? distance.toFixed(1) : '—'}
-        unit={resolved ? 'kilometers' : undefined}
+        unit={resolved ? t('route.kilometers') : undefined}
       />
       <Figure
-        label="Delivery time"
+        label={t('route.deliveryTime')}
         value={window?.value ?? '—'}
         unit={window?.unit}
       />
       <Figure
-        label={feeLabel}
+        label={feeLabel ?? t('route.totalToPay')}
         value={feeValue > 0 ? formatCurrency(feeValue) : '—'}
-        unit={feeValue > 0 ? 'including VAT' : undefined}
+        unit={feeValue > 0 ? t('route.vatIncluded') : undefined}
       />
     </section>
   );

@@ -26,6 +26,7 @@ import { RoleTypes } from '../../types/auth.type';
 import { UserStatus } from '../../constants/user.constants';
 import type { User } from '../../types/user.type';
 import { validateRwandanPhoneNumber } from '../../utils/phone.util';
+import { useI18n } from '@/i18n/i18n';
 
 export interface UserFormData {
   name?: string;
@@ -52,6 +53,7 @@ export const UserForm: React.FC<UserFormProps> = ({
   isLoading = false,
   isEdit = false,
 }) => {
+  const { t } = useI18n();
   const form = useForm<UserFormData>({
     defaultValues: {
       name: user?.name || '',
@@ -72,7 +74,7 @@ export const UserForm: React.FC<UserFormProps> = ({
     if (!isEdit && data.password !== data.confirmPassword) {
       form.setError('confirmPassword', {
         type: 'manual',
-        message: 'Passwords do not match',
+        message: t('validation.passwordMismatch'),
       });
       return;
     }
@@ -100,14 +102,14 @@ export const UserForm: React.FC<UserFormProps> = ({
             rules={{
               minLength: {
                 value: 2,
-                message: 'Name must be at least 2 characters',
+                message: t('userForm.nameMin'),
               },
             }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>{t('userForm.fullName')}</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder={t('userForm.namePlaceholder')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -120,16 +122,16 @@ export const UserForm: React.FC<UserFormProps> = ({
             rules={{
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Invalid email address',
+                message: t('validation.invalidEmail'),
               },
             }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t('userForm.email')}</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
-                    placeholder="email@example.com"
+                    placeholder={t('userForm.emailPlaceholder')}
                     {...field}
                   />
                 </FormControl>
@@ -142,7 +144,7 @@ export const UserForm: React.FC<UserFormProps> = ({
             control={form.control}
             name="phoneNumber"
             rules={{
-              required: 'Phone number is required',
+              required: t('common.phoneRequired'),
               validate: (value) => validateRwandanPhoneNumber(value),
             }}
             render={({ field }) => (
@@ -150,9 +152,9 @@ export const UserForm: React.FC<UserFormProps> = ({
                 <FormControl>
                   <TelInput
                     {...field}
-                    label="Phone Number"
+                    label={t('userForm.phone')}
                     required
-                    placeholder="0788 123 456"
+                    placeholder={t('userForm.phonePlaceholder')}
                     errorMessage={form.formState.errors.phoneNumber?.message}
                   />
                 </FormControl>
@@ -165,20 +167,20 @@ export const UserForm: React.FC<UserFormProps> = ({
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
+                <FormLabel>{t('common.status')}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder={t('userForm.selectStatus')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value={UserStatus.ACTIVE}>Active</SelectItem>
-                    <SelectItem value={UserStatus.INACTIVE}>Inactive</SelectItem>
-                    <SelectItem value={UserStatus.SUSPENDED}>Suspended</SelectItem>
+                    <SelectItem value={UserStatus.ACTIVE}>{t('status.active')}</SelectItem>
+                    <SelectItem value={UserStatus.INACTIVE}>{t('status.inactive')}</SelectItem>
+                    <SelectItem value={UserStatus.SUSPENDED}>{t('status.suspended')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -192,24 +194,24 @@ export const UserForm: React.FC<UserFormProps> = ({
                 control={form.control}
                 name="password"
                 rules={{
-                  required: !isEdit ? 'Password is required' : undefined,
+                  required: !isEdit ? t('auth.passwordRequired') : undefined,
                   minLength: {
                     value: 8,
-                    message: 'Password must be at least 8 characters',
+                    message: t('validation.passwordMinLength'),
                   },
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password {!isEdit && '*'}</FormLabel>
+                    <FormLabel>{t('userForm.password')} {!isEdit && '*'}</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Enter password"
+                        placeholder={t('userForm.passwordPlaceholder')}
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      Must be at least 8 characters long
+                      {t('userForm.passwordHint')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -220,15 +222,15 @@ export const UserForm: React.FC<UserFormProps> = ({
                 control={form.control}
                 name="confirmPassword"
                 rules={{
-                  required: !isEdit ? 'Please confirm password' : undefined,
+                  required: !isEdit ? t('userForm.confirmPasswordRequired') : undefined,
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password {!isEdit && '*'}</FormLabel>
+                    <FormLabel>{t('userForm.confirmPassword')} {!isEdit && '*'}</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Confirm password"
+                        placeholder={t('userForm.confirmPassword')}
                         {...field}
                       />
                     </FormControl>
@@ -244,9 +246,9 @@ export const UserForm: React.FC<UserFormProps> = ({
             name="nationality"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nationality</FormLabel>
+                <FormLabel>{t('userForm.nationality')}</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., United States" {...field} />
+                  <Input placeholder={t('userForm.nationalityPlaceholder')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -258,7 +260,7 @@ export const UserForm: React.FC<UserFormProps> = ({
             name="dateOfBirth"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Date of Birth</FormLabel>
+                <FormLabel>{t('userForm.dateOfBirth')}</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
@@ -270,9 +272,9 @@ export const UserForm: React.FC<UserFormProps> = ({
 
         <fieldset className="space-y-4">
           <legend>
-            <Label>Roles *</Label>
+            <Label>{t('userForm.roles')}</Label>
             <FormDescription>
-              Select one or more roles for this user
+              {t('userForm.rolesHint')}
             </FormDescription>
           </legend>
           <div className="grid gap-3 md:grid-cols-2">
@@ -289,14 +291,14 @@ export const UserForm: React.FC<UserFormProps> = ({
                   htmlFor={role}
                   className="text-sm font-normal cursor-pointer"
                 >
-                  {role.charAt(0) + role.slice(1).toLowerCase()}
+                  {t(`role.${role.toLowerCase()}`)}
                 </Label>
               </div>
             ))}
           </div>
           {form.formState.errors.roles && (
             <p className="text-sm text-destructive">
-              Please select at least one role
+              {t('userForm.roleRequired')}
             </p>
           )}
         </fieldset>
@@ -308,16 +310,16 @@ export const UserForm: React.FC<UserFormProps> = ({
             onClick={() => window.history.back()}
             disabled={isLoading}
           >
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader className="mr-2 h-4 w-4" />
-                {isEdit ? 'Updating...' : 'Creating...'}
+                {isEdit ? t('userForm.updating') : t('userForm.creating')}
               </>
             ) : (
-              <>{isEdit ? 'Update User' : 'Create User'}</>
+              <>{isEdit ? t('userForm.update') : t('userForm.create')}</>
             )}
           </Button>
         </footer>

@@ -31,6 +31,7 @@ import {
 import { UUID } from '@/types';
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -56,9 +57,10 @@ type PlanFormValues = {
 };
 
 const ManageBusinessPlanPage = () => {
+  const { t } = useI18n();
   const { id } = useParams<{ id: UUID }>();
   const navigate = useNavigate();
-  useDocumentTitle('Manage Business Plan');
+  useDocumentTitle(t('businessPlan.manageDocTitle'));
 
   const { data: planData, isFetching: isFetchingPlan } = useFetchBusinessPlanByIdQuery(id!, {
     skip: !id,
@@ -162,11 +164,11 @@ const ManageBusinessPlanPage = () => {
       };
 
       await updateBusinessPlan({ id, data: payload }).unwrap();
-      toast.success('Business plan updated successfully.');
+      toast.success(t('businessPlan.updated'));
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to update business plan.';
+        t('businessPlan.updateError');
       toast.error(message);
     }
   });
@@ -174,18 +176,18 @@ const ManageBusinessPlanPage = () => {
   const handleDelete = async () => {
     if (!id) return;
     if (orgCount > 0) {
-      toast.error('Cannot delete a plan with active organizations.');
+      toast.error(t('businessPlan.activeOrganizationsError'));
       return;
     }
-    if (!window.confirm(`Move plan "${plan?.name}" to deactivated plans? You can restore it later.`)) return;
+    if (!window.confirm(t('businessPlan.confirmDeactivate', { name: plan?.name ?? '' }))) return;
     try {
       await deactivateBusinessPlan(id).unwrap();
-      toast.success('Business plan moved to deactivated plans.');
+      toast.success(t('businessPlan.deactivatedSuccess'));
       navigate('/business-plans');
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to delete business plan.';
+        t('businessPlan.deactivateError');
       toast.error(message);
     }
   };
@@ -193,14 +195,14 @@ const ManageBusinessPlanPage = () => {
   // Build price display for stat card
   const priceDisplay = (() => {
     if (!plan) return '—';
-    if (plan.isCustomPricing) return 'Custom';
+    if (plan.isCustomPricing) return t('businessPlan.custom');
     if (plan.pricingTiers?.tiers?.length) {
       const tiers = plan.pricingTiers.tiers.filter((t) => !t.isCustom);
-      if (tiers.length === 0) return 'Custom';
+      if (tiers.length === 0) return t('businessPlan.custom');
       const prices = tiers
         .map((t) => t.pricePerUnit ?? (t.totalPrice && t.maxQuantity ? Math.round(t.totalPrice / (t.maxQuantity - t.minQuantity + 1)) : null))
         .filter((p): p is number => p != null);
-      if (prices.length === 0) return 'Custom';
+      if (prices.length === 0) return t('businessPlan.custom');
       const min = Math.min(...prices);
       const max = Math.max(...prices);
       return min === max
@@ -215,17 +217,17 @@ const ManageBusinessPlanPage = () => {
 
   const stats = [
     {
-      label: 'Status',
-      value: plan?.status ?? '—',
+      label: t('businessPlan.statusTab'),
+      value: plan?.status ? t(`status.${plan.status.toLowerCase()}`) : '—',
       icon: faShieldHalved,
     },
     {
-      label: 'Pricing',
+      label: t('businessPlan.pricingTab'),
       value: priceDisplay,
       icon: faTag,
     },
     {
-      label: 'Organizations',
+      label: t('businessPlan.organizationsTab'),
       value: orgCount.toString(),
       icon: faBuilding,
     },
@@ -234,7 +236,7 @@ const ManageBusinessPlanPage = () => {
   if (isFetchingPlan && !plan) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-(--muted)">Loading business plan…</p>
+        <p className="text-sm text-(--muted)">{t('businessPlan.loading')}</p>
       </main>
     );
   }
@@ -242,8 +244,8 @@ const ManageBusinessPlanPage = () => {
   if (!plan && !isFetchingPlan) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-(--muted)">Business plan not found.</p>
-        <Button type="button" onClick={() => navigate(-1)}>Back</Button>
+        <p className="text-sm text-(--muted)">{t('businessPlan.notFound')}</p>
+        <Button type="button" onClick={() => navigate(-1)}>{t('businessPlan.back')}</Button>
       </main>
     );
   }
@@ -252,12 +254,12 @@ const ManageBusinessPlanPage = () => {
     <InternalPage>
       <motion.section variants={itemVariants}>
         <InternalPageHeader
-          eyebrow="Business Plan Management"
-          title={plan?.name ?? 'Business Plan'}
-          description="Update plan details, view pricing, and see which organizations are assigned."
+          eyebrow={t('businessPlan.managementEyebrow')}
+          title={plan?.name ?? t('businessPlan.fallbackTitle')}
+          description={t('businessPlan.manageDescription')}
           actions={
             <Badge variant="outline" className="text-xs rounded-full px-3">
-              {plan?.status ?? 'Unknown'}
+              {plan?.status ? t(`status.${plan.status.toLowerCase()}`) : t('common.unknown')}
             </Badge>
           }
         />
@@ -284,8 +286,8 @@ const ManageBusinessPlanPage = () => {
         {/* Left: Edit form */}
         <article className="lg:col-span-2 border border-(--line) bg-(--paper) p-6">
           <header className="mb-6">
-            <p className="type-meta">Plan Details</p>
-            <h2 className="type-card-title mt-2">Edit Information</h2>
+            <p className="type-meta">{t('businessPlan.details')}</p>
+            <h2 className="type-card-title mt-2">{t('businessPlan.editInformation')}</h2>
           </header>
 
           <form onSubmit={onSubmit} className="flex flex-col gap-5">
@@ -293,12 +295,12 @@ const ManageBusinessPlanPage = () => {
               <Controller
                 name="name"
                 control={control}
-                rules={{ required: 'Plan name is required.' }}
+                rules={{ required: t('validation.required') }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Plan Name"
-                    placeholder="Business Growth Plan"
+                    label={t('businessPlan.name')}
+                    placeholder={t('businessPlan.namePlaceholder')}
                     required
                     errorMessage={errors.name?.message}
                   />
@@ -307,11 +309,11 @@ const ManageBusinessPlanPage = () => {
               <Controller
                 name="currency"
                 control={control}
-                rules={{ required: 'Currency is required.' }}
+                rules={{ required: t('validation.required') }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Currency"
+                    label={t('businessPlan.currency')}
                     placeholder="RWF"
                     required
                     errorMessage={errors.currency?.message}
@@ -323,15 +325,15 @@ const ManageBusinessPlanPage = () => {
                 control={control}
                 render={({ field }) => (
                   <Select
-                    label="Billing Period"
+                    label={t('businessPlan.billingPeriod')}
                     value={field.value}
                     onChange={field.onChange}
                     options={[
-                      { label: 'Monthly', value: BillingPeriod.MONTHLY },
-                      { label: 'Weekly', value: BillingPeriod.WEEKLY },
-                      { label: 'Daily', value: BillingPeriod.DAILY },
+                      { label: t('businessPlan.monthly'), value: BillingPeriod.MONTHLY },
+                      { label: t('businessPlan.weekly'), value: BillingPeriod.WEEKLY },
+                      { label: t('businessPlan.daily'), value: BillingPeriod.DAILY },
                     ]}
-                    placeholder="Select billing period"
+                    placeholder={t('businessPlan.selectBillingPeriod')}
                   />
                 )}
               />
@@ -340,14 +342,14 @@ const ManageBusinessPlanPage = () => {
                 control={control}
                 render={({ field }) => (
                   <Select
-                    label="Status"
+                    label={t('common.status')}
                     value={field.value}
                     onChange={field.onChange}
                     options={Object.values(BusinessPlanStatus).map((s) => ({
-                      label: s.charAt(0) + s.slice(1).toLowerCase(),
+                      label: t(`status.${s.toLowerCase()}`),
                       value: s,
                     }))}
-                    placeholder="Select status"
+                    placeholder={t('businessPlan.selectStatus')}
                   />
                 )}
               />
@@ -357,8 +359,8 @@ const ManageBusinessPlanPage = () => {
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Badge"
-                    placeholder="MOST POPULAR"
+                    label={t('businessPlan.badge')}
+                    placeholder={t('businessPlan.badgePlaceholder')}
                     value={field.value || ''}
                   />
                 )}
@@ -371,12 +373,12 @@ const ManageBusinessPlanPage = () => {
               render={({ field }) => (
                 <div className="flex flex-col gap-1">
                   <label className="text-[0.8125rem] text-(--ink)">
-                    Description
+                    {t('businessPlan.descriptionLabel')}
                   </label>
                   <textarea
                     {...field}
                     rows={3}
-                    placeholder="Brief description of this plan..."
+                    placeholder={t('businessPlan.descriptionPlaceholder')}
                     className="rounded-lg border border-(--line) bg-(--paper) px-3 py-2 text-sm text-(--ink) resize-none focus:outline-none focus:ring-2 focus:ring-(--ink)"
                   />
                 </div>
@@ -387,7 +389,7 @@ const ManageBusinessPlanPage = () => {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className="text-[0.8125rem] text-(--ink)">
-                  Features
+                  {t('businessPlan.features')}
                 </label>
                 <button
                   type="button"
@@ -395,12 +397,12 @@ const ManageBusinessPlanPage = () => {
                   className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
                 >
                   <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                  Add Feature
+                  {t('businessPlan.addFeature')}
                 </button>
               </div>
               <div className="flex flex-col gap-2">
                 {featureFields.length === 0 && (
-                  <p className="type-meta italic">No features added.</p>
+                  <p className="type-meta italic">{t('businessPlan.noFeatures')}</p>
                 )}
                 {featureFields.map((field, index) => (
                   <div key={field.id} className="flex items-center gap-2">
@@ -410,7 +412,7 @@ const ManageBusinessPlanPage = () => {
                       render={({ field: inputField }) => (
                         <input
                           {...inputField}
-                          placeholder={`Feature ${index + 1}...`}
+                          placeholder={t('businessPlan.featurePlaceholder', { number: index + 1 })}
                           className={cn(controlClassName, 'flex-1 px-3')}
                         />
                       )}
@@ -440,9 +442,9 @@ const ManageBusinessPlanPage = () => {
                     className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                   />
                   <span className="text-sm text-(--ink)">
-                    Custom pricing
+                    {t('businessPlan.customPricing')}
                     <span className="type-meta ml-1">
-                      (negotiated pricing — hides tier configuration)
+                      {t('businessPlan.customPricingHint')}
                     </span>
                   </span>
                 </label>
@@ -454,7 +456,7 @@ const ManageBusinessPlanPage = () => {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <label className="text-[0.8125rem] text-(--ink)">
-                    Pricing Tiers
+                    {t('businessPlan.pricingTiers')}
                   </label>
                   <button
                     type="button"
@@ -471,13 +473,13 @@ const ManageBusinessPlanPage = () => {
                     className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
                   >
                     <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
-                    Add Tier
+                    {t('businessPlan.addTier')}
                   </button>
                 </div>
 
                 {tierFields.length === 0 && (
                   <p className="type-meta italic">
-                    No pricing tiers defined.
+                    {t('businessPlan.noTiers')}
                   </p>
                 )}
 
@@ -489,7 +491,7 @@ const ManageBusinessPlanPage = () => {
                     >
                       <div className="flex items-center justify-between mb-3">
                         <span className="type-meta">
-                          Tier {index + 1}
+                          {t('businessPlan.tier', { number: index + 1 })}
                         </span>
                         <button
                           type="button"
@@ -507,8 +509,8 @@ const ManageBusinessPlanPage = () => {
                           render={({ field: inputField }) => (
                             <Input
                               {...inputField}
-                              label="Label"
-                              placeholder="0 – 150 deliveries per month"
+                              label={t('businessPlan.tierLabel')}
+                              placeholder={t('businessPlan.tierLabelPlaceholder')}
                               value={inputField.value || ''}
                             />
                           )}
@@ -519,7 +521,7 @@ const ManageBusinessPlanPage = () => {
                           render={({ field: inputField }) => (
                             <Input
                               {...inputField}
-                              label="Min Quantity"
+                              label={t('businessPlan.minQuantity')}
                               placeholder="0"
                               type="number"
                               required
@@ -533,8 +535,8 @@ const ManageBusinessPlanPage = () => {
                           render={({ field: inputField }) => (
                             <Input
                               {...inputField}
-                              label="Max Quantity"
-                              placeholder="Leave empty for unlimited"
+                              label={t('businessPlan.maxQuantity')}
+                              placeholder={t('businessPlan.unlimitedPlaceholder')}
                               type="number"
                               value={inputField.value ?? ''}
                               onChange={(e) =>
@@ -551,7 +553,7 @@ const ManageBusinessPlanPage = () => {
                           render={({ field: inputField }) => (
                             <Input
                               {...inputField}
-                              label="Price Per Unit"
+                              label={t('businessPlan.pricePerUnit')}
                               placeholder="1500"
                               type="number"
                               value={inputField.value ?? ''}
@@ -569,7 +571,7 @@ const ManageBusinessPlanPage = () => {
                           render={({ field: inputField }) => (
                             <Input
                               {...inputField}
-                              label="Total Price (Package)"
+                              label={t('businessPlan.packageTotal')}
                               placeholder="48000"
                               type="number"
                               value={inputField.value ?? ''}
@@ -595,7 +597,7 @@ const ManageBusinessPlanPage = () => {
                               className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                             />
                             <span className="type-meta">
-                              Custom / contact us tier
+                              {t('businessPlan.customTier')}
                             </span>
                           </label>
                         )}
@@ -612,7 +614,7 @@ const ManageBusinessPlanPage = () => {
                       render={({ field }) => (
                         <Input
                           {...field}
-                          label="Overflow Rate (per extra delivery)"
+                          label={t('businessPlan.overflowRate')}
                           placeholder="1500"
                           type="number"
                           value={field.value ?? ''}
@@ -628,7 +630,7 @@ const ManageBusinessPlanPage = () => {
                       render={({ field }) => (
                         <Input
                           {...field}
-                          label="Fallback Rate (partial package delivery)"
+                          label={t('businessPlan.fallbackRate')}
                           placeholder="1600"
                           type="number"
                           value={field.value ?? ''}
@@ -655,9 +657,9 @@ const ManageBusinessPlanPage = () => {
                     className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                   />
                   <span className="text-sm text-(--ink)">
-                    Set as default plan
+                    {t('businessPlan.setDefault')}
                     <span className="type-meta ml-1">
-                      (assigned to organizations with no plan)
+                      {t('businessPlan.defaultHint')}
                     </span>
                   </span>
                 </label>
@@ -666,7 +668,7 @@ const ManageBusinessPlanPage = () => {
 
             <div className="flex items-center gap-3">
               <Button type="submit" primary isLoading={isUpdating} disabled={isUpdating}>
-                Save Changes
+                {t('businessPlan.saveChanges')}
               </Button>
             </div>
           </form>
@@ -676,9 +678,9 @@ const ManageBusinessPlanPage = () => {
         <aside className="flex flex-col gap-6">
           <article className="border border-(--line) bg-(--paper) p-6">
             <header className="mb-4">
-              <p className="type-meta">Assigned To</p>
+              <p className="type-meta">{t('businessPlan.assignedTo')}</p>
               <h2 className="type-card-title mt-2">
-                Organizations
+                {t('businessPlan.organizations')}
                 <span className="ml-2 text-sm font-normal text-(--muted)">
                   ({orgCount})
                 </span>
@@ -686,9 +688,9 @@ const ManageBusinessPlanPage = () => {
             </header>
 
             {isFetchingOrgs ? (
-              <p className="text-sm text-(--muted)">Loading organizations…</p>
+              <p className="text-sm text-(--muted)">{t('businessPlan.loadingOrganizations')}</p>
             ) : orgsOnPlan.length === 0 ? (
-              <p className="text-sm text-(--muted)">No organizations on this plan.</p>
+              <p className="text-sm text-(--muted)">{t('businessPlan.noOrganizations')}</p>
             ) : (
               <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
                 {orgsOnPlan.map((org) => (
@@ -710,13 +712,13 @@ const ManageBusinessPlanPage = () => {
           {/* Danger zone */}
           <article className="bg-(--surface) p-6">
             <header className="mb-4">
-              <p className="text-[0.8125rem] text-(--ink)">Danger Zone</p>
-              <h2 className="type-card-title mt-2">Delete Plan</h2>
+              <p className="text-[0.8125rem] text-(--ink)">{t('businessPlan.dangerZone')}</p>
+              <h2 className="type-card-title mt-2">{t('businessPlan.delete')}</h2>
             </header>
             <p className="text-xs text-(--ink) mb-4">
               {orgCount > 0
-                ? `This plan has ${orgCount} organization(s). Reassign them before deleting.`
-                : 'Moves this plan to deactivated plans. You can restore it there or permanently delete it.'}
+                ? t('businessPlan.hasOrganizations', { count: orgCount })
+                : t('businessPlan.deactivateDescription')}
             </p>
             <Button
               type="button"
@@ -726,7 +728,7 @@ const ManageBusinessPlanPage = () => {
               isLoading={isDeactivating}
             >
               <FontAwesomeIcon icon={faTrash} className="mr-2" />
-              Deactivate Plan
+              {t('businessPlan.deactivate')}
             </Button>
           </article>
         </aside>
@@ -734,7 +736,7 @@ const ManageBusinessPlanPage = () => {
 
       <motion.menu variants={itemVariants} className="flex items-center gap-3 pb-6">
         <Button type="button" onClick={() => navigate(-1)}>
-          Back
+          {t('businessPlan.back')}
         </Button>
       </motion.menu>
     </InternalPage>

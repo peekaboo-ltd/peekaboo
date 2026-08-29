@@ -17,32 +17,17 @@ import { useHomeContent } from '@/pages/home/useHomeContent';
 import { entranceVariants } from '@/pages/home/home.animations';
 import { HERO_DELIVERY_FORM_ID } from '@/pages/home/components/HeroForm';
 
-const trackingFeatures = [
-  {
-    icon: Hash,
-    title: 'Reference ID or OTP',
-    description:
-      'Use the ID from your confirmation SMS or the one-time code shared with your recipient.',
-  },
-  {
-    icon: MapPinned,
-    title: 'Live route map',
-    description:
-      'Watch your rider move across Kigali from pickup to drop-off in real time.',
-  },
-  {
-    icon: PackageCheck,
-    title: 'Proof of delivery',
-    description: 'Photo confirmation and timestamp when your package arrives.',
-  },
-] as const;
-
 const TrackOrder = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialRef = searchParams.get('ref') || '';
-  useDocumentTitle('Track Order');
+  useDocumentTitle(t('track.docTitle'));
+  const trackingFeatures = [
+    { icon: Hash, title: t('track.feature.reference.title'), description: t('track.feature.reference.description') },
+    { icon: MapPinned, title: t('track.feature.map.title'), description: t('track.feature.map.description') },
+    { icon: PackageCheck, title: t('track.feature.proof.title'), description: t('track.feature.proof.description') },
+  ];
 
   const formRef = useRef<HTMLFormElement>(null);
   const [referenceId, setReferenceId] = useState(initialRef);
@@ -154,7 +139,7 @@ const TrackOrder = () => {
                 to={`/#${HERO_DELIVERY_FORM_ID}`}
                 className="link-sweep text-sm text-(--ink)"
               >
-                Book a delivery instead
+                {t('track.bookInstead')}
               </Link>
 
               <HeroTrustIndicators
@@ -167,8 +152,8 @@ const TrackOrder = () => {
 
             <div className="max-lg:hidden">
               <PublicApproximateMap
-                statusLabel="Live tracking"
-                etaLabel="Kigali-wide"
+                statusLabel={t('track.liveTracking')}
+                etaLabel={t('home.trust.kigaliWide')}
               />
             </div>
           </div>
@@ -179,16 +164,15 @@ const TrackOrder = () => {
         <div className="app-container">
           <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <hgroup>
-              <p className="type-eyebrow">Live tracking</p>
+              <p className="type-eyebrow">{t('track.liveTracking')}</p>
               <h2 className="type-h2 mt-2">
-                See every step
+                {t('track.seeEveryStep1')}
                 <br />
-                of your delivery.
+                {t('track.seeEveryStep2')}
               </h2>
             </hgroup>
             <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
-              From the moment a rider accepts your order to the photo at the door,
-              everything stays visible in one place.
+              {t('track.sectionDescription')}
             </p>
           </header>
 
@@ -214,15 +198,14 @@ const TrackOrder = () => {
 
           <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="max-w-[42ch] text-sm leading-[1.55] text-(--muted)">
-              Reference IDs usually start with &ldquo;P&rdquo;. OTPs are sent to the
-              recipient when the rider is on the way.
+              {t('track.referenceHelp')}
             </p>
             <button
               type="button"
               onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
               className="link-arrow inline-flex items-center gap-1.5 text-sm text-(--ink)"
             >
-              Track an order
+              {t('nav.trackOrder')}
               <ArrowRight className="size-4" aria-hidden="true" />
             </button>
           </div>
@@ -235,9 +218,9 @@ const TrackOrder = () => {
       />
 
       <FinalCtaSection
-        title="Need to send something?"
-        subtitle="Book a verified rider in under a minute. Pay when it arrives."
-        buttonLabel="Book delivery"
+        title={t('track.ctaTitle')}
+        subtitle={t('track.ctaSubtitle')}
+        buttonLabel={t('track.ctaButton')}
         onScrollToForm={handleBookDelivery}
       />
     </main>

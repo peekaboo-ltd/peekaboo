@@ -26,9 +26,11 @@ import {
   usePermanentlyDeleteBusinessPlanMutation,
   useRestoreBusinessPlanMutation,
 } from '@/api/mutations/businessPlan.mutations';
+import { useI18n } from '@/i18n/i18n';
 
 const BusinessPlansPage = () => {
-  useDocumentTitle('Business Plans');
+  const { t } = useI18n();
+  useDocumentTitle(t('businessPlans.docTitle'));
 
   // STATE VARIABLES
   const { businessPlansList } = useAppSelector((state) => state.businessPlan);
@@ -68,12 +70,12 @@ const BusinessPlansPage = () => {
     try {
       setActionPlanId(id);
       await restoreBusinessPlan(id).unwrap();
-      toast.success(`Plan "${name}" restored successfully.`);
+      toast.success(t('businessPlans.restoreSuccess', { name }));
       fetchBusinessPlans({ page: 0, size: 500 });
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to restore business plan.';
+        t('businessPlans.restoreError');
       toast.error(message);
     } finally {
       setActionPlanId(undefined);
@@ -98,13 +100,13 @@ const BusinessPlansPage = () => {
     try {
       setActionPlanId(id);
       await permanentlyDeleteBusinessPlan(id).unwrap();
-      toast.success(`Plan "${name}" permanently deleted.`);
+      toast.success(t('businessPlans.deleteSuccess', { name }));
       setPlanPendingDeletion(undefined);
       fetchBusinessPlans({ page: 0, size: 500 });
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to permanently delete business plan.';
+        t('businessPlans.deleteError');
       toast.error(message);
     } finally {
       setActionPlanId(undefined);
@@ -123,9 +125,9 @@ const BusinessPlansPage = () => {
     <InternalPage>
       <section>
         <InternalPageHeader
-          eyebrow="Admin"
-          title="Business Plans"
-          description="Create and manage pricing plans assigned to organizations."
+          eyebrow={t('businessPlans.eyebrow')}
+          title={t('businessPlans.title')}
+          description={t('businessPlans.description')}
           actions={
             <Button
               primary
@@ -133,7 +135,7 @@ const BusinessPlansPage = () => {
               className="flex items-center gap-2"
             >
               <FontAwesomeIcon icon={faPlus} />
-              Create Plan
+              {t('businessPlans.create')}
             </Button>
           }
         />
@@ -141,22 +143,22 @@ const BusinessPlansPage = () => {
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <InternalStatCard
-          label="Total Plans"
+          label={t('businessPlans.total')}
           value={stats.total.toString()}
           icon={<FontAwesomeIcon icon={faLayerGroup} />}
         />
         <InternalStatCard
-          label="Active"
+          label={t('status.active')}
           value={stats.active.toString()}
           icon={<FontAwesomeIcon icon={faCircleCheck} />}
         />
         <InternalStatCard
-          label="Deactivated"
+          label={t('businessPlans.deactivated')}
           value={stats.deactivated.toString()}
           icon={<FontAwesomeIcon icon={faBoxArchive} />}
         />
         <InternalStatCard
-          label="Default Plan"
+          label={t('businessPlans.default')}
           value={stats.defaultPlan?.name ?? '—'}
           icon={<FontAwesomeIcon icon={faTag} />}
         />
@@ -164,7 +166,7 @@ const BusinessPlansPage = () => {
 
       <section>
         <h3 className="type-label mb-3">
-          Active Plans
+          {t('businessPlans.active')}
         </h3>
         <Table
           columns={activePlansColumns}
@@ -175,27 +177,25 @@ const BusinessPlansPage = () => {
       </section>
 
       <section>
-        <h3 className="type-label mb-3">Deactivated Plans</h3>
+        <h3 className="type-label mb-3">{t('businessPlans.deactivated')}</h3>
         <Table
           columns={deactivatedPlansColumns}
           data={deactivatedPlans}
           showPagination={false}
           isLoading={isFetching}
-          noDataMessage="No deactivated plans."
+          noDataMessage={t('businessPlans.noneDeactivated')}
         />
       </section>
 
       <Modal
         isOpen={Boolean(planPendingDeletion)}
         onClose={() => setPlanPendingDeletion(undefined)}
-        heading={`Permanently delete ${planPendingDeletion?.name}?`}
+        heading={t('businessPlans.deleteHeading', { name: planPendingDeletion?.name ?? '' })}
         headingClassName="text-(--danger)"
       >
         <article className="flex w-full flex-col gap-5">
           <p className="type-body-sm">
-            This removes the plan and its pricing bands for good. Organizations
-            already on it will need to be moved to another plan. Deactivating
-            instead keeps the plan recoverable.
+            {t('businessPlans.deleteWarning')}
           </p>
           <div className="flex flex-wrap justify-end gap-3">
             <Button
@@ -203,7 +203,7 @@ const BusinessPlansPage = () => {
               onClick={() => setPlanPendingDeletion(undefined)}
               disabled={isPermanentlyDeleting}
             >
-              Keep plan
+              {t('businessPlans.keep')}
             </Button>
             <Button
               type="button"
@@ -211,7 +211,7 @@ const BusinessPlansPage = () => {
               onClick={confirmPermanentDeletion}
               isLoading={isPermanentlyDeleting}
             >
-              Delete permanently
+              {t('businessPlans.deletePermanently')}
             </Button>
           </div>
         </article>

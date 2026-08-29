@@ -34,22 +34,22 @@ const DashboardHeader = ({
     role === RoleTypes.ADMIN || role === RoleTypes.STAFF
       ? t('dashboard.platformOverview')
       : role === RoleTypes.RIDER
-        ? 'Your delivery performance at a glance'
+        ? t('dashboard.header.riderDescription')
         : role === RoleTypes.BUSINESS
-          ? "Your organization's delivery operations"
-          : 'Track your deliveries';
+          ? t('dashboard.header.businessDescription')
+          : t('dashboard.header.customerDescription');
 
   return (
     <motion.header className="w-full" variants={variants}>
       <div className="overflow-hidden rounded-xl bg-(--surface)">
         <div className="border-b border-(--line) px-5 py-4 sm:px-6">
           <p className="type-eyebrow">
-            Command center
+            {t('dashboard.header.commandCenter')}
           </p>
           <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="type-display">
-                Dashboard
+                {t('nav.dashboard')}
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-(--muted) sm:text-[15px]">
                 {userName ? `${t('dashboard.welcome', { name: userName })}. ` : ''}
@@ -80,18 +80,18 @@ const DashboardHeader = ({
               <DatePicker
                 value={startDate}
                 onChange={(e) => onStartDateChange?.(e as unknown as Date | undefined)}
-                placeholder="Start date"
+                placeholder={t('dashboard.header.startDate')}
                 toDate={endDate}
               />
             </div>
             <span className="hidden text-center text-xs text-(--muted) sm:block">
-              to
+              {t('dashboard.header.to')}
             </span>
             <div className="w-full">
               <DatePicker
                 value={endDate}
                 onChange={(e) => onEndDateChange?.(e as unknown as Date | undefined)}
-                placeholder="End date"
+                placeholder={t('dashboard.header.endDate')}
                 fromDate={startDate}
               />
             </div>
@@ -103,7 +103,7 @@ const DashboardHeader = ({
               className='border-(--line) bg-(--surface) hover:bg-(--surface-hover)'
             >
               <FontAwesomeIcon icon={faFileLines} className="type-meta" />
-              Export
+              {t('dashboard.header.export')}
             </Button>
           </div>
         </div>

@@ -23,6 +23,7 @@ import {
   authInputClassName,
   authPrimaryButtonClassName,
 } from './AuthPageShell';
+import { useI18n } from '@/i18n/i18n';
 
 interface RegisterFormData {
   phoneNumber: string;
@@ -49,17 +50,16 @@ const FieldRow = ({ children }: { children: ReactNode }) => (
  * A field nobody has to fill says so. Four asterisked fields followed by two
  * unmarked ones left the reader inferring which were which from an absence.
  */
-const OptionalLabel = ({ children }: { children: ReactNode }) => (
-  <>
-    {children}
-    <span className="type-meta font-normal">Optional</span>
-  </>
-);
+const OptionalLabel = ({ children }: { children: ReactNode }) => {
+  const { t } = useI18n();
+  return <>{children}<span className="type-meta font-normal">{t('auth.optional')}</span></>;
+};
 
 export const RegisterPage = () => {
   const location = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  useDocumentTitle('Create Account');
+  const { t } = useI18n();
+  useDocumentTitle(t('auth.register.docTitle'));
 
   const {
     control,
@@ -82,7 +82,7 @@ export const RegisterPage = () => {
     if (!phoneValidation.e164) {
       setRegisterError('phoneNumber', {
         type: 'validate',
-        message: phoneValidation.error,
+        message: t('validation.invalidPhone'),
       });
       return;
     }
@@ -111,8 +111,8 @@ export const RegisterPage = () => {
 
   return (
     <AuthPageShell maxWidthClassName="max-w-[560px]">
-      <AuthCard title="Create account" subtitle="Start sending deliveries">
-        <AuthSocialButton onClick={handleGoogleSignIn}>Sign up with Google</AuthSocialButton>
+      <AuthCard title={t('auth.register.title')} subtitle={t('auth.register.subtitle')}>
+        <AuthSocialButton onClick={handleGoogleSignIn}>{t('auth.register.google')}</AuthSocialButton>
 
         <AuthDivider />
 
@@ -121,16 +121,16 @@ export const RegisterPage = () => {
             name="phoneNumber"
             control={control}
             rules={{
-              required: 'Phone number is required',
-              validate: (value) => validateRwandanPhoneNumber(value),
+              required: t('common.phoneRequired'),
+              validate: (value) => validateRwandanPhoneNumber(value) === true || t('validation.invalidPhone'),
             }}
             render={({ field }) => (
               <TelInput
                 {...field}
-                label="Phone number"
+                label={t('auth.register.phone')}
                 placeholder="7XXXXXXXX"
                 required
-                description="You'll use this to log in."
+                description={t('auth.register.phoneHint')}
                 className={authInputClassName}
                 errorMessage={errors?.phoneNumber?.message}
               />
@@ -144,8 +144,8 @@ export const RegisterPage = () => {
               render={({ field }) => (
                 <Input
                   {...field}
-                  label={<OptionalLabel>Full name</OptionalLabel>}
-                  placeholder="Your name"
+                  label={<OptionalLabel>{t('auth.register.fullName')}</OptionalLabel>}
+                  placeholder={t('auth.register.namePlaceholder')}
                   autoComplete="name"
                   className={authInputClassName}
                   errorMessage={errors?.name?.message}
@@ -161,13 +161,13 @@ export const RegisterPage = () => {
                 // the field had no rule at all behind the browser's own.
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Enter a valid email address',
+                  message: t('auth.register.emailInvalid'),
                 },
               }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label={<OptionalLabel>Email</OptionalLabel>}
+                  label={<OptionalLabel>{t('auth.register.email')}</OptionalLabel>}
                   type="email"
                   placeholder="you@company.com"
                   autoComplete="email"
@@ -183,18 +183,18 @@ export const RegisterPage = () => {
               name="password"
               control={control}
               rules={{
-                required: 'Password is required',
+                required: t('auth.passwordRequired'),
                 minLength: {
                   value: 8,
-                  message: 'Password must be at least 8 characters',
+                  message: t('auth.passwordMin'),
                 },
               }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Password"
+                  label={t('auth.password')}
                   type="password"
-                  placeholder="At least 8 characters"
+                  placeholder={t('auth.register.passwordPlaceholder')}
                   autoComplete="new-password"
                   required
                   showPasswordToggle
@@ -208,16 +208,16 @@ export const RegisterPage = () => {
               name="confirmPassword"
               control={control}
               rules={{
-                required: 'Please confirm your password',
+                required: t('auth.confirmPasswordRequired'),
                 validate: (value) =>
-                  value === password || 'Passwords do not match',
+                  value === password || t('auth.passwordMismatch'),
               }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Confirm password"
+                  label={t('auth.confirmPassword')}
                   type="password"
-                  placeholder="Repeat password"
+                  placeholder={t('auth.register.repeatPassword')}
                   autoComplete="new-password"
                   required
                   showPasswordToggle
@@ -234,12 +234,12 @@ export const RegisterPage = () => {
             className={authPrimaryButtonClassName}
             isLoading={isLoading}
           >
-            Sign up
+            {t('auth.register.submit')}
           </Button>
         </form>
 
         <AuthFooterNote>
-          Already have an account? <AuthLink to="/auth/login">Log in</AuthLink>
+          {t('auth.register.hasAccount')} <AuthLink to="/auth/login">{t('auth.register.login')}</AuthLink>
         </AuthFooterNote>
       </AuthCard>
     </AuthPageShell>

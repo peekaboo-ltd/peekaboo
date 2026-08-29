@@ -36,6 +36,7 @@ import { User } from "@/types/user.type";
 import { ReferenceIdInput } from "@/components/inputs/TableInputs";
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
+import { useI18n, type I18nContextValue } from '@/i18n/i18n';
 
 interface InlinePhoneEditorProps {
   order: Order;
@@ -46,17 +47,17 @@ interface InlinePhoneEditorProps {
 const getRecipientPhone = (order: Order) =>
   order.recipient?.phoneNumber || order.recipientPhoneNumber || "";
 
-const getDraftOrderValidation = (order: Order) => {
+const getDraftOrderValidation = (order: Order, t: I18nContextValue['t']) => {
   const issues: string[] = [];
   const phoneResult = validateAndFormatPhoneNumber(getRecipientPhone(order));
 
   if (!phoneResult.isValid) {
-    issues.push(phoneResult.error || "Invalid recipient phone number");
+    issues.push(t('batch.invalidRecipientPhone'));
   }
 
   const locationResult = validateDeliveryLocation(order.locationTo);
   if (!locationResult.isValid) {
-    issues.push(locationResult.error || "Delivery location is required");
+    issues.push(t('batch.locationRequired'));
   }
 
   return {
@@ -71,6 +72,7 @@ const InlinePhoneEditor = ({
   onSave,
   isSaving,
 }: InlinePhoneEditorProps) => {
+  const { t } = useI18n();
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(getRecipientPhone(order));
   const [localSaving, setLocalSaving] = useState(false);
@@ -95,7 +97,7 @@ const InlinePhoneEditor = ({
   const handleSave = async () => {
     const result = validateAndFormatPhoneNumber(value);
     if (!result.isValid) {
-      toast.error(result.error || "Invalid phone number");
+      toast.error(t('batch.invalidRecipientPhone'));
       return;
     }
     if (order?.id) {
@@ -146,9 +148,9 @@ const InlinePhoneEditor = ({
       onClick={() => setIsEditing(true)}
       disabled={isSaving || localSaving}
       className={`text-xs px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ isValid ? "border-transparent hover:border-(--line) hover:bg-(--surface) text-(--ink)" : "border-(--line) bg-(--surface) text-(--ink) hover:bg-(--surface)" }`}
-      title="Click to edit phone number"
+      title={t('batch.editPhone')}
     >
-      {currentPhone || <span className="text-(--muted)">Not set</span>}
+      {currentPhone || <span className="text-(--muted)">{t('batch.notSet')}</span>}
     </button>
   );
 };
@@ -166,6 +168,7 @@ const InlineLocationEditor = ({
   onSave,
   isSaving,
 }: InlineLocationEditorProps) => {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] =
     useState<PlaceSearchResult | null>(null);
@@ -263,11 +266,11 @@ const InlineLocationEditor = ({
             }}
           >
             <p className="text-[0.8125rem] text-(--ink)">
-              Search delivery location
+              {t('batch.deliveryLocation')}
             </p>
             <PlaceSearch
               onLocationSelect={(loc) => setSelectedLocation(loc)}
-              placeholder="Search for delivery location..."
+              placeholder={t('batch.searchDelivery')}
               className="relative"
               country="rw"
             />
@@ -289,7 +292,7 @@ const InlineLocationEditor = ({
                 disabled={!selectedLocation || isSaving || localSaving}
                 isLoading={isSaving || localSaving}
               >
-                Save Location
+                {t('location.save')}
               </Button>
               <Button
                 type="button"
@@ -299,7 +302,7 @@ const InlineLocationEditor = ({
                 }}
                 disabled={localSaving}
               >
-                Cancel
+                {t('users.cancel')}
               </Button>
             </div>
           </div>,
@@ -315,13 +318,13 @@ const InlineLocationEditor = ({
         onClick={() => setIsOpen(!isOpen)}
         disabled={isSaving || localSaving}
         className={`text-xs px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ hasLocation ? "border-transparent hover:border-(--line) hover:bg-(--surface)" : "border-(--line) bg-(--surface) hover:bg-(--surface)" }`}
-        title="Click to set delivery location"
+        title={t('batch.setLocation')}
       >
         {locationDisplay ? (
           <span className="text-(--ink) text-xs">{locationDisplay}</span>
         ) : (
           <span className="text-(--muted) italic text-xs">
-            Click to set location
+            {t('batch.setLocation')}
           </span>
         )}
       </button>
@@ -343,8 +346,10 @@ const InlineTextEditor = ({
   value,
   onSave,
   isSaving,
-  placeholder = "Click to edit",
+  placeholder,
 }: InlineTextEditorProps) => {
+  const { t } = useI18n();
+  const resolvedPlaceholder = placeholder ?? t('common.actions.edit');
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || "");
   const [localSaving, setLocalSaving] = useState(false);
@@ -384,7 +389,7 @@ const InlineTextEditor = ({
           onBlur={handleSave}
           disabled={isSaving || localSaving}
           className={cn(controlClassName, 'px-3 disabled:opacity-50')}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
         />
         {(isSaving || localSaving) && (
           <svg className="animate-spin h-4 w-4 text-(--ink)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -408,7 +413,7 @@ const InlineTextEditor = ({
           {value}
         </span>
       ) : (
-        <span className="text-(--muted) italic text-xs">{placeholder}</span>
+        <span className="text-(--muted) italic text-xs">{resolvedPlaceholder}</span>
       )}
     </button>
   );
@@ -417,6 +422,7 @@ const InlineTextEditor = ({
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 const BatchPreviewPage = () => {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { fetchBatchOrders, batch, setBatch, isFetching } = useGetBatchOrders();
@@ -432,7 +438,7 @@ const BatchPreviewPage = () => {
   const orders = batch?.orders || [];
   const draftOrders = orders.filter((o) => o.status === OrderStatus.DRAFT);
 
-  const orderValidation = draftOrders.map(getDraftOrderValidation);
+  const orderValidation = draftOrders.map((order) => getDraftOrderValidation(order, t));
 
   const invalidCount = orderValidation.filter((v) => !v.isValid).length;
   const canComplete = invalidCount === 0 && draftOrders.length > 0;
@@ -474,12 +480,12 @@ const BatchPreviewPage = () => {
             phoneNumber: response?.data?.recipient?.phoneNumber || phone,
           } as User,
         } as Order);
-        toast.success("Phone number updated", { duration: 2000 });
+        toast.success(t('batch.phoneUpdated'), { duration: 2000 });
       } catch (error) {
         toast.error(formatErrorForToast(error));
       }
     },
-    [updateOrder, updateOrderInBatchState],
+    [t, updateOrder, updateOrderInBatchState],
   );
 
   const handleUpdateLocation = useCallback(
@@ -504,12 +510,12 @@ const BatchPreviewPage = () => {
           locationTo: response?.data?.locationTo || locationTo,
           notes: response?.data?.notes || notes,
         } as Order);
-        toast.success("Delivery location updated", { duration: 2000 });
+        toast.success(t('batch.locationUpdated'), { duration: 2000 });
       } catch (error) {
         toast.error(formatErrorForToast(error));
       }
     },
-    [updateOrder, updateOrderInBatchState],
+    [t, updateOrder, updateOrderInBatchState],
   );
 
   const handleUpdateField = useCallback(
@@ -525,19 +531,19 @@ const BatchPreviewPage = () => {
           order: { [field]: value || null },
         }).unwrap();
         updateOrderInBatchState(response?.data);
-        toast.success("Field updated", { duration: 2000 });
+        toast.success(t('batch.fieldUpdated'), { duration: 2000 });
       } catch (error) {
         toast.error(formatErrorForToast(error));
       }
     },
-    [updateOrder, updateOrderInBatchState],
+    [t, updateOrder, updateOrderInBatchState],
   );
 
   const handleCompleteBatch = useCallback(async () => {
     if (!id) return;
     try {
       await completeBatch({ id: id as UUID }).unwrap();
-      toast.success("Batch completed! Orders are now active.");
+      toast.success(t('batch.completedSuccess'));
       navigate("/batches");
     } catch (error) {
       const parsed = parseApiError(error);
@@ -545,12 +551,12 @@ const BatchPreviewPage = () => {
       
       // If there are validation errors, they're already in the preview table
       if (parsed.allErrors.length > 0) {
-        toast.error(`${parsed.allErrors.length} validation error(s) found. Please fix them before completing.`, {
+        toast.error(t('batch.validationErrors', { count: parsed.allErrors.length }), {
           duration: 5000,
         });
       }
     }
-  }, [id, completeBatch, navigate]);
+  }, [id, completeBatch, navigate, t]);
 
   const previewColumns = useMemo<ColumnDef<Order>[]>(
     () => [
@@ -562,7 +568,7 @@ const BatchPreviewPage = () => {
         ),
       },
       {
-        header: "Ref",
+        header: t('batches.reference'),
         accessorKey: "referenceId",
         cell: ({ row }) => (
           <ReferenceIdInput label={row?.original?.referenceId} />
@@ -570,7 +576,7 @@ const BatchPreviewPage = () => {
       },
       {
         id: "recipientPhone",
-        header: "Recipient Phone",
+        header: t('batch.recipientPhone'),
         cell: ({ row }) => {
           const isDraftOrder = row.original.status === OrderStatus.DRAFT;
           const phoneResult = validateAndFormatPhoneNumber(getRecipientPhone(row.original));
@@ -595,7 +601,7 @@ const BatchPreviewPage = () => {
       },
       {
         id: "deliveryLocation",
-        header: "Delivery Location",
+        header: t('batch.deliveryLocation'),
         cell: ({ row }) => {
           const isDraftOrder = row.original.status === OrderStatus.DRAFT;
           const locationResult = validateDeliveryLocation(row.original.locationTo);
@@ -620,7 +626,7 @@ const BatchPreviewPage = () => {
       },
       {
         id: "productRef",
-        header: "Product Ref",
+        header: t('batch.productRef'),
         cell: ({ row }) => {
           const isDraftOrder = row.original.status === OrderStatus.DRAFT;
           return (
@@ -636,7 +642,7 @@ const BatchPreviewPage = () => {
                     )
                   }
                   isSaving={isUpdating}
-                  placeholder="Add ref..."
+                  placeholder={t('batch.addReference')}
                 />
               ) : (
                 <span className="type-meta">
@@ -649,7 +655,7 @@ const BatchPreviewPage = () => {
       },
       {
         id: "description",
-        header: "Description",
+        header: t('batch.descriptionField'),
         cell: ({ row }) => {
           const isDraftOrder = row.original.status === OrderStatus.DRAFT;
           return (
@@ -661,7 +667,7 @@ const BatchPreviewPage = () => {
                     handleUpdateField(row.original.id, "description", val)
                   }
                   isSaving={isUpdating}
-                  placeholder="Add description..."
+                  placeholder={t('batch.addDescription')}
                 />
               ) : (
                 <span>{row.original.description || "—"}</span>
@@ -672,15 +678,15 @@ const BatchPreviewPage = () => {
       },
       {
         id: "previewStatus",
-        header: "Status",
+        header: t('common.status'),
         cell: ({ row }) => {
           const isDraftOrder = row.original.status === OrderStatus.DRAFT;
-          const validation = getDraftOrderValidation(row.original);
+          const validation = getDraftOrderValidation(row.original, t);
           
           if (!isDraftOrder) {
             return (
               <Badge variant="default" className="text-xs">
-                {row.original.status}
+                {t(`status.${row.original.status.toLowerCase()}`)}
               </Badge>
             );
           }
@@ -688,7 +694,7 @@ const BatchPreviewPage = () => {
           if (validation.isValid) {
             return (
               <Badge variant="secondary" className="text-xs">
-                Valid
+                {t('batch.valid')}
               </Badge>
             );
           }
@@ -701,14 +707,14 @@ const BatchPreviewPage = () => {
                     variant="destructive"
                     className="text-xs cursor-pointer hover:bg-(--surface)"
                   >
-                    {validation.issues.length} issue{validation.issues.length !== 1 ? 's' : ''}
+                    {t('batch.issues', { count: validation.issues.length })}
                   </Badge>
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-80" align="end">
                 <div className="space-y-2">
                   <h4 className="type-label">
-                    Validation Issues
+                    {t('batch.validationIssues')}
                   </h4>
                   <ul className="space-y-1">
                     {validation.issues.map((issue, idx) => (
@@ -725,23 +731,23 @@ const BatchPreviewPage = () => {
         },
       },
     ],
-    [handleUpdateField, handleUpdateLocation, handleUpdatePhone, isUpdating],
+    [handleUpdateField, handleUpdateLocation, handleUpdatePhone, isUpdating, t],
   );
 
   const rowHighlightClassName = useCallback((row: Order) => {
     const isDraftOrder = row.status === OrderStatus.DRAFT;
-    return !getDraftOrderValidation(row).isValid && isDraftOrder ? "bg-(--surface)" : "";
-  }, []);
+    return !getDraftOrderValidation(row, t).isValid && isDraftOrder ? "bg-(--surface)" : "";
+  }, [t]);
 
   if (isFetching) {
     return (
       <main className="w-full flex flex-col gap-6">
         <PublicSectionCard
-          title="Loading"
-          description="Fetching batch preview…"
+          title={t('batch.loading')}
+          description={t('batch.fetching')}
         >
           <p className="text-sm text-(--muted) text-center py-8">
-            Loading batch...
+            {t('batch.fetching')}
           </p>
         </PublicSectionCard>
       </main>
@@ -751,9 +757,9 @@ const BatchPreviewPage = () => {
   if (!batch) {
     return (
       <main className="w-full flex flex-col gap-6">
-        <PublicSectionCard title="Not found">
+        <PublicSectionCard title={t('batch.notFoundTitle')}>
           <p className="text-sm text-(--muted) text-center py-8">
-            Batch not found.
+            {t('batch.notFound')}
           </p>
         </PublicSectionCard>
       </main>
@@ -768,11 +774,11 @@ const BatchPreviewPage = () => {
         className="flex flex-col gap-4"
       >
         <PublicPageHero
-          eyebrow="Batch preview"
+          eyebrow={t('batch.previewEyebrow')}
           title={
             <span className="flex flex-wrap items-center gap-2 sm:gap-3">
               <span className="text-base font-normal">
-                {batch.name || "Unnamed Batch"}
+                {batch.name || t('batch.unnamed')}
               </span>
               <Badge
                 variant={
@@ -780,18 +786,18 @@ const BatchPreviewPage = () => {
                 }
                 size="sm"
               >
-                {batch.status}
+                {t(`status.${batch.status.toLowerCase()}`)}
               </Badge>
             </span>
           }
           description={
             <span className="type-meta">
-              Ref:{" "}
+              {t('batches.reference')}:{" "}
               <code className="text-xs bg-(--surface) px-1.5 py-0.5 rounded text-(--muted)">
                 {batch.referenceId}
               </code>
               {" · "}
-              {orders.length} order{orders.length !== 1 ? "s" : ""}
+              {t('batch.orderCount', { count: orders.length })}
             </span>
           }
         />
@@ -807,32 +813,32 @@ const BatchPreviewPage = () => {
                 <h3 className={`text-sm font-normal ${
                   canComplete ? "text-(--ink)" : "text-(--ink)"
                 }`}>
-                  {canComplete ? "✓ Batch Ready" : "⚠ Validation Summary"}
+                  {canComplete ? `✓ ${t('batch.readyTitle')}` : `⚠ ${t('batch.validationSummary')}`}
                 </h3>
                 <div className="mt-2 space-y-1">
                   <p className={`text-xs ${
                     canComplete ? "text-(--ink)" : "text-(--ink)"
                   }`}>
-                    {draftOrders.length - invalidCount} of {draftOrders.length} orders validated
+                    {t('batch.validatedCount', { valid: draftOrders.length - invalidCount, total: draftOrders.length })}
                   </p>
                   {invalidCount > 0 && (
                     <>
                       <p className="text-[0.8125rem] text-(--ink)">
-                        • {orderValidation.filter(v => !v.isValid && v.issues.some(i => i.includes('phone'))).length} invalid phone numbers
+                        • {t('batch.invalidPhoneCount', { count: draftOrders.filter(order => !validateAndFormatPhoneNumber(getRecipientPhone(order)).isValid).length })}
                       </p>
                       <p className="text-[0.8125rem] text-(--ink)">
-                        • {orderValidation.filter(v => !v.isValid && v.issues.some(i => i.includes('location'))).length} missing delivery locations
+                        • {t('batch.missingLocationCount', { count: draftOrders.filter(order => !validateDeliveryLocation(order.locationTo).isValid).length })}
                       </p>
                     </>
                   )}
                 </div>
                 {canComplete ? (
                   <p className="mt-2 text-xs text-(--ink)">
-                    All orders are valid. You can now complete the batch.
+                    {t('batch.allValid')}
                   </p>
                 ) : (
                   <p className="mt-2 text-xs text-(--ink)">
-                    Click any highlighted cell to edit inline and fix validation errors.
+                    {t('batch.fixErrors')}
                   </p>
                 )}
               </div>
@@ -842,12 +848,12 @@ const BatchPreviewPage = () => {
       </motion.div>
 
       <PublicSectionCard
-        eyebrow="Orders"
-        title="Orders preview"
+        eyebrow={t('batches.orders')}
+        title={t('batch.previewTitle')}
         description={
           isDraft
-            ? "Click any cell to edit inline."
-            : "Batch completed — this list is read-only."
+            ? t('batch.previewEditable')
+            : t('batch.previewReadonly')
         }
         contentClassName="px-0 pb-0 pt-0 sm:px-0"
       >
@@ -860,7 +866,7 @@ const BatchPreviewPage = () => {
             page={0}
             size={Math.max(orders.length, 1)}
             isLoading={false}
-            noDataMessage="No orders found in this batch."
+            noDataMessage={t('batch.previewEmpty')}
             rowClassName={rowHighlightClassName}
           />
         </div>
@@ -873,7 +879,7 @@ const BatchPreviewPage = () => {
             navigate(-1);
           }}
         >
-          Back
+          {t('common.actions.back')}
         </Button>
         {isDraft && (
           <div className="flex justify-end">
@@ -884,7 +890,7 @@ const BatchPreviewPage = () => {
               disabled={!canComplete || isCompleting}
               isLoading={isCompleting}
             >
-              Complete Batch
+              {t('batch.complete')}
             </Button>
           </div>
         )}

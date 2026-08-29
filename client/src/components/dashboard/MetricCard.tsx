@@ -6,6 +6,7 @@ import type { ChartSeriesIndex } from '@/components/charts/chart.tokens';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { createSearchParams, Link } from 'react-router-dom';
 import { faArrowRight, faArrowTrendDown, faArrowTrendUp } from '@fortawesome/free-solid-svg-icons';
+import { useI18n } from '@/i18n/i18n';
 
 // `accent` survives from the pre-monochrome palette. Every card now shares one
 // treatment; the accent only picks a step on the neutral chart ramp so a row of
@@ -37,6 +38,7 @@ const MetricCard = ({
   note,
   footerText,
 }: MetricCardData) => {
+  const { t } = useI18n();
   const destination =
     to ||
     (href
@@ -75,7 +77,7 @@ const MetricCard = ({
               'type-meta inline-flex shrink-0 items-center gap-1 tabular',
               trend.isPositive ? 'text-(--approve)' : 'text-(--danger)'
             )}
-            aria-label={`${trend.isPositive ? 'Up' : 'Down'} ${Math.abs(trend.value)} percent`}
+            aria-label={t(trend.isPositive ? 'common.upPercent' : 'common.downPercent', { value: Math.abs(trend.value) })}
           >
             <FontAwesomeIcon
               icon={trend.isPositive ? faArrowTrendUp : faArrowTrendDown}
@@ -90,7 +92,7 @@ const MetricCard = ({
       <div className="flex items-end justify-between gap-4">
         <p
           className="type-metric truncate"
-          aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
+          aria-label={t('common.valueLabel', { label, value: typeof value === 'number' ? value.toLocaleString() : value })}
         >
           {value}
         </p>
@@ -100,7 +102,7 @@ const MetricCard = ({
               values={sparklineData}
               kind={sparklineType === 'bar' ? 'bar' : 'line'}
               series={accentSeries[accent]}
-              ariaLabel={`${label} trend`}
+              ariaLabel={t('common.trendLabel', { label })}
             />
           </div>
         )}

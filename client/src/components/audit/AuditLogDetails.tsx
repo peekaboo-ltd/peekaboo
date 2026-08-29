@@ -4,12 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import type { AuditLog } from '@/services/auditLog.service';
+import { useI18n } from '@/i18n/i18n';
 
 interface AuditLogDetailsProps {
   log: AuditLog;
 }
 
 export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
+  const { t } = useI18n();
   const renderJsonDiff = () => {
     if (!log.changes || !log.changes.before || !log.changes.after) {
       return null;
@@ -36,7 +38,7 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
               </h5>
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-md bg-(--surface) p-3">
-                  <p className="text-xs font-normal text-(--ink) mb-1">Before</p>
+                  <p className="text-xs font-normal text-(--ink) mb-1">{t('audit.before')}</p>
                   <pre className="text-xs text-(--ink) overflow-auto whitespace-pre-wrap">
                     {typeof before === 'object' 
                       ? JSON.stringify(before, null, 2)
@@ -44,7 +46,7 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
                   </pre>
                 </div>
                 <div className="rounded-md bg-(--surface) p-3">
-                  <p className="text-xs font-normal text-(--ink) mb-1">After</p>
+                  <p className="text-xs font-normal text-(--ink) mb-1">{t('audit.after')}</p>
                   <pre className="text-xs text-(--ink) overflow-auto whitespace-pre-wrap">
                     {typeof after === 'object'
                       ? JSON.stringify(after, null, 2)
@@ -78,31 +80,31 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
       {/* Basic Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Audit Log Information</CardTitle>
+          <CardTitle>{t('audit.information')}</CardTitle>
           <CardDescription>
-            Details about this audit log entry
+            {t('audit.informationDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm font-normal text-muted-foreground">Action</p>
+              <p className="text-sm font-normal text-muted-foreground">{t('audit.action')}</p>
               <Badge variant="outline" className="mt-1">
                 {log.action}
               </Badge>
             </div>
             <div>
-              <p className="text-sm font-normal text-muted-foreground">Timestamp</p>
+              <p className="text-sm font-normal text-muted-foreground">{t('audit.timestamp')}</p>
               <p className="text-sm mt-1">
                 {format(new Date(log.createdAt), 'PPpp')}
               </p>
             </div>
             <div>
-              <p className="text-sm font-normal text-muted-foreground">Entity Type</p>
+              <p className="text-sm font-normal text-muted-foreground">{t('audit.entityType')}</p>
               <p className="text-sm mt-1 capitalize">{log.entityType}</p>
             </div>
             <div>
-              <p className="text-sm font-normal text-muted-foreground">Entity ID</p>
+              <p className="text-sm font-normal text-muted-foreground">{t('audit.entityId')}</p>
               <p className="text-sm mt-1">{log.entityId}</p>
             </div>
           </div>
@@ -112,7 +114,7 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
             <>
               <Separator />
               <div>
-                <h4 className="type-label mb-2">Performed By</h4>
+                <h4 className="type-label mb-2">{t('audit.performedBy')}</h4>
                 <div className="space-y-1">
                   <p className="text-sm">{log.user.name}</p>
                   <p className="text-sm text-muted-foreground">{log.user.email}</p>
@@ -128,9 +130,9 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
       {log.changes && (
         <Card>
           <CardHeader>
-            <CardTitle>Changes</CardTitle>
+            <CardTitle>{t('audit.changes')}</CardTitle>
             <CardDescription>
-              Fields that were modified in this action
+              {t('audit.changesDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -143,9 +145,9 @@ export const AuditLogDetails: React.FC<AuditLogDetailsProps> = ({ log }) => {
       {log.details && Object.keys(log.details).length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Additional Details</CardTitle>
+            <CardTitle>{t('audit.additionalDetails')}</CardTitle>
             <CardDescription>
-              Extra information recorded with this action
+              {t('audit.additionalDetailsDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>

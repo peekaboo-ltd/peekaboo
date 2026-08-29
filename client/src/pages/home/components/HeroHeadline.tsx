@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { CustomerTab } from '../home.types';
+import { useI18n } from '@/i18n/i18n';
 
 interface HeroHeadlineProps {
   activeTab: CustomerTab;
@@ -20,6 +21,7 @@ const HeroHeadline = ({
   businessSubtitle,
 }: HeroHeadlineProps) => {
   const isPersonal = activeTab === 'personal';
+  const { t } = useI18n();
 
   return (
     <hgroup className="space-y-3">
@@ -50,10 +52,10 @@ const HeroHeadline = ({
             )
           : businessTitle1}
         <br />
-        {isPersonal ? personalTitle2 : businessTitle2} in Kigali.
+        {isPersonal ? personalTitle2 : businessTitle2} {t('home.headline.kigali')}
       </h1>
       <p className="type-body max-w-[46ch] text-(--muted)">
-        {isPersonal ? <Link to="/legal/terms-and-conditions" className='underline text-sm underline-offset-2 hover:text-(--ink)'>Learn more</Link> : businessSubtitle}
+        {isPersonal ? <Link to="/legal/terms-and-conditions" className='underline text-sm underline-offset-2 hover:text-(--ink)'>{t('home.headline.learnMore')}</Link> : businessSubtitle}
       </p>
  
     </hgroup>

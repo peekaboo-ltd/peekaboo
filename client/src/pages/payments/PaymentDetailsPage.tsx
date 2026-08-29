@@ -5,7 +5,6 @@ import { useGetOrder } from '@/hooks/orders/orders.hooks';
 import { useGetPayment } from '@/hooks/payments/payment.hooks';
 import { useAppSelector } from '@/states/hooks';
 import { UUID } from '@/types';
-import { PREFERRED_CONTACT_METHOD_LABELS } from '@/types/order.type';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -34,6 +33,7 @@ import {
   InternalSectionCard,
   InternalStatCard,
 } from '@/components/layout/InternalPage';
+import { useI18n } from '@/i18n/i18n';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -48,12 +48,6 @@ const formatDateLabel = (value?: string | Date) => {
   return formatDate(value, 'DD/MM/YYYY HH:mm');
 };
 
-const paymentStatusLabelMap: Record<KpayPaymentStatus, string> = {
-  [KpayPaymentStatus.SUCCESSFUL]: 'Successful',
-  [KpayPaymentStatus.PENDING]: 'Pending',
-  [KpayPaymentStatus.FAILED]: 'Failed',
-};
-
 const paymentStatusBadgeVariantMap: Record<
   KpayPaymentStatus,
   'default' | 'secondary' | 'destructive' | 'outline'
@@ -63,18 +57,11 @@ const paymentStatusBadgeVariantMap: Record<
   [KpayPaymentStatus.FAILED]: 'destructive',
 };
 
-const methodLabelMap: Record<string, string> = {
-  momo: 'Mobile Money',
-  bank: 'Bank',
-  cc: 'Credit Card',
-  smartcash: 'SmartCash',
-  spenn: 'Spenn',
-};
-
 const PaymentDetailsPage = () => {
+  const { t } = useI18n();
   const { id } = useParams();
   const navigate = useNavigate();
-  useDocumentTitle('Payment details');
+  useDocumentTitle(t('paymentDetails.docTitle'));
 
   const { payment } = useAppSelector((state) => state.payment);
   const { order } = useAppSelector((state) => state.order);
@@ -97,7 +84,7 @@ const PaymentDetailsPage = () => {
   if (isFetchingPayment && !payment) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-(--muted)">Loading payment details…</p>
+        <p className="text-sm text-(--muted)">{t('paymentDetails.loading')}</p>
       </main>
     );
   }
@@ -105,10 +92,10 @@ const PaymentDetailsPage = () => {
   if (!payment) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-(--muted)">Payment not found.</p>
+        <p className="text-sm text-(--muted)">{t('paymentDetails.notFound')}</p>
         <menu className="w-full flex items-center gap-3">
           <Button type="button" onClick={(e) => { e.preventDefault(); navigate(-1); }}>
-            Back
+            {t('paymentDetails.back')}
           </Button>
         </menu>
       </main>
@@ -117,14 +104,22 @@ const PaymentDetailsPage = () => {
 
   const amount = Number(payment.amount || 0);
   const paymentStatusLabel =
-    paymentStatusLabelMap[payment.status as KpayPaymentStatus] || payment.status;
+    t(`status.${payment.status.toLowerCase()}`);
+
+  const methodLabelMap: Record<string, string> = {
+    momo: t('payments.mobileMoney'),
+    bank: t('payments.bank'),
+    cc: t('payments.creditCard'),
+    smartcash: 'SmartCash',
+    spenn: 'Spenn',
+  };
 
   const linkedOrder =
     payment.type === PaymentType.ORDER && order?.id === payment.entityId ? order : undefined;
 
   const stats = [
     {
-      label: 'Payment Status',
+      label: t('paymentDetails.status'),
       value: paymentStatusLabel,
       icon:
         payment.status === KpayPaymentStatus.SUCCESSFUL
@@ -140,13 +135,13 @@ const PaymentDetailsPage = () => {
           : 'bg-(--surface) text-(--muted)',
     },
     {
-      label: 'Amount',
+      label: t('paymentDetails.amount'),
       value: formatCurrency(amount, payment.currency),
       icon: faMoneyBillWave,
       iconBg: 'bg-(--ink) text-(--paper)',
     },
     {
-      label: 'Updated At',
+      label: t('paymentDetails.updatedAt'),
       value: formatDateLabel(payment.updatedAt),
       icon: faCalendarDay,
       iconBg: 'bg-(--surface) text-(--muted)',
@@ -157,9 +152,9 @@ const PaymentDetailsPage = () => {
     <InternalPage>
       <motion.section variants={itemVariants}>
         <InternalPageHeader
-          eyebrow="Payment Overview"
+          eyebrow={t('paymentDetails.overview')}
           title={payment?.externalReferenceId}
-          description="Transaction details, customer information, and linked entity context."
+          description={t('paymentDetails.description')}
           actions={
             <Badge
               variant={paymentStatusBadgeVariantMap[payment.status as KpayPaymentStatus] ?? 'outline'}
@@ -193,20 +188,20 @@ const PaymentDetailsPage = () => {
       >
         <InternalSectionCard
           className="lg:col-span-2"
-          eyebrow="Payment Details"
-          title="Core Transaction Information"
+          eyebrow={t('paymentDetails.eyebrow')}
+          title={t('paymentDetails.core')}
           actions={
             <span className="type-meta">
-              Created {formatDateLabel(payment.createdAt)}
+              {t('paymentDetails.created')} {formatDateLabel(payment.createdAt)}
             </span>
           }
         >
           <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {[
-              { label: 'Entity Type', value: payment.type, icon: faAddressCard },
-              { label: 'External Reference', value: payment.externalReferenceId, icon: faFileLines },
-              { label: 'Method', value: methodLabelMap[payment.method] || payment.method, icon: faMoneyBillWave },
-              { label: 'Currency', value: payment.currency, icon: faMoneyBillWave },
+              { label: t('paymentDetails.entityType'), value: payment.type, icon: faAddressCard },
+              { label: t('paymentDetails.externalReference'), value: payment.externalReferenceId, icon: faFileLines },
+              { label: t('paymentDetails.method'), value: methodLabelMap[payment.method] || payment.method, icon: faMoneyBillWave },
+              { label: t('paymentDetails.currency'), value: payment.currency, icon: faMoneyBillWave },
             ].map((item) => (
               <li
                 key={item.label}
@@ -235,10 +230,10 @@ const PaymentDetailsPage = () => {
                 </span>
                 <section>
                   <p className="type-meta">
-                    Description
+                    {t('paymentDetails.descriptionLabel')}
                   </p>
                   <p className="mt-1 text-sm font-normal text-(--ink)">
-                    {payment.description || 'No description provided.'}
+                    {payment.description || t('paymentDetails.noDescription')}
                   </p>
                 </section>
               </header>
@@ -247,51 +242,49 @@ const PaymentDetailsPage = () => {
         </InternalSectionCard>
 
         <InternalSectionCard
-          eyebrow="Customer & Entity Context"
-          title="Related Information"
+          eyebrow={t('paymentDetails.customerContext')}
+          title={t('paymentDetails.related')}
         >
           <section className="mt-6 flex flex-col gap-4">
             {[
-              { label: 'Customer Name', value: payment.customerName, icon: faUser },
-              { label: 'Customer Email', value: payment.customerEmail, icon: faEnvelope },
-              { label: 'Customer Phone', value: payment.customerPhone, icon: faPhone },
-              { label: 'Created By', value: payment.createdBy?.email, icon: faUserGear },
+              { label: t('paymentDetails.customerName'), value: payment.customerName, icon: faUser },
+              { label: t('paymentDetails.customerEmail'), value: payment.customerEmail, icon: faEnvelope },
+              { label: t('paymentDetails.customerPhone'), value: payment.customerPhone, icon: faPhone },
+              { label: t('paymentDetails.createdBy'), value: payment.createdBy?.email, icon: faUserGear },
               {
-                label: 'Contact Via',
+                label: t('paymentDetails.contactVia'),
                 value:
                   payment.type === PaymentType.ORDER
                     ? isFetchingOrder
-                      ? 'Loading order…'
+                      ? t('paymentDetails.loadingOrder')
                       : linkedOrder?.preferredContactMethod
-                        ? PREFERRED_CONTACT_METHOD_LABELS[
-                            linkedOrder.preferredContactMethod
-                          ]
-                        : 'Not set'
+                        ? t(`tracking.contact.${linkedOrder.preferredContactMethod.toLowerCase()}`)
+                        : t('paymentDetails.notSet')
                     : 'N/A',
                 icon: faComments,
               },
               {
-                label: 'Linked Order Ref',
+                label: t('paymentDetails.linkedOrderRef'),
                 value: payment.type === PaymentType.ORDER
-                  ? isFetchingOrder ? 'Loading order…' : linkedOrder?.referenceId || 'Order not found'
+                  ? isFetchingOrder ? t('paymentDetails.loadingOrder') : linkedOrder?.referenceId || t('paymentDetails.orderNotFound')
                   : 'N/A',
                 icon: faTruckFast,
               },
               {
-                label: 'Linked Order Status',
+                label: t('paymentDetails.linkedOrderStatus'),
                 value: payment.type === PaymentType.ORDER
-                  ? isFetchingOrder ? 'Loading order…' : linkedOrder?.status || '—'
+                  ? isFetchingOrder ? t('paymentDetails.loadingOrder') : linkedOrder?.status ? t(`status.${linkedOrder.status.toLowerCase()}`) : '—'
                   : 'N/A',
                 icon: faCircleCheck,
               },
               {
-                label: 'Linked Order OTP',
+                label: t('paymentDetails.linkedOrderOtp'),
                 value: payment.type === PaymentType.ORDER
-                  ? isFetchingOrder ? 'Loading order…' : linkedOrder?.trackingId || '—'
+                  ? isFetchingOrder ? t('paymentDetails.loadingOrder') : linkedOrder?.trackingId || '—'
                   : 'N/A',
                 icon: faHashtag,
               },
-              { label: 'Updated At', value: formatDateLabel(payment.updatedAt), icon: faCalendarDay },
+              { label: t('paymentDetails.updatedAt'), value: formatDateLabel(payment.updatedAt), icon: faCalendarDay },
             ].map((item) => (
               <article
                 key={item.label}
@@ -322,7 +315,7 @@ const PaymentDetailsPage = () => {
           type="button"
           onClick={(e) => { e.preventDefault(); navigate(-1); }}
         >
-          Back
+          {t('paymentDetails.back')}
         </Button>
       </motion.menu>
     </InternalPage>

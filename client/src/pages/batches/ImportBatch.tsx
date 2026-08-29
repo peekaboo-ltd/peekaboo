@@ -19,6 +19,7 @@ import type {
   ImportRowValidationError,
   ImportTemplateRow,
 } from '@/types/orderImport.type';
+import { useI18n, type I18nContextValue } from '@/i18n/i18n';
 
 const TEMPLATE_HEADERS_CURRENT = [
   'RECIPIENT PHONE NUMBER (+250 7XX XXX XXXX)',
@@ -60,7 +61,10 @@ const trimTrailingEmpty = (values: string[]) => {
 
 const MAX_TEXT_LENGTH = 255;
 
-function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewState {
+function buildImportPreviewFromGrid(
+  rows: (string | null)[][],
+  t: I18nContextValue['t'],
+): ImportPreviewState {
   const headerRow = trimTrailingEmpty(
     (rows[0] || []).map((value) => String(value || '')),
   );
@@ -82,7 +86,7 @@ function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewSta
       errors: [{
         rowNumber: 1,
         field: 'headers',
-        message: 'Invalid template headers. Please use the official Bulk Import Template.',
+        message: t('batch.headersInvalid'),
       }],
     };
   }
@@ -119,7 +123,7 @@ function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewSta
       validationErrors.push({
         rowNumber,
         field: 'recipientPhoneNumber',
-        message: phoneValidation.error || 'Recipient phone number is required and must be valid',
+        message: t('batch.phoneRequired'),
       });
     }
 
@@ -128,7 +132,7 @@ function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewSta
       validationErrors.push({
         rowNumber,
         field: 'deliveryLocation',
-        message: 'Delivery location is recommended for better order processing',
+        message: t('batch.locationRecommended'),
       });
     }
 
@@ -136,7 +140,7 @@ function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewSta
       validationErrors.push({
         rowNumber,
         field: 'productReferenceNo',
-        message: `Product reference cannot exceed ${MAX_TEXT_LENGTH} characters`,
+        message: t('batch.productRefLength', { count: MAX_TEXT_LENGTH }),
       });
     }
 
@@ -144,7 +148,7 @@ function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewSta
       validationErrors.push({
         rowNumber,
         field: 'productName',
-        message: `Product name cannot exceed ${MAX_TEXT_LENGTH} characters`,
+        message: t('batch.productNameLength', { count: MAX_TEXT_LENGTH }),
       });
     }
 
@@ -162,7 +166,7 @@ function buildImportPreviewFromGrid(rows: (string | null)[][]): ImportPreviewSta
     validationErrors.push({
       rowNumber: 2,
       field: 'rows',
-      message: 'No valid data rows found. Add at least one order row.',
+      message: t('batch.noRows'),
     });
   }
 
@@ -174,6 +178,7 @@ interface ImportBatchFormData {
 }
 
 const ImportBatch = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { importBatchModal } = useAppSelector((state) => state.batch);
@@ -246,7 +251,7 @@ const ImportBatch = () => {
         if (!firstSheet) {
           setPreview({
             rows: [],
-            errors: [{ rowNumber: 1, field: 'file', message: 'No worksheet found in file' }],
+            errors: [{ rowNumber: 1, field: 'file', message: t('batch.noSheet') }],
           });
           return;
         }
@@ -259,14 +264,14 @@ const ImportBatch = () => {
           raw: false,
         });
 
-        setPreview(buildImportPreviewFromGrid(rows));
+        setPreview(buildImportPreviewFromGrid(rows, t));
       } catch {
         setPreview({
           rows: [],
           errors: [{
             rowNumber: 1,
             field: 'file',
-            message: 'Unable to parse file. Please upload a valid .xlsx or .csv template.',
+            message: t('batch.parseFailed'),
           }],
         });
       }
@@ -277,7 +282,7 @@ const ImportBatch = () => {
     } else {
       reader.readAsBinaryString(file);
     }
-  }, []);
+  }, [t]);
 
   const onFileChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -296,7 +301,7 @@ const ImportBatch = () => {
       if (!isXlsx && !isCsv) {
         setPreview({
           rows: [],
-          errors: [{ rowNumber: 1, field: 'file', message: 'Only .xlsx or .csv files are supported' }],
+          errors: [{ rowNumber: 1, field: 'file', message: t('batch.fileType') }],
         });
         return;
       }
@@ -304,7 +309,7 @@ const ImportBatch = () => {
       setFileName(selectedFile.name);
       parseWorkbook(selectedFile, isCsv ? 'csv' : 'xlsx');
     },
-    [parseWorkbook],
+    [parseWorkbook, t],
   );
 
   const downloadCsvTemplate = useCallback(() => {
@@ -330,7 +335,7 @@ const ImportBatch = () => {
       }).unwrap();
 
       const batchId = response?.data?.batch?.id;
-      toast.success(`Batch created with ${preview.rows.length} orders. Review before completing.`);
+      toast.success(t('batch.created', { count: preview.rows.length }));
       closeModal();
 
       if (batchId) {
@@ -339,7 +344,7 @@ const ImportBatch = () => {
         navigate('/batches');
       }
     } catch (submissionError) {
-      const billingPrompt = parseBillingGuardPrompt(submissionError);
+      const billingPrompt = parseBillingGuardPrompt(submissionError, t);
       if (billingPrompt) {
         setBillingGuardPrompt(billingPrompt);
         dispatch(setImportBatchModal(false));
@@ -357,14 +362,14 @@ const ImportBatch = () => {
         setPreview((previous) => ({ ...previous, errors: backendErrors }));
         const summary = getErrorSummary(submissionError);
         toast.error(
-          `Import failed: ${summary.totalErrors} error(s) in ${summary.affectedRows} row(s). Please fix and retry.`,
+          t('batch.importErrorSummary', { errors: summary.totalErrors, rows: summary.affectedRows }),
           { duration: 5000 }
         );
       } else {
-        toast.error(parsed.message || 'Bulk import failed. Please try again.');
+        toast.error(parsed.message || t('batch.importFailed'));
       }
     }
-  }, [closeModal, dispatch, getValues, hasBlockingErrors, importBulkOrders, navigate, preview?.rows]);
+  }, [closeModal, dispatch, getValues, hasBlockingErrors, importBulkOrders, navigate, preview?.rows, t]);
 
   const closeBillingGuardModal = useCallback(() => {
     setBillingGuardPrompt(null);
@@ -380,8 +385,8 @@ const ImportBatch = () => {
       <Modal
         isOpen={importBatchModal}
         onClose={closeModal}
-        heading="Import Batch Orders"
-        description="Upload the official template, review, then complete the batch after validating."
+        heading={t('batch.importTitle')}
+        description={t('batch.importDescription')}
         className="!max-w-[96vw] !w-[86vw] lg:!w-[78vw]"
       >
         <section className="w-full flex flex-col gap-4 pb-2">
@@ -394,24 +399,24 @@ const ImportBatch = () => {
           <header className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h3 className="type-label">
-                Template Upload
+                {t('batch.templateUpload')}
               </h3>
               <p className="type-meta mt-1">
-                Accepted formats: <code>.xlsx</code> or <code>.csv</code> with exact 5-column template headers.
+                {t('batch.acceptedFormats')}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Button type="button" className="text-xs py-1.5 px-3" onClick={downloadCsvTemplate}>
-                Download CSV template
+                {t('batch.downloadTemplate')}
               </Button>
               {fileName && <Badge variant="secondary">{fileName}</Badge>}
             </div>
           </header>
-          <label className="mt-4 block rounded-lg border border-dashed border-(--line) bg-(--paper) p-4 cursor-pointer hover:border-(--ink) transition-colors">
+          <label className="mt-4 block rounded-lg border border border-(--line) bg-(--paper) p-4 cursor-pointer hover:border-(--ink) transition-colors">
             <input type="file" accept=".xlsx,.csv,text/csv" onChange={onFileChange} className="hidden" />
-            <p className="text-sm text-(--ink)">Click to select import file</p>
+            <p className="text-sm text-(--ink)">{t('batch.selectFile')}</p>
             <p className="type-meta mt-1">
-              Recipient phone is required. Delivery location, product ref, and description are optional.
+              {t('batch.fileHelp')}
             </p>
           </label>
         </motion.article>
@@ -426,10 +431,10 @@ const ImportBatch = () => {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <h4 className="type-label">
-                  {preview.errors.length} Validation Issue{preview.errors.length !== 1 ? 's' : ''} Found
+                  {t('batch.issuesFound', { count: preview.errors.length })}
                 </h4>
                 <p className="text-xs text-(--ink) mt-1">
-                  Affecting {Object.keys(errorsByRow).length} row{Object.keys(errorsByRow).length !== 1 ? 's' : ''}
+                  {t('batch.affectedRows', { count: Object.keys(errorsByRow).length })}
                 </p>
                 
                 {/* Error Summary by Type */}
@@ -446,12 +451,12 @@ const ImportBatch = () => {
             {/* Scrollable Error List */}
             <details className="mt-3">
               <summary className="text-xs font-normal text-(--ink) cursor-pointer hover:text-(--ink)">
-                View all errors
+                {t('batch.viewErrors')}
               </summary>
               <ul className="mt-2 space-y-1 text-xs text-(--ink) max-h-48 overflow-y-auto">
                 {preview.errors.map((item, idx) => (
                   <li key={`${item.rowNumber}-${item.field}-${idx}`}>
-                    Row {item.rowNumber} · {item.field}: {item.message}
+                    {t('batch.errorLine', { row: item.rowNumber, field: item.field, message: item.message })}
                   </li>
                 ))}
               </ul>
@@ -467,10 +472,10 @@ const ImportBatch = () => {
             className="rounded-xl bg-(--surface) p-4"
           >
             <h4 className="type-label">
-              ⚠️ {missingLocationCount} order{missingLocationCount !== 1 ? 's' : ''} missing delivery location
+              ⚠️ {t('batch.missingLocationWarning', { count: missingLocationCount })}
             </h4>
             <p className="text-xs text-(--ink) mt-1">
-              Delivery locations are optional but recommended for better order processing. You can add them in the preview page after import.
+              {t('batch.missingLocationHelp')}
             </p>
           </motion.article>
         )}
@@ -484,21 +489,21 @@ const ImportBatch = () => {
           >
             <header className="px-4 py-3 border-b bg-(--surface) rounded-t-xl flex justify-between items-center">
               <h4 className="type-label">
-                Preview ({preview.rows.length} rows)
+                {t('batch.previewRows', { count: preview.rows.length })}
               </h4>
               <Badge variant={preview.errors.length ? 'destructive' : 'secondary'}>
-                {preview.errors.length ? 'Blocked' : 'Ready'}
+                {preview.errors.length ? t('batch.blocked') : t('batch.ready')}
               </Badge>
             </header>
             <section className="overflow-auto max-h-64">
               <table className="w-full text-xs">
                 <thead className="bg-(--surface) text-(--ink) sticky top-0">
                   <tr>
-                    <th className="text-left px-3 py-2">Row</th>
-                    <th className="text-left px-3 py-2">Recipient Phone</th>
-                    <th className="text-left px-3 py-2">Delivery Location</th>
-                    <th className="text-left px-3 py-2">Product Ref</th>
-                    <th className="text-left px-3 py-2">Status</th>
+                    <th className="text-left px-3 py-2">{t('batch.row')}</th>
+                    <th className="text-left px-3 py-2">{t('batch.recipientPhone')}</th>
+                    <th className="text-left px-3 py-2">{t('batch.deliveryLocation')}</th>
+                    <th className="text-left px-3 py-2">{t('batch.productRef')}</th>
+                    <th className="text-left px-3 py-2">{t('common.status')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -516,7 +521,7 @@ const ImportBatch = () => {
                         <td className="px-3 py-2">{row.recipientPhoneNumber}</td>
                         <td className="px-3 py-2">
                           {row.deliveryLocation || (
-                            <span className="text-(--muted) italic">Optional</span>
+                            <span className="text-(--muted) italic">{t('batch.optional')}</span>
                           )}
                         </td>
                         <td className="px-3 py-2">{row.productReferenceNo || '-'}</td>
@@ -525,7 +530,7 @@ const ImportBatch = () => {
                             variant={rowErrors.length ? 'destructive' : 'secondary'}
                             className="text-xs"
                           >
-                            {rowErrors.length ? `${rowErrors.length} issue(s)` : 'Validated'}
+                            {rowErrors.length ? t('batch.issues', { count: rowErrors.length }) : t('batch.validated')}
                           </Badge>
                         </td>
                       </motion.tr>
@@ -543,26 +548,26 @@ const ImportBatch = () => {
           animate={{ opacity: 1 }}
           className="rounded-xl border border-(--line) bg-(--paper) p-4"
         >
-          <h3 className="type-label mb-3">Batch Details (Optional)</h3>
+          <h3 className="type-label mb-3">{t('batch.detailsOptional')}</h3>
           <Input
-            label="Batch Name"
-            placeholder="e.g. Morning Kigali Drop-offs"
+            label={t('batch.nameLabel')}
+            placeholder={t('batch.namePlaceholder')}
             {...register('batchName')}
           />
           <p className="type-meta mt-1">
-            Leave blank to create an unnamed batch. You can review and edit all orders on the next page.
+            {t('batch.nameHelp')}
           </p>
         </motion.article>
 
         {isError && (
           <p className="text-sm text-(--ink)">
-            {String((error as { data?: { message?: string } })?.data?.message || 'Import failed')}
+            {String((error as { data?: { message?: string } })?.data?.message || t('batch.importFailed'))}
           </p>
         )}
 
         <footer className="flex justify-between gap-3 pt-2 border-t">
           <Button type="button" onClick={closeModal}>
-            Cancel
+            {t('users.cancel')}
           </Button>
           <Button
             type="button"
@@ -571,7 +576,7 @@ const ImportBatch = () => {
             disabled={hasBlockingErrors || isLoading}
             isLoading={isLoading}
           >
-            Create Batch &amp; Review
+            {t('batch.createReview')}
           </Button>
         </footer>
         </section>
@@ -580,24 +585,21 @@ const ImportBatch = () => {
       <Modal
         isOpen={Boolean(billingGuardPrompt)}
         onClose={closeBillingGuardModal}
-        heading={billingGuardPrompt?.title || 'Billing Action Needed'}
+        heading={billingGuardPrompt?.title || t('batch.billingAction')}
         description={billingGuardPrompt?.description || ''}
       >
         <section className="flex flex-col gap-4">
           {billingGuardPrompt?.billingStatus ? (
             <p className="text-sm text-(--muted)">
-              Billing status:{' '}
-              <span className="font-normal text-(--ink)">
-                {billingGuardPrompt.billingStatus}
-              </span>
+              {t('orders.billingStatus', { status: billingGuardPrompt.billingStatus })}
             </p>
           ) : null}
           <footer className="flex justify-end gap-3 pt-2 border-t">
             <Button type="button" onClick={closeBillingGuardModal}>
-              Close
+              {t('common.actions.close')}
             </Button>
             <Button type="button" primary onClick={handlePayFirst}>
-              Pay First To Continue
+              {t('orders.payFirst')}
             </Button>
           </footer>
         </section>

@@ -1,4 +1,5 @@
 import { motion, Variants } from 'framer-motion';
+import { useI18n } from '@/i18n/i18n';
 
 interface ServiceStatus {
   name: string;
@@ -10,13 +11,6 @@ interface DashboardSystemStatusProps {
   variants?: Variants;
 }
 
-const defaultServices: ServiceStatus[] = [
-  { name: 'Order Processing', status: 'operational' },
-  { name: 'Delivery API', status: 'operational' },
-  { name: 'Notifications', status: 'operational' },
-  { name: 'Payments', status: 'operational' },
-];
-
 const dotColor: Record<ServiceStatus['status'], string> = {
   operational: 'bg-(--ink)',
   degraded: 'border border-(--ink) bg-transparent',
@@ -24,10 +18,17 @@ const dotColor: Record<ServiceStatus['status'], string> = {
 };
 
 const DashboardSystemStatus = ({
-  services = defaultServices,
+  services,
   variants,
 }: DashboardSystemStatusProps) => {
-  const allOperational = services.every((s) => s.status === 'operational');
+  const { t } = useI18n();
+  const resolvedServices = services ?? [
+    { name: t('dashboard.system.orderProcessing'), status: 'operational' as const },
+    { name: t('dashboard.system.deliveryApi'), status: 'operational' as const },
+    { name: t('dashboard.system.notifications'), status: 'operational' as const },
+    { name: t('dashboard.system.payments'), status: 'operational' as const },
+  ];
+  const allOperational = resolvedServices.every((s) => s.status === 'operational');
 
   return (
     <motion.div variants={variants}>
@@ -40,13 +41,13 @@ const DashboardSystemStatus = ({
             />
           </span>
           <span className="type-meta">
-            {allOperational ? 'All Systems Operational' : 'Partial Disruption'}
+            {allOperational ? t('dashboard.system.operational') : t('dashboard.system.disruption')}
           </span>
         </div>
 
         {/* Right: service list as plain inline text */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          {services.map((service, i) => (
+          {resolvedServices.map((service, i) => (
             <span
               key={service.name}
               className="flex items-center gap-1.5 text-xs text-(--muted)"
@@ -56,7 +57,7 @@ const DashboardSystemStatus = ({
                 aria-hidden="true"
               />
               {service.name}
-              {i < services.length - 1 && (
+              {i < resolvedServices.length - 1 && (
                 <span className="ml-5 hidden sm:inline text-(--muted)" aria-hidden="true">
                   ·
                 </span>

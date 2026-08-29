@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { useI18n } from '@/i18n/i18n';
 
 export interface ReferenceIdInputProps {
   label?: string;
@@ -13,6 +14,7 @@ export interface ReferenceIdInputProps {
 
 export const ReferenceIdInput = ({ label }: ReferenceIdInputProps) => {
   const [isCopied, setIsCopied] = useState(false);
+  const { t } = useI18n();
 
   return (
     <p className="text-xs sm:text-xs text-(--muted) px-2 flex items-center gap-1">
@@ -24,7 +26,7 @@ export const ReferenceIdInput = ({ label }: ReferenceIdInputProps) => {
           e.preventDefault();
           if (!label) return;
           navigator.clipboard.writeText(label);
-          toast.success(`${label} copied to clipboard`);
+          toast.success(t('common.copied', { value: label }));
           setIsCopied(true);
           setTimeout(() => {
             setIsCopied(false);

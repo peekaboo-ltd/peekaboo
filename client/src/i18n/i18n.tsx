@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { localStorageUtil } from '@/utils/localStorage.util';
 
 export type Language = 'en' | 'rw' | 'fr';
@@ -44,6 +44,10 @@ export const I18nProvider = ({
   const initialLanguage: Language = isLanguage(stored) ? stored : getBrowserLanguage();
   const [language, setLanguageState] = useState<Language>(initialLanguage);
 
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     localStorageUtil.setItem(STORAGE_KEY, lang);
@@ -73,4 +77,3 @@ export const useI18n = (): I18nContextValue => {
   }
   return ctx;
 };
-

@@ -32,6 +32,7 @@ import { BusinessPlan } from '@/types/businessPlan.type';
 import { UUID } from '@/types';
 import OrganizationMembers from '@/containers/organizations/OrganizationMembers';
 import { validateRwandanPhoneNumber } from '@/utils/phone.util';
+import { useI18n } from '@/i18n/i18n';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -54,11 +55,12 @@ type OrgFormValues = {
 };
 
 const ManageOrganizationPage = () => {
+  const { t } = useI18n();
 
   // NAVIGATION
   const { id } = useParams<{ id: UUID }>();
   const navigate = useNavigate();
-  useDocumentTitle('Manage Organization');
+  useDocumentTitle(t('organization.manageDocTitle'));
 
   // STATE VARIABLES
   const { organization } = useAppSelector((state) => state.organization);
@@ -135,11 +137,11 @@ const ManageOrganizationPage = () => {
     if (!id) return;
     try {
       await updateOrganization({ id, data }).unwrap();
-      toast.success('Organization updated successfully.');
+      toast.success(t('organization.updated'));
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to update organization.';
+        t('organization.updateError');
       toast.error(message);
     }
   });
@@ -148,25 +150,25 @@ const ManageOrganizationPage = () => {
     if (!id || !selectedPlanId) return;
     try {
       await assignBusinessPlan({ id, businessPlanId: selectedPlanId }).unwrap();
-      toast.success('Business plan assigned successfully.');
+      toast.success(t('organization.planAssigned'));
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        'Failed to assign business plan.';
+        t('organization.planAssignError');
       toast.error(message);
     }
   };
 
   const stats = [
     {
-      label: 'Status',
-      value: organization?.status ?? '—',
+      label: t('common.status'),
+      value: organization?.status ? t(`status.${organization.status.toLowerCase()}`) : '—',
       icon: faShieldHalved,
       iconBg: 'bg-(--ink) text-(--paper)',
     },
     {
-      label: 'Business Plan',
-      value: currentBusinessPlan?.name ?? 'No plan assigned',
+      label: t('businessPlans.title'),
+      value: currentBusinessPlan?.name ?? t('organization.noPlan'),
       icon: faCreditCard,
       iconBg: 'bg-(--surface) text-(--ink)',
     },
@@ -175,7 +177,7 @@ const ManageOrganizationPage = () => {
   if (organizationIsFetching && !organization) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-(--muted)">Loading organization…</p>
+        <p className="text-sm text-(--muted)">{t('organization.loading')}</p>
       </main>
     );
   }
@@ -183,8 +185,8 @@ const ManageOrganizationPage = () => {
   if (!organization && !organizationIsFetching) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-(--muted)">Organization not found.</p>
-        <Button type="button" onClick={() => navigate(-1)}>Back</Button>
+        <p className="text-sm text-(--muted)">{t('organization.notFound')}</p>
+        <Button type="button" onClick={() => navigate(-1)}>{t('organization.back')}</Button>
       </main>
     );
   }
@@ -193,12 +195,12 @@ const ManageOrganizationPage = () => {
     <InternalPage>
       <motion.section variants={itemVariants}>
         <InternalPageHeader
-          eyebrow="Organization Management"
-          title={organization?.name ?? 'Organization'}
-          description="Update organization details, assign a billing plan, and view members."
+          eyebrow={t('organization.management')}
+          title={organization?.name ?? t('organization.fallbackTitle')}
+          description={t('organization.manageDescription')}
           actions={
             <Badge variant="outline" className="text-xs rounded-full px-3">
-              {organization?.status ?? 'Unknown'}
+              {organization?.status ? t(`status.${organization.status.toLowerCase()}`) : t('common.unknown')}
             </Badge>
           }
         />
@@ -227,8 +229,8 @@ const ManageOrganizationPage = () => {
         {/* Left: Edit form */}
         <article className="lg:col-span-2 border border-(--line) bg-(--paper) p-6">
           <header className="mb-6">
-            <p className="type-meta">Organization Details</p>
-            <h2 className="type-card-title mt-2">Edit Information</h2>
+            <p className="type-meta">{t('organization.details')}</p>
+            <h2 className="type-card-title mt-2">{t('organization.editInformation')}</h2>
           </header>
 
           <form onSubmit={onSubmitOrgInfo} className="flex flex-col gap-5">
@@ -236,12 +238,12 @@ const ManageOrganizationPage = () => {
               <Controller
                 name="name"
                 control={control}
-                rules={{ required: 'Name is required.' }}
+                rules={{ required: t('validation.required') }}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Organization Name"
-                    placeholder="Acme Logistics"
+                    label={t('organization.name')}
+                    placeholder={t('organization.namePlaceholder')}
                     required
                     errorMessage={errors.name?.message}
                   />
@@ -253,8 +255,8 @@ const ManageOrganizationPage = () => {
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Email"
-                    placeholder="ops@acme.com"
+                    label={t('organization.emailLabel')}
+                    placeholder={t('organization.emailPlaceholder')}
                     type="email"
                     errorMessage={errors.email?.message}
                   />
@@ -269,8 +271,8 @@ const ManageOrganizationPage = () => {
                 render={({ field }) => (
                   <TelInput
                     {...field}
-                    label="Phone Number"
-                    placeholder="+250 7XX XXX XXX"
+                    label={t('organization.phone')}
+                    placeholder={t('organization.phonePlaceholder')}
                     errorMessage={errors.phoneNumber?.message}
                   />
                 )}
@@ -281,8 +283,8 @@ const ManageOrganizationPage = () => {
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="TIN"
-                    placeholder="Tax Identification Number"
+                    label={t('organization.tin')}
+                    placeholder={t('organization.tin')}
                     errorMessage={errors.tin?.message}
                   />
                 )}
@@ -292,14 +294,14 @@ const ManageOrganizationPage = () => {
                 control={control}
                 render={({ field }) => (
                   <Select
-                    label="Status"
+                    label={t('common.status')}
                     value={field.value}
                     onChange={field.onChange}
                     options={Object.values(OrganizationStatus).map((s) => ({
-                      label: s.charAt(0) + s.slice(1).toLowerCase(),
+                      label: t(`status.${s.toLowerCase()}`),
                       value: s,
                     }))}
-                    placeholder="Select status"
+                    placeholder={t('organization.selectStatus')}
                   />
                 )}
               />
@@ -308,14 +310,14 @@ const ManageOrganizationPage = () => {
                 control={control}
                 render={({ field }) => (
                   <Select
-                    label="Billing Period"
+                    label={t('organization.billingPeriod')}
                     value={field.value}
                     onChange={field.onChange}
                     options={Object.values(BillingPeriod).map((p) => ({
-                      label: p.charAt(0) + p.slice(1).toLowerCase(),
+                      label: t(`businessPlan.${p.toLowerCase()}`),
                       value: p,
                     }))}
-                    placeholder="Select billing period"
+                    placeholder={t('organization.selectBillingPeriod')}
                   />
                 )}
               />
@@ -325,7 +327,7 @@ const ManageOrganizationPage = () => {
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Payment Terms (days)"
+                    label={t('organization.paymentTerms')}
                     placeholder="30"
                     type="number"
                     errorMessage={errors.paymentTermsDays?.message}
@@ -340,8 +342,8 @@ const ManageOrganizationPage = () => {
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Address"
-                  placeholder="123 Main St, Kigali"
+                  label={t('organization.address')}
+                  placeholder={t('organization.addressPlaceholder')}
                   errorMessage={errors.address?.message}
                 />
               )}
@@ -353,12 +355,12 @@ const ManageOrganizationPage = () => {
               render={({ field }) => (
                 <div className="flex flex-col gap-1">
                   <label className="text-[0.8125rem] text-(--ink)">
-                    Description
+                    {t('organization.descriptionLabel')}
                   </label>
                   <textarea
                     {...field}
                     rows={3}
-                    placeholder="Brief description of the organization..."
+                    placeholder={t('organization.descriptionPlaceholder')}
                     className="rounded-lg border border-(--line) bg-(--paper) px-3 py-2 text-sm text-(--ink) resize-none focus:outline-none focus:ring-2 focus:ring-(--ink)"
                   />
                 </div>
@@ -367,7 +369,7 @@ const ManageOrganizationPage = () => {
 
             <div className="flex items-center gap-3">
               <Button type="submit" primary isLoading={isUpdating} disabled={isUpdating}>
-                Save Changes
+                {t('organization.saveChanges')}
               </Button>
             </div>
           </form>
@@ -378,22 +380,22 @@ const ManageOrganizationPage = () => {
           {/* Business Plan */}
           <article className="border border-(--line) bg-(--paper) p-6">
             <header className="mb-4">
-              <p className="type-meta">Billing</p>
-              <h2 className="type-card-title mt-2">Business Plan</h2>
+              <p className="type-meta">{t('organization.billing')}</p>
+              <h2 className="type-card-title mt-2">{t('businessPlans.title')}</h2>
             </header>
 
             {currentBusinessPlan && (
               <div className="mb-4 flex items-center gap-2 rounded-lg bg-(--surface) px-4 py-3">
                 <FontAwesomeIcon icon={faTag} className="text-(--ink)" />
                 <section>
-                  <p className="type-meta">Current Plan</p>
+                  <p className="type-meta">{t('organization.currentPlan')}</p>
                   <p className="text-sm font-normal text-(--ink)">{currentBusinessPlan.name}</p>
                   <p className="type-meta">
                     {currentBusinessPlan.isCustomPricing
-                      ? 'Custom pricing'
+                      ? t('businessPlan.customPricing')
                       : currentBusinessPlan.pricePerOrder != null
-                        ? `${currentBusinessPlan?.currency} ${Number(currentBusinessPlan.pricePerOrder).toLocaleString()} / order`
-                        : currentBusinessPlan.billingPeriod?.toLowerCase() ?? 'Volume-based pricing'}
+                        ? t('businessPlan.perOrder', { currency: currentBusinessPlan.currency, price: Number(currentBusinessPlan.pricePerOrder).toLocaleString() })
+                        : currentBusinessPlan.billingPeriod ? t(`businessPlan.${currentBusinessPlan.billingPeriod.toLowerCase()}`) : t('organization.volumePricing')}
                   </p>
                 </section>
               </div>
@@ -401,18 +403,18 @@ const ManageOrganizationPage = () => {
 
             <fieldset className="flex flex-col gap-3">
               <Select
-                label="Assign Plan"
+                label={t('organization.assignPlan')}
                 value={selectedPlanId}
                 onChange={(value) => setSelectedPlanId(value)}
                 options={businessPlansList.map((plan) => ({
                   label: plan.isCustomPricing
-                    ? `${plan.name} (Custom pricing)`
+                    ? `${plan.name} (${t('businessPlan.customPricing')})`
                     : plan.pricePerOrder != null
-                      ? `${plan.name} (${plan.currency} ${Number(plan.pricePerOrder).toLocaleString()}/order)`
-                      : `${plan.name} (${plan.billingPeriod?.toLowerCase() ?? 'volume'} pricing)`,
+                      ? `${plan.name} (${t('businessPlan.perOrder', { currency: plan.currency, price: Number(plan.pricePerOrder).toLocaleString() })})`
+                      : `${plan.name} (${plan.billingPeriod ? t(`businessPlan.${plan.billingPeriod.toLowerCase()}`) : t('organization.volumePricing')})`,
                   value: plan?.id ?? '',
                 }))}
-                placeholder="Select a plan"
+                placeholder={t('organization.selectPlan')}
               />
               <Button
                 primary
@@ -421,7 +423,7 @@ const ManageOrganizationPage = () => {
                 disabled={!selectedPlanId || isAssigning}
                 isLoading={isAssigning}
               >
-                Assign Plan
+                {t('organization.assignPlan')}
               </Button>
             </fieldset>
           </article>
@@ -433,7 +435,7 @@ const ManageOrganizationPage = () => {
       {/* Back button */}
       <motion.menu variants={itemVariants} className="flex items-center gap-3 pb-6">
         <Button type="button" onClick={(e) => { e.preventDefault(); navigate(-1); }}>
-          Back
+          {t('organization.back')}
         </Button>
       </motion.menu>
     </InternalPage>

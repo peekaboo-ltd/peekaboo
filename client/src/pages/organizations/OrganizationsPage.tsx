@@ -22,6 +22,7 @@ import {
 import { useFetchOrganizations } from '@/hooks/organization/organization.hooks';
 import { useOrganizationsColumns } from '@/hooks/organization/columns.organization';
 import { useAppSelector } from '@/states/hooks';
+import { useI18n } from '@/i18n/i18n';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -32,7 +33,8 @@ const itemVariants: Variants = {
 };
 
 const OrganizationsPage = () => {
-  useDocumentTitle('Organizations');
+  const { t } = useI18n();
+  useDocumentTitle(t('organizations.docTitle'));
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
@@ -75,9 +77,9 @@ const OrganizationsPage = () => {
     <InternalPage>
       <motion.section variants={itemVariants}>
         <InternalPageHeader
-          eyebrow="Admin"
-          title="Organizations"
-          description="Manage all registered organizations, assign billing plans, and view their members."
+          eyebrow={t('organizations.eyebrow')}
+          title={t('organizations.title')}
+          description={t('organizations.description')}
           actions={
             <Button
               primary
@@ -85,7 +87,7 @@ const OrganizationsPage = () => {
               className="flex items-center gap-2"
             >
               <FontAwesomeIcon icon={faPlus} />
-              Invite Organization
+              {t('organizations.invite')}
             </Button>
           }
         />
@@ -96,17 +98,17 @@ const OrganizationsPage = () => {
         variants={itemVariants}
       >
         <InternalStatCard
-          label="Total Organizations"
+          label={t('organizations.total')}
           value={stats?.total?.toString() ?? '0'}
           icon={<FontAwesomeIcon icon={faBuilding} />}
         />
         <InternalStatCard
-          label="Active"
+          label={t('status.active')}
           value={stats?.active?.toString() ?? '0'}
           icon={<FontAwesomeIcon icon={faCircleCheck} />}
         />
         <InternalStatCard
-          label="Pending"
+          label={t('status.pending')}
           value={stats?.pending?.toString() ?? '0'}
           icon={<FontAwesomeIcon icon={faClockRotateLeft} />}
         />
@@ -117,19 +119,19 @@ const OrganizationsPage = () => {
         variants={itemVariants}
       >
         <Input
-          label="Search"
-          placeholder="Search by name, email, or phone number..."
+          label={t('common.search')}
+          placeholder={t('organizations.searchPlaceholder')}
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
         />
         <Select
-          label="Status"
+          label={t('common.status')}
           value={statusFilter}
           onChange={(value) => setStatusFilter(value)}
           options={[
-            { label: 'All', value: 'ALL' },
-            { label: 'Active', value: OrganizationStatus.ACTIVE },
-            { label: 'Inactive', value: OrganizationStatus.INACTIVE },
+            { label: t('organizations.all'), value: 'ALL' },
+            { label: t('status.active'), value: OrganizationStatus.ACTIVE },
+            { label: t('status.inactive'), value: OrganizationStatus.INACTIVE },
           ]}
         />
       </motion.section>

@@ -21,6 +21,7 @@ import DatePicker from './DatePicker';
 import { SkeletonLoader } from './Loader';
 import { toast } from 'sonner';
 import { faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
+import { useI18n } from '@/i18n/i18n';
 
 /**
  * Props for the Input component
@@ -340,6 +341,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     },
     ref,
   ) => {
+    const { t } = useI18n();
     const hiddenFileInput = useRef<HTMLButtonElement>(null);
     const [passwordVisible, setPasswordVisible] = useState(false);
 
@@ -431,7 +433,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                   'cursor-not-allowed bg-(--surface) text-(--disabled-fg)'
                 } ${className}`}
               >
-                {placeholder || 'Choose file'}
+                {placeholder || t('common.chooseFile')}
                 {multiple ? 's' : ''} {required}
               </button>
               <input
@@ -598,7 +600,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               type="button"
               onClick={() => setPasswordVisible((v) => !v)}
               className="absolute right-0 top-0 flex h-full items-center justify-center px-3 text-(--muted) hover:text-(--ink) focus:outline-none"
-              aria-label={passwordVisible ? 'Hide password' : 'Show password'}
+              aria-label={passwordVisible ? t('common.hidePassword') : t('common.showPassword')}
               tabIndex={-1}
             >
               <FontAwesomeIcon
@@ -615,7 +617,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               }
               className="absolute top-0 right-0 flex h-full cursor-pointer items-center rounded-r-(--radius-control) bg-(--ink) px-4 text-sm font-medium text-(--paper) transition-[background-color] duration-200 ease-(--ease-flat) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]"
             >
-              Search
+              {t('common.search')}
             </button>
           )}
         </section>

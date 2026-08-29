@@ -17,9 +17,11 @@ import {
   authInputClassName,
   authPrimaryButtonClassName,
 } from './AuthPageShell';
+import { useI18n } from '@/i18n/i18n';
 
 const CompleteAccount = () => {
-  useDocumentTitle('Complete Your Account');
+  const { t } = useI18n();
+  useDocumentTitle(t('auth.complete.docTitle'));
 
   const [searchParams] = useSearchParams();
   const nextPath = useMemo(
@@ -52,7 +54,7 @@ const CompleteAccount = () => {
     e.preventDefault();
     const userEmail = authUser?.email;
     if (!userEmail) {
-      toast.error('No email address found. Please contact support.');
+      toast.error(t('auth.complete.noEmail'));
       return;
     }
     try {
@@ -72,7 +74,7 @@ const CompleteAccount = () => {
     } catch (error) {
       toast.error(
         (error as { data: { message?: string } })?.data?.message ||
-          'Incorrect password. Please try again.'
+          t('auth.complete.incorrectPassword')
       );
     }
   };
@@ -80,11 +82,11 @@ const CompleteAccount = () => {
   const handleSetup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters long.');
+      toast.error(t('auth.passwordMin'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match.');
+      toast.error(t('auth.passwordMismatch'));
       return;
     }
     try {
@@ -104,12 +106,12 @@ const CompleteAccount = () => {
       dispatch(setToken(token));
       dispatch(setUser(user));
       dispatch(setIsAuthenticated(true));
-      toast.success('Account set up successfully. Welcome!');
+      toast.success(t('auth.complete.success'));
       navigate(nextPath, { replace: true });
     } catch (error) {
       toast.error(
         (error as { data: { message?: string } })?.data?.message ||
-          'Unable to complete account setup. Please try again.'
+          t('auth.complete.error')
       );
     }
   };
@@ -117,7 +119,7 @@ const CompleteAccount = () => {
   if (isChecking || !accountStatus) {
     return (
       <AuthPageShell>
-        <AuthCard title="Checking your account" subtitle="We are preparing your setup.">
+        <AuthCard title={t('auth.complete.checkingTitle')} subtitle={t('auth.complete.checkingSubtitle')}>
           <div className="flex justify-center py-4">
             <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-(--ink)" />
           </div>
@@ -132,26 +134,26 @@ const CompleteAccount = () => {
   return (
     <AuthPageShell>
       <AuthCard
-        title={isExistingUser ? 'Welcome back' : 'Complete your account'}
+        title={isExistingUser ? t('auth.complete.existingTitle') : t('auth.complete.newTitle')}
         subtitle={
           isExistingUser
-            ? 'Enter your password to continue.'
-            : 'Set up your account details to access the dashboard.'
+            ? t('auth.complete.existingSubtitle')
+            : t('auth.complete.newSubtitle')
         }
       >
         {isExistingUser ? (
           <form className="flex flex-col gap-4" onSubmit={handleLogin}>
             <Input
-              label="Email address"
+              label={t('auth.complete.emailAddress')}
               type="email"
               value={authUser?.email || ''}
               readOnly
               className={authInputClassName}
             />
             <Input
-              label="Password"
+              label={t('auth.password')}
               type="password"
-              placeholder="Enter your password"
+              placeholder={t('auth.passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -164,29 +166,29 @@ const CompleteAccount = () => {
               className={authPrimaryButtonClassName}
               isLoading={isLoginLoading}
             >
-              Sign in and continue
+              {t('auth.complete.signInContinue')}
             </Button>
           </form>
         ) : (
           <form className="flex flex-col gap-4" onSubmit={handleSetup}>
             <Input
-              label="Phone number"
+              label={t('auth.register.phone')}
               type="tel"
               value={authUser?.phoneNumber || ''}
               readOnly
               className={authInputClassName}
             />
             <Input
-              label="Full name"
+              label={t('auth.register.fullName')}
               type="text"
-              placeholder="Your full name"
+              placeholder={t('auth.complete.fullNamePlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
               className={authInputClassName}
             />
             <Input
-              label="Email address"
+              label={t('auth.complete.emailAddress')}
               type="email"
               placeholder="you@example.com"
               value={email}
@@ -195,9 +197,9 @@ const CompleteAccount = () => {
               className={authInputClassName}
             />
             <Input
-              label="Password"
+              label={t('auth.password')}
               type="password"
-              placeholder="Minimum 8 characters"
+              placeholder={t('auth.reset.minimumPlaceholder')}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
@@ -205,9 +207,9 @@ const CompleteAccount = () => {
               className={authInputClassName}
             />
             <Input
-              label="Confirm password"
+              label={t('auth.confirmPassword')}
               type="password"
-              placeholder="Re-enter your password"
+              placeholder={t('auth.reset.reenterPlaceholder')}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -220,13 +222,13 @@ const CompleteAccount = () => {
               className={authPrimaryButtonClassName}
               isLoading={isCompleteLoading}
             >
-              Create account and continue
+              {t('auth.complete.createContinue')}
             </Button>
           </form>
         )}
 
         <AuthFooterNote>
-          <AuthLink to="/auth/login">Sign in with a different account</AuthLink>
+          <AuthLink to="/auth/login">{t('auth.complete.differentAccount')}</AuthLink>
         </AuthFooterNote>
       </AuthCard>
     </AuthPageShell>

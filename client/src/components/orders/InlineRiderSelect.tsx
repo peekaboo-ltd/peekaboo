@@ -9,6 +9,7 @@ import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import { Link } from 'react-router-dom';
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 interface InlineRiderSelectProps {
   order: Order;
@@ -16,6 +17,7 @@ interface InlineRiderSelectProps {
 }
 
 const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps) => {
+  const { t } = useI18n();
   const {
     searchTerm,
     setSearchTerm,
@@ -94,8 +96,8 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
 
   // Format rider display
   const formatRiderDisplay = (rider?: User) => {
-    if (!rider) return 'Assign Rider';
-    const name = rider.name || 'Unnamed';
+    if (!rider) return t('rider.assign');
+    const name = rider.name || t('rider.unnamed');
     const phone = rider.phoneNumber ? ` (${rider.phoneNumber.slice(-4)})` : '';
     return `${name}${phone}`;
   };
@@ -106,7 +108,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
       return (
         <span className="text-xs text-(--muted) w-full text-center">
           <FontAwesomeIcon icon={faSpinner} spin className="mr-1" />
-          Assigning...
+          {t('rider.assigning')}
         </span>
       );
     }
@@ -122,7 +124,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
     return (
       <span className="text-xs text-(--muted) w-full text-center">
         <FontAwesomeIcon icon={faUser} className="mr-1" />
-        No assignment
+        {t('rider.noAssignment')}
       </span>
     );
   };
@@ -142,22 +144,22 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
           <input
             ref={inputRef}
             type="search"
-            placeholder="Search by name or phone..."
+            placeholder={t('rider.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className={cn(controlClassName, 'h-(--control-sm) px-3')}
-            aria-label="Search riders"
+            aria-label={t('rider.searchLabel')}
           />
         </header>
         <menu className="max-h-60 overflow-auto">
           {isFetchingRiders ? (
             <li className="px-3 py-2 text-sm text-(--muted) text-center list-none">
               <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
-              Loading riders...
+              {t('rider.loading')}
             </li>
           ) : riders.length === 0 ? (
             <li className="px-3 py-2 text-sm text-(--muted) text-center list-none">
-              No riders found
+              {t('rider.noneFound')}
             </li>
           ) : (
             riders.map((rider) => (
@@ -173,7 +175,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
                   }}
                 >
                   <strong className="block text-sm font-medium text-(--ink)">
-                    {rider?.name || 'Unnamed Rider'}
+                    {rider?.name || t('rider.unnamed')}
                   </strong>
                   <span className="block text-xs text-(--muted)">
                     {rider?.phoneNumber}
@@ -203,7 +205,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         disabled={isAssigning}
         className="inline-flex h-(--control-sm) cursor-pointer items-center rounded-(--radius-control) bg-(--surface) px-3 text-sm text-(--ink) transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface-hover) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] disabled:cursor-not-allowed disabled:opacity-40"
-        aria-label="Assign rider to order"
+        aria-label={t('rider.assignOrder')}
         aria-expanded={isDropdownOpen}
         aria-haspopup="true"
       >

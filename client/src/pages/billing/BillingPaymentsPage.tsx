@@ -57,6 +57,7 @@ import { faFileLines } from "@fortawesome/free-regular-svg-icons";
 import { validateAndFormatPhoneNumber } from "@/utils/phone.util";
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
+import { useI18n, type I18nContextValue } from '@/i18n/i18n';
 
 interface OrganizationRow {
   id: UUID;
@@ -93,8 +94,10 @@ const isBillingPaymentRequired = (row?: OrganizationBillingSummary) => {
   return false;
 };
 
-const resolveAssignmentLabel = (order: Order) => {
-  if (!order.assignments?.length) return "Not assigned";
+type Translate = I18nContextValue['t'];
+
+const resolveAssignmentLabel = (order: Order, t: Translate) => {
+  if (!order.assignments?.length) return t('billing.notAssigned');
   const latest = [...order.assignments].sort(
     (a, b) =>
       new Date(b.updatedAt || b.createdAt).getTime() -
@@ -104,8 +107,8 @@ const resolveAssignmentLabel = (order: Order) => {
   const assignedName =
     latest?.assignedTo?.name ||
     latest?.assignedTo?.phoneNumber ||
-    "Unknown rider";
-  return `${assignedName} (${latest?.status || "PENDING"})`;
+    t('billing.unknownRider');
+  return `${assignedName} (${t(`status.${(latest?.status || 'PENDING').toLowerCase()}`)})`;
 };
 
 const resolveBillingCurrency = (...values: Array<string | undefined>) =>
@@ -118,27 +121,28 @@ const resolveInvoiceIdentifier = (
 const formatBillingPeriodRange = (
   periodStart?: string | Date,
   periodEnd?: string | Date,
+  t?: Translate,
 ) => {
-  if (!periodStart && !periodEnd) return "Not available";
+  if (!periodStart && !periodEnd) return t?.('billing.notAvailable') || 'N/A';
   const start = periodStart
     ? formatDate(periodStart, "YYYY-MM-DD")
-    : "Unknown start";
-  const end = periodEnd ? formatDate(periodEnd, "YYYY-MM-DD") : "Unknown end";
-  return `${start} to ${end}`;
+    : t?.('billing.unknownStart') || 'N/A';
+  const end = periodEnd ? formatDate(periodEnd, "YYYY-MM-DD") : t?.('billing.unknownEnd') || 'N/A';
+  return t ? t('billing.range', { start, end }) : `${start} – ${end}`;
 };
 
-const getBreakdownTypeLabel = (type?: TierBreakdownType) => {
+const getBreakdownTypeLabel = (type: TierBreakdownType | undefined, t: Translate) => {
   switch (type) {
     case "package":
-      return "Package";
+      return t('billing.package');
     case "fallback":
-      return "Fallback";
+      return t('billing.fallback');
     case "per_unit":
-      return "Per Unit";
+      return t('billing.perUnit');
     case "overflow":
-      return "Overflow";
+      return t('billing.overflow');
     default:
-      return "Line Item";
+      return t('billing.lineItem');
   }
 };
 
@@ -155,10 +159,12 @@ const BreakdownTable = ({
   errorMessage?: string;
   emptyMessage: string;
 }) => {
+  const { t } = useI18n();
+
   if (isLoading) {
     return (
       <div className="rounded bg-(--surface) px-4 py-3 text-sm text-(--muted)">
-        Loading billing breakdown...
+        {t('billing.breakdownLoading')}
       </div>
     );
   }
@@ -185,11 +191,11 @@ const BreakdownTable = ({
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-(--surface) text-left text-(--muted)">
             <tr>
-              <th className="px-4 py-3 font-normal text-xs">Tier</th>
-              <th className="px-4 py-3 font-normal text-xs">Type</th>
-              <th className="px-4 py-3 font-normal text-xs">Deliveries</th>
-              <th className="px-4 py-3 font-normal text-xs">Unit Price</th>
-              <th className="px-4 py-3 font-normal text-xs">Subtotal</th>
+              <th className="px-4 py-3 font-normal text-xs">{t('billing.tier')}</th>
+              <th className="px-4 py-3 font-normal text-xs">{t('billing.type')}</th>
+              <th className="px-4 py-3 font-normal text-xs">{t('billing.deliveries')}</th>
+              <th className="px-4 py-3 font-normal text-xs">{t('billing.unitPrice')}</th>
+              <th className="px-4 py-3 font-normal text-xs">{t('billing.subtotal')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-(--paper)">
@@ -198,7 +204,7 @@ const BreakdownTable = ({
                 <td className="px-4 py-3 text-(--ink)">{row.tierLabel}</td>
                 <td className="px-4 py-3">
                   <span className="inline-flex rounded-full bg-(--surface) px-2 py-1 text-xs text-(--muted)">
-                    {getBreakdownTypeLabel(row.type)}
+                    {getBreakdownTypeLabel(row.type, t)}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-(--ink)">{row.quantity}</td>
@@ -218,7 +224,8 @@ const BreakdownTable = ({
 };
 
 const BillingPaymentsPage = () => {
-  useDocumentTitle("Billing & Payments");
+  const { t } = useI18n();
+  useDocumentTitle(t('billing.docTitle'));
 
   const { user } = useAppSelector((state) => state.auth);
   const roleNames = useMemo(
@@ -572,7 +579,7 @@ const BillingPaymentsPage = () => {
     currentActiveBilling?.businessPlan?.name ||
     selectedOrganization?.businessPlan?.name ||
     myOrgResp?.data?.businessPlan?.name ||
-    "No plan assigned";
+    t('billing.noPlan');
 
   const historyBreakdownRows = historyBreakdown?.breakdown || [];
   const historyBillingCurrency = resolveBillingCurrency(
@@ -594,16 +601,16 @@ const BillingPaymentsPage = () => {
   );
 
   const businessPayDisabledReason = useMemo(() => {
-    if (!myCurrentDue) return "No unpaid billing available right now.";
+    if (!myCurrentDue) return t('billing.noUnpaid');
     if (myBillingEstimateLoading)
-      return "Loading the latest early payment estimate...";
+      return t('billing.estimateLoading');
     if (myBillingEstimateError) {
-      return "Unable to load the current estimate. Please refresh and try again.";
+      return t('billing.estimateError');
     }
     if (currentEstimateAmount <= 0)
-      return "No amount is due for this billing record right now.";
+      return t('billing.noAmountDue');
     if (editableBusinessPhoneValidation?.isValid === false) {
-      return editableBusinessPhoneValidation.error || "Enter a valid Rwandan phone number.";
+      return editableBusinessPhoneValidation.error || t('billing.validPhone');
     }
     return "";
   }, [
@@ -612,6 +619,7 @@ const BillingPaymentsPage = () => {
     myBillingEstimateLoading,
     myCurrentDue,
     editableBusinessPhoneValidation,
+    t,
   ]);
 
   const canBusinessPay = useMemo(
@@ -628,12 +636,12 @@ const BillingPaymentsPage = () => {
   ) => {
     try {
       await markBillingAsPaid({ organizationId, billingId }).unwrap();
-      toast.success("Billing marked as paid successfully.");
+      toast.success(t('billing.markPaidSuccess'));
       refetchAdminBillings();
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        "Failed to mark billing as paid.";
+        t('billing.markPaidError');
       toast.error(message);
     }
   };
@@ -647,9 +655,7 @@ const BillingPaymentsPage = () => {
           ? `Business payment contact: ${editableBusinessPhoneValidation.e164}`
           : undefined,
       }).unwrap();
-      toast.success(
-        "Payment completed. A new billing cycle will start for upcoming deliveries.",
-      );
+      toast.success(t('billing.paymentSuccess'));
       setPaymentWorkflowOpen(false);
       setBusinessOrdersPage(0);
       refetchMyBillings();
@@ -657,7 +663,7 @@ const BillingPaymentsPage = () => {
     } catch (error) {
       const message =
         (error as { data?: { message?: string } })?.data?.message ||
-        "Payment failed. Please try again.";
+        t('billing.paymentError');
       toast.error(message);
     }
   };
@@ -665,22 +671,22 @@ const BillingPaymentsPage = () => {
   const adminOrdersColumns = useMemo<ColumnDef<Order>[]>(
     () => [
       {
-        header: "Reference ID",
+        header: t('common.referenceId'),
         accessorKey: "referenceId",
         cell: ({ row }) => row.original.referenceId || row.original.id,
       },
       {
-        header: "Tracking ID",
+        header: t('billing.trackingId'),
         accessorKey: "trackingId",
         cell: ({ row }) => row.original.trackingId || "N/A",
       },
       {
-        header: "Status",
+        header: t('common.status'),
         accessorKey: "status",
         cell: ({ row }) => <StatusBadge status={row.original.status} />,
       },
       {
-        header: "Recipient Number",
+        header: t('billing.recipientNumber'),
         id: "recipientNumber",
         cell: ({ row }) =>
           row.original.recipientPhoneNumber ||
@@ -688,7 +694,7 @@ const BillingPaymentsPage = () => {
           "N/A",
       },
       {
-        header: "Sender Number",
+        header: t('billing.senderNumber'),
         id: "senderNumber",
         cell: ({ row }) =>
           row.original.sender?.phoneNumber ||
@@ -696,12 +702,12 @@ const BillingPaymentsPage = () => {
           "N/A",
       },
       {
-        header: "Assigned Rider",
+        header: t('billing.assignedRider'),
         id: "assignedRider",
-        cell: ({ row }) => resolveAssignmentLabel(row.original),
+        cell: ({ row }) => resolveAssignmentLabel(row.original, t),
       },
       {
-        header: "Fee",
+        header: t('common.fee'),
         accessorKey: "finalFee",
         cell: ({ row }) =>
           formatCurrency(
@@ -710,7 +716,7 @@ const BillingPaymentsPage = () => {
           ),
       },
       {
-        header: "Created By",
+        header: t('common.createdBy'),
         id: "createdBy",
         cell: ({ row }) =>
           row.original.createdBy?.name ||
@@ -718,34 +724,34 @@ const BillingPaymentsPage = () => {
           "N/A",
       },
       {
-        header: "Created At",
+        header: t('billing.createdAt'),
         accessorKey: "createdAt",
         cell: ({ row }) =>
           formatDate(row.original.createdAt, "YYYY-MM-DD HH:mm"),
       },
     ],
-    [],
+    [t],
   );
 
   const businessOrdersColumns = useMemo<ColumnDef<Order>[]>(
     () => [
       {
-        header: "Reference ID",
+        header: t('common.referenceId'),
         accessorKey: "referenceId",
         cell: ({ row }) => row.original.referenceId || row.original.id,
       },
       {
-        header: "Tracking ID",
+        header: t('billing.trackingId'),
         accessorKey: "trackingId",
         cell: ({ row }) => row.original.trackingId || "N/A",
       },
       {
-        header: "Status",
+        header: t('common.status'),
         accessorKey: "status",
         cell: ({ row }) => <StatusBadge status={row.original.status} />,
       },
       {
-        header: "Recipient Number",
+        header: t('billing.recipientNumber'),
         id: "recipientNumber",
         cell: ({ row }) =>
           row.original.recipientPhoneNumber ||
@@ -753,7 +759,7 @@ const BillingPaymentsPage = () => {
           "N/A",
       },
       {
-        header: "Sender Number",
+        header: t('billing.senderNumber'),
         id: "senderNumber",
         cell: ({ row }) =>
           row.original.sender?.phoneNumber ||
@@ -761,7 +767,7 @@ const BillingPaymentsPage = () => {
           "N/A",
       },
       {
-        header: "Fee",
+        header: t('common.fee'),
         accessorKey: "finalFee",
         cell: ({ row }) =>
           formatCurrency(
@@ -770,13 +776,13 @@ const BillingPaymentsPage = () => {
           ),
       },
       {
-        header: "Created At",
+        header: t('billing.createdAt'),
         accessorKey: "createdAt",
         cell: ({ row }) =>
           formatDate(row.original.createdAt, "YYYY-MM-DD HH:mm"),
       },
     ],
-    [],
+    [t],
   );
 
   const billingHistoryColumns = useMemo<
@@ -784,12 +790,12 @@ const BillingPaymentsPage = () => {
   >(
     () => [
       {
-        header: "Invoice",
+        header: t('billing.invoice'),
         accessorKey: "invoiceNumber",
         cell: ({ row }) => resolveInvoiceIdentifier(row.original),
       },
       {
-        header: "Paid Date",
+        header: t('billing.paidDate'),
         id: "paidDate",
         cell: ({ row }) =>
           formatDate(
@@ -798,11 +804,11 @@ const BillingPaymentsPage = () => {
           ),
       },
       {
-        header: "Deliveries",
+        header: t('billing.deliveries'),
         accessorKey: "totalOrders",
       },
       {
-        header: "Amount",
+        header: t('billing.amount'),
         id: "amount",
         cell: ({ row }) =>
           formatCurrency(
@@ -814,12 +820,12 @@ const BillingPaymentsPage = () => {
           ),
       },
       {
-        header: "Status",
+        header: t('common.status'),
         accessorKey: "status",
         cell: ({ row }) => <StatusBadge status={row.original.status} />,
       },
       {
-        header: "Action",
+        header: t('billing.action'),
         id: "action",
         cell: ({ row }) => (
           <Link
@@ -832,33 +838,33 @@ const BillingPaymentsPage = () => {
             }}
           >
             <FontAwesomeIcon icon={faFileLines} className="text-(--ink)" />
-            View Invoice
+            {t('billing.viewInvoice')}
           </Link>
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const invoiceDeliveryColumns = useMemo<ColumnDef<Order>[]>(
     () => [
       {
-        header: "Reference ID",
+        header: t('common.referenceId'),
         accessorKey: "referenceId",
         cell: ({ row }) => row.original.referenceId || row.original.id,
       },
       {
-        header: "Tracking ID",
+        header: t('billing.trackingId'),
         accessorKey: "trackingId",
         cell: ({ row }) => row.original.trackingId || "N/A",
       },
       {
-        header: "Status",
+        header: t('common.status'),
         accessorKey: "status",
         cell: ({ row }) => <StatusBadge status={row.original.status} />,
       },
       {
-        header: "Recipient Number",
+        header: t('billing.recipientNumber'),
         id: "recipientNumber",
         cell: ({ row }) =>
           row.original.recipientPhoneNumber ||
@@ -866,7 +872,7 @@ const BillingPaymentsPage = () => {
           "N/A",
       },
       {
-        header: "Sender Number",
+        header: t('billing.senderNumber'),
         id: "senderNumber",
         cell: ({ row }) =>
           row.original.sender?.phoneNumber ||
@@ -874,7 +880,7 @@ const BillingPaymentsPage = () => {
           "N/A",
       },
       {
-        header: "Fee",
+        header: t('common.fee'),
         accessorKey: "finalFee",
         cell: ({ row }) =>
           formatCurrency(
@@ -883,13 +889,13 @@ const BillingPaymentsPage = () => {
           ),
       },
       {
-        header: "Created At",
+        header: t('billing.createdAt'),
         accessorKey: "createdAt",
         cell: ({ row }) =>
           formatDate(row.original.createdAt, "YYYY-MM-DD HH:mm"),
       },
     ],
-    [],
+    [t],
   );
 
   const closeInvoiceDeliveriesModal = useCallback(() => {
@@ -900,26 +906,26 @@ const BillingPaymentsPage = () => {
   const openAdminReportConfirmation = useCallback(
     (action: "download" | "email") => {
       if (!selectedOrganizationId) {
-        toast.error("Please select a business first.");
+        toast.error(t('billing.reportSelectBusiness'));
         return;
       }
 
       if (!reportStartDate || !reportEndDate) {
-        toast.error("Please select both start and end dates.");
+        toast.error(t('billing.reportSelectDates'));
         return;
       }
 
       if (
         new Date(reportStartDate).getTime() > new Date(reportEndDate).getTime()
       ) {
-        toast.error("Start date cannot be after end date.");
+        toast.error(t('billing.reportDateOrder'));
         return;
       }
 
       setAdminReportAction(action);
       setAdminReportConfirmOpen(true);
     },
-    [reportEndDate, reportStartDate, selectedOrganizationId],
+    [reportEndDate, reportStartDate, selectedOrganizationId, t],
   );
 
   const handleConfirmAdminReport = useCallback(async () => {
@@ -927,7 +933,7 @@ const BillingPaymentsPage = () => {
 
     const token = localStorageUtil.getItem("token");
     if (!token) {
-      toast.error("Please sign in again to continue.");
+      toast.error(t('billing.signInContinue'));
       return;
     }
 
@@ -949,7 +955,7 @@ const BillingPaymentsPage = () => {
         );
 
         if (!response.ok) {
-          throw new Error("Unable to download report");
+          throw new Error(t('billing.reportDownloadError'));
         }
 
         const blob = await response.blob();
@@ -961,7 +967,7 @@ const BillingPaymentsPage = () => {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(objectUrl);
-        toast.success("Report downloaded successfully.");
+        toast.success(t('billing.reportDownloaded'));
       } else {
         const response = await fetch(
           `${ENVIRONMENTS.API_URL}/dashboard/business-report/email?${query.toString()}`,
@@ -972,17 +978,17 @@ const BillingPaymentsPage = () => {
         );
 
         if (!response.ok) {
-          throw new Error("Unable to request report");
+          throw new Error(t('billing.reportRequestError'));
         }
 
-        toast.success("Report requested and sent to email.");
+        toast.success(t('billing.reportEmailed'));
       }
 
       setAdminReportConfirmOpen(false);
       setAdminReportAction(null);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Report action failed.",
+        error instanceof Error ? error.message : t('billing.reportActionError'),
       );
     } finally {
       setIsSubmittingAdminReport(false);
@@ -992,12 +998,13 @@ const BillingPaymentsPage = () => {
     reportEndDate,
     reportStartDate,
     selectedOrganizationId,
+    t,
   ]);
 
   const handleRequestReport = useCallback(async () => {
     const token = localStorageUtil.getItem("token");
     if (!token) {
-      toast.error("Please sign in again to request report.");
+      toast.error(t('billing.signInRequest'));
       return;
     }
 
@@ -1020,26 +1027,26 @@ const BillingPaymentsPage = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Unable to request report");
+        throw new Error(t('billing.reportRequestError'));
       }
 
-      toast.success("Report requested. It will be sent to your email.");
+      toast.success(t('billing.reportRequested'));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to request report.",
+        error instanceof Error ? error.message : t('billing.reportRequestError'),
       );
     } finally {
       setIsRequestingReport(false);
     }
-  }, []);
+  }, [t]);
 
   return (
     <InternalPage>
       <motion.section variants={itemVariants}>
         <InternalPageHeader
-          eyebrow="Business"
-          title="Billing & Payments"
-          description="Track server-calculated billing estimates, package-tier breakdowns, and payment history."
+          eyebrow={t('billing.eyebrow')}
+          title={t('billing.title')}
+          description={t('billing.description')}
         />
       </motion.section>
 
@@ -1049,17 +1056,17 @@ const BillingPaymentsPage = () => {
           variants={itemVariants}
         >
           <InternalStatCard
-            label="Organizations"
+            label={t('billing.organizations')}
             value={organizations.length}
             icon={<FontAwesomeIcon icon={faBuilding} />}
           />
           <InternalStatCard
-            label="Pending Amount"
+            label={t('billing.pendingAmount')}
             value={formatCurrency(pendingAmountAdminGlobal, "RWF")}
             icon={<FontAwesomeIcon icon={faMoneyBillWave} />}
           />
           <InternalStatCard
-            label="Deliveries (Selected Business)"
+            label={t('billing.selectedDeliveries')}
             value={adminOrdersTotalCount}
             icon={<FontAwesomeIcon icon={faCreditCard} />}
           />
@@ -1072,9 +1079,9 @@ const BillingPaymentsPage = () => {
           className="grid grid-cols-1 gap-4"
         >
           <InternalSectionCard
-            eyebrow="Reports"
-            title="Business Report"
-            description="Pick a business and date range, then request or download its billing report."
+            eyebrow={t('billing.reports')}
+            title={t('billing.businessReport')}
+            description={t('billing.reportDescription')}
             actions={
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -1084,7 +1091,7 @@ const BillingPaymentsPage = () => {
                   disabled={isSubmittingAdminReport}
                   onClick={() => openAdminReportConfirmation("email")}
                 >
-                  Request Report
+                  {t('billing.requestReport')}
                 </Button>
                 <Button
                   type="button"
@@ -1092,14 +1099,14 @@ const BillingPaymentsPage = () => {
                   disabled={isSubmittingAdminReport}
                   onClick={() => openAdminReportConfirmation("download")}
                 >
-                  Download Report
+                  {t('billing.downloadReport')}
                 </Button>
               </div>
             }
           >
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               <label className="text-sm text-(--ink)">
-                Business
+                {t('billing.business')}
                 <Select
                   className="mt-1"
                   value={selectedOrganizationId}
@@ -1112,7 +1119,7 @@ const BillingPaymentsPage = () => {
               </label>
 
               <label className="text-sm text-(--ink)">
-                Start date
+                {t('billing.startDate')}
                 <input
                   type="date"
                   className={cn(controlClassName, 'mt-1 px-3')}
@@ -1122,7 +1129,7 @@ const BillingPaymentsPage = () => {
               </label>
 
               <label className="text-sm text-(--ink)">
-                End date
+                {t('billing.endDate')}
                 <input
                   type="date"
                   className={cn(controlClassName, 'mt-1 px-3')}
@@ -1132,11 +1139,11 @@ const BillingPaymentsPage = () => {
               </label>
             </div>
             <p className="mt-3 text-sm text-(--muted)">
-              Selected:{" "}
-              <span className="text-[0.8125rem] text-(--ink)">
-                {selectedOrganization?.name || "N/A"}
-              </span>{" "}
-              | {reportStartDate} to {reportEndDate}
+              {t('billing.selectedRange', {
+                business: selectedOrganization?.name || 'N/A',
+                start: reportStartDate,
+                end: reportEndDate,
+              })}
             </p>
           </InternalSectionCard>
         </motion.section>
@@ -1148,7 +1155,7 @@ const BillingPaymentsPage = () => {
           variants={itemVariants}
         >
           <InternalStatCard
-            label="Current Estimated Amount Due"
+            label={t('billing.currentAmountDue')}
             value={formatCurrency(
               currentEstimateAmount,
               currentBillingCurrency,
@@ -1156,12 +1163,12 @@ const BillingPaymentsPage = () => {
             icon={<FontAwesomeIcon icon={faMoneyBillWave} />}
           />
           <InternalStatCard
-            label="Deliveries In Current Billing"
+            label={t('billing.currentDeliveries')}
             value={currentTotalOrders}
             icon={<FontAwesomeIcon icon={faBuilding} />}
           />
           <InternalStatCard
-            label="Report"
+            label={t('billing.report')}
             value={
               <Button
                 type="button"
@@ -1171,7 +1178,7 @@ const BillingPaymentsPage = () => {
                 disabled={isRequestingReport}
                 onClick={handleRequestReport}
               >
-                Request Report
+                {t('billing.requestReport')}
               </Button>
             }
             icon={<FontAwesomeIcon icon={faFileLines} />}
@@ -1184,28 +1191,32 @@ const BillingPaymentsPage = () => {
         className="grid grid-cols-1 gap-4"
       >
         <InternalSectionCard
-          eyebrow="Current Plan"
+          eyebrow={t('billing.currentPlan')}
           title={currentPlanName}
           description={
             isAdmin
               ? selectedOrganization
-                ? `${selectedOrganization.name} • ${
-                    selectedOrganization.businessPlan?.billingPeriod ||
-                    selectedOrganization.billingPeriod ||
-                    "N/A"
-                  } cycle`
-                : "Select a business to see current plan in use."
-              : `${myOrgResp?.data?.name || "My Organization"} • ${
-                  myOrgResp?.data?.businessPlan?.billingPeriod ||
-                  myOrgResp?.data?.billingPeriod ||
-                  "N/A"
-                } cycle`
+                ? t('billing.cycle', {
+                    name: selectedOrganization.name,
+                    period:
+                      selectedOrganization.businessPlan?.billingPeriod ||
+                      selectedOrganization.billingPeriod ||
+                      'N/A',
+                  })
+                : t('billing.selectPlanHint')
+              : t('billing.cycle', {
+                  name: myOrgResp?.data?.name || t('billing.myOrganization'),
+                  period:
+                    myOrgResp?.data?.businessPlan?.billingPeriod ||
+                    myOrgResp?.data?.billingPeriod ||
+                    'N/A',
+                })
           }
         >
           <p className="text-sm text-(--muted)">
             {isAdmin
-              ? "Highlighted plan is based on the currently selected business."
-              : "This plan card reflects the active business plan tied to the current billing cycle."}
+              ? t('billing.adminPlanHint')
+              : t('billing.businessPlanHint')}
           </p>
         </InternalSectionCard>
       </motion.section>
@@ -1216,12 +1227,12 @@ const BillingPaymentsPage = () => {
           className="grid grid-cols-1 gap-4"
         >
           <InternalSectionCard
-            eyebrow="Businesses"
-            title="Select Business"
-            description="Choose a business to load deliveries and billing details for that organization."
+            eyebrow={t('billing.businesses')}
+            title={t('billing.selectBusiness')}
+            description={t('billing.selectBusinessDescription')}
           >
             <label className="block max-w-md text-sm text-(--ink)">
-              Business
+              {t('billing.business')}
               <Select
                 className="mt-1"
                 value={selectedOrganizationId}
@@ -1235,12 +1246,12 @@ const BillingPaymentsPage = () => {
           </InternalSectionCard>
 
           <InternalSectionCard
-            eyebrow="Current Invoice"
+            eyebrow={t('billing.currentInvoice')}
             title={formatCurrency(
               currentEstimateAmount,
               currentBillingCurrency,
             )}
-            description="Server-calculated amount due for the selected business's active billing record."
+            description={t('billing.adminInvoiceDescription')}
             actions={
               selectedOrganizationDue ? (
                 <Button
@@ -1255,7 +1266,7 @@ const BillingPaymentsPage = () => {
                     )
                   }
                 >
-                  Mark as Paid
+                  {t('billing.markPaid')}
                 </Button>
               ) : null
             }
@@ -1264,30 +1275,30 @@ const BillingPaymentsPage = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-3 rounded bg-(--surface) p-4 text-sm text-(--ink) md:grid-cols-2">
                   <p className="text-[0.8125rem] text-(--ink)">
-                    Invoice:{" "}
+                    {t('billing.invoice')}:{" "}
                     <span className="text-[0.8125rem] text-(--ink)">
                       {resolveInvoiceIdentifier(selectedOrganizationDue)}
                     </span>
                   </p>
                   <p className="text-[0.8125rem] text-(--ink)">
-                    Billing period:{" "}
+                    {t('billing.period')}:{" "}
                     <span className="text-[0.8125rem] text-(--ink)">
                       {formatBillingPeriodRange(
                         currentBreakdown?.periodStart ||
                           selectedOrganizationDue.periodStart,
-                        currentBreakdown?.periodEnd ||
-                          selectedOrganizationDue.periodEnd,
+                        currentBreakdown?.periodEnd || selectedOrganizationDue.periodEnd,
+                        t,
                       )}
                     </span>
                   </p>
                   <p className="text-[0.8125rem] text-(--ink)">
-                    Deliveries so far:{" "}
+                    {t('billing.deliveriesSoFar')}:{" "}
                     <span className="text-[0.8125rem] text-(--ink)">
                       {currentTotalOrders}
                     </span>
                   </p>
                   <p className="text-[0.8125rem] text-(--ink)">
-                    Outstanding across unpaid billings:{" "}
+                    {t('billing.outstanding')}:{" "}
                     <span className="text-[0.8125rem] text-(--ink)">
                       {formatCurrency(
                         pendingAmountAdminSelectedOrganization,
@@ -1300,11 +1311,10 @@ const BillingPaymentsPage = () => {
                 <div className="space-y-2">
                   <div>
                     <h3 className="type-label">
-                      Billing Breakdown
+                      {t('billing.breakdown')}
                     </h3>
                     <p className="text-sm text-(--muted)">
-                      Invoice totals come from the billing record and its
-                      pricing breakdown, not by summing delivery fees.
+                      {t('billing.breakdownAdminHint')}
                     </p>
                   </div>
                   <BreakdownTable
@@ -1313,10 +1323,10 @@ const BillingPaymentsPage = () => {
                     isLoading={currentBreakdownLoading}
                     errorMessage={
                       currentBreakdownError
-                        ? "Unable to load the billing breakdown right now."
+                        ? t('billing.breakdownError')
                         : undefined
                     }
-                    emptyMessage="No stored breakdown available for this billing record."
+                    emptyMessage={t('billing.breakdownEmpty')}
                   />
                 </div>
 
@@ -1328,29 +1338,29 @@ const BillingPaymentsPage = () => {
               </div>
             ) : (
               <p className="text-sm text-(--muted)">
-                No unpaid billing at the moment for this business.
+                {t('billing.noUnpaidBusiness')}
               </p>
             )}
           </InternalSectionCard>
 
           <InternalSectionCard
-            eyebrow="Deliveries"
+            eyebrow={t('billing.deliveries')}
             title={
               selectedOrganization
-                ? `${selectedOrganization.name} Deliveries`
-                : "Deliveries"
+                ? t('billing.namedDeliveries', { name: selectedOrganization.name })
+                : t('billing.deliveries')
             }
-            description="All deliveries made by the selected company, including assignment details."
+            description={t('billing.adminDeliveriesDescription')}
           >
             <Table
               columns={adminOrdersColumns}
               data={adminOrdersRows}
               showPagination={false}
               isLoading={adminOrdersLoading}
-              noDataMessage="No deliveries found for the selected business."
+              noDataMessage={t('billing.noBusinessDeliveries')}
             />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-(--muted)">
-              <p className="text-[0.8125rem] text-(--ink)">Showing up to 10 deliveries per page.</p>
+              <p className="text-[0.8125rem] text-(--ink)">{t('billing.pageSize')}</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -1360,11 +1370,10 @@ const BillingPaymentsPage = () => {
                     setAdminOrdersPage((prev) => Math.max(prev - 1, 0))
                   }
                 >
-                  Prev
+                  {t('common.actions.previous')}
                 </button>
                 <span>
-                  Page {adminOrdersTotalPages === 0 ? 1 : adminOrdersPage + 1}{" "}
-                  of {adminOrdersTotalPages || 1}
+                  {t('pagination.page', { page: adminOrdersTotalPages === 0 ? 1 : adminOrdersPage + 1, total: adminOrdersTotalPages || 1 })}
                 </span>
                 <button
                   type="button"
@@ -1381,20 +1390,19 @@ const BillingPaymentsPage = () => {
                     )
                   }
                 >
-                  Next
+                  {t('common.actions.next')}
                 </button>
               </div>
             </div>
             <div className="mt-4 rounded bg-(--surface) p-3 text-sm text-(--muted)">
-              Delivery fees shown below are operational records. Invoice totals
-              come from the billing breakdown above.
+              {t('billing.operationalFees')}
             </div>
           </InternalSectionCard>
 
           <InternalSectionCard
-            eyebrow="Payment History"
-            title="Selected Business Payment History"
-            description="Toggle to review paid invoices and their delivery records."
+            eyebrow={t('billing.paymentHistory')}
+            title={t('billing.selectedHistory')}
+            description={t('billing.selectedHistoryDescription')}
             actions={
               <Button
                 type="button"
@@ -1402,7 +1410,7 @@ const BillingPaymentsPage = () => {
                 primary={showAdminHistory}
                 onClick={() => setShowAdminHistory((prev) => !prev)}
               >
-                {showAdminHistory ? "Hide History" : "Show History"}
+                {t(showAdminHistory ? 'billing.hideHistory' : 'billing.showHistory')}
               </Button>
             }
           >
@@ -1413,7 +1421,7 @@ const BillingPaymentsPage = () => {
                   data={selectedOrganizationPaidHistory}
                   showPagination={false}
                   isLoading={adminPaidBillingsLoading}
-                  noDataMessage="No payment history for this business yet."
+                  noDataMessage={t('billing.noBusinessHistory')}
                 />
                 <div className="flex items-center justify-end gap-2 text-sm text-(--muted)">
                   <button
@@ -1424,11 +1432,10 @@ const BillingPaymentsPage = () => {
                       setAdminHistoryPage((prev) => Math.max(prev - 1, 0))
                     }
                   >
-                    Prev
+                    {t('common.actions.previous')}
                   </button>
                   <span>
-                    Page {adminHistoryPage + 1} of{" "}
-                    {selectedOrganizationPaidHistoryTotalPages || 1}
+                    {t('pagination.page', { page: adminHistoryPage + 1, total: selectedOrganizationPaidHistoryTotalPages || 1 })}
                   </span>
                   <button
                     type="button"
@@ -1449,13 +1456,13 @@ const BillingPaymentsPage = () => {
                       )
                     }
                   >
-                    Next
+                    {t('common.actions.next')}
                   </button>
                 </div>
               </div>
             ) : (
               <p className="text-sm text-(--muted)">
-                History is hidden. Toggle to view.
+                {t('billing.historyHidden')}
               </p>
             )}
           </InternalSectionCard>
@@ -1468,12 +1475,12 @@ const BillingPaymentsPage = () => {
           className="grid grid-cols-1 gap-4"
         >
           <InternalSectionCard
-            eyebrow="Current Estimate"
+            eyebrow={t('billing.currentEstimate')}
             title={formatCurrency(
               currentEstimateAmount,
               currentBillingCurrency,
             )}
-            description="Server-calculated amount due for your active billing period."
+            description={t('billing.businessEstimateDescription')}
             actions={
               <Button
                 type="button"
@@ -1482,36 +1489,37 @@ const BillingPaymentsPage = () => {
                 disabled={!canBusinessPay || !myCurrentDue}
                 onClick={() => setPaymentWorkflowOpen(true)}
               >
-                Start Payment Workflow
+                {t('billing.startPayment')}
               </Button>
             }
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3 rounded bg-(--surface) p-4 text-sm text-(--ink) md:grid-cols-2">
                 <p className="text-[0.8125rem] text-(--ink)">
-                  Current plan:{" "}
+                  {t('billing.currentPlan')}:{" "}
                   <span className="text-[0.8125rem] text-(--ink)">
                     {currentPlanName}
                   </span>
                 </p>
                 <p className="text-[0.8125rem] text-(--ink)">
-                  Billing period:{" "}
+                  {t('billing.period')}:{" "}
                   <span className="text-[0.8125rem] text-(--ink)">
                     {formatBillingPeriodRange(
                       currentBreakdown?.periodStart ||
                         myCurrentDue?.periodStart,
                       currentBreakdown?.periodEnd || myCurrentDue?.periodEnd,
+                      t,
                     )}
                   </span>
                 </p>
                 <p className="text-[0.8125rem] text-(--ink)">
-                  Deliveries so far:{" "}
+                  {t('billing.deliveriesSoFar')}:{" "}
                   <span className="text-[0.8125rem] text-(--ink)">
                     {currentTotalOrders}
                   </span>
                 </p>
                 <p className="text-[0.8125rem] text-(--ink)">
-                  Current estimated amount due:{" "}
+                  {t('billing.estimatedDue')}:{" "}
                   <span className="text-[0.8125rem] text-(--ink)">
                     {formatCurrency(
                       currentEstimateAmount,
@@ -1522,27 +1530,22 @@ const BillingPaymentsPage = () => {
               </div>
 
               <div className="rounded bg-(--surface) p-4 text-sm text-(--ink)">
-                <p className="font-normal text-xs">How this estimate works</p>
+                <p className="font-normal text-xs">{t('billing.estimateHow')}</p>
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   <li>
-                    Final billing is calculated per billing period, not by
-                    summing visible order fees.
+                    {t('billing.estimatePeriodRule')}
                   </li>
                   <li>
-                    Package tiers are charged in full only after their delivery
-                    threshold is met.
+                    {t('billing.estimatePackageRule')}
                   </li>
                   <li>
-                    Partial progress inside a package tier appears as a
-                    fallback row at the configured fallback rate.
+                    {t('billing.estimateFallbackRule')}
                   </li>
                   <li>
-                    Deliveries beyond the final package threshold appear as
-                    overflow rows at the configured overflow rate.
+                    {t('billing.estimateOverflowRule')}
                   </li>
                   <li>
-                    Early payment estimates are based on deliveries so far and
-                    can change until the billing period closes.
+                    {t('billing.estimateChangeRule')}
                   </li>
                 </ul>
               </div>
@@ -1550,11 +1553,10 @@ const BillingPaymentsPage = () => {
               <div className="space-y-2">
                 <div>
                   <h3 className="type-label">
-                    Billing Breakdown
+                    {t('billing.breakdown')}
                   </h3>
                   <p className="text-sm text-(--muted)">
-                    This table reflects the current billing estimate from the
-                    server.
+                    {t('billing.breakdownBusinessHint')}
                   </p>
                 </div>
                 <BreakdownTable
@@ -1563,10 +1565,10 @@ const BillingPaymentsPage = () => {
                   isLoading={currentBreakdownLoading || currentEstimateLoading}
                   errorMessage={
                     currentBreakdownError || currentEstimateError
-                      ? "Unable to load the current billing breakdown right now."
+                      ? t('billing.currentBreakdownError')
                       : undefined
                   }
-                  emptyMessage="No stored breakdown available for this billing record."
+                  emptyMessage={t('billing.breakdownEmpty')}
                 />
               </div>
 
@@ -1582,26 +1584,25 @@ const BillingPaymentsPage = () => {
                 </p>
               ) : (
                 <p className="text-sm text-(--ink)">
-                  Payment is active. After payment, new deliveries continue on a
-                  new billing record.
+                  {t('billing.paymentActive')}
                 </p>
               )}
             </div>
           </InternalSectionCard>
 
           <InternalSectionCard
-            eyebrow="Deliveries"
-            title="All Deliveries Made By Your Company"
-            description="All delivery information is included in this table except assignments."
+            eyebrow={t('billing.deliveries')}
+            title={t('billing.businessDeliveriesTitle')}
+            description={t('billing.businessDeliveriesDescription')}
           >
             <Table
               columns={businessOrdersColumns}
               data={businessPagedOrders}
               showPagination={false}
-              noDataMessage="No deliveries in current billing cycle."
+              noDataMessage={t('billing.noCurrentDeliveries')}
             />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-(--muted)">
-              <p className="text-[0.8125rem] text-(--ink)">Showing up to 10 deliveries per page.</p>
+              <p className="text-[0.8125rem] text-(--ink)">{t('billing.pageSize')}</p>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -1611,12 +1612,10 @@ const BillingPaymentsPage = () => {
                     setBusinessOrdersPage((prev) => Math.max(prev - 1, 0))
                   }
                 >
-                  Prev
+                  {t('common.actions.previous')}
                 </button>
                 <span>
-                  Page{" "}
-                  {businessOrdersTotalPages === 0 ? 1 : businessOrdersPage + 1}{" "}
-                  of {businessOrdersTotalPages || 1}
+                  {t('pagination.page', { page: businessOrdersTotalPages === 0 ? 1 : businessOrdersPage + 1, total: businessOrdersTotalPages || 1 })}
                 </span>
                 <button
                   type="button"
@@ -1633,20 +1632,19 @@ const BillingPaymentsPage = () => {
                     )
                   }
                 >
-                  Next
+                  {t('common.actions.next')}
                 </button>
               </div>
             </div>
             <div className="mt-4 rounded bg-(--surface) p-3 text-sm text-(--muted)">
-              Delivery fees shown below are operational records. Invoice totals
-              come from the billing breakdown above.
+              {t('billing.operationalFees')}
             </div>
           </InternalSectionCard>
 
           <InternalSectionCard
-            eyebrow="Payment History"
-            title="Payments Completed"
-            description="Open paid invoices to review the billing breakdown first and linked deliveries second."
+            eyebrow={t('billing.paymentHistory')}
+            title={t('billing.completedPayments')}
+            description={t('billing.completedPaymentsDescription')}
             actions={
               <Button
                 type="button"
@@ -1654,7 +1652,7 @@ const BillingPaymentsPage = () => {
                 primary={showBusinessHistory}
                 onClick={() => setShowBusinessHistory((prev) => !prev)}
               >
-                {showBusinessHistory ? "Hide History" : "Show History"}
+                {t(showBusinessHistory ? 'billing.hideHistory' : 'billing.showHistory')}
               </Button>
             }
           >
@@ -1665,7 +1663,7 @@ const BillingPaymentsPage = () => {
                   data={myBillingHistory}
                   showPagination={false}
                   isLoading={myPaidBillingsLoading}
-                  noDataMessage="No payment history yet."
+                  noDataMessage={t('billing.noHistory')}
                 />
                 <div className="flex items-center justify-end gap-2 text-sm text-(--muted)">
                   <button
@@ -1676,11 +1674,10 @@ const BillingPaymentsPage = () => {
                       setBusinessHistoryPage((prev) => Math.max(prev - 1, 0))
                     }
                   >
-                    Prev
+                    {t('common.actions.previous')}
                   </button>
                   <span>
-                    Page {businessHistoryPage + 1} of{" "}
-                    {myBillingHistoryTotalPages || 1}
+                    {t('pagination.page', { page: businessHistoryPage + 1, total: myBillingHistoryTotalPages || 1 })}
                   </span>
                   <button
                     type="button"
@@ -1697,13 +1694,13 @@ const BillingPaymentsPage = () => {
                       )
                     }
                   >
-                    Next
+                    {t('common.actions.next')}
                   </button>
                 </div>
               </div>
             ) : (
               <p className="text-sm text-(--muted)">
-                History is hidden. Toggle to view.
+                {t('billing.historyHidden')}
               </p>
             )}
           </InternalSectionCard>
@@ -1717,41 +1714,41 @@ const BillingPaymentsPage = () => {
           setAdminReportConfirmOpen(false);
           setAdminReportAction(null);
         }}
-        heading="Confirm Report Details"
-        description="Please confirm the selected business and report time range."
+        heading={t('billing.confirmReport')}
+        description={t('billing.confirmReportDescription')}
       >
         <section className="space-y-4">
           <div className="space-y-2 rounded bg-(--surface) p-3 text-sm">
             <p className="text-[0.8125rem] text-(--ink)">
-              Business:{" "}
+              {t('billing.business')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
-                {selectedOrganization?.name || "Not selected"}
+                {selectedOrganization?.name || t('billing.notSelected')}
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Start date:{" "}
+              {t('billing.startDate')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
-                {reportStartDate || "Not selected"}
+                {reportStartDate || t('billing.notSelected')}
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              End date:{" "}
+              {t('billing.endDate')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
-                {reportEndDate || "Not selected"}
+                {reportEndDate || t('billing.notSelected')}
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Action:{" "}
+              {t('billing.action')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {adminReportAction === "download"
-                  ? "Download report"
-                  : "Request report by email"}
+                  ? t('billing.downloadAction')
+                  : t('billing.emailAction')}
               </span>
             </p>
           </div>
 
           <p className="text-sm text-(--ink)">
-            Is this the correct business and time range for your report?
+            {t('billing.confirmQuestion')}
           </p>
 
           <footer className="flex justify-end gap-3 border-t pt-2">
@@ -1763,7 +1760,7 @@ const BillingPaymentsPage = () => {
                 setAdminReportAction(null);
               }}
             >
-              No, Edit
+              {t('billing.edit')}
             </Button>
             <Button
               type="button"
@@ -1772,7 +1769,7 @@ const BillingPaymentsPage = () => {
               disabled={isSubmittingAdminReport}
               onClick={handleConfirmAdminReport}
             >
-              Yes, Continue
+              {t('billing.continue')}
             </Button>
           </footer>
         </section>
@@ -1781,35 +1778,36 @@ const BillingPaymentsPage = () => {
       <Modal
         isOpen={paymentWorkflowOpen}
         onClose={() => setPaymentWorkflowOpen(false)}
-        heading="Business Plan Payment Workflow"
-        description="Review the current server-calculated estimate before paying early."
+        heading={t('billing.paymentWorkflow')}
+        description={t('billing.paymentWorkflowDescription')}
       >
         <section className="space-y-4">
           <div className="space-y-2 rounded bg-(--surface) p-3 text-sm">
             <p className="text-[0.8125rem] text-(--ink)">
-              Current business plan:{" "}
+              {t('billing.currentPlan')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {currentPlanName}
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Amount to pay now:{" "}
+              {t('billing.amountNow')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {formatCurrency(currentEstimateAmount, currentBillingCurrency)}
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Deliveries so far:{" "}
+              {t('billing.deliveriesSoFar')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {currentTotalOrders}
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Billing period:{" "}
+              {t('billing.period')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {formatBillingPeriodRange(
                   currentBreakdown?.periodStart || myCurrentDue?.periodStart,
                   currentBreakdown?.periodEnd || myCurrentDue?.periodEnd,
+                  t,
                 )}
               </span>
             </p>
@@ -1821,10 +1819,10 @@ const BillingPaymentsPage = () => {
             isLoading={currentEstimateLoading}
             errorMessage={
               currentEstimateError
-                ? "Unable to load the latest payment estimate right now."
+                ? t('billing.estimateError')
                 : undefined
             }
-            emptyMessage="No current billing breakdown is available for this estimate."
+            emptyMessage={t('billing.breakdownEmpty')}
           />
 
           {currentEstimate?.note ? (
@@ -1835,16 +1833,14 @@ const BillingPaymentsPage = () => {
             <TelInput
               value={editableBusinessNumber}
               onChange={setEditableBusinessNumber}
-              label="Business Number (editable)"
-              placeholder="Enter business phone number"
+              label={t('billing.businessPhone')}
+              placeholder={t('billing.businessPhonePlaceholder')}
               errorMessage={editableBusinessPhoneValidation?.error}
             />
           </div>
 
           <div className="rounded bg-(--surface) p-3 text-sm text-(--ink)">
-            Early payment settles the server estimate shown above. Package,
-            fallback, and overflow rows can still change if more deliveries are
-            added before the billing period closes.
+            {t('billing.earlyPaymentNote')}
           </div>
 
           {!canBusinessPay ? (
@@ -1855,7 +1851,7 @@ const BillingPaymentsPage = () => {
 
           <footer className="flex justify-end gap-3 border-t pt-2">
             <Button type="button" onClick={() => setPaymentWorkflowOpen(false)}>
-              Cancel
+              {t('common.actions.close')}
             </Button>
             <Button
               type="button"
@@ -1864,7 +1860,7 @@ const BillingPaymentsPage = () => {
               disabled={!canBusinessPay || !myCurrentDue}
               onClick={() => myCurrentDue && handleBusinessPay(myCurrentDue.id)}
             >
-              Pay Business Plan
+              {t('billing.payPlan')}
             </Button>
           </footer>
         </section>
@@ -1873,29 +1869,29 @@ const BillingPaymentsPage = () => {
       <Modal
         isOpen={invoiceDeliveriesModalOpen}
         onClose={closeInvoiceDeliveriesModal}
-        heading="Invoice Details"
+        heading={t('billing.invoiceDetails')}
         description={
           selectedHistoryBilling
-            ? `Review invoice ${resolveInvoiceIdentifier(selectedHistoryBilling)} and its linked deliveries.`
-            : "Review this invoice and its linked deliveries."
+            ? t('billing.invoiceDetailsNamed', { invoice: resolveInvoiceIdentifier(selectedHistoryBilling) })
+            : t('billing.invoiceDetailsFallback')
         }
       >
         <section className="space-y-4">
           <div className="grid grid-cols-1 gap-3 rounded bg-(--surface) p-4 text-sm text-(--ink) md:grid-cols-2">
             <p className="text-[0.8125rem] text-(--ink)">
-              Invoice:{" "}
+              {t('billing.invoice')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {resolveInvoiceIdentifier(selectedHistoryBilling)}
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Status:{" "}
+              {t('common.status')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {selectedHistoryBilling?.status || "N/A"}
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Paid date:{" "}
+              {t('billing.paidDate')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {selectedHistoryBilling?.paidAt
                   ? formatDate(selectedHistoryBilling.paidAt, "YYYY-MM-DD")
@@ -1903,18 +1899,18 @@ const BillingPaymentsPage = () => {
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Billing period:{" "}
+              {t('billing.period')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {formatBillingPeriodRange(
                   historyBreakdown?.periodStart ||
                     selectedHistoryBilling?.periodStart,
-                  historyBreakdown?.periodEnd ||
-                    selectedHistoryBilling?.periodEnd,
+                  historyBreakdown?.periodEnd || selectedHistoryBilling?.periodEnd,
+                  t,
                 )}
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Deliveries:{" "}
+              {t('billing.deliveries')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {historyBreakdown?.totalOrders ||
                   selectedHistoryBilling?.totalOrders ||
@@ -1922,7 +1918,7 @@ const BillingPaymentsPage = () => {
               </span>
             </p>
             <p className="text-[0.8125rem] text-(--ink)">
-              Total amount:{" "}
+              {t('billing.totalAmount')}:{" "}
               <span className="text-[0.8125rem] text-(--ink)">
                 {formatCurrency(
                   historyBreakdown?.totalAmount ||
@@ -1937,11 +1933,10 @@ const BillingPaymentsPage = () => {
           <div className="space-y-2">
             <div>
               <h3 className="type-label">
-                Billing Breakdown
+                {t('billing.breakdown')}
               </h3>
               <p className="text-sm text-(--muted)">
-                Invoice totals are calculated from the billing breakdown first.
-                Linked deliveries are shown below for auditability.
+                {t('billing.breakdownInvoiceHint')}
               </p>
             </div>
             <BreakdownTable
@@ -1950,28 +1945,27 @@ const BillingPaymentsPage = () => {
               isLoading={historyBreakdownLoading}
               errorMessage={
                 historyBreakdownError
-                  ? "Unable to load the invoice breakdown right now."
+                  ? t('billing.invoiceBreakdownError')
                   : undefined
               }
-              emptyMessage="No stored breakdown available for this billing record."
+              emptyMessage={t('billing.breakdownEmpty')}
             />
           </div>
 
           <div className="rounded bg-(--surface) p-3 text-sm text-(--muted)">
-            Delivery fees shown below are operational records. Invoice totals
-            come from the billing breakdown above.
+            {t('billing.operationalFees')}
           </div>
 
           <Table
             columns={invoiceDeliveryColumns}
             data={invoicePaidDeliveries}
             showPagination={false}
-            noDataMessage="No deliveries found for this invoice."
+            noDataMessage={t('billing.noInvoiceDeliveries')}
           />
 
           <footer className="flex justify-end border-t pt-2">
             <Button type="button" onClick={closeInvoiceDeliveriesModal}>
-              Close
+              {t('common.actions.close')}
             </Button>
           </footer>
         </section>

@@ -1,7 +1,7 @@
 import { motion, type Variants } from 'framer-motion';
-import { formatDistanceToNow } from 'date-fns';
 import type { RecentActivity } from '@/types/dashboard.type';
 import DashboardPanel from './DashboardPanel';
+import { useI18n } from '@/i18n/i18n';
 
 interface DashboardActivityPanelProps {
   items: RecentActivity[];
@@ -29,22 +29,23 @@ const statusTone = (status?: string) => {
 };
 
 const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps) => {
+  const { t, language } = useI18n();
   const rows = items.slice(0, 6);
 
   return (
     <motion.div variants={variants}>
       <DashboardPanel
-        eyebrow="Activity feed"
-        title="Recent movement"
-        description="A compact stream of the latest orders, assignments, and payment-related updates."
+        eyebrow={t('dashboard.activity.eyebrow')}
+        title={t('dashboard.activity.title')}
+        description={t('dashboard.activity.description')}
         className="rounded-lg"
       >
         {rows.length > 0 ? (
           <div className="overflow-hidden rounded-md bg-(--surface)">
             <div className="hidden grid-cols-[1.2fr_1fr_auto] gap-4 border-b border-(--line) px-5 py-3 text-xs font-normal text-(--muted) sm:grid">
-              <span>Activity</span>
-              <span>Status</span>
-              <span>Updated</span>
+              <span>{t('dashboard.activity.activity')}</span>
+              <span>{t('common.status')}</span>
+              <span>{t('dashboard.activity.updated')}</span>
             </div>
             <ul>
               {rows.map((item) => (
@@ -68,22 +69,22 @@ const DashboardActivityPanel = ({ items, variants }: DashboardActivityPanelProps
                     <span
                       className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-normal ${statusTone(item.status)}`}
                     >
-                      {item.status}
+                      {item.status ? t(`status.${item.status.toLowerCase()}`) : '—'}
                     </span>
                   </div>
 
                   <time className="text-sm text-(--muted)">
-                    {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
+                    {new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.timestamp))}
                   </time>
                 </li>
               ))}
             </ul>
           </div>
         ) : (
-          <div className="rounded-md border border-dashed border-(--line) bg-(--surface) px-5 py-12 text-center">
-            <p className="text-base font-normal text-(--ink)">No recent activity yet</p>
+          <div className="rounded-md border border border-(--line) bg-(--surface) px-5 py-12 text-center">
+            <p className="text-base font-normal text-(--ink)">{t('dashboard.activity.empty')}</p>
             <p className="mt-2 text-sm text-(--muted)">
-              As new orders or assignments land, they will appear here.
+              {t('dashboard.activity.emptyDescription')}
             </p>
           </div>
         )}

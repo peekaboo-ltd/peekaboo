@@ -17,6 +17,7 @@ import {
   selectEmptyClassName,
   selectListItemHintClassName,
 } from '@/components/ui/select-options';
+import { useI18n } from '@/i18n/i18n';
 
 const RADIX_NAVIGATION_KEYS = new Set([
   'ArrowDown',
@@ -64,8 +65,8 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       readOnly = false,
       options = [],
       defaultValue = undefined,
-      placeholder = 'Select here...',
-      searchPlaceholder = 'Search...',
+      placeholder,
+      searchPlaceholder,
       className = undefined,
       value = '',
       onChange,
@@ -75,6 +76,9 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
     },
     ref
   ) => {
+    const { t } = useI18n();
+    const resolvedPlaceholder = placeholder ?? t('common.select');
+    const resolvedSearchPlaceholder = searchPlaceholder ?? t('common.search');
     const [searchTerm, setSearchTerm] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -126,7 +130,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
               aria-invalid={Boolean(errorMessage)}
               className={cn('w-full justify-between text-left', className)}
             >
-              <SelectValue className="truncate" placeholder={placeholder} />
+              <SelectValue className="truncate" placeholder={resolvedPlaceholder} />
             </SelectTrigger>
 
             <SelectContent className="p-0">
@@ -143,8 +147,8 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                           event.stopPropagation();
                         }
                       }}
-                      placeholder={searchPlaceholder}
-                      aria-label={label ? `Search ${label}` : 'Search options'}
+                      placeholder={resolvedSearchPlaceholder}
+                      aria-label={label ? `${t('common.search')} ${label}` : t('common.searchOptions')}
                       autoComplete="off"
                     className={cn(controlClassName, 'h-(--control-sm) border-none !border-b border-(--line) focus:!outline-none focus:ring-0 focus:!border-b-ink w-full text-sm')}
                     />
@@ -154,11 +158,11 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
                 <nav
                   className="flex w-full flex-col overflow-y-auto rounded-md bg-(--paper) py-2"
                   style={{ maxHeight: searchable ? 'calc(55vh - 50px)' : 'calc(55vh - 12px)' }}
-                  aria-label={label ? `${label} options` : 'Select options'}
+                  aria-label={label ? `${label}: ${t('common.selectOptions')}` : t('common.selectOptions')}
                 >
                   <SelectGroup className="flex flex-col gap-1">
                     {filteredOptions.length === 0 ? (
-                      <p className={selectEmptyClassName}>No matches found</p>
+                      <p className={selectEmptyClassName}>{t('common.noMatches')}</p>
                     ) : (
                       filteredOptions.map((option, index) => (
                         <SelectItem

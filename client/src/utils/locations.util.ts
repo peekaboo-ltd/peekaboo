@@ -118,6 +118,21 @@ export const locationErrorMessage = (error: LocationError): string => {
   }
 };
 
+export const locationErrorKey = (error: LocationError): string => {
+  switch (error.code) {
+    case 1:
+      return 'location.permissionDenied';
+    case 2:
+      return 'location.unavailable';
+    case 3:
+      return 'location.timeout';
+    case 0:
+      return 'location.unsupported';
+    default:
+      return 'location.unknownError';
+  }
+};
+
 // Best available single-line description of a location, without any lookups.
 export const describeLocation = (location?: OrderLocation | null): string => {
   if (!location) return '';

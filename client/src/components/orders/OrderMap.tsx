@@ -7,6 +7,7 @@ import {
 } from '@vis.gl/react-google-maps';
 import type { Order } from '../../types/order.type';
 import { ENVIRONMENTS } from '../../constants/environments.constants';
+import { useI18n } from '@/i18n/i18n';
 
 interface OrderMapProps {
   order: Order;
@@ -14,6 +15,7 @@ interface OrderMapProps {
 }
 
 export const OrderMap: React.FC<OrderMapProps> = ({ order, riderLocation }) => {
+  const { t } = useI18n();
   const mapCenter = useMemo(() => {
     if (order.locationFrom?.latitude && order.locationFrom?.longitude) {
       return {
@@ -37,7 +39,7 @@ export const OrderMap: React.FC<OrderMapProps> = ({ order, riderLocation }) => {
   if (!hasValidCoordinates) {
     return (
       <div className="flex items-center justify-center h-96 bg-(--surface) rounded-lg">
-        <p className="text-muted-foreground">No location coordinates available</p>
+        <p className="text-muted-foreground">{t('order.map.noCoordinates')}</p>
       </div>
     );
   }
@@ -58,7 +60,7 @@ export const OrderMap: React.FC<OrderMapProps> = ({ order, riderLocation }) => {
                 lat: order.locationFrom.latitude,
                 lng: order.locationFrom.longitude,
               }}
-              title="Pickup Location"
+              title={t('order.map.pickup')}
             />
           )}
 
@@ -69,7 +71,7 @@ export const OrderMap: React.FC<OrderMapProps> = ({ order, riderLocation }) => {
                 lat: order.locationTo.latitude,
                 lng: order.locationTo.longitude,
               }}
-              title="Delivery Location"
+              title={t('order.map.delivery')}
             />
           )}
 
@@ -77,7 +79,7 @@ export const OrderMap: React.FC<OrderMapProps> = ({ order, riderLocation }) => {
           {riderLocation && (
             <Marker
               position={riderLocation}
-              title="Rider Location"
+              title={t('order.map.rider')}
             />
           )}
 

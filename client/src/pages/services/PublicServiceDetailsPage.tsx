@@ -23,6 +23,7 @@ import {
 } from './plan-pricing';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { useI18n } from '@/i18n/i18n';
 
 const PlanFact = ({ label, value }: { label: string; value: string }) => (
   <div className="min-w-0">
@@ -56,6 +57,7 @@ const ServiceDetailsLoading = () => (
 );
 
 const PublicServiceDetailsPage = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const { data, isFetching, error } = useFetchPublicBusinessPlanBySlugQuery(
@@ -66,7 +68,7 @@ const PublicServiceDetailsPage = () => {
   const { heroCopy, supportContacts } = useHomeContent();
   const plan = data?.data;
 
-  useDocumentTitle(plan ? `${plan.name} | Services` : 'Service Details');
+  useDocumentTitle(plan ? t('services.details.docTitlePlan', { plan: plan.name }) : t('services.details.docTitle'));
 
   const handleContactNavigation = () => {
     navigate('/contact');
@@ -88,16 +90,16 @@ const PublicServiceDetailsPage = () => {
               animate="visible"
             >
               <hgroup className="space-y-3">
-                <p className="type-eyebrow">Service details</p>
+                <p className="type-eyebrow">{t('services.details.eyebrow')}</p>
                 <h1 className="type-display max-w-[16ch] text-(--ink)">
-                  We couldn&apos;t find that plan
+                  {t('services.details.notFoundTitle')}
                 </h1>
                 <p className="type-body max-w-[46ch] text-(--muted)">
-                  The plan may have been archived, or the link may be incomplete.
+                  {t('services.details.notFoundDescription')}
                 </p>
               </hgroup>
               <Button route="/services" primary>
-                Browse all plans
+                {t('services.details.browse')}
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             </motion.div>
@@ -107,14 +109,14 @@ const PublicServiceDetailsPage = () => {
     );
   }
 
-  const price = resolvePrice(plan);
-  const rows = getPricingRows(plan);
-  const unit = periodNoun(plan.billingPeriod);
+  const price = resolvePrice(plan, t);
+  const rows = getPricingRows(plan, t);
+  const unit = periodNoun(plan.billingPeriod, t);
   const quotableRows = rows.filter((row) => !row.isCustom);
   const entryVolume = quotableRows[0]?.tier.minQuantity;
   const topBand = quotableRows[quotableRows.length - 1]?.tier;
   const featureList = plan.features ?? [];
-  const cadenceLabel = billingPeriodLabel(plan.billingPeriod);
+  const cadenceLabel = billingPeriodLabel(plan.billingPeriod, t);
 
   return (
     <ServiceDetailsShell>
@@ -132,12 +134,12 @@ const PublicServiceDetailsPage = () => {
                 className="p-2 px-4 bg-(--surface) hover:bg-(--surface-hover) active:bg-(--surface-active) rounded-md inline-flex items-center gap-2 text-sm text-(--ink)"
               >
                 <FontAwesomeIcon icon={faChevronLeft} className="size-4" aria-hidden="true" />
-                All plans
+                {t('services.details.allPlans')}
               </Link>
 
               <hgroup className="space-y-3">
                 <div className="flex flex-wrap items-center gap-3">
-                  <p className="type-eyebrow">{cadenceLabel} plan</p>
+                  <p className="type-eyebrow">{t('services.details.planCadence', { cadence: cadenceLabel })}</p>
                   {plan.badge ? (
                     <span className="inline-flex h-5 items-center rounded-(--radius-pill) bg-(--ink) px-2.5 text-[0.6875rem] font-medium uppercase text-(--paper)">
                       {plan.badge}
@@ -147,37 +149,37 @@ const PublicServiceDetailsPage = () => {
                 <h1 className="type-display max-w-[16ch] text-(--ink)">{plan.name}</h1>
                 <p className="type-body max-w-[52ch] text-(--muted)">
                   {plan.description ||
-                    'A business delivery plan priced in volume bands, so your cost follows what you actually send.'}
+                    t('services.details.fallbackDescription')}
                 </p>
               </hgroup>
 
               <div className="w-full max-w-md border-t border-(--line) pt-6">
-                <p className="type-eyebrow">Price</p>
+                <p className="type-eyebrow">{t('services.details.price')}</p>
                 <PriceLockup price={price} className="mt-2" />
               </div>
 
               <dl className="flex w-full max-w-md flex-wrap gap-x-10 gap-y-4 border-t border-(--line) pt-6">
-                <PlanFact label="Billed" value={cadenceLabel} />
+                <PlanFact label={t('services.details.billed')} value={cadenceLabel} />
                 <PlanFact
-                  label="Volume bands"
-                  value={rows.length ? String(rows.length) : 'Quoted'}
+                  label={t('services.details.volumeBands')}
+                  value={rows.length ? String(rows.length) : t('services.details.quoted')}
                 />
                 <PlanFact
-                  label="Starts from"
+                  label={t('services.details.startsFrom')}
                   value={
                     entryVolume != null
-                      ? `${entryVolume} per ${unit}`
-                      : 'Any volume'
+                      ? t('services.details.perUnit', { count: entryVolume, unit })
+                      : t('services.details.anyVolume')
                   }
                 />
                 <PlanFact
-                  label="Upper limit"
+                  label={t('services.details.upperLimit')}
                   value={
                     plan.isCustomPricing
-                      ? 'Negotiated'
+                      ? t('services.details.negotiated')
                       : topBand?.maxQuantity == null
-                        ? 'None'
-                        : `${topBand.maxQuantity} per ${unit}`
+                        ? t('services.none')
+                        : t('services.details.perUnit', { count: topBand.maxQuantity, unit })
                   }
                 />
               </dl>
@@ -187,7 +189,7 @@ const PublicServiceDetailsPage = () => {
                 className="link-arrow p-1.5 px-3 bg-(--surface) hover:bg-(--surface-hover) active:bg-(--surface-active) rounded-md inline-flex items-center gap-1.5 text-sm text-(--ink)"
               >
                 <FontAwesomeIcon icon={faChevronLeft} className="size-4" aria-hidden="true" />
-                Compare plans
+                {t('services.comparePlans')}
               </Link>
 
               <HeroTrustIndicators
@@ -213,16 +215,15 @@ const PublicServiceDetailsPage = () => {
           <div className="app-container">
             <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
               <hgroup>
-                <p className="type-eyebrow">Pricing</p>
+                <p className="type-eyebrow">{t('services.details.pricing')}</p>
                 <h2 className="type-h2 mt-2">
-                  Find your
+                  {t('services.details.findBand1')}
                   <br />
-                  volume band.
+                  {t('services.details.findBand2')}
                 </h2>
               </hgroup>
               <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
-                Enter what you send in a typical {unit}. The band you land in is
-                highlighted below.
+                {t('services.details.findBandDescription', { unit })}
               </p>
             </header>
 
@@ -238,16 +239,15 @@ const PublicServiceDetailsPage = () => {
           <div className="app-container">
             <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
               <hgroup>
-                <p className="type-eyebrow">Included</p>
+                <p className="type-eyebrow">{t('services.details.included')}</p>
                 <h2 className="type-h2 mt-2">
-                  What every
+                  {t('services.details.includedTitle1')}
                   <br />
-                  band includes.
+                  {t('services.details.includedTitle2')}
                 </h2>
               </hgroup>
               <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
-                Every volume band on {plan.name} ships with the same operational
-                support and delivery tooling.
+                {t('services.details.includedDescription', { plan: plan.name })}
               </p>
             </header>
 
@@ -277,12 +277,11 @@ const PublicServiceDetailsPage = () => {
       />
 
       <FinalCtaSection
-        title={`Ready to start on ${plan.name}?`}
-        subtitle={`Tell us your volume and service area and we will confirm the setup${plan.pricingTiers?.overflowRate
-          ? `, including how overflow past a band is billed at ${formatCurrency(plan.pricingTiers.overflowRate, plan.currency)} each`
-          : ''
-          }.`}
-        buttonLabel="Talk to our team"
+        title={t('services.details.ready', { plan: plan.name })}
+        subtitle={plan.pricingTiers?.overflowRate
+          ? t('services.details.readyOverflow', { amount: formatCurrency(plan.pricingTiers.overflowRate, plan.currency) })
+          : t('services.details.readyDescription')}
+        buttonLabel={t('services.talkToTeam')}
         onScrollToForm={handleContactNavigation}
       />
     </ServiceDetailsShell>

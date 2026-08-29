@@ -2,7 +2,6 @@ import CustomPopover from '@/components/inputs/CustomPopover';
 import Input from '@/components/inputs/Input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { capitalizeString } from '@/utils/strings.util';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,15 +21,16 @@ import {
   UseFormSetValue,
 } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { useI18n } from '@/i18n/i18n';
 
 export const useStatusFilter = ({
   control,
   setValue,
   applicationStatuses,
   defaultStatuses,
-  searchPlaceholder = 'Search status...',
+  searchPlaceholder,
   labelIcon = faGlobe,
-  label = 'Status',
+  label,
 }: {
   control: Control<FieldValues>;
   setApplicationStatuses?: Dispatch<SetStateAction<string[]>>;
@@ -41,6 +41,9 @@ export const useStatusFilter = ({
   labelIcon?: IconProp;
   label?: string;
 }) => {
+  const { t } = useI18n();
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t('filter.searchStatus');
+  const resolvedLabel = label ?? t('common.status');
   const [applicationStatus, setApplicationStatus] = useState<string[]>(
     defaultStatuses || [],
   );
@@ -106,7 +109,7 @@ export const useStatusFilter = ({
 
     return (applicationStatuses || []).filter((status) => {
       // Get the mapped label for the status
-      const statusLabel = status;
+      const statusLabel = t(`status.${status.toLowerCase()}`);
 
       // Normalize both the original status and the mapped label
       const normalizedStatus = normalizeSearchText(status);
@@ -118,7 +121,7 @@ export const useStatusFilter = ({
         normalizedLabel.includes(normalizedQuery)
       );
     });
-  }, [applicationStatuses, searchQuery]);
+  }, [applicationStatuses, searchQuery, t]);
 
   // Memoize applicationStatus to ensure stable reference
   const memoizedApplicationStatus = useMemo(
@@ -169,7 +172,7 @@ export const useStatusFilter = ({
             className="w-full justify-start gap-2 !border-(--line)"
           >
             <FontAwesomeIcon icon={labelIcon} />
-            <p className="text-sm">{label}</p>
+            <p className="text-sm">{resolvedLabel}</p>
           </Button>
         }
       >
@@ -177,7 +180,7 @@ export const useStatusFilter = ({
           {/* Search input */}
           <fieldset className="w-full flex-shrink-0">
             <Input
-              placeholder={searchPlaceholder}
+              placeholder={resolvedSearchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full text-sm h-9"
@@ -188,7 +191,7 @@ export const useStatusFilter = ({
           <nav
             className="flex flex-col w-full overflow-y-auto bg-(--paper) rounded-md py-2"
             style={{ maxHeight: 'calc(55vh - 50px)' }}
-            aria-label="Status Filter List"
+            aria-label={t('filter.statusList')}
           >
             <menu className="flex flex-col w-full min-w-[17vw] gap-1">
               {filteredStatuses.length > 0 ? (
@@ -221,7 +224,7 @@ export const useStatusFilter = ({
                               }
                             />
                             <p className="text-sm text-(--ink)">
-                              {capitalizeString(status)}
+                              {t(`status.${status.toLowerCase()}`)}
                             </p>
                           </Link>
                         );
@@ -231,7 +234,7 @@ export const useStatusFilter = ({
                 })
               ) : (
                 <p className="text-sm text-(--muted) text-center py-2">
-                  No statuses found
+                  {t('filter.none')}
                 </p>
               )}
             </menu>
@@ -242,7 +245,7 @@ export const useStatusFilter = ({
                   to={`#`}
                   onClick={handleClear}
                 >
-                  Clear
+                  {t('common.actions.clear')}
                 </Link>
               </li>
               <li>
@@ -251,7 +254,7 @@ export const useStatusFilter = ({
                   to={`#`}
                   onClick={handleSelectAll}
                 >
-                  Select all
+                  {t('common.actions.selectAll')}
                 </Link>
               </li>
             </ul>
@@ -261,8 +264,8 @@ export const useStatusFilter = ({
     ),
     [
       labelIcon,
-      label,
-      searchPlaceholder,
+      resolvedLabel,
+      resolvedSearchPlaceholder,
       searchQuery,
       filteredStatuses,
       applicationStatus,
@@ -270,6 +273,7 @@ export const useStatusFilter = ({
       handleStatusToggle,
       handleClear,
       handleSelectAll,
+      t,
     ],
   );
 

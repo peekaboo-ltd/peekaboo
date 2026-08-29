@@ -7,9 +7,9 @@ import {
 import Input from '@/components/inputs/Input';
 import {
   contactMethodNeedsEmail,
-  PREFERRED_CONTACT_METHOD_LABELS,
   PreferredContactMethod,
 } from '@/types/order.type';
+import { useI18n } from '@/i18n/i18n';
 
 interface ContactMethodPickerProps {
   value?: PreferredContactMethod | null;
@@ -44,11 +44,14 @@ const ContactMethodPicker = ({
   email,
   onEmailChange,
   emailError,
-  label = 'How should we reach you?',
-  description = 'We use this for pickup and delivery updates on this order.',
+  label,
+  description,
   disabled = false,
 }: ContactMethodPickerProps) => {
   const emailFieldId = useId();
+  const { t } = useI18n();
+  const resolvedLabel = label ?? t('publicOrder.contact.label');
+  const resolvedDescription = description ?? t('publicOrder.contact.description');
   const groupLabelId = useId();
   const showEmail = contactMethodNeedsEmail(value);
 
@@ -56,7 +59,7 @@ const ContactMethodPicker = ({
     <div className="flex w-full flex-col gap-3">
       <div className="flex w-full flex-col gap-1.5">
         <p className={fieldLabelClassName} id={groupLabelId}>
-          {label}
+          {resolvedLabel}
         </p>
 
         {/* Always a controlled value. Passing `undefined` while the order is
@@ -70,14 +73,14 @@ const ContactMethodPicker = ({
           <TabsList className="w-full" aria-labelledby={groupLabelId}>
             {Object.values(PreferredContactMethod).map((method) => (
               <TabsTrigger key={method} value={method} disabled={disabled} className='data-[state=disabled]:text-(--muted) hover:bg-(--surface-hover)'>
-                {PREFERRED_CONTACT_METHOD_LABELS[method]}
+                {t(`publicOrder.contact.${method.toLowerCase()}`)}
               </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
 
-        {!showEmail && description ? (
-          <p className={fieldHelpClassName}>{description}</p>
+        {!showEmail && resolvedDescription ? (
+          <p className={fieldHelpClassName}>{resolvedDescription}</p>
         ) : null}
       </div>
 
@@ -85,11 +88,11 @@ const ContactMethodPicker = ({
         <Input
           id={emailFieldId}
           type="email"
-          label="Email address"
-          placeholder="you@example.com"
+          label={t('publicOrder.contact.emailLabel')}
+          placeholder={t('publicOrder.contact.emailPlaceholder')}
           value={email ?? ''}
           onChange={(e) => onEmailChange(e.target.value)}
-          description="Delivery updates go here."
+          description={t('publicOrder.contact.emailHelp')}
           errorMessage={emailError}
           required
         />

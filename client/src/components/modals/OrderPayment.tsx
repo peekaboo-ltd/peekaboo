@@ -25,6 +25,7 @@ import PaymentChannelSelect from './payment/PaymentChannelSelect';
 import MobileMoneyFields from './payment/MobileMoneyFields';
 import CardFields from './payment/CardFields';
 import type { PaymentFormValues } from './payment/payment.types';
+import { useI18n } from '@/i18n/i18n';
 
 const FALLBACK_EMAIL = 'info@peekaboo.co.rw';
 
@@ -38,6 +39,7 @@ const defaultValues: PaymentFormValues = {
 };
 
 const OrderPayment = () => {
+  const { t } = useI18n();
   // STATE VARIABLES
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -100,7 +102,7 @@ const OrderPayment = () => {
               ? formatPhone(selectedOrder.senderPhoneNumber, 'RW')
               : undefined,
           email: selectedOrder?.sender?.email || FALLBACK_EMAIL,
-          name: selectedOrder?.sender?.name || selectedOrder?.senderName || 'Sender',
+          name: selectedOrder?.sender?.name || selectedOrder?.senderName || t('orderPayment.payer.sender'),
         };
       }
       if (values.payerType === 'recipient') {
@@ -112,16 +114,16 @@ const OrderPayment = () => {
               : undefined,
           email: selectedOrder?.recipient?.email || FALLBACK_EMAIL,
           name:
-            selectedOrder?.recipient?.name || selectedOrder?.recipientName || 'Recipient',
+            selectedOrder?.recipient?.name || selectedOrder?.recipientName || t('orderPayment.payer.recipient'),
         };
       }
       return {
         phone: values.customPhone,
         email: FALLBACK_EMAIL,
-        name: 'Custom Payer',
+        name: t('orderPayment.payer.other'),
       };
     },
-    [selectedOrder],
+    [selectedOrder, t],
   );
 
   // The number shown to the network-mismatch hint, before submit validation.
@@ -142,13 +144,13 @@ const OrderPayment = () => {
       if (!isCard) {
         if (!payerPhone) {
           const message = !payerInfo.phone?.trim()
-            ? 'No phone number on file for this payer. Choose "Other" and enter one.'
-            : (phoneValidation.error ?? 'Enter a valid Rwandan phone number');
+            ? t('orderPayment.noPayerPhone')
+            : t('orderPayment.invalidPhone');
           setPayerPhoneError(message);
           return;
         }
         if (phoneValidation.type !== 'MOBILE') {
-          setPayerPhoneError('Enter a Rwandan mobile number for mobile money');
+          setPayerPhoneError(t('orderPayment.mobilePhone'));
           return;
         }
       }
@@ -189,7 +191,7 @@ const OrderPayment = () => {
         if (initiationError) {
           toast.error(
             initiationError?.message ||
-              'Payment could not be initiated. Please try again.',
+              t('orderPayment.initiationError'),
           );
           return;
         }
@@ -199,7 +201,7 @@ const OrderPayment = () => {
           // don't send the user to the success page.
           if (!paymentUrl || !paymentId) {
             toast.error(
-              'Card payment could not be started. Please try again or pay with mobile money.',
+              t('orderPayment.cardStartError'),
             );
             return;
           }
@@ -214,7 +216,7 @@ const OrderPayment = () => {
             `/p/orders/${orderId}/payment-pending?paymentId=${paymentId}`,
           );
         } else {
-          toast.error('Payment status could not be tracked. Please try again.');
+          toast.error(t('orderPayment.trackingError'));
         }
       } catch (error: unknown) {
         console.error('Payment creation failed:', error);
@@ -225,7 +227,7 @@ const OrderPayment = () => {
         const message =
           apiError?.data?.message ||
           apiError?.error ||
-          'Payment could not be initiated. Please try again.';
+          t('orderPayment.initiationError');
         if (!isCard && /phone|mobile money|wallet/i.test(message)) {
           setPayerPhoneError(message);
         }
@@ -240,6 +242,7 @@ const OrderPayment = () => {
       isPublic,
       navigate,
       selectedOrder,
+      t,
     ],
   );
 
@@ -275,8 +278,8 @@ const OrderPayment = () => {
       isOpen={orderPaymentModal}
       onClose={closeModal}
       className="min-w-[50vw]"
-      heading="Order Payment"
-      description="Payment for the order"
+      heading={t('orderPayment.title')}
+      description={t('orderPayment.description')}
     >
       <form
         className="w-full flex flex-col gap-4"
@@ -310,28 +313,30 @@ const OrderPayment = () => {
         )}
 
         <p className="flex items-center justify-between border-t border-(--line) pt-3 text-sm">
-          <span className="text-(--muted)">Amount due</span>
+          <span className="text-(--muted)">{t('orderPayment.amountDue')}</span>
           <span className="font-normal text-(--ink)">{formatCurrency(amount)}</span>
         </p>
 
         {ENVIRONMENTS.isPaymentSimulation ? (
           <p className="text-xs font-normal leading-snug text-(--ink)">
-            Payments are simulated in this environment. No real charge will be made.
+            {t('orderPayment.simulation')}
           </p>
         ) : null}
         {ENVIRONMENTS.isDevPrice ? (
           <p className="text-xs font-normal leading-snug text-(--ink)">
-            Catalog fee is {formatCurrency(amount)}. In this environment you will only
-            be charged {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)}.
+            {t('orderPayment.devPrice', {
+              fee: formatCurrency(amount),
+              amount: formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF),
+            })}
           </p>
         ) : null}
 
         <Button submit primary isLoading={isLoading || isRedirecting}>
           {isRedirecting
-            ? 'Redirecting to secure payment…'
+            ? t('orderPayment.redirecting')
             : isMobileMoney
-              ? `Pay ${formatCurrency(amount)}`
-              : 'Continue to secure card payment'}
+              ? t('orderPayment.payAmount', { amount: formatCurrency(amount) })
+              : t('orderPayment.continueCard')}
         </Button>
       </form>
     </Modal>

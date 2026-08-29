@@ -1,8 +1,12 @@
 import type { Language } from './i18n';
 import { legalBodyEn } from './legalBodyEn';
+import { legalBodyFr } from './legalBodyFr';
+import { legalBodyRw } from './legalBodyRw';
+import { extendedMessages } from './extendedMessages';
 
 export const messages: Record<Language, Record<string, string>> = {
   en: {
+    ...extendedMessages.en,
     'home.language.label': 'Language',
     'home.language.description': 'Choose how you read Peekaboo across the site.',
     'home.language.en': 'English',
@@ -338,6 +342,7 @@ export const messages: Record<Language, Record<string, string>> = {
     'validation.passwordMismatch': 'Passwords do not match',
   },
   fr: {
+    ...extendedMessages.fr,
     'home.language.label': 'Langue',
     'home.language.description': 'Choisissez comment vous lisez Peekaboo sur le site.',
     'home.language.en': 'English',
@@ -499,19 +504,19 @@ export const messages: Record<Language, Record<string, string>> = {
     'legal.terms.docTitle': 'Conditions générales',
     'legal.terms.title': 'Conditions générales',
     'legal.terms.description':
-      'These Terms and Conditions govern access to Peekaboo’s websites, apps, and delivery coordination services. Please read them carefully; Rwandan law applies.',
+      'Les présentes Conditions générales régissent l’accès aux sites web, applications et services de coordination de livraison de Peekaboo. Veuillez les lire attentivement ; le droit rwandais s’applique.',
 
     'legal.refund.docTitle': 'Politique de remboursement',
     'legal.refund.title': 'Politique de remboursement',
     'legal.refund.description':
-      'How Peekaboo assesses refund requests for delivery fees paid through our platform, including timing, eligibility, and payment-partner constraints.',
+      'Comment Peekaboo examine les demandes de remboursement pour les frais de livraison payés via notre plateforme, y compris les délais, l’éligibilité et les contraintes des partenaires de paiement.',
 
     'legal.cancellation.docTitle': 'Politique d’annulation',
     'legal.cancellation.title': 'Politique d’annulation',
     'legal.cancellation.description':
-      'When you can withdraw an order in early processing, how to request help after payment or dispatch, and how business billing may be affected.',
+      'Quand vous pouvez retirer une commande en phase de traitement initial, comment demander de l’aide après paiement ou expédition, et comment la facturation professionnelle peut être affectée.',
 
-    ...legalBodyEn,
+    ...legalBodyFr,
 
     // Dashboard
     'dashboard.welcome': 'Bienvenue, {name}',
@@ -673,6 +678,7 @@ export const messages: Record<Language, Record<string, string>> = {
     'validation.passwordMismatch': 'Les mots de passe ne correspondent pas',
   },
   rw: {
+    ...extendedMessages.rw,
     'home.language.label': 'Ururimi',
     'home.language.description': 'Hitamo uko usoma Peekaboo kuri uru rubuga.',
     'home.language.en': 'English',
@@ -834,19 +840,19 @@ export const messages: Record<Language, Record<string, string>> = {
     'legal.terms.docTitle': 'Amabwiriza n’amasezerano',
     'legal.terms.title': 'Amabwiriza n’amasezerano',
     'legal.terms.description':
-      'These Terms and Conditions govern access to Peekaboo’s websites, apps, and delivery coordination services. Please read them carefully; Rwandan law applies.',
+      'Aya Mabwiriza n’Amasezerano agenga kwinjira ku mbuga za Peekaboo, porogaramu, na serivisi zo guhuza gutanga. Nyamuneka usome neza; amategeko y’u Rwanda akurikizwa.',
 
     'legal.refund.docTitle': 'Politiki y’kwishyura',
     'legal.refund.title': 'Politiki y’kwishyura',
     'legal.refund.description':
-      'How Peekaboo assesses refund requests for delivery fees paid through our platform, including timing, eligibility, and payment-partner constraints.',
+      'Uko Peekaboo isuzuma ibisaba byo kwishyura ku mafaranga yo kohereza yishyuwe binyuze ku rubuga rwacu, harimo igihe, uburenganzira, n’imipaka y’abafatanyabikorwa bo kwishyura.',
 
     'legal.cancellation.docTitle': 'Politiki yo guhagarika',
     'legal.cancellation.title': 'Politiki yo guhagarika',
     'legal.cancellation.description':
-      'When you can withdraw an order in early processing, how to request help after payment or dispatch, and how business billing may be affected.',
+      'Igihe ushobora gukuraho itegeko mu gihe cyo gukora mu ntangiriro, uko wasaba ubufasha nyuma yo kwishyura cyangwa kohereza, n’uko inyemezabwishyu y’ubucuruzi ishobora guhindurwa.',
 
-    ...legalBodyEn,
+    ...legalBodyRw,
 
     // Dashboard
     'dashboard.welcome': 'Murakaza neza, {name}',

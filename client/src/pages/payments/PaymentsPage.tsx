@@ -34,6 +34,7 @@ import { AdminPaymentsQueryParams } from '@/api/queries/payments.queries';
 import { controlClassName } from '@/components/inputs/control';
 import DatePicker from '@/components/inputs/DatePicker';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 const formatDateParam = (date?: Date) => {
   if (!date) return undefined;
@@ -44,29 +45,30 @@ const formatDateParam = (date?: Date) => {
 };
 
 const PAYMENT_STATUS_OPTIONS = [
-  { value: 'all', label: 'All Statuses' },
-  { value: KpayPaymentStatus.PENDING, label: 'Pending' },
-  { value: KpayPaymentStatus.SUCCESSFUL, label: 'Successful' },
-  { value: KpayPaymentStatus.FAILED, label: 'Failed' },
+  { value: 'all', labelKey: 'payments.allStatuses' },
+  { value: KpayPaymentStatus.PENDING, labelKey: 'status.pending' },
+  { value: KpayPaymentStatus.SUCCESSFUL, labelKey: 'status.successful' },
+  { value: KpayPaymentStatus.FAILED, labelKey: 'status.failed' },
 ];
 
 const CURRENCY_OPTIONS = [
-  { value: 'all', label: 'All Currencies' },
-  { value: 'RWF', label: 'RWF' },
-  { value: 'USD', label: 'USD' },
+  { value: 'all', labelKey: 'payments.allCurrencies' },
+  { value: 'RWF', labelKey: 'RWF' },
+  { value: 'USD', labelKey: 'USD' },
 ];
 
 const METHOD_OPTIONS = [
-  { value: 'all', label: 'All Methods' },
-  { value: 'momo', label: 'Mobile Money' },
-  { value: 'cc', label: 'Credit Card' },
-  { value: 'bank', label: 'Bank' },
-  { value: 'spenn', label: 'Spenn' },
-  { value: 'smartcash', label: 'SmartCash' },
+  { value: 'all', labelKey: 'payments.allMethods' },
+  { value: 'momo', labelKey: 'payments.mobileMoney' },
+  { value: 'cc', labelKey: 'payments.creditCard' },
+  { value: 'bank', labelKey: 'payments.bank' },
+  { value: 'spenn', labelKey: 'Spenn' },
+  { value: 'smartcash', labelKey: 'SmartCash' },
 ];
 
 const PaymentsPage = () => {
-  useDocumentTitle('Payments');
+  const { t } = useI18n();
+  useDocumentTitle(t('payments.docTitle'));
 
   const { adminPaymentsList, updateStatusModal } = useAppSelector(
     (state) => state.payment,
@@ -219,37 +221,30 @@ const PaymentsPage = () => {
     exportPayments(exportParams);
   };
 
-  useEffect(() => {
-    if (exportSuccess && exportData) {
-      downloadCSV(exportData);
-      resetExport();
-    }
-  }, [exportSuccess, exportData, resetExport]);
-
-  const downloadCSV = (payments: Payment[]) => {
+  const downloadCSV = useCallback((payments: Payment[]) => {
     const headers = [
-      'Reference ID',
-      'Status',
-      'Amount',
-      'Currency',
-      'Method',
-      'Customer Name',
-      'Customer Email',
-      'Customer Phone',
-      'External Reference',
-      'Date',
+      t('payments.csv.reference'),
+      t('payments.csv.status'),
+      t('payments.csv.amount'),
+      t('payments.csv.currency'),
+      t('payments.csv.method'),
+      t('payments.csv.customerName'),
+      t('payments.csv.customerEmail'),
+      t('payments.csv.customerPhone'),
+      t('payments.csv.externalReference'),
+      t('payments.csv.date'),
     ];
 
     const statusLabels: Record<string, string> = {
-      [KpayPaymentStatus.PENDING]: 'Pending',
-      [KpayPaymentStatus.SUCCESSFUL]: 'Successful',
-      [KpayPaymentStatus.FAILED]: 'Failed',
+      [KpayPaymentStatus.PENDING]: t('status.pending'),
+      [KpayPaymentStatus.SUCCESSFUL]: t('status.successful'),
+      [KpayPaymentStatus.FAILED]: t('status.failed'),
     };
 
     const methodLabels: Record<string, string> = {
-      momo: 'Mobile Money',
-      cc: 'Credit Card',
-      bank: 'Bank',
+      momo: t('payments.mobileMoney'),
+      cc: t('payments.creditCard'),
+      bank: t('payments.bank'),
       spenn: 'Spenn',
       smartcash: 'SmartCash',
     };
@@ -288,16 +283,23 @@ const PaymentsPage = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  };
+  }, [t]);
+
+  useEffect(() => {
+    if (exportSuccess && exportData) {
+      downloadCSV(exportData);
+      resetExport();
+    }
+  }, [exportSuccess, exportData, resetExport, downloadCSV]);
 
   return (
     <main className="w-full flex flex-col gap-6">
       <header className="flex flex-col gap-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="type-page-title">Payments</h1>
+            <h1 className="type-page-title">{t('payments.title')}</h1>
             <p className="text-sm text-muted-foreground">
-              View and manage all payments across the platform.
+              {t('payments.description')}
             </p>
           </article>
           <menu className="flex items-center gap-2 flex-wrap">
@@ -307,7 +309,7 @@ const PaymentsPage = () => {
               className="flex items-center gap-2"
             >
               <FontAwesomeIcon icon={faFilter} />
-              {showFilters ? 'Hide Filters' : 'Show Filters'}
+              {showFilters ? t('payments.hideFilters') : t('payments.showFilters')}
             </Button>
             <Button
               primary
@@ -317,7 +319,7 @@ const PaymentsPage = () => {
               className="flex items-center gap-2"
             >
               <FontAwesomeIcon icon={faDownload} />
-              Export CSV
+              {t('payments.exportCsv')}
             </Button>
           </menu>
         </section>
@@ -331,7 +333,7 @@ const PaymentsPage = () => {
               />
               <input
                 type="text"
-                placeholder="Search by reference, customer name, email, phone..."
+                placeholder={t('payments.searchPlaceholder')}
                 value={searchKey}
                 onChange={(e) => setSearchKey(e.target.value)}
                 onKeyDown={(e) => {
@@ -346,7 +348,7 @@ const PaymentsPage = () => {
                 onChange={(event) =>
                   handleStartDateChange(event as unknown as Date | undefined)
                 }
-                placeholder="From date"
+                placeholder={t('payments.fromDate')}
                 toDate={endDate}
               />
             </div>
@@ -356,12 +358,12 @@ const PaymentsPage = () => {
                 onChange={(event) =>
                   handleEndDateChange(event as unknown as Date | undefined)
                 }
-                placeholder="To date"
+                placeholder={t('payments.toDate')}
                 fromDate={startDate}
               />
             </div>
             <Button primary type="button" onClick={handleApplyFilters}>
-              Apply
+              {t('payments.apply')}
             </Button>
           </div>
         </section>
@@ -370,27 +372,27 @@ const PaymentsPage = () => {
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
-              label: 'Total Revenue',
+              label: t('payments.totalRevenue'),
               value: formatCurrency(stats?.totalRevenue || 0),
               icon: faMoneyBillWave,
               bgColor: 'bg-(--ink)',
             },
             {
-              label: 'Successful',
+              label: t('status.successful'),
               value: `${stats?.successfulCount || 0}`,
               subtitle: formatCurrency(stats?.successfulAmount || 0),
               icon: faCheckCircle,
               bgColor: 'bg-(--surface)',
             },
             {
-              label: 'Pending',
+              label: t('status.pending'),
               value: `${stats?.pendingCount || 0}`,
               subtitle: formatCurrency(stats?.pendingAmount || 0),
               icon: faClock,
               bgColor: 'bg-(--surface)',
             },
             {
-              label: 'Failed',
+              label: t('status.failed'),
               value: `${stats?.failedCount || 0}`,
               subtitle: formatCurrency(stats?.failedAmount || 0),
               icon: faTimesCircle,
@@ -430,7 +432,7 @@ const PaymentsPage = () => {
               {/* Search */}
               <div className="flex flex-col gap-1.5">
                 <label className="type-meta">
-                  Search
+                  {t('common.search')}
                 </label>
                 <div className="relative">
                   <FontAwesomeIcon
@@ -439,7 +441,7 @@ const PaymentsPage = () => {
                   />
                   <input
                     type="text"
-                    placeholder="Reference, email, name, phone..."
+                    placeholder={t('payments.searchShortPlaceholder')}
                     value={searchKey}
                     onChange={(e) => setSearchKey(e.target.value)}
                     onKeyDown={(e) => {
@@ -453,16 +455,16 @@ const PaymentsPage = () => {
               {/* Status */}
               <div className="flex flex-col gap-1.5">
                 <label className="type-meta">
-                  Status
+                  {t('common.status')}
                 </label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="All Statuses" />
+                    <SelectValue placeholder={t('payments.allStatuses')} />
                   </SelectTrigger>
                   <SelectContent>
                     {PAYMENT_STATUS_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                        {option.labelKey === option.value ? option.value : t(option.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -472,19 +474,19 @@ const PaymentsPage = () => {
               {/* Currency */}
               <div className="flex flex-col gap-1.5">
                 <label className="type-meta">
-                  Currency
+                  {t('paymentDetails.currency')}
                 </label>
                 <Select
                   value={currencyFilter}
                   onValueChange={setCurrencyFilter}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="All Currencies" />
+                    <SelectValue placeholder={t('payments.allCurrencies')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CURRENCY_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                        {option.labelKey === option.value ? option.value : t(option.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -494,16 +496,16 @@ const PaymentsPage = () => {
               {/* Payment Method */}
               <div className="flex flex-col gap-1.5">
                 <label className="type-meta">
-                  Payment Method
+                  {t('payments.paymentMethod')}
                 </label>
                 <Select value={methodFilter} onValueChange={setMethodFilter}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="All Methods" />
+                    <SelectValue placeholder={t('payments.allMethods')} />
                   </SelectTrigger>
                   <SelectContent>
                     {METHOD_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                        {option.labelKey === option.value ? option.value : t(option.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -512,14 +514,14 @@ const PaymentsPage = () => {
 
               <div className="flex flex-col gap-1.5">
                 <label className="type-meta">
-                  From Date
+                  {t('payments.fromDate')}
                 </label>
                 <DatePicker
                   value={startDate}
                   onChange={(event) =>
                     handleStartDateChange(event as unknown as Date | undefined)
                   }
-                  placeholder="From date"
+                  placeholder={t('payments.fromDate')}
                   toDate={endDate}
                 />
               </div>
@@ -527,14 +529,14 @@ const PaymentsPage = () => {
               {/* End Date */}
               <div className="flex flex-col gap-1.5">
                 <label className="type-meta">
-                  To Date
+                  {t('payments.toDate')}
                 </label>
                 <DatePicker
                   value={endDate}
                   onChange={(event) =>
                     handleEndDateChange(event as unknown as Date | undefined)
                   }
-                  placeholder="To date"
+                  placeholder={t('payments.toDate')}
                   fromDate={startDate}
                 />
               </div>
@@ -542,7 +544,7 @@ const PaymentsPage = () => {
               {/* Min Amount */}
               <div className="flex flex-col gap-1.5">
                 <label className="type-meta">
-                  Min Amount
+                  {t('payments.minimumAmount')}
                 </label>
                 <input
                   type="number"
@@ -556,7 +558,7 @@ const PaymentsPage = () => {
               {/* Max Amount */}
               <div className="flex flex-col gap-1.5">
                 <label className="type-meta">
-                  Max Amount
+                  {t('payments.maximumAmount')}
                 </label>
                 <input
                   type="number"
@@ -572,11 +574,11 @@ const PaymentsPage = () => {
             <div className="flex items-center gap-2 justify-end">
               <Button type="button" onClick={handleResetFilters}>
                 <FontAwesomeIcon icon={faRotateRight} className="mr-2" />
-                Reset
+                {t('payments.reset')}
               </Button>
               <Button primary type="button" onClick={handleApplyFilters}>
                 <FontAwesomeIcon icon={faSearch} className="mr-2" />
-                Apply Filters
+                {t('payments.applyFilters')}
               </Button>
             </div>
           </section>

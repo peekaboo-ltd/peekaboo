@@ -47,9 +47,10 @@ import { entranceVariants } from '@/pages/home/home.animations';
 import OrderSetupHeroMap from './components/OrderSetupHeroMap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCopy, faPenToSquare } from '@fortawesome/free-regular-svg-icons';
+import { useI18n } from '@/i18n/i18n';
 
 interface LocationCardProps {
-  label: 'Pickup' | 'Destination';
+  label: string;
   location?: OrderLocation | null;
   emptyHint: string;
   onEdit: () => void;
@@ -74,7 +75,9 @@ const LocationCard = ({
   onInspect,
   onUseCurrent,
   usingCurrentLocation = false,
-}: LocationCardProps) => (
+}: LocationCardProps) => {
+  const { t } = useI18n();
+  return (
   <article className="card-quiet flex min-w-0 flex-col gap-2 px-4 py-2">
     <header className="flex items-center justify-between gap-3">
       <p className="type-eyebrow">{label}</p>
@@ -86,7 +89,7 @@ const LocationCard = ({
             e.preventDefault();
             onEdit();
           }}
-          aria-label={`Change ${label.toLowerCase()} location`}
+          aria-label={t('publicOrder.changeLocation', { location: label.toLowerCase() })}
         />
       ) : null}
     </header>
@@ -102,7 +105,7 @@ const LocationCard = ({
           }}
           className="type-meta w-fit cursor-pointer text-(--ink) underline underline-offset-2"
         >
-          Address details
+          {t('publicOrder.addressDetails')}
         </button>
       </>
     ) : (
@@ -116,20 +119,22 @@ const LocationCard = ({
               variant="primary"
               size="sm"
             >
-              Use current location
+              {t('publicOrder.useCurrent')}
             </Button>
           ) : null}
           <Button onClick={onEdit} size="sm">
-            Set location
+            {t('publicOrder.setLocation')}
           </Button>
         </div>
       </div>
     )}
   </article>
-);
+  );
+};
 
 const PublicOrderDetails = () => {
-  useDocumentTitle('Order Details');
+  const { t } = useI18n();
+  useDocumentTitle(t('publicOrder.docTitle'));
 
   const dispatch = useAppDispatch();
   const { order } = useAppSelector((state) => state.order);
@@ -200,10 +205,11 @@ const PublicOrderDetails = () => {
       });
     } catch (error) {
       console.error('Failed to get current location:', error);
+      toast.error(t('publicOrder.currentLocationError'));
     } finally {
       setGettingCurrentLocation(false);
     }
-  }, [currentOrder?.id, updatePublicOrder]);
+  }, [currentOrder?.id, t, updatePublicOrder]);
 
   // SET USER DEFAULT LOCATION
   useEffect(() => {
@@ -297,7 +303,7 @@ const PublicOrderDetails = () => {
         }
         setDistance(null);
         setEstimatedTime(null);
-        toast.error('Could not calculate the route. Check both locations and try again.');
+        toast.error(t('publicOrder.routeError'));
       });
 
     return () => {
@@ -312,6 +318,7 @@ const PublicOrderDetails = () => {
     dispatch,
     isSameCoordinates,
     quotePublicOrder,
+    t,
   ]);
   const handleContactMethodChange = useCallback(
     (method: PreferredContactMethod) => {
@@ -351,7 +358,7 @@ const PublicOrderDetails = () => {
         return;
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-        setEmailError('Enter a valid email address.');
+        setEmailError(t('publicOrder.emailInvalid'));
         return;
       }
       setEmailError('');
@@ -365,7 +372,7 @@ const PublicOrderDetails = () => {
         });
       }
     },
-    [currentOrder?.id, updatePublicOrder],
+    [currentOrder?.id, t, updatePublicOrder],
   );
 
   const hasSuccessfulPayment = paymentsList?.some(
@@ -391,14 +398,12 @@ const PublicOrderDetails = () => {
     currentOrder?.initialFee ??
     0;
 
-    const [copied, setCopied] = useState(false);
-    useEffect(() => {
-      if (copied) {
-        setTimeout(() => {
-          setCopied(false);
-        }, 2000);
-      }
-    }, [copied]);
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
 
   return (
     // The Maps APIProvider is mounted app-wide in App.tsx.
@@ -415,50 +420,56 @@ const PublicOrderDetails = () => {
               and the pay button off it. */}
           <div className="flex min-h-0 flex-col gap-4 overflow-y-auto lg:pr-1">
             <hgroup className="flex flex-col gap-1">
-              <p className="type-eyebrow">Delivery setup</p>
+              <p className="type-eyebrow">{t('publicOrder.setup')}</p>
               <h1 className="type-page-title">
-                {currentOrder?.referenceId || 'Set delivery locations'} <FontAwesomeIcon icon={copied ? faCircleCheck : faCopy} className="size-3.5 cursor-pointer" onClick={(e) => {
-                  e.preventDefault();
-                  if (currentOrder?.referenceId) {
-                    navigator.clipboard.writeText(currentOrder.referenceId);
-                    toast.success('Reference ID copied to clipboard');
-                    setCopied(true);
-                  }
-                }} />
+                {currentOrder?.referenceId || t('publicOrder.setLocations')}{' '}
+                {currentOrder?.referenceId ? (
+                  <button
+                    type="button"
+                    className="inline-flex size-8 items-center justify-center rounded-(--radius-control) align-middle hover:bg-(--surface-hover)"
+                    aria-label={t('publicOrder.copyReference')}
+                    onClick={() => {
+                      void navigator.clipboard.writeText(currentOrder.referenceId);
+                      toast.success(t('publicOrder.referenceCopied'));
+                      setCopied(true);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={copied ? faCircleCheck : faCopy} className="size-3.5" />
+                  </button>
+                ) : null}
               </h1>
               <p className="type-meta max-w-[52ch]">
-                Set both ends of the route. We price it before you pay.
+                {t('publicOrder.setupDescription')}
               </p>
             </hgroup>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <LocationCard
-                label="Pickup"
+                label={t('publicOrder.pickup')}
                 location={pickup}
-                emptyHint="Not set yet."
+                emptyHint={t('publicOrder.notSet')}
                 onEdit={() => dispatch(setUpdateOrderLocationFromModal(true))}
                 onInspect={() =>
-                  pickup && setLocationDetail({ label: 'Pickup', location: pickup })
+                  pickup && setLocationDetail({ label: t('publicOrder.pickup'), location: pickup })
                 }
                 onUseCurrent={handleGetCurrentLocation}
                 usingCurrentLocation={gettingCurrentLocation}
               />
               <LocationCard
-                label="Destination"
+                label={t('publicOrder.destination')}
                 location={dropoff}
-                emptyHint="Not set yet."
+                emptyHint={t('publicOrder.notSet')}
                 onEdit={() => dispatch(setUpdateOrderLocationToModal(true))}
                 onInspect={() =>
                   dropoff &&
-                  setLocationDetail({ label: 'Destination', location: dropoff })
+                  setLocationDetail({ label: t('publicOrder.destination'), location: dropoff })
                 }
               />
             </div>
 
             {isSameLocation ? (
               <p className="card-quiet px-4 py-3 text-sm text-(--ink)">
-                Pickup and destination are the same place. Choose a different
-                destination to continue.
+                {t('publicOrder.sameLocation')}
               </p>
             ) : null}
 
@@ -480,15 +491,15 @@ const PublicOrderDetails = () => {
 
             {locationsReady && feeValue > 0 ? (
               <p className="type-meta">
-                Fee is based on the distance between the two locations.{' '}
+                {t('publicOrder.feeExplanation')}{' '}
                 <Link to="/about/orders/fees" className="link-sweep underline underline-offset-3 text-(--ink)">
-                  How fees work
+                  {t('publicOrder.howFeesWork')}
                 </Link>
                 {ENVIRONMENTS.isPaymentSimulation
-                  ? ' · Payments are simulated here; no real charge is made.'
+                  ? ` · ${t('publicOrder.simulationNote')}`
                   : ''}
                 {ENVIRONMENTS.isDevPrice
-                  ? ` · Checkout charges ${formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} only.`
+                  ? ` · ${t('publicOrder.devPriceNote', { amount: formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF) })}`
                   : ''}
               </p>
             ) : null}
@@ -500,7 +511,7 @@ const PublicOrderDetails = () => {
                   navigate(-1);
                 }}
               >
-                Back
+                {t('tracking.back')}
               </Button>
               {hasPaidEquivalent ? (
                 <Button
@@ -512,7 +523,7 @@ const PublicOrderDetails = () => {
                     }
                   }}
                 >
-                  Track order
+                  {t('publicOrder.track')}
                 </Button>
               ) : canDeferPayment ? (
                 <Button
@@ -527,10 +538,10 @@ const PublicOrderDetails = () => {
                   }}
                 >
                   {!hasBothLocations
-                    ? 'Set both locations to continue'
+                    ? t('publicOrder.setBoth')
                     : isSameLocation
-                      ? 'Pickup and destination must differ'
-                      : 'Defer payment'}
+                      ? t('publicOrder.locationsDiffer')
+                      : t('publicOrder.deferPayment')}
                 </Button>
               ) : (
                 <Button
@@ -543,10 +554,10 @@ const PublicOrderDetails = () => {
                   }}
                 >
                   {!hasBothLocations
-                    ? 'Set both locations to continue'
+                    ? t('publicOrder.setBoth')
                     : isSameLocation
-                      ? 'Pickup and destination must differ'
-                      : 'Complete payment'}
+                      ? t('publicOrder.locationsDiffer')
+                      : t('publicOrder.completePayment')}
                 </Button>
               )}
             </nav>

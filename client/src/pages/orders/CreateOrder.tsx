@@ -9,21 +9,20 @@ import {
   parseBillingGuardPrompt,
   type BillingGuardPrompt,
 } from "@/utils/billingGuard.util";
-import {
-  validateAndFormatPhoneNumber,
-  validateRwandanPhoneNumber,
-} from "@/utils/phone.util";
+import { validateAndFormatPhoneNumber } from "@/utils/phone.util";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { PreferredContactMethod } from "@/types/order.type";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useI18n } from '@/i18n/i18n';
 
 interface CreateOrderFormValues {
   recipientPhoneNumber: string;
 }
 
 const CreateOrder = () => {
+  const { t } = useI18n();
   // STATE VARIABLES
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -73,19 +72,19 @@ const CreateOrder = () => {
     const recipient = validateAndFormatPhoneNumber(data.recipientPhoneNumber);
 
     if (!sender?.isValid || !sender?.e164) {
-      toast.error("Sender phone number is missing or invalid.");
+      toast.error(t('orders.senderInvalid'));
       return;
     }
 
     if (!recipient?.isValid || !recipient?.e164) {
-      toast.error("Please enter a valid recipient phone number.");
+      toast.error(t('orders.recipientInvalid'));
       return;
     }
 
     // An EMAIL preference with no address is one the server will reject, so
     // stop here rather than losing the whole form to a round trip.
     if (contactMethod === PreferredContactMethod.EMAIL && !contactEmail.trim()) {
-      setContactEmailError('Add an email address, or choose another method.');
+      setContactEmailError(t('orders.contactEmailRequired'));
       return;
     }
 
@@ -112,20 +111,20 @@ const CreateOrder = () => {
   useEffect(() => {
     if (isSuccess) {
       if (createOrderModal) {
-        toast.success("Order created successfully");
+        toast.success(t('orders.created'));
       }
       closeModal();
     }
-  }, [isSuccess, closeModal, createOrderModal]);
+  }, [isSuccess, closeModal, createOrderModal, t]);
 
   useEffect(() => {
     if (!isError) return;
-    const prompt = parseBillingGuardPrompt(error);
+    const prompt = parseBillingGuardPrompt(error, t);
     if (!prompt) return;
 
     dispatch(setCreateOrderModal(false));
     setBillingGuardPrompt(prompt);
-  }, [dispatch, error, isError]);
+  }, [dispatch, error, isError, t]);
 
   const closeBillingGuardModal = useCallback(() => {
     setBillingGuardPrompt(null);
@@ -137,9 +136,9 @@ const CreateOrder = () => {
     setContactEmailError(
       !trimmed || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)
         ? ''
-        : 'Enter a valid email address.',
+        : t('publicOrder.emailInvalid'),
     );
-  }, []);
+  }, [t]);
 
   const handlePayFirst = useCallback(() => {
     setBillingGuardPrompt(null);
@@ -151,19 +150,22 @@ const CreateOrder = () => {
       <Modal
         isOpen={createOrderModal}
         onClose={closeModal}
-        heading="Create order"
-        description="Enter the recipient’s phone number. You’ll set the route before payment."
+        heading={t('orders.create')}
+        description={t('orders.createDescription')}
       >
         <form onSubmit={onSubmit} className="w-full flex flex-col gap-4">
           <fieldset className="flex flex-col gap-4">
             <Controller
               name="recipientPhoneNumber"
               control={control}
-              rules={{ validate: (value) => validateRwandanPhoneNumber(value) }}
+              rules={{
+                validate: (value) =>
+                  validateAndFormatPhoneNumber(value).isValid || t('orders.recipientInvalid'),
+              }}
               render={({ field }) => (
                 <TelInput
                   {...field}
-                  label="Recipient phone number"
+                  label={t('orders.recipientPhone')}
                   required
                   placeholder="0788123456"
                   errorMessage={errors?.recipientPhoneNumber?.message}
@@ -177,8 +179,8 @@ const CreateOrder = () => {
               email={contactEmail}
               onEmailChange={handleContactEmailChange}
               emailError={contactEmailError}
-              label="How should we reach the sender?"
-              description="Used for pickup and delivery updates on this order."
+              label={t('orders.senderContact')}
+              description={t('orders.senderContactHelp')}
             />
           </fieldset>
 
@@ -191,7 +193,7 @@ const CreateOrder = () => {
 
           <footer className="flex justify-end gap-3 border-t border-(--line) pt-4">
             <Button type="submit" primary isLoading={isLoading}>
-              Create order
+              {t('orders.create')}
             </Button>
           </footer>
         </form>
@@ -200,24 +202,21 @@ const CreateOrder = () => {
       <Modal
         isOpen={Boolean(billingGuardPrompt)}
         onClose={closeBillingGuardModal}
-        heading={billingGuardPrompt?.title || "Billing action needed"}
+        heading={billingGuardPrompt?.title || t('orders.billingAction')}
         description={billingGuardPrompt?.description || ""}
       >
         <section className="flex flex-col gap-4">
           {billingGuardPrompt?.billingStatus ? (
             <p className="text-sm text-(--muted)">
-              Billing status:{" "}
-              <span className="font-normal text-(--ink)">
-                {billingGuardPrompt.billingStatus}
-              </span>
+              {t('orders.billingStatus', { status: billingGuardPrompt.billingStatus })}
             </p>
           ) : null}
           <footer className="flex justify-end gap-3 border-t border-(--line) pt-3">
             <Button type="button" onClick={closeBillingGuardModal}>
-              Close
+              {t('common.actions.close')}
             </Button>
             <Button type="button" primary onClick={handlePayFirst}>
-              Pay first to continue
+              {t('orders.payFirst')}
             </Button>
           </footer>
         </section>

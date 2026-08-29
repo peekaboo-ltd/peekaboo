@@ -3,44 +3,46 @@ import { StatusBadge } from "@/components/inputs/StatusBadge";
 import { ellipsisHClassName, tableActionClassName } from "@/constants/inputs.constants";
 import { Organization } from "@/types/organization.type";
 import { OrganizationMembership } from "@/types/organizationMembership.types";
-import { capitalizeString, formatDate } from "@/utils/strings.util";
+import { formatDate } from "@/utils/strings.util";
 import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
 import { faEllipsisH, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useI18n } from '@/i18n/i18n';
 
 /**
  * Organizations Columns
  */
 export const useOrganizationsColumns = () => {
+    const { t } = useI18n();
     const organizationsColumns: ColumnDef<Organization>[] = useMemo(
         () => [
             {
-                header: 'Name',
+                header: t('organization.columnName'),
                 accessorKey: 'name',
             },
             {
-                header: 'Email',
+                header: t('organization.emailLabel'),
                 accessorKey: 'email',
             },
             {
-                header: 'Phone',
+                header: t('organization.columnPhone'),
                 accessorKey: 'phoneNumber',
             },
             {
-                header: 'Status',
+                header: t('common.status'),
                 accessorKey: 'status',
                 cell: ({ row }) => <StatusBadge status={row.original.status} />,
             },
             {
-                header: 'Created',
+                header: t('organization.columnCreated'),
                 accessorKey: 'createdAt',
                 cell: ({ row }) => formatDate(row.original.createdAt, 'DD/MM/YYYY HH:mm'),
             },
             {
-                header: 'Actions',
+                header: t('common.actions'),
                 id: 'actions',
                 cell: ({ row }) => (
                     <CustomPopover
@@ -51,14 +53,14 @@ export const useOrganizationsColumns = () => {
                         <menu className="w-full flex flex-col gap-1">
                             <Link className={tableActionClassName} to={`/organizations/${row.original.id}/manage`}>
                                 <FontAwesomeIcon icon={faPenToSquare} />
-                                Manage
+                                {t('organization.manage')}
                             </Link>
                         </menu>
                     </CustomPopover>
                 ),
             },
         ],
-        []
+        [t]
     );
 
     return { organizationsColumns };
@@ -68,30 +70,31 @@ export const useOrganizationsColumns = () => {
  * Organization Members Columns
  */
 export const useOrganizationMembersColumns = () => {
+    const { t } = useI18n();
     const organizationMembersColumns: ColumnDef<OrganizationMembership>[] = useMemo(
         () => [
             {
-                header: 'Name',
+                header: t('organization.columnName'),
                 accessorKey: 'name',
                 cell: ({ row }) => row?.original?.user?.name || '-',
             },
             {
-                header: 'Email',
+                header: t('organization.emailLabel'),
                 accessorKey: 'email',
                 cell: ({ row }) => row?.original?.user?.email || '-',
             },
             {
-                header: 'Phone',
+                header: t('organization.columnPhone'),
                 accessorKey: 'phoneNumber',
                 cell: ({ row }) => row?.original?.user?.phoneNumber || '-',
             },
             {
-                header: 'Role',
+                header: t('organization.columnRole'),
                 accessorKey: 'role',
-                cell: ({ row }) => capitalizeString(row?.original?.role) || '-',
+                cell: ({ row }) => row?.original?.role ? t(`role.${row.original.role.toLowerCase()}`) : '-',
             },
             {
-                header: `Actions`,
+                header: t('common.actions'),
                 id: 'actions',
                 cell: ({ row }) => (
                     <CustomPopover
@@ -102,14 +105,14 @@ export const useOrganizationMembersColumns = () => {
                         <menu className="w-full flex flex-col gap-1">
                             <Link className={tableActionClassName} to={`/users/${row.original.userId}`}>
                                 <FontAwesomeIcon icon={faInfoCircle} />
-                                View details
+                                {t('organization.viewDetails')}
                             </Link>
                         </menu>
                     </CustomPopover>
                 ),
             }
         ],
-        []
+        [t]
     );
     return { organizationMembersColumns };
 };

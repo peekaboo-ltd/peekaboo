@@ -4,10 +4,10 @@ interface ServicesVolumeVisualProps {
 }
 
 const volumeBands = [
-  { x: 72, height: 72, label: 'Starter', fill: 'var(--public-band-1)', soft: 'var(--public-sky-soft)' },
-  { x: 168, height: 120, label: 'Growth', fill: 'var(--public-band-2)', soft: 'var(--public-sage-soft)' },
-  { x: 264, height: 168, label: 'Scale', fill: 'var(--public-band-3)', soft: 'var(--public-clay-soft)' },
-  { x: 360, height: 216, label: 'Enterprise', fill: 'var(--public-band-4)', soft: 'var(--public-plum-soft)' },
+  { x: 72, height: 72, labelKey: 'pricing.band.starter', fill: 'var(--public-band-1)', soft: 'var(--public-sky-soft)' },
+  { x: 168, height: 120, labelKey: 'pricing.band.growth', fill: 'var(--public-band-2)', soft: 'var(--public-sage-soft)' },
+  { x: 264, height: 168, labelKey: 'pricing.band.scale', fill: 'var(--public-band-3)', soft: 'var(--public-clay-soft)' },
+  { x: 360, height: 216, labelKey: 'pricing.band.enterprise', fill: 'var(--public-band-4)', soft: 'var(--public-plum-soft)' },
 ] as const;
 
 /**
@@ -16,13 +16,15 @@ const volumeBands = [
  */
 const ServicesVolumeVisual = ({
   planCount = 3,
-  cadenceLabel = 'Monthly · Weekly',
-}: ServicesVolumeVisualProps) => (
+  cadenceLabel,
+}: ServicesVolumeVisualProps) => {
+  const { t } = useI18n();
+  return (
   <figure className="relative isolate w-full overflow-hidden rounded-md bg-(--surface)">
     <svg
       viewBox="0 0 480 360"
       role="img"
-      aria-label="Volume-based pricing bands increasing with delivery volume"
+      aria-label={t('pricing.visualLabel')}
       className="block h-auto w-full"
       preserveAspectRatio="xMidYMid slice"
     >
@@ -36,7 +38,7 @@ const ServicesVolumeVisual = ({
       </g>
 
       {volumeBands.slice(0, Math.max(2, Math.min(planCount, 4))).map((band) => (
-        <g key={band.label}>
+        <g key={band.labelKey}>
           <rect
             x={band.x}
             y={320 - band.height}
@@ -63,7 +65,7 @@ const ServicesVolumeVisual = ({
             fontSize="11"
             fontFamily="inherit"
           >
-            {band.label}
+            {t(band.labelKey)}
           </text>
         </g>
       ))}
@@ -86,10 +88,12 @@ const ServicesVolumeVisual = ({
     </svg>
 
     <figcaption className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-(--radius-control) bg-(--paper) px-4 py-3">
-      <span className="text-sm font-normal text-(--ink)">Your band. Your rate.</span>
-      <span className="shrink-0 text-sm text-(--muted)">{cadenceLabel}</span>
+      <span className="text-sm font-normal text-(--ink)">{t('pricing.yourBand')}</span>
+      <span className="shrink-0 text-sm text-(--muted)">{cadenceLabel ?? t('services.defaultCadence')}</span>
     </figcaption>
   </figure>
-);
+  );
+};
 
 export default ServicesVolumeVisual;
+import { useI18n } from '@/i18n/i18n';

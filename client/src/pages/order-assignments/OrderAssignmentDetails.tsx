@@ -24,6 +24,7 @@ import {
   InternalSectionCard,
   InternalStatCard,
 } from '@/components/layout/InternalPage';
+import { useI18n, type Language } from '@/i18n/i18n';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -33,11 +34,11 @@ const itemVariants: Variants = {
   },
 };
 
-const formatDateLabel = (value?: string | Date) => {
+const formatDateLabel = (value: string | Date | undefined, language: Language) => {
   if (!value) return '—';
   const date = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(language === 'fr' ? 'fr-RW' : language === 'rw' ? 'rw-RW' : 'en-RW', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -47,10 +48,11 @@ const formatDateLabel = (value?: string | Date) => {
 };
 
 const OrderAssignmentDetails = () => {
+  const { t, language } = useI18n();
   const { orderAssignment } = useAppSelector((state) => state.orderAssignment);
   const { id } = useParams();
   const navigate = useNavigate();
-  useDocumentTitle('Assignment details');
+  useDocumentTitle(t('assignments.detailsDocTitle'));
 
   const { getOrderAssignment, isFetching } = useGetOrderAssignment();
 
@@ -63,7 +65,7 @@ const OrderAssignmentDetails = () => {
   if (isFetching && !orderAssignment) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-(--muted)">Loading assignment details…</p>
+        <p className="text-sm text-(--muted)">{t('assignments.loading')}</p>
       </main>
     );
   }
@@ -71,10 +73,10 @@ const OrderAssignmentDetails = () => {
   if (!orderAssignment) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-(--muted)">Assignment not found.</p>
+        <p className="text-sm text-(--muted)">{t('assignments.notFound')}</p>
         <menu className="w-full flex items-center gap-3">
           <Button type="button" onClick={(e) => { e.preventDefault(); navigate(-1); }}>
-            Back
+            {t('common.actions.back')}
           </Button>
         </menu>
       </main>
@@ -84,12 +86,12 @@ const OrderAssignmentDetails = () => {
   const createdByLabel =
     orderAssignment?.createdBy?.name ||
     orderAssignment?.createdBy?.phoneNumber ||
-    'System';
+    t('assignments.system');
 
   const assignedToLabel =
     orderAssignment?.assignedTo?.name ||
     orderAssignment?.assignedTo?.phoneNumber ||
-    'Unassigned';
+    t('assignments.unassigned');
 
   const recipientLabel =
     orderAssignment?.order?.recipient?.name ||
@@ -103,20 +105,20 @@ const OrderAssignmentDetails = () => {
 
   const stats = [
     {
-      label: 'Assignment Status',
-      value: orderAssignment?.status || '—',
+      label: t('assignments.status'),
+      value: orderAssignment?.status ? t(`status.${orderAssignment.status.toLowerCase()}`) : '—',
       icon: faCircleCheck,
       iconBg: 'bg-(--surface) text-(--muted)',
     },
     {
-      label: 'Order Status',
-      value: orderAssignment?.order?.status || '—',
+      label: t('common.status'),
+      value: orderAssignment?.order?.status ? t(`status.${orderAssignment.order.status.toLowerCase()}`) : '—',
       icon: faTruckFast,
       iconBg: 'bg-(--ink) text-(--paper)',
     },
     {
-      label: 'Last Updated',
-      value: formatDateLabel(orderAssignment?.updatedAt),
+      label: t('assignments.lastUpdated'),
+      value: formatDateLabel(orderAssignment?.updatedAt, language),
       icon: faClockRotateLeft,
       iconBg: 'bg-(--surface) text-(--muted)',
     },
@@ -128,9 +130,9 @@ const OrderAssignmentDetails = () => {
         variants={itemVariants}
       >
         <InternalPageHeader
-          eyebrow="Assignment Overview"
-          title={orderAssignment?.order?.referenceId || 'Order Assignment'}
-          description="Rider assignment details, ownership, and order context."
+          eyebrow={t('assignments.overview')}
+          title={orderAssignment?.order?.referenceId || t('assignments.fallbackTitle')}
+          description={t('assignments.overviewDescription')}
         />
       </motion.section>
 
@@ -154,21 +156,21 @@ const OrderAssignmentDetails = () => {
       >
         <InternalSectionCard
           className="lg:col-span-2"
-          eyebrow="Assignment Details"
-          title="Core Information"
+          eyebrow={t('assignments.details')}
+          title={t('assignments.core')}
           actions={
             <span className="type-meta">
-              Created {formatDateLabel(orderAssignment.createdAt)}
+              {t('assignments.created', { date: formatDateLabel(orderAssignment.createdAt, language) })}
             </span>
           }
         >
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {[
-              { label: 'Order ID', value: orderAssignment?.order?.referenceId, icon: faHashtag },
-              { label: 'Assigned Rider', value: assignedToLabel, icon: faUserGear },
-              { label: 'Assigned By', value: createdByLabel, icon: faUserGear },
-              { label: 'Sender', value: senderLabel, icon: faPhone },
-              { label: 'Recipient', value: recipientLabel, icon: faPhone },
+              { label: t('assignments.orderId'), value: orderAssignment?.order?.referenceId, icon: faHashtag },
+              { label: t('assignments.assignedRider'), value: assignedToLabel, icon: faUserGear },
+              { label: t('assignments.assignedBy'), value: createdByLabel, icon: faUserGear },
+              { label: t('assignments.sender'), value: senderLabel, icon: faPhone },
+              { label: t('assignments.recipient'), value: recipientLabel, icon: faPhone },
             ].map((item) => (
               <li
                 key={item.label}
@@ -197,10 +199,10 @@ const OrderAssignmentDetails = () => {
                 </span>
                 <section>
                   <p className="type-meta">
-                    Delivery Notes / Destination
+                    {t('assignments.deliveryNotes')}
                   </p>
                   <p className="mt-1 text-sm font-normal text-(--ink)">
-                    {orderAssignment?.order?.notes || 'No destination notes available.'}
+                    {orderAssignment?.order?.notes || t('assignments.noNotes')}
                   </p>
                 </section>
               </header>
@@ -209,16 +211,16 @@ const OrderAssignmentDetails = () => {
         </InternalSectionCard>
 
         <InternalSectionCard
-          eyebrow="Order Context"
-          title="Assignment Metadata"
+          eyebrow={t('assignments.orderContext')}
+          title={t('assignments.metadata')}
         >
           <section className="flex flex-col gap-4">
             {[
-              { label: 'Order Reference', value: orderAssignment?.order?.referenceId, icon: faHashtag },
-              { label: 'Order Status', value: orderAssignment?.order?.status, icon: faTruckFast },
-              { label: 'Initial Fee', value: orderAssignment?.order?.initialFee, icon: faCircleCheck },
-              { label: 'Description', value: orderAssignment?.description || orderAssignment?.order?.description, icon: faFileLines },
-              { label: 'Assignment Updated', value: formatDateLabel(orderAssignment?.updatedAt), icon: faCalendarDay },
+              { label: t('assignments.orderReference'), value: orderAssignment?.order?.referenceId, icon: faHashtag },
+              { label: t('common.status'), value: orderAssignment?.order?.status ? t(`status.${orderAssignment.order.status.toLowerCase()}`) : undefined, icon: faTruckFast },
+              { label: t('assignments.initialFee'), value: orderAssignment?.order?.initialFee, icon: faCircleCheck },
+              { label: t('assignments.description'), value: orderAssignment?.description || orderAssignment?.order?.description, icon: faFileLines },
+              { label: t('assignments.updated'), value: formatDateLabel(orderAssignment?.updatedAt, language), icon: faCalendarDay },
             ].map((item) => (
               <article
                 key={item.label}
@@ -246,7 +248,7 @@ const OrderAssignmentDetails = () => {
         className="w-full flex items-center gap-3"
       >
         <Button type="button" onClick={(e) => { e.preventDefault(); navigate(-1); }}>
-          Back
+          {t('common.actions.back')}
         </Button>
       </motion.menu>
     </InternalPage>

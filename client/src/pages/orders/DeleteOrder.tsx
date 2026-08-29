@@ -8,8 +8,10 @@ import {
 } from '@/states/slices/order.slice';
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n/i18n';
 
 const DeleteOrder = () => {
+  const { t } = useI18n();
   // STATE VARIABLES
   const dispatch = useAppDispatch();
   const { deleteOrderModal, selectedOrder } = useAppSelector(
@@ -34,19 +36,19 @@ const DeleteOrder = () => {
   useEffect(() => {
     if (isSuccess) {
       if (selectedOrder?.id && selectedOrder?.referenceId) {
-        toast.success(
-          `Order ${selectedOrder?.referenceId} deleted successfully`,
-        );
+        toast.success(t('orders.deleted', { reference: selectedOrder.referenceId }));
       }
       closeModal();
     }
-  }, [isSuccess, closeModal, selectedOrder?.id, selectedOrder?.referenceId]);
+  }, [isSuccess, closeModal, selectedOrder?.id, selectedOrder?.referenceId, t]);
 
   return (
     <Modal
       isOpen={deleteOrderModal}
       onClose={closeModal}
-      heading={`Delete ${selectedOrder?.referenceId || 'order'}?`}
+      heading={t('orders.deleteTitle', {
+        reference: selectedOrder?.referenceId || t('orders.orderFallback'),
+      })}
       headingClassName="text-(--destructive)"
     >
       <article className="w-full flex flex-col gap-4">
@@ -61,7 +63,7 @@ const DeleteOrder = () => {
           isLoading={isLoading}
           className="self-end"
         >
-          Delete order
+          {t('orders.delete')}
         </Button>
       </article>
     </Modal>

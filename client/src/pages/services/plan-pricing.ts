@@ -1,6 +1,11 @@
 import type { BusinessPlan, PricingTier } from '@/types/businessPlan.type';
 import { BillingPeriod } from '@/types/businessPlan.type';
 
+export type PricingTranslate = (
+  key: string,
+  vars?: Record<string, string | number>,
+) => string;
+
 /**
  * Everything the app knows about reading a business plan's price.
  *
@@ -16,27 +21,27 @@ export const formatCurrency = (value: number, currency = 'RWF') =>
   `${Number(value).toLocaleString()} ${currency}`;
 
 /** The unit a band is counted in: "40 deliveries per month". */
-export const periodNoun = (billingPeriod: BillingPeriod) => {
+export const periodNoun = (billingPeriod: BillingPeriod, t: PricingTranslate) => {
   switch (billingPeriod) {
     case BillingPeriod.DAILY:
-      return 'day';
+      return t('pricing.day');
     case BillingPeriod.WEEKLY:
-      return 'week';
+      return t('pricing.week');
     case BillingPeriod.MONTHLY:
     default:
-      return 'month';
+      return t('pricing.month');
   }
 };
 
-export const billingPeriodLabel = (billingPeriod: BillingPeriod) => {
+export const billingPeriodLabel = (billingPeriod: BillingPeriod, t: PricingTranslate) => {
   switch (billingPeriod) {
     case BillingPeriod.DAILY:
-      return 'Daily';
+      return t('pricing.daily');
     case BillingPeriod.WEEKLY:
-      return 'Weekly';
+      return t('pricing.weekly');
     case BillingPeriod.MONTHLY:
     default:
-      return 'Monthly';
+      return t('pricing.monthly');
   }
 };
 
@@ -58,20 +63,20 @@ export const cheapestTier = (plan: BusinessPlan) =>
       return aValue - bValue;
     })[0];
 
-export const tierRangeLabel = (tier: PricingTier, billingPeriod: BillingPeriod) => {
+export const tierRangeLabel = (tier: PricingTier, billingPeriod: BillingPeriod, t: PricingTranslate) => {
   if (tier.label) return tier.label;
-  if (tier.isCustom) return 'Custom volume';
+  if (tier.isCustom) return t('pricing.customVolume');
 
-  const unit = periodNoun(billingPeriod);
+  const unit = periodNoun(billingPeriod, t);
   if (tier.maxQuantity == null) {
-    return `${tier.minQuantity}+ deliveries per ${unit}`;
+    return t('pricing.deliveriesPer', { count: `${tier.minQuantity}+`, unit });
   }
-  return `${tier.minQuantity}–${tier.maxQuantity} deliveries per ${unit}`;
+  return t('pricing.deliveriesRangePer', { min: tier.minQuantity, max: tier.maxQuantity, unit });
 };
 
 /** The short form used inside a card, where the cadence is stated once above. */
-export const tierRangeShort = (tier: PricingTier) => {
-  if (tier.isCustom) return 'Custom';
+export const tierRangeShort = (tier: PricingTier, t: PricingTranslate) => {
+  if (tier.isCustom) return t('pricing.custom');
   if (tier.maxQuantity == null) return `${tier.minQuantity}+`;
   return `${tier.minQuantity}–${tier.maxQuantity}`;
 };
@@ -94,11 +99,11 @@ export interface PriceParts {
   isFrom: boolean;
 }
 
-export const resolvePrice = (plan: BusinessPlan): PriceParts => {
+export const resolvePrice = (plan: BusinessPlan, t: PricingTranslate): PriceParts => {
   const currency = plan.currency || 'RWF';
 
   if (plan.isCustomPricing) {
-    return { currency, note: 'Priced with our team', isFrom: false };
+    return { currency, note: t('pricing.withTeam'), isFrom: false };
   }
 
   const tier = cheapestTier(plan);
@@ -107,7 +112,7 @@ export const resolvePrice = (plan: BusinessPlan): PriceParts => {
     return {
       amount: Number(tier.totalPrice).toLocaleString(),
       currency,
-      cadence: `per ${periodNoun(plan.billingPeriod)}`,
+      cadence: t('pricing.perUnit', { unit: periodNoun(plan.billingPeriod, t) }),
       isFrom: true,
     };
   }
@@ -116,7 +121,7 @@ export const resolvePrice = (plan: BusinessPlan): PriceParts => {
     return {
       amount: Number(tier.pricePerUnit).toLocaleString(),
       currency,
-      cadence: 'per delivery',
+      cadence: t('pricing.perDelivery'),
       isFrom: true,
     };
   }
@@ -125,19 +130,19 @@ export const resolvePrice = (plan: BusinessPlan): PriceParts => {
     return {
       amount: Number(plan.pricePerOrder).toLocaleString(),
       currency,
-      cadence: 'per delivery',
+      cadence: t('pricing.perDelivery'),
       isFrom: true,
     };
   }
 
-  return { currency, note: 'Priced with our team', isFrom: false };
+  return { currency, note: t('pricing.withTeam'), isFrom: false };
 };
 
 /** Flat, printable form — for a document title or a plain-text summary. */
-export const headlinePriceText = (plan: BusinessPlan) => {
-  const price = resolvePrice(plan);
-  if (!price.amount) return price.note ?? 'Contact us for pricing';
-  return `${price.isFrom ? 'From ' : ''}${price.amount} ${price.currency} ${price.cadence}`;
+export const headlinePriceText = (plan: BusinessPlan, t: PricingTranslate) => {
+  const price = resolvePrice(plan, t);
+  if (!price.amount) return price.note ?? t('pricing.contact');
+  return `${price.isFrom ? `${t('pricing.from')} ` : ''}${price.amount} ${price.currency} ${price.cadence}`;
 };
 
 export interface PricingRow {
@@ -154,7 +159,7 @@ export interface PricingRow {
   isCustom: boolean;
 }
 
-export const getPricingRows = (plan: BusinessPlan): PricingRow[] =>
+export const getPricingRows = (plan: BusinessPlan, t: PricingTranslate): PricingRow[] =>
   orderedTiers(plan).map((tier, index) => {
     const currency = plan.currency || 'RWF';
 
@@ -168,15 +173,15 @@ export const getPricingRows = (plan: BusinessPlan): PricingRow[] =>
     return {
       key: `${tier.minQuantity ?? index}-${tier.maxQuantity ?? 'plus'}-${index}`,
       tier,
-      label: tierRangeLabel(tier, plan.billingPeriod),
-      range: tierRangeShort(tier),
+      label: tierRangeLabel(tier, plan.billingPeriod, t),
+      range: tierRangeShort(tier, t),
       priceLabel: tier.isCustom
-        ? 'Quoted'
+        ? t('services.details.quoted')
         : tier.totalPrice
           ? formatCurrency(tier.totalPrice, currency)
           : tier.pricePerUnit
-            ? `${formatCurrency(tier.pricePerUnit, currency)} / delivery`
-            : 'Included',
+            ? t('pricing.pricePerDelivery', { price: formatCurrency(tier.pricePerUnit, currency) })
+            : t('pricing.included'),
       perDeliveryLabel:
         !tier.isCustom && perDelivery ? formatCurrency(perDelivery, currency) : undefined,
       isCustom: Boolean(tier.isCustom),
@@ -201,17 +206,17 @@ export interface Quote {
  * point of the pricing page, and until now the buyer had to do it in their
  * head from a list of bands.
  */
-export const quoteForVolume = (plan: BusinessPlan, volume: number): Quote => {
+export const quoteForVolume = (plan: BusinessPlan, volume: number, t: PricingTranslate): Quote => {
   const currency = plan.currency || 'RWF';
-  const rows = getPricingRows(plan);
+  const rows = getPricingRows(plan, t);
   const empty: Quote = { overflowCount: 0, overflowTotal: 0, currency };
 
   if (!Number.isFinite(volume) || volume <= 0) {
-    return { ...empty, note: 'Enter how many deliveries you send.' };
+    return { ...empty, note: t('pricing.enterVolume') };
   }
 
   if (plan.isCustomPricing || !rows.length) {
-    return { ...empty, note: 'This plan is quoted with our team.' };
+    return { ...empty, note: t('pricing.planQuoted') };
   }
 
   const row = rows.find((candidate) => {
@@ -228,10 +233,10 @@ export const quoteForVolume = (plan: BusinessPlan, volume: number): Quote => {
     if (smallest && volume < (smallest.tier.minQuantity ?? 0)) {
       return {
         ...empty,
-        note: `Plans on this package start at ${smallest.tier.minQuantity} deliveries per ${periodNoun(plan.billingPeriod)}.`,
+        note: t('pricing.startsAt', { count: smallest.tier.minQuantity, unit: periodNoun(plan.billingPeriod, t) }),
       };
     }
-    return { ...empty, note: 'This volume is quoted with our team.' };
+    return { ...empty, note: t('pricing.volumeQuoted') };
   }
 
   const { tier } = row;
@@ -239,7 +244,7 @@ export const quoteForVolume = (plan: BusinessPlan, volume: number): Quote => {
   const base = tier.totalPrice ?? (tier.pricePerUnit ? tier.pricePerUnit * volume : undefined);
 
   if (base == null) {
-    return { ...empty, row, note: 'This band is quoted with our team.' };
+    return { ...empty, row, note: t('pricing.bandQuoted') };
   }
 
   // Only a capped package band can overflow; a per-delivery band scales.

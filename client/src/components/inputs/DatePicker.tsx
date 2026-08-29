@@ -10,6 +10,7 @@ import {
 import { ChangeEvent, useState, useMemo, useEffect } from 'react';
 import moment from 'moment';
 import Select from './Select';
+import { useI18n } from '@/i18n/i18n';
 
 export type DatePickerSelectionType = 'date' | 'month' | 'year' | 'recurringDate' | undefined
 
@@ -28,10 +29,12 @@ const DatePicker = ({
   value = undefined,
   selectionType,
   fromDate = undefined,
-  placeholder = 'Select date',
+  placeholder,
   toDate = undefined,
   disabled = false,
 }: DatePickerProps) => {
+  const { t } = useI18n();
+  const resolvedPlaceholder = placeholder ?? t('common.selectDate');
   // Normalize value to Date object (handles string values from react-hook-form)
   const normalizedValue = useMemo(() => {
     if (!value) return undefined;
@@ -135,7 +138,7 @@ const DatePicker = ({
           <span className="truncate">
             {normalizedValue
               ? moment(normalizedValue).format('DD/MM/YYYY')
-              : placeholder}
+              : resolvedPlaceholder}
           </span>
         </Button>
       </PopoverTrigger>
@@ -151,7 +154,7 @@ const DatePicker = ({
           >
             {selectionType !== 'recurringDate' && (
               <Select
-                placeholder="Year"
+                placeholder={t('common.year')}
                 onChange={(e) => {
                   setYear(e);
                   // Update defaultMonth to the selected year, preserving month if valid
@@ -223,7 +226,7 @@ const DatePicker = ({
               />
             )}
             <Select
-              placeholder="Month"
+              placeholder={t('common.month')}
               onChange={(e) => {
                 setDefaultMonth(moment(`${year}-${e}`, 'YYYY-MM-DD').toDate());
               }}

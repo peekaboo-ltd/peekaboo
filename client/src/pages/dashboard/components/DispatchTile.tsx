@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 import type { DispatchStripItem } from './DashboardDispatchStrip';
 
 /**
@@ -14,13 +15,15 @@ const toneByStatus: Record<DispatchStripItem['status'], string> = {
   down: 'rounded-none rotate-45 bg-(--danger)',
 };
 
-const labelByStatus: Record<DispatchStripItem['status'], string> = {
-  up: 'Healthy',
-  watch: 'Needs watching',
-  down: 'Degraded',
-};
+const DispatchTile = ({ item }: { item: DispatchStripItem }) => {
+  const { t } = useI18n();
+  const labelByStatus: Record<DispatchStripItem['status'], string> = {
+    up: t('dashboard.dispatch.healthy'),
+    watch: t('dashboard.dispatch.watch'),
+    down: t('dashboard.dispatch.degraded'),
+  };
 
-const DispatchTile = ({ item }: { item: DispatchStripItem }) => (
+  return (
   <li className="card-quiet px-3 py-2.5">
     <div className="flex items-center gap-2">
       <span
@@ -32,6 +35,7 @@ const DispatchTile = ({ item }: { item: DispatchStripItem }) => (
     </div>
     <p className="mt-1 truncate text-lg font-medium tabular">{item.value}</p>
   </li>
-);
+  );
+};
 
 export default DispatchTile;

@@ -7,7 +7,7 @@ interface ImageSlotProps {
 const ImageSlot = ({ label, dark = false, className = '' }: ImageSlotProps) => (
   <figure
     className={[
-      'flex items-center justify-center rounded-md border border-dashed text-center text-xs',
+      'flex items-center justify-center rounded-md border border text-center text-xs',
       dark
         ? 'border-(--line) bg-(--surface) text-(--muted)'
         : 'border-(--line) bg-(--surface) text-(--muted)',

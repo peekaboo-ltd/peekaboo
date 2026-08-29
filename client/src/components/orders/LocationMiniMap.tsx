@@ -12,6 +12,7 @@ import {
   hasCoordinates,
   openInGoogleMapsUrl,
 } from '@/utils/locations.util';
+import { useI18n } from '@/i18n/i18n';
 
 interface LocationMiniMapProps {
   location?: OrderLocation | null;
@@ -25,6 +26,7 @@ const LocationMiniMap = ({
   label,
   className = '',
 }: LocationMiniMapProps) => {
+  const { t } = useI18n();
   const center = useMemo(
     () =>
       hasCoordinates(location)
@@ -70,7 +72,7 @@ const LocationMiniMap = ({
         // Maps key missing — keep the link working rather than hiding the location.
         <div className="flex h-24 w-full items-center justify-center gap-2 bg-(--surface) text-(--muted)">
           <FontAwesomeIcon icon={faLocationDot} className="text-sm" aria-hidden="true" />
-          <span className="text-xs">Map preview unavailable</span>
+          <span className="text-xs">{t('common.mapUnavailable')}</span>
         </div>
       )}
 
@@ -79,10 +81,10 @@ const LocationMiniMap = ({
           href={mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`Open ${label.toLowerCase()} location in Google Maps (opens in a new tab)`}
+          aria-label={t('common.openMapLabel', { label: label.toLowerCase() })}
           className="inline-flex items-center gap-1.5 text-xs text-(--muted) transition-colors hover:text-(--ink)"
         >
-          Open in Google Maps
+          {t('common.openMap')}
           <FontAwesomeIcon
             icon={faArrowUpRightFromSquare}
             className="text-xs"

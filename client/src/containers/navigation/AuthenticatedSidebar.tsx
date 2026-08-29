@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { SIDEBAR_NAV, type SidebarNav } from '@/constants/navigation.constants';
 import { setIsOpen } from '@/states/slices/sidebar.slice';
 import { RoleTypes } from '@/types/auth.type';
+import { useI18n } from '@/i18n/i18n';
 
 function canSeeItem(userRoles: Set<RoleTypes>, itemRoles: RoleTypes[]) {
   return itemRoles.some((role) => userRoles.has(role));
@@ -32,6 +33,7 @@ const AuthenticatedSidebar = () => {
   const { isOpen: sidebarOpen } = useAppSelector((state) => state.sidebar);
   const { user } = useAppSelector((state) => state.auth);
   const [openCategories, setOpenCategories] = useState<string[]>([]);
+  const { t } = useI18n();
   const userRoleNames = useMemo(
     () =>
       new Set<RoleTypes>(
@@ -67,13 +69,13 @@ const AuthenticatedSidebar = () => {
           type="button"
           onClick={() => dispatch(setIsOpen(!sidebarOpen))}
           className="flex size-10 items-center justify-center rounded-(--radius-control) text-(--muted) outline-none transition-[background-color,color,box-shadow] duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
-          aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          aria-label={sidebarOpen ? t('nav.sidebar.collapse') : t('nav.sidebar.expand')}
         >
           <FontAwesomeIcon icon={sidebarOpen ? faAnglesLeft : faBars} />
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3" aria-label="Dashboard navigation">
+      <nav className="flex-1 overflow-y-auto px-3" aria-label={t('nav.sidebar.label')}>
         <ul className="space-y-1">
           {filteredNav.map((nav) => {
             const selected = pathname === nav.path;
@@ -97,10 +99,10 @@ const AuthenticatedSidebar = () => {
                       else toggleCategory(nav.label);
                     }
                   }}
-                  title={nav.label}
+                  title={t(nav.labelKey)}
                 >
                   <FontAwesomeIcon icon={nav.icon} className="size-4 shrink-0" />
-                  {sidebarOpen ? <span className="truncate">{nav.label}</span> : null}
+                  {sidebarOpen ? <span className="truncate">{t(nav.labelKey)}</span> : null}
                   {hasSubcategories && sidebarOpen ? (
                     <FontAwesomeIcon
                       icon={faChevronDown}
@@ -121,7 +123,7 @@ const AuthenticatedSidebar = () => {
                             className="flex min-h-(--control-sm) items-center gap-3 rounded-(--radius-control) px-3 text-sm text-(--muted) outline-none transition-[background-color,color] duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink)"
                           >
                             <FontAwesomeIcon icon={subCategory.icon} className="size-3 shrink-0" />
-                            <span className="truncate">{subCategory.label}</span>
+                            <span className="truncate">{t(subCategory.labelKey)}</span>
                           </Link>
                         </li>
                       );

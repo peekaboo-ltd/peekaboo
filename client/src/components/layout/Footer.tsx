@@ -54,11 +54,11 @@ const Footer = () => {
   );
   const socialMedia = useMemo<SocialMedia[]>(
     () => [
-      { icon: faInstagram, url: 'https://www.instagram.com/peekaboo.delivery/', label: 'Instagram' },
-      { icon: faWhatsapp, url: 'https://wa.me/250794892784?text=Hello, I have a question about Peekaboo', label: 'WhatsApp' },
-      { icon: faTiktok, url: 'https://www.tiktok.com/@peekaboo.delivery', label: 'TikTok' },
+      { icon: faInstagram, url: 'https://www.instagram.com/peekaboo.delivery/', label: t('footer.social.instagram') },
+      { icon: faWhatsapp, url: 'https://wa.me/250794892784?text=Hello, I have a question about Peekaboo', label: t('tracking.contact.whatsapp') },
+      { icon: faTiktok, url: 'https://www.tiktok.com/@peekaboo.delivery', label: t('footer.social.tiktok') },
     ],
-    [],
+    [t],
   );
 
   const renderLinks = (links: QuickLink[]) => (
@@ -82,7 +82,7 @@ const Footer = () => {
             <p className="mt-4 max-w-[46ch] text-sm leading-[1.6] text-(--muted)">
               {t('footer.description')}
             </p>
-            <nav className="mt-6 flex items-center gap-2" aria-label="Social media links">
+            <nav className="mt-6 flex items-center gap-2" aria-label={t('footer.socialNav')}>
               {socialMedia.map((social) => (
                 <a
                   key={social.label}
@@ -98,7 +98,7 @@ const Footer = () => {
             </nav>
           </section>
 
-          <nav className="lg:col-span-3" aria-label="Footer links">
+          <nav className="lg:col-span-3" aria-label={t('footer.linksNav')}>
             <h3 className="type-eyebrow mb-4">{t('footer.quickLinks')}</h3>
             {renderLinks(quickLinks)}
             <h3 className="type-eyebrow mt-8 mb-4">{t('footer.legal')}</h3>

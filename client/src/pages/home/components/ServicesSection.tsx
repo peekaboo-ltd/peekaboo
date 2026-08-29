@@ -1,41 +1,7 @@
 import { ArrowUpRight } from 'lucide-react';
 import { publicAccentAt, publicAccentSoftClass } from '@/components/public/PublicIconBadge';
 import RoutePreviewMap from './RoutePreviewMap';
-
-const services = [
-  {
-    title: 'Same-day in Kigali',
-    blurb:
-      'Door-to-door across all 30 sectors of Kigali, picked up fast and dropped the same day.',
-    tone: 'inverted',
-    tag: 'Featured',
-    featured: true,
-  },
-  {
-    title: 'Business & e-commerce',
-    blurb: 'API + dashboard, batch uploads, weekly invoices.',
-    tone: 'quiet',
-    tag: 'Business',
-  },
-  {
-    title: 'Document delivery',
-    blurb: 'Signed paperwork, contracts, ID cards. Tamper-evident sleeves.',
-    tone: 'quiet',
-    tag: 'Service',
-  },
-  {
-    title: 'Food & small parcels',
-    blurb: 'Insulated bags, careful handling, restaurant integrations.',
-    tone: 'quiet',
-    tag: 'Service',
-  },
-  {
-    title: 'Scheduled bulk runs',
-    blurb: 'Plan your week. We dispatch riders to your door at fixed slots.',
-    tone: 'quiet',
-    tag: 'Service',
-  },
-];
+import { useI18n } from '@/i18n/i18n';
 
 const toneClasses = {
   // Inside .invert-surface, --ink and --paper are locally swapped, so these
@@ -53,23 +19,31 @@ const toneClasses = {
   },
 } as const;
 
-const ServicesSection = () => (
+const ServicesSection = () => {
+  const { t } = useI18n();
+  const services = [
+    { title: t('home.services.sameDay.title'), blurb: t('home.services.sameDay.description'), tone: 'inverted', tag: t('home.services.featured'), featured: true },
+    { title: t('home.services.business.title'), blurb: t('home.services.business.description'), tone: 'quiet', tag: t('home.services.businessTag') },
+    { title: t('home.services.documents.title'), blurb: t('home.services.documents.description'), tone: 'quiet', tag: t('home.services.serviceTag') },
+    { title: t('home.services.food.title'), blurb: t('home.services.food.description'), tone: 'quiet', tag: t('home.services.serviceTag') },
+    { title: t('home.services.bulk.title'), blurb: t('home.services.bulk.description'), tone: 'quiet', tag: t('home.services.serviceTag') },
+  ];
+  return (
   <section id="services" className="section-rhythm w-full border-(--line) bg-(--paper)">
     <article className="app-container">
       <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <hgroup className="max-w-[660px]">
           <p className="type-eyebrow">
-            Top solutions
+            {t('home.services.eyebrow')}
           </p>
           <h2 className="type-h2 mt-2">
-            Built for the way
+            {t('home.services.title1')}
             <br />
-            Kigali moves.
+            {t('home.services.title2')}
           </h2>
         </hgroup>
         <p className="type-body-sm max-w-[380px] text-(--muted)">
-          From a single envelope to a hundred-stop run, choose the service that fits
-          every order tracked end to end.
+          {t('home.services.description')}
         </p>
       </header>
 
@@ -111,10 +85,10 @@ const ServicesSection = () => (
                   <footer className="mt-6 flex flex-col gap-4 border-t border-(--line) pt-5 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <p className="text-[15px] font-normal">
-                        Live tracking, end to end
+                        {t('home.services.tracking')}
                       </p>
                       <p className="mt-1 text-xs font-normal text-(--paper)">
-                        pickup to drop-off
+                        {t('home.services.pickupDropoff')}
                       </p>
                     </div>
                     <RoutePreviewMap dark className="h-[72px] w-full sm:w-[160px]" />
@@ -127,6 +101,7 @@ const ServicesSection = () => (
       </ul>
     </article>
   </section>
-);
+  );
+};
 
 export default ServicesSection;

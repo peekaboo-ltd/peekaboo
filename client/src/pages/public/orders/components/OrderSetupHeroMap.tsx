@@ -12,6 +12,7 @@ import type { OrderLocation } from '@/types/order.type';
 import { hasCoordinates } from '@/utils/locations.util';
 import HeroMapViewport from '@/pages/home/components/HeroMapViewport';
 import HeroRouteCard from '@/pages/home/components/HeroRouteCard';
+import { useI18n, type I18nContextValue } from '@/i18n/i18n';
 
 interface OrderSetupHeroMapProps {
   pickup?: OrderLocation | null;
@@ -38,13 +39,15 @@ const toPosition = (
       }
     : null;
 
-const formatEta = (minutes: number | null) => {
+const formatEta = (minutes: number | null, t: I18nContextValue['t']) => {
   if (minutes === null) return null;
   const base = Math.round(minutes);
   const buffered = base + 15;
   const low = base < 20 ? 20 : base;
   const high = buffered < 30 ? 30 : buffered;
-  return high < 60 ? `${low}–${high} min` : `${low} min+`;
+  return high < 60
+    ? t('publicOrder.map.minutes', { minutes: `${low}–${high}` })
+    : t('publicOrder.map.minutesPlus', { minutes: low });
 };
 
 const OrderSetupHeroMap = ({
@@ -54,6 +57,7 @@ const OrderSetupHeroMap = ({
   estimatedTime,
   className,
 }: OrderSetupHeroMapProps) => {
+  const { t } = useI18n();
   const apiStatus = useApiLoadingStatus();
   const origin = toPosition(pickup);
   const destination = toPosition(dropoff);
@@ -65,15 +69,17 @@ const OrderSetupHeroMap = ({
   );
 
   const statusLabel = (() => {
-    if (origin && destination) return 'Route ready';
-    if (origin) return 'Pickup set';
-    if (destination) return 'Drop-off set';
-    return 'Rider on the way';
+    if (origin && destination) return t('publicOrder.map.routeReady');
+    if (origin) return t('publicOrder.map.pickupSet');
+    if (destination) return t('publicOrder.map.dropoffSet');
+    return t('publicOrder.map.riderOnWay');
   })();
 
   const etaLabel =
-    formatEta(estimatedTime ?? null) ??
-    (typeof distance === 'number' ? `${distance.toFixed(1)} km` : '12 min away');
+    formatEta(estimatedTime ?? null, t) ??
+    (typeof distance === 'number'
+      ? `${distance.toFixed(1)} km`
+      : t('publicOrder.map.minutes', { minutes: 12 }));
 
   if (!ENVIRONMENTS.GOOGLE_MAPS_API_KEY) {
     return <HeroRouteCard etaLabel={etaLabel} statusLabel={statusLabel} />;
@@ -93,13 +99,13 @@ const OrderSetupHeroMap = ({
           'aspect-[4/3] w-full animate-pulse rounded-(--radius-card) bg-(--surface)',
           className,
         )}
-        aria-label="Loading route map"
+        aria-label={t('publicOrder.map.loading')}
       />
     );
   }
 
   if (!positions.length) {
-    return <HeroRouteCard etaLabel={etaLabel} statusLabel="Set your route" />;
+    return <HeroRouteCard etaLabel={etaLabel} statusLabel={t('publicOrder.map.setRoute')} />;
   }
 
   return (
@@ -122,7 +128,7 @@ const OrderSetupHeroMap = ({
         <HeroMapViewport positions={positions} />
 
         {origin ? (
-          <AdvancedMarker position={origin} title="Pickup">
+          <AdvancedMarker position={origin} title={t('publicOrder.pickup')}>
             <Pin
               background="var(--paper)"
               borderColor="var(--ink)"
@@ -132,7 +138,7 @@ const OrderSetupHeroMap = ({
         ) : null}
 
         {destination ? (
-          <AdvancedMarker position={destination} title="Drop-off">
+          <AdvancedMarker position={destination} title={t('publicOrder.destination')}>
             <Pin
               background="var(--ink)"
               borderColor="var(--ink)"

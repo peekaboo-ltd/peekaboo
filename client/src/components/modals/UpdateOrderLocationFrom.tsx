@@ -7,8 +7,10 @@ import PlaceSearch, { type PlaceSearchResult } from '../inputs/PlaceSearch';
 import Button from '../inputs/Button';
 import { placeSearchResultToOrderLocation } from '@/utils/locations.util';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n/i18n';
 
 const UpdateOrderLocationFrom = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const { updateOrderLocationFromModal, order } = useAppSelector((state) => state.order);
   const { token } = useAppSelector((state) => state.auth);
@@ -45,31 +47,31 @@ const UpdateOrderLocationFrom = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success('Origin location updated successfully');
+      toast.success(t('location.pickup.updated'));
       handleClose();
     }
-  }, [isSuccess, handleClose]);
+  }, [isSuccess, handleClose, t]);
 
   return (
     <Modal
       isOpen={updateOrderLocationFromModal}
       onClose={handleClose}
       className="top-[42%] translate-y-[-42%] sm:top-[50%] sm:translate-y-[-50%]"
-      heading="Update Origin Location"
-      description="Search and select the pickup location for your order"
+      heading={t('location.pickup.updateTitle')}
+      description={t('location.pickup.updateDescription')}
     >
       <article className="space-y-6">
         <section className="space-y-4">
           <header>
-            <h4 className="type-card-title">Search Location</h4>
+            <h4 className="type-card-title">{t('location.searchTitle')}</h4>
             <p className="text-sm text-(--muted)">
-              Enter the address or location name where the package should be picked up
+              {t('location.pickup.searchHelp')}
             </p>
           </header>
 
           <PlaceSearch
             onLocationSelect={handleLocationSelect}
-            placeholder="Search for pickup location..."
+            placeholder={t('location.pickup.searchPlaceholder')}
             className="relative"
             country="rw"
           />
@@ -77,7 +79,7 @@ const UpdateOrderLocationFrom = () => {
 
         {selectedLocation && (
           <aside className="p-4 bg-(--surface) rounded-lg border">
-            <h5 className="text-sm font-normal text-(--ink) mb-2">Selected Location:</h5>
+            <h5 className="text-sm font-normal text-(--ink) mb-2">{t('location.selected')}:</h5>
             <address className="text-sm text-(--ink) not-italic">
               <strong>{selectedLocation.name}</strong>
               <br />
@@ -94,7 +96,7 @@ const UpdateOrderLocationFrom = () => {
             primary
             className="px-6 py-2"
           >
-            Save Location
+            {t('location.save')}
           </Button>
         </footer>
       </article>

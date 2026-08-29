@@ -2,12 +2,17 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import PlaceSearch from './PlaceSearch';
+import { I18nProvider } from '@/i18n/i18n';
+import { messages } from '@/i18n/messages';
+
+const renderWithI18n = (component: React.ReactNode) =>
+  render(<I18nProvider messages={messages}>{component}</I18nProvider>);
 
 describe('PlaceSearch empty option', () => {
   it('shows the option on empty focus and removes it when searching', async () => {
     const user = userEvent.setup();
 
-    render(
+    renderWithI18n(
       <PlaceSearch
         onLocationSelect={vi.fn()}
         placeholder="Pickup"
@@ -35,7 +40,7 @@ describe('PlaceSearch empty option', () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
 
-    render(
+    renderWithI18n(
       <PlaceSearch
         onLocationSelect={vi.fn()}
         placeholder="Pickup"

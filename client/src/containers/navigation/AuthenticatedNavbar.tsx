@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '@/states/store';
 import { setLogout } from '@/states/slices/auth.slice';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
-import { capitalizeString } from '@/utils/strings.util';
 import type { UserRole } from '@/types/user.type';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getProfilePhotoUrl } from '@/utils/profilePhoto.util';
@@ -16,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import peekabooLogo from '/peekaboo.png';
+import { useI18n } from '@/i18n/i18n';
 
 interface Props {
   className?: string;
@@ -29,6 +29,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   if (['/auth/login', '/auth/register'].includes(pathname)) return null;
 
@@ -37,15 +38,15 @@ const AuthenticatedNavbar = ({ className }: Props) => {
   );
 
   const userRolesLabel = user?.userRoles
-    ?.map((role: UserRole) => capitalizeString(role?.role?.name))
+    ?.map((role: UserRole) => t(`role.${role?.role?.name?.toLowerCase()}`))
     .join(', ');
 
   const navDropdown = [
     ...(isBusinessUser
-      ? [{ title: 'Organization Settings', link: '/organizations/settings', icon: Building2 }]
+      ? [{ title: t('nav.organizationSettings'), action: 'settings', link: '/organizations/settings', icon: Building2 }]
       : []),
-    { title: 'Profile', link: '/user-profile', icon: User },
-    { title: 'Logout', link: '/auth/login', icon: LogOut, destructive: true },
+    { title: t('nav.profile'), action: 'profile', link: '/user-profile', icon: User },
+    { title: t('nav.logout'), action: 'logout', link: '/auth/login', icon: LogOut, destructive: true },
   ] as const;
 
   const userInitial =
@@ -55,11 +56,11 @@ const AuthenticatedNavbar = ({ className }: Props) => {
 
   return (
     <header className={cn('invert-surface sticky top-0 z-50 h-16', className)}>
-      <nav className="app-container flex h-16 items-center justify-between" aria-label="Account navigation">
+      <nav className="app-container flex h-16 items-center justify-between" aria-label={t('nav.account')}>
         <Link
           to="/"
           className="flex h-(--control-lg) shrink-0 items-center rounded-(--radius-control) px-2 outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
-          aria-label="Peekaboo home"
+          aria-label={t('nav.homeLabel')}
         >
           <img
             src={peekabooLogo}
@@ -72,10 +73,10 @@ const AuthenticatedNavbar = ({ className }: Props) => {
           {pathname === '/' ? (
             <>
               <Link to="/dashboard" className={cn(navLinkClassName, 'hidden sm:inline-flex')}>
-                Dashboard
+                {t('nav.dashboard')}
               </Link>
               <Link to="/track" className={cn(navLinkClassName, 'hidden sm:inline-flex')}>
-                Track order
+                {t('nav.trackOrder')}
               </Link>
             </>
           ) : null}
@@ -90,7 +91,7 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                 type="button"
                 className="group inline-flex h-(--control-lg) min-h-11 cursor-pointer items-center gap-2 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm font-medium text-(--ink) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-(--ease-flat) hover:border-(--line-strong) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
                 aria-haspopup="menu"
-                aria-label={`Account menu for ${user?.name || user?.phoneNumber || 'user'}`}
+                aria-label={t('nav.accountMenu', { name: user?.name || user?.phoneNumber || t('role.customer') })}
               >
                 <Avatar className="size-8 shrink-0 rounded-(--radius-control) border border-(--line)">
                   <AvatarImage
@@ -135,10 +136,10 @@ const AuthenticatedNavbar = ({ className }: Props) => {
                 ) : null}
               </div>
 
-              <ul className="mt-2 grid gap-2" role="menu" aria-label="Account options">
+              <ul className="mt-2 grid gap-2" role="menu" aria-label={t('nav.accountOptions')}>
                 {navDropdown.map((item) => {
                   const Icon = item.icon;
-                  const isLogout = item.title === 'Logout';
+                  const isLogout = item.action === 'logout';
 
                   return (
                     <li key={item.title} role="none">

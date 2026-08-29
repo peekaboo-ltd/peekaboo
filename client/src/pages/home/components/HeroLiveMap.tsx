@@ -26,6 +26,7 @@ import { hasCoordinates } from '@/utils/locations.util';
 import type { HomeFormValues } from '../home.types';
 import HeroMapViewport from './HeroMapViewport';
 import HeroRouteCard from './HeroRouteCard';
+import { useI18n } from '@/i18n/i18n';
 
 interface HeroLiveMapProps {
   control: Control<HomeFormValues>;
@@ -83,6 +84,7 @@ const HeroLiveMapContent = ({
   geolocation,
   approximateLocation,
 }: HeroLiveMapContentProps) => {
+  const { t } = useI18n();
   const apiStatus = useApiLoadingStatus();
   const locationFrom = useWatch({ control, name: 'locationFrom' });
   const locationTo = useWatch({ control, name: 'locationTo' });
@@ -116,7 +118,7 @@ const HeroLiveMapContent = ({
     return (
       <div
         className="aspect-[4/3] w-full animate-pulse rounded-md bg-(--surface)"
-        aria-label="Loading delivery map"
+        aria-label={t('home.map.loading')}
       />
     );
   }
@@ -128,7 +130,7 @@ const HeroLiveMapContent = ({
     (position): position is google.maps.LatLngLiteral => position !== null,
   );
   const originLabel =
-    pickupSource === 'geolocation' ? 'Your location' : 'Pickup';
+    pickupSource === 'geolocation' ? t('home.form.yourLocation') : t('home.map.pickup');
 
   return (
     <div>
@@ -164,7 +166,7 @@ const HeroLiveMapContent = ({
           ) : null}
 
           {dropOff ? (
-            <AdvancedMarker position={dropOff} title="Drop-off">
+            <AdvancedMarker position={dropOff} title={t('home.map.dropoff')}>
               <Pin
                 background="var(--ink)"
                 borderColor="var(--ink)"
@@ -176,7 +178,7 @@ const HeroLiveMapContent = ({
           {rider && riderPosition ? (
             <AdvancedMarker
               position={riderPosition}
-              title={`${rider.isLive ? 'Live' : 'Latest'} rider position, ${rider.etaMinutes} minutes away`}
+              title={t('home.map.riderPosition', { status: t(rider.isLive ? 'home.map.live' : 'home.map.latest'), minutes: rider.etaMinutes })}
             >
               <span className="relative flex size-9 items-center justify-center rounded-full bg-(--ink) text-(--paper)">
                 {rider.isLive ? (
@@ -198,11 +200,11 @@ const HeroLiveMapContent = ({
                 <MapLegendItem label={originLabel} shape="hollow" />
               ) : null}
               {dropOff ? (
-                <MapLegendItem label="Drop-off" shape="solid" />
+                <MapLegendItem label={t('home.map.dropoff')} shape="solid" />
               ) : null}
               {rider ? (
                 <MapLegendItem
-                  label={`${rider.isLive ? 'Live rider' : 'Nearby rider'} · ${rider.etaMinutes} min`}
+                  label={`${t(rider.isLive ? 'home.map.liveRider' : 'home.map.nearbyRider')} · ${rider.etaMinutes} min`}
                   shape="rider"
                 />
               ) : null}
@@ -210,7 +212,7 @@ const HeroLiveMapContent = ({
           </figcaption>
         ) : approximateLocation ? (
           <figcaption className="absolute left-3 top-3 z-10 rounded-(--radius-control) bg-(--paper) px-3 py-2 text-xs text-(--ink)">
-            Approximate area · {approximateLocation.label}
+            {t('home.map.approximateArea', { area: approximateLocation.label })}
           </figcaption>
         ) : null}
 
@@ -224,7 +226,7 @@ const HeroLiveMapContent = ({
             disabled={isLocating}
           >
             <LocateFixed aria-hidden="true" />
-            {isLocating ? 'Finding you…' : 'Use my location'}
+            {isLocating ? t('home.map.findingYou') : t('home.form.useLocation')}
           </Button>
         ) : null}
       </figure>

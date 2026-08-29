@@ -15,31 +15,12 @@ import ServicesVolumeVisual from './components/ServicesVolumeVisual';
 import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-
-const pricingPrinciples = [
-  {
-    icon: Layers,
-    title: 'Volume bands',
-    description:
-      'Each plan covers a delivery range. Stay in your band and your per-drop rate stays predictable.',
-  },
-  {
-    icon: BarChart3,
-    title: 'No seat counts',
-    description:
-      'Price scales with how much you send, not how many people log in. Add teammates without adding cost.',
-  },
-  {
-    icon: FileText,
-    title: 'Clear invoicing',
-    description:
-      'Weekly statements with every drop itemised. Pay by MoMo, card, or wire on terms that fit your ops.',
-  },
-] as const;
+import { useI18n } from '@/i18n/i18n';
 
 const Services = () => {
   const navigate = useNavigate();
-  useDocumentTitle('Services');
+  const { t } = useI18n();
+  useDocumentTitle(t('services.docTitle'));
 
   const { data, isFetching } = useFetchPublicBusinessPlansQuery(undefined);
   const { data: landingStats } = useGetLandingStatsQuery();
@@ -47,8 +28,13 @@ const Services = () => {
   const plans = data?.data || [];
 
   const cadences = Array.from(
-    new Set(plans.map((plan) => billingPeriodLabel(plan.billingPeriod))),
+    new Set(plans.map((plan) => billingPeriodLabel(plan.billingPeriod, t))),
   );
+  const pricingPrinciples = [
+    { icon: Layers, title: t('services.principle.volume.title'), description: t('services.principle.volume.description') },
+    { icon: BarChart3, title: t('services.principle.seats.title'), description: t('services.principle.seats.description') },
+    { icon: FileText, title: t('services.principle.invoicing.title'), description: t('services.principle.invoicing.description') },
+  ];
 
   const handleContactNavigation = () => {
     navigate('/contact');
@@ -73,29 +59,28 @@ const Services = () => {
               animate="visible"
             >
               <hgroup className="space-y-3">
-                <p className="type-eyebrow">Business pricing</p>
+                <p className="type-eyebrow">{t('services.pricingEyebrow')}</p>
                 <h1 className="type-display max-w-[16ch] text-(--ink)">
-                  Pay for the volume you actually send
+                  {t('services.heroTitle')}
                 </h1>
                 <p className="type-body max-w-[52ch] text-(--muted)">
-                  Every plan is priced in volume bands. Find the band you operate in,
-                  and that is your cost — no seat counts, no minimum commitment.
+                  {t('services.heroDescription')}
                 </p>
               </hgroup>
 
               {!isFetching && plans.length ? (
                 <dl className="flex w-full max-w-md flex-wrap gap-x-10 gap-y-4 border-t border-(--line) pt-6">
                   <div>
-                    <dt className="type-eyebrow">Plans</dt>
+                    <dt className="type-eyebrow">{t('services.plans')}</dt>
                     <dd className="type-card-title mt-2">{plans.length}</dd>
                   </div>
                   <div>
-                    <dt className="type-eyebrow">Billing cadences</dt>
+                    <dt className="type-eyebrow">{t('services.billingCadences')}</dt>
                     <dd className="type-card-title mt-2">{cadences.join(' · ')}</dd>
                   </div>
                   <div>
-                    <dt className="type-eyebrow">Commitment</dt>
-                    <dd className="type-card-title mt-2">None</dd>
+                    <dt className="type-eyebrow">{t('services.commitment')}</dt>
+                    <dd className="type-card-title mt-2">{t('services.none')}</dd>
                   </div>
                 </dl>
               ) : null}
@@ -105,7 +90,7 @@ const Services = () => {
                 onClick={scrollToPlans}
                 className="link-arrow link-sweep inline-flex items-center gap-1.5 text-sm text-(--ink)"
               >
-                Compare plans
+                {t('services.comparePlans')}
                 <FontAwesomeIcon icon={faChevronDown} className="size-4" aria-hidden="true" />
               </button>
 
@@ -120,7 +105,7 @@ const Services = () => {
             <div className="max-lg:hidden">
               <ServicesVolumeVisual
                 planCount={plans.length || 3}
-                cadenceLabel={cadences.length ? cadences.join(' · ') : 'Monthly · Weekly'}
+                cadenceLabel={cadences.length ? cadences.join(' · ') : t('services.defaultCadence')}
               />
             </div>
           </div>
@@ -131,16 +116,15 @@ const Services = () => {
         <div className="app-container">
           <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <hgroup>
-              <p className="type-eyebrow">How pricing works</p>
+              <p className="type-eyebrow">{t('services.howEyebrow')}</p>
               <h2 className="type-h2 mt-2">
-                One band.
+                {t('services.howTitle1')}
                 <br />
-                One clear rate.
+                {t('services.howTitle2')}
               </h2>
             </hgroup>
             <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
-              Peekaboo plans are built for teams that send regularly across Kigali —
-              not for counting seats or guessing monthly minimums.
+              {t('services.howDescription')}
             </p>
           </header>
 
@@ -162,11 +146,11 @@ const Services = () => {
       </section>
 
       <BusinessPlansSection
-        title="Business delivery plans"
-        subtitle="Choose the volume band that matches how your team sends across Kigali."
+        title={t('services.plansTitle')}
+        subtitle={t('services.plansSubtitle')}
         showHeader
-        popularLabel="Most popular"
-        ctaLabel="See full pricing"
+        popularLabel={t('plans.mostPopular')}
+        ctaLabel={t('plans.seePricing')}
         plans={plans}
         isLoading={isFetching}
       />
@@ -177,9 +161,9 @@ const Services = () => {
       />
 
       <FinalCtaSection
-        title="Not sure which band you land in?"
-        subtitle="Tell us roughly how much you send in a month and we will confirm the plan that costs you least."
-        buttonLabel="Talk to our team"
+        title={t('services.ctaTitle')}
+        subtitle={t('services.ctaSubtitle')}
+        buttonLabel={t('services.talkToTeam')}
         onScrollToForm={handleContactNavigation}
       />
     </main>

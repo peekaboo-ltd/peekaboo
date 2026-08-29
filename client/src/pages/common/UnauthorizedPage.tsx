@@ -7,9 +7,11 @@ import Button from '@/components/inputs/Button';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/states/store';
 import { setLogout } from '@/states/slices/auth.slice';
+import { useI18n } from '@/i18n/i18n';
 
 const UnauthorizedPage = () => {
-  useDocumentTitle('Unauthorized');
+  const { t } = useI18n();
+  useDocumentTitle(t('error.unauthorized.docTitle'));
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
@@ -34,7 +36,7 @@ const UnauthorizedPage = () => {
             <article className="flex justify-center">
               <span className="inline-flex items-center gap-2 rounded-full bg-(--surface) px-4 py-2 text-xs font-normal text-(--ink)">
                 <FontAwesomeIcon icon={faShieldHalved} className="text-(--ink)" />
-                403 Unauthorized
+                {t('error.unauthorized.code')}
               </span>
             </article>
 
@@ -46,10 +48,10 @@ const UnauthorizedPage = () => {
 
             <article className="space-y-4">
               <h1 className="type-display text-(--ink)">
-                Access not allowed.
+                {t('error.unauthorized.title')}
               </h1>
               <p className="type-body mx-auto max-w-md text-(--muted)">
-                You don’t have permission to view this page. You’ve been signed out for your security.
+                {t('error.unauthorized.description')}
               </p>
             </article>
 
@@ -64,7 +66,7 @@ const UnauthorizedPage = () => {
                   className="text-xs"
                   aria-hidden="true"
                 />
-                Go to homepage
+                {t('error.unauthorized.home')}
               </Button>
             </nav>
           </header>

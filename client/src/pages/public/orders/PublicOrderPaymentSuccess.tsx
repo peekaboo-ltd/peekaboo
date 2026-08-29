@@ -17,6 +17,7 @@ import {
   PublicPageHero,
   PublicSectionCard,
 } from '@/components/layout/PublicPage';
+import { useI18n } from '@/i18n/i18n';
 
 const SkeletonLine = ({ className = '' }: { className?: string }) => (
   <span
@@ -26,16 +27,16 @@ const SkeletonLine = ({ className = '' }: { className?: string }) => (
 
 interface ReferenceValueProps {
   value?: string;
-  label: string;
   copied: boolean;
   onCopy: () => void;
+  copyLabel: string;
 }
 
 const ReferenceValue = ({
   value,
-  label,
   copied,
   onCopy,
+  copyLabel,
 }: ReferenceValueProps) => (
   <span className="flex min-w-0 items-center gap-2">
     <span className="min-w-0 break-all text-xs text-(--ink) tabular-nums">
@@ -46,7 +47,7 @@ const ReferenceValue = ({
         type="button"
         onClick={onCopy}
         className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) border border-(--line) bg-(--paper) text-(--muted) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-(--ink) hover:text-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
-        aria-label={`Copy ${label} to clipboard`}
+        aria-label={copyLabel}
       >
         <FontAwesomeIcon
           icon={copied ? faCheckCircle : faCopy}
@@ -59,10 +60,11 @@ const ReferenceValue = ({
 );
 
 const PublicOrderPaymentSuccess = () => {
+  const { t } = useI18n();
   const [copiedReference, setCopiedReference] = useState<
     'payment' | 'order' | null
   >(null);
-  useDocumentTitle('Payment Successful');
+  useDocumentTitle(t('payment.success.docTitle'));
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const paymentId = searchParams.get('paymentId') || '';
@@ -103,9 +105,9 @@ const PublicOrderPaymentSuccess = () => {
 
   const copyReference = (value: string, field: 'payment' | 'order') => {
     void navigator.clipboard.writeText(value);
-    toast.success(
-      `${field === 'payment' ? 'Payment' : 'Order'} reference copied`,
-    );
+    toast.success(t('payment.success.referenceCopied', {
+      type: field === 'payment' ? t('payment.label') : t('tracking.orderReference'),
+    }));
     setCopiedReference(field);
     window.setTimeout(() => setCopiedReference(null), 2000);
   };
@@ -123,10 +125,10 @@ const PublicOrderPaymentSuccess = () => {
           <div className="py-5 text-center" role="status" aria-live="polite">
             <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-(--line) border-t-(--ink) motion-reduce:animate-none" />
             <h1 className="type-h3 mt-5">
-              Confirming your payment
+              {t('payment.success.confirmingTitle')}
             </h1>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--muted)">
-              We’re checking the transaction before showing your receipt.
+              {t('payment.success.confirmingDescription')}
             </p>
           </div>
         </PublicSectionCard>
@@ -140,15 +142,14 @@ const PublicOrderPaymentSuccess = () => {
         <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
           <div className="py-5 text-center">
             <h1 className="type-h3">
-              Payment confirmation unavailable
+              {t('payment.success.unavailableTitle')}
             </h1>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--muted)">
-              We couldn’t verify a completed payment for this order. Return to
-              the order to check its current status.
+              {t('payment.success.unavailableDescription')}
             </p>
             {id ? (
               <Button primary route={`/p/orders/${id}`} className="mt-6">
-                Return to order
+                {t('payment.returnOrder')}
               </Button>
             ) : null}
           </div>
@@ -160,13 +161,13 @@ const PublicOrderPaymentSuccess = () => {
   return (
     <PublicPage>
       <PublicPageHero
-        eyebrow="Payment complete"
-        title="Payment confirmed"
-        description="Your order is paid and ready for rider assignment. Keep the references below for your records."
+        eyebrow={t('payment.success.complete')}
+        title={t('payment.success.confirmedTitle')}
+        description={t('payment.success.confirmedDescription')}
         actions={
           <span className="inline-flex h-6 items-center gap-2 rounded-(--radius-pill) border border-(--approve-line) bg-(--approve-surface) px-2.5 text-xs font-normal text-(--approve)">
             <FontAwesomeIcon icon={faCheckCircle} aria-hidden="true" />
-            Confirmed
+            {t('payment.success.confirmed')}
           </span>
         }
       />
@@ -174,20 +175,20 @@ const PublicOrderPaymentSuccess = () => {
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(17rem,0.8fr)] lg:items-start">
         <div className="space-y-5">
           <PublicSectionCard
-            eyebrow="Receipt"
-            title="Payment details"
-            description="Transaction and order references."
+            eyebrow={t('payment.success.receipt')}
+            title={t('payment.success.details')}
+            description={t('payment.success.detailsDescription')}
           >
             <dl className="divide-y divide-(--line)">
               {successfulPayment.externalReferenceId ? (
                 <div className="grid gap-2 py-4 first:pt-0 sm:grid-cols-[10rem_1fr] sm:items-center">
                   <dt className="type-meta">
-                    Payment reference
+                    {t('payment.paymentReference')}
                   </dt>
                   <dd className="sm:justify-self-end">
                     <ReferenceValue
                       value={successfulPayment.externalReferenceId}
-                      label="payment reference"
+                      copyLabel={t('payment.copyLabel', { label: t('payment.paymentReference') })}
                       copied={copiedReference === 'payment'}
                       onCopy={() =>
                         copyReference(
@@ -202,7 +203,7 @@ const PublicOrderPaymentSuccess = () => {
 
               <div className="grid gap-2 py-4 sm:grid-cols-[10rem_1fr] sm:items-center">
                 <dt className="type-meta">
-                  Order reference
+                  {t('payment.orderReference')}
                 </dt>
                 <dd className="sm:justify-self-end">
                   {orderLoading ? (
@@ -210,7 +211,7 @@ const PublicOrderPaymentSuccess = () => {
                   ) : (
                     <ReferenceValue
                       value={currentOrder?.referenceId}
-                      label="order reference"
+                      copyLabel={t('payment.copyLabel', { label: t('payment.orderReference') })}
                       copied={copiedReference === 'order'}
                       onCopy={() => {
                         if (currentOrder?.referenceId) {
@@ -224,7 +225,7 @@ const PublicOrderPaymentSuccess = () => {
 
               <div className="grid gap-2 py-4 pb-0 sm:grid-cols-[10rem_1fr] sm:items-center">
                 <dt className="type-meta">
-                  Amount paid
+                  {t('payment.success.amountPaid')}
                 </dt>
                 <dd className="type-metric sm:justify-self-end">
                   {formatCurrency(successfulPayment.amount)}
@@ -233,7 +234,7 @@ const PublicOrderPaymentSuccess = () => {
             </dl>
           </PublicSectionCard>
 
-          <PublicSectionCard eyebrow="Route" title="Pickup and destination">
+          <PublicSectionCard eyebrow={t('payment.success.route')} title={t('payment.success.pickupDestination')}>
             {orderLoading ? (
               <div className="grid gap-6 sm:grid-cols-2">
                 {[1, 2].map((item) => (
@@ -252,11 +253,11 @@ const PublicOrderPaymentSuccess = () => {
                 />
                 {[
                   {
-                    label: 'Pickup',
+                    label: t('payment.pickup'),
                     location: currentOrder?.locationFrom,
                   },
                   {
-                    label: 'Destination',
+                    label: t('payment.destination'),
                     location: currentOrder?.locationTo,
                   },
                 ].map((stop) => (
@@ -269,7 +270,7 @@ const PublicOrderPaymentSuccess = () => {
                       {stop.location ? (
                         <AdministrativeLocation location={stop.location} />
                       ) : (
-                        <p>Not set</p>
+                        <p>{t('common.notSet')}</p>
                       )}
                     </div>
                   </article>
@@ -280,7 +281,7 @@ const PublicOrderPaymentSuccess = () => {
             {!orderLoading ? (
               <div className="mt-6 flex items-center justify-between border-t border-(--line) pt-4">
                 <span className="text-sm text-(--muted)">
-                  Delivery fee
+                  {t('payment.deliveryFee')}
                 </span>
                 <span className="font-normal text-(--ink)">
                   {formatCurrency(
@@ -293,20 +294,19 @@ const PublicOrderPaymentSuccess = () => {
         </div>
 
         <PublicSectionCard
-          eyebrow="Next"
-          title="Track rider assignment"
-          description="We’ll update the tracking page when a rider is assigned and as the delivery moves."
+          eyebrow={t('payment.success.next')}
+          title={t('payment.success.trackAssignment')}
+          description={t('payment.success.trackDescription')}
         >
           <p className="text-sm leading-6 text-(--muted)">
-            You can leave this receipt safely. Your order reference will remain
-            available on the tracking page.
+            {t('payment.success.leaveReceipt')}
           </p>
           <Button
             primary
             route={`/p/orders/${id}/tracking`}
             className="mt-5 w-full"
           >
-            Track order
+            {t('payment.trackOrder')}
           </Button>
         </PublicSectionCard>
       </div>
@@ -319,7 +319,7 @@ const PublicOrderPaymentSuccess = () => {
             navigate(-1);
           }}
         >
-          Back
+          {t('tracking.back')}
         </Button>
       </footer>
     </PublicPage>

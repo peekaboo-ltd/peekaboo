@@ -30,6 +30,7 @@ import {
   SUPPORTED_PHONE_COUNTRY,
   validateAndFormatPhoneNumber,
 } from '@/utils/phone.util';
+import { useI18n } from '@/i18n/i18n';
 
 interface CountrySelectOption {
   value?: Country;
@@ -54,6 +55,7 @@ function CountryCallingCodeSelect({
   readOnly,
   invalid,
 }: CountryCallingCodeSelectProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -102,7 +104,7 @@ function CountryCallingCodeSelect({
           type="button"
           role="combobox"
           aria-expanded={open}
-          aria-label="Country calling code"
+          aria-label={t('common.countryCallingCode')}
           aria-invalid={invalid}
           disabled={disabled}
           className={cn(
@@ -113,7 +115,7 @@ function CountryCallingCodeSelect({
           )}
         >
           <span className="truncate tabular-nums text-sm">
-            {value ? `${value} +${getCountryCallingCode(value)}` : 'Country'}
+            {value ? `${value} +${getCountryCallingCode(value)}` : t('common.country')}
           </span>
           <ChevronsUpDown className="size-4 shrink-0 text-(--muted)" />
         </button>
@@ -129,7 +131,7 @@ function CountryCallingCodeSelect({
             type="search"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search countries"
+            placeholder={t('common.searchCountries')}
             autoComplete="off"
             className="min-w-0 focus:border-none focus:ring-0 py-2 flex-1 bg-transparent text-sm text-(--ink) outline-none placeholder:text-(--muted)"
           />
@@ -137,7 +139,7 @@ function CountryCallingCodeSelect({
         <ul className="max-h-60 overflow-y-auto overscroll-contain">
           {filteredCountries.length === 0 ? (
             <li className="px-2 py-5 text-center text-sm text-(--muted)">
-              No matching country
+              {t('common.noMatchingCountry')}
             </li>
           ) : (
             filteredCountries.map((country) => {
@@ -225,7 +227,7 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
       label,
       name,
       id,
-      placeholder = 'Enter phone number',
+      placeholder,
       required = false,
       disabled = false,
       readOnly = false,
@@ -239,6 +241,7 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
     },
     ref,
   ) => {
+    const { t } = useI18n();
     const generatedId = useId();
     const inputId = id ?? `tel-${generatedId}`;
     const errorId = `${inputId}-error`;
@@ -246,11 +249,11 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
 
     const liveError = useMemo(() => {
       if (!hasInteracted) return undefined;
-      if (!value) return required ? 'Phone number is required' : undefined;
+      if (!value) return required ? t('common.phoneRequired') : undefined;
 
       const validation = validateAndFormatPhoneNumber(value);
-      return validation.isValid ? undefined : validation.error;
-    }, [hasInteracted, required, value]);
+      return validation.isValid ? undefined : t('validation.invalidPhone');
+    }, [hasInteracted, required, t, value]);
 
     const resolvedError = errorMessage || liveError;
     const isInvalid = Boolean(resolvedError);
@@ -301,7 +304,7 @@ const TelInput = forwardRef<HTMLInputElement, TelInputProps>(
             readOnly,
             className: cn(readOnly && readOnlyControlClassName),
           }}
-          placeholder={readOnly ? '' : placeholder}
+          placeholder={readOnly ? '' : (placeholder ?? t('common.enterPhone'))}
           disabled={disabled}
           readOnly={readOnly}
           autoComplete={autoComplete}

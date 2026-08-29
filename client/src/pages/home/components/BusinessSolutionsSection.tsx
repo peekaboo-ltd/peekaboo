@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
 import Button from '@/components/inputs/Button';
 import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
+import { useI18n } from '@/i18n/i18n';
 
 interface BusinessFeature {
   icon: LucideIcon;
@@ -19,23 +20,21 @@ const BusinessSolutionsSection = ({
   features,
   onContactClick,
   onSeePlans,
-}: BusinessSolutionsSectionProps) => (
+}: BusinessSolutionsSectionProps) => {
+  const { t } = useI18n();
+
+  return (
   <section id="business" className="section-rhythm w-full border-(--line) bg-(--paper) text-(--ink)">
     <article className="app-container grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
       <header>
         <p className="type-eyebrow">
-          For businesses
+          {t('home.business.eyebrow')}
         </p>
         <h2 className="type-h2 mt-2">
-          Logistics
-          <br />
-          without the
-          <br />
-          operations team.
+          {t('home.business.title')}
         </h2>
         <p className="mt-4 max-w-[480px] text-sm font-normal leading-relaxed text-muted-foreground">
-          Switch from in-house dispatch to a Peekaboo plan and consolidate every
-          delivery into one billing cycle, one dashboard, and one SLA.
+          {t('home.business.description')}
         </p>
         <nav className="mt-5 flex flex-wrap gap-3">
           <Button
@@ -44,7 +43,7 @@ const BusinessSolutionsSection = ({
             onClick={onContactClick}
             className="rounded-(--radius-control) font-normal"
           >
-            Request business account
+            {t('home.business.request')}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
           <Button
@@ -52,7 +51,7 @@ const BusinessSolutionsSection = ({
             onClick={onSeePlans}
             className={`rounded-(--radius-control) border-border bg-(--surface) text-foreground`}
           >
-            See plans
+            {t('home.business.seePlans')}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         </nav>
@@ -78,6 +77,7 @@ const BusinessSolutionsSection = ({
       </ul>
     </article>
   </section>
-);
+  );
+};
 
 export default BusinessSolutionsSection;

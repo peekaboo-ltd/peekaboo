@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { containerVariants, itemVariants } from '../home.animations';
 import Button from '@/components/inputs/Button';
+import { useI18n } from '@/i18n/i18n';
 
 interface FinalCtaSectionProps {
   title: string;
@@ -13,7 +14,9 @@ const FinalCtaSection = ({
   title,
   subtitle,
   buttonLabel,
-}: FinalCtaSectionProps) => (
+}: FinalCtaSectionProps) => {
+  const { t } = useI18n();
+  return (
   <section className="section-rhythm relative w-full">
     <motion.article
       className="relative mx-auto max-w-[720px] px-5 text-center sm:px-8 lg:px-10"
@@ -24,7 +27,7 @@ const FinalCtaSection = ({
     >
       <motion.header variants={itemVariants}>
         <p className="type-eyebrow">
-          Get started
+          {t('home.finalCta.getStarted')}
         </p>
         <h2 className="type-h2 mt-2">
           {title}
@@ -43,6 +46,7 @@ const FinalCtaSection = ({
       </motion.header>
     </motion.article>
   </section>
-);
+  );
+};
 
 export default FinalCtaSection;

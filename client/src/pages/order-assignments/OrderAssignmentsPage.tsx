@@ -12,8 +12,10 @@ import { UUID } from "@/types";
 import { useDocumentTitle } from "@/hooks/common/useDocumentTitle";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
+import { useI18n } from '@/i18n/i18n';
 
 const OrderAssignmentsPage = () => {
+  const { t } = useI18n();
   // STATE VARIABLES
   const {
     orderAssignmentsList,
@@ -26,7 +28,7 @@ const OrderAssignmentsPage = () => {
     string[]
   >([]);
 
-  useDocumentTitle("Assignments");
+  useDocumentTitle(t('assignments.docTitle'));
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { control: filterControl, setValue: setFilterValue } = useForm();
@@ -68,7 +70,7 @@ const OrderAssignmentsPage = () => {
     setValue: setFilterValue,
     applicationStatuses: filteredAssignmentStatuses,
     defaultStatuses,
-    label: "Assignment Status",
+    label: t('assignments.status'),
   });
 
   // ORDER ASSIGMENT HOOKS

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Building2, ChevronLeft, ChevronRight, Quote, Store } from 'lucide-react';
 import type { Testimonial } from '../home.types';
 import { containerVariants, itemVariants } from '../home.animations';
+import { useI18n } from '@/i18n/i18n';
 
 interface TestimonialsSectionProps {
   badgeLabel: string;
@@ -18,6 +19,7 @@ const TestimonialsSection = ({
   testimonials,
 }: TestimonialsSectionProps) => {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (testimonials.length <= 1) return undefined;
@@ -95,7 +97,7 @@ const TestimonialsSection = ({
 
             <nav
               className="relative z-10 mt-8 flex items-center gap-3"
-              aria-label="Testimonial navigation"
+              aria-label={t('home.testimonials.navigation')}
             >
               {testimonials.map((_, index) => (
                 <button
@@ -104,7 +106,7 @@ const TestimonialsSection = ({
                   onClick={() => setActiveTestimonial(index)}
                   aria-selected={index === activeTestimonial}
                   className="flex size-6 items-center justify-center rounded-(--radius-pill) border border-(--line) text-xs text-(--muted) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] aria-selected:border-(--ink) aria-selected:bg-(--ink) aria-selected:text-(--paper) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
-                  aria-label={`Go to testimonial ${index + 1}`}
+                  aria-label={t('home.testimonials.goTo', { number: index + 1 })}
                 >
                   {index + 1}
                 </button>
@@ -122,7 +124,7 @@ const TestimonialsSection = ({
                   )
                 }
                 className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-(--surface) text-muted-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-(--surface-hover) hover:text-foreground"
-                aria-label="Previous testimonial"
+                aria-label={t('home.testimonials.previous')}
               >
                 <ChevronLeft className="h-4 w-4 transition-transform duration-200" />
               </button>
@@ -132,7 +134,7 @@ const TestimonialsSection = ({
                   setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
                 }
                 className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-(--surface) text-muted-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-(--surface-hover) hover:text-foreground"
-                aria-label="Next testimonial"
+                aria-label={t('home.testimonials.next')}
               >
                 <ChevronRight className="h-4 w-4 transition-transform duration-200" />
               </button>

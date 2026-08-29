@@ -1,6 +1,7 @@
 import Button from "@/components/inputs/Button";
 import { Link } from "react-router-dom";
 import { HERO_DELIVERY_FORM_ID } from "./HeroForm";
+import { useI18n } from '@/i18n/i18n';
 
 interface HeroBusinessCtaProps {
   isActive: boolean;
@@ -19,10 +20,12 @@ const HeroBusinessCta = ({
   primaryLabel,
   onContactClick,
   onTrackClick,
-}: HeroBusinessCtaProps) => (
+}: HeroBusinessCtaProps) => {
+  const { t } = useI18n();
+  return (
   <nav
     className={`flex ${isActive ? `flex` : `flex-row-reverse`} w-full flex-wrap justify-between items-center gap-4 max-sm:flex-col max-sm:items-stretch`}
-    aria-label="Delivery actions"
+    aria-label={t('home.form.actions')}
   >
     <Button
       onClick={isActive ? onContactClick : undefined}
@@ -33,7 +36,7 @@ const HeroBusinessCta = ({
       disabled={isLoading}
       className="max-sm:w-full"
     >
-      {isLoading ? 'Booking…' : isActive ? accountLabel : primaryLabel}
+      {isLoading ? t('home.form.booking') : isActive ? accountLabel : primaryLabel}
     </Button>
     {!isActive ? (
       <Link
@@ -41,10 +44,11 @@ const HeroBusinessCta = ({
         to="/track"
         className="link-sweep text-sm text-(--ink) max-sm:text-center"
       >
-        Track an order
+        {t('nav.trackOrder')}
       </Link>
     ) : null}
   </nav>
-);
+  );
+};
 
 export default HeroBusinessCta;

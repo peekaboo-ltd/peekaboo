@@ -9,8 +9,10 @@ import Modal from '@/components/Modal';
 import PlaceSearch, { type PlaceSearchResult } from '@/components/inputs/PlaceSearch';
 import Button from '@/components/inputs/Button';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n/i18n';
 
 const SetUserDefaultLocationModal = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const { userDefaultLocationModal, selectedUser } = useAppSelector(
     (state) => state.user
@@ -27,10 +29,10 @@ const SetUserDefaultLocationModal = () => {
   useEffect(() => {
     if (isSuccess && data?.data) {
       dispatch(setSelectedUser(data.data));
-      toast.success('Default location updated successfully');
+      toast.success(t('profile.defaultLocationUpdated'));
       handleClose();
     }
-  }, [isSuccess, data, dispatch, handleClose]);
+  }, [isSuccess, data, dispatch, handleClose, t]);
 
   const handleSave = () => {
     if (selectedLocation?.coordinates && selectedUser?.id) {
@@ -49,21 +51,21 @@ const SetUserDefaultLocationModal = () => {
       isOpen={userDefaultLocationModal}
       onClose={handleClose}
       className="top-[42%] translate-y-[-42%] sm:top-[50%] sm:translate-y-[-50%]"
-      heading="Default Pickup Location"
-      description="Set the location that will be pre-filled when you create orders"
+      heading={t('profile.defaultLocationTitle')}
+      description={t('profile.defaultLocationDescription')}
     >
       <article className="space-y-6">
         <section className="space-y-4">
           <header>
-            <h4 className="type-card-title">Search Location</h4>
+            <h4 className="type-card-title">{t('location.searchTitle')}</h4>
             <p className="text-sm text-(--muted)">
-              Enter an address or place name to use as your default pickup point
+              {t('profile.defaultLocationDescription')}
             </p>
           </header>
 
           <PlaceSearch
             onLocationSelect={setSelectedLocation}
-            placeholder="Search for your default location..."
+            placeholder={t('profile.defaultLocationPlaceholder')}
             className="relative"
             country="rw"
           />
@@ -72,7 +74,7 @@ const SetUserDefaultLocationModal = () => {
         {selectedLocation && (
           <aside className="p-4 bg-(--surface) rounded-lg border">
             <h5 className="text-sm font-normal text-(--ink) mb-2">
-              Selected Location:
+              {t('location.selected')}:
             </h5>
             <address className="text-sm text-(--ink) not-italic">
               <strong>{selectedLocation.name}</strong>
@@ -84,7 +86,7 @@ const SetUserDefaultLocationModal = () => {
 
         <footer className="flex items-center justify-end gap-3 pt-4 border-t">
           <Button onClick={handleClose} className="px-6 py-2">
-            Cancel
+            {t('users.cancel')}
           </Button>
           <Button
             onClick={handleSave}
@@ -93,7 +95,7 @@ const SetUserDefaultLocationModal = () => {
             primary
             className="px-6 py-2"
           >
-            Save Location
+            {t('location.save')}
           </Button>
         </footer>
       </article>

@@ -30,6 +30,7 @@ import {
   InternalSectionCard,
   InternalStatCard,
 } from '@/components/layout/InternalPage';
+import { useI18n, type Language } from '@/i18n/i18n';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -39,11 +40,11 @@ const itemVariants: Variants = {
   },
 };
 
-const formatDateLabel = (value?: string | Date) => {
+const formatDateLabel = (value: string | Date | undefined, language: Language) => {
   if (!value) return '—';
   const date = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(language === 'fr' ? 'fr-RW' : language === 'rw' ? 'rw-RW' : 'en-RW', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -51,10 +52,11 @@ const formatDateLabel = (value?: string | Date) => {
 };
 
 const UserProfilePage = () => {
+  const { t, language } = useI18n();
   const dispatch = useAppDispatch();
   const { user: authUser } = useAppSelector((state) => state.auth);
   const { selectedUser } = useAppSelector((state) => state.user);
-  useDocumentTitle('Profile');
+  useDocumentTitle(t('profile.docTitle'));
 
   const navigate = useNavigate();
 
@@ -82,19 +84,19 @@ const UserProfilePage = () => {
 
   const stats = [
     {
-      label: 'Account Status',
-      value: selectedUser?.status ?? '—',
+      label: t('profile.accountStatus'),
+      value: selectedUser?.status ? t(`status.${selectedUser.status.toLowerCase()}`) : '—',
       icon: faShieldHalved,
       iconBg: 'bg-(--ink) text-(--paper)',
     },
     {
-      label: 'Active Roles',
+      label: t('profile.activeRoles'),
       value: roles.length ? roles.length.toString() : '—',
       icon: faIdBadge,
       iconBg: 'bg-(--surface) text-(--muted)',
     },
     {
-      label: 'Orders',
+      label: t('profile.orders'),
       value: selectedUser?.orders?.length?.toString() ?? '—',
       icon: faChartLine,
       iconBg: 'bg-(--ink) text-(--paper)',
@@ -105,13 +107,15 @@ const UserProfilePage = () => {
     <InternalPage>
       <motion.section variants={itemVariants}>
         <InternalPageHeader
-          eyebrow="Profile Overview"
-          title={selectedUser?.name ?? 'Your Profile'}
-          description="Keep your personal details, roles, and contact information current."
+          eyebrow={t('profile.overview')}
+          title={selectedUser?.name ?? t('profile.yours')}
+          description={t('profile.description')}
           actions={
             <>
               <span className="rounded-full border border-(--line) bg-(--paper) px-3 py-1 text-xs font-normal text-(--muted)">
-                {selectedUser?.status ?? 'Status Unavailable'}
+                {selectedUser?.status
+                  ? t(`status.${selectedUser.status.toLowerCase()}`)
+                  : t('userDetails.statusUnavailable')}
               </span>
               <Button
                 primary
@@ -124,7 +128,7 @@ const UserProfilePage = () => {
                 }}
               >
                 <FontAwesomeIcon icon={faPenToSquare} />
-                Edit Profile
+                {t('profile.updateTitle')}
               </Button>
             </>
           }
@@ -153,22 +157,22 @@ const UserProfilePage = () => {
       >
         <InternalSectionCard
           className="lg:col-span-2"
-          eyebrow="Personal Details"
-          title="Profile Information"
+          eyebrow={t('profile.personalDetails')}
+          title={t('profile.information')}
           actions={
             <span className="type-meta">
-              Updated {formatDateLabel(selectedUser?.updatedAt)}
+              {t('profile.updated', { date: formatDateLabel(selectedUser?.updatedAt, language) })}
             </span>
           }
         >
           <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {[
-              { label: 'Full Name', value: selectedUser?.name ?? '—', icon: faIdBadge },
-              { label: 'Email Address', value: selectedUser?.email ?? '—', icon: faEnvelope },
-              { label: 'Phone Number', value: selectedUser?.phoneNumber ?? '—', icon: faPhone },
-              { label: 'Date of Birth', value: formatDateLabel(selectedUser?.dateOfBirth), icon: faCalendarDay },
-              { label: 'Nationality', value: selectedUser?.nationality ?? '—', icon: faFlag },
-              { label: 'Member Since', value: formatDateLabel(selectedUser?.createdAt), icon: faBriefcase },
+              { label: t('profile.fullName'), value: selectedUser?.name ?? '—', icon: faIdBadge },
+              { label: t('profile.email'), value: selectedUser?.email ?? '—', icon: faEnvelope },
+              { label: t('profile.phone'), value: selectedUser?.phoneNumber ?? '—', icon: faPhone },
+              { label: t('profile.birthDate'), value: formatDateLabel(selectedUser?.dateOfBirth, language), icon: faCalendarDay },
+              { label: t('profile.nationality'), value: selectedUser?.nationality ?? '—', icon: faFlag },
+              { label: t('profile.memberSince'), value: formatDateLabel(selectedUser?.createdAt, language), icon: faBriefcase },
             ].map((item) => (
               <li
                 key={item.label}
@@ -198,7 +202,7 @@ const UserProfilePage = () => {
                   </span>
                   <section>
                     <p className="type-meta">
-                      Default Pickup Location
+                      {t('profile.defaultPickup')}
                     </p>
                     <p className="mt-1 text-sm font-normal text-(--ink)">
                       {selectedUser?.defaultLocation
@@ -215,7 +219,9 @@ const UserProfilePage = () => {
                   }}
                   className="text-xs font-normal text-(--muted) hover:underline underline-offset-2 shrink-0"
                 >
-                  {selectedUser?.defaultLocation ? 'Update' : 'Set Location'}
+                  {selectedUser?.defaultLocation
+                    ? t('profile.updateLocation')
+                    : t('profile.setLocation')}
                 </Link>
               </header>
             </li>
@@ -223,32 +229,32 @@ const UserProfilePage = () => {
         </InternalSectionCard>
 
         <InternalSectionCard
-          eyebrow="Access & Membership"
-          title="Roles & Organizations"
+          eyebrow={t('profile.access')}
+          title={t('profile.rolesOrganizations')}
         >
           <section className="mt-6 flex flex-col gap-5">
             <section>
               <p className="type-meta">
-                Assigned Roles
+                {t('profile.assignedRoles')}
               </p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
                       <span className="rounded-full bg-(--surface) px-3 py-1 text-xs font-normal text-(--muted)">
-                        {role}
+                        {t(`role.${role.toLowerCase()}`)}
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-(--muted)">No roles assigned.</li>
+                  <li className="text-sm text-(--muted)">{t('profile.noRoles')}</li>
                 )}
               </ul>
             </section>
 
             <section>
               <p className="type-meta">
-                Organizations
+                {t('profile.organizations')}
               </p>
               <ul className="mt-3 flex flex-col gap-2">
                 {organizations.length ? (
@@ -259,15 +265,15 @@ const UserProfilePage = () => {
                     >
                       <section>
                         <p className="text-sm font-normal text-(--ink)">{org}</p>
-                        <p className="type-meta">Active membership</p>
+                        <p className="type-meta">{t('profile.activeMembership')}</p>
                       </section>
                       <span className="rounded-full bg-(--surface) px-2.5 py-1 text-xs font-normal text-(--muted)">
-                        Active
+                        {t('status.active')}
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-(--muted)">No organization memberships.</li>
+                  <li className="text-sm text-(--muted)">{t('profile.noOrganizations')}</li>
                 )}
               </ul>
             </section>
@@ -282,7 +288,7 @@ const UserProfilePage = () => {
               navigate(-1);
             }}
           >
-            Back
+            {t('common.actions.back')}
           </Button>
         </menu>
       </motion.section>

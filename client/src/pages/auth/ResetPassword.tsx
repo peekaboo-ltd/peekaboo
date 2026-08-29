@@ -14,9 +14,11 @@ import {
   authInputClassName,
   authPrimaryButtonClassName,
 } from './AuthPageShell';
+import { useI18n } from '@/i18n/i18n';
 
 const ResetPassword = () => {
-  useDocumentTitle('Set New Password');
+  const { t } = useI18n();
+  useDocumentTitle(t('auth.reset.docTitle'));
   const [searchParams] = useSearchParams();
   const token = useMemo(() => searchParams.get('token') || '', [searchParams]);
   const [newPassword, setNewPassword] = useState('');
@@ -28,44 +30,44 @@ const ResetPassword = () => {
     event.preventDefault();
 
     if (newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters long.');
+      toast.error(t('auth.passwordMin'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match.');
+      toast.error(t('auth.passwordMismatch'));
       return;
     }
 
     try {
       const response = await resetPassword({ token, newPassword }).unwrap();
-      toast.success(response?.message || 'Password reset successful.');
+      toast.success(response?.message || t('auth.reset.successToast'));
       setIsSubmitted(true);
     } catch (error) {
       toast.error(
         (error as { data?: { message?: string } })?.data?.message ||
-          'Unable to reset your password. Please request a new reset link.'
+          t('auth.reset.error')
       );
     }
   };
 
   return (
     <AuthPageShell>
-      <AuthCard title="Set a new password" subtitle="Choose a strong password for your account.">
+      <AuthCard title={t('auth.reset.title')} subtitle={t('auth.reset.subtitle')}>
         {!token ? (
           <AuthNotice tone="error">
-            Invalid or missing reset token. Please request a new password reset link.
+            {t('auth.reset.invalidToken')}
           </AuthNotice>
         ) : isSubmitted ? (
           <AuthNotice tone="success">
-            Your password has been updated successfully.
+            {t('auth.reset.success')}
           </AuthNotice>
         ) : (
           <form className="flex flex-col gap-4" onSubmit={onSubmit}>
             <Input
-              label="New password"
+              label={t('auth.reset.newPassword')}
               type="password"
-              placeholder="Minimum 8 characters"
+              placeholder={t('auth.reset.minimumPlaceholder')}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
@@ -73,9 +75,9 @@ const ResetPassword = () => {
               className={authInputClassName}
             />
             <Input
-              label="Confirm new password"
+              label={t('auth.reset.confirmNewPassword')}
               type="password"
-              placeholder="Re-enter your password"
+              placeholder={t('auth.reset.reenterPlaceholder')}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -88,13 +90,13 @@ const ResetPassword = () => {
               className={authPrimaryButtonClassName}
               isLoading={isLoading}
             >
-              Update password
+              {t('auth.reset.submit')}
             </Button>
           </form>
         )}
 
         <AuthFooterNote>
-          <AuthLink to="/auth/login">Return to sign in</AuthLink>
+          <AuthLink to="/auth/login">{t('auth.reset.return')}</AuthLink>
         </AuthFooterNote>
       </AuthCard>
     </AuthPageShell>

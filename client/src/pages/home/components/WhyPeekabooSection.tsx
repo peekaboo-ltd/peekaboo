@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type { LandingStats } from '@/types/landing.type';
 import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
+import { useI18n } from '@/i18n/i18n';
 
 interface WhyItem {
   icon: LucideIcon;
@@ -21,16 +22,17 @@ const WhyPeekabooSection = ({
   activeCustomersLabel,
   completedOrdersLabel,
 }: WhyPeekabooSectionProps) => {
+  const { t, language } = useI18n();
   const stats = [
     typeof landingStats?.activeCustomers === 'number'
       ? {
-          value: landingStats.activeCustomers.toLocaleString(),
+          value: landingStats.activeCustomers.toLocaleString(language),
           label: activeCustomersLabel,
         }
       : null,
     typeof landingStats?.customersWithOrders === 'number'
       ? {
-          value: landingStats.customersWithOrders.toLocaleString(),
+          value: landingStats.customersWithOrders.toLocaleString(language),
           label: completedOrdersLabel,
         }
       : null,
@@ -42,12 +44,10 @@ const WhyPeekabooSection = ({
         <header className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <hgroup>
             <p className="type-eyebrow">
-              Why Peekaboo
+              {t('home.why.eyebrow')}
             </p>
             <h2 className="type-h2 mt-2">
-              The trusted way
-              <br />
-              to send.
+              {t('home.why.title')}
             </h2>
           </hgroup>
           {stats.length > 0 && (

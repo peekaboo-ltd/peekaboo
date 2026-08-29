@@ -12,8 +12,10 @@ import { faSpinner, faUser, faCheck, faArrowLeft, faPhone, faEnvelope } from '@f
 import Button from '@/components/inputs/Button';
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 const ReassignOrderAssignment = () => {
+    const { t } = useI18n();
     // STATE VARIABLES
     const dispatch = useAppDispatch();
     const { reassignOrderAssignmentModal, selectedOrderAssignment } = useAppSelector((state) => state.orderAssignment);
@@ -109,7 +111,7 @@ const ReassignOrderAssignment = () => {
         <Modal
             isOpen={reassignOrderAssignmentModal}
             onClose={closeModal}
-            heading={`Reassign ${selectedOrderAssignment?.order?.referenceId || 'Order'}`}
+            heading={t('assignments.reassignTitle', { reference: selectedOrderAssignment?.order?.referenceId || t('orders.orderFallback') })}
             className="max-w-4xl w-full"
         >
             <form
@@ -125,20 +127,20 @@ const ReassignOrderAssignment = () => {
                     <>
                         {/* Search Section */}
                         <fieldset className="flex flex-col mb-2" disabled={isAssigning}>
-                            <legend className="sr-only">Search for a rider</legend>
+                            <legend className="sr-only">{t('assignments.searchRider')}</legend>
 
                             <label htmlFor="rider-search" className="block text-sm font-normal text-(--ink) mb-2">
-                                Search for a new rider
+                                {t('assignments.searchNewRider')}
                             </label>
                             <input
                                 ref={inputRef}
                                 id="rider-search"
                                 type="search"
-                                placeholder="Search by name or phone..."
+                                placeholder={t('assignments.searchPlaceholder')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className={cn(controlClassName, 'px-3')}
-                                aria-label="Search riders"
+                                aria-label={t('assignments.searchRider')}
                                 disabled={isAssigning}
                             />
                         </fieldset>
@@ -148,11 +150,11 @@ const ReassignOrderAssignment = () => {
                             {isFetchingRiders ? (
                                 <p className="px-4 py-8 text-sm text-(--muted) text-center" role="status" aria-live="polite">
                                     <FontAwesomeIcon icon={faSpinner} spin className="mr-2" aria-hidden="true" />
-                                    Loading riders...
+                                    {t('assignments.loadingRiders')}
                                 </p>
                             ) : riders.length === 0 ? (
                                 <p className="px-4 py-8 text-sm text-(--muted) text-center" role="status">
-                                    {searchTerm ? 'No riders found matching your search' : 'No riders available'}
+                                    {searchTerm ? t('assignments.noRiderMatch') : t('assignments.noRiders')}
                                 </p>
                             ) : (
                                 <menu className="divide-y divide-gray-100" role="listbox">
@@ -174,8 +176,8 @@ const ReassignOrderAssignment = () => {
                                                 >
                                                     <span className="flex items-center justify-between">
                                                         <span className="flex-1">
-                                                            <strong className="block text-sm font-normal text-(--ink)">
-                                                                {rider.name || 'Unnamed Rider'}
+                                                            <strong className={`block text-sm font-normal text-(--ink) ${isCurrentRider ? 'text-(--ink-hover)' : ''}`}>
+                                                                {rider.name || t('assignments.unnamedRider')}
                                                             </strong>
                                                             <span className="block text-xs text-(--muted) mt-0.5">
                                                                 {rider.phoneNumber}
@@ -183,7 +185,7 @@ const ReassignOrderAssignment = () => {
                                                         </span>
                                                         {isCurrentRider && (
                                                             <span className="text-xs text-(--ink) font-normal ml-2">
-                                                                Current
+                                                                {t('assignments.current')}
                                                             </span>
                                                         )}
                                                     </span>
@@ -203,7 +205,7 @@ const ReassignOrderAssignment = () => {
                                 disabled={isAssigning}
                                 variant="secondary"
                             >
-                                Cancel
+                                {t('users.cancel')}
                             </Button>
                         </footer>
                     </>
@@ -221,19 +223,19 @@ const ReassignOrderAssignment = () => {
                                     variant="ghost"
                                     size="sm"
                                 >
-                                    Back to selection
+                                    {t('assignments.backSelection')}
                                 </Button>
                                 <h2 className="type-card-title">
-                                    Confirm Rider Assignment
+                                    {t('assignments.confirmTitle')}
                                 </h2>
                                 <p className="text-sm text-(--muted) mt-1">
-                                    Review the rider details before confirming the assignment
+                                    {t('assignments.confirmDescription')}
                                 </p>
                             </header>
 
                             <article className="flex-1 bg-(--surface) rounded-lg p-6">
                                 <figure className="flex items-start space-x-4">
-                                    <span className="shrink-0 w-16 h-16 bg-(--ink) rounded-full flex items-center justify-center" role="img" aria-label="Rider avatar">
+                                    <span className="shrink-0 w-16 h-16 bg-(--ink) rounded-full flex items-center justify-center" role="img" aria-label={t('assignments.riderAvatar')}>
                                         <FontAwesomeIcon
                                             icon={faUser}
                                             className="w-8 h-8 text-(--ink)"
@@ -242,11 +244,11 @@ const ReassignOrderAssignment = () => {
                                     </span>
                                     <figcaption className="flex-1 min-w-0">
                                         <h3 className="type-h3 mb-2">
-                                            {selectedRider.name || 'Unnamed Rider'}
+                                            {selectedRider.name || t('assignments.unnamedRider')}
                                         </h3>
 
                                         <dl className="space-y-3">
-                                            <dt className="sr-only">Phone Number</dt>
+                                            <dt className="sr-only">{t('users.phone')}</dt>
                                             <dd className="flex items-center text-sm text-(--ink)">
                                                 <FontAwesomeIcon
                                                     icon={faPhone}
@@ -258,7 +260,7 @@ const ReassignOrderAssignment = () => {
 
                                             {selectedRider.email && (
                                                 <>
-                                                    <dt className="sr-only">Email</dt>
+                                                    <dt className="sr-only">{t('users.email')}</dt>
                                                     <dd className="flex items-center text-sm text-(--ink)">
                                                         <FontAwesomeIcon
                                                             icon={faEnvelope}
@@ -270,13 +272,13 @@ const ReassignOrderAssignment = () => {
                                                 </>
                                             )}
 
-                                            <dt className="sr-only">Status</dt>
+                                            <dt className="sr-only">{t('common.status')}</dt>
                                             <dd className="flex items-center">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-normal ${selectedRider.status === UserStatus.ACTIVE
                                                     ? 'bg-(--surface) text-(--ink)'
                                                     : 'bg-(--surface) text-(--ink)'
                                                     }`}>
-                                                    {selectedRider.status}
+                                                    {t(`status.${selectedRider.status.toLowerCase()}`)}
                                                 </span>
                                             </dd>
                                         </dl>
@@ -295,7 +297,7 @@ const ReassignOrderAssignment = () => {
                                 icon={faCheck}
                                 className="px-6 py-2 text-sm font-normal cursor-pointer"
                             >
-                                Confirm Assignment
+                                {t('assignments.confirm')}
                             </Button>
                         </footer>
                     </>

@@ -15,15 +15,17 @@ import CreateOrder from './CreateOrder';
 import DeleteOrder from './DeleteOrder';
 import ImportBatch from '../batches/ImportBatch';
 import { setImportBatchModal } from '@/states/slices/batch.slice';
+import { useI18n } from '@/i18n/i18n';
 
 const OrdersPage = () => {
+  const { t } = useI18n();
   // STATE VARIABLES
   const dispatch = useAppDispatch();
   const { ordersList, deleteOrderModal } = useAppSelector(
     (state) => state.order,
   );
   const { importBatchModal } = useAppSelector((state) => state.batch);
-  useDocumentTitle('Orders');
+  useDocumentTitle(t('orders.docTitle'));
 
   // REACT HOOK FORM
   const { control: filterControl, setValue: setFilterValue } = useForm();
@@ -63,7 +65,7 @@ const OrdersPage = () => {
   const { statusFilter, applicationStatus } = useStatusFilter({
     control: filterControl,
     setValue: setFilterValue,
-    label: 'Order Status',
+    label: t('orders.status'),
     applicationStatuses: availableStatuses,
     defaultStatuses: initialStatusesRef.current,
   });
@@ -121,10 +123,10 @@ const OrdersPage = () => {
         <section className="flex flex-wrap items-start justify-between gap-4">
           <article>
             <h1 className="type-page-title mt-1">
-              Orders
+              {t('orders.title')}
             </h1>
             <p className="mt-1 text-sm text-(--muted)">
-              Find an order by reference or narrow the list by status.
+              {t('orders.description')}
             </p>
           </article>
           <nav className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -137,7 +139,7 @@ const OrdersPage = () => {
                 dispatch(setImportBatchModal(true));
               }}
             >
-              Import orders
+              {t('orders.import')}
             </Button>
             <Button
               type="button"
@@ -149,7 +151,7 @@ const OrdersPage = () => {
                 dispatch(setCreateOrderModal(true));
               }}
             >
-              Create order
+              {t('orders.create')}
             </Button>
           </nav>
         </section>

@@ -3,6 +3,7 @@ import type { ComponentType, SVGProps } from 'react';
 import type { HowItWorksStep } from '../home.types';
 import { Button } from '@/components/ui/button';
 import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
+import { useI18n } from '@/i18n/i18n';
 
 interface HowItWorksSectionProps {
   steps: HowItWorksStep[];
@@ -11,22 +12,24 @@ interface HowItWorksSectionProps {
 
 type StepIcon = ComponentType<SVGProps<SVGSVGElement> & { 'aria-hidden'?: boolean }>;
 
-const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) => (
+const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) => {
+  const { t } = useI18n();
+  return (
   <section id="how-it-works" className="section-rhythm w-full border-(--line) bg-(--paper)">
     <div className="app-container">
       <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <hgroup>
-          <p className="type-eyebrow">How it works</p>
+          <p className="type-eyebrow">{t('home.how.eyebrow')}</p>
           <h2 className="type-h2 mt-2">
-            Three steps. One delivery.
+            {t('home.how.title')}
           </h2>
         </hgroup>
         <div className="flex flex-col items-start gap-4 md:items-end">
           <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
-            Designed for senders who do not have time to think about logistics.
+            {t('home.how.description')}
           </p>
           <Button type="button" onClick={onScrollToForm} className="link-arrow">
-            See it in action
+            {t('home.how.action')}
             <ArrowRight data-slot="icon" className="size-4" aria-hidden="true" />
           </Button>
         </div>
@@ -53,6 +56,7 @@ const HowItWorksSection = ({ steps, onScrollToForm }: HowItWorksSectionProps) =>
       </ol>
     </div>
   </section>
-);
+  );
+};
 
 export default HowItWorksSection;

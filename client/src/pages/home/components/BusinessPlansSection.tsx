@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import type { BusinessPlan } from '@/types/businessPlan.type';
 import { containerVariants, itemVariants } from '../home.animations';
 import PlanCard from '@/pages/services/PlanCard';
+import { useI18n } from '@/i18n/i18n';
 
 interface BusinessPlansSectionProps {
   badgeLabel?: string;
@@ -25,12 +26,13 @@ const BusinessPlansSection = ({
   badgeLabel,
   title,
   subtitle,
-  popularLabel = 'Most popular',
-  ctaLabel = 'See full pricing',
+  popularLabel,
+  ctaLabel,
   plans,
   isLoading,
   showHeader = true,
 }: BusinessPlansSectionProps) => {
+  const { t } = useI18n();
   const hasPlans = !isLoading && plans.length > 0;
 
   return (
@@ -70,14 +72,14 @@ const BusinessPlansSection = ({
             {plans.map((plan) => (
                 <PlanCard
                   plan={plan}
-                  recommendedLabel={popularLabel}
-                  ctaLabel={ctaLabel}
+                  recommendedLabel={popularLabel ?? t('plans.mostPopular')}
+                  ctaLabel={ctaLabel ?? t('plans.seePricing')}
                 />
             ))}
           </motion.ul>
         ) : (
           <p className="card-framed type-body-sm px-5 py-8 text-(--muted)">
-            Plans are being updated. Talk to our team for current pricing.
+            {t('plans.updating')}
           </p>
         )}
       </motion.article>

@@ -4,6 +4,7 @@ import { faCcMastercard, faCcVisa } from '@fortawesome/free-brands-svg-icons';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import Input from '@/components/inputs/Input';
 import type { PaymentFormValues } from './payment.types';
+import { useI18n } from '@/i18n/i18n';
 
 interface CardFieldsProps {
   control: Control<PaymentFormValues>;
@@ -17,7 +18,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
  * expiry and CVV are never entered here. We only collect what the gateway needs
  * to open that page and issue a receipt.
  */
-const CardFields = ({ control, errors }: CardFieldsProps) => (
+const CardFields = ({ control, errors }: CardFieldsProps) => {
+  const { t } = useI18n();
+  return (
   <>
     <Controller
       name="cardholderName"
@@ -25,18 +28,18 @@ const CardFields = ({ control, errors }: CardFieldsProps) => (
       rules={{
         validate: (value) => {
           const trimmed = value?.trim() ?? '';
-          if (!trimmed) return 'Cardholder name is required';
-          if (trimmed.length < 2) return 'Enter the full name on the card';
-          if (/\d/.test(trimmed)) return 'Cardholder name cannot contain numbers';
+          if (!trimmed) return t('orderPayment.cardholderRequired');
+          if (trimmed.length < 2) return t('orderPayment.cardholderFull');
+          if (/\d/.test(trimmed)) return t('orderPayment.cardholderNumbers');
           return true;
         },
       }}
       render={({ field }) => (
         <Input
           {...field}
-          label="Name on card"
+          label={t('orderPayment.cardholder')}
           required
-          placeholder="As printed on the card"
+          placeholder={t('orderPayment.cardholderPlaceholder')}
           autoComplete="cc-name"
           errorMessage={errors.cardholderName?.message}
         />
@@ -49,15 +52,15 @@ const CardFields = ({ control, errors }: CardFieldsProps) => (
       rules={{
         validate: (value) => {
           const trimmed = value?.trim() ?? '';
-          if (!trimmed) return 'Email is required for card payments';
-          return EMAIL_PATTERN.test(trimmed) ? true : 'Enter a valid email address';
+          if (!trimmed) return t('orderPayment.emailRequired');
+          return EMAIL_PATTERN.test(trimmed) ? true : t('publicOrder.emailInvalid');
         },
       }}
       render={({ field }) => (
         <Input
           {...field}
           type="email"
-          label="Email for the receipt"
+          label={t('orderPayment.receiptEmail')}
           required
           placeholder="you@example.com"
           autoComplete="email"
@@ -74,17 +77,17 @@ const CardFields = ({ control, errors }: CardFieldsProps) => (
           aria-hidden="true"
         />
         <span>
-          You'll be taken to UrubutoPay's secure page to enter your card details.
-          Peekaboo never sees or stores your card number.
+          {t('orderPayment.cardSecurity')}
         </span>
       </p>
       <p className="mt-2 flex items-center gap-2 text-(--muted)">
-        <span className="sr-only">Accepted cards: Visa and Mastercard</span>
+        <span className="sr-only">{t('orderPayment.acceptedCards')}</span>
         <FontAwesomeIcon icon={faCcVisa} className="text-2xl" aria-hidden="true" />
         <FontAwesomeIcon icon={faCcMastercard} className="text-2xl" aria-hidden="true" />
       </p>
     </aside>
   </>
-);
+  );
+};
 
 export default CardFields;

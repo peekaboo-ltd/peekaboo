@@ -1,7 +1,7 @@
 export const localStorageUtil = {
   getItem: <T = string>(key: string): T | null => {
     try {
-      const item = localStorage.getItem(key);
+      const item = window.localStorage.getItem(key);
       if (item === null) return null;
 
       // Try to parse as JSON, if it fails return as string
@@ -18,9 +18,9 @@ export const localStorageUtil = {
   setItem: (key: string, value: string | object) => {
     try {
       if (typeof value === 'string') {
-        localStorage.setItem(key, value);
+        window.localStorage.setItem(key, value);
       } else {
-        localStorage.setItem(key, JSON.stringify(value));
+        window.localStorage.setItem(key, JSON.stringify(value));
       }
     } catch (error) {
       console.error('Error setting localStorage item:', error);
@@ -29,13 +29,13 @@ export const localStorageUtil = {
 
   removeItem: (key: string) => {
     try {
-      localStorage.removeItem(key);
+      window.localStorage.removeItem(key);
     } catch (error) {
       console.error('Error removing localStorage item:', error);
     }
   },
 
   clearAll: (): void => {
-    localStorage.clear();
+    window.localStorage.clear();
   },
 };

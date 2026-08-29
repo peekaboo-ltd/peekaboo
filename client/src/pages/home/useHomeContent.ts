@@ -54,76 +54,71 @@ export const useHomeContent = (): HomeContent => {
   const heroCopy: HeroCopy = {
     personalTabLabel: t('home.hero.tab.personal'),
     businessTabLabel: t('home.hero.tab.business'),
-    personalTitle1: 'Send anything*,',
-    personalTitle2: 'anywhere',
-    personalSubtitle:
-      'Peekaboo connects senders to verified riders for same-day delivery across Kigali. Book in under a minute, track every step, pay when it arrives.',
-    businessTitle1: 'Move every order,',
-    businessTitle2: 'smarter',
-    businessSubtitle:
-      'Bulk drops, live delivery analytics, weekly invoices, and dedicated support for Kigali teams that need logistics without the extra operations layer.',
+    personalTitle1: t('home.hero.personalTitle1'),
+    personalTitle2: t('home.hero.personalTitle2'),
+    personalSubtitle: t('home.hero.personalSubtitle'),
+    businessTitle1: t('home.hero.businessTitle1'),
+    businessTitle2: t('home.hero.businessTitle2'),
+    businessSubtitle: t('home.hero.businessSubtitle'),
     tryQuickDeliveryLabel: t('home.hero.tryQuickDelivery'),
     quickStartLabel: t('home.hero.quickStart'),
-    formTitle: 'Book a rider',
-    formSubtitle: "Share both phone numbers and we'll match a rider.",
-    senderLabel: 'Pickup phone',
+    formTitle: t('home.hero.bookRider'),
+    formSubtitle: t('home.hero.formSubtitle'),
+    senderLabel: t('home.hero.pickupPhone'),
     senderPlaceholder: '780412884',
-    recipientLabel: 'Recipient phone',
+    recipientLabel: t('home.hero.recipientPhone'),
     recipientPlaceholder: '788902117',
-    continueLabel: 'Book delivery',
+    continueLabel: t('home.hero.bookDelivery'),
     haveOrderLabel: t('home.hero.haveOrder'),
     trackHereLabel: t('home.hero.trackHere'),
     verifiedRidersLabel: t('home.hero.verifiedRiders'),
     realtimeTrackingLabel: t('home.hero.realtimeTracking'),
     activeCustomersLabel: t('home.stats.activeCustomers').toLowerCase(),
     completedOrdersLabel: t('home.stats.customersWithOrders').toLowerCase(),
-    growingCommunityLabel: 'Trusted by senders across Kigali',
+    growingCommunityLabel: t('home.hero.community'),
     businessAccountCta: t('home.b2b.cta.contact'),
   };
 
   const quickActions: IconCard[] = [
     {
       icon: PackagePlus,
-      title: 'Send a package',
-      description: 'Book a rider in under a minute',
+      title: t('home.quick.send.title'),
+      description: t('home.quick.send.description'),
     },
     {
       icon: MapPinned,
-      title: 'Track delivery',
-      description: 'Live updates from pickup to drop',
+      title: t('home.quick.track.title'),
+      description: t('home.quick.track.description'),
     },
     {
       icon: Building2,
-      title: 'Business deliveries',
-      description: 'Bulk sends, billing, dashboards',
+      title: t('home.quick.business.title'),
+      description: t('home.quick.business.description'),
     },
     {
       icon: Bike,
-      title: 'Become a rider',
-      description: 'Earn flexibly across Kigali',
+      title: t('home.quick.rider.title'),
+      description: t('home.quick.rider.description'),
     },
   ];
 
   const howItWorks: HowItWorksStep[] = [
     {
       step: '01',
-      title: 'Tell us where',
-      description:
-        'Drop two phone numbers and the pickup area. We match a verified rider in seconds.',
+      title: t('home.steps.location.title'),
+      description: t('home.steps.location.description'),
       icon: PackagePlus,
     },
     {
       step: '02',
-      title: 'Hand off the package',
-      description:
-        'Your rider arrives with ID, scans the parcel, and confirms drop details with you.',
+      title: t('home.steps.handoff.title'),
+      description: t('home.steps.handoff.description'),
       icon: Bike,
     },
     {
       step: '03',
-      title: 'Track until it lands',
-      description:
-        'Live map. SMS to recipient. Photo proof on delivery. Pay cash, MoMo, or card.',
+      title: t('home.steps.track.title'),
+      description: t('home.steps.track.description'),
       icon: PackageCheck,
     },
   ];
@@ -131,58 +126,56 @@ export const useHomeContent = (): HomeContent => {
   const whyItems: IconCard[] = [
     {
       icon: ShieldCheck,
-      title: 'Verified riders',
-      description: 'Background-checked, insured, and rated after every drop.',
+      title: t('home.why.verified.title'),
+      description: t('home.why.verified.description'),
     },
     {
       icon: Clock3,
-      title: 'Predictable ETAs',
-      description:
-        "Live route times that account for Kigali's traffic, not just distance.",
+      title: t('home.why.eta.title'),
+      description: t('home.why.eta.description'),
     },
     {
       icon: ScanLine,
-      title: 'Tamper-evident handoffs',
-      description:
-        'Sealed sleeves, photo proof, and signature capture for sensitive items.',
+      title: t('home.why.handoff.title'),
+      description: t('home.why.handoff.description'),
     },
     {
       icon: CreditCard,
-      title: 'Pay how you want',
-      description: 'Cash on delivery, MoMo, card, or post-paid invoices for businesses.',
+      title: t('home.why.payment.title'),
+      description: t('home.why.payment.description'),
     },
     {
       icon: MessageSquare,
-      title: 'Real human support',
-      description: 'WhatsApp, phone, or web chat answered by a Kigali team in under 90s.',
+      title: t('home.why.support.title'),
+      description: t('home.why.support.description'),
     },
     {
       icon: Route,
-      title: 'Smart routing',
-      description: 'Riders are matched and routed across Kigali to keep every drop on time.',
+      title: t('home.why.routing.title'),
+      description: t('home.why.routing.description'),
     },
   ];
 
   const businessFeatures: IconCard[] = [
     {
       icon: Upload,
-      title: 'Bulk uploads',
-      description: 'CSV in, hundreds of drops out. Schedule by hour or by route.',
+      title: t('home.business.bulk.title'),
+      description: t('home.business.bulk.description'),
     },
     {
       icon: ChartNoAxesCombined,
-      title: 'Live analytics',
-      description: 'Watch on-time, cost-per-drop, and rider performance in real time.',
+      title: t('home.business.analytics.title'),
+      description: t('home.business.analytics.description'),
     },
     {
       icon: FileText,
-      title: 'Post-paid invoicing',
-      description: 'Weekly statements, cost centres, MoMo or wire payment.',
+      title: t('home.business.invoices.title'),
+      description: t('home.business.invoices.description'),
     },
     {
       icon: Headphones,
-      title: 'Dedicated support',
-      description: 'An ops lead on WhatsApp, plus uptime support for engineering teams.',
+      title: t('home.business.support.title'),
+      description: t('home.business.support.description'),
     },
   ];
 
@@ -210,24 +203,24 @@ export const useHomeContent = (): HomeContent => {
   const supportContacts: SupportContact[] = [
     {
       icon: MessageSquare,
-      title: 'WhatsApp',
+      title: t('home.support.whatsapp'),
       subtitle: '+250 794 892 784',
-      badge: '~90s',
+      badge: t('home.support.whatsappBadge'),
       href: 'https://wa.me/250794892784?text=Hello%2C%20I%20need%20help%20with%20Peekaboo',
       external: true,
     },
     {
       icon: Phone,
-      title: 'Phone',
+      title: t('home.support.phone'),
       subtitle: '+250 794 892 784',
-      badge: 'Live',
+      badge: t('home.support.live'),
       href: 'tel:+250794892784',
     },
     {
       icon: Mail,
-      title: 'Email',
+      title: t('home.support.email'),
       subtitle: 'info@peekaboo.co.rw',
-      badge: '8 min',
+      badge: t('home.support.emailBadge'),
       href: 'mailto:info@peekaboo.co.rw',
     },
   ];
@@ -241,12 +234,12 @@ export const useHomeContent = (): HomeContent => {
     testimonials,
     trustedByLabel: t('home.b2b.trustedBy'),
     trustedByIndustries: [
-      'E-commerce',
-      'Restaurants',
-      'Pharmacies',
-      'Banks',
-      'Retail',
-      'Logistics',
+      t('home.industry.ecommerce'),
+      t('home.industry.restaurants'),
+      t('home.industry.pharmacies'),
+      t('home.industry.banks'),
+      t('home.industry.retail'),
+      t('home.industry.logistics'),
     ],
     supportContacts,
   };

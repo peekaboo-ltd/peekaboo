@@ -2,6 +2,7 @@ import { motion, Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowTrendUp, faArrowTrendDown } from '@fortawesome/free-solid-svg-icons';
 import DashboardPanel from './DashboardPanel';
+import { useI18n } from '@/i18n/i18n';
 
 interface ScorecardKPI {
   label: string;
@@ -16,27 +17,27 @@ interface DashboardPerformanceScorecardProps {
 }
 
 // Placeholder KPIs — replace with real data once backend is wired
-const placeholderKPIs: ScorecardKPI[] = [
+const placeholderKPIs: Array<Omit<ScorecardKPI, 'label'> & { labelKey: string }> = [
   {
-    label: 'On-Time Rate',
+    labelKey: 'dashboard.scorecard.onTime',
     value: '91.4%',
     progress: 91,
     trend: { value: 3, isPositive: true },
   },
   {
-    label: 'Avg. Fulfillment',
+    labelKey: 'dashboard.scorecard.averageFulfillment',
     value: '2.4 hrs',
     progress: 72,
     trend: { value: 8, isPositive: false },
   },
   {
-    label: 'Completion Rate',
+    labelKey: 'dashboard.scorecard.completion',
     value: '87.2%',
     progress: 87,
     trend: { value: 2, isPositive: true },
   },
   {
-    label: 'Active Zones',
+    labelKey: 'dashboard.scorecard.activeZones',
     value: '14',
     progress: 58,
     trend: { value: 1, isPositive: true },
@@ -44,18 +45,20 @@ const placeholderKPIs: ScorecardKPI[] = [
 ];
 
 const DashboardPerformanceScorecard = ({
-  kpis = placeholderKPIs,
+  kpis,
   variants,
 }: DashboardPerformanceScorecardProps) => {
+  const { t } = useI18n();
+  const resolvedKpis = kpis ?? placeholderKPIs.map(({ labelKey, ...kpi }) => ({ ...kpi, label: t(labelKey) }));
   return (
     <motion.div variants={variants}>
       <DashboardPanel
-        eyebrow="Performance overview"
-        title="Operational Scorecard"
-        description="Key delivery and fulfillment indicators. Backend integration pending."
+        eyebrow={t('dashboard.scorecard.eyebrow')}
+        title={t('dashboard.scorecard.title')}
+        description={t('dashboard.scorecard.description')}
       >
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {kpis.map((kpi) => (
+          {resolvedKpis.map((kpi) => (
             <article
               key={kpi.label}
               className="rounded-md border border-(--line) bg-(--paper) p-4"

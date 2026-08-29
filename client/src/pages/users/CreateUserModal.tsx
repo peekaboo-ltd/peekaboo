@@ -8,8 +8,9 @@ import TelInput from '@/components/inputs/TelInput';
 import { useCreateUser } from '@/hooks/users/users.hooks';
 import { RoleTypes } from '@/types/auth.type';
 import { Controller, useForm } from 'react-hook-form';
-import { validateRwandanPhoneNumber } from '@/utils/phone.util';
+import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import { MembershipStatus } from '@/types/organization.type';
+import { useI18n } from '@/i18n/i18n';
 
 interface CreateUserFormData {
   name: string;
@@ -20,6 +21,7 @@ interface CreateUserFormData {
 }
 
 const CreateUserModal = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const { createUserModal } = useAppSelector((state) => state.user);
   const { user: authUser } = useAppSelector((state) => state.auth);
@@ -97,23 +99,23 @@ const CreateUserModal = () => {
     <Modal
       isOpen={createUserModal}
       onClose={closeModal}
-      heading="Create User"
-      description="Add a new user to the system"
+      heading={t('users.createTitle')}
+      description={t('users.createDescription')}
     >
       <form onSubmit={onSubmit} className="w-full flex flex-col gap-4">
         <fieldset className="flex flex-col gap-4">
           <Controller
             name="name"
             control={control}
-            rules={{ required: 'Name is required' }}
+            rules={{ required: t('users.nameRequired') }}
             render={({ field }) => (
               <label className="flex flex-col gap-1">
                 <span className="text-sm font-normal text-(--ink)">
-                  Name *
+                  {t('users.name')} *
                 </span>
                 <Input
                   {...field}
-                  placeholder="Enter full name"
+                  placeholder={t('users.namePlaceholder')}
                   className={errors.name ? 'border-destructive' : ''}
                 />
                 {errors.name && (
@@ -129,13 +131,14 @@ const CreateUserModal = () => {
             name="phoneNumber"
             control={control}
             rules={{
-              required: 'Phone number is required',
-              validate: (value) => validateRwandanPhoneNumber(value),
+              required: t('users.phoneRequired'),
+              validate: (value) =>
+                validateAndFormatPhoneNumber(value).isValid || t('orderPayment.invalidPhone'),
             }}
             render={({ field }) => (
               <TelInput
                 {...field}
-                label="Phone Number"
+                label={t('users.phone')}
                 required
                 placeholder="0788 123 456"
                 errorMessage={errors.phoneNumber?.message}
@@ -148,11 +151,11 @@ const CreateUserModal = () => {
             control={control}
             render={({ field }) => (
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-normal text-(--ink)">Email</span>
+                <span className="text-sm font-normal text-(--ink)">{t('users.email')}</span>
                 <Input
                   {...field}
                   type="email"
-                  placeholder="Enter email address"
+                  placeholder={t('users.emailPlaceholder')}
                 />
               </label>
             )}
@@ -161,7 +164,7 @@ const CreateUserModal = () => {
 
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-normal text-(--ink) mb-2">
-            Assign Roles
+            {t('users.assignRoles')}
           </legend>
           <menu className="flex flex-wrap gap-2">
             {availableRoles?.map((role) => (
@@ -175,14 +178,14 @@ const CreateUserModal = () => {
                       : 'bg-(--surface) text-(--ink) hover:bg-(--surface)'
                   }`}
                 >
-                  {role}
+                  {t(`role.${role.toLowerCase()}`)}
                 </button>
               </li>
             ))}
           </menu>
           {selectedRoles.length === 0 && (
             <p className="type-meta">
-              No roles selected. Customer role will be assigned by default.
+              {t('users.defaultRole')}
             </p>
           )}
         </fieldset>
@@ -193,10 +196,10 @@ const CreateUserModal = () => {
             onClick={closeModal}
             className="bg-(--surface) text-(--ink)"
           >
-            Cancel
+            {t('users.cancel')}
           </Button>
           <Button type="submit" primary isLoading={isLoading}>
-            Create User
+            {t('users.createTitle')}
           </Button>
         </footer>
       </form>

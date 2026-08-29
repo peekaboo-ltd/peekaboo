@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { formatNumbers } from "@/utils/strings.util";
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n/i18n';
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -28,6 +29,7 @@ export function DataTablePagination<TData>({
   setPage,
   setSize,
 }: DataTablePaginationProps<TData>) {
+  const { t } = useI18n();
 
   const pageSizeOptions = useMemo(() => {
     const options = [{
@@ -46,13 +48,13 @@ export function DataTablePagination<TData>({
 
     if (totalCount > 50) {
       options.push({
-        label: 'All',
+        label: t('pagination.all'),
         value: totalCount,
       });
     }
 
     return options;
-  }, [totalCount]);
+  }, [t, totalCount]);
 
   return (
     <footer className="flex flex-col items-center gap-4 px-2 mt-4 
@@ -61,13 +63,15 @@ export function DataTablePagination<TData>({
  md:w-auto md:text-left">
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
           <span className="type-meta">
-            {table.getFilteredSelectedRowModel().rows.length} of{' '}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+            {t('pagination.selected', {
+              selected: table.getFilteredSelectedRowModel().rows.length,
+              total: table.getFilteredRowModel().rows.length,
+            })}
           </span>
         )}
         {totalCount > 0 && (
           <span className="text-xs">
-            Total records: {formatNumbers(totalCount)}
+            {t('pagination.total', { total: formatNumbers(totalCount) })}
           </span>
         )}
       </article>
@@ -75,7 +79,7 @@ export function DataTablePagination<TData>({
       <menu className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 
  md:justify-end md:gap-x-6">
         <section className="flex items-center space-x-2">
-          <span className="hidden text-sm font-normal sm:block">Rows per page</span>
+          <span className="hidden text-sm font-normal sm:block">{t('pagination.rows')}</span>
           <Select
             value={`${size}`}
             onValueChange={(value) => {
@@ -104,7 +108,7 @@ export function DataTablePagination<TData>({
 
         <section className="flex items-center gap-2">
           <span className="text-sm font-normal whitespace-nowrap">
-            Page {page + 1} of {formatNumbers(totalPages) || 1}
+            {t('pagination.page', { page: page + 1, total: formatNumbers(totalPages) || 1 })}
           </span>
           <input
             type="number"
@@ -131,7 +135,7 @@ export function DataTablePagination<TData>({
                 e.target.value = String(page + 1);
               }
             }}
-            aria-label="Go to page number"
+            aria-label={t('pagination.goTo')}
           />
         </section>
 
@@ -145,7 +149,7 @@ export function DataTablePagination<TData>({
             }}
             disabled={page === 0}
           >
-            <span className="sr-only">Go to first page</span>
+            <span className="sr-only">{t('pagination.first')}</span>
             <DoubleArrowLeftIcon className="w-4 h-4" />
           </Button>
           <Button
@@ -157,7 +161,7 @@ export function DataTablePagination<TData>({
             }}
             disabled={page === 0}
           >
-            <span className="sr-only">Go to previous page</span>
+            <span className="sr-only">{t('pagination.previous')}</span>
             <ChevronLeftIcon className="w-4 h-4" />
           </Button>
           <Button
@@ -169,7 +173,7 @@ export function DataTablePagination<TData>({
             }}
             disabled={totalPages === 0 || page >= (totalPages - 1)}
           >
-            <span className="sr-only">Go to next page</span>
+            <span className="sr-only">{t('pagination.next')}</span>
             <ChevronRightIcon className="w-4 h-4" />
           </Button>
           <Button
@@ -181,7 +185,7 @@ export function DataTablePagination<TData>({
             }}
             disabled={totalPages === 0 || page >= (totalPages - 1)}
           >
-            <span className="sr-only">Go to last page</span>
+            <span className="sr-only">{t('pagination.last')}</span>
             <DoubleArrowRightIcon className="w-4 h-4" />
           </Button>
         </section>

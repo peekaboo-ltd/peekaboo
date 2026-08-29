@@ -19,6 +19,7 @@ import {
   InternalPageHeader,
   InternalSectionCard,
 } from '@/components/layout/InternalPage';
+import { useI18n } from '@/i18n/i18n';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0 },
@@ -29,7 +30,8 @@ const itemVariants: Variants = {
 };
 
 const OrganizationSettingsPage = () => {
-  useDocumentTitle('Organization Settings');
+  const { t } = useI18n();
+  useDocumentTitle(t('organization.settingsDocTitle'));
 
   const { data: orgResponse, isLoading, refetch } = useFetchMyOrganizationQuery();
   const { updateMyOrganization, isLoading: isUpdating, isSuccess } =
@@ -66,22 +68,22 @@ const OrganizationSettingsPage = () => {
   const details = organization
     ? [
         {
-          label: 'Organization Name',
+          label: t('organization.name'),
           value: organization.name,
           icon: faBuilding,
         },
         {
-          label: 'Email',
+          label: t('organization.emailLabel'),
           value: organization.email ?? '—',
           icon: faEnvelope,
         },
         {
-          label: 'Phone Number',
+          label: t('organization.phone'),
           value: organization.phoneNumber ?? '—',
           icon: faPhone,
         },
         {
-          label: 'Address',
+          label: t('organization.address'),
           value: organization.address ?? '—',
           icon: faMapPin,
         },
@@ -92,9 +94,9 @@ const OrganizationSettingsPage = () => {
     <InternalPage>
       <motion.section variants={itemVariants}>
         <InternalPageHeader
-          eyebrow="Organization Settings"
-          title={isLoading ? 'Loading…' : (organization?.name ?? 'My Organization')}
-          description="Manage your organization's details and default pickup location."
+          eyebrow={t('organization.settings')}
+          title={isLoading ? t('common.loading') : (organization?.name ?? t('organization.myOrganization'))}
+          description={t('organization.settingsDescription')}
         />
       </motion.section>
 
@@ -104,13 +106,13 @@ const OrganizationSettingsPage = () => {
       >
         <InternalSectionCard
           className="lg:col-span-2"
-          eyebrow="General Information"
-          title="Organization Details"
+          eyebrow={t('organization.generalInformation')}
+          title={t('organization.details')}
         >
           {isLoading ? (
             <section className="mt-6 flex items-center gap-3 text-(--muted)">
               <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-(--ink)" />
-              <span className="text-sm">Loading organization…</span>
+              <span className="text-sm">{t('organization.loading')}</span>
             </section>
           ) : (
             <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -139,9 +141,9 @@ const OrganizationSettingsPage = () => {
         </InternalSectionCard>
 
         <InternalSectionCard
-          eyebrow="Location"
-          title="Default Pickup Location"
-          description="This location will be offered as the default pickup point when members of your organization create orders."
+          eyebrow={t('organization.location')}
+          title={t('organization.defaultPickup')}
+          description={t('organization.defaultPickupDescription')}
         >
           <section className="mt-6">
             {organization?.defaultLocation ? (
@@ -152,7 +154,7 @@ const OrganizationSettingsPage = () => {
                     className="text-(--ink) text-sm"
                   />
                   <p className="type-meta">
-                    Current Default
+                    {t('organization.currentDefault')}
                   </p>
                 </header>
                 <p className="text-sm font-normal text-(--ink)">
@@ -161,7 +163,7 @@ const OrganizationSettingsPage = () => {
                 </p>
               </aside>
             ) : (
-              <p className="text-sm text-(--muted)">No default location set.</p>
+              <p className="text-sm text-(--muted)">{t('organization.noDefault')}</p>
             )}
 
               <Button
@@ -170,7 +172,7 @@ const OrganizationSettingsPage = () => {
               className="mt-4 w-full flex items-center justify-center gap-2"
             >
               <FontAwesomeIcon icon={faLocationDot} />
-              {organization?.defaultLocation ? 'Update Location' : 'Set Location'}
+              {organization?.defaultLocation ? t('organization.updateLocation') : t('organization.setLocation')}
             </Button>
           </section>
         </InternalSectionCard>
@@ -180,22 +182,21 @@ const OrganizationSettingsPage = () => {
         isOpen={locationModalOpen}
         onClose={handleCloseLocationModal}
         className="top-[42%] translate-y-[-42%] sm:top-[50%] sm:translate-y-[-50%]"
-        heading="Default Pickup Location"
-        description="Set the default location for orders created by your organization"
+        heading={t('organization.defaultPickup')}
+        description={t('organization.setLocationDescription')}
       >
         <article className="space-y-6">
           <section className="space-y-4">
             <header>
-              <h4 className="type-card-title">Search Location</h4>
+              <h4 className="type-card-title">{t('organization.searchLocation')}</h4>
               <p className="text-sm text-(--muted)">
-                Enter an address or place name to use as the organization's default
-                pickup point
+                {t('organization.searchLocationHelp')}
               </p>
             </header>
 
             <PlaceSearch
               onLocationSelect={setSelectedLocation}
-              placeholder="Search for organization location..."
+              placeholder={t('organization.searchLocationPlaceholder')}
               className="relative"
               country="rw"
             />
@@ -204,7 +205,7 @@ const OrganizationSettingsPage = () => {
           {selectedLocation && (
             <aside className="p-4 bg-(--surface) rounded-lg border">
               <h5 className="text-sm font-normal text-(--ink) mb-2">
-                Selected Location:
+                {t('organization.selectedLocation')}
               </h5>
               <address className="text-sm text-(--ink) not-italic">
                 <strong>{selectedLocation.name}</strong>
@@ -216,7 +217,7 @@ const OrganizationSettingsPage = () => {
 
           <footer className="flex items-center justify-end gap-3 pt-4 border-t">
             <Button onClick={handleCloseLocationModal} className="px-6 py-2">
-              Cancel
+              {t('common.actions.cancel')}
             </Button>
             <Button
               onClick={handleSaveLocation}
@@ -225,7 +226,7 @@ const OrganizationSettingsPage = () => {
               primary
               className="px-6 py-2"
             >
-              Save Location
+              {t('organization.saveLocation')}
             </Button>
           </footer>
         </article>

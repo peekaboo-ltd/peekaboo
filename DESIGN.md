@@ -229,7 +229,7 @@ only reinforces.
 | --- | --- | --- |
 | Active / in progress | Solid inverted chip | `bg-[--ink] text-[--paper] rounded-full px-2.5 h-6` |
 | Completed / success | Outlined chip, ink border + ink text, check icon | `border border-[--ink] text-[--ink]` |
-| Pending / waiting | Outlined chip, **dashed** border, muted text, clock icon | `border border-dashed border-[--line-strong] text-[--muted]` |
+| Pending / waiting | Outlined chip, **dashed** border, muted text, clock icon | `border border border-[--line-strong] text-[--muted]` |
 | Failed / cancelled | Outlined chip, ink border, **strikethrough label**, x icon | `border border-[--ink] line-through` |
 | Draft / inactive | Filled quiet chip on `--surface`, muted text | `bg-[--surface] text-[--muted]` |
 

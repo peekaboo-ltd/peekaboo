@@ -31,7 +31,7 @@ const Home = () => {
     supportContacts,
   } = useHomeContent();
 
-  useDocumentTitle('Home');
+  useDocumentTitle(t('home.docTitle'));
 
   const businessPlans = businessPlansData?.data || [];
 
@@ -105,8 +105,8 @@ const Home = () => {
         badgeLabel={t('home.b2b.pricing.badge')}
         title={t('home.b2b.pricing.title')}
         subtitle={t('home.b2b.pricing.subtitle')}
-        popularLabel="Most popular"
-        ctaLabel="See full pricing"
+        popularLabel={t('plans.mostPopular')}
+        ctaLabel={t('plans.seePricing')}
         plans={businessPlans}
         isLoading={isLoadingPlans}
       />

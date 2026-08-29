@@ -20,6 +20,7 @@ import Button from '@/components/inputs/Button';
 import Modal from '@/components/Modal';
 import { FieldMessage } from '@/components/inputs/Field';
 import { fieldErrorClassName } from '@/components/inputs/control';
+import { useI18n } from '@/i18n/i18n';
 
 export const HERO_DELIVERY_FORM_ID = 'hero-delivery-form';
 
@@ -40,12 +41,6 @@ interface HeroFormProps {
   errors: FieldErrors<HomeFormValues>;
   geolocation: GeolocationPickupState;
 }
-
-const validateRwandanPhone = (value: string | undefined) => {
-  if (!value?.trim()) return 'Phone number is required';
-  const result = validateAndFormatPhoneNumber(value);
-  return result.isValid ? true : (result.error ?? 'Invalid phone number');
-};
 
 const FieldError = ({ message }: { message?: string }) =>
   message ? (
@@ -76,6 +71,7 @@ const LocationField = ({
   validate,
   geolocation,
 }: LocationFieldProps) => {
+  const { t } = useI18n();
   const [searchText, setSearchText] = useState('');
   const [confirmGeoOpen, setConfirmGeoOpen] = useState(false);
   const {
@@ -94,8 +90,8 @@ const LocationField = ({
 
   const isPickupField = name === 'locationFrom';
   const useCurrentLocationLabel = isPickupField
-    ? 'Set your device location as pickup'
-    : 'Set your device location as drop-off';
+    ? t('home.form.pickupDeviceLocation')
+    : t('home.form.dropoffDeviceLocation');
 
   const renderSelectedLocation = (location: OrderLocation) => {
     if (
@@ -104,7 +100,7 @@ const LocationField = ({
       !location.name?.trim() &&
       !location.formattedAddress?.trim()
     ) {
-      return 'Your location';
+      return t('home.form.yourLocation');
     }
 
     if (
@@ -112,7 +108,7 @@ const LocationField = ({
       !location.name?.trim() &&
       !location.formattedAddress?.trim()
     ) {
-      return 'Your location';
+      return t('home.form.yourLocation');
     }
 
     return describeLocation(location);
@@ -141,7 +137,7 @@ const LocationField = ({
                   field.onChange(undefined);
                 }}
                 className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) outline-none transition-[background-color,box-shadow] duration-200 ease-(--ease-flat) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
-                aria-label={`Change ${label.toLowerCase()}`}
+                aria-label={t('home.form.changeLocation', { label: label.toLowerCase() })}
               >
                 <Pencil className="size-3.5" aria-hidden="true" />
               </button>
@@ -166,8 +162,8 @@ const LocationField = ({
                   geolocation
                     ? {
                         label: isLocating
-                          ? 'Finding your current location…'
-                          : 'Use current location',
+                          ? t('home.form.findingLocation')
+                          : t('home.form.useCurrentLocation'),
                         description: useCurrentLocationLabel,
                         icon: (
                           <LocateFixed
@@ -186,7 +182,7 @@ const LocationField = ({
                   onClick={() => setConfirmGeoOpen(true)}
                   disabled={isLocating}
                   className="absolute right-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-(--radius-control) text-(--muted) outline-none transition-[background-color,color,box-shadow] duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] disabled:pointer-events-none disabled:opacity-40"
-                  aria-label="Use my current location"
+                  aria-label={t('home.form.useLocation')}
                 >
                   <LocateFixed
                     className={`size-4 ${isLocating ? 'animate-pulse' : ''}`}
@@ -208,13 +204,13 @@ const LocationField = ({
               onClose={() => setConfirmGeoOpen(false)}
               heading={
                 isPickupField
-                  ? 'Use your current location?'
-                  : 'Use your current location for drop-off?'
+                  ? t('home.form.confirmPickupTitle')
+                  : t('home.form.confirmDropoffTitle')
               }
               description={
                 isPickupField
-                  ? "We'll set where you are now as the pickup point. You can change it anytime."
-                  : "We'll set where you are now as the drop-off point. You can change it anytime."
+                  ? t('home.form.confirmPickupDescription')
+                  : t('home.form.confirmDropoffDescription')
               }
             >
               <div className="flex flex-wrap justify-end gap-2 pt-2">
@@ -223,7 +219,7 @@ const LocationField = ({
                   variant="outline"
                   onClick={() => setConfirmGeoOpen(false)}
                 >
-                  Type address instead
+                  {t('home.form.typeAddress')}
                 </Button>
                 <Button
                   type="button"
@@ -231,7 +227,7 @@ const LocationField = ({
                   onClick={handleUseMyLocation}
                   isLoading={isLocating}
                 >
-                  Use my location
+                  {t('home.form.useLocation')}
                 </Button>
               </div>
             </Modal>
@@ -250,8 +246,15 @@ const HeroForm = ({
   errors,
   geolocation,
 }: HeroFormProps) => {
+  const { t } = useI18n();
   const senderPhoneNumber = useWatch({ control, name: 'senderPhoneNumber' });
   const locationFrom = useWatch({ control, name: 'locationFrom' });
+
+  const validateRwandanPhone = (value: string | undefined) => {
+    if (!value?.trim()) return t('common.phoneRequired');
+    const result = validateAndFormatPhoneNumber(value);
+    return result.isValid ? true : t('validation.invalidPhone');
+  };
 
   const validateDistinctLocation = (
     value: OrderLocation | undefined,
@@ -261,7 +264,7 @@ const HeroForm = ({
       ? locationFrom.placeId === value.placeId
       : locationFrom.latitude === value.latitude &&
         locationFrom.longitude === value.longitude;
-    return same ? 'Pickup and drop-off must be different places' : true;
+    return same ? t('home.form.locationsDifferent') : true;
   };
 
   const validateRecipientPhone = (value: string | undefined) => {
@@ -275,7 +278,7 @@ const HeroForm = ({
       validateAndFormatPhoneNumber(value || '').e164 || (value || '').trim();
 
     return normalizedSender === normalizedRecipient
-      ? 'Sender and recipient phone numbers must be different'
+      ? t('home.form.phonesDifferent')
       : true;
   };
 
@@ -292,18 +295,18 @@ const HeroForm = ({
         <LocationField
           name="locationFrom"
           control={control}
-          label="Pickup location"
-          placeholder="Where should we collect?"
-          requiredMessage="Select a pickup location from the suggestions"
+          label={t('home.form.pickupLocation')}
+          placeholder={t('home.form.pickupPlaceholder')}
+          requiredMessage={t('home.form.pickupRequired')}
           errorMessage={errors.locationFrom?.message}
           geolocation={geolocation}
         />
         <LocationField
           name="locationTo"
           control={control}
-          label="Drop-off location"
-          placeholder="Where is it going?"
-          requiredMessage="Select a drop-off location from the suggestions"
+          label={t('home.form.dropoffLocation')}
+          placeholder={t('home.form.dropoffPlaceholder')}
+          requiredMessage={t('home.form.dropoffRequired')}
           errorMessage={errors.locationTo?.message}
           validate={validateDistinctLocation}
           geolocation={geolocation}

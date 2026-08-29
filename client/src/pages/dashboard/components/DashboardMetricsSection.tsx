@@ -3,6 +3,7 @@ import MetricCard from '@/components/dashboard/MetricCard';
 import type { MetricCardData } from '@/types/dashboard.type';
 import type { DispatchStripItem } from './DashboardDispatchStrip';
 import DispatchTile from './DispatchTile';
+import { useI18n } from '@/i18n/i18n';
 
 interface DashboardMetricsSectionProps {
   cards: MetricCardData[];
@@ -19,11 +20,12 @@ const DashboardMetricsSection = ({
   containerVariants,
   itemVariants,
 }: DashboardMetricsSectionProps) => {
+  const { t } = useI18n();
   if (!cards.length && !dispatch.length) return null;
 
   return (
     <motion.section
-      aria-label="Dashboard metrics"
+      aria-label={t('dashboard.metrics.label')}
       className="flex flex-col gap-4"
       variants={containerVariants}
     >

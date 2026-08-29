@@ -23,14 +23,16 @@ import { useAdminUpdatePaymentStatus } from '@/hooks/payments/payment.hooks';
 import { KpayPaymentStatus } from '@/types/payment.types';
 import { useState } from 'react';
 import { formatCurrency } from '@/utils/strings.util';
+import { useI18n } from '@/i18n/i18n';
 
 const STATUS_OPTIONS = [
-  { value: KpayPaymentStatus.PENDING, label: 'Pending' },
-  { value: KpayPaymentStatus.SUCCESSFUL, label: 'Successful' },
-  { value: KpayPaymentStatus.FAILED, label: 'Failed' },
+  { value: KpayPaymentStatus.PENDING, labelKey: 'status.pending' },
+  { value: KpayPaymentStatus.SUCCESSFUL, labelKey: 'status.successful' },
+  { value: KpayPaymentStatus.FAILED, labelKey: 'status.failed' },
 ];
 
 const UpdatePaymentStatusModal = () => {
+  const { t } = useI18n();
   const dispatch = useAppDispatch();
   const { selectedPayment, updateStatusModal } = useAppSelector(
     (state) => state.payment,
@@ -53,28 +55,27 @@ const UpdatePaymentStatusModal = () => {
     <Dialog open={updateStatusModal} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update Payment Status</DialogTitle>
+          <DialogTitle>{t('paymentStatus.updateTitle')}</DialogTitle>
           <DialogDescription>
-            Update the status for payment{' '}
-            <span className="font-normal">
-              {selectedPayment?.internalReferenceId?.slice(0, 8)}...
-            </span>{' '}
+            {t('paymentStatus.updateDescription', {
+              reference: `${selectedPayment?.internalReferenceId?.slice(0, 8) ?? ''}…`,
+            })}{' '}
             ({formatCurrency(selectedPayment?.amount, selectedPayment?.currency)})
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 py-2">
-          <label className="text-sm font-normal">New Status</label>
+          <label className="text-sm font-normal">{t('paymentStatus.newStatus')}</label>
           <Select
             value={status}
             onValueChange={setStatus}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select status" />
+              <SelectValue placeholder={t('paymentStatus.selectStatus')} />
             </SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                  {t(option.labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -82,7 +83,7 @@ const UpdatePaymentStatusModal = () => {
         </div>
         <DialogFooter>
           <Button type="button" onClick={handleClose}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
           <Button
             primary
@@ -91,7 +92,7 @@ const UpdatePaymentStatusModal = () => {
             disabled={!status || status === selectedPayment?.status}
             isLoading={isLoading}
           >
-            Update Status
+            {t('paymentStatus.update')}
           </Button>
         </DialogFooter>
       </DialogContent>

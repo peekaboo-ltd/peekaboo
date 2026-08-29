@@ -7,9 +7,10 @@ import type { OrderLocation } from '@/types/order.type';
 import {
   coordinateKey,
   getCurrentLocation,
-  locationErrorMessage,
+  locationErrorKey,
   type LocationError,
 } from '@/utils/locations.util';
+import { useI18n } from '@/i18n/i18n';
 
 export type GeolocationTarget = 'locationFrom' | 'locationTo';
 
@@ -26,6 +27,7 @@ export const useGeolocationPickup = (
   control: Control<HomeFormValues>,
   setValue: UseFormSetValue<HomeFormValues>,
 ): GeolocationPickupState => {
+  const { t } = useI18n();
   const locationFrom = useWatch({ control, name: 'locationFrom' });
   const locationTo = useWatch({ control, name: 'locationTo' });
   const pickupSource = useWatch({ control, name: 'pickupSource' }) ?? 'search';
@@ -126,7 +128,7 @@ export const useGeolocationPickup = (
         typeof location.latitude !== 'number' ||
         typeof location.longitude !== 'number'
       ) {
-        throw { code: 2, message: 'Location unavailable' } as LocationError;
+        throw { code: 2, message: t('location.unavailable') } as LocationError;
       }
 
       const nextLocation: OrderLocation = {
@@ -154,8 +156,8 @@ export const useGeolocationPickup = (
       const locationFailure =
         typeof error === 'object' && error && 'code' in error
           ? (error as LocationError)
-          : ({ code: -1, message: 'Unknown location error' } as LocationError);
-      setLocationError(locationErrorMessage(locationFailure));
+          : ({ code: -1, message: t('location.unknownError') } as LocationError);
+      setLocationError(t(locationErrorKey(locationFailure)));
     } finally {
       setIsLocating(false);
     }

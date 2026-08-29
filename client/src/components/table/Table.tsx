@@ -26,6 +26,7 @@ import { DataTablePagination } from './TablePagination';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { UnknownAction } from '@reduxjs/toolkit';
 import { SkeletonLoader } from '../inputs/Loader';
+import { useI18n } from '@/i18n/i18n';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -58,10 +59,12 @@ export default function Table<TData, TValue>({
   setPage,
   setSize,
   isLoading = false,
-  noDataMessage = 'No results.',
+  noDataMessage,
   rowClassName = '',
   manualPagination,
 }: DataTableProps<TData, TValue>) {
+  const { t } = useI18n();
+  const resolvedNoDataMessage = noDataMessage ?? t('common.noResults');
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -216,7 +219,7 @@ export default function Table<TData, TValue>({
                   className="h-24 text-center"
                 >
                   <span className="type-body-sm text-(--muted)">
-                    {noDataMessage}
+                    {resolvedNoDataMessage}
                   </span>
                 </TableCell>
               </TableRow>

@@ -1,3 +1,5 @@
+import { useI18n } from '@/i18n/i18n';
+
 export type ValueCharacterVariant =
   | 'speed'
   | 'trust'
@@ -11,27 +13,27 @@ interface ValueCharacterProps {
 
 const variantStyles: Record<
   ValueCharacterVariant,
-  { accent: string; soft: string; label: string }
+  { accent: string; soft: string; labelKey: string }
 > = {
   speed: {
     accent: 'var(--public-sky)',
     soft: 'var(--public-sky-soft)',
-    label: 'Rider in motion',
+    labelKey: 'about.values.speed.label',
   },
   trust: {
     accent: 'var(--public-sage)',
     soft: 'var(--public-sage-soft)',
-    label: 'Verified handoff',
+    labelKey: 'about.values.trust.label',
   },
   partnership: {
     accent: 'var(--public-clay)',
     soft: 'var(--public-clay-soft)',
-    label: 'Business partners',
+    labelKey: 'about.values.partnership.label',
   },
   simplicity: {
     accent: 'var(--public-plum)',
     soft: 'var(--public-plum-soft)',
-    label: 'Easy drop-off',
+    labelKey: 'about.values.simplicity.label',
   },
 };
 
@@ -111,14 +113,15 @@ const SimplicityCharacter = ({
 );
 
 const ValueCharacter = ({ variant, className = '' }: ValueCharacterProps) => {
-  const { accent, soft, label } = variantStyles[variant];
+  const { t } = useI18n();
+  const { accent, soft, labelKey } = variantStyles[variant];
 
   return (
     <span
       className={`flex size-10 items-center justify-center rounded-(--radius-control) bg-(--paper) p-1 ${className}`}
       style={{ boxShadow: `inset 0 0 0 1px ${accent}` }}
       role="img"
-      aria-label={label}
+      aria-label={t(labelKey)}
     >
       {variant === 'speed' ? (
         <SpeedCharacter accent={accent} soft={soft} />

@@ -19,8 +19,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import ImportBatch from './ImportBatch';
+import { useI18n } from '@/i18n/i18n';
 
 const BatchesPage = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { fetchBatches, batches, isFetching } = useFetchBatches();
@@ -32,7 +34,7 @@ const BatchesPage = () => {
   const { statusFilter, applicationStatus } = useStatusFilter({
     control: filterControl,
     setValue: setFilterValue,
-    label: 'Batch Status',
+    label: t('batches.status'),
     applicationStatuses: availableStatuses,
   });
 
@@ -90,14 +92,14 @@ const BatchesPage = () => {
       >
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="type-page-title">Batches</h1>
+            <h1 className="type-page-title">{t('batches.title')}</h1>
             <p className="text-sm text-muted-foreground">
-              Manage imports, review draft records, and track batch progress.
+              {t('batches.description')}
             </p>
           </article>
           <menu className="flex items-center gap-2 flex-wrap">
             <Button type="button" primary onClick={handleImport}>
-              Import New Batch
+              {t('batches.importNew')}
             </Button>
           </menu>
         </section>
@@ -105,17 +107,17 @@ const BatchesPage = () => {
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             {
-              label: 'Total batches',
+              label: t('batches.total'),
               value: batches.length,
               icon: faBoxesPacking,
             },
             {
-              label: 'Draft / pending',
+              label: t('batches.draftPending'),
               value: draftCount + pendingCount,
               icon: faClockRotateLeft,
             },
             {
-              label: 'Completed',
+              label: t('batches.completed'),
               value: completedCount,
               icon: faCircleCheck,
             },
@@ -144,7 +146,7 @@ const BatchesPage = () => {
           <Input
             value={referenceFilter}
             onChange={(e) => setReferenceFilter(e.target.value)}
-            placeholder="Search by batch reference"
+            placeholder={t('batches.searchReference')}
             className="bg-(--paper)"
           />
         </fieldset>
@@ -156,7 +158,7 @@ const BatchesPage = () => {
           data={filteredBatches}
           isLoading={isFetching}
           showPagination={false}
-          noDataMessage="No batches match the selected filters."
+          noDataMessage={t('batches.empty')}
         />
       </section>
       <ImportBatch />

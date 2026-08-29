@@ -24,6 +24,7 @@ import {
   authPrimaryButtonClassName,
   authSecondaryButtonClassName,
 } from './AuthPageShell';
+import { useI18n } from '@/i18n/i18n';
 
 interface AddPhoneFormData {
   phoneNumber: string;
@@ -37,8 +38,9 @@ const AuthCallback = () => {
   const [needsPhone, setNeedsPhone] = useState(false);
   const [token, setTokenState] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useI18n();
   useDocumentTitle(
-    isLoading ? 'Signing In' : needsPhone ? 'Add Phone Number' : 'Authenticating',
+    isLoading ? t('auth.callback.signingIn') : needsPhone ? t('auth.callback.addPhoneDocTitle') : t('auth.callback.authenticating'),
   );
 
   const {
@@ -70,14 +72,14 @@ const AuthCallback = () => {
       dispatch(setUser(userData));
       dispatch(setIsAuthenticated(true));
 
-      toast.success('Successfully signed in with Google!');
+      toast.success(t('auth.callback.success'));
       navigate('/dashboard');
     } catch (error) {
       console.error('Authentication error:', error);
-      toast.error('Authentication failed. Please try again.');
+      toast.error(t('auth.callback.failed'));
       navigate('/auth/login');
     }
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, t]);
 
   useEffect(() => {
     const processCallback = async () => {
@@ -86,13 +88,13 @@ const AuthCallback = () => {
       const needsPhoneParam = searchParams.get('needsPhone');
 
       if (errorParam) {
-        toast.error('Authentication failed. Please try again.');
+        toast.error(t('auth.callback.failed'));
         navigate('/auth/login');
         return;
       }
 
       if (!tokenParam) {
-        toast.error('No authentication token received.');
+        toast.error(t('auth.callback.noToken'));
         navigate('/auth/login');
         return;
       }
@@ -109,20 +111,20 @@ const AuthCallback = () => {
     };
 
     processCallback();
-  }, [completeAuthentication, navigate, searchParams]);
+  }, [completeAuthentication, navigate, searchParams, t]);
 
   const handlePhoneSubmit = handleSubmit(async (data) => {
     const validation = validateAndFormatPhoneNumber(data.phoneNumber);
     if (!validation.isValid) {
       setError('phoneNumber', {
         type: 'validate',
-        message: validation.error,
+        message: t('validation.invalidPhone'),
       });
       return;
     }
 
     if (!token) {
-      toast.error('Authentication session expired. Please try again.');
+      toast.error(t('auth.callback.expired'));
       navigate('/auth/login');
       return;
     }
@@ -150,7 +152,7 @@ const AuthCallback = () => {
     } catch (error) {
       console.error('Error adding phone number:', error);
       toast.error(
-        error instanceof Error ? error.message : 'Failed to add phone number'
+        error instanceof Error ? error.message : t('auth.callback.addPhoneFailed')
       );
     } finally {
       setIsSubmitting(false);
@@ -159,7 +161,7 @@ const AuthCallback = () => {
 
   const handleSkipPhone = async () => {
     if (!token) {
-      toast.error('Authentication session expired. Please try again.');
+      toast.error(t('auth.callback.expired'));
       navigate('/auth/login');
       return;
     }
@@ -170,7 +172,7 @@ const AuthCallback = () => {
   if (isLoading) {
     return (
       <AuthPageShell>
-        <AuthCard title="Completing sign in" subtitle="We are securing your session.">
+        <AuthCard title={t('auth.callback.completingTitle')} subtitle={t('auth.callback.completingSubtitle')}>
           <div className="flex justify-center py-4">
             <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-(--ink)" />
           </div>
@@ -183,8 +185,8 @@ const AuthCallback = () => {
     return (
       <AuthPageShell>
         <AuthCard
-          title="Add your phone number"
-          subtitle="Add a phone number to complete your Peekaboo profile."
+          title={t('auth.callback.addPhoneTitle')}
+          subtitle={t('auth.callback.addPhoneSubtitle')}
         >
           <form className="flex flex-col gap-4" onSubmit={handlePhoneSubmit}>
             <div>
@@ -192,13 +194,13 @@ const AuthCallback = () => {
                 name="phoneNumber"
                 control={control}
                 rules={{
-                  required: 'Phone number is required',
-                  validate: (value) => validateRwandanPhoneNumber(value),
+                  required: t('common.phoneRequired'),
+                  validate: (value) => validateRwandanPhoneNumber(value) === true || t('validation.invalidPhone'),
                 }}
                 render={({ field }) => (
                   <TelInput
                     {...field}
-                    label="Phone number"
+                    label={t('auth.register.phone')}
                     placeholder="7XXXXXXXX"
                     required
                     className={authInputClassName}
@@ -215,14 +217,14 @@ const AuthCallback = () => {
                 isLoading={isSubmitting}
                 className={authPrimaryButtonClassName}
               >
-                Add phone number
+                {t('auth.callback.addPhone')}
               </Button>
               <Button
                 type="button"
                 onClick={handleSkipPhone}
                 className={authSecondaryButtonClassName}
               >
-                Skip for now
+                {t('auth.callback.skip')}
               </Button>
             </nav>
           </form>

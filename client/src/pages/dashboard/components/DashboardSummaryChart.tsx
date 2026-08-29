@@ -4,9 +4,10 @@ import type { DashboardStatusBreakdownItem } from '@/types/dashboard.type';
 import SeriesChart from '@/components/charts/SeriesChart';
 import Sparkline from '@/components/charts/Sparkline';
 import type { DashboardSupportCardData } from '@/types/dashboard.type';
-import { capitalizeString, formatCurrency, formatNumbers } from '@/utils/strings.util';
+import { formatCurrency, formatNumbers } from '@/utils/strings.util';
 import { RoleTypes } from '@/types/auth.type';
 import Select from '@/components/inputs/Select';
+import { useI18n } from '@/i18n/i18n';
 
 const getMetricOptionsForRole = (role?: RoleTypes): string[] => {
   switch (role) {
@@ -23,15 +24,13 @@ const getMetricOptionsForRole = (role?: RoleTypes): string[] => {
   }
 };
 
-const formatLabel = (label: unknown): string => {
+const formatLabel = (label: unknown, language: string): string => {
   if (typeof label !== 'string') return '';
   if (label.includes('-W')) {
     return `W${parseInt(label.split('-W')[1], 10)}`;
   }
   if (/^\d{4}-\d{2}-\d{2}$/.test(label)) {
-    const [, month, day] = label.split('-');
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${monthNames[parseInt(month, 10) - 1]} ${parseInt(day, 10)}`;
+    return new Intl.DateTimeFormat(language, { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${label}T00:00:00Z`));
   }
   return label;
 };
@@ -64,7 +63,17 @@ const DashboardSummaryChart = ({
   containerVariants,
   itemVariants,
 }: DashboardSummaryChartProps) => {
+  const { t, language } = useI18n();
   const metricOptions = getMetricOptionsForRole(role);
+  const metricLabel = (value: string) => {
+    const keys: Record<string, string> = {
+      ORDERS: 'dashboard.action.orders',
+      REVENUE: 'dashboard.metric.totalRevenue',
+      ACTIVE_USERS: 'dashboard.metric.activeUsers',
+      DELIVERIES: 'dashboard.metric.deliveries',
+    };
+    return t(keys[value] ?? value);
+  };
   const isRevenue = metric === 'REVENUE';
 
   const total = useMemo(
@@ -84,7 +93,7 @@ const DashboardSummaryChart = ({
 
   return (
     <motion.section
-      aria-label="Summary chart"
+      aria-label={t('dashboard.summary.label')}
       className="overflow-hidden rounded-md border border-(--line) bg-(--paper) p-5 sm:p-6"
       variants={containerVariants}
     >
@@ -92,7 +101,7 @@ const DashboardSummaryChart = ({
         <header className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <p className="type-eyebrow">
-              Primary insight
+              {t('dashboard.summary.insight')}
             </p>
             {data.length > 0 ? (
               <p className="type-metric mt-2 text-[2rem] sm:text-[2.5rem]">
@@ -104,18 +113,18 @@ const DashboardSummaryChart = ({
               </p>
             )}
             <p className="mt-2 text-sm text-(--muted)">
-              {capitalizeString(metric.toLowerCase())} across the selected period with a single high-signal trend line.
+              {t('dashboard.summary.description', { metric: metricLabel(metric) })}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="rounded-full bg-(--surface) px-3 py-1 text-xs font-normal text-(--ink)">
-                {range.toUpperCase()} view
+                {t('dashboard.summary.view', { range: range.toUpperCase() })}
               </span>
               <span className="rounded-full bg-(--surface) px-3 py-1 text-xs font-normal text-(--muted)">
-                {data.length} data points
+                {t('dashboard.summary.dataPoints', { count: data.length })}
               </span>
               {peakPoint && (
                 <span className="rounded-full bg-(--surface) px-3 py-1 text-xs font-normal text-(--ink)">
-                  Peak {formatLabel(peakPoint.name)}
+                  {t('dashboard.summary.peak', { label: formatLabel(peakPoint.name, language) })}
                 </span>
               )}
             </div>
@@ -141,10 +150,10 @@ const DashboardSummaryChart = ({
               value={metric}
               onChange={(value) => onMetricChange(value)}
               options={metricOptions.map((option) => ({
-                label: capitalizeString(option),
+                label: metricLabel(option),
                 value: option,
               }))}
-              placeholder="Metric"
+              placeholder={t('dashboard.summary.metric')}
               className="w-[140px] cursor-pointer inline-flex items-center gap-2"
             />
           </ul>
@@ -161,7 +170,7 @@ const DashboardSummaryChart = ({
             kind="area"
             series={1}
             height={272}
-            ariaLabel={`${capitalizeString(metric.toLowerCase())} over the last ${range}`}
+            ariaLabel={t('dashboard.summary.aria', { metric: metricLabel(metric), range: range.toUpperCase() })}
           />
         </section>
 
@@ -180,7 +189,7 @@ const DashboardSummaryChart = ({
                     series={2}
                     width={64}
                     height={32}
-                    ariaLabel={`${widget.title} trend`}
+                    ariaLabel={t('dashboard.summary.trend', { title: widget.title })}
                   />
                 )}
               </article>

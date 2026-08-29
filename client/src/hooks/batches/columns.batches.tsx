@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useI18n } from '@/i18n/i18n';
 
 export const useBatchesColumns = ({
   onView,
@@ -23,43 +24,44 @@ export const useBatchesColumns = ({
   onView: (batch: Batch) => void;
   onReview: (batch: Batch) => void;
 }) => {
+  const { t } = useI18n();
   const batchesColumns: ColumnDef<Batch>[] = useMemo(
     () => [
       {
-        header: "Reference",
+        header: t('batches.reference'),
         accessorKey: "referenceId",
         cell: ({ row }) => (
           <ReferenceIdInput label={row?.original?.referenceId} />
         ),
       },
       {
-        header: "Name",
+        header: t('batches.name'),
         accessorKey: "name",
         cell: ({ row }) => row?.original?.name || `-`,
       },
       {
-        header: "Status",
+        header: t('common.status'),
         accessorKey: "status",
         cell: ({ row }) => <StatusBadge status={row?.original?.status} />,
       },
       {
-        header: "Orders",
+        header: t('batches.orders'),
         id: "ordersCount",
         cell: ({ row }) => row.original.orders?.length ?? 0,
       },
       {
-        header: "Created By",
+        header: t('common.createdBy'),
         id: "createdBy",
         cell: ({ row }) => <TableUserLabel user={row.original?.createdBy} />,
       },
       {
-        header: "Last updated",
+        header: t('common.lastUpdated'),
         accessorKey: "updatedAt",
         cell: ({ row }) =>
           formatDate(row?.original?.updatedAt, "DD/MM/YYYY HH:mm"),
       },
       {
-        header: "Actions",
+        header: t('common.actions'),
         id: "actions",
         cell: ({ row }) => {
           return (
@@ -81,7 +83,7 @@ export const useBatchesColumns = ({
                   to="#"
                 >
                   <FontAwesomeIcon icon={faCircleInfo} />
-                  View details
+                  {t('common.actions.view')}
                 </Link>
                 {row.original.status === BatchStatus.DRAFT && (
                   <Link
@@ -93,7 +95,7 @@ export const useBatchesColumns = ({
                     to="#"
                   >
                     <FontAwesomeIcon icon={faPenToSquare} />
-                    Review
+                    {t('batches.review')}
                   </Link>
                 )}
               </menu>
@@ -102,7 +104,7 @@ export const useBatchesColumns = ({
         },
       },
     ],
-    [onReview, onView],
+    [onReview, onView, t],
   );
 
   return { batchesColumns };

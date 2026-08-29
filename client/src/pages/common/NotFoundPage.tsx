@@ -12,9 +12,11 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import Button from '@/components/inputs/Button';
+import { useI18n } from '@/i18n/i18n';
 
 const NotFoundPage = () => {
-  useDocumentTitle('Page Not Found');
+  const { t } = useI18n();
+  useDocumentTitle(t('error.notFound.docTitle'));
   const location = useLocation();
   const navigate = useNavigate();
   const canGoBack = typeof window !== 'undefined' && window.history.length > 1;
@@ -37,32 +39,31 @@ const NotFoundPage = () => {
             <header className="space-y-6">
               <article className="flex items-center gap-3">
                 <span className="inline-flex items-center rounded-full border border-(--line) bg-(--paper) px-3 py-1 text-xs font-normal text-(--muted)">
-                  Error 404
+                  {t('error.notFound.code')}
                 </span>
                 <span className="inline-flex items-center gap-2 rounded-full bg-(--surface) px-3 py-1 text-xs font-normal text-(--muted)">
                   <FontAwesomeIcon
                     icon={faExclamationTriangle}
                     className="text-[0.8125rem] text-(--ink)"
                   />
-                  Page missing
+                  {t('error.notFound.badge')}
                 </span>
               </article>
 
               <article className="space-y-4">
                 <h1 className="type-display text-(--ink)">
-                  Lost route.
+                  {t('error.notFound.titleLine1')}
                   <br />
-                  Let’s get you back.
+                  {t('error.notFound.titleLine2')}
                 </h1>
                 <p className="type-body text-(--muted)">
-                  We couldn’t find the page you requested. The link might be
-                  broken, or the route has changed.
+                  {t('error.notFound.description')}
                 </p>
               </article>
 
               <article className="rounded-md bg-(--surface) px-4 py-3 text-sm text-(--muted)">
                 <span className="type-meta">
-                  Requested
+                  {t('error.notFound.requested')}
                 </span>
                 <p className="mt-1 font-normal text-(--ink)">
                   {location.pathname}
@@ -82,7 +83,7 @@ const NotFoundPage = () => {
                       className="text-xs"
                       aria-hidden="true"
                     />
-                    Back to previous page
+                    {t('error.notFound.back')}
                   </Button>
                 )}
                 <Button
@@ -95,7 +96,7 @@ const NotFoundPage = () => {
                     className="text-xs"
                     aria-hidden="true"
                   />
-                  Go to homepage
+                  {t('error.notFound.home')}
                 </Button>
               </nav>
             </header>
@@ -109,13 +110,13 @@ const NotFoundPage = () => {
           >
             <header className="space-y-2">
               <p className="type-eyebrow">
-                Quick links
+                {t('error.notFound.quickLinks')}
               </p>
               <h2 className="type-h3 text-(--ink)">
-                Keep exploring
+                {t('error.notFound.keepExploring')}
               </h2>
               <p className="text-sm text-(--muted)">
-                Here are a few useful places to continue from.
+                {t('error.notFound.continue')}
               </p>
             </header>
 
@@ -129,9 +130,9 @@ const NotFoundPage = () => {
                     icon={faBox}
                     className="text-[0.8125rem] text-(--ink)"
                   />
-                  Track an order
+                  {t('error.notFound.track')}
                 </span>
-                <span className="type-meta">Order ID needed</span>
+                <span className="type-meta">{t('error.notFound.orderIdNeeded')}</span>
               </Link>
 
               <Link
@@ -143,9 +144,9 @@ const NotFoundPage = () => {
                     icon={faInfoCircle}
                     className="text-[0.8125rem] text-(--ink)"
                   />
-                  Contact support
+                  {t('error.notFound.support')}
                 </span>
-                <span className="type-meta">We can help</span>
+                <span className="type-meta">{t('error.notFound.canHelp')}</span>
               </Link>
 
               <article className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -158,7 +159,7 @@ const NotFoundPage = () => {
                     className="text-xs"
                     aria-hidden="true"
                   />
-                  Sign in
+                  {t('error.notFound.signIn')}
                 </Link>
                 <Link
                   to="/auth/register"
@@ -169,7 +170,7 @@ const NotFoundPage = () => {
                     className="text-xs"
                     aria-hidden="true"
                   />
-                  Create account
+                  {t('error.notFound.createAccount')}
                 </Link>
               </article>
             </article>

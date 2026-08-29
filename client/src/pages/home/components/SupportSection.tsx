@@ -3,6 +3,7 @@ import { ArrowRight, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/inputs/Button';
 import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
+import { useI18n } from '@/i18n/i18n';
 
 interface SupportContact {
   icon: LucideIcon;
@@ -18,29 +19,30 @@ interface SupportSectionProps {
   onContactClick?: () => void;
 }
 
-const helpLinks = [
-  { label: 'How do I track an order?', to: '/track' },
-  { label: 'What does delivery cost?', to: '/services' },
-  { label: 'Where do you currently deliver?', to: '#coverage' },
-  { label: 'How do I become a rider?', to: '/contact' },
-  { label: 'Can I schedule recurring drops?', to: '/contact' },
-  { label: 'How do business invoices work?', to: '/services' },
-];
-
-const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
+const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => {
+  const { t } = useI18n();
+  const helpLinks = [
+    { label: t('home.support.trackQuestion'), to: '/track' },
+    { label: t('home.support.costQuestion'), to: '/services' },
+    { label: t('home.support.coverageQuestion'), to: '#coverage' },
+    { label: t('home.support.riderQuestion'), to: '/contact' },
+    { label: t('home.support.recurringQuestion'), to: '/contact' },
+    { label: t('home.support.invoiceQuestion'), to: '/services' },
+  ];
+  return (
   <section id="support" className="section-rhythm w-full border-(--line) bg-(--paper)">
     <article className="app-container grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.4fr]">
       <header>
         <p className="type-eyebrow">
-          Support
+          {t('home.support.eyebrow')}
         </p>
         <h2 className="type-h2 mt-2">
-          How can
+          {t('home.support.title1')}
           <br />
-          we help?
+          {t('home.support.title2')}
         </h2>
         <p className="mt-3 max-w-[340px] text-sm font-normal leading-relaxed text-muted-foreground">
-          Talk to a real person, anytime. Our Kigali team replies in under 90 seconds.
+          {t('home.support.description')}
         </p>
         <ul className="mt-5 grid gap-2">
           {contacts.map((contact, index) => {
@@ -98,7 +100,7 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <input
             type="search"
-            placeholder="Search help topics — billing, tracking, coverage..."
+            placeholder={t('home.support.searchPlaceholder')}
             className="min-w-0 focus:border-none focus:ring-0 py-2 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
         </label>
@@ -129,9 +131,9 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
 
         <section className="invert-surface mt-3 flex flex-col gap-4 rounded-md p-6 sm:flex-row sm:items-center sm:justify-between">
           <hgroup>
-            <h3 className="type-label">Still stuck? Open a ticket.</h3>
+            <h3 className="type-label">{t('home.support.ticketTitle')}</h3>
             <p className="type-meta mt-1">
-              Average first response in under 8 minutes during business hours.
+              {t('home.support.ticketDescription')}
             </p>
           </hgroup>
           <Button
@@ -140,13 +142,14 @@ const SupportSection = ({ contacts, onContactClick }: SupportSectionProps) => (
             onClick={onContactClick}
             className="shrink-0 rounded-(--radius-control) font-normal"
           >
-            Contact support
+            {t('home.support.contact')}
             <ArrowRight className="ml-2 h-3.5 w-3.5" aria-hidden="true" />
           </Button>
         </section>
       </aside>
     </article>
   </section>
-);
+  );
+};
 
 export default SupportSection;
