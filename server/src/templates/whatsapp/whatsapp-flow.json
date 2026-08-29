@@ -2,18 +2,31 @@
   "version": "7.0",
   "data_api_version": "3.0",
   "routing_model": {
-    "RECIPIENT": ["PICKUP_METHOD"],
+    "SENDER_RECIPIENT": ["PICKUP_METHOD"],
     "PICKUP_METHOD": ["PICKUP_SEARCH", "LOCATION_REQUEST_NOTICE"],
     "PICKUP_SEARCH": ["PICKUP_RESULTS"],
-    "PICKUP_RESULTS": ["DROPOFF"],
-    "DROPOFF": ["SUCCESS"],
+    "PICKUP_RESULTS": ["PAYER", "PICKUP_SEARCH"],
+    "PAYER": ["SENDER_REVIEW"],
+    "SENDER_REVIEW": ["INVITATION_SENT"],
+    "RECIPIENT_DECISION": ["DROPOFF_METHOD", "DECLINED"],
+    "DROPOFF_METHOD": ["DROPOFF_SEARCH", "LOCATION_REQUEST_NOTICE"],
+    "DROPOFF_SEARCH": ["DROPOFF_RESULTS"],
+    "DROPOFF_RESULTS": ["QUOTE", "WAITING_FOR_PAYER", "DROPOFF_SEARCH", "DROPOFF_METHOD"],
+    "QUOTE": ["CARD_DETAILS", "PAYMENT_PENDING"],
+    "CARD_DETAILS": ["PAYMENT_PENDING"],
     "LOCATION_REQUEST_NOTICE": [],
-    "SUCCESS": []
+    "INVITATION_SENT": [],
+    "WAITING_FOR_PAYER": [],
+    "PAYMENT_PENDING": [],
+    "DECLINED": []
   },
   "screens": [
     {
-      "id": "RECIPIENT",
-      "title": "Recipient Details",
+      "id": "SENDER_RECIPIENT",
+      "title": "Recipient",
+      "data": {
+        "error": { "type": "string", "__example__": "" }
+      },
       "layout": {
         "type": "SingleColumnLayout",
         "children": [
@@ -21,26 +34,21 @@
             "type": "Form",
             "name": "recipient_form",
             "children": [
+              { "type": "TextBody", "text": "Enter the recipient's Rwandan WhatsApp mobile number." },
+              { "type": "TextCaption", "text": "${data.error}" },
               {
                 "type": "TextInput",
-                "label": "Recipient's Phone Number",
+                "label": "Recipient mobile number",
                 "name": "recipient_phone",
                 "input-type": "phone",
-                "required": true,
-                "helper-text": "Enter the recipient's Rwandan phone number"
+                "required": true
               },
               {
                 "type": "Footer",
-                "label": "Next",
+                "label": "Continue",
                 "on-click-action": {
-                  "name": "navigate",
-                  "next": {
-                    "type": "screen",
-                    "name": "PICKUP_METHOD"
-                  },
-                  "payload": {
-                    "recipient_phone": "${form.recipient_phone}"
-                  }
+                  "name": "data_exchange",
+                  "payload": { "recipient_phone": "${form.recipient_phone}" }
                 }
               }
             ]
@@ -50,16 +58,11 @@
     },
     {
       "id": "PICKUP_METHOD",
-      "title": "Pickup Location",
+      "title": "Pickup location",
       "data": {
-        "recipient_phone": {
-          "type": "string",
-          "__example__": "0780000000"
-        },
-        "error": {
-          "type": "string",
-          "__example__": ""
-        }
+        "session_id": { "type": "string", "__example__": "018f" },
+        "recipient_phone": { "type": "string", "__example__": "+250780000000" },
+        "error": { "type": "string", "__example__": "" }
       },
       "layout": {
         "type": "SingleColumnLayout",
@@ -68,20 +71,15 @@
             "type": "Form",
             "name": "pickup_method_form",
             "children": [
+              { "type": "TextCaption", "text": "${data.error}" },
               {
                 "type": "RadioButtonsGroup",
-                "label": "How would you like to provide the pickup location?",
-                "name": "pickup_method",
+                "label": "How should we find the pickup?",
+                "name": "location_method",
                 "required": true,
                 "data-source": [
-                  {
-                    "id": "type_address",
-                    "title": "Search/type pickup address"
-                  },
-                  {
-                    "id": "current_location",
-                    "title": "Use my current location"
-                  }
+                  { "id": "search", "title": "Search for a place" },
+                  { "id": "gps", "title": "Share GPS location" }
                 ]
               },
               {
@@ -90,8 +88,8 @@
                 "on-click-action": {
                   "name": "data_exchange",
                   "payload": {
-                    "recipient_phone": "${data.recipient_phone}",
-                    "pickup_method": "${form.pickup_method}"
+                    "session_id": "${data.session_id}",
+                    "location_method": "${form.location_method}"
                   }
                 }
               }
@@ -102,16 +100,10 @@
     },
     {
       "id": "PICKUP_SEARCH",
-      "title": "Search Pickup",
+      "title": "Search pickup",
       "data": {
-        "recipient_phone": {
-          "type": "string",
-          "__example__": "0780000000"
-        },
-        "error": {
-          "type": "string",
-          "__example__": ""
-        }
+        "session_id": { "type": "string", "__example__": "018f" },
+        "error": { "type": "string", "__example__": "" }
       },
       "layout": {
         "type": "SingleColumnLayout",
@@ -120,22 +112,16 @@
             "type": "Form",
             "name": "pickup_search_form",
             "children": [
-              {
-                "type": "TextInput",
-                "label": "Pickup Location",
-                "name": "pickup_query",
-                "input-type": "text",
-                "required": true,
-                "helper-text": "Example: Kimironko Market, Kacyiru near RDB"
-              },
+              { "type": "TextCaption", "text": "${data.error}" },
+              { "type": "TextInput", "label": "Place or landmark", "name": "location_query", "required": true },
               {
                 "type": "Footer",
                 "label": "Search",
                 "on-click-action": {
                   "name": "data_exchange",
                   "payload": {
-                    "recipient_phone": "${data.recipient_phone}",
-                    "pickup_query": "${form.pickup_query}"
+                    "session_id": "${data.session_id}",
+                    "location_query": "${form.location_query}"
                   }
                 }
               }
@@ -146,44 +132,21 @@
     },
     {
       "id": "PICKUP_RESULTS",
-      "title": "Choose Pickup",
+      "title": "Choose pickup",
       "data": {
-        "recipient_phone": {
-          "type": "string",
-          "__example__": "0780000000"
-        },
-        "pickup_search_session_id": {
-          "type": "string",
-          "__example__": "search_123"
-        },
-        "pickup_options": {
+        "session_id": { "type": "string", "__example__": "018f" },
+        "search_session_id": { "type": "string", "__example__": "018e" },
+        "location_options": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "id": {
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              }
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" }
             }
           },
-          "__example__": [
-            {
-              "id": "google:place_123",
-              "title": "Kimironko Market",
-              "description": "KG 11 Ave, Kigali, Rwanda"
-            },
-            {
-              "id": "google:place_456",
-              "title": "Kigali Convention Centre",
-              "description": "KG 2 Roundabout, Kigali, Rwanda"
-            }
-          ]
+          "__example__": [{ "id": "google:abc", "title": "Kimironko Market", "description": "Kigali" }]
         }
       },
       "layout": {
@@ -193,26 +156,16 @@
             "type": "Form",
             "name": "pickup_results_form",
             "children": [
-              {
-                "type": "Dropdown",
-                "label": "Select pickup location",
-                "name": "pickup_place_id",
-                "required": true,
-                "data-source": "${data.pickup_options}"
-              },
+              { "type": "Dropdown", "label": "Pickup", "name": "location_place_id", "required": true, "data-source": "${data.location_options}" },
               {
                 "type": "Footer",
-                "label": "Next",
+                "label": "Use this pickup",
                 "on-click-action": {
-                  "name": "navigate",
-                  "next": {
-                    "type": "screen",
-                    "name": "DROPOFF"
-                  },
+                  "name": "data_exchange",
                   "payload": {
-                    "recipient_phone": "${data.recipient_phone}",
-                    "pickup_search_session_id": "${data.pickup_search_session_id}",
-                    "pickup_place_id": "${form.pickup_place_id}"
+                    "session_id": "${data.session_id}",
+                    "search_session_id": "${data.search_session_id}",
+                    "location_place_id": "${form.location_place_id}"
                   }
                 }
               }
@@ -222,24 +175,189 @@
       }
     },
     {
-      "id": "DROPOFF",
-      "title": "Drop-off Location",
+      "id": "PAYER",
+      "title": "Who will pay?",
       "data": {
-        "recipient_phone": {
-          "type": "string",
-          "__example__": "0780000000"
-        },
-        "pickup_search_session_id": {
-          "type": "string",
-          "__example__": "search_123"
-        },
-        "pickup_place_id": {
-          "type": "string",
-          "__example__": "google:place_123"
-        },
-        "error": {
-          "type": "string",
-          "__example__": ""
+        "session_id": { "type": "string", "__example__": "018f" },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "payer_form",
+            "children": [
+              { "type": "TextCaption", "text": "${data.error}" },
+              {
+                "type": "RadioButtonsGroup",
+                "label": "Select payer",
+                "name": "payer_type",
+                "required": true,
+                "data-source": [
+                  { "id": "SENDER", "title": "I will pay" },
+                  { "id": "RECIPIENT", "title": "Recipient will pay" }
+                ]
+              },
+              {
+                "type": "Footer",
+                "label": "Review",
+                "on-click-action": {
+                  "name": "data_exchange",
+                  "payload": { "session_id": "${data.session_id}", "payer_type": "${form.payer_type}" }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SENDER_REVIEW",
+      "title": "Review booking",
+      "data": {
+        "session_id": { "type": "string", "__example__": "018f" },
+        "recipient_phone": { "type": "string", "__example__": "+250780000000" },
+        "pickup_label": { "type": "string", "__example__": "Kimironko Market" },
+        "payer_label": { "type": "string", "__example__": "Sender" },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextBody", "text": "Recipient: ${data.recipient_phone}\nPickup: ${data.pickup_label}\nPayer: ${data.payer_label}" },
+          { "type": "TextCaption", "text": "${data.error}" },
+          {
+            "type": "Footer",
+            "label": "Create draft & invite",
+            "on-click-action": { "name": "data_exchange", "payload": { "session_id": "${data.session_id}" } }
+          }
+        ]
+      }
+    },
+    {
+      "id": "RECIPIENT_DECISION",
+      "title": "Delivery invitation",
+      "data": {
+        "session_id": { "type": "string", "__example__": "018f" },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "decision_form",
+            "children": [
+              { "type": "TextBody", "text": "The sender asked you to provide the drop-off and receive major updates for this delivery." },
+              { "type": "TextCaption", "text": "${data.error}" },
+              {
+                "type": "RadioButtonsGroup",
+                "label": "Your choice",
+                "name": "decision",
+                "required": true,
+                "data-source": [
+                  { "id": "accept", "title": "Accept" },
+                  { "id": "decline", "title": "Decline" }
+                ]
+              },
+              {
+                "type": "Footer",
+                "label": "Continue",
+                "on-click-action": {
+                  "name": "data_exchange",
+                  "payload": { "session_id": "${data.session_id}", "decision": "${form.decision}" }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "DROPOFF_METHOD",
+      "title": "Drop-off location",
+      "data": {
+        "session_id": { "type": "string", "__example__": "018f" },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "dropoff_method_form",
+            "children": [
+              { "type": "TextCaption", "text": "${data.error}" },
+              {
+                "type": "RadioButtonsGroup",
+                "label": "How should we find the drop-off?",
+                "name": "location_method",
+                "required": true,
+                "data-source": [
+                  { "id": "search", "title": "Search for a place" },
+                  { "id": "gps", "title": "Share GPS location" }
+                ]
+              },
+              {
+                "type": "Footer",
+                "label": "Continue",
+                "on-click-action": {
+                  "name": "data_exchange",
+                  "payload": { "session_id": "${data.session_id}", "location_method": "${form.location_method}" }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "DROPOFF_SEARCH",
+      "title": "Search drop-off",
+      "data": {
+        "session_id": { "type": "string", "__example__": "018f" },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "dropoff_search_form",
+            "children": [
+              { "type": "TextCaption", "text": "${data.error}" },
+              { "type": "TextInput", "label": "Place or landmark", "name": "location_query", "required": true },
+              {
+                "type": "Footer",
+                "label": "Search",
+                "on-click-action": {
+                  "name": "data_exchange",
+                  "payload": { "session_id": "${data.session_id}", "location_query": "${form.location_query}" }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "DROPOFF_RESULTS",
+      "title": "Choose drop-off",
+      "data": {
+        "session_id": { "type": "string", "__example__": "018f" },
+        "search_session_id": { "type": "string", "__example__": "018e" },
+        "location_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          },
+          "__example__": [{ "id": "google:def", "title": "Kigali Heights", "description": "Kigali" }]
         }
       },
       "layout": {
@@ -247,26 +365,109 @@
         "children": [
           {
             "type": "Form",
-            "name": "dropoff_form",
+            "name": "dropoff_results_form",
             "children": [
-              {
-                "type": "TextInput",
-                "label": "Drop-off Address",
-                "name": "dropoff_address",
-                "input-type": "text",
-                "required": true,
-                "helper-text": "Where should the package be delivered?"
-              },
+              { "type": "Dropdown", "label": "Drop-off", "name": "location_place_id", "required": true, "data-source": "${data.location_options}" },
               {
                 "type": "Footer",
-                "label": "Place Order",
+                "label": "Use this drop-off",
                 "on-click-action": {
                   "name": "data_exchange",
                   "payload": {
-                    "recipient_phone": "${data.recipient_phone}",
-                    "pickup_search_session_id": "${data.pickup_search_session_id}",
-                    "pickup_place_id": "${data.pickup_place_id}",
-                    "dropoff_address": "${form.dropoff_address}"
+                    "session_id": "${data.session_id}",
+                    "search_session_id": "${data.search_session_id}",
+                    "location_place_id": "${form.location_place_id}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "QUOTE",
+      "title": "Delivery quote",
+      "data": {
+        "session_id": { "type": "string", "__example__": "018f" },
+        "pickup_label": { "type": "string", "__example__": "Kimironko" },
+        "dropoff_label": { "type": "string", "__example__": "Kigali Heights" },
+        "distance_label": { "type": "string", "__example__": "8.2 km" },
+        "duration_label": { "type": "string", "__example__": "22 min" },
+        "amount_label": { "type": "string", "__example__": "1,000 RWF" },
+        "payer_label": { "type": "string", "__example__": "Sender" },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "quote_form",
+            "children": [
+              { "type": "TextBody", "text": "Pickup: ${data.pickup_label}\nDrop-off: ${data.dropoff_label}\nDistance: ${data.distance_label}\nEstimated duration: ${data.duration_label}\nFee: ${data.amount_label}\nPayer: ${data.payer_label}" },
+              { "type": "TextCaption", "text": "${data.error}" },
+              {
+                "type": "RadioButtonsGroup",
+                "label": "Fee approval",
+                "name": "approve_quote",
+                "required": true,
+                "data-source": [{ "id": "true", "title": "I approve this fee" }]
+              },
+              {
+                "type": "RadioButtonsGroup",
+                "label": "Payment method",
+                "name": "payment_method",
+                "required": true,
+                "data-source": [
+                  { "id": "MOMO", "title": "MTN MoMo" },
+                  { "id": "AIRTEL_MONEY", "title": "Airtel Money" },
+                  { "id": "CARD", "title": "Card" }
+                ]
+              },
+              {
+                "type": "Footer",
+                "label": "Continue to payment",
+                "on-click-action": {
+                  "name": "data_exchange",
+                  "payload": {
+                    "session_id": "${data.session_id}",
+                    "approve_quote": "${form.approve_quote}",
+                    "payment_method": "${form.payment_method}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "CARD_DETAILS",
+      "title": "Card checkout",
+      "data": {
+        "session_id": { "type": "string", "__example__": "018f" },
+        "error": { "type": "string", "__example__": "" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "card_form",
+            "children": [
+              { "type": "TextCaption", "text": "${data.error}" },
+              { "type": "TextInput", "label": "Cardholder name", "name": "cardholder_name", "required": true },
+              { "type": "TextInput", "label": "Email", "name": "cardholder_email", "input-type": "email", "required": true },
+              {
+                "type": "Footer",
+                "label": "Create secure checkout",
+                "on-click-action": {
+                  "name": "data_exchange",
+                  "payload": {
+                    "session_id": "${data.session_id}",
+                    "cardholder_name": "${form.cardholder_name}",
+                    "cardholder_email": "${form.cardholder_email}"
                   }
                 }
               }
@@ -277,64 +478,73 @@
     },
     {
       "id": "LOCATION_REQUEST_NOTICE",
-      "title": "Share Pickup Location",
+      "title": "Share location",
       "terminal": true,
+      "data": { "location_kind": { "type": "string", "__example__": "pickup" } },
       "layout": {
         "type": "SingleColumnLayout",
         "children": [
-          {
-            "type": "TextHeading",
-            "text": "Almost done"
-          },
-          {
-            "type": "TextBody",
-            "text": "We will ask you to share your pickup location in this WhatsApp chat. Tap Done, then use the Send location button."
-          },
-          {
-            "type": "Footer",
-            "label": "Done",
-            "on-click-action": {
-              "name": "complete",
-              "payload": {
-                "next_step": "request_pickup_location"
-              }
-            }
-          }
+          { "type": "TextHeading", "text": "Return to the chat" },
+          { "type": "TextBody", "text": "Tap Done, then use the WhatsApp location request to share the ${data.location_kind} GPS pin." },
+          { "type": "Footer", "label": "Done", "on-click-action": { "name": "complete", "payload": {} } }
         ]
       }
     },
     {
-      "id": "SUCCESS",
-      "title": "Order Created!",
+      "id": "INVITATION_SENT",
+      "title": "Invitation sent",
       "terminal": true,
       "success": true,
-      "data": {
-        "order_id": {
-          "type": "string",
-          "__example__": "ORD-1001"
-        }
-      },
+      "data": { "order_reference": { "type": "string", "__example__": "P123456" } },
       "layout": {
         "type": "SingleColumnLayout",
         "children": [
-          {
-            "type": "TextHeading",
-            "text": "Your order has been placed!"
-          },
-          {
-            "type": "TextBody",
-            "text": "Check your WhatsApp for a payment link. Complete payment to dispatch your rider."
-          },
-          {
-            "type": "Footer",
-            "label": "Done",
-            "on-click-action": {
-              "name": "complete",
-              "payload": {
-                "order_id": "${data.order_id}"
-              }
-            }
-          }
+          { "type": "TextHeading", "text": "Draft ${data.order_reference} created" },
+          { "type": "TextBody", "text": "The recipient has five hours to accept the SMS invitation and provide the drop-off." },
+          { "type": "Footer", "label": "Done", "on-click-action": { "name": "complete", "payload": {} } }
+        ]
+      }
+    },
+    {
+      "id": "WAITING_FOR_PAYER",
+      "title": "Drop-off saved",
+      "terminal": true,
+      "success": true,
+      "data": { "order_reference": { "type": "string", "__example__": "P123456" } },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Thank you" },
+          { "type": "TextBody", "text": "The quote for ${data.order_reference} has been sent to the selected payer." },
+          { "type": "Footer", "label": "Done", "on-click-action": { "name": "complete", "payload": {} } }
+        ]
+      }
+    },
+    {
+      "id": "PAYMENT_PENDING",
+      "title": "Payment started",
+      "terminal": true,
+      "success": true,
+      "data": { "payment_method": { "type": "string", "__example__": "MOMO" } },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Complete payment" },
+          { "type": "TextBody", "text": "Follow the payment instructions sent in this chat. Payment must complete before the quote expires." },
+          { "type": "Footer", "label": "Done", "on-click-action": { "name": "complete", "payload": {} } }
+        ]
+      }
+    },
+    {
+      "id": "DECLINED",
+      "title": "Invitation declined",
+      "terminal": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Delivery cancelled" },
+          { "type": "TextBody", "text": "The sender has been notified." },
+          { "type": "Footer", "label": "Done", "on-click-action": { "name": "complete", "payload": {} } }
         ]
       }
     }

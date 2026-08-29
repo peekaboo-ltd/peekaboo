@@ -4,6 +4,7 @@ import { User } from './user.entity';
 import { UUID } from '../types';
 import {
   OrderPaymentStatus,
+  OrderPayerType,
   OrderStatus,
   OrderType,
   PreferredContactMethod,
@@ -47,8 +48,8 @@ export class Order extends AbstractEntity {
   createdById: UUID;
 
   // INITIAL FEE
-  @Column({ name: 'initial_fee', type: 'numeric', nullable: false })
-  initialFee: number;
+  @Column({ name: 'initial_fee', type: 'numeric', nullable: true })
+  initialFee: number | null;
 
   // DESCRIPTION
   @Column({ name: 'description', type: 'text', nullable: true })
@@ -84,7 +85,33 @@ export class Order extends AbstractEntity {
 
   // FINAL FEE
   @Column({ name: 'final_fee', type: 'numeric', nullable: true })
-  finalFee: number;
+  finalFee: number | null;
+
+  @Column({
+    name: 'payer_type',
+    type: 'enum',
+    enum: OrderPayerType,
+    nullable: true,
+  })
+  payerType?: OrderPayerType | null;
+
+  @Column({ name: 'quoted_distance_km', type: 'double precision', nullable: true })
+  quotedDistanceKm?: number | null;
+
+  @Column({ name: 'quoted_duration_minutes', type: 'integer', nullable: true })
+  quotedDurationMinutes?: number | null;
+
+  @Column({ name: 'quoted_amount', type: 'numeric', nullable: true })
+  quotedAmount?: number | null;
+
+  @Column({ name: 'quote_confirmed_at', type: 'timestamptz', nullable: true })
+  quoteConfirmedAt?: Date | null;
+
+  @Column({ name: 'payment_expires_at', type: 'timestamptz', nullable: true })
+  paymentExpiresAt?: Date | null;
+
+  @Column({ name: 'recipient_whatsapp_opt_in_at', type: 'timestamptz', nullable: true })
+  recipientWhatsappOptInAt?: Date | null;
 
   // PAYMENT STATUS
   @Column({

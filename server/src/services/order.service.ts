@@ -13,6 +13,7 @@ import {
   OrderActivityStatus,
   OrderAssignmentStatus,
   OrderPaymentStatus,
+  OrderPayerType,
   OrderStatus,
   isLifecycleOrderActivityStatus,
 } from '../constants/order.constants';
@@ -255,7 +256,7 @@ export class OrderService {
     conversationId,
     description,
     notes,
-    initialFee = 1500,
+    initialFee = null,
     locationFrom,
     locationTo,
     pickupProvider,
@@ -267,7 +268,7 @@ export class OrderService {
     conversationId?: UUID;
     description?: string;
     notes?: string;
-    initialFee?: number;
+    initialFee?: number | null;
     locationFrom?: OrderLocation;
     locationTo?: OrderLocation;
     pickupProvider?: string | null;
@@ -333,6 +334,187 @@ export class OrderService {
     const createdOrder = await this.orderRepository.save(orderPayload);
 
     return { order: createdOrder };
+  }
+
+  async createWhatsappDraftOrder(params: {
+    senderPhoneNumber: string;
+    recipientPhoneNumber: string;
+    conversationId?: UUID | null;
+    locationFrom: OrderLocation;
+    payerType: OrderPayerType;
+    recipientName?: string | null;
+  }): Promise<Order> {
+    const senderValidation = validateAndFormatPhoneNumber(params.senderPhoneNumber);
+    const recipientValidation = validateAndFormatPhoneNumber(params.recipientPhoneNumber);
+    if (!senderValidation.e164 || !senderValidation.isValid) {
+      throw new ValidationError(senderValidation.error || 'Invalid sender phone number');
+    }
+    if (!recipientValidation.e164 || !recipientValidation.isValid) {
+      throw new ValidationError(recipientValidation.error || 'Invalid recipient phone number');
+    }
+    if (senderValidation.e164 === recipientValidation.e164) {
+      throw new ValidationError('Sender and recipient phone numbers must be different');
+    }
+
+    let sender = await this.userRepository.findOne({
+      where: { phoneNumber: senderValidation.e164 },
+    });
+    if (!sender) {
+      sender = await this.userService.createUser(
+        { phoneNumber: senderValidation.e164 },
+        [RoleTypes.GUEST],
+      );
+    }
+
+    let recipient = await this.userRepository.findOne({
+      where: { phoneNumber: recipientValidation.e164 },
+    });
+    if (!recipient) {
+      recipient = await this.userService.createUser({
+        phoneNumber: recipientValidation.e164,
+        ...(params.recipientName ? { name: params.recipientName } : {}),
+      });
+    }
+
+    const order = await this.orderRepository.save({
+      referenceId: await this.generateUniqueOrderReferenceId(),
+      trackingId: await this.generateUniqueTrackingId(),
+      senderId: sender.id,
+      recipientId: recipient.id,
+      createdById: sender.id,
+      conversationId: params.conversationId ?? undefined,
+      locationFrom: params.locationFrom,
+      initialFee: null,
+      finalFee: null,
+      status: OrderStatus.DRAFT,
+      payerType: params.payerType,
+      orderSource: 'whatsapp_personal',
+    });
+
+    await this.orderActivityService.createOrderActivity({
+      orderId: order.id,
+      status: OrderActivityStatus.DRAFT,
+      createdById: sender.id,
+    });
+    return order;
+  }
+
+  async recordWhatsappQuote(params: {
+    orderId: UUID;
+    locationTo: OrderLocation;
+    amount: number;
+    distanceKm: number;
+    durationMinutes: number;
+    paymentExpiresAt: Date;
+    recipientWhatsappOptInAt?: Date | null;
+  }): Promise<Order> {
+    const order = await this.getOrderById(params.orderId);
+    if (order.status !== OrderStatus.DRAFT) {
+      throw new ValidationError('Only a draft WhatsApp order can receive a quote');
+    }
+    if (!Number.isFinite(params.amount) || params.amount <= 0) {
+      throw new ValidationError('A valid delivery quote is required');
+    }
+
+    order.locationTo = params.locationTo;
+    order.quotedAmount = params.amount;
+    order.quotedDistanceKm = params.distanceKm;
+    order.quotedDurationMinutes = params.durationMinutes;
+    order.paymentExpiresAt = params.paymentExpiresAt;
+    order.recipientWhatsappOptInAt = params.recipientWhatsappOptInAt ?? null;
+    return this.orderRepository.save(order);
+  }
+
+  async markRecipientWhatsappOptIn(orderId: UUID, optedInAt = new Date()): Promise<void> {
+    const order = await this.getOrderById(orderId);
+    if (order.status !== OrderStatus.DRAFT) {
+      throw new ValidationError('Only an active draft can record recipient WhatsApp consent');
+    }
+    await this.orderRepository.update(order.id, {
+      recipientWhatsappOptInAt: order.recipientWhatsappOptInAt ?? optedInAt,
+    });
+  }
+
+  async confirmWhatsappQuote(orderId: UUID): Promise<Order> {
+    const order = await this.getOrderById(orderId);
+    if (
+      order.status === OrderStatus.PENDING &&
+      order.quoteConfirmedAt &&
+      order.finalFee
+    ) {
+      if (order.paymentExpiresAt && order.paymentExpiresAt.getTime() <= Date.now()) {
+        throw new ValidationError('This delivery quote has expired');
+      }
+      return order;
+    }
+    if (order.status !== OrderStatus.DRAFT || !order.quotedAmount) {
+      throw new ValidationError('This order does not have an approvable quote');
+    }
+    if (order.paymentExpiresAt && order.paymentExpiresAt.getTime() <= Date.now()) {
+      throw new ValidationError('This delivery quote has expired');
+    }
+    order.initialFee = Number(order.quotedAmount);
+    order.finalFee = Number(order.quotedAmount);
+    order.status = OrderStatus.PENDING;
+    order.quoteConfirmedAt = order.quoteConfirmedAt ?? new Date();
+    await this.orderRepository.save(order);
+    await this.orderActivityService.createOrderActivity({
+      orderId: order.id,
+      status: OrderActivityStatus.PENDING,
+      createdById: order.createdById,
+    });
+    return order;
+  }
+
+  async applyPublicPersonalQuote(params: {
+    orderId: UUID;
+    amount: number;
+    distanceKm: number;
+    durationMinutes: number;
+  }): Promise<Order> {
+    const order = await this.getOrderById(params.orderId);
+    if (order.orderSource === 'whatsapp_personal') {
+      throw new ValidationError('WhatsApp booking quotes must be approved in the assigned payer Flow');
+    }
+    if (order.isBusinessOrder || order.organizationId) {
+      throw new ValidationError('Business order pricing cannot use the public personal quote endpoint');
+    }
+    if (!order.locationFrom || !order.locationTo) {
+      throw new ValidationError('Set both order locations before requesting a quote');
+    }
+    if ([OrderStatus.PAID, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED, OrderStatus.COMPLETED, OrderStatus.CANCELLED].includes(order.status)) {
+      throw new ValidationError('This order can no longer be repriced');
+    }
+    order.quotedAmount = params.amount;
+    order.quotedDistanceKm = params.distanceKm;
+    order.quotedDurationMinutes = params.durationMinutes;
+    order.initialFee = params.amount;
+    order.finalFee = params.amount;
+    order.quoteConfirmedAt = new Date();
+    return this.orderRepository.save(order);
+  }
+
+  async cancelWhatsappOrder(orderId: UUID, reason: string): Promise<Order> {
+    const order = await this.getOrderById(orderId);
+    if ([OrderStatus.PAID, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED, OrderStatus.COMPLETED].includes(order.status)) {
+      return order;
+    }
+    if (order.status !== OrderStatus.CANCELLED) {
+      order.status = OrderStatus.CANCELLED;
+      await this.orderRepository.save(order);
+      const existing = order.activities?.find(
+        (activity) => activity.status === OrderActivityStatus.CANCELLED,
+      );
+      if (!existing) {
+        await this.orderActivityRepository.save({
+          orderId: order.id,
+          status: OrderActivityStatus.CANCELLED,
+          createdById: order.createdById,
+          notes: reason,
+        });
+      }
+    }
+    return order;
   }
 
   private async generateUniqueOrderReferenceId(): Promise<string> {

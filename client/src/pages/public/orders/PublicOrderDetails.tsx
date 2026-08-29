@@ -1,9 +1,9 @@
 import {
   useDeferOrderPayment,
   useGetPublicOrder,
-  useGetOrderFees,
   useUpdatePublicOrder,
 } from '@/hooks/orders/orders.hooks';
+import { useQuotePublicOrderMutation } from '@/api/mutations/orders.mutations';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import {
   setOrder,
@@ -21,7 +21,6 @@ import {
   DEVELOPMENT_PAYMENT_AMOUNT_RWF,
   ENVIRONMENTS,
 } from '@/constants/environments.constants';
-import RouteCalculator from '@/containers/locations/RouteCalculator';
 import NearestPlace from '@/containers/locations/NearestPlace';
 import Button from '@/components/inputs/Button';
 import ContactMethodPicker from '@/components/orders/ContactMethodPicker';
@@ -167,10 +166,8 @@ const PublicOrderDetails = () => {
 
   const { getPublicOrder } = useGetPublicOrder();
   const { updatePublicOrder } = useUpdatePublicOrder();
-  const { getOrderFee, orderFee } = useGetOrderFees(
-    currentOrder?.finalFee !== null && currentOrder?.finalFee !== undefined ? currentOrder.finalFee : undefined,
-    orderId,
-  );
+  const [quotePublicOrder, { isLoading: quoteIsLoading }] =
+    useQuotePublicOrderMutation();
 
   const {
     deferOrderPayment,
@@ -299,30 +296,46 @@ const PublicOrderDetails = () => {
     [currentOrder?.id, updatePublicOrder],
   );
 
-  const handleRouteCalculated = (calculatedDistance: number, calculatedTime: number) => {
-    setDistance(calculatedDistance);
-    setEstimatedTime(calculatedTime);
-  };
-
   useEffect(() => {
-    if (distance !== null && distance > 0 && currentOrder?.id === orderId) {
-      getOrderFee(distance);
+    if (
+      !currentOrder?.id ||
+      !currentOrder.locationFrom ||
+      !currentOrder.locationTo ||
+      (currentOrder.locationFrom.latitude === currentOrder.locationTo.latitude &&
+        currentOrder.locationFrom.longitude === currentOrder.locationTo.longitude)
+    ) {
+      setDistance(null);
+      setEstimatedTime(null);
+      return;
     }
-  }, [distance, getOrderFee, currentOrder?.id, orderId]);
-
-  // Only write the fee when it actually changed. Without the guard this fires
-  // on every render that touches the order — and because the server updates by
-  // saving the whole row (`save({...orderExists, ...order})`), a fee write
-  // holding a stale snapshot silently reverts any field saved alongside it.
-  // That is what was undoing the contact-method choice a moment after it saved.
-  useEffect(() => {
-    if (!orderFee || !currentOrder?.id) return;
-    if (Number(currentOrder.finalFee) === Number(orderFee)) return;
-    updatePublicOrder({
-      id: currentOrder.id,
-      order: { finalFee: orderFee },
-    });
-  }, [currentOrder?.id, currentOrder?.finalFee, orderFee, updatePublicOrder]);
+    let active = true;
+    quotePublicOrder({ orderId: currentOrder.id })
+      .unwrap()
+      .then((response) => {
+        if (!active) return;
+        const quote = response?.data?.quote;
+        if (!quote) return;
+        setDistance(Number(quote.distanceKm));
+        setEstimatedTime(Number(quote.durationMinutes));
+        if (response.data.order) dispatch(setOrder(response.data.order));
+      })
+      .catch(() => {
+        if (!active) return;
+        setDistance(null);
+        setEstimatedTime(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [
+    currentOrder?.id,
+    currentOrder?.locationFrom?.latitude,
+    currentOrder?.locationFrom?.longitude,
+    currentOrder?.locationTo?.latitude,
+    currentOrder?.locationTo?.longitude,
+    dispatch,
+    quotePublicOrder,
+  ]);
 
   const hasSuccessfulPayment = paymentsList?.some(
     (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL,
@@ -352,26 +365,12 @@ const PublicOrderDetails = () => {
   );
   const locationsReady = hasBothLocations && !isSameLocation;
 
-  const feeValue = orderFee ?? currentOrder?.finalFee ?? 0;
+  const feeValue = currentOrder?.finalFee ?? 0;
 
 
   return (
     // The Maps APIProvider is mounted app-wide in App.tsx.
     <>
-      {currentOrder?.locationFrom && currentOrder?.locationTo ? (
-        <RouteCalculator
-          locationFrom={{
-            latitude: currentOrder.locationFrom.latitude ?? 0,
-            longitude: currentOrder.locationFrom.longitude ?? 0,
-          }}
-          locationTo={{
-            latitude: currentOrder.locationTo.latitude ?? 0,
-            longitude: currentOrder.locationTo.longitude ?? 0,
-          }}
-          onRouteCalculated={handleRouteCalculated}
-        />
-      ) : null}
-
       <PublicPage viewport>
         <motion.div
           className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-8"
@@ -497,7 +496,7 @@ const PublicOrderDetails = () => {
               ) : (
                 <Button
                   variant="primary"
-                  disabled={!locationsReady}
+                  disabled={!locationsReady || quoteIsLoading || feeValue <= 0}
                   onClick={(e) => {
                     e.preventDefault();
                     dispatch(setSelectedOrder(currentOrder));

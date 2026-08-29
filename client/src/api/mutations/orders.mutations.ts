@@ -63,6 +63,14 @@ export const ordersMutationApiSlice = createApi({
       }),
     }),
 
+    quotePublicOrder: builder.mutation({
+      query: ({ orderId }: { orderId: UUID }) => ({
+        url: '/orders/public/quote',
+        method: 'POST',
+        body: { orderId },
+      }),
+    }),
+
     // UPDATE ORDER
     updateOrder: builder.mutation({
       query: ({ id, order }: { id: UUID; order: Partial<Order> }) => ({
@@ -116,6 +124,7 @@ export const ordersMutationApiSlice = createApi({
 export const {
   useCreateOrderMutation,
   useCreatePublicOrderMutation,
+  useQuotePublicOrderMutation,
   useUpdateOrderMutation,
   useUpdatePublicOrderMutation,
   useDeferOrderPaymentMutation,

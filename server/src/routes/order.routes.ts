@@ -8,6 +8,7 @@ const router = Router();
 
 // Public order endpoints (no auth required, order UUID acts as access key)
 router.post('/public', OrderController.createPublicOrder);
+router.post('/public/quote', OrderController.quotePublicOrder);
 router.get(
   '/public/reference/:referenceId',
   OrderController.getOrderByReferenceId,

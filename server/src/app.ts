@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, Request } from 'express';
 import path from 'path';
 import cors from 'cors';
 import 'dotenv/config';
@@ -29,7 +29,12 @@ if (urubutoConfigIssues.length) {
 const app: Application = express();
 
 // MIDDLEWARES
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({
+  limit: '50mb',
+  verify: (req, _res, buffer) => {
+    (req as unknown as Request & { rawBody?: Buffer }).rawBody = Buffer.from(buffer);
+  },
+}));
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 

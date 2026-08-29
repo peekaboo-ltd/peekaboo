@@ -1,75 +1,86 @@
-import cron from 'node-cron';
-import { LessThan } from 'typeorm';
-import { AppDataSource } from '../data-source';
-import {
-  ConversationStatus,
-  ConversationStep,
-} from '../constants/conversation.constants';
-import {
-  OrderActivityStatus,
-  OrderStatus,
-} from '../constants/order.constants';
-import { Conversation } from '../entities/conversation.entity';
-import { Order } from '../entities/order.entity';
-import { OrderActivity } from '../entities/orderActivity.entity';
-import { sendMessage } from '../helpers/whatsapp.helper';
-import logger from '../helpers/logger.helper';
-import { sessionExpiredTemplate } from '../templates/whatsapp/whatsapp.template';
+import cron from "node-cron";
+import { AppDataSource } from "../data-source";
+import { OrderActivityStatus, OrderStatus } from "../constants/order.constants";
+import { PendingOrderSessionStatus } from "../constants/pendingOrderSession.constants";
+import { Order } from "../entities/order.entity";
+import { OrderActivity } from "../entities/orderActivity.entity";
+import { Payment } from "../entities/payment.entity";
+import { PendingOrderSession } from "../entities/pendingOrderSession.entity";
+import { KpayPaymentStatus } from "../types/kpay.types";
+import { PendingOrderSessionService } from "../services/pendingOrderSession.service";
+import { WhatsappNotificationService } from "../services/whatsappNotification.service";
+import logger from "../helpers/logger.helper";
 
 export async function expireStaleWhatsappSessions(): Promise<void> {
-  const conversationRepository = AppDataSource.getRepository(Conversation);
-  const orderRepository = AppDataSource.getRepository(Order);
-  const orderActivityRepository = AppDataSource.getRepository(OrderActivity);
-  const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
+  const sessions = await new PendingOrderSessionService().findExpiredActive();
+  const notifier = new WhatsappNotificationService();
 
-  const staleConversations = await conversationRepository.find({
-    where: {
-      status: ConversationStatus.ACTIVE,
-      step: ConversationStep.PAYMENT_PENDING,
-      updatedAt: LessThan(fiveHoursAgo),
-    },
-    relations: ["recipient"],
-  });
-
-  for (const conversation of staleConversations) {
-    await conversationRepository.update(conversation.id, {
-      status: ConversationStatus.EXPIRED,
-    });
-
-    const orders = await orderRepository.find({
-      where: { conversationId: conversation.id },
-    });
-
-    for (const order of orders) {
-      const paidActivity = await orderActivityRepository.findOne({
-        where: { orderId: order.id, status: OrderActivityStatus.PAID },
+  for (const candidate of sessions) {
+    const expired = await AppDataSource.transaction(async (manager) => {
+      const session = await manager.getRepository(PendingOrderSession).findOne({
+        where: { id: candidate.id },
+        lock: { mode: "pessimistic_write" },
       });
+      if (
+        !session ||
+        session.expiresAt.getTime() > Date.now() ||
+        [
+          PendingOrderSessionStatus.PAID,
+          PendingOrderSessionStatus.DECLINED,
+          PendingOrderSessionStatus.EXPIRED,
+          PendingOrderSessionStatus.CANCELLED,
+          PendingOrderSessionStatus.COMPLETED,
+        ].includes(session.status)
+      ) return null;
 
-      if (!paidActivity) {
-        await orderActivityRepository.save({
-          orderId: order.id,
-          status: OrderActivityStatus.CANCELLED,
-          createdById: order.createdById,
-          notes: "Session expired — payment not completed within 5 hours",
-        });
-        await orderRepository.update(order.id, {
-          status: OrderStatus.CANCELLED,
-        });
+      const payment = session.paymentId
+        ? await manager.getRepository(Payment).findOne({
+            where: { id: session.paymentId },
+            lock: { mode: "pessimistic_write" },
+          })
+        : null;
+      if (payment?.status === KpayPaymentStatus.SUCCESSFUL) {
+        session.status = PendingOrderSessionStatus.PAID;
+        return manager.getRepository(PendingOrderSession).save(session).then(() => null);
       }
-    }
 
-    if (conversation.recipient?.phoneNumber) {
-      sendMessage({
-        phoneNumber: conversation.recipient.phoneNumber,
-        type: "text",
-        message: sessionExpiredTemplate(),
-      }).catch(() => {});
+      if (session.orderId) {
+        const order = await manager.getRepository(Order).findOne({
+          where: { id: session.orderId },
+          lock: { mode: "pessimistic_write" },
+        });
+        if (order && ![OrderStatus.PAID, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED, OrderStatus.COMPLETED].includes(order.status)) {
+          order.status = OrderStatus.CANCELLED;
+          await manager.getRepository(Order).save(order);
+          const activity = await manager.getRepository(OrderActivity).findOne({
+            where: { orderId: order.id, status: OrderActivityStatus.CANCELLED },
+          });
+          if (!activity) {
+            await manager.getRepository(OrderActivity).save({
+              orderId: order.id,
+              status: OrderActivityStatus.CANCELLED,
+              createdById: order.createdById,
+              notes: "WhatsApp recipient or quote/payment deadline expired",
+            });
+          }
+        }
+      }
+      session.status = PendingOrderSessionStatus.EXPIRED;
+      session.terminalReason = "Five-hour WhatsApp booking deadline expired";
+      await manager.getRepository(PendingOrderSession).save(session);
+      return session;
+    });
+
+    if (expired) {
+      notifier.notifyBookingExpired(expired).catch((error) =>
+        logger.error("Failed to send WhatsApp booking expiry notification", error),
+      );
     }
   }
 }
 
 export function startWhatsappSessionCronJob(): void {
-  cron.schedule("*/30 * * * *", async () => {
+  cron.schedule("*/5 * * * *", async () => {
     try {
       await expireStaleWhatsappSessions();
     } catch (error) {

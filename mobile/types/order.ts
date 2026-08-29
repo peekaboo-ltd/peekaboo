@@ -39,7 +39,7 @@ export interface Order {
   senderId?: string;
   createdById: string;
   status?: OrderStatus;
-  initialFee: number;
+  initialFee: number | null;
   type: OrderType;
   discount: number;
   finalFee?: number;

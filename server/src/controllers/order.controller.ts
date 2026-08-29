@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { OrderService } from '../services/order.service';
 import { UUID } from '../types';
+import { PersonalDeliveryQuoteService } from '../services/personalDeliveryQuote.service';
 import { Order } from '../entities/order.entity';
 import { UserService } from '../services/user.service';
 import { AuthRequest } from '../types/auth.types';
@@ -13,6 +14,7 @@ import { RoleTypes } from '../constants/role.constants';
 import { PreferredContactMethod } from '../constants/order.constants';
 
 const orderService = new OrderService();
+const personalDeliveryQuoteService = new PersonalDeliveryQuoteService();
 const userService = new UserService();
 
 type OrderLocation = NonNullable<Order['locationFrom']>;
@@ -118,6 +120,26 @@ const normalizeOrderLocation = (
 };
 
 export const OrderController = {
+  async quotePublicOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const orderId = req.body?.orderId as UUID | undefined;
+      const order = orderId ? await orderService.getOrderById(orderId) : null;
+      const quote = await personalDeliveryQuoteService.quote({
+        pickup: order?.locationFrom || req.body?.locationFrom,
+        dropoff: order?.locationTo || req.body?.locationTo,
+      });
+      const updatedOrder = orderId
+        ? await orderService.applyPublicPersonalQuote({ orderId, ...quote })
+        : null;
+      return res.status(200).json({
+        message: 'Delivery quote calculated successfully',
+        data: { quote, ...(updatedOrder ? { order: updatedOrder } : {}) },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // ACCEPT ORDER
   async acceptOrder(req: Request, res: Response, next: NextFunction) {
     try {
@@ -313,13 +335,15 @@ export const OrderController = {
       const { order } = req.body;
 
       const existingOrder = await orderService.getOrderById(id as UUID);
+      if (existingOrder.orderSource === 'whatsapp_personal') {
+        throw new ForbiddenError('WhatsApp booking details can only be changed through the active Flow');
+      }
 
-      // Only allow updating location, fee, and contact-preference fields for
-      // public orders
+      // Public clients may move locations and set contact preferences. Fees
+      // are written only by POST /orders/public/quote.
       const allowedFields: (keyof Order)[] = [
         'locationFrom',
         'locationTo',
-        'finalFee',
         'preferredContactMethod',
         'contactEmail',
       ];
@@ -328,6 +352,15 @@ export const OrderController = {
         if (order?.[key] !== undefined) {
           (sanitized as Record<string, unknown>)[key] = order[key];
         }
+      }
+
+      if ((sanitized.locationFrom || sanitized.locationTo) && !existingOrder.isBusinessOrder) {
+        sanitized.initialFee = null;
+        sanitized.finalFee = null;
+        sanitized.quotedAmount = null;
+        sanitized.quotedDistanceKm = null;
+        sanitized.quotedDurationMinutes = null;
+        sanitized.quoteConfirmedAt = null;
       }
 
       // Locations arrive as free-form JSON, so validate them the same way the

@@ -38,6 +38,11 @@ export enum OrderPaymentStatus {
   COMPLETED = "COMPLETED",
 }
 
+export enum OrderPayerType {
+  SENDER = "SENDER",
+  RECIPIENT = "RECIPIENT",
+}
+
 // How the sender wants Peekaboo to reach them about this delivery. Deliberately
 // separate from MessageChannel, which describes the transport an existing
 // conversation message arrived on and backs a non-nullable column on `messages`.

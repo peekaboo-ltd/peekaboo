@@ -5,6 +5,7 @@ import { PaymentProvider, UrubutoChannelName } from "./urubuto.types";
 
 // Payment creation DTO
 export interface CreatePaymentDto {
+  idempotencyKey?: string;
   entityId: UUID;
   amount: number;
   currency: KpayCurrency;

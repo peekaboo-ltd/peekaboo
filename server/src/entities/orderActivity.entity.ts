@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { AbstractEntity } from './index';
 import { Order } from './order.entity';
 import { User } from './user.entity';
@@ -6,6 +6,7 @@ import { UUID } from '../types';
 import { OrderActivityStatus } from '../constants/order.constants';
 
 @Entity('order_activities')
+@Index(['orderId', 'status'], { unique: true })
 export class OrderActivity extends AbstractEntity {
   // ORDER ID
   @Column({ name: 'order_id', type: 'uuid', nullable: false })

@@ -27,6 +27,11 @@ export enum OrderPaymentStatus {
   COMPLETED = 'COMPLETED',
 }
 
+export enum OrderPayerType {
+  SENDER = 'SENDER',
+  RECIPIENT = 'RECIPIENT',
+}
+
 /** Mirrors the server's PreferredContactMethod (server/src/constants/order.constants.ts). */
 export enum PreferredContactMethod {
   WHATSAPP = 'WHATSAPP',
@@ -67,10 +72,16 @@ export interface Order extends BaseDomain {
   recipientId?: UUID | null;
   senderId?: UUID | null;
   createdById: UUID;
-  initialFee: number;
+  initialFee: number | null;
   type: keyof typeof OrderType;
   discount?: number | null;
   finalFee?: number | null;
+  payerType?: OrderPayerType | null;
+  quotedDistanceKm?: number | null;
+  quotedDurationMinutes?: number | null;
+  quotedAmount?: number | null;
+  quoteConfirmedAt?: string | null;
+  paymentExpiresAt?: string | null;
   paymentStatus?: OrderPaymentStatus | null;
   preferredContactMethod?: PreferredContactMethod | null;
   contactEmail?: string | null;
