@@ -17,6 +17,7 @@ import { getCurrentLocation } from '@/utils/locations.util';
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import {
   DEVELOPMENT_PAYMENT_AMOUNT_RWF,
   ENVIRONMENTS,
@@ -45,7 +46,7 @@ import { useFetchUserById } from '@/hooks/users/users.hooks';
 import { entranceVariants } from '@/pages/home/home.animations';
 import OrderSetupHeroMap from './components/OrderSetupHeroMap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
+import { faCircleCheck, faCopy, faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 
 interface LocationCardProps {
   label: 'Pickup' | 'Destination';
@@ -234,13 +235,84 @@ const PublicOrderDetails = () => {
   }, [orderId, getPublicOrder]);
 
   useEffect(() => {
-    return () => {
+    if (currentOrder?.contactEmail) {
+      setEmailDraft(currentOrder.contactEmail);
+    }
+  }, [currentOrder?.contactEmail, currentOrder?.preferredContactMethod]);
+
+  const isSameCoordinates = useCallback(
+    (from?: OrderLocation | null, to?: OrderLocation | null) => {
+      if (!from || !to) return false;
+      if (from.placeId && to.placeId) {
+        return from.placeId === to.placeId;
+      }
+      const fromLat = Number(from.latitude);
+      const fromLng = Number(from.longitude);
+      const toLat = Number(to.latitude);
+      const toLng = Number(to.longitude);
+      if (
+        !Number.isFinite(fromLat) ||
+        !Number.isFinite(fromLng) ||
+        !Number.isFinite(toLat) ||
+        !Number.isFinite(toLng)
+      ) {
+        return false;
+      }
+      return fromLat === toLat && fromLng === toLng;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const pickup = currentOrder?.locationFrom;
+    const dropoff = currentOrder?.locationTo;
+
+    if (!currentOrder?.id || !pickup || !dropoff || isSameCoordinates(pickup, dropoff)) {
       setDistance(null);
       setEstimatedTime(null);
-    };
-  }, []);
+      return;
+    }
 
-  // Same one-field patch the page already uses for locations and the fee.
+    let active = true;
+    quotePublicOrder({ orderId: currentOrder.id })
+      .unwrap()
+      .then((response) => {
+        if (!active) return;
+        const quote = response?.data?.quote;
+        if (!quote) return;
+        setDistance(Number(quote.distanceKm));
+        setEstimatedTime(Number(quote.durationMinutes));
+        if (response.data.order) {
+          dispatch(setOrder(response.data.order));
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        const fallbackDistance = currentOrder.quotedDistanceKm;
+        const fallbackDuration = currentOrder.quotedDurationMinutes;
+        if (fallbackDistance != null && fallbackDuration != null) {
+          setDistance(Number(fallbackDistance));
+          setEstimatedTime(Number(fallbackDuration));
+          return;
+        }
+        setDistance(null);
+        setEstimatedTime(null);
+        toast.error('Could not calculate the route. Check both locations and try again.');
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [
+    currentOrder?.id,
+    currentOrder?.locationFrom,
+    currentOrder?.locationTo,
+    currentOrder?.quotedDistanceKm,
+    currentOrder?.quotedDurationMinutes,
+    dispatch,
+    isSameCoordinates,
+    quotePublicOrder,
+  ]);
   const handleContactMethodChange = useCallback(
     (method: PreferredContactMethod) => {
       if (!currentOrder?.id) return;
@@ -296,47 +368,6 @@ const PublicOrderDetails = () => {
     [currentOrder?.id, updatePublicOrder],
   );
 
-  useEffect(() => {
-    if (
-      !currentOrder?.id ||
-      !currentOrder.locationFrom ||
-      !currentOrder.locationTo ||
-      (currentOrder.locationFrom.latitude === currentOrder.locationTo.latitude &&
-        currentOrder.locationFrom.longitude === currentOrder.locationTo.longitude)
-    ) {
-      setDistance(null);
-      setEstimatedTime(null);
-      return;
-    }
-    let active = true;
-    quotePublicOrder({ orderId: currentOrder.id })
-      .unwrap()
-      .then((response) => {
-        if (!active) return;
-        const quote = response?.data?.quote;
-        if (!quote) return;
-        setDistance(Number(quote.distanceKm));
-        setEstimatedTime(Number(quote.durationMinutes));
-        if (response.data.order) dispatch(setOrder(response.data.order));
-      })
-      .catch(() => {
-        if (!active) return;
-        setDistance(null);
-        setEstimatedTime(null);
-      });
-    return () => {
-      active = false;
-    };
-  }, [
-    currentOrder?.id,
-    currentOrder?.locationFrom?.latitude,
-    currentOrder?.locationFrom?.longitude,
-    currentOrder?.locationTo?.latitude,
-    currentOrder?.locationTo?.longitude,
-    dispatch,
-    quotePublicOrder,
-  ]);
-
   const hasSuccessfulPayment = paymentsList?.some(
     (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL,
   );
@@ -351,22 +382,23 @@ const PublicOrderDetails = () => {
   const pickup = currentOrder?.locationFrom;
   const dropoff = currentOrder?.locationTo;
   const hasBothLocations = Boolean(pickup && dropoff);
-  // Pickup and drop-off must be two different places, otherwise the route (and
-  // therefore the fee) has no meaning.
-  const isSameLocation = Boolean(
-    pickup &&
-    dropoff &&
-    (pickup.placeId
-      ? pickup.placeId === dropoff.placeId
-      : pickup.latitude !== null &&
-      pickup.longitude !== null &&
-      pickup.latitude === dropoff.latitude &&
-      pickup.longitude === dropoff.longitude),
-  );
+  const isSameLocation = isSameCoordinates(pickup, dropoff);
   const locationsReady = hasBothLocations && !isSameLocation;
 
-  const feeValue = currentOrder?.finalFee ?? 0;
+  const feeValue =
+    currentOrder?.finalFee ??
+    currentOrder?.quotedAmount ??
+    currentOrder?.initialFee ??
+    0;
 
+    const [copied, setCopied] = useState(false);
+    useEffect(() => {
+      if (copied) {
+        setTimeout(() => {
+          setCopied(false);
+        }, 2000);
+      }
+    }, [copied]);
 
   return (
     // The Maps APIProvider is mounted app-wide in App.tsx.
@@ -385,7 +417,14 @@ const PublicOrderDetails = () => {
             <hgroup className="flex flex-col gap-1">
               <p className="type-eyebrow">Delivery setup</p>
               <h1 className="type-page-title">
-                {currentOrder?.referenceId || 'Set delivery locations'}
+                {currentOrder?.referenceId || 'Set delivery locations'} <FontAwesomeIcon icon={copied ? faCircleCheck : faCopy} className="size-3.5 cursor-pointer" onClick={(e) => {
+                  e.preventDefault();
+                  if (currentOrder?.referenceId) {
+                    navigator.clipboard.writeText(currentOrder.referenceId);
+                    toast.success('Reference ID copied to clipboard');
+                    setCopied(true);
+                  }
+                }} />
               </h1>
               <p className="type-meta max-w-[52ch]">
                 Set both ends of the route. We price it before you pay.

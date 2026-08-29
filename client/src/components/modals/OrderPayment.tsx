@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import Modal from '../Modal';
@@ -41,9 +41,9 @@ const OrderPayment = () => {
   // STATE VARIABLES
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { orderPaymentModal, selectedOrder } = useAppSelector((state) => state.order);
-  const { token } = useAppSelector((state) => state.auth);
-  const isPublic = !token;
+  const isPublic = pathname.startsWith('/p/orders');
 
   // Payers picked from the order have no form field of their own, so their
   // validation error is held here rather than in the form state.
@@ -62,7 +62,11 @@ const OrderPayment = () => {
   const customPhone = useWatch({ control, name: 'customPhone' });
   const isMobileMoney = isMobileMoneyChannel(channelName);
 
-  const amount = selectedOrder?.finalFee ?? selectedOrder?.initialFee ?? 0;
+  const amount =
+    selectedOrder?.finalFee ??
+    selectedOrder?.quotedAmount ??
+    selectedOrder?.initialFee ??
+    0;
 
   // CLOSE MODAL
   const closeModal = useCallback(() => {
@@ -257,6 +261,7 @@ const OrderPayment = () => {
           '',
         payerEmail:
           current.payerEmail ||
+          selectedOrder.contactEmail ||
           (selectedOrder.sender?.email !== FALLBACK_EMAIL
             ? (selectedOrder.sender?.email ?? '')
             : ''),

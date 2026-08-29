@@ -27,6 +27,7 @@ import type { UUID } from '@/types';
  */
 export const useCreatePublicOrder = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const [createPublicOrder, { data, error, isLoading, reset, isSuccess }] =
     useCreatePublicOrderMutation();
@@ -34,12 +35,11 @@ export const useCreatePublicOrder = () => {
   useEffect(() => {
     if (isSuccess && data?.data) {
       const { order } = data.data;
-
-      // Navigate to order details (no auth token stored)
+      dispatch(setOrder(order));
       navigate(`/p/orders/${order.id}`);
       reset();
     }
-  }, [data, isSuccess, navigate, reset]);
+  }, [data, dispatch, isSuccess, navigate, reset]);
 
   return { createPublicOrder, data, error, isLoading, reset, isSuccess };
 };
@@ -60,6 +60,7 @@ export const useDeleteOrder = () => {
  */
 export const useCreateOrder = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const [createOrder, { data, error, isLoading, reset, isSuccess, isError }] =
     useCreateOrderMutation();
@@ -67,10 +68,11 @@ export const useCreateOrder = () => {
   useEffect(() => {
     if (isSuccess && data?.data) {
       const order = data.data;
+      dispatch(setOrder(order));
       navigate(`/p/orders/${order.id}`);
       reset();
     }
-  }, [data, isSuccess, navigate, reset]);
+  }, [data, dispatch, isSuccess, navigate, reset]);
 
   return { createOrder, data, error, isLoading, reset, isSuccess, isError };
 };
@@ -253,13 +255,14 @@ export const useFetchOrders = () => {
     (params: {
       page: number;
       size: number;
-      createdById?: string;
-      senderId?: string;
-      recipientId?: string;
+      createdById?: UUID;
+      senderId?: UUID;
+      recipientId?: UUID;
       batchId?: UUID;
       status?: string;
       statusGroup?: 'recent' | 'pending' | 'active' | 'completed';
       referenceId?: string;
+      orderLookup?: string;
     }) => {
       const queryParams =
         isCustomerOrBusiness && user?.id

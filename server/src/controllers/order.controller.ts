@@ -128,7 +128,12 @@ export const OrderController = {
         pickup: order?.locationFrom || req.body?.locationFrom,
         dropoff: order?.locationTo || req.body?.locationTo,
       });
-      const updatedOrder = orderId
+      const canApplyQuote =
+        orderId &&
+        order &&
+        !order.isBusinessOrder &&
+        !order.organizationId;
+      const updatedOrder = canApplyQuote
         ? await orderService.applyPublicPersonalQuote({ orderId, ...quote })
         : null;
       return res.status(200).json({
@@ -192,12 +197,30 @@ export const OrderController = {
         recipientPhoneNumber: _recipientPhoneNumber,
         locationFrom: locationFromFromOrder,
         locationTo: locationToFromOrder,
+        preferredContactMethod: preferredContactMethodFromOrder,
+        contactEmail: contactEmailFromOrder,
         ...persistableOrderInput
       } = orderInput;
 
       const senderPhoneNumber = senderPhoneFromBody ?? orderInput.senderPhoneNumber;
       const recipientPhoneNumber =
         recipientPhoneFromBody ?? orderInput.recipientPhoneNumber;
+      const preferredContactMethod = normalizePreferredContactMethod(
+        hasOwn(requestBody, 'preferredContactMethod')
+          ? requestBody.preferredContactMethod
+          : preferredContactMethodFromOrder,
+      );
+      const contactEmail = normalizeContactEmail(
+        hasOwn(requestBody, 'contactEmail')
+          ? requestBody.contactEmail
+          : contactEmailFromOrder,
+      );
+
+      if (preferredContactMethod === PreferredContactMethod.EMAIL && !contactEmail) {
+        throw new ValidationError(
+          'contactEmail is required when preferredContactMethod is EMAIL',
+        );
+      }
       const locationFrom = normalizeOrderLocation(
         hasOwn(requestBody, 'locationFrom')
           ? requestBody.locationFrom
@@ -232,6 +255,8 @@ export const OrderController = {
         recipientId,
         createdById: user.id,
         initialFee: orderInput.initialFee ?? 1500,
+        ...(preferredContactMethod !== undefined ? { preferredContactMethod } : {}),
+        ...(contactEmail !== undefined ? { contactEmail } : {}),
         ...(locationFrom !== undefined ? { locationFrom } : {}),
         ...(locationTo !== undefined ? { locationTo } : {}),
       };
