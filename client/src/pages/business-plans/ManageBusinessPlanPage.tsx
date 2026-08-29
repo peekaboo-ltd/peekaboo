@@ -12,6 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
+import { LoadingItem } from '@/components/ui/loading-item';
 import Input from '@/components/inputs/Input';
 import Select from '@/components/inputs/Select';
 import { StatusBadge } from '@/components/inputs/StatusBadge';
@@ -235,8 +236,8 @@ const ManageBusinessPlanPage = () => {
 
   if (isFetchingPlan && !plan) {
     return (
-      <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-(--muted)">{t('businessPlan.loading')}</p>
+      <main className="flex min-h-screen w-full items-center justify-center py-16">
+        <LoadingItem title={t('businessPlan.loading')} />
       </main>
     );
   }

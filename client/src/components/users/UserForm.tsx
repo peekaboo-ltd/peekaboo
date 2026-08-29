@@ -21,7 +21,7 @@ import {
 } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
-import { Loader } from '../inputs/Loader';
+import { Spinner } from '@/components/ui/spinner';
 import { RoleTypes } from '../../types/auth.type';
 import { UserStatus } from '../../constants/user.constants';
 import type { User } from '../../types/user.type';
@@ -315,7 +315,7 @@ export const UserForm: React.FC<UserFormProps> = ({
           <Button type="submit" disabled={isLoading}>
             {isLoading ? (
               <>
-                <Loader className="mr-2 h-4 w-4" />
+                <Spinner />
                 {isEdit ? t('userForm.updating') : t('userForm.creating')}
               </>
             ) : (

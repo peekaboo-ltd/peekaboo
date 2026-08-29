@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
+import { Spinner } from '@/components/ui/spinner';
 import Input from '@/components/inputs/Input';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setToken, setUser, setIsAuthenticated } from '@/states/slices/auth.slice';
@@ -121,7 +122,7 @@ const CompleteAccount = () => {
       <AuthPageShell>
         <AuthCard title={t('auth.complete.checkingTitle')} subtitle={t('auth.complete.checkingSubtitle')}>
           <div className="flex justify-center py-4">
-            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-(--ink)" />
+            <Spinner />
           </div>
         </AuthCard>
       </AuthPageShell>

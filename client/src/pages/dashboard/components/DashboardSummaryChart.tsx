@@ -7,6 +7,7 @@ import type { DashboardSupportCardData } from '@/types/dashboard.type';
 import { formatCurrency, formatNumbers } from '@/utils/strings.util';
 import { RoleTypes } from '@/types/auth.type';
 import Select from '@/components/inputs/Select';
+import { Spinner } from '@/components/ui/spinner';
 import { useI18n } from '@/i18n/i18n';
 
 const getMetricOptionsForRole = (role?: RoleTypes): string[] => {
@@ -162,7 +163,7 @@ const DashboardSummaryChart = ({
         <section className="relative mt-8 h-64 sm:h-72">
           {isLoading && (
             <figure className="absolute inset-0 z-10 flex items-center justify-center rounded-(--radius-card) bg-(--surface)">
-              <figure className="h-5 w-5 animate-spin rounded-full border-2 border-(--line) border-t-(--ink)" />
+              <Spinner />
             </figure>
           )}
           <SeriesChart

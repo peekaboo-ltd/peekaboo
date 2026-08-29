@@ -2,7 +2,7 @@ import { type IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { type FC, type MouseEventHandler, type ReactNode, type HTMLAttributes } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader } from './Loader.tsx';
+import { Spinner } from '@/components/ui/spinner';
 import { Button as ButtonUI } from '../ui/button';
 import { cn } from '@/lib/utils';
 
@@ -75,7 +75,7 @@ const Button: FC<ButtonProps> = ({
   const classes = cn(className);
 
   const content = isLoading ? (
-    <Loader className="text-current" />
+    <Spinner />
   ) : (
     <>
       {icon ? <FontAwesomeIcon icon={icon} aria-hidden="true" /> : null}

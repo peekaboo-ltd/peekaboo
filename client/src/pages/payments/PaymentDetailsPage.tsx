@@ -1,4 +1,5 @@
 import Button from '@/components/inputs/Button';
+import { LoadingItem } from '@/components/ui/loading-item';
 import { Badge } from '@/components/ui/badge';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useGetOrder } from '@/hooks/orders/orders.hooks';
@@ -83,8 +84,8 @@ const PaymentDetailsPage = () => {
 
   if (isFetchingPayment && !payment) {
     return (
-      <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-(--muted)">{t('paymentDetails.loading')}</p>
+      <main className="flex min-h-screen w-full items-center justify-center py-16">
+        <LoadingItem title={t('paymentDetails.loading')} />
       </main>
     );
   }

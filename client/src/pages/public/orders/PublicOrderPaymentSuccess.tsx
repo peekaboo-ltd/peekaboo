@@ -5,6 +5,7 @@ import { useGetPublicOrder } from '@/hooks/orders/orders.hooks';
 import { KpayPaymentStatus } from '@/types/payment.types';
 import type { UUID } from '@/types';
 import Button from '@/components/inputs/Button';
+import { LoadingItem } from '@/components/ui/loading-item';
 import AdministrativeLocation from '@/containers/locations/AdministrativeLocation';
 import { formatCurrency } from '@/utils/strings.util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -122,12 +123,12 @@ const PublicOrderPaymentSuccess = () => {
     return (
       <PublicPage>
         <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
-          <div className="py-5 text-center" role="status" aria-live="polite">
-            <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-(--line) border-t-(--ink) motion-reduce:animate-none" />
-            <h1 className="type-h3 mt-5">
-              {t('payment.success.confirmingTitle')}
-            </h1>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--muted)">
+          <div className="py-5" role="status" aria-live="polite">
+            <LoadingItem
+              title={t('payment.success.confirmingTitle')}
+              className="mx-auto max-w-md"
+            />
+            <p className="mx-auto mt-2 max-w-md text-center text-sm leading-6 text-(--muted)">
               {t('payment.success.confirmingDescription')}
             </p>
           </div>

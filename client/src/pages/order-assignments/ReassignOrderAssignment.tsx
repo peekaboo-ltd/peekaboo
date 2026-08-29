@@ -8,8 +8,9 @@ import { RoleTypes } from '@/types/auth.type';
 import { UserStatus } from '@/constants/user.constants';
 import type { User } from '@/types/user.type';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpinner, faUser, faCheck, faArrowLeft, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faCheck, faArrowLeft, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/components/inputs/Button';
+import { LoadingItem } from '@/components/ui/loading-item';
 import { controlClassName } from '@/components/inputs/control';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/i18n/i18n';
@@ -148,10 +149,9 @@ const ReassignOrderAssignment = () => {
                         {/* Riders List */}
                         <section className="flex-1 overflow-auto border border-(--line) rounded-md min-h-0">
                             {isFetchingRiders ? (
-                                <p className="px-4 py-8 text-sm text-(--muted) text-center" role="status" aria-live="polite">
-                                    <FontAwesomeIcon icon={faSpinner} spin className="mr-2" aria-hidden="true" />
-                                    {t('assignments.loadingRiders')}
-                                </p>
+                                <div className="px-4 py-8" role="status" aria-live="polite">
+                                    <LoadingItem title={t('assignments.loadingRiders')} className="mx-auto" />
+                                </div>
                             ) : riders.length === 0 ? (
                                 <p className="px-4 py-8 text-sm text-(--muted) text-center" role="status">
                                     {searchTerm ? t('assignments.noRiderMatch') : t('assignments.noRiders')}

@@ -10,6 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
+import { LoadingItem } from '@/components/ui/loading-item';
 import Input from '@/components/inputs/Input';
 import TelInput from '@/components/inputs/TelInput';
 import Select from '@/components/inputs/Select';
@@ -176,8 +177,8 @@ const ManageOrganizationPage = () => {
 
   if (organizationIsFetching && !organization) {
     return (
-      <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-(--muted)">{t('organization.loading')}</p>
+      <main className="flex min-h-screen w-full items-center justify-center py-16">
+        <LoadingItem title={t('organization.loading')} />
       </main>
     );
   }

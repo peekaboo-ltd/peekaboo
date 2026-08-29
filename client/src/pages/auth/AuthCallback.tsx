@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
+import { Spinner } from '@/components/ui/spinner';
 import TelInput from '@/components/inputs/TelInput';
 import { useAppDispatch } from '@/states/hooks';
 import {
@@ -174,7 +175,7 @@ const AuthCallback = () => {
       <AuthPageShell>
         <AuthCard title={t('auth.callback.completingTitle')} subtitle={t('auth.callback.completingSubtitle')}>
           <div className="flex justify-center py-4">
-            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-(--ink)" />
+            <Spinner />
           </div>
         </AuthCard>
       </AuthPageShell>

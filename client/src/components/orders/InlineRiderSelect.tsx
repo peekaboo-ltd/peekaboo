@@ -4,7 +4,9 @@ import type { Order } from '@/types/order.type';
 import type { User } from '@/types/user.type';
 import { useInlineRiderAssignment } from '@/hooks/orders/useInlineRiderAssignment.hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { Spinner } from '@/components/ui/spinner';
+import { LoadingItem } from '@/components/ui/loading-item';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import { Link } from 'react-router-dom';
 import { controlClassName } from '@/components/inputs/control';
@@ -106,8 +108,8 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
   const renderAssignmentStatus = () => {
     if (isAssigning) {
       return (
-        <span className="text-xs text-(--muted) w-full text-center">
-          <FontAwesomeIcon icon={faSpinner} spin className="mr-1" />
+        <span className="inline-flex w-full items-center justify-center gap-2 text-xs text-(--muted)">
+          <Spinner />
           {t('rider.assigning')}
         </span>
       );
@@ -153,9 +155,8 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
         </header>
         <menu className="max-h-60 overflow-auto">
           {isFetchingRiders ? (
-            <li className="px-3 py-2 text-sm text-(--muted) text-center list-none">
-              <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
-              {t('rider.loading')}
+            <li className="list-none px-3 py-2">
+              <LoadingItem title={t('rider.loading')} className="max-w-none" />
             </li>
           ) : riders.length === 0 ? (
             <li className="px-3 py-2 text-sm text-(--muted) text-center list-none">

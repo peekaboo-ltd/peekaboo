@@ -1,4 +1,5 @@
 import Button from '@/components/inputs/Button';
+import { LoadingItem } from '@/components/ui/loading-item';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useGetOrderAssignment } from '@/hooks/orders/orderAssignments.hooks';
 import { useAppSelector } from '@/states/hooks';
@@ -64,8 +65,8 @@ const OrderAssignmentDetails = () => {
 
   if (isFetching && !orderAssignment) {
     return (
-      <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-(--muted)">{t('assignments.loading')}</p>
+      <main className="flex min-h-screen w-full items-center justify-center py-16">
+        <LoadingItem title={t('assignments.loading')} />
       </main>
     );
   }

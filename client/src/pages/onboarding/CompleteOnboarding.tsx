@@ -12,6 +12,7 @@ import {
 import Input from '@/components/inputs/Input';
 import TelInput from '@/components/inputs/TelInput';
 import Button from '@/components/inputs/Button';
+import { LoadingItem } from '@/components/ui/loading-item';
 import {
   useValidateOnboardingTokenQuery,
   useCompleteOnboardingMutation,
@@ -129,12 +130,7 @@ const CompleteOnboarding = () => {
   if (isValidating) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-(--surface)">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-(--ink) border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-(--muted) text-sm">
-            {t('completeOnboarding.validating')}
-          </p>
-        </div>
+        <LoadingItem title={t('completeOnboarding.validating')} />
       </div>
     );
   }

@@ -13,6 +13,7 @@ import { useUpdateMyOrganization } from '@/hooks/organization/organization.hooks
 import Modal from '@/components/Modal';
 import PlaceSearch, { type PlaceSearchResult } from '@/components/inputs/PlaceSearch';
 import Button from '@/components/inputs/Button';
+import { LoadingItem } from '@/components/ui/loading-item';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
   InternalPage,
@@ -110,10 +111,7 @@ const OrganizationSettingsPage = () => {
           title={t('organization.details')}
         >
           {isLoading ? (
-            <section className="mt-6 flex items-center gap-3 text-(--muted)">
-              <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-(--ink)" />
-              <span className="text-sm">{t('organization.loading')}</span>
-            </section>
+            <LoadingItem title={t('organization.loading')} className="max-w-none" />
           ) : (
             <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {details.map((item) => (
