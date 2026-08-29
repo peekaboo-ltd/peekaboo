@@ -5,6 +5,7 @@ import { useGetOrder } from '@/hooks/orders/orders.hooks';
 import { useGetPayment } from '@/hooks/payments/payment.hooks';
 import { useAppSelector } from '@/states/hooks';
 import { UUID } from '@/types';
+import { PREFERRED_CONTACT_METHOD_LABELS } from '@/types/order.type';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,10 +19,10 @@ import {
   faHashtag,
   faMoneyBillWave,
   faPhone,
-  faReceipt,
   faTruckFast,
   faUser,
   faUserGear,
+  faComments,
   faXmarkCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { motion, Variants } from 'framer-motion';
@@ -34,20 +35,11 @@ import {
   InternalStatCard,
 } from '@/components/layout/InternalPage';
 
-const containerVariants: Variants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.08 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -105,7 +97,7 @@ const PaymentDetailsPage = () => {
   if (isFetchingPayment && !payment) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-slate-500">Loading payment details…</p>
+        <p className="text-sm text-(--muted)">Loading payment details…</p>
       </main>
     );
   }
@@ -113,7 +105,7 @@ const PaymentDetailsPage = () => {
   if (!payment) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-slate-500">Payment not found.</p>
+        <p className="text-sm text-(--muted)">Payment not found.</p>
         <menu className="w-full flex items-center gap-3">
           <Button type="button" onClick={(e) => { e.preventDefault(); navigate(-1); }}>
             Back
@@ -140,23 +132,24 @@ const PaymentDetailsPage = () => {
           : payment.status === KpayPaymentStatus.FAILED
             ? faXmarkCircle
             : faClockRotateLeft,
+      // Settled payments carry their outcome; one still in flight stays grey.
       iconBg: payment.status === KpayPaymentStatus.SUCCESSFUL
-        ? 'bg-secondary-50 text-secondary-800'
+        ? 'bg-(--approve-surface) text-(--approve)'
         : payment.status === KpayPaymentStatus.FAILED
-          ? 'bg-red-50 text-red-700'
-          : 'bg-amber-50 text-amber-700',
+          ? 'bg-(--danger-surface) text-(--danger)'
+          : 'bg-(--surface) text-(--muted)',
     },
     {
       label: 'Amount',
       value: formatCurrency(amount, payment.currency),
       icon: faMoneyBillWave,
-      iconBg: 'bg-primary-50 text-primary-900',
+      iconBg: 'bg-(--ink) text-(--paper)',
     },
     {
       label: 'Updated At',
       value: formatDateLabel(payment.updatedAt),
       icon: faCalendarDay,
-      iconBg: 'bg-secondary-50 text-secondary-800',
+      iconBg: 'bg-(--surface) text-(--muted)',
     },
   ];
 
@@ -203,7 +196,7 @@ const PaymentDetailsPage = () => {
           eyebrow="Payment Details"
           title="Core Transaction Information"
           actions={
-            <span className="text-xs uppercase text-slate-400">
+            <span className="type-meta">
               Created {formatDateLabel(payment.createdAt)}
             </span>
           }
@@ -217,17 +210,17 @@ const PaymentDetailsPage = () => {
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                className="rounded-lg bg-(--surface) p-4"
               >
                 <header className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase text-slate-400">
+                    <p className="type-meta">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-[#25343F] break-all">
+                    <p className="mt-1 text-sm font-normal text-(--ink) break-all">
                       {item.value || '—'}
                     </p>
                   </section>
@@ -235,16 +228,16 @@ const PaymentDetailsPage = () => {
               </li>
             ))}
 
-            <li className="rounded-lg border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+            <li className="rounded-lg bg-(--surface) p-4 sm:col-span-2">
               <header className="flex items-center gap-3">
-                <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
+                <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                   <FontAwesomeIcon icon={faFileLines} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase text-slate-400">
+                  <p className="type-meta">
                     Description
                   </p>
-                  <p className="mt-1 text-sm font-medium text-[#25343F]">
+                  <p className="mt-1 text-sm font-normal text-(--ink)">
                     {payment.description || 'No description provided.'}
                   </p>
                 </section>
@@ -263,6 +256,20 @@ const PaymentDetailsPage = () => {
               { label: 'Customer Email', value: payment.customerEmail, icon: faEnvelope },
               { label: 'Customer Phone', value: payment.customerPhone, icon: faPhone },
               { label: 'Created By', value: payment.createdBy?.email, icon: faUserGear },
+              {
+                label: 'Contact Via',
+                value:
+                  payment.type === PaymentType.ORDER
+                    ? isFetchingOrder
+                      ? 'Loading order…'
+                      : linkedOrder?.preferredContactMethod
+                        ? PREFERRED_CONTACT_METHOD_LABELS[
+                            linkedOrder.preferredContactMethod
+                          ]
+                        : 'Not set'
+                    : 'N/A',
+                icon: faComments,
+              },
               {
                 label: 'Linked Order Ref',
                 value: payment.type === PaymentType.ORDER
@@ -288,16 +295,16 @@ const PaymentDetailsPage = () => {
             ].map((item) => (
               <article
                 key={item.label}
-                className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3"
+                className="flex items-start gap-3 rounded-lg bg-(--surface) px-4 py-3"
               >
-                <span className="mt-0.5 h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center shrink-0">
+                <span className="mt-0.5 h-8 w-8 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center shrink-0">
                   <FontAwesomeIcon icon={item.icon} />
                 </span>
                 <section>
-                  <p className="text-xs uppercase text-slate-400">
+                  <p className="type-meta">
                     {item.label}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-[#25343F] break-all">
+                  <p className="mt-1 text-sm font-normal text-(--ink) break-all">
                     {item.value || '—'}
                   </p>
                 </section>

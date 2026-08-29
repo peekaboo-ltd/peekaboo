@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
@@ -7,6 +6,8 @@ import { useForgotPasswordMutation } from '@/api/mutations/auth.mutations';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
   AuthCard,
+  AuthFooterNote,
+  AuthLink,
   AuthNotice,
   AuthPageShell,
   authInputClassName,
@@ -64,15 +65,10 @@ const ForgotPassword = () => {
           </form>
         )}
 
-        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
-          <span>Remembered your password? </span>
-          <Link
-            to="/auth/login"
-            className="font-normal text-primary hover:text-secondary-600"
-          >
-            Back to sign in
-          </Link>
-        </div>
+        <AuthFooterNote>
+          Remembered your password?{' '}
+          <AuthLink to="/auth/login">Back to sign in</AuthLink>
+        </AuthFooterNote>
       </AuthCard>
     </AuthPageShell>
   );

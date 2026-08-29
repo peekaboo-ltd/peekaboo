@@ -44,7 +44,7 @@ const LocationMiniMap = ({
 
   return (
     <figure
-      className={`overflow-hidden rounded-lg border border-slate-200 bg-white ${className}`}
+      className={`overflow-hidden rounded-lg border border-(--line) bg-(--paper) ${className}`}
     >
       {canRenderMap ? (
         <div className="h-40 w-full">
@@ -59,33 +59,33 @@ const LocationMiniMap = ({
           >
             <AdvancedMarker position={center} title={description || label}>
               <Pin
-                background="var(--color-secondary-500, #ffc400)"
-                borderColor="#0a0a0a"
-                glyphColor="#0a0a0a"
+                background="var(--ink)"
+                borderColor="var(--paper)"
+                glyphColor="var(--paper)"
               />
             </AdvancedMarker>
           </Map>
         </div>
       ) : (
         // Maps key missing — keep the link working rather than hiding the location.
-        <div className="flex h-24 w-full items-center justify-center gap-2 bg-slate-50 text-slate-400">
+        <div className="flex h-24 w-full items-center justify-center gap-2 bg-(--surface) text-(--muted)">
           <FontAwesomeIcon icon={faLocationDot} className="text-sm" aria-hidden="true" />
           <span className="text-xs">Map preview unavailable</span>
         </div>
       )}
 
-      <figcaption className="border-t border-slate-200 px-3 py-2">
+      <figcaption className="border-t border-(--line) px-3 py-2">
         <a
           href={mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`Open ${label.toLowerCase()} location in Google Maps (opens in a new tab)`}
-          className="inline-flex items-center gap-1.5 text-xs text-slate-600 transition-colors hover:text-primary"
+          className="inline-flex items-center gap-1.5 text-xs text-(--muted) transition-colors hover:text-(--ink)"
         >
           Open in Google Maps
           <FontAwesomeIcon
             icon={faArrowUpRightFromSquare}
-            className="text-[10px]"
+            className="text-xs"
             aria-hidden="true"
           />
         </a>

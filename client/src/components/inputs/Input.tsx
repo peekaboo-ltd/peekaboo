@@ -13,8 +13,10 @@ import {
 } from 'react';
 import { FieldValues, SetFieldValue } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
-import CustomTooltip from './CustomTooltip';
+import { controlClassName, readOnlyControlClassName } from './control';
+import { FieldShell } from './Field';
 import DatePicker from './DatePicker';
 import { SkeletonLoader } from './Loader';
 import { toast } from 'sonner';
@@ -281,6 +283,12 @@ export interface InputProps {
   errorMessage?: string;
 
   /**
+   * Helper text under the control. An error message replaces it.
+   * @property {string | ReactNode} [description]
+   */
+  description?: string | ReactNode;
+
+  /**
    * When true and type is "password", shows a toggle to reveal/hide the password
    * @property {boolean} [showPasswordToggle]
    */
@@ -305,6 +313,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       prefixIconHandler,
       prefixText = undefined,
       defaultChecked = undefined,
+      id,
       name,
       accept = 'application/pdf',
       min,
@@ -326,6 +335,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       autoCorrect,
       spellCheck,
       errorMessage,
+      description,
       showPasswordToggle = false,
     },
     ref,
@@ -361,7 +371,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     if (['checkbox', 'radio'].includes(type)) {
       if (['checkbox'].includes(type)) {
         return (
-          <label className="flex w-fit items-center gap-2 text-[13px]">
+          <label className="flex w-fit items-center gap-2 text-sm">
             <Checkbox
               onCheckedChange={
                 onChange as ((checked: CheckedState) => void) | undefined
@@ -372,14 +382,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               defaultChecked={defaultChecked || !!value}
               className={`${
                 value || defaultChecked || checked
-                  ? 'data-[state=checked]:bg-primary text-white'
+                  ? 'data-[state=checked]:bg-(--ink) text-(--paper)'
                   : ''
-              } w-4 h-4 border-[1.5px] cursor-pointer border-secondary outline-none focus:outline-none ease-in-out duration-50`}
+              } size-5 cursor-pointer border-(--ink) outline-none duration-100`}
             />
             <p
               className={`${
                 label ? 'flex' : 'hidden'
-              } text-secondary text-[13px]`}
+              } text-(--muted) text-sm`}
             >
               {label}
             </p>
@@ -387,7 +397,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         );
       }
       return (
-        <label className="flex items-center gap-2 text-[13px]">
+        <label className="flex items-center gap-2 text-sm">
           <input
             type={type}
             name={name}
@@ -395,9 +405,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             defaultChecked={defaultChecked as boolean}
             checked={checked as boolean}
             onChange={onChange}
-            className={`w-4 h-4 border-[1.5px] rounded-xl cursor-pointer border-secondary outline-none focus:outline-none accent-primary focus:border-[1.6px] focus:border-primary ease-in-out duration-50 ${className}`}
+            className={`size-5 cursor-pointer rounded-(--radius-pill) border border-(--ink) accent-(--ink) outline-none duration-100 ${className}`}
           />
-          <p className={`${label ? 'flex' : 'hidden'} text-[13px]`}>{label}</p>
+          <p className={`${label ? 'flex' : 'hidden'} text-sm`}>{label}</p>
         </label>
       );
     }
@@ -411,14 +421,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {isLoading ? (
             <SkeletonLoader type="button" />
           ) : (
-            <menu className="text-[13px] w-fit">
+            <menu className="text-sm w-fit">
               <button
                 type="button"
                 onClick={handleClick}
                 disabled={readOnly}
-                className={`!bg-primary !text-white hover:!bg-primary hover:!text-white !shadow-sm py-[5px] w-full text-[13px] text-center max-[800px]:!text-[13px] px-8 rounded-md cursor-pointer ease-in-out duration-400 hover:scale-[1.005] ${
+                className={`inline-flex h-(--control-md) w-full cursor-pointer items-center justify-center rounded-(--radius-control) bg-(--ink) px-4 text-sm font-medium text-(--paper) outline-none transition-[background-color,color,box-shadow] duration-200 ease-(--ease-flat) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] ${
                   readOnly &&
-                  '!bg-secondary hover:!bg-secondary !cursor-not-allowed'
+                  'cursor-not-allowed bg-(--surface) text-(--disabled-fg)'
                 } ${className}`}
               >
                 {placeholder || 'Choose file'}
@@ -460,22 +470,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     if (['date'].includes(type)) {
       return (
-        <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
-          <p
-            className={`${
-              label ? 'flex items-center gap-[5px] text-[13px] text-slate-800' : 'hidden'
-            }`}
-          >
-            {label}{' '}
-            {required && (
-              <CustomTooltip
-                label={required ? `${label} is required` : ''}
-                labelClassName="text-[13px] bg-red-600"
-              >
-                <span className="text-red-600 cursor-pointer">*</span>
-              </CustomTooltip>
-            )}
-          </p>
+        <FieldShell
+          label={label}
+          required={required}
+          description={description}
+          errorMessage={errorMessage}
+          className={labelClassName}
+        >
           {isLoading ? (
             <SkeletonLoader type="input" />
           ) : (
@@ -493,55 +494,64 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               value={(value || defaultValue) as Date | undefined}
             />
           )}
-        </label>
+        </FieldShell>
       );
     }
 
     const resolvedValue =
       (value as string | number | readonly string[] | undefined) ?? undefined;
+    const messageId = id && (errorMessage || description) ? `${id}-message` : undefined;
 
     return (
-      <label className={`flex flex-col gap-[5px] w-full ${labelClassName}`}>
-        <p
-          className={`${
-            label ? 'pl-1 flex items-center gap-[5px] text-[13px] text-slate-800' : 'hidden'
-          }`}
-        >
-          {label}{' '}
-          {required && (
-            <CustomTooltip
-              label={required ? `${label} is required` : ''}
-              labelClassName="text-[13px] bg-red-600"
-            >
-              <span className="text-red-600 cursor-pointer">*</span>
-            </CustomTooltip>
-          )}
-        </p>
-
+      <FieldShell
+        label={label}
+        required={required}
+        description={description}
+        errorMessage={errorMessage}
+        messageId={messageId}
+        className={labelClassName}
+      >
         <section className="relative w-full">
+          {/* The prefix sits inside this wrapper, which is the input's own box
+              — not the field's. Positioning it against the field made it drift
+              downward the moment an error message grew underneath. An
+              un-handled prefix is decoration and renders inert; it used to be
+              an anchor to "#", which put a dead stop in the tab order. */}
           {prefixIcon || prefixText ? (
-            <label className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-              <Link
-                to={'#'}
-                onClick={prefixIconHandler}
-                className="text-secondary"
+            prefixIconHandler ? (
+              <button
+                type="button"
+                onClick={
+                  prefixIconHandler as unknown as MouseEventHandler<HTMLButtonElement>
+                }
+                className="absolute inset-y-0 start-0 flex items-center ps-3.5 text-(--muted) outline-none transition-colors duration-200 ease-(--ease-flat) hover:text-(--ink)"
               >
                 {prefixIcon && (
                   <FontAwesomeIcon className="text-current" icon={prefixIcon} />
                 )}
-                {prefixText && <p className="text-[13px]">{prefixText}</p>}
-              </Link>
-            </label>
+                {prefixText && <span className="text-sm">{prefixText}</span>}
+              </button>
+            ) : (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3.5 text-(--muted)"
+              >
+                {prefixIcon && (
+                  <FontAwesomeIcon className="text-current" icon={prefixIcon} />
+                )}
+                {prefixText && <span className="text-sm">{prefixText}</span>}
+              </span>
+            )
           ) : null}
 
           {(suffixIcon || showSearchSuffix) && (
             <Link
               to={'#'}
               onClick={suffixIconHandler}
-              className={`absolute top-0 end-0 p-2.5 px-3.5 text-sm font-medium h-full rounded-e-lg border focus:outline-none ${
+              className={`absolute inset-y-0 end-0 flex items-center rounded-e-(--radius-control) px-3.5 text-sm outline-none transition-[background-color,color] duration-200 ease-(--ease-flat) ${
                 suffixIconPrimary
-                  ? 'bg-primary text-white border-primary border-l-none'
-                  : 'border-secondary border-opacity-50 bg-white text-primary border-l-none'
+                  ? 'bg-(--ink) text-(--paper) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]'
+                  : 'border-s border-(--line) bg-(--paper) text-(--muted) hover:text-(--ink)'
               }`}
             >
               <FontAwesomeIcon icon={suffixIcon || faSearch} />
@@ -552,6 +562,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <SkeletonLoader type="input" />
           ) : (
             <input
+              id={id}
               defaultValue={defaultValue as string}
               value={resolvedValue}
               type={isPasswordWithToggle ? (passwordVisible ? 'text' : 'password') : type || 'text'}
@@ -569,28 +580,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               autoCapitalize={autoCapitalize}
               autoCorrect={autoCorrect}
               spellCheck={spellCheck}
-              className={`
-                py-[7px] px-4
-                font-normal
-                placeholder:!font-light
-                placeholder:text-[13px]
-                placeholder:text-slate-400
-                text-[13px] text-slate-900
-                flex items-center w-full
-                rounded-md border-[1.5px]
-                border-slate-300 border-opacity-10
-                outline-none focus:outline-none
-                focus:border-[1.6px] focus:border-primary
-                ease-in-out duration-50
-                ${className}
-                ${prefixIcon && 'ps-10'}
-                ${prefixText ? 'ps-[3.6rem]' : ''}
-                ${isPasswordWithToggle ? 'pe-10' : ''}
-                ${
-                  readOnly &&
-                  '!border-[.1px] !border-background hover:cursor-default focus:!border-background'
-                }
-              `}
+              aria-invalid={Boolean(errorMessage)}
+              aria-describedby={messageId}
+              className={cn(
+                controlClassName,
+                prefixIcon && 'ps-10',
+                prefixText && 'ps-[3.6rem]',
+                isPasswordWithToggle && 'pe-10',
+                readOnly && readOnlyControlClassName,
+                className,
+              )}
             />
           )}
 
@@ -598,7 +597,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setPasswordVisible((v) => !v)}
-              className="absolute right-0 top-0 flex h-full items-center justify-center px-3 text-slate-500 hover:text-slate-700 focus:outline-none"
+              className="absolute right-0 top-0 flex h-full items-center justify-center px-3 text-(--muted) hover:text-(--ink) focus:outline-none"
               aria-label={passwordVisible ? 'Hide password' : 'Show password'}
               tabIndex={-1}
             >
@@ -614,16 +613,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               onClick={
                 suffixIconHandler as unknown as MouseEventHandler<HTMLButtonElement>
               }
-              className="absolute top-0 right-0 h-full p-2 px-4 text-xs text-white rounded-r-md bg-primary"
+              className="absolute top-0 right-0 flex h-full cursor-pointer items-center rounded-r-(--radius-control) bg-(--ink) px-4 text-sm font-medium text-(--paper) transition-[background-color] duration-200 ease-(--ease-flat) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]"
             >
               Search
             </button>
           )}
         </section>
-        {errorMessage && (
-          <p className="text-red-700 text-[13px]">{errorMessage}</p>
-        )}
-      </label>
+      </FieldShell>
     );
   },
 );

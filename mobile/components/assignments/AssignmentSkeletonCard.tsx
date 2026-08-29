@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   metaLine: {
     width: '30%',
-    height: 12,
+    height: 10,
     borderRadius: 6,
     backgroundColor: `${colors.primary}14`,
   },
@@ -100,13 +100,13 @@ const styles = StyleSheet.create({
   },
   locationLine: {
     width: '70%',
-    height: 12,
+    height: 10,
     borderRadius: 6,
     backgroundColor: `${colors.primary}12`,
   },
   locationLineSmall: {
     width: '55%',
-    height: 12,
+    height: 10,
     borderRadius: 6,
     backgroundColor: `${colors.primary}0F`,
   },

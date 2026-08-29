@@ -336,7 +336,9 @@ export const AssignmentDetails: React.FC<AssignmentDetailsProps> = ({
           <View style={[styles.row, styles.totalRow]}>
             <Text style={styles.totalLabel}>{t('assignmentInfo.total')}</Text>
             <Text style={styles.totalValue}>
-              {formatCurrency(order.finalFee || order.initialFee - order.discount)}
+              {formatCurrency(
+                order.finalFee ?? Math.max(0, (order.initialFee ?? 0) - order.discount),
+              )}
             </Text>
           </View>
         </Card>

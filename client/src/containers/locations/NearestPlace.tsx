@@ -13,8 +13,8 @@ const NearestPlace = ({ location }: { location?: OrderLocation | null }) => {
   if (isLoading) {
     return (
       <p className="flex items-center gap-2" aria-live="polite">
-        <span className="h-3 w-3 animate-pulse rounded-full bg-slate-200" />
-        <span className="h-3 w-44 animate-pulse rounded-full bg-slate-200" />
+        <span className="h-3 w-3 animate-pulse rounded-full bg-(--surface)" />
+        <span className="h-3 w-44 animate-pulse rounded-full bg-(--surface)" />
       </p>
     );
   }
@@ -32,15 +32,15 @@ const NearestPlace = ({ location }: { location?: OrderLocation | null }) => {
     <p className="flex items-start gap-2">
       <FontAwesomeIcon
         icon={faLocationDot}
-        className="mt-0.5 text-xs text-slate-400"
+        className="type-meta mt-0.5"
         aria-hidden="true"
       />
       <span className="min-w-0">
-        <span className="block break-words text-sm font-medium text-slate-800">
+        <span className="block break-words text-sm font-normal text-(--ink)">
           {heading}
         </span>
         {subtitle ? (
-          <span className="block break-words text-xs text-slate-500">{subtitle}</span>
+          <span className="block break-words text-xs text-(--muted)">{subtitle}</span>
         ) : null}
       </span>
     </p>

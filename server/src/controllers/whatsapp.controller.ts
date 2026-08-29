@@ -8,6 +8,7 @@ import {
 } from "../helpers/whatsapp.flows.helper";
 import { WhatsappService } from "../services/whatsapp.service";
 import { UUID } from "../types";
+import crypto from "crypto";
 
 const whatsappService = new WhatsappService();
 
@@ -38,6 +39,19 @@ export const WhatsappController = {
 
   async postWebhook(req: Request, res: Response, next: NextFunction) {
     try {
+      const appSecret = process.env.WHATSAPP_APP_SECRET;
+      if (appSecret) {
+        const signature = req.header("x-hub-signature-256") || "";
+        const rawBody = (req as Request & { rawBody?: Buffer }).rawBody;
+        const expected = rawBody
+          ? `sha256=${crypto.createHmac("sha256", appSecret).update(rawBody).digest("hex")}`
+          : "";
+        const valid =
+          signature.length === expected.length &&
+          signature.length > 0 &&
+          crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+        if (!valid) return res.status(401).send({ error: "Invalid WhatsApp webhook signature" });
+      }
       await whatsappService.handleMessage(req.body);
 
       return res.status(200).send({ message: "Message received" });
@@ -88,7 +102,12 @@ export const WhatsappController = {
       const decoded = jwt.verify(
         decryptedBody.flow_token || "",
         flowTokenSecret,
-      ) as JwtPayload & { phone?: string; conversationId?: UUID };
+      ) as JwtPayload & {
+        phone?: string;
+        conversationId?: UUID;
+        sessionId?: UUID;
+        role?: "sender" | "recipient" | "payer";
+      };
       const senderPhone = decoded.phone;
 
       if (!senderPhone) {
@@ -99,7 +118,11 @@ export const WhatsappController = {
         const encryptedResponse = await whatsappService.handleFlowSubmission(
           decryptedBody,
           senderPhone,
-          decoded.conversationId,
+          {
+            conversationId: decoded.conversationId,
+            sessionId: decoded.sessionId,
+            role: decoded.role,
+          },
           aesKeyBuffer,
           initialVectorBuffer,
         );
@@ -110,7 +133,7 @@ export const WhatsappController = {
       return res.status(200).send(
         encryptFlowResponse(
           {
-            screen: decryptedBody.screen || "DROPOFF",
+            screen: decryptedBody.screen || "SENDER_RECIPIENT",
             data: { error: "Unsupported WhatsApp Flow action" },
           },
           aesKeyBuffer,
@@ -122,7 +145,7 @@ export const WhatsappController = {
       return res.status(200).send(
         encryptFlowResponse(
           {
-            screen: decryptedBody.screen || "DROPOFF",
+            screen: decryptedBody.screen || "SENDER_RECIPIENT",
             data: {
               error:
                 error instanceof Error

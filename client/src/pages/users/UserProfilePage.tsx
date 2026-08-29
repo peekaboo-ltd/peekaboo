@@ -32,11 +32,10 @@ import {
 } from '@/components/layout/InternalPage';
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -86,19 +85,19 @@ const UserProfilePage = () => {
       label: 'Account Status',
       value: selectedUser?.status ?? '—',
       icon: faShieldHalved,
-      iconBg: 'bg-primary-50 text-primary-900',
+      iconBg: 'bg-(--ink) text-(--paper)',
     },
     {
       label: 'Active Roles',
       value: roles.length ? roles.length.toString() : '—',
       icon: faIdBadge,
-      iconBg: 'bg-secondary-50 text-secondary-800',
+      iconBg: 'bg-(--surface) text-(--muted)',
     },
     {
       label: 'Orders',
       value: selectedUser?.orders?.length?.toString() ?? '—',
       icon: faChartLine,
-      iconBg: 'bg-primary-50 text-primary-900',
+      iconBg: 'bg-(--ink) text-(--paper)',
     },
   ];
 
@@ -111,7 +110,7 @@ const UserProfilePage = () => {
           description="Keep your personal details, roles, and contact information current."
           actions={
             <>
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium uppercase text-slate-600">
+              <span className="rounded-full border border-(--line) bg-(--paper) px-3 py-1 text-xs font-normal text-(--muted)">
                 {selectedUser?.status ?? 'Status Unavailable'}
               </span>
               <Button
@@ -157,7 +156,7 @@ const UserProfilePage = () => {
           eyebrow="Personal Details"
           title="Profile Information"
           actions={
-            <span className="text-xs uppercase text-slate-400">
+            <span className="type-meta">
               Updated {formatDateLabel(selectedUser?.updatedAt)}
             </span>
           }
@@ -173,17 +172,17 @@ const UserProfilePage = () => {
             ].map((item) => (
               <li
                 key={item.label}
-                className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                className="rounded-md bg-(--surface) p-4"
               >
                 <header className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                     <FontAwesomeIcon icon={item.icon} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase text-slate-400">
+                    <p className="type-meta">
                       {item.label}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-[#25343F]">
+                    <p className="mt-1 text-sm font-normal text-(--ink)">
                       {item.value}
                     </p>
                   </section>
@@ -191,17 +190,17 @@ const UserProfilePage = () => {
               </li>
             ))}
 
-            <li className="rounded-lg border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+            <li className="rounded-md bg-(--surface) p-4 sm:col-span-2">
               <header className="flex items-center justify-between gap-3">
                 <section className="flex items-center gap-3">
-                  <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
+                  <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                     <FontAwesomeIcon icon={faLocationDot} />
                   </span>
                   <section>
-                    <p className="text-xs uppercase text-slate-400">
+                    <p className="type-meta">
                       Default Pickup Location
                     </p>
-                    <p className="mt-1 text-sm font-medium text-[#25343F]">
+                    <p className="mt-1 text-sm font-normal text-(--ink)">
                       {selectedUser?.defaultLocation
                         ? `${selectedUser.defaultLocation.latitude.toFixed(5)}, ${selectedUser.defaultLocation.longitude.toFixed(5)}`
                         : '—'}
@@ -214,7 +213,7 @@ const UserProfilePage = () => {
                     e.preventDefault();
                     dispatch(setUserDefaultLocationModal(true));
                   }}
-                  className="text-xs font-medium text-secondary-700 hover:underline underline-offset-2 shrink-0"
+                  className="text-xs font-normal text-(--muted) hover:underline underline-offset-2 shrink-0"
                 >
                   {selectedUser?.defaultLocation ? 'Update' : 'Set Location'}
                 </Link>
@@ -229,26 +228,26 @@ const UserProfilePage = () => {
         >
           <section className="mt-6 flex flex-col gap-5">
             <section>
-              <p className="text-xs uppercase text-slate-400">
+              <p className="type-meta">
                 Assigned Roles
               </p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {roles.length ? (
                   roles.map((role) => (
                     <li key={role}>
-                      <span className="rounded-full border border-secondary-100 bg-secondary-50 px-3 py-1 text-xs font-medium uppercase text-secondary-800">
+                      <span className="rounded-full bg-(--surface) px-3 py-1 text-xs font-normal text-(--muted)">
                         {role}
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-slate-500">No roles assigned.</li>
+                  <li className="text-sm text-(--muted)">No roles assigned.</li>
                 )}
               </ul>
             </section>
 
             <section>
-              <p className="text-xs uppercase text-slate-400">
+              <p className="type-meta">
                 Organizations
               </p>
               <ul className="mt-3 flex flex-col gap-2">
@@ -256,19 +255,19 @@ const UserProfilePage = () => {
                   organizations.map((org) => (
                     <li
                       key={org}
-                      className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3"
+                      className="flex items-center justify-between rounded-md bg-(--surface) px-4 py-3"
                     >
                       <section>
-                        <p className="text-sm font-medium text-[#25343F]">{org}</p>
-                        <p className="text-xs text-slate-500">Active membership</p>
+                        <p className="text-sm font-normal text-(--ink)">{org}</p>
+                        <p className="type-meta">Active membership</p>
                       </section>
-                      <span className="rounded-full bg-secondary-100 px-2.5 py-1 text-[11px] font-medium uppercase text-secondary-800">
+                      <span className="rounded-full bg-(--surface) px-2.5 py-1 text-xs font-normal text-(--muted)">
                         Active
                       </span>
                     </li>
                   ))
                 ) : (
-                  <li className="text-sm text-slate-500">No organization memberships.</li>
+                  <li className="text-sm text-(--muted)">No organization memberships.</li>
                 )}
               </ul>
             </section>

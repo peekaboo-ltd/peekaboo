@@ -20,7 +20,7 @@ export const useUsersColumns = () => {
         header: 'Name',
         accessorKey: 'name',
         cell: ({ row }) => (
-          <span className="font-normal text-[13px]">{row?.original?.name || '-'}</span>
+          <span className="font-normal text-sm">{row?.original?.name || '-'}</span>
         ),
       },
       {
@@ -42,7 +42,7 @@ export const useUsersColumns = () => {
             .map((userRole: UserRole) => capitalizeString(userRole?.role?.name))
             .filter(Boolean) as RoleTypes[];
           if (roleNames.length === 0) {
-            return <span className="text-gray-400">-</span>;
+            return <span className="text-(--muted)">-</span>;
           }
           return <p>{roleNames.join(', ')}</p>;
         },

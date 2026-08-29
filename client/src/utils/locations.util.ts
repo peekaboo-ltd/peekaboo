@@ -98,6 +98,26 @@ export const hasCoordinates = (
   Number.isFinite(location.latitude) &&
   Number.isFinite(location.longitude);
 
+export const coordinateKey = (location?: OrderLocation | null) => {
+  if (!hasCoordinates(location)) return '';
+  return `${location?.latitude},${location?.longitude}`;
+};
+
+export const locationErrorMessage = (error: LocationError): string => {
+  switch (error.code) {
+    case 1:
+      return 'Location permission was denied. Allow it in your browser settings, or type your pickup instead.';
+    case 2:
+      return 'Your location is currently unavailable. Try again, or type your pickup instead.';
+    case 3:
+      return 'Finding your location timed out. Try again, or type your pickup instead.';
+    case 0:
+      return 'This browser does not support location sharing. Type your pickup instead.';
+    default:
+      return 'We could not find your location. Try again, or type your pickup instead.';
+  }
+};
+
 // Best available single-line description of a location, without any lookups.
 export const describeLocation = (location?: OrderLocation | null): string => {
   if (!location) return '';

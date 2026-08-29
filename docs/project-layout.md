@@ -152,7 +152,7 @@ Environment for the deploy script (all optional): `NODE_MAJOR`, `NODE_ENV`, `POR
 ## Conventions shared across the repo
 
 - **TypeScript everywhere**; no plain JS in app code.
-- **Per-app environment files** (`.env`). `server/` and `mobile/` have committed `.env.example` files; the client does not — document client vars in `client/README.md` and [environment-variables.md](environment-variables.md).
+- **Per-app environment files** (`.env`). `server/`, `client/`, and `mobile/` have committed `.env.example` files; client variables are also documented in `client/README.md` and [environment-variables.md](environment-variables.md).
 - **Feature folders** rather than flat file lists; shared code is colocated near the feature that owns it.
 - **Config over hardcoding:** env vars and per-feature constants live in `constants/` and are never duplicated across apps.
 - Each app has its own README that is kept up to date — start there when working inside an app.

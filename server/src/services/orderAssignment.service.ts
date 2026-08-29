@@ -130,6 +130,9 @@ export class OrderAssignmentService {
     if (!orderExists) {
       throw new NotFoundError('Order not found');
     }
+    if (orderExists.status === OrderStatus.CANCELLED) {
+      throw new ConflictError('A cancelled order cannot be assigned to a rider.');
+    }
 
     await this.cancelOpenAssignmentsForOrder(orderExists.id, {
       orderReference: orderExists.referenceId || '',
@@ -528,6 +531,10 @@ export class OrderAssignmentService {
 
     if (!orderExists) {
       throw new NotFoundError('Order not found');
+    }
+
+    if (orderExists.status === OrderStatus.CANCELLED) {
+      throw new ConflictError('A cancelled order cannot be assigned to a rider.');
     }
 
     await this.cancelOpenAssignmentsForOrder(orderId, {

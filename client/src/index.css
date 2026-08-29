@@ -1,52 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --color-primary-50:  #f5f5f5;
-  --color-primary-100: #e5e5e5;
-  --color-primary-200: #c9c9c9;
-  --color-primary-300: #a3a3a3;
-  --color-primary-400: #737373;
-  --color-primary-500: #525252;
-  --color-primary-600: #404040;
-  --color-primary-700: #2a2a2a;
-  --color-primary-800: #1a1a1a;
-  --color-primary-900: #0a0a0a;
-  --color-primary-950: #050505;
-
-  --color-secondary-50:  #fffdf0;
-  --color-secondary-100: #fff4be;
-  --color-secondary-200: #ffe96e;
-  --color-secondary-300: #ffd900;
-  --color-secondary-400: #ffc400;
-  --color-secondary-500: #e6ad00;
-  --color-secondary-600: #b38600;
-  --color-secondary-700: #7a5c00;
-  --color-secondary-800: #4a3800;
-  --color-secondary-900: #2a2000;
-  --color-secondary-950: #1a1300;
-}
-
-* {
-  font-family: 'Google Sans', sans-serif;
-  box-sizing: border-box;
-}
-
-h1,
-h2 {
-  font-family: 'Google Sans', sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-family-sans);
+  --radius-sm: var(--radius-control);
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-card);
+  --radius-xl: var(--radius-card);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -57,7 +20,7 @@ h2 {
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
+  --color-muted: var(--surface);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
@@ -81,106 +44,226 @@ h2 {
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #0a0a0a;
-  --primary-foreground: #ffffff;
-  --secondary: #edb100;
-  --secondary-foreground: #0a0a0a;
+  color-scheme: light;
+  --font-family-sans: 'DM Sans', system-ui, -apple-system;
+  --paper: #ffffff;
+  --ink: #000000;
+  --surface: #f3f3f3;
+  --surface-hover: #e2e2e2;
+  --surface-sunken: #fafafa;
+  --line: #e2e2e2;
+  --line-strong: #afafaf;
+  --muted: #6e6e6e;
+  --muted-weak: #757575;
+  --disabled-fg: #afafaf;
+  --press-on-ink: rgba(255, 255, 255, 0.22);
+  --press-on-paper: rgba(0, 0, 0, 0.1);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.24);
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
 
-  /* Peekaboo brand tokens */
-  --peekaboo-yellow: #edb100;
-  --peekaboo-yellow-dark: #d49e00;
-  --peekaboo-black: #050505;
-  --peekaboo-dark: #0a0a0a;
-  --peekaboo-gray: #f5f5f5;
-  --peekaboo-warm: #f7f6f1;
-  --peekaboo-surface: rgba(243, 237, 226, 0.05);
-  --peekaboo-line: #ececea;
-  --peekaboo-text: #1f1f1f;
-  --peekaboo-muted: #6b7280;
-  --ops-ink: #14181d;
-  --ops-paper: #f4f6f3;
-  --ops-line: #cbd3db;
-  --ops-signal: #e0a100;
-  --ops-route: #2d5b8a;
-  --ops-alert: #c84c4c;
-  --font-ui: 'Google Sans';
+  /* Control heights — one scale for every input, select, and button.
+     A field and the button next to it must always share an edge. */
+  --control-sm: 36px;
+  --control-md: 40px;
+  --control-lg: 44px;
+  --ease-flat: cubic-bezier(0, 0, 1, 1);
+  --ease-menu: cubic-bezier(0.2, 0.8, 0.4, 1);
+  --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-menu: 100ms;
+  --dur-state: 200ms;
+  --dur-sweep: 500ms;
+  --chart-1: #1d4ed8;
+  --chart-2: #15803d;
+  --chart-3: #b45309;
+  --chart-4: #6d28d9;
+  --chart-5: #b91c1c;
 
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* ── Consequence ─────────────────────────────────────────────────────────
+     The only two hues in the system. Structure — cards, tables, navigation,
+     labels, the primary action — stays black and white; color is spent only
+     where something has failed, is about to be destroyed, or has been
+     resolved. Because nothing decorative is ever colored, any color at all
+     reads as "this one matters."
+     Red 700 and green 700, as specified. */
+  --danger: #b91c1c;
+  --danger-strong: #991b1b;
+  --danger-surface: #fef2f2;
+  --danger-line: #fecaca;
+  --approve: #15803d;
+  --approve-strong: #166534;
+  --approve-surface: #f0fdf4;
+  --approve-line: #bbf7d0;
+  /* Text that sits on a filled danger, approve, warning, or info ground. */
+  --on-consequence: #ffffff;
+
+  /* Two more meanings, same shape, authenticated app only. `warning` is a
+     state that needs attention but has not failed — pending payment, an order
+     past its window. `info` is a neutral fact the reader did not ask for —
+     a trend direction, a comparison, a system note. Both stay at the dense
+     end of the ramp so they hold 4.5:1 with white on the fill. */
+  --warning: #b45309;
+  --warning-strong: #92400e;
+  --warning-surface: #fffbeb;
+  --warning-line: #fde68a;
+  --info: #1d4ed8;
+  --info-strong: #1e40af;
+  --info-surface: #eff6ff;
+  --info-line: #bfdbfe;
+
+  /* Public marketing pages — subtle warmth without touching app semantics. */
+  --public-sky: #6ba3c7;
+  --public-sky-soft: #e8f3fa;
+  --public-sage: #6f9b7a;
+  --public-sage-soft: #eaf4ec;
+  --public-clay: #c9925a;
+  --public-clay-soft: #f8efe4;
+  --public-rose: #d48484;
+  --public-rose-soft: #faecec;
+  --public-plum: #9b87c4;
+  --public-plum-soft: #f0ebf8;
+  --public-band-1: #6ba3c7;
+  --public-band-2: #6f9b7a;
+  --public-band-3: #c9925a;
+  --public-band-4: #9b87c4;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: #0a0a0a;
-  --primary-foreground: #ffffff;
-  --secondary: #ffc400;
-  --secondary-foreground: #0a0a0a;
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-  --ops-paper: #171c22;
-  --ops-line: #2a323b;
+  color-scheme: dark;
+  --paper: #000000;
+  --ink: #ffffff;
+  --surface: #141414;
+  --surface-hover: #232323;
+  --surface-sunken: #0a0a0a;
+  --line: #2e2e2e;
+  --line-strong: #5e5e5e;
+  --muted: #a3a3a3;
+  --muted-weak: #8f8f8f;
+  --brand-whatsapp: #25d366;
+  --brand-tiktok: #ffffff;
+  --brand-x-twitter: #ffffff;
+  --brand-mastercard: #f79e1b;
+  --disabled-fg: #5e5e5e;
+  --press-on-ink: rgba(255, 255, 255, 0.22);
+  --press-on-paper: rgba(0, 0, 0, 0.1);
+  --overlay: rgba(0, 0, 0, 0.72);
+  --shadow-menu: 0 4px 16px rgba(0, 0, 0, 0.55);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.7);
+  --chart-1: #60a5fa;
+  --chart-2: #4ade80;
+  --chart-3: #fbbf24;
+  --chart-4: #c4b5fd;
+  --chart-5: #f87171;
+
+  /* The 700s read at 3.4:1 on black — below the floor. Dark mode keeps the
+     same two meanings and lifts them to the 400s to hold contrast. */
+  --danger: #f87171;
+  --danger-strong: #fca5a5;
+  --danger-surface: #1c1011;
+  --danger-line: #4c1d1d;
+  --approve: #4ade80;
+  --approve-strong: #86efac;
+  --approve-surface: #0c1a10;
+  --approve-line: #14532d;
+  --warning: #fbbf24;
+  --warning-strong: #fcd34d;
+  --warning-surface: #1f1608;
+  --warning-line: #573b0c;
+  --info: #60a5fa;
+  --info-strong: #93c5fd;
+  --info-surface: #0d1526;
+  --info-line: #1e3a5f;
+  --on-consequence: #000000;
+
+  --public-sky: #8ec0e4;
+  --public-sky-soft: #142028;
+  --public-sage: #8fbf9f;
+  --public-sage-soft: #152018;
+  --public-clay: #d4a574;
+  --public-clay-soft: #221a12;
+  --public-rose: #e8a4a4;
+  --public-rose-soft: #241414;
+  --public-plum: #b8a4d4;
+  --public-plum-soft: #1c1824;
+  --public-band-1: #8ec0e4;
+  --public-band-2: #8fbf9f;
+  --public-band-3: #d4a574;
+  --public-band-4: #b8a4d4;
+}
+
+:root,
+.dark {
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ink);
+  --muted-foreground: var(--muted);
+  --accent: var(--surface);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--ink);
+  --sidebar: var(--paper);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--ink);
+  --sidebar-primary-foreground: var(--paper);
+  --sidebar-accent: var(--surface);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--ink);
+}
+
+.invert-surface {
+  --paper: #000000;
+  --ink: #ffffff;
+  --surface: #1a1a1a;
+  --surface-hover: #2b2b2b;
+  --line: #2e2e2e;
+  --muted: #a3a3a3;
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+.dark .invert-surface {
+  --paper: #ffffff;
+  --ink: #000000;
+  --surface: #f3f3f3;
+  --surface-hover: #e2e2e2;
+  --line: #e2e2e2;
+  --muted: #6e6e6e;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-    font-family: 'Google Sans', sans-serif;
-    font-size: 14px;
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    @apply border-border;
+  }
+
+  html {
+    position: relative;
+    font-family: var(--font-family-sans);
+    font-size: 16px;
+    scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-size: 14px;
+    margin: 0;
+    min-width: 320px;
+    font-weight: 400;
+    line-height: 1.6;
   }
 
   h1,
@@ -189,43 +272,12 @@ h2 {
   h4,
   h5,
   h6 {
-    font-family: 'Google Sans', sans-serif;
-    letter-spacing: -0.01em;
+    font-weight: 500;
   }
 
-  /* Prevent primary color from leaking onto links and buttons by default */
-  a {
-    color: inherit;
-  }
-
+  a,
   button {
     color: inherit;
-  }
-}
-
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Selection color */
-::selection {
-  background: var(--peekaboo-yellow);
-  color: var(--peekaboo-black);
-}
-
-@layer base {
-  a,
-  button,
-  [role='button'],
-  summary {
-    transition:
-      color 200ms ease,
-      background-color 200ms ease,
-      border-color 200ms ease,
-      box-shadow 200ms ease,
-      transform 200ms ease,
-      opacity 200ms ease;
   }
 
   a:hover,
@@ -234,83 +286,70 @@ html {
     cursor: pointer;
   }
 
-  button:not(:disabled):active,
-  [role='button']:not([aria-disabled='true']):active {
-    transform: translateY(1px);
-  }
-
   :focus-visible {
-    outline: 2px solid color-mix(in oklab, var(--peekaboo-yellow) 80%, transparent);
-    outline-offset: 2px;
-    border-radius: 6px;
-  }
-
-  img,
-  svg {
-    transition: transform 250ms ease, opacity 200ms ease;
+    border-radius: var(--radius-control);
+    outline: none;
+    box-shadow: var(--paper) 0 0 0 2px inset, var(--ink) 0 0 0 2px;
   }
 }
 
-@utility hover-lift {
-  transition: transform 250ms ease, box-shadow 250ms ease;
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 36px -18px rgba(10, 10, 10, 0.28);
+/* Selection is an inversion, but only on controls that actually express choice.
+   A blanket [data-state] rule repaints every Radix node that happens to be open. */
+[role='tab'][aria-selected='true'],
+[role='option'][aria-selected='true'],
+[role='tab'][data-state='active'],
+a[aria-current='page'],
+button[aria-current='page'],
+[data-selected='true'] {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+@utility app-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 20px;
+
+  @media (width >= 40rem) {
+    padding-inline: 32px;
+  }
+
+  @media (width >= 64rem) {
+    padding-inline: 40px;
   }
 }
 
-@utility hover-glow {
-  transition: box-shadow 250ms ease, border-color 250ms ease;
+@utility section-rhythm {
+  padding-block: 40px;
 
-  &:hover {
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--peekaboo-yellow) 30%, transparent);
-    border-color: color-mix(in oklab, var(--peekaboo-yellow) 55%, var(--border));
+  @media (width >= 48rem) {
+    padding-block: 48px;
+  }
+
+  @media (width >= 64rem) {
+    padding-block: 56px;
   }
 }
 
-@utility home-card-interactive {
-  position: relative;
-  isolation: isolate;
-  transition:
-    background-color 200ms ease,
-    border-color 200ms ease,
-    box-shadow 200ms ease,
-    color 200ms ease;
-
-  &:hover {
-    border-color: color-mix(in oklab, var(--peekaboo-yellow) 48%, var(--peekaboo-line));
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--peekaboo-yellow) 22%, transparent);
-  }
-}
-
-@utility home-scroll-target {
-  scroll-margin-top: 96px;
-}
-
-.home-page button:not(:disabled):active,
-.home-page [role='button']:not([aria-disabled='true']):active {
-  transform: none;
-}
-
-.home-page .home-card-interactive svg {
-  transform: none;
-}
-
-@utility link-underline {
+@utility link-sweep {
   position: relative;
 
   &::after {
     content: '';
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -2px;
-    height: 1.5px;
-    background: currentColor;
-    transform-origin: left;
+    inset-inline: 0;
+    bottom: -0.5px;
+    height: 1px;
+    background-color: currentColor;
     transform: scaleX(0);
-    transition: transform 250ms ease;
+    transform-origin: left;
+    transition: transform var(--dur-sweep) var(--ease-glide);
   }
 
   &:hover::after,
@@ -319,19 +358,137 @@ html {
   }
 }
 
-@utility font-ui {
-  font-family: var(--font-ui), 'Google Sans', sans-serif;
-  letter-spacing: -0.02em;
+@utility link-arrow {
+  & [data-slot='icon'] {
+    transition: transform var(--dur-state) var(--ease-glide);
+  }
+
+  &:hover [data-slot='icon'] {
+    transform: translateX(12px);
+  }
 }
 
-@utility font-ui {
-  font-family: var(--font-ui), sans-serif;
-}
-
-@utility font-ui {
-  font-family: var(--font-ui), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  letter-spacing: 0.01em;
+@utility tabular {
   font-variant-numeric: tabular-nums;
+}
+
+@utility home-scroll-target {
+  scroll-margin-top: 96px;
+}
+
+/* ── Type scale ────────────────────────────────────────────────────────────
+   Every size in the system lives here. Pages compose these instead of
+   hand-picking text-[24px]/text-2xl, so a scale change is one edit, not 300.
+   Hierarchy is carried by size, spacing, and color; 500 is the weight ceiling. */
+
+@utility type-display {
+  font-size: clamp(2rem, 1.5rem + 2.1vw, 2.875rem); /* 32 → 46px */
+  line-height: 1.08;
+  font-weight: 500;
+}
+
+@utility type-h2 {
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 1.875rem); /* 24 → 30px */
+  line-height: 1.16;
+  font-weight: 500;
+}
+
+@utility type-h3 {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+/* Dashboard page heading — the authenticated app tops out here, not at display. */
+@utility type-page-title {
+  font-size: 1.375rem; /* 22px */
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+@utility type-card-title {
+  font-size: 1rem; /* 16px */
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+@utility type-body {
+  font-size: 1rem; /* 16px */
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+@utility type-body-sm {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+@utility type-label {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+@utility type-meta {
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* A price. Larger than a metric and tightened, because the numeral is the
+   content on a pricing card — its currency and cadence are set small beside it
+   so the numbers line up across cards regardless of how long the words are. */
+@utility type-price {
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem); /* 28 → 36px */
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Big numbers: counters, metric cards, totals. Tabular so columns align. */
+@utility type-metric {
+  font-size: 1.75rem; /* 28px */
+  line-height: 1.1;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-eyebrow {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ── Surfaces ──────────────────────────────────────────────────────────────
+   Three card treatments, and nothing else. A surface fill and a border are
+   two ways of saying the same thing — a card gets one of them, never both. */
+
+/* Framed card: paper ground, hairline edge. The default for content. */
+@utility card-framed {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+/* Quiet card: surface fill, no border. For stats and inert grouping. */
+@utility card-quiet {
+  border-radius: var(--radius-card);
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+/* Interactive framed card — the edge darkens on hover. No lift, no shadow. */
+@utility card-interactive {
+  transition: border-color var(--dur-state) var(--ease-flat);
+
+  &:hover {
+    border-color: var(--ink);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -339,23 +496,16 @@ html {
     scroll-behavior: auto;
   }
 
-  a,
-  button,
-  [role='button'],
-  summary,
-  img,
-  svg {
-    transition-duration: 1ms !important;
+  *,
+  *::before,
+  *::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
   }
 
-  button:not(:disabled):active,
-  [role='button']:not([aria-disabled='true']):active {
-    transform: none;
-  }
-
-  .home-page .home-card-interactive svg {
-    transform: none;
+  .link-arrow [data-slot='icon'] {
+    transform: none !important;
   }
 }

@@ -24,11 +24,10 @@ import { useOrganizationsColumns } from '@/hooks/organization/columns.organizati
 import { useAppSelector } from '@/states/hooks';
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
   },
 };
 

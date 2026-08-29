@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { OrderService } from '../services/order.service';
 import { UUID } from '../types';
+import { PersonalDeliveryQuoteService } from '../services/personalDeliveryQuote.service';
 import { Order } from '../entities/order.entity';
 import { UserService } from '../services/user.service';
 import { AuthRequest } from '../types/auth.types';
@@ -10,8 +11,10 @@ import {
   ValidationError,
 } from '../helpers/errors.helper';
 import { RoleTypes } from '../constants/role.constants';
+import { PreferredContactMethod } from '../constants/order.constants';
 
 const orderService = new OrderService();
+const personalDeliveryQuoteService = new PersonalDeliveryQuoteService();
 const userService = new UserService();
 
 type OrderLocation = NonNullable<Order['locationFrom']>;
@@ -27,6 +30,53 @@ const normalizeLocationLabel = (value: unknown): string | undefined => {
   }
   const trimmed = value.trim().slice(0, LOCATION_LABEL_MAX_LENGTH);
   return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CONTACT_EMAIL_MAX_LENGTH = 255;
+
+const normalizePreferredContactMethod = (
+  value: unknown
+): PreferredContactMethod | null | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  if (
+    typeof value !== 'string' ||
+    !Object.values(PreferredContactMethod).includes(
+      value as PreferredContactMethod
+    )
+  ) {
+    throw new ValidationError(
+      `preferredContactMethod must be one of ${Object.values(
+        PreferredContactMethod
+      ).join(', ')}`
+    );
+  }
+  return value as PreferredContactMethod;
+};
+
+const normalizeContactEmail = (value: unknown): string | null | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  if (typeof value !== 'string') {
+    throw new ValidationError('contactEmail must be a string');
+  }
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+  if (trimmed.length > CONTACT_EMAIL_MAX_LENGTH || !EMAIL_PATTERN.test(trimmed)) {
+    throw new ValidationError('contactEmail must be a valid email address');
+  }
+  return trimmed;
 };
 
 const normalizeOrderLocation = (
@@ -70,6 +120,26 @@ const normalizeOrderLocation = (
 };
 
 export const OrderController = {
+  async quotePublicOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const orderId = req.body?.orderId as UUID | undefined;
+      const order = orderId ? await orderService.getOrderById(orderId) : null;
+      const quote = await personalDeliveryQuoteService.quote({
+        pickup: order?.locationFrom || req.body?.locationFrom,
+        dropoff: order?.locationTo || req.body?.locationTo,
+      });
+      const updatedOrder = orderId
+        ? await orderService.applyPublicPersonalQuote({ orderId, ...quote })
+        : null;
+      return res.status(200).json({
+        message: 'Delivery quote calculated successfully',
+        data: { quote, ...(updatedOrder ? { order: updatedOrder } : {}) },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // ACCEPT ORDER
   async acceptOrder(req: Request, res: Response, next: NextFunction) {
     try {
@@ -265,18 +335,32 @@ export const OrderController = {
       const { order } = req.body;
 
       const existingOrder = await orderService.getOrderById(id as UUID);
+      if (existingOrder.orderSource === 'whatsapp_personal') {
+        throw new ForbiddenError('WhatsApp booking details can only be changed through the active Flow');
+      }
 
-      // Only allow updating location and fee fields for public orders
+      // Public clients may move locations and set contact preferences. Fees
+      // are written only by POST /orders/public/quote.
       const allowedFields: (keyof Order)[] = [
         'locationFrom',
         'locationTo',
-        'finalFee',
+        'preferredContactMethod',
+        'contactEmail',
       ];
       const sanitized: Partial<Order> = {};
       for (const key of allowedFields) {
         if (order?.[key] !== undefined) {
           (sanitized as Record<string, unknown>)[key] = order[key];
         }
+      }
+
+      if ((sanitized.locationFrom || sanitized.locationTo) && !existingOrder.isBusinessOrder) {
+        sanitized.initialFee = null;
+        sanitized.finalFee = null;
+        sanitized.quotedAmount = null;
+        sanitized.quotedDistanceKm = null;
+        sanitized.quotedDurationMinutes = null;
+        sanitized.quoteConfirmedAt = null;
       }
 
       // Locations arrive as free-form JSON, so validate them the same way the
@@ -292,6 +376,31 @@ export const OrderController = {
           sanitized.locationTo,
           'locationTo'
         );
+      }
+
+      // There is no schema layer on this route, so the enum and the address are
+      // checked here rather than persisted as whatever was sent.
+      if (sanitized.preferredContactMethod !== undefined) {
+        sanitized.preferredContactMethod = normalizePreferredContactMethod(
+          sanitized.preferredContactMethod
+        );
+      }
+      if (sanitized.contactEmail !== undefined) {
+        sanitized.contactEmail = normalizeContactEmail(sanitized.contactEmail);
+      }
+
+      // A stored preference we cannot act on is worse than none: EMAIL needs an
+      // address, either arriving in this request or already on the order.
+      if (sanitized.preferredContactMethod === PreferredContactMethod.EMAIL) {
+        const resolvedEmail =
+          sanitized.contactEmail !== undefined
+            ? sanitized.contactEmail
+            : existingOrder.contactEmail;
+        if (!resolvedEmail) {
+          throw new ValidationError(
+            'contactEmail is required when preferredContactMethod is EMAIL'
+          );
+        }
       }
 
       const updatedOrder = await orderService.updateOrder(id as UUID, sanitized, {

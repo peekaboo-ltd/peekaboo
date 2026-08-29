@@ -48,7 +48,6 @@ export const getAdminMetricCards = (
   {
     label: 'Total Orders',
     value: safeFormatNumber(metrics.totalOrders),
-    colorClass: 'text-blue-600',
     accent: 'blue',
     href: '/orders',
     query: { statusGroup: 'recent' },
@@ -60,7 +59,6 @@ export const getAdminMetricCards = (
   {
     label: 'Orders This Month',
     value: safeFormatNumber(metrics.ordersThisMonth),
-    colorClass: 'text-violet-600',
     accent: 'violet',
     href: '/orders',
     icon: faCalendarWeek,
@@ -70,7 +68,6 @@ export const getAdminMetricCards = (
   {
     label: 'Billing & Payments',
     value: safeFormatCurrency(metrics.billingAndPaymentsThisMonth),
-    colorClass: 'text-green-600',
     accent: 'emerald',
     href: '/billing-payments',
     icon: faCreditCard,
@@ -80,7 +77,6 @@ export const getAdminMetricCards = (
   {
     label: 'Active Assignments',
     value: safeFormatNumber(metrics.activeAssignments),
-    colorClass: 'text-amber-600',
     accent: 'amber',
     href: '/assignments',
     query: { status: 'PENDING', prioritizeUnassigned: 'true' },
@@ -91,7 +87,6 @@ export const getAdminMetricCards = (
   {
     label: 'Business Plans',
     value: 'See Plans',
-    colorClass: 'text-blue-700',
     accent: 'blue',
     to: '/services',
     icon: faRocket,
@@ -101,7 +96,6 @@ export const getAdminMetricCards = (
   {
     label: 'Total Revenue',
     value: safeFormatCurrency(metrics.totalRevenue),
-    colorClass: 'text-blue-700',
     accent: 'violet',
     href: '/orders',
     icon: faDollarSign,
@@ -111,7 +105,6 @@ export const getAdminMetricCards = (
   {
     label: 'Active Riders',
     value: safeFormatNumber(metrics.activeRiders),
-    colorClass: 'text-purple-600',
     accent: 'violet',
     href: '/users',
     icon: faMotorcycle,
@@ -121,7 +114,6 @@ export const getAdminMetricCards = (
   {
     label: 'Total Customers',
     value: safeFormatNumber(metrics.totalCustomers),
-    colorClass: 'text-pink-600',
     accent: 'blue',
     href: '/users',
     icon: faUsers,
@@ -131,7 +123,6 @@ export const getAdminMetricCards = (
   {
     label: 'Pending Assignments',
     value: safeFormatNumber(metrics.pendingStatuses),
-    colorClass: 'text-amber-600',
     accent: 'amber',
     href: '/assignments',
     query: { status: 'PENDING' },
@@ -142,7 +133,6 @@ export const getAdminMetricCards = (
   {
     label: 'Completed Payments',
     value: safeFormatNumber(metrics.completedPayments),
-    colorClass: 'text-green-600',
     accent: 'emerald',
     href: '/orders?status=COMPLETED',
     icon: faCheckCircle,
@@ -152,7 +142,6 @@ export const getAdminMetricCards = (
   {
     label: 'Organizations',
     value: safeFormatNumber(metrics.totalOrganizations),
-    colorClass: 'text-indigo-600',
     accent: 'violet',
     href: '/organizations',
     icon: faBuilding,
@@ -162,7 +151,6 @@ export const getAdminMetricCards = (
   {
     label: 'Business Orders',
     value: `${safeFormatNumber(metrics.businessOrdersPercentage)}%`,
-    colorClass: 'text-teal-600',
     accent: 'teal',
     href: '/orders',
     icon: faChartLine,
@@ -177,7 +165,6 @@ export const getRiderMetricCards = (
   {
     label: 'Active Assignments',
     value: safeFormatNumber(metrics.activeAssignments),
-    colorClass: 'text-blue-600',
     accent: 'blue',
     href: '/assignments',
     query: { status: 'ACTIVE' },
@@ -188,7 +175,6 @@ export const getRiderMetricCards = (
   {
     label: 'Pending Assignments',
     value: safeFormatNumber(metrics.pendingAssignments),
-    colorClass: 'text-amber-600',
     accent: 'amber',
     href: '/assignments',
     query: { status: 'PENDING' },
@@ -199,7 +185,6 @@ export const getRiderMetricCards = (
   {
     label: 'Completed Deliveries',
     value: safeFormatNumber(metrics.completedDeliveries),
-    colorClass: 'text-green-600',
     accent: 'emerald',
     href: '/assignments',
     query: { status: 'COMPLETED' },
@@ -210,7 +195,6 @@ export const getRiderMetricCards = (
   {
     label: 'Cancelled Assignments',
     value: safeFormatNumber(metrics.cancelledAssignments),
-    colorClass: 'text-rose-600',
     accent: 'rose',
     href: '/assignments',
     query: { status: 'CANCELLED' },
@@ -221,7 +205,6 @@ export const getRiderMetricCards = (
   {
     label: 'Deliveries This Month',
     value: safeFormatNumber(metrics.deliveriesThisMonth),
-    colorClass: 'text-purple-600',
     accent: 'violet',
     href: '/assignments',
     icon: faCalendarCheck,
@@ -231,8 +214,6 @@ export const getRiderMetricCards = (
   {
     label: 'Acceptance Rate',
     value: `${safeFormatNumber(metrics.acceptanceRate)}%`,
-    colorClass:
-      metrics.acceptanceRate >= 80 ? 'text-green-600' : 'text-amber-600',
     accent: metrics.acceptanceRate >= 80 ? 'emerald' : 'amber',
     href: '/assignments',
     icon: faPercent,
@@ -242,8 +223,6 @@ export const getRiderMetricCards = (
   {
     label: 'Completion Rate',
     value: `${safeFormatNumber(metrics.completionRate)}%`,
-    colorClass:
-      metrics.completionRate >= 90 ? 'text-green-600' : 'text-amber-600',
     accent: metrics.completionRate >= 90 ? 'emerald' : 'amber',
     href: '/assignments',
     icon: faCheckDouble,
@@ -253,7 +232,6 @@ export const getRiderMetricCards = (
   {
     label: 'Total Earnings',
     value: safeFormatCurrency(metrics.totalEarnings),
-    colorClass: 'text-teal-600',
     accent: 'teal',
     href: '/assignments',
     icon: faDollarSign,
@@ -263,7 +241,6 @@ export const getRiderMetricCards = (
   {
     label: 'Avg Per Delivery',
     value: safeFormatCurrency(metrics.averageEarningPerDelivery),
-    colorClass: 'text-indigo-600',
     accent: 'blue',
     href: '/assignments',
     icon: faChartLine,
@@ -278,7 +255,6 @@ export const getCustomerMetricCards = (
   {
     label: 'Total Orders',
     value: safeFormatNumber(metrics.totalOrders),
-    colorClass: 'text-blue-600',
     accent: 'blue',
     href: '/orders',
     query: { statusGroup: 'recent' },
@@ -290,7 +266,6 @@ export const getCustomerMetricCards = (
   {
     label: 'Pending Orders',
     value: safeFormatNumber(metrics.pendingOrders),
-    colorClass: 'text-amber-600',
     accent: 'amber',
     href: '/orders',
     query: { status: 'PENDING' },
@@ -301,7 +276,6 @@ export const getCustomerMetricCards = (
   {
     label: 'Active Orders',
     value: safeFormatNumber(metrics.activeOrders),
-    colorClass: 'text-amber-600',
     accent: 'amber',
     href: '/orders',
     query: { status: 'IN_TRANSIT,ACCEPTED,CONFIRMED' },
@@ -312,7 +286,6 @@ export const getCustomerMetricCards = (
   {
     label: 'Completed Orders',
     value: safeFormatNumber(metrics.completedOrders),
-    colorClass: 'text-green-600',
     accent: 'emerald',
     href: '/orders',
     query: { status: 'COMPLETED,DELIVERED' },
@@ -323,7 +296,6 @@ export const getCustomerMetricCards = (
   {
     label: 'Orders This Month',
     value: safeFormatNumber(metrics.ordersThisMonth),
-    colorClass: 'text-purple-600',
     accent: 'violet',
     href: '/orders',
     icon: faCalendarCheck,
@@ -333,7 +305,6 @@ export const getCustomerMetricCards = (
   {
     label: 'Cancelled Orders',
     value: safeFormatNumber(metrics.cancelledOrders),
-    colorClass: 'text-red-500',
     accent: 'rose',
     href: '/orders',
     icon: faBan,
@@ -343,8 +314,6 @@ export const getCustomerMetricCards = (
   {
     label: 'Success Rate',
     value: `${safeFormatNumber(metrics.deliverySuccessRate)}%`,
-    colorClass:
-      metrics.deliverySuccessRate >= 90 ? 'text-green-600' : 'text-amber-600',
     accent: metrics.deliverySuccessRate >= 90 ? 'emerald' : 'amber',
     href: '/orders',
     icon: faPercent,
@@ -354,7 +323,6 @@ export const getCustomerMetricCards = (
   {
     label: 'Total Spent',
     value: safeFormatCurrency(metrics.totalSpent),
-    colorClass: 'text-teal-600',
     accent: 'teal',
     href: '/orders',
     icon: faDollarSign,
@@ -364,7 +332,6 @@ export const getCustomerMetricCards = (
   {
     label: 'Avg Order Cost',
     value: safeFormatCurrency(metrics.averageOrderCost),
-    colorClass: 'text-indigo-600',
     accent: 'blue',
     href: '/orders',
     icon: faChartLine,
@@ -379,7 +346,6 @@ export const getBusinessMetricCards = (
   {
     label: 'Total Orders',
     value: formatNumbers(metrics.totalOrders),
-    colorClass: 'text-blue-600',
     accent: 'blue',
     href: '/orders',
     query: { statusGroup: 'recent' },
@@ -391,7 +357,6 @@ export const getBusinessMetricCards = (
   {
     label: 'Active Orders',
     value: formatNumbers(metrics.activeOrders ?? 0),
-    colorClass: 'text-amber-600',
     accent: 'amber',
     href: '/orders',
     query: { status: 'IN_TRANSIT,ACCEPTED,CONFIRMED' },
@@ -402,7 +367,6 @@ export const getBusinessMetricCards = (
   {
     label: 'Billing & Payments',
     value: formatCurrency(metrics.currentAmountDue),
-    colorClass: 'text-emerald-600',
     accent: 'emerald',
     href: '/billing-payments',
     icon: faCreditCard,
@@ -412,7 +376,6 @@ export const getBusinessMetricCards = (
   {
     label: 'Business Plans',
     value: 'See Plans',
-    colorClass: 'text-blue-700',
     accent: 'blue',
     to: '/services',
     icon: faRocket,
@@ -426,7 +389,6 @@ export const getBusinessMetricCards = (
         ? metrics.monthlyOrderVolume.slice(-1)[0]?.value || 0
         : 0
     ),
-    colorClass: 'text-purple-600',
     accent: 'violet',
     href: '/orders',
     icon: faChartLine,
@@ -436,8 +398,6 @@ export const getBusinessMetricCards = (
   {
     label: 'Delivery Success Rate',
     value: `${formatNumbers(metrics.deliverySuccessRate)}%`,
-    colorClass:
-      metrics.deliverySuccessRate >= 90 ? 'text-green-600' : 'text-amber-600',
     accent: metrics.deliverySuccessRate >= 90 ? 'emerald' : 'amber',
     href: '/orders',
     icon: faCheckCircle,
@@ -447,7 +407,6 @@ export const getBusinessMetricCards = (
   {
     label: 'Team Members',
     value: formatNumbers(metrics.teamMembers),
-    colorClass: 'text-indigo-600',
     accent: 'blue',
     href: '/users',
     icon: faUserGroup,
@@ -457,7 +416,6 @@ export const getBusinessMetricCards = (
   {
     label: 'Orders This Week',
     value: formatNumbers(metrics.ordersThisWeek),
-    colorClass: 'text-cyan-600',
     accent: 'teal',
     href: '/orders',
     icon: faCalendarWeek,
@@ -467,7 +425,6 @@ export const getBusinessMetricCards = (
   {
     label: 'Pending Payments',
     value: formatNumbers(metrics.pendingPayments),
-    colorClass: 'text-amber-600',
     accent: 'amber',
     href: '/orders',
     icon: faClock,

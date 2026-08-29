@@ -1,68 +1,26 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { type MetricCardData } from '@/types/dashboard.type';
 import { cn } from '@/lib/utils';
+import Sparkline from '@/components/charts/Sparkline';
+import type { ChartSeriesIndex } from '@/components/charts/chart.tokens';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { createSearchParams, Link } from 'react-router-dom';
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  ResponsiveContainer,
-} from 'recharts';
+import { faArrowRight, faArrowTrendDown, faArrowTrendUp } from '@fortawesome/free-solid-svg-icons';
 
-const accentMap = {
-  blue: {
-    icon: 'text-slate-700',
-    iconBg: 'bg-[var(--peekaboo-surface)]',
-    iconRing: 'ring-slate-200',
-    spark: 'hsl(var(--primary))',
-    footer: 'text-slate-700',
-  },
-  teal: {
-    icon: 'text-slate-700',
-    iconBg: 'bg-[var(--peekaboo-surface)]',
-    iconRing: 'ring-slate-200',
-    spark: '#0891b2',
-    footer: 'text-slate-700',
-  },
-  amber: {
-    icon: 'text-amber-600',
-    iconBg: 'bg-amber-50',
-    iconRing: 'ring-amber-100',
-    spark: '#d97706',
-    footer: 'text-amber-700',
-  },
-  emerald: {
-    icon: 'text-emerald-600',
-    iconBg: 'bg-emerald-50',
-    iconRing: 'ring-emerald-100',
-    spark: '#059669',
-    footer: 'text-emerald-700',
-  },
-  violet: {
-    icon: 'text-slate-700',
-    iconBg: 'bg-[var(--peekaboo-surface)]',
-    iconRing: 'ring-slate-200',
-    spark: 'hsl(var(--primary))',
-    footer: 'text-slate-700',
-  },
-  rose: {
-    icon: 'text-rose-600',
-    iconBg: 'bg-rose-50',
-    iconRing: 'ring-rose-100',
-    spark: '#e11d48',
-    footer: 'text-rose-700',
-  },
-  slate: {
-    icon: 'text-slate-700',
-    iconBg: 'bg-[var(--peekaboo-surface)]',
-    iconRing: 'ring-slate-200',
-    spark: '#475569',
-    footer: 'text-slate-700',
-  },
-} as const;
+// `accent` survives from the pre-monochrome palette. Every card now shares one
+// treatment; the accent only picks a step on the neutral chart ramp so a row of
+// sparklines stays distinguishable from one another.
+// `accent` is a leftover name from the old palette. It now selects a step on
+// the shared series ramp so a column of metric cards stays tellable apart.
+const accentSeries = {
+  blue: 1,
+  teal: 2,
+  amber: 3,
+  emerald: 4,
+  violet: 5,
+  rose: 2,
+  slate: 3,
+} as const satisfies Record<string, ChartSeriesIndex>;
 
 const MetricCard = ({
   label,
@@ -74,7 +32,6 @@ const MetricCard = ({
   icon,
   sparklineData,
   sparklineType,
-  sparkColor,
   accent = 'slate',
   comparisonLabel,
   note,
@@ -88,139 +45,85 @@ const MetricCard = ({
         : href
       : undefined);
 
-  const chartData = sparklineData?.map((item, index) => ({ value: item, index })) || [];
-
-  const renderSparkline = () => {
-    if (!sparklineData?.length || !sparklineType) return null;
-
-    return (
-      <div className="h-12 w-24">
-        <ResponsiveContainer width="100%" height="100%">
-          {sparklineType === 'line' ? (
-            <LineChart data={chartData}>
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={sparkColor || accentMap[accent].spark}
-                strokeWidth={2.4}
-                dot={false}
-              />
-            </LineChart>
-          ) : (
-            <BarChart data={chartData}>
-              <Bar
-                dataKey="value"
-                fill={sparkColor || accentMap[accent].spark}
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          )}
-        </ResponsiveContainer>
-      </div>
-    );
-  };
+  const caption = footerText || note || comparisonLabel;
 
   const cardContent = (
     <Card
+      interactive={Boolean(destination)}
       className={cn(
-        'group relative overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] shadow-[0_1px_0_rgba(20,24,29,0.05)] transition-all duration-300',
-        destination
-          ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_10px_22px_-18px_rgba(20,24,29,0.5)]'
-          : 'hover:shadow-[0_10px_22px_-18px_rgba(20,24,29,0.5)]',
+        'group h-full gap-3',
+        destination && 'active:shadow-[var(--press-on-paper)_999px_999px_0_inset]',
       )}
     >
-      <CardContent className="relative p-5 sm:p-6">
-        <header className="mb-4 flex items-start justify-between gap-3">
-          <span className="flex min-w-0 items-center gap-3">
-            {icon && (
-              <span
-                className={cn(
-                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-md ring-1 transition-transform duration-300 group-hover:scale-[1.03]',
-                  accentMap[accent].iconBg,
-                  accentMap[accent].iconRing,
-                )}
-                aria-hidden="true"
-              >
-                <FontAwesomeIcon
-                  icon={icon}
-                  className={cn('text-base sm:text-lg', accentMap[accent].icon)}
-                  aria-hidden="true"
-                />
-              </span>
-            )}
-            <span className="min-w-0">
-              <span className="font-ui block truncate text-[11px] font-medium uppercase text-slate-600">
-                {label}
-              </span>
-              {(comparisonLabel || note) && (
-                <span className="mt-0.5 block truncate text-xs text-slate-500">
-                  {comparisonLabel || note}
-                </span>
-              )}
-            </span>
-          </span>
-          {trend && (
+      <header className="flex items-start justify-between gap-3">
+        <span className="flex min-w-0 items-center gap-2.5">
+          {icon && (
             <span
-              className={`font-ui shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${trend.isPositive
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-rose-50 text-rose-700'
-                }`}
-              aria-label={`Trend: ${trend.isPositive ? 'increasing' : 'decreasing'} by ${Math.abs(trend.value)}%`}
+              className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) bg-(--surface) text-(--ink)"
+              aria-hidden="true"
             >
-              {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
+              <FontAwesomeIcon icon={icon} className="text-sm" aria-hidden="true" />
             </span>
           )}
-        </header>
+          <span className="type-body-sm min-w-0 truncate text-(--muted)">{label}</span>
+        </span>
 
-        <section className="flex items-end justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <p
-              className="font-ui truncate text-[2rem] font-semibold leading-none text-[color:var(--ops-ink)] sm:text-[2.3rem]"
-              aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
-            >
-              {value}
-            </p>
-            <p className="mt-3 max-w-[16rem] text-sm leading-6 text-slate-600">
-              {footerText || note || comparisonLabel || 'Performance snapshot'}
-            </p>
-          </div>
-
-          <div className="hidden items-center gap-2 sm:flex">
-            {renderSparkline()}
-            {destination && (
-              <span
-                className="opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                aria-hidden="true"
-              >
-                <FontAwesomeIcon
-                  icon={faArrowRight}
-                  className="transform text-sm text-slate-700 transition-transform duration-300 group-hover:translate-x-1"
-                  aria-hidden="true"
-                />
-              </span>
+        {trend && (
+          // Direction reads from the arrow and the label, not from a fill.
+          <span
+            className={cn(
+              'type-meta inline-flex shrink-0 items-center gap-1 tabular',
+              trend.isPositive ? 'text-(--approve)' : 'text-(--danger)'
             )}
-          </div>
-        </section>
-
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-[color:var(--ops-line)] pt-4 sm:hidden">
-          <span className={cn('text-xs font-medium', accentMap[accent].footer)}>
-            {footerText || comparisonLabel || 'Live dashboard signal'}
+            aria-label={`${trend.isPositive ? 'Up' : 'Down'} ${Math.abs(trend.value)} percent`}
+          >
+            <FontAwesomeIcon
+              icon={trend.isPositive ? faArrowTrendUp : faArrowTrendDown}
+              className="size-3"
+              aria-hidden="true"
+            />
+            {Math.abs(trend.value)}%
           </span>
+        )}
+      </header>
+
+      <div className="flex items-end justify-between gap-4">
+        <p
+          className="type-metric truncate"
+          aria-label={`${label}: ${typeof value === 'number' ? value.toLocaleString() : value}`}
+        >
+          {value}
+        </p>
+        {sparklineData && sparklineData.length > 0 && (
+          <div className="hidden shrink-0 sm:block">
+            <Sparkline
+              values={sparklineData}
+              kind={sparklineType === 'bar' ? 'bar' : 'line'}
+              series={accentSeries[accent]}
+              ariaLabel={`${label} trend`}
+            />
+          </div>
+        )}
+      </div>
+
+      {(caption || destination) && (
+        <footer className="flex items-center justify-between gap-3">
+          <span className="type-meta min-w-0 truncate">{caption}</span>
           {destination && (
             <FontAwesomeIcon
               icon={faArrowRight}
-              className="text-sm text-slate-500"
+              className="size-3 shrink-0 text-(--muted) transition-transform duration-200 ease-(--ease-glide) group-hover:translate-x-1 group-hover:text-(--ink)"
               aria-hidden="true"
             />
           )}
-        </div>
-      </CardContent>
+        </footer>
+      )}
     </Card>
   );
 
   if (destination) {
     return (
-      <Link to={destination} className="block">
+      <Link to={destination} className="block h-full">
         {cardContent}
       </Link>
     );

@@ -14,15 +14,17 @@ const statusConfig: Record<UserStatus, {
 }> = {
   [UserStatus.ACTIVE]: {
     label: 'Active',
-    className: 'bg-green-100 text-black hover:bg-green-200',
+    className: 'invert-surface border-transparent',
   },
   [UserStatus.INACTIVE]: {
     label: 'Inactive',
-    className: 'bg-gray-100 text-black hover:bg-gray-200',
+    className: 'border-(--line) bg-transparent text-(--muted)',
   },
+  // Active is the ordinary state and stays ink; only the one that is a
+  // consequence takes color.
   [UserStatus.SUSPENDED]: {
     label: 'Suspended',
-    className: 'bg-red-100 text-black hover:bg-red-200',
+    className: 'border-(--danger-line) bg-(--danger-surface) text-(--danger)',
   },
 };
 
@@ -43,7 +45,7 @@ export const UserStatusBadge: React.FC<UserStatusBadgeProps> = ({
   return (
     <Badge 
       className={cn(config.className, className)}
-      variant="secondary"
+      variant="outline"
     >
       {config.label}
     </Badge>

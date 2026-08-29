@@ -84,13 +84,13 @@ const BatchesPage = () => {
   return (
     <main className="w-full flex flex-col gap-6">
       <motion.header
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         className="flex flex-col gap-4"
       >
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-bold text-black">Batches</h1>
+            <h1 className="type-page-title">Batches</h1>
             <p className="text-sm text-muted-foreground">
               Manage imports, review draft records, and track batch progress.
             </p>
@@ -122,17 +122,17 @@ const BatchesPage = () => {
           ].map((card) => (
             <article
               key={card.label}
-              className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between"
+              className="bg-(--paper) border border-(--line) rounded-xl p-4 flex items-center justify-between"
             >
               <div>
-                <p className="text-xs uppercase text-slate-500">
+                <p className="type-meta">
                   {card.label}
                 </p>
-                <p className="text-lg font-semibold text-slate-900 mt-1">
+                <p className="type-metric mt-1">
                   {card.value}
                 </p>
               </div>
-              <span className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center text-black">
+              <span className="w-10 h-10 rounded-lg bg-(--ink) flex items-center justify-center text-(--paper)">
                 <FontAwesomeIcon icon={card.icon} />
               </span>
             </article>
@@ -145,7 +145,7 @@ const BatchesPage = () => {
             value={referenceFilter}
             onChange={(e) => setReferenceFilter(e.target.value)}
             placeholder="Search by batch reference"
-            className="bg-white"
+            className="bg-(--paper)"
           />
         </fieldset>
       </motion.header>

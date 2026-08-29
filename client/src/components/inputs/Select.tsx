@@ -8,9 +8,15 @@ import {
 } from '@/components/ui/select';
 import { UUID } from 'crypto';
 import { useState, useRef, useEffect, forwardRef } from 'react';
-import CustomTooltip from './CustomTooltip';
 import useDebounce from '@/hooks/common/debounce.hooks';
 import { SkeletonLoader } from './Loader';
+import { cn } from '@/lib/utils';
+import { controlClassName } from './control';
+import { FieldShell } from './Field';
+import {
+  selectEmptyClassName,
+  selectListItemHintClassName,
+} from '@/components/ui/select-options';
 
 const RADIX_NAVIGATION_KEYS = new Set([
   'ArrowDown',
@@ -28,9 +34,11 @@ interface SelectProps {
     label: string | undefined;
     value: string | UUID;
     disabled?: boolean;
+    hint?: string;
   }>;
   defaultValue?: string | undefined;
   placeholder?: string;
+  searchPlaceholder?: string;
   className?: string;
   onChange?: ((value: string) => void) | undefined;
   value?: string | undefined;
@@ -40,6 +48,9 @@ interface SelectProps {
   searchable?: boolean;
   readOnly?: boolean;
   isLoading?: boolean;
+  /** Helper text under the control. An error message replaces it. */
+  description?: string;
+  errorMessage?: string;
 }
 
 const Select = forwardRef<HTMLInputElement, SelectProps>(
@@ -54,14 +65,16 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       options = [],
       defaultValue = undefined,
       placeholder = 'Select here...',
+      searchPlaceholder = 'Search...',
       className = undefined,
       value = '',
       onChange,
       isLoading = false,
+      description,
+      errorMessage,
     },
     ref
   ) => {
-
     const [searchTerm, setSearchTerm] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -76,9 +89,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
       : options;
 
     const handleValueChange = (selectedValue: string) => {
-      if (onChange) {
-        onChange(selectedValue);
-      }
+      onChange?.(selectedValue);
       setSearchTerm('');
     };
 
@@ -91,16 +102,13 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
     }, [debouncedSearchTerm, isOpen, searchable]);
 
     return (
-      <label className={`flex flex-col gap-1 w-full ${labelClassName}`}>
-        <p className={label ? 'flex items-center gap-1 text-[13px]' : 'hidden'}>
-          {label}{' '}
-          <CustomTooltip
-            label={required ? `${label} is required` : ''}
-            labelClassName="text-[13px] bg-red-600"
-          >
-            <span className={required ? `text-red-600 cursor-pointer` : 'hidden'}>*</span>
-          </CustomTooltip>
-        </p>
+      <FieldShell
+        label={label}
+        required={required}
+        description={description}
+        errorMessage={errorMessage}
+        className={labelClassName}
+      >
         {isLoading ? (
           <SkeletonLoader type="input" />
         ) : (
@@ -115,63 +123,66 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(
             name={name}
           >
             <SelectTrigger
-              className={`w-full focus:ring-transparent ring-0 h-10 ${className}`}
+              aria-invalid={Boolean(errorMessage)}
+              className={cn('w-full justify-between text-left', className)}
             >
-              <SelectValue
-                className="!text-[10px] truncate"
-                placeholder={
-                  <p className="text-[13px] text-gray-500 truncate">{placeholder}</p>
-                }
-              />
+              <SelectValue className="truncate" placeholder={placeholder} />
             </SelectTrigger>
-            <SelectContent>
-              {searchable ? (
-                <search className="sticky top-0 z-10 -mt-1 bg-popover pb-2 pt-1">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    // Radix runs its own typeahead on keydown and would swallow
-                    // the keystrokes, but it still owns list navigation and
-                    // closing, so those keys are left to bubble.
-                    onKeyDown={(e) => {
-                      if (!RADIX_NAVIGATION_KEYS.has(e.key)) {
-                        e.stopPropagation();
-                      }
-                    }}
-                    placeholder="Search..."
-                    aria-label={label ? `Search ${label}` : 'Search options'}
-                    autoComplete="off"
-                    className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-[13px] placeholder:text-[13px] focus:border-transparent focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </search>
-              ) : null}
-              <SelectGroup>
-                {filteredOptions.length === 0 ? (
-                  <p className="px-2 py-3 text-center text-[13px] text-gray-500">
-                    No matches found
-                  </p>
-                ) : (
-                  filteredOptions.map((option, index: number) => {
-                    return (
-                      <SelectItem
-                        ref={ref}
-                        key={index}
-                        value={option.value}
-                        disabled={option?.disabled || readOnly}
-                        className="cursor-pointer text-[13px] py-1 hover:bg-background"
-                      >
-                        <p className="text-[13px] py-[3px] truncate">{option?.label}</p>
-                      </SelectItem>
-                    );
-                  })
-                )}
-              </SelectGroup>
+
+            <SelectContent className="p-0">
+              <section className="flex w-full min-w-[14rem] max-h-[75vh] flex-col gap-2">
+                {searchable ? (
+                  <fieldset className="w-full shrink-0">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (!RADIX_NAVIGATION_KEYS.has(event.key)) {
+                          event.stopPropagation();
+                        }
+                      }}
+                      placeholder={searchPlaceholder}
+                      aria-label={label ? `Search ${label}` : 'Search options'}
+                      autoComplete="off"
+                    className={cn(controlClassName, 'h-(--control-sm) border-none !border-b border-(--line) focus:!outline-none focus:ring-0 focus:!border-b-ink w-full text-sm')}
+                    />
+                  </fieldset>
+                ) : null}
+
+                <nav
+                  className="flex w-full flex-col overflow-y-auto rounded-md bg-(--paper) py-2"
+                  style={{ maxHeight: searchable ? 'calc(55vh - 50px)' : 'calc(55vh - 12px)' }}
+                  aria-label={label ? `${label} options` : 'Select options'}
+                >
+                  <SelectGroup className="flex flex-col gap-1">
+                    {filteredOptions.length === 0 ? (
+                      <p className={selectEmptyClassName}>No matches found</p>
+                    ) : (
+                      filteredOptions.map((option, index) => (
+                        <SelectItem
+                          ref={ref}
+                          key={`${option.value}-${index}`}
+                          value={option.value}
+                          disabled={option?.disabled || readOnly}
+                        >
+                          <span className="truncate">{option?.label}</span>
+                          {option.hint ? (
+                            <span className={selectListItemHintClassName}>
+                              {option.hint}
+                            </span>
+                          ) : null}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectGroup>
+                </nav>
+              </section>
             </SelectContent>
           </SelectComponent>
         )}
-      </label>
+      </FieldShell>
     );
   }
 );

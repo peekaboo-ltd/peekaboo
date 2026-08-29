@@ -35,7 +35,7 @@ import {
 } from '../helpers/errors.helper';
 import { LogReferenceTypes } from '../constants/logs.constants';
 import { OrderActivityService } from './orderActivity.service';
-import { OrderActivityStatus } from '../constants/order.constants';
+import { OrderActivityStatus, OrderStatus } from '../constants/order.constants';
 import { OrderActivity } from '../entities/orderActivity.entity';
 import { OrderAssignmentService } from './orderAssignment.service';
 import { EmailService } from '../integrations/emails/email.service';
@@ -53,6 +53,9 @@ import {
   getPaymentMode,
   resolveChargeableAmount,
 } from '../helpers/paymentMode.helper';
+import { WhatsappNotificationService } from './whatsappNotification.service';
+import { PendingOrderSession } from '../entities/pendingOrderSession.entity';
+import { PendingOrderSessionStatus } from '../constants/pendingOrderSession.constants';
 
 type InitiationContext = {
   provider: PaymentProvider;
@@ -72,6 +75,7 @@ export class PaymentService {
   private readonly orderActivityService: OrderActivityService;
   private readonly orderAssignmentService: OrderAssignmentService;
   private readonly emailService: EmailService;
+  private readonly whatsappNotificationService: WhatsappNotificationService;
 
   constructor() {
     this.paymentRepository = AppDataSource.getRepository(Payment);
@@ -80,6 +84,7 @@ export class PaymentService {
     this.orderActivityService = new OrderActivityService();
     this.orderAssignmentService = new OrderAssignmentService();
     this.emailService = new EmailService();
+    this.whatsappNotificationService = new WhatsappNotificationService();
   }
 
 
@@ -279,6 +284,29 @@ export class PaymentService {
     };
     await this.paymentRepository.update(payment?.id as UUID, payment);
 
+    const latestOrder = status === KpayPaymentStatus.SUCCESSFUL
+      ? await AppDataSource.getRepository(Order).findOne({
+          where: { id: payment.entityId },
+        })
+      : order;
+
+    if (
+      status === KpayPaymentStatus.SUCCESSFUL &&
+      previousStatus !== KpayPaymentStatus.SUCCESSFUL &&
+      latestOrder?.status === OrderStatus.CANCELLED
+    ) {
+      payment.metadata = {
+        ...(payment.metadata || {}),
+        lateSuccessfulPaymentRequiresManualReconciliation: true,
+        lateSuccessfulPaymentRecordedAt: new Date().toISOString(),
+      };
+      await this.paymentRepository.update(payment.id, { metadata: payment.metadata });
+      this.whatsappNotificationService.notifyLatePayment(payment).catch((error) =>
+        logger.error('Failed to notify payer about late payment', error),
+      );
+      return payment;
+    }
+
     if (paidAfterWhatsappSessionExpired && existingMetadata.conversationId) {
       await AppDataSource.getRepository(Conversation).update(
         { id: existingMetadata.conversationId as UUID },
@@ -290,6 +318,13 @@ export class PaymentService {
       status === KpayPaymentStatus.SUCCESSFUL &&
       previousStatus !== KpayPaymentStatus.SUCCESSFUL
     ) {
+      const whatsappSessionId = payment.metadata?.whatsappBookingSessionId as UUID | undefined;
+      if (whatsappSessionId) {
+        await AppDataSource.getRepository(PendingOrderSession).update(
+          { id: whatsappSessionId },
+          { status: PendingOrderSessionStatus.PAID },
+        );
+      }
       const existingPaidActivity = await AppDataSource.getRepository(
         OrderActivity,
       ).findOne({
@@ -310,6 +345,9 @@ export class PaymentService {
           orderId: payment?.entityId as UUID,
         });
       }
+      this.whatsappNotificationService.notifyOrderPaid(payment).catch((error) =>
+        logger.error('Failed to send WhatsApp paid notification', error),
+      );
     }
 
     if (
@@ -548,6 +586,7 @@ export class PaymentService {
     context: InitiationContext,
   ): Partial<Payment> {
     return {
+      idempotencyKey: payment.idempotencyKey,
       entityId: payment.entityId,
       amount: context.chargeAmount,
       externalReferenceId: undefined,

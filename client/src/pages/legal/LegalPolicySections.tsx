@@ -19,7 +19,7 @@ export const LegalPolicySections = ({ sections, t }: Props) => (
             block.type === 'p' ? (
               <div key={blockIdx} className="flex flex-col gap-3">
                 {block.keys.map((key) => (
-                  <p key={key} className="text-sm leading-6 text-slate-600">
+                  <p key={key} className="text-sm leading-6 text-(--muted)">
                     {t(key)}
                   </p>
                 ))}
@@ -27,7 +27,7 @@ export const LegalPolicySections = ({ sections, t }: Props) => (
             ) : (
               <ul
                 key={blockIdx}
-                className="list-disc space-y-2 pl-5 text-sm leading-6 text-slate-600"
+                className="list-disc space-y-2 pl-5 text-sm leading-6 text-(--muted)"
               >
                 {block.keys.map((key) => (
                   <li key={key}>{t(key)}</li>

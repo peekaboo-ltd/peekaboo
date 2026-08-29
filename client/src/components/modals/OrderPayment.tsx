@@ -304,18 +304,18 @@ const OrderPayment = () => {
           <CardFields control={control} errors={errors} />
         )}
 
-        <p className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm">
-          <span className="text-slate-500">Amount due</span>
-          <span className="font-medium text-slate-900">{formatCurrency(amount)}</span>
+        <p className="flex items-center justify-between border-t border-(--line) pt-3 text-sm">
+          <span className="text-(--muted)">Amount due</span>
+          <span className="font-normal text-(--ink)">{formatCurrency(amount)}</span>
         </p>
 
         {ENVIRONMENTS.isPaymentSimulation ? (
-          <p className="text-xs font-normal leading-snug text-amber-700">
+          <p className="text-xs font-normal leading-snug text-(--ink)">
             Payments are simulated in this environment. No real charge will be made.
           </p>
         ) : null}
         {ENVIRONMENTS.isDevPrice ? (
-          <p className="text-xs font-normal leading-snug text-amber-700">
+          <p className="text-xs font-normal leading-snug text-(--ink)">
             Catalog fee is {formatCurrency(amount)}. In this environment you will only
             be charged {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)}.
           </p>

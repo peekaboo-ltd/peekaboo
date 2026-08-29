@@ -7,7 +7,6 @@ import Button from '@/components/inputs/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
-  faArrowRight,
   faCheck,
   faRocket,
 } from '@fortawesome/free-solid-svg-icons';
@@ -26,34 +25,31 @@ const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+    transition: { duration: 0.2, ease: [0, 0, 1, 1] },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 };
 
 const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 };
 
 const sidebarVariants: Variants = {
-  hidden: { opacity: 0, x: 40 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    x: 0,
-    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.2 },
+    transition: { duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.2 },
   },
 };
 
@@ -64,12 +60,11 @@ const StepProgress = ({ currentStep }: { currentStep: 1 | 2 | 3 }) => {
       {[1, 2, 3].map((step) => (
         <div key={step} className="flex items-center">
           <motion.span
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-normal transition-colors ${
               currentStep >= step
-                ? 'bg-primary-600 text-white'
-                : 'bg-slate-200 text-slate-500'
+                ? 'bg-(--ink) text-(--paper)'
+                : 'bg-(--surface) text-(--muted)'
             }`}
-            animate={{ scale: currentStep === step ? 1.1 : 1 }}
             transition={{ duration: 0.2 }}
           >
             {currentStep > step ? (
@@ -81,7 +76,7 @@ const StepProgress = ({ currentStep }: { currentStep: 1 | 2 | 3 }) => {
           {step < 3 && (
             <div
               className={`w-12 h-0.5 mx-1 transition-colors ${
-                currentStep > step ? 'bg-primary-600' : 'bg-slate-200'
+                currentStep > step ? 'bg-(--ink)' : 'bg-(--surface)'
               }`}
             />
           )}
@@ -149,7 +144,7 @@ const UserManagementOnboarding = () => {
 
   return (
     <motion.main
-      className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen bg-(--surface) py-10 px-4 sm:px-6 lg:px-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -160,13 +155,13 @@ const UserManagementOnboarding = () => {
         </motion.div>
 
         <motion.header variants={itemVariants} className="flex flex-col gap-3">
-          <span className="text-sm font-semibold text-black">
+          <span className="type-eyebrow">
             {t('onboarding.step', { step: 3 })}
           </span>
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
+          <h1 className="type-h2 text-(--ink)">
             {t('onboarding.users.title')}
           </h1>
-          <p className="text-slate-600 max-w-3xl">
+          <p className="type-body max-w-[68ch] text-(--muted)">
             {t('onboarding.users.subtitle')}
           </p>
         </motion.header>
@@ -175,21 +170,20 @@ const UserManagementOnboarding = () => {
           <motion.form
             variants={cardVariants}
             onSubmit={handleFinish}
-            className="bg-white border border-slate-200 p-6 sm:p-8 space-y-6"
+            className="card-framed space-y-5 p-6 sm:p-8"
           >
-            <section className="flex items-center gap-3 text-slate-800">
+            <section className="flex items-center gap-3 text-(--ink)">
               <motion.span
-                className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200"
-                whileHover={{ scale: 1.05 }}
+                className="w-10 h-10 rounded-full bg-(--surface) flex items-center justify-center"
                 transition={{ duration: 0.2 }}
               >
-                <FontAwesomeIcon icon={faUsers} className="text-black" />
+                <FontAwesomeIcon icon={faUsers} className="text-(--ink)" />
               </motion.span>
               <div>
-                <h2 className="text-lg font-semibold">
+                <h2 className="type-card-title">
                   {t('onboarding.users.detailsTitle')}
                 </h2>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-(--muted)">
                   {t('onboarding.users.detailsSubtitle')}
                 </p>
               </div>
@@ -199,9 +193,9 @@ const UserManagementOnboarding = () => {
               {[0, 1].map((index) => (
                 <motion.div
                   key={`member-${index}`}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 border border-slate-200"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  className="card-quiet grid grid-cols-1 gap-4 p-4 md:grid-cols-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={{ delay: 0.1 * index }}
                 >
                   <Controller
@@ -235,14 +229,14 @@ const UserManagementOnboarding = () => {
               ))}
             </div>
 
-            <aside className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg">
+            <aside className="text-xs text-(--muted) bg-(--surface) p-3 rounded-lg">
               {t('onboarding.users.optionalHint')}
             </aside>
 
-            <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-(--line) pt-4">
               <Link
                 to="/onboarding/admin"
-                className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                className="text-sm text-(--muted) hover:text-(--ink) transition-colors"
               >
                 {t('onboarding.users.back')}
               </Link>
@@ -270,18 +264,18 @@ const UserManagementOnboarding = () => {
 
           <motion.aside
             variants={sidebarVariants}
-            className="border border-slate-200 bg-white p-6 sm:p-8 flex flex-col gap-6"
+            className="card-framed flex flex-col gap-5 p-6 sm:p-8"
           >
             <header>
-              <h3 className="text-xl font-semibold text-slate-900">
+              <h3 className="type-h3">
                 {t('onboarding.users.nextTitle')}
               </h3>
-              <p className="text-sm text-slate-600 mt-2">
+              <p className="text-sm text-(--muted) mt-2">
                 {t('onboarding.users.nextSubtitle')}
               </p>
             </header>
 
-            <ul className="space-y-4 text-sm text-slate-600">
+            <ul className="space-y-4 text-sm text-(--muted)">
               {[
                 t('onboarding.users.nextItem1'),
                 t('onboarding.users.nextItem2'),
@@ -290,14 +284,13 @@ const UserManagementOnboarding = () => {
                 <motion.li
                   key={item}
                   className="flex items-start gap-3"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
+                  aria-setsize={3}
+                  aria-posinset={index + 1}
                 >
-                  <span className="mt-0.5 w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0">
+                  <span className="mt-0.5 w-5 h-5 rounded-full bg-(--surface) flex items-center justify-center flex-shrink-0">
                     <FontAwesomeIcon
                       icon={faCheck}
-                      className="text-xs text-slate-700"
+                      className="text-[0.8125rem] text-(--ink)"
                     />
                   </span>
                   <span>{item}</span>
@@ -306,17 +299,17 @@ const UserManagementOnboarding = () => {
             </ul>
 
             <motion.div
-              className="mt-auto pt-4 border-t border-slate-200"
+              className="mt-auto pt-4 border-t border-(--line)"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
             >
-              <p className="text-xs text-slate-500 mb-3">
+              <p className="text-xs text-(--muted) mb-3">
                 {t('onboarding.users.alreadyHaveAccount')}
               </p>
               <Link
                 to="/auth/login"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white text-slate-900 rounded-lg font-medium hover:bg-slate-50 transition-colors w-full border border-slate-200"
+                className="inline-flex h-(--control-md) w-full items-center justify-center gap-2 rounded-(--radius-control) bg-(--surface) px-4 text-sm font-medium text-(--ink) transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface-hover) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]"
               >
                 {t('onboarding.users.signIn')}
               </Link>

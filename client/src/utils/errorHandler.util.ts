@@ -18,6 +18,9 @@ export interface ParsedApiError {
   allErrors: FieldError[];
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
 /**
  * Parses API error responses into a consistent structure
  * Handles various error response formats from the backend
@@ -36,15 +39,15 @@ export function parseApiError(error: unknown): ParsedApiError {
   }
 
   // Extract error data from various response structures
-  let errorData: any;
+  let errorData: Record<string, unknown> | undefined;
   
-  if (typeof error === 'object' && error !== null) {
+  if (isRecord(error)) {
     // RTK Query error structure: { data: { message, errors } }
     if ('data' in error) {
-      errorData = (error as any).data;
+      errorData = isRecord(error.data) ? error.data : undefined;
       
       // Handle nested data structure: { data: { data: { errors } } }
-      if (errorData?.data?.errors) {
+      if (isRecord(errorData?.data) && errorData.data.errors) {
         errorData = errorData.data;
       }
     } else {
@@ -53,12 +56,12 @@ export function parseApiError(error: unknown): ParsedApiError {
   }
 
   // Extract main message
-  if (errorData?.message) {
+  if (typeof errorData?.message === 'string') {
     result.message = errorData.message;
   }
 
   // Extract and organize errors array
-  const errors = errorData?.errors || [];
+  const errors = errorData?.errors ?? [];
   
   if (Array.isArray(errors)) {
     result.allErrors = errors;

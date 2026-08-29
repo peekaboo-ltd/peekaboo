@@ -30,6 +30,7 @@ import { buildOrderCompletedSMS } from '../integrations/sms/sms.messages';
 import { pushService } from './push.service';
 import { PushNotificationType } from '../constants/push.constants';
 import logger from '../helpers/logger.helper';
+import { WhatsappNotificationService } from './whatsappNotification.service';
 
 const ORDER_STATUS_MESSAGES: Record<string, string> = {
   [OrderActivityStatus.PAID]:
@@ -48,6 +49,7 @@ export class OrderActivityService {
   private readonly orderAssignmentRepository: Repository<OrderAssignment>;
   private readonly emailService: EmailService;
   private readonly smsService: SMSService;
+  private readonly whatsappNotificationService: WhatsappNotificationService;
 
   constructor() {
     this.orderActivityRepository = AppDataSource.getRepository(OrderActivity);
@@ -55,6 +57,7 @@ export class OrderActivityService {
     this.orderAssignmentRepository = AppDataSource.getRepository(OrderAssignment);
     this.emailService = new EmailService();
     this.smsService = new SMSService();
+    this.whatsappNotificationService = new WhatsappNotificationService();
   }
 
   // CREATE ORDER STATUS
@@ -96,6 +99,12 @@ export class OrderActivityService {
     if (isLifecycleOrderActivityStatus(orderStatus.status)) {
       order.status = orderStatus.status;
       await this.orderRepository.save(order);
+    }
+
+    if (orderStatus.status === OrderActivityStatus.DELIVERED) {
+      this.whatsappNotificationService.notifyOrderDelivered(order.id).catch((error) =>
+        logger.error('Failed to send WhatsApp delivered notifications', error),
+      );
     }
 
     // Send push notification to assigned rider for key status changes (non-blocking)

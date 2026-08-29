@@ -4,8 +4,10 @@ import { User } from './user.entity';
 import { UUID } from '../types';
 import {
   OrderPaymentStatus,
+  OrderPayerType,
   OrderStatus,
   OrderType,
+  PreferredContactMethod,
 } from '../constants/order.constants';
 import { Conversation } from './conversation.entity';
 import { OrderAssignment } from './orderAssignment.entity';
@@ -46,8 +48,8 @@ export class Order extends AbstractEntity {
   createdById: UUID;
 
   // INITIAL FEE
-  @Column({ name: 'initial_fee', type: 'numeric', nullable: false })
-  initialFee: number;
+  @Column({ name: 'initial_fee', type: 'numeric', nullable: true })
+  initialFee: number | null;
 
   // DESCRIPTION
   @Column({ name: 'description', type: 'text', nullable: true })
@@ -83,7 +85,33 @@ export class Order extends AbstractEntity {
 
   // FINAL FEE
   @Column({ name: 'final_fee', type: 'numeric', nullable: true })
-  finalFee: number;
+  finalFee: number | null;
+
+  @Column({
+    name: 'payer_type',
+    type: 'enum',
+    enum: OrderPayerType,
+    nullable: true,
+  })
+  payerType?: OrderPayerType | null;
+
+  @Column({ name: 'quoted_distance_km', type: 'double precision', nullable: true })
+  quotedDistanceKm?: number | null;
+
+  @Column({ name: 'quoted_duration_minutes', type: 'integer', nullable: true })
+  quotedDurationMinutes?: number | null;
+
+  @Column({ name: 'quoted_amount', type: 'numeric', nullable: true })
+  quotedAmount?: number | null;
+
+  @Column({ name: 'quote_confirmed_at', type: 'timestamptz', nullable: true })
+  quoteConfirmedAt?: Date | null;
+
+  @Column({ name: 'payment_expires_at', type: 'timestamptz', nullable: true })
+  paymentExpiresAt?: Date | null;
+
+  @Column({ name: 'recipient_whatsapp_opt_in_at', type: 'timestamptz', nullable: true })
+  recipientWhatsappOptInAt?: Date | null;
 
   // PAYMENT STATUS
   @Column({
@@ -93,6 +121,22 @@ export class Order extends AbstractEntity {
     nullable: true,
   })
   paymentStatus?: OrderPaymentStatus | null;
+
+  // PREFERRED CONTACT METHOD
+  @Column({
+    name: 'preferred_contact_method',
+    type: 'enum',
+    enum: PreferredContactMethod,
+    nullable: true,
+  })
+  preferredContactMethod?: PreferredContactMethod | null;
+
+  // CONTACT EMAIL
+  // The order carries its own address rather than writing to the linked User:
+  // the public order endpoint is unauthenticated, so it must not be able to
+  // mutate a user record. Only meaningful when preferredContactMethod is EMAIL.
+  @Column({ name: 'contact_email', type: 'varchar', length: 255, nullable: true })
+  contactEmail?: string | null;
 
   // CONVERSATION ID
   @Column({ name: 'conversation_id', type: 'uuid', nullable: true })

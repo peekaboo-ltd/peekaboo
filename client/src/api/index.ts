@@ -12,7 +12,7 @@ export const createBaseQuery = () => {
         if (token) {
           headers.set('authorization', `Bearer ${token}`);
         }
-        if (!isFormData) {
+        if (endpoint.body !== undefined && !isFormData) {
           headers.set('content-type', 'application/json');
         }
         return headers;

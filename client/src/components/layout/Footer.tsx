@@ -1,20 +1,11 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faLocationDot,
-  faPhone,
-  faEnvelope,
-} from '@fortawesome/free-solid-svg-icons';
-import {
-  faInstagram,
-  faTiktok,
-  faWhatsapp,
-} from '@fortawesome/free-brands-svg-icons';
-import type { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core';
+import { faLocationDot, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { faInstagram, faTiktok, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { useI18n } from '@/i18n/i18n';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
-import { motion, Variants } from 'framer-motion';
 
 interface QuickLink {
   to: string;
@@ -28,37 +19,13 @@ interface ContactInfo {
 }
 
 interface SocialMedia {
-  icon: IconProp | IconDefinition;
+  icon: IconDefinition;
   url: string;
   label: string;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  },
-};
-
 const Footer = () => {
   const { t } = useI18n();
-
   const quickLinks = useMemo<QuickLink[]>(
     () => [
       { to: '/about', labelKey: 'footer.aboutUs' },
@@ -66,9 +33,8 @@ const Footer = () => {
       { to: '/contact', labelKey: 'footer.contactUs' },
       { to: '/services', labelKey: 'footer.services' },
     ],
-    []
+    [],
   );
-
   const legalLinks = useMemo<QuickLink[]>(
     () => [
       { to: '/legal', labelKey: 'footer.legalOverview' },
@@ -76,151 +42,105 @@ const Footer = () => {
       { to: '/legal/refund-policy', labelKey: 'footer.refundPolicy' },
       { to: '/legal/cancellation-policy', labelKey: 'footer.cancellationPolicy' },
     ],
-    []
+    [],
   );
-
   const contactInfo = useMemo<ContactInfo[]>(
     () => [
       { icon: faLocationDot, text: 'Niboye, Kicukiro, Kigali, Rwanda' },
       { icon: faPhone, text: '(+250) 794 892 784', href: 'tel:+250794892784' },
       { icon: faEnvelope, text: 'info@peekaboo.co.rw', href: 'mailto:info@peekaboo.co.rw' },
     ],
-    []
+    [],
   );
-
   const socialMedia = useMemo<SocialMedia[]>(
     () => [
-      { icon: faInstagram as IconProp | IconDefinition, url: 'https://www.instagram.com/peekaboo.delivery/', label: 'Instagram' },
-      { icon: faWhatsapp as IconProp | IconDefinition, url: 'https://wa.me/250794892784?text=Hello, I have a question about Peekaboo', label: 'WhatsApp' },
-      { icon: faTiktok as IconProp | IconDefinition, url: 'https://www.tiktok.com/@peekaboo.delivery', label: 'TikTok' },
+      { icon: faInstagram, url: 'https://www.instagram.com/peekaboo.delivery/', label: 'Instagram' },
+      { icon: faWhatsapp, url: 'https://wa.me/250794892784?text=Hello, I have a question about Peekaboo', label: 'WhatsApp' },
+      { icon: faTiktok, url: 'https://www.tiktok.com/@peekaboo.delivery', label: 'TikTok' },
     ],
-    []
+    [],
+  );
+
+  const renderLinks = (links: QuickLink[]) => (
+    <ul className="space-y-3">
+      {links.map((link) => (
+        <li key={link.to}>
+          <Link to={link.to} className="link-sweep text-sm text-(--muted) hover:text-(--ink)">
+            {t(link.labelKey)}
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 
   return (
-    <footer className="relative w-full border-t border-primary-100 bg-[var(--peekaboo-surface)]">
-      <motion.article
-        className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-8 pt-14 pb-8"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-        variants={containerVariants}
-      >
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 mb-12">
-          <motion.article variants={itemVariants as unknown as Variants} className="lg:col-span-5">
-            <header className="mb-5">
-              <h3 className="text-2xl font-semibold text-primary-900">
-                Peekaboo
-              </h3>
-              <hr className="mt-2 h-[2px] w-10 bg-secondary-500/60 rounded-full border-0" />
-            </header>
-            <p className="text-[13px] leading-relaxed text-primary-600 mb-6 max-w-sm">
+    <footer className="invert-surface border-t border-(--line)">
+      <div className="app-container py-16">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-12">
+          <section className="lg:col-span-5">
+            <h2 className="type-h3">Peekaboo</h2>
+            <p className="mt-4 max-w-[46ch] text-sm leading-[1.6] text-(--muted)">
               {t('footer.description')}
             </p>
-
-            <nav className="flex items-center gap-2.5" aria-label="Social media links">
-              {socialMedia?.length > 0 && socialMedia?.map((social) => (
+            <nav className="mt-6 flex items-center gap-2" aria-label="Social media links">
+              {socialMedia.map((social) => (
                 <a
                   key={social.label}
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl border border-primary-100 text-primary-500 hover:text-primary-900 hover:border-primary-300 transition-colors"
+                  className="flex size-10 items-center justify-center rounded-(--radius-control) border border-(--line) transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-(--ink) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]"
                 >
-                  <FontAwesomeIcon icon={social.icon} className="w-[16px] h-[16px]" />
+                  <FontAwesomeIcon icon={social.icon} className="size-4" />
                 </a>
               ))}
             </nav>
-          </motion.article>
+          </section>
 
-          <motion.div variants={itemVariants as unknown as Variants} className="lg:col-span-3">
-            <nav aria-label={t('footer.quickLinks')}>
-              <h4 className="text-xs font-semibold uppercase text-primary-400 mb-5">
-                {t('footer.quickLinks')}
-              </h4>
-              <ul className="space-y-3">
-                {quickLinks.map((link) => (
-                  <li key={link.to}>
-                    <Link
-                      to={link.to}
-                      className="group inline-block text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
-                    >
-                      <span className="relative text-[13px]">
-                        {t(link.labelKey)}
-                        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-secondary-600/70 group-hover:w-full transition-all duration-300" />
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-            <nav className="mt-10" aria-label={t('footer.legal')}>
-              <h4 className="text-xs font-semibold uppercase text-primary-400 mb-5">
-                {t('footer.legal')}
-              </h4>
-              <ul className="space-y-3">
-                {legalLinks.map((link) => (
-                  <li key={link.to}>
-                    <Link
-                      to={link.to}
-                      className="group inline-block text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
-                    >
-                      <span className="relative text-[13px]">
-                        {t(link.labelKey)}
-                        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-secondary-600/70 group-hover:w-full transition-all duration-300" />
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </motion.div>
+          <nav className="lg:col-span-3" aria-label="Footer links">
+            <h3 className="type-eyebrow mb-4">{t('footer.quickLinks')}</h3>
+            {renderLinks(quickLinks)}
+            <h3 className="type-eyebrow mt-8 mb-4">{t('footer.legal')}</h3>
+            {renderLinks(legalLinks)}
+          </nav>
 
-          <motion.address variants={itemVariants as unknown as Variants} className="not-italic lg:col-span-4">
-            <h4 className="text-xs font-semibold uppercase text-primary-400 mb-5">
-              {t('footer.contactUs')}
-            </h4>
+          <address className="not-italic lg:col-span-4">
+            <h3 className="type-eyebrow mb-4">{t('footer.contactUs')}</h3>
             <ul className="space-y-4">
-              {contactInfo.map((contact, index) => (
-                <li key={index}>
+              {contactInfo.map((contact) => (
+                <li key={contact.text}>
                   {contact.href ? (
                     <a
                       href={contact.href}
-                      className="group flex items-start gap-3 text-[13px] text-primary-600 hover:text-primary-900 transition-colors duration-300"
+                      className="flex items-center gap-3 text-sm text-(--muted) hover:text-(--ink)"
+                      style={{ width: 'fit-content', maxWidth: '100%' }}
                     >
-                      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--peekaboo-surface)] text-primary-500 group-hover:text-primary-700 transition-colors duration-300">
-                        <FontAwesomeIcon icon={contact.icon} className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center">
+                        <FontAwesomeIcon icon={contact.icon} className="size-4" />
+                        <span className="link-sweep ml-3">{contact.text}</span>
                       </span>
-                      <span className="pt-1.5 text-[13px]">{contact.text}</span>
                     </a>
                   ) : (
-                    <p className="flex items-start gap-3 text-[13px] text-primary-600">
-                      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--peekaboo-surface)] text-primary-500">
-                        <FontAwesomeIcon icon={contact.icon} className="w-3.5 h-3.5" />
-                      </span>
-                      <span className="pt-1.5 text-[13px]">{contact.text}</span>
+                    <p className="flex items-center gap-3 text-sm text-(--muted)">
+                      <FontAwesomeIcon icon={contact?.icon} className="size-4" />
+                      {contact?.text}
                     </p>
                   )}
                 </li>
               ))}
             </ul>
-          </motion.address>
-        </section>
+          </address>
+        </div>
+   
 
-        <section className="border-t border-primary-100">
-          <motion.section
-            variants={itemVariants as unknown as Variants}
-            className="flex flex-col md:flex-row justify-between items-center gap-4 pt-6"
-          >
-            <p className="text-[12px] text-primary-500 ">
-              &copy; {new Date().getFullYear()} Peekaboo. {t('footer.copyright')}
-            </p>
-
-            <LanguageSelector dropdownDirection="up" />
-          </motion.section>
-        </section>
-      </motion.article>
+        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-(--line) pt-6 sm:flex-row sm:items-center">
+          <p className="type-meta">
+            &copy; {new Date().getFullYear()} Peekaboo. {t('footer.copyright')}
+          </p>
+          <LanguageSelector />
+        </div>
+      </div>
     </footer>
   );
 };

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   useCreateOrderMutation,
   useCreatePublicOrderMutation,
@@ -17,7 +17,6 @@ import {
 } from '@/api/queries/orders.queries';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrder, setOrdersList } from '@/states/slices/order.slice';
-import { ORDER_FEE_RANGES } from '@/constants/order.constants';
 import { usePagination } from '../common/pagination.hooks';
 import { RoleTypes } from '@/types/auth.type';
 import type { UUID } from '@/types';
@@ -131,59 +130,6 @@ export const useUpdateOrder = () => {
   }, [data, isSuccess, dispatch, reset]);
 
   return { updateOrder, data, error, isLoading, isSuccess, reset };
-};
-
-export const useGetOrderFees = (
-  initialFee?: number,
-  resetKey?: string | number,
-) => {
-  const [orderFee, setOrderFee] = useState<number | undefined>(initialFee);
-
-  // Reset fee when the tracked entity changes (e.g., navigating to a different order)
-  useEffect(() => {
-    if (resetKey !== undefined) {
-      setOrderFee(initialFee);
-    }
-  }, [initialFee, resetKey]);
-
-  // Sync with initialFee when it changes (e.g., when order loads)
-  useEffect(() => {
-    if (initialFee !== undefined && initialFee > 0 && orderFee === undefined) {
-      setOrderFee(initialFee);
-    }
-  }, [initialFee, orderFee]);
-
-  // STATE VARIABLES
-  const getOrderFee = useCallback(
-    (distance: number) => {
-      if (!distance || distance <= 0) {
-        // Don't reset to undefined if we have an initial fee
-        if (!initialFee) {
-          setOrderFee(undefined);
-        }
-        return;
-      }
-
-      // Find the matching fee range
-      const matchingRange = ORDER_FEE_RANGES.find((range) => {
-        if (range.max === Infinity) {
-          return distance >= range.min;
-        }
-        return distance >= range.min && distance <= range.max;
-      });
-
-      if (matchingRange) {
-        setOrderFee(matchingRange.fee);
-      } else {
-        // Fallback: use the highest fee if distance exceeds all ranges
-        const highestFee = ORDER_FEE_RANGES[ORDER_FEE_RANGES.length - 1]?.fee;
-        setOrderFee(highestFee ?? 0);
-      }
-    },
-    [initialFee],
-  );
-
-  return { getOrderFee, orderFee };
 };
 
 /**

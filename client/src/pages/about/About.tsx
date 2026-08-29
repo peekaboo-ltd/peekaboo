@@ -1,23 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
 import {
-  Bolt,
-  Handshake,
-  Lightbulb,
-  Rocket,
-  ShieldCheck,
-  Target,
-} from 'lucide-react';
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+} from 'framer-motion';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import {
-  containerVariants,
-  fadeInUp,
-  itemVariants,
-  scaleIn,
-  slideInLeft,
-  slideInRight,
-} from '../home/home.animations';
+import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
+import HeroTrustIndicators from '@/pages/home/components/HeroTrustIndicators';
+import FinalCtaSection from '@/pages/home/components/FinalCtaSection';
+import PublicHeadquartersMap from '@/components/maps/PublicHeadquartersMap';
+import ValueCharacter, {
+  type ValueCharacterVariant,
+} from './components/ValueCharacter';
+import { useHomeContent } from '@/pages/home/useHomeContent';
+import { entranceVariants } from '@/pages/home/home.animations';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 type Stats = {
   deliveriesToday: number;
@@ -25,415 +25,343 @@ type Stats = {
   businessPartners: number;
 };
 
+const fallbackStats: Stats = {
+  deliveriesToday: 128,
+  activeRiders: 42,
+  businessPartners: 65,
+};
+
 const milestones = [
-  { year: '2022', label: 'Founded in Kigali with a small team of riders' },
-  { year: '2023', label: 'Launched B2B logistics for local businesses' },
-  { year: '2024', label: 'Expanded to full city-wide coverage' },
-  { year: '2025', label: 'Serving hundreds of businesses and individuals daily' },
+  {
+    year: '2022',
+    title: 'The first route',
+    description:
+      'Peekaboo started in Kigali with a small team of riders and one promise: every handoff should feel accountable.',
+  },
+  {
+    year: '2023',
+    title: 'Built for local business',
+    description:
+      'We introduced business logistics for merchants who needed repeatable dispatch, clear records, and a dependable partner.',
+  },
+  {
+    year: '2024',
+    title: 'Kigali-wide coverage',
+    description:
+      'Our rider network expanded across the city, connecting more neighbourhoods without losing live visibility.',
+  },
+  {
+    year: '2025',
+    title: 'A daily delivery network',
+    description:
+      'Hundreds of businesses and individuals now rely on Peekaboo to move everyday orders across Kigali.',
+  },
 ];
 
-const coreValues = [
+const coreValues: Array<{
+  variant: ValueCharacterVariant;
+  title: string;
+  description: string;
+}> = [
   {
-    icon: Rocket,
+    variant: 'speed',
     title: 'Speed',
     description: 'Every delivery is optimised for the fastest possible route and pickup.',
   },
   {
-    icon: ShieldCheck,
+    variant: 'trust',
     title: 'Trust',
     description: 'Verified riders, proof of delivery, and transparent tracking at every step.',
   },
   {
-    icon: Handshake,
+    variant: 'partnership',
     title: 'Partnership',
     description: 'We grow with the businesses and people we serve across Kigali.',
   },
   {
-    icon: Bolt,
+    variant: 'simplicity',
     title: 'Simplicity',
-    description: 'A clean, straightforward experience from order to drop-off.',
+    description: 'A straightforward experience from order to drop-off.',
   },
 ];
 
-const Statistics = () => {
-  const [stats, setStats] = useState<Stats>({
-    deliveriesToday: 0,
-    activeRiders: 0,
-    businessPartners: 0,
+const timelineCardVariants = {
+  enter: (direction: number) => ({
+    opacity: 0,
+    y: direction > 0 ? 30 : -30,
+    scale: 0.985,
+  }),
+  center: { opacity: 1, y: 0, scale: 1 },
+  exit: (direction: number) => ({
+    opacity: 0,
+    y: direction > 0 ? -30 : 30,
+    scale: 0.985,
+  }),
+};
+
+const StoryTimeline = () => {
+  const timelineRef = useRef<HTMLElement>(null);
+  const activeMilestoneRef = useRef(0);
+  const reduceMotion = useReducedMotion();
+  const [activeMilestone, setActiveMilestone] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const { scrollYProgress } = useScroll({
+    target: timelineRef,
+    offset: ['start start', 'end end'],
   });
-  const ref = useRef<HTMLElement | null>(null);
-  const [inView, setInView] = useState(false);
 
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 },
+  useMotionValueEvent(scrollYProgress, 'change', (latest) => {
+    const nextMilestone = Math.min(
+      milestones.length - 1,
+      Math.floor(latest * milestones.length),
     );
 
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
+    if (nextMilestone === activeMilestoneRef.current) return;
+    setDirection(nextMilestone > activeMilestoneRef.current ? 1 : -1);
+    activeMilestoneRef.current = nextMilestone;
+    setActiveMilestone(nextMilestone);
+  });
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const animateTo = (next: Stats) => {
-      const start = { ...stats };
-      const duration = 700;
-      const startTime = performance.now();
-
-      const step = (now: number) => {
-        if (!isMounted) return;
-        const progress = Math.min((now - startTime) / duration, 1);
-
-        const interpolated: Stats = {
-          deliveriesToday: Math.round(
-            start.deliveriesToday +
-              (next.deliveriesToday - start.deliveriesToday) * progress,
-          ),
-          activeRiders: Math.round(
-            start.activeRiders +
-              (next.activeRiders - start.activeRiders) * progress,
-          ),
-          businessPartners: Math.round(
-            start.businessPartners +
-              (next.businessPartners - start.businessPartners) * progress,
-          ),
-        };
-
-        setStats(interpolated);
-
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        }
-      };
-
-      requestAnimationFrame(step);
-    };
-
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/stats');
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch stats');
-        }
-
-        const data = (await response.json()) as Partial<Stats>;
-
-        const next: Stats = {
-          deliveriesToday: data.deliveriesToday ?? 128,
-          activeRiders: data.activeRiders ?? 42,
-          businessPartners: data.businessPartners ?? 65,
-        };
-
-        animateTo(next);
-      } catch {
-        animateTo({
-          deliveriesToday: 128,
-          activeRiders: 42,
-          businessPartners: 65,
-        });
-      }
-    };
-
-    fetchStats();
-    const id = setInterval(fetchStats, 15000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(id);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const milestone = milestones[activeMilestone];
 
   return (
     <section
-      ref={ref}
-      className="relative w-full overflow-hidden bg-[#0a0a0a] py-8 pb-6 lg:py-20"
+      ref={timelineRef}
+      className="relative border-b border-(--line) bg-(--paper)"
+      style={{ height: `${milestones.length * 100}svh` }}
+      aria-labelledby="story-timeline-title"
     >
-      <figure
-        className="pointer-events-none absolute inset-0"
-        aria-hidden="true"
-      />
-      <article
-        className={`relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 transition-all duration-700 ${
-          inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-        }`}
-      >
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-          <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-medium uppercase text-[#edb100]">
-              Deliveries today
-            </figcaption>
-            <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
-              {stats.deliveriesToday.toLocaleString()}
+      <div className="sticky top-16 flex min-h-[calc(100svh-4rem)] items-center overflow-hidden py-10 sm:py-14">
+        <div className="app-container grid w-full items-center gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.72fr)] lg:gap-20">
+          <div
+            className="relative order-2 min-h-[320px] sm:min-h-[350px] lg:order-1"
+            aria-hidden="true"
+          >
+            <AnimatePresence initial={false} custom={direction} mode="popLayout">
+              <motion.article
+                key={milestone.year}
+                custom={direction}
+                variants={timelineCardVariants}
+                initial={reduceMotion ? false : 'enter'}
+                animate="center"
+                exit={reduceMotion ? undefined : 'exit'}
+                transition={{
+                  duration: reduceMotion ? 0 : 0.38,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="card-framed absolute inset-0 flex flex-col overflow-hidden p-7 sm:p-9"
+              >
+                <header className="flex items-start justify-between gap-6 border-b border-(--line) pb-6">
+                  <div>
+                    <span className="type-eyebrow block">Milestone</span>
+                    <time className="mt-2 block text-4xl font-medium tabular-nums tracking-[-0.045em] text-(--ink) sm:text-5xl">
+                      {milestone.year}
+                    </time>
+                  </div>
+                  <span className="type-meta tabular-nums">
+                    {String(activeMilestone + 1).padStart(2, '0')}
+                  </span>
+                </header>
+
+                <div className="mt-auto pt-8">
+                  <h3 className="type-h2 max-w-[18ch]">{milestone.title}</h3>
+                  <p className="type-body-sm mt-3 max-w-[54ch] text-(--muted)">
+                    {milestone.description}
+                  </p>
+                </div>
+
+                <footer
+                  className="mt-8 flex gap-2 border-t border-(--line) pt-5"
+                  aria-hidden="true"
+                >
+                  {milestones.map((item, index) => (
+                    <span
+                      key={item.year}
+                      className={`h-1 flex-1 transition-colors duration-300 ${index <= activeMilestone ? 'bg-(--ink)' : 'bg-(--line)'}`}
+                    />
+                  ))}
+                </footer>
+              </motion.article>
+            </AnimatePresence>
+          </div>
+
+          <header className="order-1 lg:order-2">
+            <p className="type-eyebrow">Our story</p>
+            <h2 id="story-timeline-title" className="type-h2 mt-2 max-w-[14ch]">
+              Built in Kigali, one dependable route at a time.
+            </h2>
+            <div className="mt-5 max-w-[48ch] space-y-3 text-sm leading-[1.6] text-(--muted) sm:text-base">
+              <p>
+                Peekaboo started with a simple idea: city delivery should feel
+                dependable, not uncertain.
+              </p>
+              <p>
+                Each chapter strengthened the same promise — clear progress,
+                accountable handoffs, and a delivery partner Kigali can rely on.
+              </p>
+            </div>
+            <p className="type-meta mt-7 text-xs">
+              Continue down the page to move through the story.
             </p>
-          </figure>
-          <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-medium uppercase text-[#edb100]">
-              Active riders
-            </figcaption>
-            <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
-              {stats.activeRiders.toLocaleString()}
-            </p>
-          </figure>
-          <figure className="space-y-2 text-center">
-            <figcaption className="text-[11px] font-medium uppercase text-[#edb100]">
-              Businesses served
-            </figcaption>
-            <p className="text-[40px] font-extrabold leading-[1.02] text-white tabular-nums">
-              {stats.businessPartners.toLocaleString()}
-            </p>
-          </figure>
+          </header>
+
+          <ol className="sr-only">
+            {milestones.map((item) => (
+              <li key={item.year}>
+                <time>{item.year}</time>: {item.title}. {item.description}
+              </li>
+            ))}
+          </ol>
         </div>
-      </article>
+      </div>
     </section>
   );
 };
 
 const About = () => {
+  const [stats, setStats] = useState<Stats>(fallbackStats);
+  const { data: landingStats } = useGetLandingStatsQuery();
+  const { heroCopy } = useHomeContent();
+
   useDocumentTitle('About');
 
+  useEffect(() => {
+    let active = true;
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats');
+        if (!response.ok) return;
+        const data = (await response.json()) as Partial<Stats>;
+        if (active) setStats({ ...fallbackStats, ...data });
+      } catch {
+        if (active) setStats(fallbackStats);
+      }
+    };
+    fetchStats();
+    const interval = window.setInterval(fetchStats, 15000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, []);
+
   return (
-    <main className="min-h-screen bg-[#f7f6f1]">
-      <motion.section
-        className="relative w-full overflow-hidden bg-[#0a0a0a] py-20 text-white lg:py-28"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        <figure
-          className="pointer-events-none absolute -right-32 -top-40 h-[520px] w-[520px] rounded-full"
-          aria-hidden="true"
-        />
-        <figure
-          className="pointer-events-none absolute -bottom-32 -left-24 h-[400px] w-[400px] rounded-full"
-          aria-hidden="true"
-        />
-        <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
-          <motion.p
-            variants={itemVariants}
-            className="text-[11px] font-medium uppercase text-[#edb100] mb-4"
-          >
-            About Peekaboo
-          </motion.p>
-          <motion.h1
-            variants={itemVariants}
-            className="text-[32px] font-extrabold leading-[1.02] text-white sm:text-[42px] lg:text-[52px] mb-5"
-          >
-            We move what matters
-            <br />
-            <span className="text-[#edb100]">across Kigali.</span>
-          </motion.h1>
-          <motion.p
-            variants={itemVariants}
-            className="mx-auto max-w-[560px] text-[13px] leading-relaxed text-white/70"
-          >
-            Peekaboo connects individuals, small businesses, and growing brands with a
-            trusted network of professional riders — so every parcel arrives quickly,
-            safely, and with a smile.
-          </motion.p>
-        </article>
-      </motion.section>
-
-      <motion.section
-        className="w-full bg-[#f7f6f1] py-14 lg:py-20"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        variants={containerVariants}
-      >
-        <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
-            <motion.article variants={slideInLeft}>
-              <p className="text-[11px] font-medium uppercase text-[#6b6f76] mb-4">
-                Our Story
-              </p>
-              <h2 className="text-[24px] font-extrabold leading-[1.02] text-[#0a0a0a] sm:text-[30px] mb-6">
-                Built from the streets of{' '}
-                <span className="text-[#6b6f76]">Kigali.</span>
-              </h2>
-              <div className="space-y-4 text-[13px] leading-relaxed text-[#6b6f76]">
-                <p>
-                  Peekaboo started with a simple observation: sending a package across
-                  Kigali shouldn't be complicated. What began as a small team of riders
-                  and a shared phone has grown into a technology-driven delivery platform
-                  trusted by thousands.
+    <main className="home-page relative min-h-screen w-full overflow-x-clip bg-(--paper)">
+      <section className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center bg-(--paper) text-(--ink)">
+        <div className="app-container pb-10 pt-8 lg:pb-14 lg:pt-10">
+          <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-14">
+            <motion.div
+              className="flex flex-col items-start gap-5"
+              variants={entranceVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <hgroup className="space-y-3">
+                <p className="type-eyebrow">About Peekaboo</p>
+                <h1 className="type-display max-w-[16ch] text-(--ink)">
+                  Kigali moves quickly. Delivery should too.
+                </h1>
+                <p className="type-body max-w-[52ch] text-(--muted)">
+                  We connect people and businesses with verified riders, clear
+                  pricing, and live progress from pickup to handoff.
                 </p>
-                <blockquote className="text-[#1f1f1f] my-6 text-[13px]">
-                  "We believe every delivery is a promise, and we take promises seriously."
-                </blockquote>
-                <p>
-                  Today, Peekaboo combines routing logic, rider location data, and smart
-                  notifications so each delivery moves smoothly from order to drop-off.
-                  We serve both individuals running personal errands and businesses
-                  managing daily logistics.
-                </p>
-              </div>
-            </motion.article>
+              </hgroup>
 
-            <motion.aside
-              variants={slideInRight}
-              className="flex items-start justify-center lg:justify-end"
-            >
-              <nav className="relative pl-8" aria-label="Company milestones">
-                <hr className="absolute left-0 top-0 bottom-0 w-px h-full bg-[#ececea] border-0" />
-                <ol className="space-y-10">
-                  {milestones.map((m) => (
-                    <li key={m.year} className="relative">
-                      <mark className="absolute -left-8 top-0.5 w-2 h-2 rounded-full bg-[#edb100] ring-4 ring-[#f7f6f1] bg-clip-padding" />
-                      <time className="text-[11px] font-medium uppercase text-[#6b6f76] mb-1 block">
-                        {m.year}
-                      </time>
-                      <p className="text-[13px] leading-relaxed text-[#0a0a0a]">
-                        {m.label}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              </nav>
-            </motion.aside>
-          </div>
-        </article>
-      </motion.section>
+              <dl className="flex w-full max-w-md flex-wrap gap-x-10 gap-y-4 border-t border-(--line) pt-6">
+                <div>
+                  <dt className="type-eyebrow">Deliveries today</dt>
+                  <dd className="type-card-title mt-2 tabular-nums">
+                    {stats.deliveriesToday.toLocaleString()}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="type-eyebrow">Active riders</dt>
+                  <dd className="type-card-title mt-2 tabular-nums">
+                    {stats.activeRiders.toLocaleString()}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="type-eyebrow">Businesses served</dt>
+                  <dd className="type-card-title mt-2 tabular-nums">
+                    {stats.businessPartners.toLocaleString()}
+                  </dd>
+                </div>
+              </dl>
 
-      <motion.section
-        className="relative w-full overflow-hidden bg-[#0a0a0a] py-14 lg:py-20"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        variants={containerVariants}
-      >
-        <figure
-          className="pointer-events-none absolute inset-0"
-          aria-hidden="true"
-        />
-        <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
-          <motion.p
-            variants={fadeInUp}
-            className="text-[11px] font-medium uppercase text-[#edb100] mb-10 text-center"
-          >
-            What drives us
-          </motion.p>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <motion.article
-              variants={scaleIn}
-              className="rounded-[18px] border border-white/10 bg-white/[0.03] p-6 lg:p-8"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
-                <Target className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <h3 className="text-[11px] font-medium uppercase text-[#edb100] mb-3">
-                Mission
-              </h3>
-              <p className="text-[18px] font-medium leading-[1.2] text-white sm:text-[20px]">
-                To make sending and receiving parcels across Kigali simple,
-                transparent, and stress-free — for every person and every business.
-              </p>
-            </motion.article>
-            <motion.article
-              variants={scaleIn}
-              className="rounded-[18px] border border-white/10 bg-white/[0.03] p-6 lg:p-8"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#edb100] text-[#0a0a0a] mb-4">
-                <Lightbulb className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <h3 className="text-[11px] font-medium uppercase text-[#edb100] mb-3">
-                Vision
-              </h3>
-              <p className="text-[18px] font-medium leading-[1.2] text-white sm:text-[20px]">
-                To be Rwanda's most trusted last-mile delivery partner,
-                connecting communities and businesses through reliable logistics.
-              </p>
-            </motion.article>
-          </div>
-        </article>
-      </motion.section>
-
-      <motion.section
-        className="w-full bg-white py-14 lg:py-20"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        variants={containerVariants}
-      >
-        <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
-          <motion.header variants={fadeInUp} className="mb-10 text-center">
-            <p className="text-[11px] font-medium uppercase text-[#6b6f76] mb-4">
-              Core Values
-            </p>
-            <h2 className="text-[24px] font-extrabold leading-[1.02] text-[#0a0a0a] sm:text-[30px]">
-              What we stand{' '}
-              <span className="text-[#6b6f76]">for.</span>
-            </h2>
-          </motion.header>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {coreValues.map((v, index) => (
-              <motion.article
-                key={v.title}
-                variants={itemVariants}
-                className="group rounded-[18px] border border-[#ececea] bg-white p-5 transition duration-200 hover:-translate-y-px hover:border-[#d9d8d4]"
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById('our-story')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  });
+                }}
+                className="link-sweep inline-flex items-center gap-1.5 text-sm text-(--ink)"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#fff4be] text-[#0a0a0a] mb-4">
-                  <v.icon className="h-4 w-4" aria-hidden="true" />
-                </span>
-                <h3 className="text-[14px] font-medium text-[#0a0a0a] mb-1">
-                  {v.title}
-                </h3>
-                <p className="text-[12px] leading-relaxed text-[#6b6f76]">
-                  {v.description}
-                </p>
-              </motion.article>
-            ))}
+                Read our story
+                <FontAwesomeIcon icon={faChevronDown} className="size-4" aria-hidden="true" />
+              </button>
+
+              <HeroTrustIndicators
+                landingStats={landingStats}
+                activeCustomersLabel={heroCopy.activeCustomersLabel}
+                completedOrdersLabel={heroCopy.completedOrdersLabel}
+                fallbackLabel={heroCopy.growingCommunityLabel}
+              />
+            </motion.div>
+
+            <div className="max-lg:hidden">
+              <PublicHeadquartersMap
+                ridersLabel={`${stats.activeRiders} riders active`}
+              />
+            </div>
           </div>
-        </article>
-      </motion.section>
+        </div>
+      </section>
 
-      <Statistics />
+      <div id="our-story">
+        <StoryTimeline />
+      </div>
 
-      <motion.section
-        className="relative w-full overflow-hidden bg-[#0a0a0a] py-14 lg:py-20"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        variants={containerVariants}
-      >
-        <figure
-          className="pointer-events-none absolute inset-0"
-          aria-hidden="true"
-        />
-        <article className="relative mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 text-center">
-          <motion.h2
-            variants={fadeInUp}
-            className="text-[24px] font-extrabold leading-[1.02] text-white sm:text-[30px] mb-3"
-          >
-            Ready to get started?
-          </motion.h2>
-          <motion.p
-            variants={fadeInUp}
-            className="mx-auto mb-8 max-w-[460px] text-[13px] leading-relaxed text-white/70"
-          >
-            Join thousands of satisfied customers using Peekaboo for their delivery needs.
-          </motion.p>
-          <motion.nav variants={scaleIn}>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 rounded-full bg-[#edb100] px-6 py-2.5 text-[13px] font-semibold text-[#0a0a0a] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)] transition hover:bg-[#d49e00]"
-            >
-              Get Started
-            </Link>
-          </motion.nav>
-        </article>
-      </motion.section>
+      <section className="section-rhythm w-full border-(--line) bg-(--paper)">
+        <div className="app-container">
+          <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <hgroup>
+              <p className="type-eyebrow">Core values</p>
+              <h2 className="type-h2 mt-2">
+                What we
+                <br />
+                stand for.
+              </h2>
+            </hgroup>
+            <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
+              Every route we run is shaped by the same commitments — to the
+              people sending, the riders delivering, and the city we operate in.
+            </p>
+          </header>
+
+          <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {coreValues.map((value) => (
+              <li
+                key={value.title}
+                className="rounded-md border border-(--line) p-6"
+              >
+                <ValueCharacter variant={value.variant} />
+                <h3 className="type-h3 mt-6">{value.title}</h3>
+                <p className="mt-3 text-sm leading-[1.55] text-(--muted)">
+                  {value.description}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <FinalCtaSection
+        title="Move something across Kigali."
+        subtitle="Talk to our team about personal deliveries, business logistics, or becoming a rider."
+        buttonLabel="Talk to our team"
+      />
     </main>
   );
 };

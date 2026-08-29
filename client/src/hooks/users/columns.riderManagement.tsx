@@ -11,18 +11,18 @@ const getPerformanceLabel = (rider: RiderPerformanceItem) => {
     rider.failedDeliveries <= 1 &&
     rider.canceledDeliveries <= 2
   ) {
-    return { text: "Top Performer", className: "bg-green-100 text-green-700" };
+    return { text: "Top Performer", className: "bg-(--surface) text-(--ink)" };
   }
 
   if (rider.totalDeliveriesCompleted >= 8 && rider.failedDeliveries <= 3) {
-    return { text: "Doing Well", className: "bg-emerald-100 text-emerald-700" };
+    return { text: "Doing Well", className: "bg-(--surface) text-(--ink)" };
   }
 
   if (rider.totalDeliveriesCompleted === 0 || rider.failedDeliveries >= 4) {
-    return { text: "Needs Support", className: "bg-red-100 text-red-700" };
+    return { text: "Needs Support", className: "bg-(--surface) text-(--ink)" };
   }
 
-  return { text: "Average", className: "bg-amber-100 text-amber-700" };
+  return { text: "Average", className: "bg-(--surface) text-(--ink)" };
 };
 
 export const useRiderManagementColumns = (
@@ -34,7 +34,7 @@ export const useRiderManagementColumns = (
         header: "#",
         accessorKey: "rank",
         cell: ({ row }) => (
-          <span className="font-semibold">#{row.original.rank}</span>
+          <span className="font-normal">#{row.original.rank}</span>
         ),
       },
       {
@@ -42,8 +42,8 @@ export const useRiderManagementColumns = (
         accessorKey: "riderName",
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <span className="font-medium">{row.original.riderName || "-"}</span>
-            <span className="text-xs text-slate-500">
+            <span className="font-normal">{row.original.riderName || "-"}</span>
+            <span className="type-meta">
               {row.original.riderEmail || "-"}
             </span>
           </div>
@@ -66,7 +66,7 @@ export const useRiderManagementColumns = (
           const performance = getPerformanceLabel(row.original);
           return (
             <span
-              className={`px-2 py-1 rounded-md text-[11px] font-medium ${performance.className}`}
+              className={`px-2 py-1 rounded-md text-xs font-normal ${performance.className}`}
             >
               {performance.text}
             </span>
@@ -83,7 +83,7 @@ export const useRiderManagementColumns = (
               e.preventDefault();
               onViewDetails(row.original);
             }}
-            className="text-primary underline text-[11px] underline-offset-2"
+            className="text-(--ink) underline text-xs underline-offset-2"
           >
             View details
           </Link>

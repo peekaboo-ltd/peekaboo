@@ -20,6 +20,9 @@ export class Payment extends AbstractEntity {
   })
   internalReferenceId?: string;
 
+  @Column({ name: 'idempotency_key', type: 'varchar', length: 255, nullable: true, unique: true })
+  idempotencyKey?: string | null;
+
   // AMOUNT
   @Column({
     name: 'amount',

@@ -5,7 +5,7 @@ import {
     TooltipTrigger,
   } from '@/components/ui/tooltip';
   import { ReactNode } from 'react';
-  
+
   type CustomTooltipProps = {
     children: ReactNode;
     label?: string;
@@ -21,13 +21,12 @@ import {
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>{children}</TooltipTrigger>
-          <TooltipContent className={`bg-primary text-white shadow-md text-[13px] ${labelClassName}`}>
+          <TooltipContent className={`invert-surface shadow-(--shadow-menu) text-sm ${labelClassName}`}>
             <>{label}</>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
   };
-  
+
   export default CustomTooltip;
-  

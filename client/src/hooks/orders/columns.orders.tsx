@@ -2,7 +2,10 @@ import { StatusBadge } from '@/components/inputs/StatusBadge';
 import { ReferenceIdInput } from '@/components/inputs/TableInputs';
 import TableUserLabel from '@/components/users/TableUserLabel';
 import InlineRiderSelect from '@/components/orders/InlineRiderSelect';
-import { Order } from '@/types/order.type';
+import {
+  PREFERRED_CONTACT_METHOD_LABELS,
+  type Order,
+} from '@/types/order.type';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
@@ -18,6 +21,7 @@ import {
 import {
   ellipsisHClassName,
   tableActionClassName,
+  tableDangerActionClassName,
 } from '@/constants/inputs.constants';
 import { Link } from 'react-router-dom';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
@@ -69,6 +73,18 @@ export const useOrdersColumns = () => {
 
     columns.push(
       {
+        header: 'Contact via',
+        accessorKey: 'preferredContactMethod',
+        cell: ({ row }) => {
+          const method = row.original.preferredContactMethod;
+          return (
+            <p className="text-sm text-(--ink)">
+              {method ? PREFERRED_CONTACT_METHOD_LABELS[method] : '—'}
+            </p>
+          );
+        },
+      },
+      {
         header: 'Assigned To',
         accessorKey: 'assignments',
         cell: ({ row }) => (
@@ -118,7 +134,7 @@ export const useOrdersColumns = () => {
                       Resume
                     </Link>
                     <Link
-                      className={tableActionClassName}
+                      className={tableDangerActionClassName}
                       to={`#`}
                       onClick={(e) => {
                         e.preventDefault();
@@ -126,10 +142,7 @@ export const useOrdersColumns = () => {
                         dispatch(setDeleteOrderModal(true));
                       }}
                     >
-                      <FontAwesomeIcon
-                        icon={faTrash}
-                        className="text-red-700"
-                      />
+                      <FontAwesomeIcon icon={faTrash} />
                       Delete
                     </Link>
                   </>

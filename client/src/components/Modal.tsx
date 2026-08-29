@@ -37,7 +37,7 @@ const JSX_MODAL: FC<ModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        overlayClassName={overlayClassName}
+        overlayClassName={overlayClassName ?? undefined}
         className={`z-[9999] w-[92vw] max-w-[92vw] min-w-0 sm:w-auto sm:max-w-[80vw] sm:min-w-[420px] lg:max-w-[720px] lg:min-w-[520px] max-h-[85vh] sm:max-h-[80vh] ${className} flex flex-col overflow-hidden`}
         onClick={(e) => {
           e.stopPropagation();
@@ -45,20 +45,20 @@ const JSX_MODAL: FC<ModalProps> = ({
       >
         <DialogHeader className="shrink-0">
           <DialogTitle
-            className={`text-lg font-semibold text-black uppercase mt-[-10px] ${
+            className={`type-card-title mt-[-10px] ${
               headingClassName ?? ''
             }`}
           >
             {heading}
           </DialogTitle>
             <DialogDescription
-              className={`text-sm text-gray-500 ${descriptionClassName ?? ''}`}
+              className={`text-sm text-(--muted) ${descriptionClassName ?? ''}`}
             >
               {description}
             </DialogDescription>
         </DialogHeader>
         <main className="flex-1 overflow-y-auto min-h-0">
-          <section className="p-1">{children}</section>
+          <section className="p-0">{children}</section>
         </main>
       </DialogContent>
     </Dialog>

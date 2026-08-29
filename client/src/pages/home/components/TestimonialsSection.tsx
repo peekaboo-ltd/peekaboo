@@ -34,38 +34,38 @@ const TestimonialsSection = ({
   const current = testimonials[activeTestimonial];
 
   return (
-    <section className="w-full bg-[var(--peekaboo-surface)] py-12 lg:py-16">
+    <section className="section-rhythm w-full border-t border-(--line) bg-(--paper)">
       <motion.article
-        className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10"
+        className="app-container"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-80px' }}
         variants={containerVariants}
       >
         <motion.header className="mb-8 max-w-[640px]" variants={itemVariants}>
-          <p className="text-[11px] font-medium uppercase text-muted-foreground">
+          <p className="type-eyebrow">
             {badgeLabel}
           </p>
-          <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
+          <h2 className="type-h2 mt-2">
             {title}
           </h2>
-          <p className="mt-3 text-[13px] font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
+          <p className="mt-3 text-sm font-normal leading-relaxed text-muted-foreground">{subtitle}</p>
         </motion.header>
 
         <motion.figure className="relative" variants={itemVariants}>
-          <blockquote className="relative overflow-hidden rounded-md border border-border bg-[var(--peekaboo-surface)] p-6 sm:p-8 lg:p-10 shadow-[0_22px_70px_-52px_color-mix(in_oklab,var(--primary)_45%,transparent)]">
+          <blockquote className="relative overflow-hidden rounded-md border border-(--line) bg-(--paper) p-6 sm:p-8 lg:p-10">
             <Quote
-              className="absolute right-6 top-6 h-10 w-10 text-[#fff4be]"
+              className="absolute right-6 top-6 h-10 w-10 text-(--surface)"
               aria-hidden="true"
             />
 
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTestimonial}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.35, ease: 'easeOut' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, y: 0 }}
+                transition={{ duration: 0.2, ease: [0, 0, 1, 1] }}
                 className="relative z-10 max-w-[720px]"
               >
                 <p className="text-[18px] font-normal leading-relaxed text-foreground sm:text-[22px]">
@@ -73,14 +73,14 @@ const TestimonialsSection = ({
                 </p>
 
                 <figcaption className="mt-6 flex items-center gap-4">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0a0a0a] text-[15px] font-medium text-[#edb100]">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-(--ink) text-[15px] font-normal text-(--paper)">
                     {current.name.charAt(0)}
                   </span>
                   <cite className="not-italic">
-                    <strong className="block text-[14px] font-medium text-foreground">
+                    <strong className="block text-[14px] font-normal text-foreground">
                       {current.name}
                     </strong>
-                    <span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                    <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                       {current.type === 'business' ? (
                         <Building2 className="h-3 w-3" aria-hidden="true" />
                       ) : (
@@ -102,14 +102,12 @@ const TestimonialsSection = ({
                   key={index}
                   type="button"
                   onClick={() => setActiveTestimonial(index)}
-                  className={`group relative h-2 rounded-full transition-all duration-300 ${
-                    index === activeTestimonial
-                      ? 'w-8 bg-[#edb100] shadow-[0_0_8px_rgba(237,177,0,0.4)]'
-                      : 'w-2 bg-border hover:bg-[#d9d8d4] hover:w-4'
-                  }`}
+                  aria-selected={index === activeTestimonial}
+                  className="flex size-6 items-center justify-center rounded-(--radius-pill) border border-(--line) text-xs text-(--muted) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] aria-selected:border-(--ink) aria-selected:bg-(--ink) aria-selected:text-(--paper) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
                   aria-label={`Go to testimonial ${index + 1}`}
-                  aria-current={index === activeTestimonial ? 'true' : undefined}
-                />
+                >
+                  {index + 1}
+                </button>
               ))}
             </nav>
           </blockquote>
@@ -123,20 +121,20 @@ const TestimonialsSection = ({
                     (prev) => (prev - 1 + testimonials.length) % testimonials.length
                   )
                 }
-                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--peekaboo-surface)] text-muted-foreground shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition-all duration-300 hover:border-[#d49e00] hover:text-foreground hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]"
+                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-(--surface) text-muted-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-(--surface-hover) hover:text-foreground"
                 aria-label="Previous testimonial"
               >
-                <ChevronLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
+                <ChevronLeft className="h-4 w-4 transition-transform duration-200" />
               </button>
               <button
                 type="button"
                 onClick={() =>
                   setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
                 }
-                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-[var(--peekaboo-surface)] text-muted-foreground shadow-[0_8px_24px_-16px_rgba(10,10,10,0.35)] transition-all duration-300 hover:border-[#d49e00] hover:text-foreground hover:shadow-[0_8px_24px_-12px_rgba(237,177,0,0.25)]"
+                className="pointer-events-auto group flex h-10 w-10 items-center justify-center rounded-full border border-border bg-(--surface) text-muted-foreground transition-[background-color,color,border-color,box-shadow] duration-200 hover:border-(--surface-hover) hover:text-foreground"
                 aria-label="Next testimonial"
               >
-                <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                <ChevronRight className="h-4 w-4 transition-transform duration-200" />
               </button>
             </nav>
           )}

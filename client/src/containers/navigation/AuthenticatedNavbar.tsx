@@ -1,322 +1,174 @@
-import { useLocation } from 'react-router';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowAltCircleRight, faUser } from '@fortawesome/free-regular-svg-icons';
-import { Link, useNavigate } from 'react-router-dom';
-import {
-    faChevronDown,
-    faBars,
-    faTimes,
-    faBuilding,
-    faBoxOpen,
-} from '@fortawesome/free-solid-svg-icons';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Building2, ChevronDown, LogOut, User } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/states/store';
-import { FC, useState } from 'react';
+import type { AppDispatch, RootState } from '@/states/store';
 import { setLogout } from '@/states/slices/auth.slice';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
 import { capitalizeString } from '@/utils/strings.util';
-import { UserRole } from '@/types/user.type';
+import type { UserRole } from '@/types/user.type';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getProfilePhotoUrl } from '@/utils/profilePhoto.util';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 import peekabooLogo from '/peekaboo.png';
 
 interface Props {
-    className?: string;
+  className?: string;
 }
+
+const navLinkClassName =
+  'inline-flex min-h-10 items-center rounded-lg px-3 text-sm font-normal transition-[background-color,color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:bg-(--surface) active:shadow-[var(--press-on-ink)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]';
 
 const AuthenticatedNavbar = ({ className }: Props) => {
-    // STATE VARIABLES
-    const dispatch: AppDispatch = useDispatch();
-    const { user } = useSelector((state: RootState) => state.auth);
-    const [isOpen, setIsOpen] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dispatch: AppDispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
-    const { pathname } = useLocation();
-    const navigate = useNavigate();
+  if (['/auth/login', '/auth/register'].includes(pathname)) return null;
 
-    if (['auth/login', 'auth/register'].includes(pathname)) {
-        return null;
-    }
+  const isBusinessUser = user?.userRoles?.some(
+    (role: UserRole) => role?.role?.name === 'BUSINESS',
+  );
 
-    const isBusinessUser = user?.userRoles?.some(
-        (role: UserRole) => role?.role?.name === 'BUSINESS'
-    );
+  const userRolesLabel = user?.userRoles
+    ?.map((role: UserRole) => capitalizeString(role?.role?.name))
+    .join(', ');
 
-    // NAV DROPDOWN
-    const navDropdown = [
-        ...(isBusinessUser
-            ? [
-                {
-                    title: 'Organization Settings',
-                    link: '/organizations/settings',
-                    icon: faBuilding,
-                },
-            ]
-            : []),
-        {
-            title: 'Profile',
-            link: '/user-profile',
-            icon: faUser,
-        },
-        {
-            title: 'Logout',
-            link: '/auth/login',
-            icon: faArrowAltCircleRight,
-        },
-    ];
+  const navDropdown = [
+    ...(isBusinessUser
+      ? [{ title: 'Organization Settings', link: '/organizations/settings', icon: Building2 }]
+      : []),
+    { title: 'Profile', link: '/user-profile', icon: User },
+    { title: 'Logout', link: '/auth/login', icon: LogOut, destructive: true },
+  ] as const;
 
-    return (
-        <nav className="w-full fixed top-0 z-1000 bg-[#FAFAF7] shadow-md">
-            <header
-                className={`relative w-[95%] sm:w-[92%] md:w-[90%] mx-auto transition-all duration-300
-        py-2 sm:py-3 h-[64px] min-h-[64px] max-h-[64px] flex items-center justify-between ${className}`}
-            >
-                <Link to="/" className="w-fit shrink-0">
-                    <img
-                        src={peekabooLogo}
-                        className="h-14 w-auto sm:h-16 object-contain"
-                        alt="Peekaboo Logo"
-                    />
-                </Link>
+  const userInitial =
+    user?.name?.[0]?.toUpperCase()
+    || user?.email?.[0]?.toUpperCase()
+    || user?.phoneNumber?.[0]?.toUpperCase();
 
-                <section className="flex items-center gap-2 ml-auto">
-                    {pathname === '/' && (
-                        <Link
-                            to="/dashboard"
-                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-normal text-primary-900 hover:bg-[var(--peekaboo-surface)] rounded-lg transition-colors duration-200"
-                        >
-                            Dashboard
-                        </Link>
-                    )}
-                    {pathname === '/' && (
-                        <Link
-                            to="/track"
-                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-normal text-gray-700 hover:bg-[var(--peekaboo-surface)] rounded-lg transition-colors duration-200"
-                        >
-                            Track order
-                        </Link>
-                    )}
-                    <LanguageSelector className="hidden sm:block" />
-
-                    <button
-                        className="md:hidden p-2 rounded-lg cursor-pointer hover:bg-[var(--peekaboo-surface)] transition-colors duration-200"
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        aria-label="Toggle mobile menu"
-                    >
-                        <FontAwesomeIcon
-                            icon={faBars}
-                            className="text-gray-600 text-lg sm:text-xl"
-                        />
-                    </button>
-
-                    <section className="relative">
-                        <button
-                            className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 pr-2 sm:pr-3 rounded-lg cursor-pointer hover:bg-[var(--peekaboo-surface)] transition-colors duration-200"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setIsOpen(!isOpen);
-                            }}
-                            aria-expanded={isOpen}
-                            aria-haspopup="true"
-                        >
-                            <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200">
-                                <AvatarImage src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined} alt="" />
-                                <AvatarFallback className="rounded-full bg-[var(--peekaboo-surface)] text-black text-xs font-normal">
-                                    {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-
-                            <div className="hidden sm:flex flex-col items-start">
-                                <span className="text-sm font-normal text-gray-800 truncate max-w-[150px] sm:max-w-[170px]">
-                                    {user?.name || user?.phoneNumber}
-                                </span>
-                                <span className="text-xs text-gray-500 truncate max-w-[150px] sm:max-w-[170px]">
-                                    {user?.userRoles?.map((role: UserRole) => capitalizeString(role?.role?.name))?.join(', ')}
-                                </span>
-                            </div>
-
-                            <FontAwesomeIcon
-                                className={`text-gray-400 mb-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-                                    }`}
-                                icon={faChevronDown}
-                                aria-hidden="true"
-                            />
-                        </button>
-                    </section>
-                </section>
-
-                <NavDropdown isOpen={isOpen}>
-                    <section className="py-2 w-full rounded-lg shadow-md bg-[#FAFAF7] border border-gray-100">
-                        <div className="sm:hidden p-4 border-b border-gray-100">
-                            <h3 className="font-normal text-gray-800">
-                                {user?.name || user?.phoneNumber}
-                            </h3>
-                            <p className="text-sm text-gray-500 truncate">
-                                {user?.email || user?.phoneNumber}
-                            </p>
-                        </div>
-
-                        <nav className="py-2">
-                            {navDropdown?.map((nav, index) => (
-                                <Link
-                                    key={index}
-                                    to={nav?.link}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        if (nav?.title === 'Logout') {
-                                            dispatch(setLogout());
-                                            if (pathname.includes('/dashboard')) {
-                                                window.location.href = '/auth/login';
-                                            }
-                                        }
-                                        navigate(`${nav?.link}`);
-                                    }}
-                                    className={`flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900 transition-colors duration-200
-                  ${['Theme', 'Notifications'].includes(nav?.title)
-                                            ? 'min-[450px]:hidden'
-                                            : ''
-                                        }`}
-                                >
-                                    <FontAwesomeIcon
-                                        className="w-4 h-4"
-                                        icon={nav?.icon}
-                                        aria-hidden="true"
-                                    />
-                                    {nav?.title}
-                                </Link>
-                            ))}
-                        </nav>
-                    </section>
-                </NavDropdown>
-
-                <aside
-                    className={`md:hidden fixed inset-0 z-1001 transition-all duration-300 ${isMobileMenuOpen ? 'visible' : 'invisible'
-                        }`}
-                >
-                    <section
-                        className={`absolute inset-y-0 right-0 left-[260px] bg-black/60 backdrop-blur-sm transition-opacity duration-300 sm:left-[300px] ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'
-                            }`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        aria-hidden="true"
-                    />
-
-                    <nav
-                        className={`absolute top-0 left-0 h-full w-[260px] sm:w-[300px] bg-[#FAFAF7] shadow-sm transform transition-transform duration-300 ease-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-                            }`}
-                    >
-                        <header className="flex items-center justify-start p-3 border-b border-gray-100 bg-[#FAFAF7]">
-                            <button
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-[var(--peekaboo-surface)] rounded-lg transition-colors duration-200"
-                                aria-label="Close menu"
-                            >
-                                <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
-                            </button>
-                        </header>
-
-                        <section className="py-2">
-                            <header className="px-3 py-3 border-b border-gray-100 bg-gradient-to-r from-primary-900/5 to-transparent">
-                                <div className="flex items-center gap-2.5">
-                                    <Avatar className="w-10 h-10 rounded-full border border-slate-200">
-                                        <AvatarImage src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined} alt="" />
-                                        <AvatarFallback className="rounded-full bg-[var(--peekaboo-surface)] text-black text-sm font-normal">
-                                            {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || user?.phoneNumber?.[0]?.toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="font-normal text-gray-800 text-sm">
-                                            {user?.name || user?.phoneNumber}
-                                        </p>
-                                        <p className="text-xs text-gray-500 truncate max-w-[160px]">
-                                            {user?.email || user?.phoneNumber}
-                                        </p>
-                                    </div>
-                                </div>
-                            </header>
-
-                            <nav className="py-2">
-                                <ul className="space-y-0.5">
-                                    <li className="px-3 py-2">
-                                        <LanguageSelector className="w-full" menuClassName="left-0 right-auto min-w-full" />
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/dashboard"
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900 transition-all duration-200"
-                                        >
-                                            <FontAwesomeIcon
-                                                icon={faUser}
-                                                className="w-4 h-4 text-gray-400"
-                                            />
-                                            Dashboard
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/track"
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900 transition-all duration-200"
-                                        >
-                                            <FontAwesomeIcon
-                                                icon={faBoxOpen}
-                                                className="w-4 h-4 text-gray-400"
-                                            />
-                                            Track order
-                                        </Link>
-                                    </li>
-                                    {navDropdown?.map((nav, index) => (
-                                        <li key={index}>
-                                            <Link
-                                                to={nav?.link}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setIsMobileMenuOpen(false);
-                                                    if (nav?.title === 'Logout') {
-                                                        dispatch(setLogout());
-                                                        if (pathname.includes('/dashboard')) {
-                                                            window.location.href = '/auth/login';
-                                                        }
-                                                    }
-                                                    navigate(`${nav?.link}`);
-                                                }}
-                                                className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-normal text-gray-600 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900 transition-all duration-200"
-                                            >
-                                                <FontAwesomeIcon
-                                                    icon={nav.icon}
-                                                    className="w-4 h-4 text-gray-400"
-                                                />
-                                                {nav?.title}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </nav>
-                        </section>
-                    </nav>
-                </aside>
-            </header>
-        </nav>
-    );
-};
-
-interface NavDropdownProps {
-    isOpen: boolean;
-    children: React.ReactNode;
-}
-
-export const NavDropdown: FC<NavDropdownProps> = ({ isOpen, children }) => {
-    return (
-        <aside
-            className={`${isOpen ? 'translate-y-0' : 'translate-y-[-400px]'
-                } ease-in-out duration-300 z-[10000] absolute top-[calc(100%+0.35rem)] right-0 w-[250px] bg-transparent rounded-md max-[450px]:fixed max-[450px]:top-[64px] max-[450px]:left-0 max-[450px]:right-0 max-[450px]:w-screen`}
-            role="dialog"
-            aria-modal="true"
-            aria-label="User menu"
+  return (
+    <header className={cn('invert-surface sticky top-0 z-50 h-16', className)}>
+      <nav className="app-container flex h-16 items-center justify-between" aria-label="Account navigation">
+        <Link
+          to="/"
+          className="flex h-(--control-lg) shrink-0 items-center rounded-(--radius-control) px-2 outline-none focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+          aria-label="Peekaboo home"
         >
-            {children}
-        </aside>
-    );
+          <img
+            src={peekabooLogo}
+            className="h-10 w-auto object-contain invert dark:invert-0"
+            alt="Peekaboo"
+          />
+        </Link>
+
+        <div className="flex items-center gap-2">
+          {pathname === '/' ? (
+            <>
+              <Link to="/dashboard" className={cn(navLinkClassName, 'hidden sm:inline-flex')}>
+                Dashboard
+              </Link>
+              <Link to="/track" className={cn(navLinkClassName, 'hidden sm:inline-flex')}>
+                Track order
+              </Link>
+            </>
+          ) : null}
+
+          <div className="hidden sm:block">
+            <LanguageSelector />
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="group inline-flex h-(--control-lg) min-h-11 cursor-pointer items-center gap-2 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3 text-sm font-medium text-(--ink) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-(--ease-flat) hover:border-(--line-strong) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+                aria-haspopup="menu"
+                aria-label={`Account menu for ${user?.name || user?.phoneNumber || 'user'}`}
+              >
+                <Avatar className="size-8 shrink-0 rounded-(--radius-control) border border-(--line)">
+                  <AvatarImage
+                    src={user?.profilePhotoUrl ? getProfilePhotoUrl(user.profilePhotoUrl) ?? undefined : undefined}
+                    alt=""
+                  />
+                  <AvatarFallback className="rounded-(--radius-control) bg-(--surface) text-sm text-(--ink)">
+                    {userInitial}
+                  </AvatarFallback>
+                </Avatar>
+
+                <span className="hidden max-w-[150px] flex-col items-start sm:flex">
+                  <span className="w-full truncate text-sm font-medium text-(--ink)">
+                    {user?.name || user?.phoneNumber}
+                  </span>
+                  {userRolesLabel ? (
+                    <span className="type-meta w-full truncate">{userRolesLabel}</span>
+                  ) : null}
+                </span>
+
+                <ChevronDown
+                  className="size-4 shrink-0 text-(--muted) transition-transform duration-200 group-data-[state=open]:rotate-180"
+                  aria-hidden="true"
+                />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="end"
+              sideOffset={8}
+              className="w-[min(100vw-2rem,320px)] border border-(--line) bg-(--paper) p-3 shadow-(--shadow-menu)"
+            >
+              <div className="border-b border-(--line) pb-3">
+                <p className="text-sm font-medium text-(--ink)">
+                  {user?.name || user?.phoneNumber}
+                </p>
+                <p className="type-meta mt-0.5 truncate">
+                  {user?.email || user?.phoneNumber}
+                </p>
+                {userRolesLabel ? (
+                  <p className="type-meta mt-1">{userRolesLabel}</p>
+                ) : null}
+              </div>
+
+              <ul className="mt-2 grid gap-2" role="menu" aria-label="Account options">
+                {navDropdown.map((item) => {
+                  const Icon = item.icon;
+                  const isLogout = item.title === 'Logout';
+
+                  return (
+                    <li key={item.title} role="none">
+                      <DropdownMenuItem
+                        role="menuitem"
+                        variant={isLogout ? 'destructive' : 'default'}
+                        onSelect={() => {
+                          if (isLogout) dispatch(setLogout());
+                          navigate(item.link);
+                        }}
+                        className={cn(
+                          'flex h-auto w-full cursor-pointer items-center gap-3 rounded-(--radius-control) border px-4 py-3 text-sm font-medium transition-[border-color,background-color,box-shadow] duration-200 ease-(--ease-flat)',
+                          isLogout
+                            ? 'border-(--line) bg-(--paper) text-(--danger) hover:border-(--line-strong) hover:bg-(--danger-surface) focus:bg-(--danger-surface)'
+                            : 'border-(--line) bg-(--paper) text-(--ink) hover:border-(--line-strong) hover:bg-(--surface) focus:bg-(--surface)',
+                        )}
+                      >
+                        <Icon className="size-4 shrink-0" aria-hidden="true" />
+                        <span>{item.title}</span>
+                      </DropdownMenuItem>
+                    </li>
+                  );
+                })}
+              </ul>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </nav>
+    </header>
+  );
 };
 
 export default AuthenticatedNavbar;

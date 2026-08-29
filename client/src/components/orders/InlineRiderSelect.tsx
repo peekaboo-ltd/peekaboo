@@ -5,9 +5,10 @@ import type { User } from '@/types/user.type';
 import { useInlineRiderAssignment } from '@/hooks/orders/useInlineRiderAssignment.hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { OrderAssignmentStatus } from '@/types/orderAssignment.type';
 import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import { Link } from 'react-router-dom';
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 interface InlineRiderSelectProps {
   order: Order;
@@ -99,28 +100,11 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
     return `${name}${phone}`;
   };
 
-  // Get background color based on assignment status
-  const getStatusBackgroundColor = (status?: string) => {
-    let bgColor = 'bg-gray-100 hover:bg-gray-200';
-
-    switch (status) {
-      case OrderAssignmentStatus.PENDING:
-        bgColor = 'bg-yellow-700 text-white';
-        break;
-      case OrderAssignmentStatus.ACTIVE:
-        bgColor = 'bg-green-700 text-white';
-        break;
-      case OrderAssignmentStatus.REJECTED:
-    }
-
-    return bgColor;
-  };
-
   // Render current assignment status
   const renderAssignmentStatus = () => {
     if (isAssigning) {
       return (
-        <span className="text-xs text-gray-500 w-full text-center">
+        <span className="text-xs text-(--muted) w-full text-center">
           <FontAwesomeIcon icon={faSpinner} spin className="mr-1" />
           Assigning...
         </span>
@@ -136,7 +120,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
     }
 
     return (
-      <span className="text-xs text-gray-400 w-full text-center">
+      <span className="text-xs text-(--muted) w-full text-center">
         <FontAwesomeIcon icon={faUser} className="mr-1" />
         No assignment
       </span>
@@ -147,32 +131,32 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
     isDropdownOpen && dropdownPosition ? (
       <section
         ref={dropdownRef}
-        className="fixed z-10000 bg-white border border-gray-300 rounded-md shadow-lg overflow-hidden"
+        className="fixed z-[10000] overflow-hidden rounded-(--radius-control) border border-(--line) bg-(--paper) shadow-(--shadow-menu)"
         style={{
           top: `${dropdownPosition.top}px`,
           left: `${dropdownPosition.left}px`,
           width: `${dropdownPosition.width}px`,
         }}
       >
-        <header className="p-2 border-b border-gray-200">
+        <header className="border-b border-(--line) p-2">
           <input
             ref={inputRef}
             type="search"
             placeholder="Search by name or phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className={cn(controlClassName, 'h-(--control-sm) px-3')}
             aria-label="Search riders"
           />
         </header>
         <menu className="max-h-60 overflow-auto">
           {isFetchingRiders ? (
-            <li className="px-3 py-2 text-sm text-gray-500 text-center list-none">
+            <li className="px-3 py-2 text-sm text-(--muted) text-center list-none">
               <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
               Loading riders...
             </li>
           ) : riders.length === 0 ? (
-            <li className="px-3 py-2 text-sm text-gray-500 text-center list-none">
+            <li className="px-3 py-2 text-sm text-(--muted) text-center list-none">
               No riders found
             </li>
           ) : (
@@ -180,7 +164,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
               <li key={rider.id} className="list-none">
                 <Link
                   to={`/users/${rider?.id}`}
-                  className="w-full px-3 py-2 text-left hover:bg-gray-100 border-b border-gray-100 last:border-b-0 cursor-pointer"
+                  className="block w-full cursor-pointer border-b border-(--line) px-3 py-2 text-left transition-[background-color] duration-200 ease-(--ease-flat) last:border-b-0 hover:bg-(--surface)"
                   onClick={(e) => {
                     e.preventDefault();
                     if (rider?.id) {
@@ -188,10 +172,10 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
                     }
                   }}
                 >
-                  <strong className="block text-sm font-medium text-gray-900">
+                  <strong className="block text-sm font-medium text-(--ink)">
                     {rider?.name || 'Unnamed Rider'}
                   </strong>
-                  <span className="block text-xs text-gray-600">
+                  <span className="block text-xs text-(--muted)">
                     {rider?.phoneNumber}
                   </span>
                 </Link>
@@ -205,9 +189,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
   // If user is a customer, show read-only assignment status
   if (isCustomer) {
     return (
-      <p
-        className={`text-sm text-black px-4 py-2 rounded-md ${getStatusBackgroundColor(activeAssignment?.status)}`}
-      >
+      <p className="type-body-sm px-1 py-1.5 text-(--ink)">
         {renderAssignmentStatus()}
       </p>
     );
@@ -220,7 +202,7 @@ const InlineRiderSelect = ({ order, isCustomer = false }: InlineRiderSelectProps
         type="button"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         disabled={isAssigning}
-        className={`text-sm text-black px-4 py-2 cursor-pointer rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${getStatusBackgroundColor(activeAssignment?.status)}`}
+        className="inline-flex h-(--control-sm) cursor-pointer items-center rounded-(--radius-control) bg-(--surface) px-3 text-sm text-(--ink) transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface-hover) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Assign rider to order"
         aria-expanded={isDropdownOpen}
         aria-haspopup="true"

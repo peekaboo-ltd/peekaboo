@@ -4,6 +4,7 @@ import { legalBodyEn } from './legalBodyEn';
 export const messages: Record<Language, Record<string, string>> = {
   en: {
     'home.language.label': 'Language',
+    'home.language.description': 'Choose how you read Peekaboo across the site.',
     'home.language.en': 'English',
     'home.language.rw': 'Kinyarwanda',
     'home.language.fr': 'Français',
@@ -338,6 +339,7 @@ export const messages: Record<Language, Record<string, string>> = {
   },
   fr: {
     'home.language.label': 'Langue',
+    'home.language.description': 'Choisissez comment vous lisez Peekaboo sur le site.',
     'home.language.en': 'English',
     'home.language.rw': 'Kinyarwanda',
     'home.language.fr': 'Français',
@@ -672,6 +674,7 @@ export const messages: Record<Language, Record<string, string>> = {
   },
   rw: {
     'home.language.label': 'Ururimi',
+    'home.language.description': 'Hitamo uko usoma Peekaboo kuri uru rubuga.',
     'home.language.en': 'English',
     'home.language.rw': 'Kinyarwanda',
     'home.language.fr': 'Français',

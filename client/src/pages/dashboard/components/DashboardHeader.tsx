@@ -1,12 +1,11 @@
 import { motion, type Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
 import { RoleTypes } from '@/types/auth.type';
 import { useI18n } from '@/i18n/i18n';
-import { Button } from '@/components/ui/button';
 import DatePicker from '@/components/inputs/DatePicker';
 import type { DashboardActionLink } from '@/types/dashboard.type';
 import { faFileLines } from '@fortawesome/free-regular-svg-icons';
+import Button from '@/components/inputs/Button';
 
 interface DashboardHeaderProps {
   userName?: string | null;
@@ -42,17 +41,17 @@ const DashboardHeader = ({
 
   return (
     <motion.header className="w-full" variants={variants}>
-      <div className="overflow-hidden rounded-xl border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] shadow-[0_1px_0_rgba(20,24,29,0.05)]">
-        <div className="border-b border-[color:var(--ops-line)] px-5 py-4 sm:px-6">
-          <p className="font-ui text-[11px] font-medium uppercase text-slate-500">
+      <div className="overflow-hidden rounded-xl bg-(--surface)">
+        <div className="border-b border-(--line) px-5 py-4 sm:px-6">
+          <p className="type-eyebrow">
             Command center
           </p>
           <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="font-ui text-[2rem] font-semibold text-[color:var(--ops-ink)] sm:text-[2.3rem]">
+              <h1 className="type-display">
                 Dashboard
               </h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[15px]">
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-(--muted) sm:text-[15px]">
                 {userName ? `${t('dashboard.welcome', { name: userName })}. ` : ''}
                 {description}
               </p>
@@ -61,14 +60,14 @@ const DashboardHeader = ({
             {actions.length > 0 && (
               <div className="flex flex-wrap gap-2 xl:max-w-[28rem] xl:justify-end">
                 {actions.slice(0, 3).map((action) => (
-                  <Link
+                  <Button
                     key={action.label}
-                    to={action.to}
-                    className="inline-flex items-center gap-2 rounded-md border border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-4 py-2 text-sm font-medium text-[color:var(--ops-ink)] transition-colors duration-200 hover:bg-[var(--peekaboo-surface)]"
+                    variant='outline'
+                    className='border-(--line) bg-(--surface) hover:bg-(--surface-hover)'
                   >
-                    <FontAwesomeIcon icon={action.icon} className="text-xs text-slate-500" />
+                    <FontAwesomeIcon icon={action.icon} className="type-meta" />
                     {action.label}
-                  </Link>
+                  </Button>
                 ))}
               </div>
             )}
@@ -85,7 +84,7 @@ const DashboardHeader = ({
                 toDate={endDate}
               />
             </div>
-            <span className="font-ui hidden text-center text-[11px] uppercase text-slate-400 sm:block">
+            <span className="hidden text-center text-xs text-(--muted) sm:block">
               to
             </span>
             <div className="w-full">
@@ -101,10 +100,9 @@ const DashboardHeader = ({
           <div className="flex flex-wrap items-center justify-start gap-2 xl:justify-end">
             <Button
               variant="outline"
-              size="sm"
-              className="h-10 gap-2 rounded-md border-[color:var(--ops-line)] bg-[var(--peekaboo-surface)] px-4 hover:bg-[var(--peekaboo-surface)]"
+              className='border-(--line) bg-(--surface) hover:bg-(--surface-hover)'
             >
-              <FontAwesomeIcon icon={faFileLines} className="text-xs" />
+              <FontAwesomeIcon icon={faFileLines} className="type-meta" />
               Export
             </Button>
           </div>

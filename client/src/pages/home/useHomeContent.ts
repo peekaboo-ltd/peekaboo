@@ -54,7 +54,7 @@ export const useHomeContent = (): HomeContent => {
   const heroCopy: HeroCopy = {
     personalTabLabel: t('home.hero.tab.personal'),
     businessTabLabel: t('home.hero.tab.business'),
-    personalTitle1: 'Send anything,',
+    personalTitle1: 'Send anything*,',
     personalTitle2: 'anywhere',
     personalSubtitle:
       'Peekaboo connects senders to verified riders for same-day delivery across Kigali. Book in under a minute, track every step, pay when it arrives.',

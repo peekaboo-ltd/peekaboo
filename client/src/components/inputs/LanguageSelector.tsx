@@ -1,87 +1,109 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { Check, ChevronDown, Globe } from 'lucide-react';
 import { useI18n, type Language } from '@/i18n/i18n';
+import Modal from '@/components/Modal';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
 
-const languageOptions: Record<Language, { label: string; shortLabel: string }> = {
-  en: { label: 'English', shortLabel: 'EN' },
-  fr: { label: 'Francais', shortLabel: 'FR' },
-  rw: { label: 'Kinyarwanda', shortLabel: 'RW' },
-};
+const languageOptions: {
+  code: Language;
+  nativeName: string;
+  labelKey: string;
+}[] = [
+  { code: 'en', nativeName: 'English', labelKey: 'home.language.en' },
+  { code: 'fr', nativeName: 'Français', labelKey: 'home.language.fr' },
+  { code: 'rw', nativeName: 'Ikinyarwanda', labelKey: 'home.language.rw' },
+];
 
 interface LanguageSelectorProps {
   className?: string;
-  menuClassName?: string;
-  dropdownDirection?: 'up' | 'down';
 }
 
-const LanguageSelector = ({ className, menuClassName, dropdownDirection = 'down' }: LanguageSelectorProps) => {
-  const { language, setLanguage } = useI18n();
+const LanguageSelector = ({ className }: LanguageSelectorProps) => {
+  const { language, setLanguage, t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
+  const currentOption = languageOptions.find((option) => option.code === language);
 
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, []);
-
-  const currentOption = languageOptions[language];
+  const selectLanguage = (code: Language) => {
+    setLanguage(code);
+    setIsOpen(false);
+  };
 
   return (
-    <div ref={containerRef} className={cn('relative inline-flex', className)}>
-      <Link
-        to="#"
-        onClick={(e) => {
-          e.preventDefault();
-          setIsOpen((prev) => !prev);
-        }}
-        className="inline-flex items-center cursor-pointer justify-between gap-1 px-2 py-1 text-[12px] font-light text-slate-900 uppercase transition-all duration-200 hover:border-primary-900/20 hover:text-primary-900"
-        aria-haspopup="listbox"
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className={cn(
+          'inline-flex h-(--control-lg) min-h-11 cursor-pointer items-center justify-center gap-2 rounded-(--radius-control) border border-(--line) bg-(--paper) px-3.5 text-sm font-medium text-(--ink) transition-[background-color,color,border-color,box-shadow] duration-200 ease-(--ease-flat) hover:border-(--line-strong) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]',
+          className,
+        )}
+        aria-haspopup="dialog"
         aria-expanded={isOpen}
-        aria-label="Select language"
+        aria-label={`${t('home.language.label')}: ${currentOption ? t(currentOption.labelKey) : 'English'}`}
       >
-        <span className='flex items-center gap-1 text-slate-900 text-[12px] font-light uppercase'>{currentOption?.shortLabel}</span>
-      </Link>
-
-      {isOpen && (
-        <div
+        <Globe className="size-4 shrink-0 text-(--muted)" aria-hidden="true" />
+        <span className="hidden sm:inline">{t('home.language.label')}</span>
+        <span className="uppercase tracking-wide">{currentOption?.code ?? 'EN'}</span>
+        <ChevronDown
           className={cn(
-            `absolute ${dropdownDirection === 'up' ? 'bottom-full' : 'top-full'} right-[-10px] z-[10001] mt-2 w-[52px] overflow-hidden bg-[var(--peekaboo-surface)] p-0.5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.2)] backdrop-blur-sm`,
-            menuClassName
+            'size-4 shrink-0 text-(--muted) transition-transform duration-200',
+            isOpen && 'rotate-180',
           )}
-          role="listbox"
-          aria-label="Language options"
-        >
-          {Object.entries(languageOptions).map(([code, option]) => {
+          aria-hidden="true"
+        />
+      </button>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        heading={t('home.language.label')}
+        description={t('home.language.description')}
+        className="sm:min-w-[360px] sm:max-w-[420px]"
+      >
+        <ul className="grid gap-2" role="listbox" aria-label={t('home.language.label')}>
+          {languageOptions.map(({ code, nativeName, labelKey }) => {
             const isActive = code === language;
 
             return (
-              <Link
-                key={code}
-                to="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setLanguage(code as Language);
-                  setIsOpen(false);
-                }}
-                className={`cursor-pointer ${isActive ? 'text-primary-900' : 'text-slate-500 hover:bg-[var(--peekaboo-surface)] hover:text-primary-900'} flex w-full items-center justify-center rounded-md px-2 py-1 text-[12px] font-light uppercase transition-colors duration-150`}
-                role="option"
-                aria-selected={isActive}
-                title={option.label}
-              >
-                {option?.shortLabel}
-              </Link>
+              <li key={code}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={isActive}
+                  onClick={() => selectLanguage(code)}
+                  className={cn(
+                    'flex w-full items-center justify-between gap-3 rounded-(--radius-control) border px-4 py-3 text-left transition-[border-color,background-color,box-shadow] duration-200 ease-(--ease-flat)',
+                    isActive
+                      ? 'border-(--ink) bg-(--ink) text-(--paper)'
+                      : 'border-(--line) bg-(--paper) text-(--ink) hover:border-(--line-strong) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]',
+                  )}
+                >
+                  <span>
+                    <span className={cn(
+                      "block text-sm font-medium",
+                      isActive ? "text-(--paper)" : "text-(--ink)"
+                    )}>
+                      {t(labelKey)}
+                    </span>
+                    <span className={cn(
+                      "type-meta mt-0.5 block",
+                      isActive ? "text-(--paper)" : ""
+                    )}>{nativeName}</span>
+                  </span>
+                  {isActive ? (
+                    <Check className="size-4 shrink-0 text-(--paper)" aria-hidden="true" />
+                  ) : (
+                    <span className="type-meta shrink-0 uppercase">{code}</span>
+                  )}
+                </button>
+              </li>
             );
           })}
-        </div>
-      )}
-    </div>
+        </ul>
+      </Modal>
+
+    </>
   );
 };
 

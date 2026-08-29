@@ -31,6 +31,17 @@ import { KpayPaymentStatus, Payment } from '@/types/payment.types';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { AdminPaymentsQueryParams } from '@/api/queries/payments.queries';
+import { controlClassName } from '@/components/inputs/control';
+import DatePicker from '@/components/inputs/DatePicker';
+import { cn } from '@/lib/utils';
+
+const formatDateParam = (date?: Date) => {
+  if (!date) return undefined;
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate(),
+  ).padStart(2, '0')}`;
+};
 
 const PAYMENT_STATUS_OPTIONS = [
   { value: 'all', label: 'All Statuses' },
@@ -65,8 +76,8 @@ const PaymentsPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [currencyFilter, setCurrencyFilter] = useState<string>('all');
   const [methodFilter, setMethodFilter] = useState<string>('all');
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
   const [minAmount, setMinAmount] = useState<string>('');
   const [maxAmount, setMaxAmount] = useState<string>('');
   const [searchKey, setSearchKey] = useState<string>('');
@@ -106,8 +117,8 @@ const PaymentsPage = () => {
     if (currencyFilter && currencyFilter !== 'all')
       params.currency = currencyFilter;
     if (methodFilter && methodFilter !== 'all') params.method = methodFilter;
-    if (startDate) params.startDate = startDate;
-    if (endDate) params.endDate = endDate;
+    if (startDate) params.startDate = formatDateParam(startDate);
+    if (endDate) params.endDate = formatDateParam(endDate);
     if (minAmount) params.minAmount = Number(minAmount);
     if (maxAmount) params.maxAmount = Number(maxAmount);
     if (searchKey.trim()) params.searchKey = searchKey.trim();
@@ -159,8 +170,8 @@ const PaymentsPage = () => {
 
   useEffect(() => {
     fetchPaymentStats({
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
+      startDate: formatDateParam(startDate),
+      endDate: formatDateParam(endDate),
       currency: currencyFilter !== 'all' ? currencyFilter : undefined,
     });
   }, [startDate, endDate, currencyFilter, fetchPaymentStats]);
@@ -170,21 +181,19 @@ const PaymentsPage = () => {
     fetchAdminPayments(buildFilterParams({ page: 0 }));
   };
 
-  const handleStartDateChange = (value: string) => {
-    setStartDate(value);
+  const handleStartDateChange = (date?: Date) => {
+    setStartDate(date);
 
-    // Keep a valid range: startDate must be <= endDate
-    if (endDate && value && value > endDate) {
-      setEndDate(value);
+    if (endDate && date && date > endDate) {
+      setEndDate(date);
     }
   };
 
-  const handleEndDateChange = (value: string) => {
-    setEndDate(value);
+  const handleEndDateChange = (date?: Date) => {
+    setEndDate(date);
 
-    // Keep a valid range: endDate must be >= startDate
-    if (startDate && value && value < startDate) {
-      setStartDate(value);
+    if (startDate && date && date < startDate) {
+      setStartDate(date);
     }
   };
 
@@ -192,8 +201,8 @@ const PaymentsPage = () => {
     setStatusFilter('all');
     setCurrencyFilter('all');
     setMethodFilter('all');
-    setStartDate('');
-    setEndDate('');
+    setStartDate(undefined);
+    setEndDate(undefined);
     setMinAmount('');
     setMaxAmount('');
     setSearchKey('');
@@ -286,7 +295,7 @@ const PaymentsPage = () => {
       <header className="flex flex-col gap-4">
         <section className="flex items-start justify-between gap-4 flex-wrap">
           <article>
-            <h1 className="text-2xl font-bold text-black">Payments</h1>
+            <h1 className="type-page-title">Payments</h1>
             <p className="text-sm text-muted-foreground">
               View and manage all payments across the platform.
             </p>
@@ -313,12 +322,12 @@ const PaymentsPage = () => {
           </menu>
         </section>
 
-        <section className="bg-white border border-slate-200 rounded-xl p-4">
+        <section className="bg-(--paper) border border-(--line) rounded-xl p-4">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-3">
             <div className="relative">
               <FontAwesomeIcon
                 icon={faSearch}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted) text-xs"
               />
               <input
                 type="text"
@@ -328,25 +337,29 @@ const PaymentsPage = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleApplyFilters();
                 }}
-                className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                className={cn(controlClassName, 'pl-8 pr-3')}
               />
             </div>
-            <input
-              type="date"
-              aria-label="From date"
-              value={startDate}
-              max={endDate || undefined}
-              onChange={(e) => handleStartDateChange(e.target.value)}
-              className="w-full md:w-[170px] px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-            />
-            <input
-              type="date"
-              aria-label="To date"
-              value={endDate}
-              min={startDate || undefined}
-              onChange={(e) => handleEndDateChange(e.target.value)}
-              className="w-full md:w-[170px] px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-            />
+            <div className="md:w-[170px]">
+              <DatePicker
+                value={startDate}
+                onChange={(event) =>
+                  handleStartDateChange(event as unknown as Date | undefined)
+                }
+                placeholder="From date"
+                toDate={endDate}
+              />
+            </div>
+            <div className="md:w-[170px]">
+              <DatePicker
+                value={endDate}
+                onChange={(event) =>
+                  handleEndDateChange(event as unknown as Date | undefined)
+                }
+                placeholder="To date"
+                fromDate={startDate}
+              />
+            </div>
             <Button primary type="button" onClick={handleApplyFilters}>
               Apply
             </Button>
@@ -360,49 +373,49 @@ const PaymentsPage = () => {
               label: 'Total Revenue',
               value: formatCurrency(stats?.totalRevenue || 0),
               icon: faMoneyBillWave,
-              bgColor: 'bg-primary-50',
+              bgColor: 'bg-(--ink)',
             },
             {
               label: 'Successful',
               value: `${stats?.successfulCount || 0}`,
               subtitle: formatCurrency(stats?.successfulAmount || 0),
               icon: faCheckCircle,
-              bgColor: 'bg-green-50',
+              bgColor: 'bg-(--surface)',
             },
             {
               label: 'Pending',
               value: `${stats?.pendingCount || 0}`,
               subtitle: formatCurrency(stats?.pendingAmount || 0),
               icon: faClock,
-              bgColor: 'bg-yellow-50',
+              bgColor: 'bg-(--surface)',
             },
             {
               label: 'Failed',
               value: `${stats?.failedCount || 0}`,
               subtitle: formatCurrency(stats?.failedAmount || 0),
               icon: faTimesCircle,
-              bgColor: 'bg-red-50',
+              bgColor: 'bg-(--surface)',
             },
           ].map((card) => (
             <article
               key={card.label}
-              className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between"
+              className="bg-(--paper) border border-(--line) rounded-xl p-4 flex items-center justify-between"
             >
               <div>
-                <p className="text-xs uppercase text-slate-500">
+                <p className="type-meta">
                   {card.label}
                 </p>
-                <p className="text-lg font-semibold text-slate-900 mt-1">
+                <p className="type-metric mt-1">
                   {card.value}
                 </p>
                 {card.subtitle && (
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-(--muted) mt-0.5">
                     {card.subtitle}
                   </p>
                 )}
               </div>
               <span
-                className={`w-10 h-10 rounded-lg ${card.bgColor} flex items-center justify-center text-black`}
+                className={`w-10 h-10 rounded-lg ${card.bgColor} flex items-center justify-center text-(--ink)`}
               >
                 <FontAwesomeIcon icon={card.icon} />
               </span>
@@ -412,17 +425,17 @@ const PaymentsPage = () => {
 
         {/* Filters */}
         {showFilters && (
-          <section className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-4">
+          <section className="bg-(--paper) border border-(--line) rounded-xl p-4 flex flex-col gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Search */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="type-meta">
                   Search
                 </label>
                 <div className="relative">
                   <FontAwesomeIcon
                     icon={faSearch}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-(--muted) text-xs"
                   />
                   <input
                     type="text"
@@ -432,14 +445,14 @@ const PaymentsPage = () => {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleApplyFilters();
                     }}
-                    className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                    className={cn(controlClassName, 'pl-8 pr-3')}
                   />
                 </div>
               </div>
 
               {/* Status */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="type-meta">
                   Status
                 </label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -458,7 +471,7 @@ const PaymentsPage = () => {
 
               {/* Currency */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="type-meta">
                   Currency
                 </label>
                 <Select
@@ -480,7 +493,7 @@ const PaymentsPage = () => {
 
               {/* Payment Method */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="type-meta">
                   Payment Method
                 </label>
                 <Select value={methodFilter} onValueChange={setMethodFilter}>
@@ -497,37 +510,38 @@ const PaymentsPage = () => {
                 </Select>
               </div>
 
-              {/* Start Date */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="type-meta">
                   From Date
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={startDate}
-                  max={endDate || undefined}
-                  onChange={(e) => handleStartDateChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  onChange={(event) =>
+                    handleStartDateChange(event as unknown as Date | undefined)
+                  }
+                  placeholder="From date"
+                  toDate={endDate}
                 />
               </div>
 
               {/* End Date */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="type-meta">
                   To Date
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={endDate}
-                  min={startDate || undefined}
-                  onChange={(e) => handleEndDateChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  onChange={(event) =>
+                    handleEndDateChange(event as unknown as Date | undefined)
+                  }
+                  placeholder="To date"
+                  fromDate={startDate}
                 />
               </div>
 
               {/* Min Amount */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="type-meta">
                   Min Amount
                 </label>
                 <input
@@ -535,13 +549,13 @@ const PaymentsPage = () => {
                   placeholder="0"
                   value={minAmount}
                   onChange={(e) => setMinAmount(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  className={cn(controlClassName, 'px-3')}
                 />
               </div>
 
               {/* Max Amount */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-slate-600">
+                <label className="type-meta">
                   Max Amount
                 </label>
                 <input
@@ -549,7 +563,7 @@ const PaymentsPage = () => {
                   placeholder="0"
                   value={maxAmount}
                   onChange={(e) => setMaxAmount(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                  className={cn(controlClassName, 'px-3')}
                 />
               </div>
             </div>

@@ -6,6 +6,7 @@ import {
 } from '@/utils/phone.util';
 import { PaymentChannel } from '@/types/payment.types';
 import type { PaymentFormValues, PayerType } from './payment.types';
+import { FieldMessage } from '@/components/inputs/Field';
 
 interface MobileMoneyFieldsProps {
   control: Control<PaymentFormValues>;
@@ -59,7 +60,7 @@ const MobileMoneyFields = ({
         control={control}
         render={({ field }) => (
           <fieldset className="flex flex-col gap-3">
-            <legend className="text-sm font-medium">Who is paying?</legend>
+            <legend className="text-sm font-normal">Who is paying?</legend>
             {payerOptions.map((option) => (
               <label
                 key={option.value}
@@ -82,7 +83,7 @@ const MobileMoneyFields = ({
       />
 
       {payerType !== 'other' && payerPhoneError ? (
-        <p className="text-sm text-red-600">{payerPhoneError}</p>
+        <FieldMessage errorMessage={payerPhoneError} />
       ) : null}
 
       {payerType === 'other' && (
@@ -115,7 +116,7 @@ const MobileMoneyFields = ({
       )}
 
       {showNetworkWarning && detected ? (
-        <p className="text-xs font-normal leading-snug text-amber-700">
+        <p className="text-xs font-normal leading-snug text-(--ink)">
           This number looks like {networkLabels[detected]}, but you selected{' '}
           {networkLabels[expected]}. Continue if it is registered with{' '}
           {networkLabels[expected]}.

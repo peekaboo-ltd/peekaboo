@@ -166,10 +166,10 @@ export const useStatusFilter = ({
         trigger={
           <Button
             variant="outline"
-            className="cursor-pointer font-normal text-slate-700 !justify-start bg-white flex !w-full items-center gap-2 !h-[38px] text-[13px]"
+            className="w-full justify-start gap-2 !border-(--line)"
           >
             <FontAwesomeIcon icon={labelIcon} />
-            <p className="text-[13px]">{label}</p>
+            <p className="text-sm">{label}</p>
           </Button>
         }
       >
@@ -180,17 +180,17 @@ export const useStatusFilter = ({
               placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-[13px] h-9"
+              className="w-full text-sm h-9"
             />
           </fieldset>
 
           {/* Scrollable container for statuses and action buttons */}
           <nav
-            className="flex flex-col w-full overflow-y-auto bg-white rounded-md p-2"
+            className="flex flex-col w-full overflow-y-auto bg-(--paper) rounded-md py-2"
             style={{ maxHeight: 'calc(55vh - 50px)' }}
             aria-label="Status Filter List"
           >
-            <menu className="flex flex-col w-full min-w-[17vw] gap-3">
+            <menu className="flex flex-col w-full min-w-[17vw] gap-1">
               {filteredStatuses.length > 0 ? (
                 filteredStatuses.map((status, index) => {
                   return (
@@ -208,7 +208,7 @@ export const useStatusFilter = ({
                               e.preventDefault();
                               handleStatusToggle(status);
                             }}
-                            className="flex items-center w-full cursor-pointer gap-2"
+                            className="flex items-center w-full cursor-pointer gap-2 hover:bg-(--surface) p-2 rounded-md"
                           >
                             <Checkbox
                               id={status}
@@ -216,11 +216,11 @@ export const useStatusFilter = ({
                               aria-checked={isSelected}
                               className={
                                 isSelected
-                                  ? 'bg-primary w-4.5 h-4.5 rounded-md cursor-pointer'
+                                  ? 'bg-(--ink) w-4.5 h-4.5 rounded-md cursor-pointer'
                                   : 'w-4.5 h-4.5'
                               }
                             />
-                            <p className="text-[13px] text-black">
+                            <p className="text-sm text-(--ink)">
                               {capitalizeString(status)}
                             </p>
                           </Link>
@@ -230,7 +230,7 @@ export const useStatusFilter = ({
                   );
                 })
               ) : (
-                <p className="text-[13px] text-secondary text-center py-2">
+                <p className="text-sm text-(--muted) text-center py-2">
                   No statuses found
                 </p>
               )}
@@ -238,7 +238,7 @@ export const useStatusFilter = ({
             <ul className="flex items-center justify-between w-full gap-2 mt-4">
               <li>
                 <Link
-                  className="text-center text-primary text-[13px] p-1 px-3 border hover:!border-primary hover:!bg-primary hover:!text-white font-normal rounded-sm"
+                  className="h-(--control-sm) px-3 py-2 rounded-(--radius-control) border border-(--line) text-sm transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:border-(--ink) hover:bg-(--surface)"
                   to={`#`}
                   onClick={handleClear}
                 >
@@ -247,7 +247,7 @@ export const useStatusFilter = ({
               </li>
               <li>
                 <Link
-                  className="text-center text-primary text-[13px] p-1 px-3 border hover:!border-primary hover:!bg-primary hover:!text-white font-normal rounded-sm"
+                  className="h-(--control-sm) px-3 py-2 rounded-(--radius-control) border border-(--line) text-sm transition-[background-color,border-color] duration-200 ease-(--ease-flat) hover:border-(--ink) hover:bg-(--surface)"
                   to={`#`}
                   onClick={handleSelectAll}
                 >

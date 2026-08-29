@@ -34,6 +34,8 @@ import { BatchStatus } from "@/types/batch.type";
 import { OrderStatus } from "@/types/order.type";
 import { User } from "@/types/user.type";
 import { ReferenceIdInput } from "@/components/inputs/TableInputs";
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 interface InlinePhoneEditorProps {
   order: Order;
@@ -129,7 +131,7 @@ const InlinePhoneEditor = ({
           placeholder="0788 123 456"
         />
         {(isSaving || localSaving) && (
-          <svg className="animate-spin h-4 w-4 text-primary-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg className="animate-spin h-4 w-4 text-(--ink)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -143,14 +145,10 @@ const InlinePhoneEditor = ({
       type="button"
       onClick={() => setIsEditing(true)}
       disabled={isSaving || localSaving}
-      className={`text-[12px] px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-        isValid
-          ? "border-transparent hover:border-slate-200 hover:bg-slate-50 text-slate-900"
-          : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
-      }`}
+      className={`text-xs px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ isValid ? "border-transparent hover:border-(--line) hover:bg-(--surface) text-(--ink)" : "border-(--line) bg-(--surface) text-(--ink) hover:bg-(--surface)" }`}
       title="Click to edit phone number"
     >
-      {currentPhone || <span className="text-slate-400">Not set</span>}
+      {currentPhone || <span className="text-(--muted)">Not set</span>}
     </button>
   );
 };
@@ -257,14 +255,14 @@ const InlineLocationEditor = ({
       ? createPortal(
           <div
             ref={dropdownRef}
-            className="fixed z-[10000] bg-white border border-slate-200 rounded-xl shadow-xl p-4 space-y-3"
+            className="fixed z-[10000] space-y-3 rounded-(--radius-control) border border-(--line) bg-(--paper) p-4 shadow-(--shadow-menu)"
             style={{
               top: `${dropdownPos.top}px`,
               left: `${dropdownPos.left}px`,
               width: `${dropdownPos.width}px`,
             }}
           >
-            <p className="text-xs font-semibold text-slate-700 uppercase ">
+            <p className="text-[0.8125rem] text-(--ink)">
               Search delivery location
             </p>
             <PlaceSearch
@@ -274,11 +272,11 @@ const InlineLocationEditor = ({
               country="rw"
             />
             {selectedLocation && (
-              <div className="p-2 bg-slate-50 rounded-md border">
-                <p className="font-normal text-slate-800 text-[12px]">
+              <div className="p-2 bg-(--surface) rounded-md border">
+                <p className="font-normal text-(--ink) text-xs">
                   {selectedLocation?.name}
                 </p>
-                <p className="text-slate-500 text-[12px]">
+                <p className="text-(--muted) text-xs">
                   {selectedLocation?.formattedAddress}
                 </p>
               </div>
@@ -316,17 +314,13 @@ const InlineLocationEditor = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         disabled={isSaving || localSaving}
-        className={`text-[12px] px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-          hasLocation
-            ? "border-transparent hover:border-slate-200 hover:bg-slate-50"
-            : "border-red-200 bg-red-50 hover:bg-red-100"
-        }`}
+        className={`text-xs px-2 py-1 rounded border cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${ hasLocation ? "border-transparent hover:border-(--line) hover:bg-(--surface)" : "border-(--line) bg-(--surface) hover:bg-(--surface)" }`}
         title="Click to set delivery location"
       >
         {locationDisplay ? (
-          <span className="text-slate-900 text-[12px]">{locationDisplay}</span>
+          <span className="text-(--ink) text-xs">{locationDisplay}</span>
         ) : (
-          <span className="text-slate-400 italic text-[12px]">
+          <span className="text-(--muted) italic text-xs">
             Click to set location
           </span>
         )}
@@ -389,11 +383,11 @@ const InlineTextEditor = ({
           onKeyDown={handleKeyDown}
           onBlur={handleSave}
           disabled={isSaving || localSaving}
-          className="w-full px-2 py-1 text-[12px] border border-primary-900 rounded focus:outline-none focus:ring-1 focus:ring-primary-900 disabled:opacity-50"
+          className={cn(controlClassName, 'px-3 disabled:opacity-50')}
           placeholder={placeholder}
         />
         {(isSaving || localSaving) && (
-          <svg className="animate-spin h-4 w-4 text-primary-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg className="animate-spin h-4 w-4 text-(--ink)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -407,14 +401,14 @@ const InlineTextEditor = ({
       type="button"
       onClick={() => setIsEditing(true)}
       disabled={isSaving || localSaving}
-      className="text-[12px] px-2 py-1 rounded border border-transparent hover:border-slate-200 hover:bg-slate-50 cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="text-xs px-2 py-1 rounded border border-transparent hover:border-(--line) hover:bg-(--surface) cursor-pointer text-left w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {value ? (
-        <span className="text-slate-900 truncate block max-w-[180px] text-[12px]">
+        <span className="text-(--ink) truncate block max-w-[180px] text-xs">
           {value}
         </span>
       ) : (
-        <span className="text-slate-400 italic text-[12px]">{placeholder}</span>
+        <span className="text-(--muted) italic text-xs">{placeholder}</span>
       )}
     </button>
   );
@@ -564,7 +558,7 @@ const BatchPreviewPage = () => {
         id: "rowNum",
         header: "#",
         cell: ({ row }) => (
-          <span className="text-slate-500 tabular-nums">{row.index + 1}</span>
+          <span className="text-(--muted) tabular-nums">{row.index + 1}</span>
         ),
       },
       {
@@ -583,7 +577,7 @@ const BatchPreviewPage = () => {
           const hasError = isDraftOrder && !phoneResult.isValid;
           
           return (
-            <div className={`min-w-[140px] whitespace-normal ${hasError ? 'border-l-2 border-red-500 pl-2' : ''}`}>
+            <div className={`min-w-[140px] whitespace-normal ${hasError ? 'border-l-2 border-(--ink) pl-2' : ''}`}>
               {isDraftOrder ? (
                 <InlinePhoneEditor
                   order={row.original}
@@ -591,7 +585,7 @@ const BatchPreviewPage = () => {
                   isSaving={isUpdating}
                 />
               ) : (
-                <span className="text-[12px] text-slate-500">
+                <span className="type-meta">
                   {row.original.recipient?.phoneNumber || "—"}
                 </span>
               )}
@@ -608,7 +602,7 @@ const BatchPreviewPage = () => {
           const hasError = isDraftOrder && !locationResult.isValid;
           
           return (
-            <div className={`min-w-[180px] max-w-[260px] whitespace-normal ${hasError ? 'border-l-2 border-red-500 pl-2' : ''}`}>
+            <div className={`min-w-[180px] max-w-[260px] whitespace-normal ${hasError ? 'border-l-2 border-(--ink) pl-2' : ''}`}>
               {isDraftOrder ? (
                 <InlineLocationEditor
                   order={row.original}
@@ -616,7 +610,7 @@ const BatchPreviewPage = () => {
                   isSaving={isUpdating}
                 />
               ) : (
-                <span className="text-[12px] text-slate-500">
+                <span className="type-meta">
                   {row.original.notes || "—"}
                 </span>
               )}
@@ -645,7 +639,7 @@ const BatchPreviewPage = () => {
                   placeholder="Add ref..."
                 />
               ) : (
-                <span className="text-[12px] text-slate-500">
+                <span className="type-meta">
                   {row.original.externalReferenceId || "—"}
                 </span>
               )}
@@ -685,7 +679,7 @@ const BatchPreviewPage = () => {
           
           if (!isDraftOrder) {
             return (
-              <Badge variant="default" className="text-[10px]">
+              <Badge variant="default" className="text-xs">
                 {row.original.status}
               </Badge>
             );
@@ -693,7 +687,7 @@ const BatchPreviewPage = () => {
 
           if (validation.isValid) {
             return (
-              <Badge variant="secondary" className="text-[10px]">
+              <Badge variant="secondary" className="text-xs">
                 Valid
               </Badge>
             );
@@ -705,7 +699,7 @@ const BatchPreviewPage = () => {
                 <button className="text-left">
                   <Badge
                     variant="destructive"
-                    className="text-[10px] cursor-pointer hover:bg-red-600"
+                    className="text-xs cursor-pointer hover:bg-(--surface)"
                   >
                     {validation.issues.length} issue{validation.issues.length !== 1 ? 's' : ''}
                   </Badge>
@@ -713,13 +707,13 @@ const BatchPreviewPage = () => {
               </PopoverTrigger>
               <PopoverContent className="w-80" align="end">
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-sm text-red-800">
+                  <h4 className="type-label">
                     Validation Issues
                   </h4>
                   <ul className="space-y-1">
                     {validation.issues.map((issue, idx) => (
-                      <li key={idx} className="text-xs text-red-700 flex items-start gap-2">
-                        <span className="text-red-500 mt-0.5">•</span>
+                      <li key={idx} className="text-xs text-(--ink) flex items-start gap-2">
+                        <span className="text-(--ink) mt-0.5">•</span>
                         <span>{issue}</span>
                       </li>
                     ))}
@@ -736,7 +730,7 @@ const BatchPreviewPage = () => {
 
   const rowHighlightClassName = useCallback((row: Order) => {
     const isDraftOrder = row.status === OrderStatus.DRAFT;
-    return !getDraftOrderValidation(row).isValid && isDraftOrder ? "bg-red-50/40" : "";
+    return !getDraftOrderValidation(row).isValid && isDraftOrder ? "bg-(--surface)" : "";
   }, []);
 
   if (isFetching) {
@@ -746,7 +740,7 @@ const BatchPreviewPage = () => {
           title="Loading"
           description="Fetching batch preview…"
         >
-          <p className="text-sm text-slate-500 text-center py-8">
+          <p className="text-sm text-(--muted) text-center py-8">
             Loading batch...
           </p>
         </PublicSectionCard>
@@ -758,7 +752,7 @@ const BatchPreviewPage = () => {
     return (
       <main className="w-full flex flex-col gap-6">
         <PublicSectionCard title="Not found">
-          <p className="text-sm text-slate-500 text-center py-8">
+          <p className="text-sm text-(--muted) text-center py-8">
             Batch not found.
           </p>
         </PublicSectionCard>
@@ -769,31 +763,31 @@ const BatchPreviewPage = () => {
   return (
     <main className="w-full flex flex-col gap-6">
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         className="flex flex-col gap-4"
       >
         <PublicPageHero
           eyebrow="Batch preview"
           title={
             <span className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <span className="text-base font-bold">
+              <span className="text-base font-normal">
                 {batch.name || "Unnamed Batch"}
               </span>
               <Badge
                 variant={
                   batch.status === BatchStatus.DRAFT ? "secondary" : "default"
                 }
-                className="text-xs font-normal !rounded-md"
+                size="sm"
               >
                 {batch.status}
               </Badge>
             </span>
           }
           description={
-            <span className="text-[12px] text-slate-500">
+            <span className="type-meta">
               Ref:{" "}
-              <code className="text-[11px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/80 text-slate-600">
+              <code className="text-xs bg-(--surface) px-1.5 py-0.5 rounded text-(--muted)">
                 {batch.referenceId}
               </code>
               {" · "}
@@ -804,44 +798,40 @@ const BatchPreviewPage = () => {
 
         {isDraft && (
           <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`overflow-hidden rounded-xl border px-5 py-4 sm:px-6 ${
-              canComplete
-                ? "border-green-200 bg-green-50"
-                : "border-amber-200 bg-amber-50"
-            }`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className={`overflow-hidden rounded-xl px-5 py-4 sm:px-6 ${ canComplete ? "border-(--line) bg-(--surface)" : "border-(--line) bg-(--surface)" }`}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h3 className={`text-sm font-semibold ${
-                  canComplete ? "text-green-800" : "text-amber-800"
+                <h3 className={`text-sm font-normal ${
+                  canComplete ? "text-(--ink)" : "text-(--ink)"
                 }`}>
                   {canComplete ? "✓ Batch Ready" : "⚠ Validation Summary"}
                 </h3>
                 <div className="mt-2 space-y-1">
                   <p className={`text-xs ${
-                    canComplete ? "text-green-700" : "text-amber-700"
+                    canComplete ? "text-(--ink)" : "text-(--ink)"
                   }`}>
                     {draftOrders.length - invalidCount} of {draftOrders.length} orders validated
                   </p>
                   {invalidCount > 0 && (
                     <>
-                      <p className="text-xs text-amber-700">
+                      <p className="text-[0.8125rem] text-(--ink)">
                         • {orderValidation.filter(v => !v.isValid && v.issues.some(i => i.includes('phone'))).length} invalid phone numbers
                       </p>
-                      <p className="text-xs text-amber-700">
+                      <p className="text-[0.8125rem] text-(--ink)">
                         • {orderValidation.filter(v => !v.isValid && v.issues.some(i => i.includes('location'))).length} missing delivery locations
                       </p>
                     </>
                   )}
                 </div>
                 {canComplete ? (
-                  <p className="mt-2 text-xs text-green-700">
+                  <p className="mt-2 text-xs text-(--ink)">
                     All orders are valid. You can now complete the batch.
                   </p>
                 ) : (
-                  <p className="mt-2 text-xs text-amber-700">
+                  <p className="mt-2 text-xs text-(--ink)">
                     Click any highlighted cell to edit inline and fix validation errors.
                   </p>
                 )}

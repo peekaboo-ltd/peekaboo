@@ -130,54 +130,6 @@ export const maskPhoneDigits = (phone: string) => {
 };
 
 /**
- * GET STATUS BACKGROUND COLOR
- * @param status - The status to get the background color for
- * @returns The background color
- */
-export const getStatusBackgroundColor = (status?: string) => {
-  let bgColor =
-    'bg-gray-700 text-center p-[3px] px-3 text-white rounded-md text-[13px]';
-  switch (status) {
-    case 'PENDING':
-      bgColor =
-        'bg-yellow-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
-      break;
-    case 'APPROVED':
-    case 'ACTIVE':
-    case 'ACCEPTED':
-    case 'COMPLETED':
-    case 'PERMIT_APPROVED':
-    case 'RECEIVED':
-      bgColor =
-        'bg-green-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
-      break;
-    case 'REJECTED':
-    case 'CANCELLED':
-    case 'PERMIT_REJECTED':
-    case 'INACTIVE':
-      bgColor =
-        'bg-red-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
-      break;
-    case 'ACTION_REQUIRED':
-      bgColor =
-        'bg-amber-800 text-center p-1 px-3 text-white rounded-md text-[13px]';
-      break;
-    case 'RESUBMITTED':
-      bgColor =
-        'bg-gray-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
-      break;
-    case 'SUBMITTED':
-      bgColor =
-        'bg-primary text-center p-1 px-3 text-white rounded-md text-[13px]';
-      break;
-    default:
-      bgColor =
-        'bg-yellow-700 text-center p-1 px-3 text-white rounded-md text-[13px]';
-  }
-  return bgColor;
-};
-
-/**
  * DAY HOURS MINS ARRAY
  * @param startHour - The start hour
  * @param endHour - The end hour

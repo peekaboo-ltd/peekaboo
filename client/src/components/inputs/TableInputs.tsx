@@ -15,11 +15,11 @@ export const ReferenceIdInput = ({ label }: ReferenceIdInputProps) => {
   const [isCopied, setIsCopied] = useState(false);
 
   return (
-    <p className="text-xs sm:text-[12px] text-gray-600 px-2 flex items-center gap-1">
+    <p className="text-xs sm:text-xs text-(--muted) px-2 flex items-center gap-1">
       {label}
       <FontAwesomeIcon
         icon={isCopied ? faCheckCircle : faCopy}
-        className="w-4 h-4 cursor-pointer text-[12px]"
+        className="w-4 h-4 cursor-pointer text-xs"
         onClick={(e) => {
           e.preventDefault();
           if (!label) return;
@@ -48,7 +48,7 @@ export const ActionButton = ({
   route = "#",
   onClick,
   label,
-  iconClassName = "text-primary",
+  iconClassName = "text-(--ink)",
 }: ActionButtonProps) => {
   return (
     <Link to={route} onClick={onClick} className={tableActionClassName}>

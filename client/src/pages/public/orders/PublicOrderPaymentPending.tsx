@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import StepTrail from '@/components/orders/StepTrail';
 import {
   faArrowsRotate,
   faCircleCheck,
@@ -11,7 +12,6 @@ import {
 import { useGetPublicPaymentStatusQuery } from '@/api/queries/payments.queries';
 import Button from '@/components/inputs/Button';
 import {
-  OrderStageRail,
   PublicPage,
   PublicPageHero,
   PublicSectionCard,
@@ -109,12 +109,12 @@ const PublicOrderPaymentPending = () => {
           <div className="py-5 text-center">
             <FontAwesomeIcon
               icon={faTriangleExclamation}
-              className="mb-4 h-5 w-5 text-[var(--destructive)]"
+              className="mb-4 h-5 w-5 text-(--destructive)"
             />
-            <h1 className="font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)]">
+            <h1 className="type-h3">
               Payment reference missing
             </h1>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--peekaboo-muted)]">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--muted)">
               Return to the order and start payment again so we can track its
               confirmation.
             </p>
@@ -146,7 +146,13 @@ const PublicOrderPaymentPending = () => {
               : 'Complete the provider checkout. This page will move forward automatically when the payment is confirmed.'
         }
         actions={
-          <span className="inline-flex items-center gap-2 rounded-full bg-[var(--peekaboo-gray)] px-3 py-2 text-xs font-medium text-[var(--peekaboo-dark)]">
+          <span
+            className={`inline-flex h-6 items-center gap-2 rounded-(--radius-pill) border px-2.5 text-xs font-normal ${
+              isFailed
+                ? 'border-(--danger-line) bg-(--danger-surface) text-(--danger)'
+                : 'border-dashed border-(--line-strong) text-(--muted)'
+            }`}
+          >
             <FontAwesomeIcon
               icon={isFailed ? faTriangleExclamation : faShieldHalved}
               aria-hidden="true"
@@ -155,8 +161,6 @@ const PublicOrderPaymentPending = () => {
           </span>
         }
       />
-
-      <OrderStageRail currentStage="payment" />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(17rem,0.7fr)] lg:items-start">
         <PublicSectionCard
@@ -168,65 +172,28 @@ const PublicOrderPaymentPending = () => {
               : 'Keep this page open while the provider confirms the charge.'
           }
         >
-          <ol
-            className="relative grid grid-cols-2 gap-8"
-            aria-label="Payment confirmation progress"
-          >
-            <span
-              aria-hidden="true"
-              className="absolute left-3.5 right-3.5 top-3.5 h-px bg-[var(--peekaboo-line)]"
-            />
-            {!isFailed ? (
-              <span
-                aria-hidden="true"
-                className="absolute left-3.5 top-3.5 h-px w-[calc(50%-0.875rem)] bg-[var(--peekaboo-yellow)]"
-              />
-            ) : null}
-
-            <li className="relative">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--peekaboo-dark)] text-white">
-                <FontAwesomeIcon icon={faCircleCheck} className="h-3 w-3" />
-              </span>
-              <p className="mt-3 font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-dark)]">
-                Initiated
-              </p>
-              <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">
-                Request sent
-              </p>
-            </li>
-
-            <li className="relative text-right">
-              <span
-                className={`ml-auto flex h-7 w-7 items-center justify-center rounded-full border border-[var(--peekaboo-line)] ${
-                  isFailed
-                    ? 'bg-white text-[var(--destructive)]'
-                    : 'bg-[var(--peekaboo-yellow)] text-[var(--peekaboo-dark)]'
-                }`}
-              >
-                <FontAwesomeIcon
-                  icon={isFailed ? faTriangleExclamation : faArrowsRotate}
-                  className={`h-3 w-3 ${
-                    isFailed
-                      ? ''
-                      : 'motion-safe:animate-spin motion-reduce:animate-none'
-                  }`}
-                />
-              </span>
-              <p className="mt-3 font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-dark)]">
-                {isFailed ? 'Not completed' : 'Confirmation'}
-              </p>
-              <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">
-                {isFailed ? 'Try again' : 'Waiting securely'}
-              </p>
-            </li>
-          </ol>
+          <StepTrail
+            label="Payment confirmation progress"
+            steps={[
+              {
+                key: 'initiated',
+                label: 'Initiated',
+                description: 'Request sent',
+                icon: faCircleCheck,
+                state: 'done',
+              },
+              {
+                key: 'confirmation',
+                label: isFailed ? 'Not completed' : 'Confirmation',
+                description: isFailed ? 'Try again' : 'Waiting securely',
+                icon: isFailed ? faTriangleExclamation : faArrowsRotate,
+                state: isFailed ? 'upcoming' : 'current',
+              },
+            ]}
+          />
 
           <div
-            className={`mt-7 flex items-start gap-3 rounded-md px-4 py-3 text-sm leading-6 ${
-              isFailed
-                ? 'bg-[color-mix(in_oklab,var(--destructive)_7%,white)] text-[var(--peekaboo-text)]'
-                : 'bg-[var(--peekaboo-warm)] text-[var(--peekaboo-text)]'
-            }`}
+            className={`mt-7 flex items-start gap-3 rounded-(--radius-control) border px-4 py-3 text-sm leading-6 ${ isFailed ? 'border-(--danger-line) bg-(--danger-surface) text-(--danger)' : 'border-dashed border-(--line-strong) bg-(--surface) text-(--ink)' }`}
             role="status"
             aria-live="polite"
           >
@@ -269,24 +236,24 @@ const PublicOrderPaymentPending = () => {
         </PublicSectionCard>
 
         <PublicSectionCard eyebrow="Payment" title="Attempt details">
-          <dl className="divide-y divide-[var(--peekaboo-line)] text-sm">
+          <dl className="divide-y divide-(--line) text-sm">
             <div className="pb-4">
-              <dt className="text-xs text-[var(--peekaboo-muted)]">Method</dt>
-              <dd className="mt-1 font-medium text-[var(--peekaboo-dark)]">
+              <dt className="type-meta">Method</dt>
+              <dd className="mt-1 font-normal text-(--ink)">
                 {payment ? channelLabel : 'Loading…'}
               </dd>
             </div>
             <div className="py-4">
-              <dt className="text-xs text-[var(--peekaboo-muted)]">
+              <dt className="type-meta">
                 Order reference
               </dt>
-              <dd className="mt-1 break-all font-['IBM_Plex_Mono'] text-xs text-[var(--peekaboo-text)]">
+              <dd className="mt-1 break-all text-xs text-(--ink)">
                 {orderLoading ? 'Loading…' : currentOrder?.referenceId || '—'}
               </dd>
             </div>
             <div className="pt-4">
-              <dt className="text-xs text-[var(--peekaboo-muted)]">Amount</dt>
-              <dd className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-[var(--peekaboo-dark)]">
+              <dt className="type-meta">Amount</dt>
+              <dd className="type-metric mt-1">
                 {payment
                   ? formatCurrency(payment.amount)
                   : orderLoading
@@ -297,7 +264,7 @@ const PublicOrderPaymentPending = () => {
               </dd>
             </div>
           </dl>
-          <p className="mt-6 border-t border-[var(--peekaboo-line)] pt-4 text-xs leading-5 text-[var(--peekaboo-muted)]">
+          <p className="mt-6 border-t border-(--line) pt-4 text-xs leading-5 text-(--muted)">
             Closing this page doesn’t cancel the payment. You can return using
             the same link.
           </p>

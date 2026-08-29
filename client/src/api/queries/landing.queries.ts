@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createBaseQuery } from '..';
-import type { LandingStats } from '@/types/landing.type';
+import type { LandingStats, SuggestedRider } from '@/types/landing.type';
 
 export const landingQueriesApiSlice = createApi({
   reducerPath: 'landingQueriesApi',
@@ -16,8 +16,19 @@ export const landingQueriesApiSlice = createApi({
       }),
       transformResponse: (response: { data: LandingStats }) => response.data,
     }),
+    getSuggestedRider: builder.query<
+      SuggestedRider | null,
+      { latitude: number; longitude: number }
+    >({
+      query: ({ latitude, longitude }) => ({
+        url: '/landing/suggested-rider',
+        params: { latitude, longitude },
+      }),
+      transformResponse: (response: { data: SuggestedRider | null }) =>
+        response.data ?? null,
+    }),
   }),
 });
 
-export const { useGetLandingStatsQuery } = landingQueriesApiSlice;
-
+export const { useGetLandingStatsQuery, useGetSuggestedRiderQuery } =
+  landingQueriesApiSlice;

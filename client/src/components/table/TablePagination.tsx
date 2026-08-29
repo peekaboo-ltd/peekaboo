@@ -6,6 +6,8 @@ import { UnknownAction } from "@reduxjs/toolkit";
 import { Table } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { formatNumbers } from "@/utils/strings.util";
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -54,11 +56,11 @@ export function DataTablePagination<TData>({
 
   return (
     <footer className="flex flex-col items-center gap-4 px-2 mt-4 
-                   md:flex-row md:justify-between">
+ md:flex-row md:justify-between">
       <article className="flex flex-col gap-1 w-full text-center 
-                      md:w-auto md:text-left">
+ md:w-auto md:text-left">
         {table.getFilteredSelectedRowModel().rows.length > 0 && (
-          <span className="text-xs text-muted-foreground">
+          <span className="type-meta">
             {table.getFilteredSelectedRowModel().rows.length} of{' '}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </span>
@@ -71,7 +73,7 @@ export function DataTablePagination<TData>({
       </article>
 
       <menu className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 
-                     md:justify-end md:gap-x-6">
+ md:justify-end md:gap-x-6">
         <section className="flex items-center space-x-2">
           <span className="hidden text-sm font-normal sm:block">Rows per page</span>
           <Select
@@ -83,7 +85,7 @@ export function DataTablePagination<TData>({
               }
             }}
           >
-            <SelectTrigger className="h-8 w-[70px] !text-[11px] cursor-pointer">
+            <SelectTrigger size="sm" className="w-[70px] cursor-pointer">
               <SelectValue placeholder={size} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -91,7 +93,7 @@ export function DataTablePagination<TData>({
                 <SelectItem
                   value={`${option.value}`}
                   key={option.value}
-                  className="cursor-pointer !text-[11px] hover:bg-background"
+                  className="cursor-pointer"
                 >
                   {option?.label}
                 </SelectItem>
@@ -109,7 +111,7 @@ export function DataTablePagination<TData>({
             min={1}
             max={totalPages || 1}
             defaultValue={page + 1}
-            className="w-12 text-center placeholder:!text-[11px] !text-[11px] py-1 px-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className={cn(controlClassName, 'w-14 px-2')}
             onChange={(e) => {
               const targetPage = e.target.value ? Number(e.target.value) : 0;
               if (targetPage >= 1 && targetPage <= (totalPages || 1)) {

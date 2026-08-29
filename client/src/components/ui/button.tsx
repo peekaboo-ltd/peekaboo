@@ -4,31 +4,50 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
+// Press is a full-surface inset flood, never a transform — a 999px spread
+// floods the control whatever its size. Hover is a flat background change:
+// linear easing so it reads mechanical rather than soft. Buttons cast no
+// shadow; only menus, popovers, and modals do.
 const buttonVariants = cva(
-  "inline-flex items-center cursor-pointer justify-center gap-2 whitespace-nowrap rounded-md text-sm font-normal transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex shrink-0 cursor-pointer select-none touch-manipulation items-center justify-center gap-2 whitespace-nowrap rounded-(--radius-control) text-sm font-medium outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-(--ease-flat) disabled:pointer-events-none disabled:opacity-40 aria-disabled:pointer-events-none aria-disabled:opacity-40 focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] active:transition-[box-shadow_0ms] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+        // Primary: solid ink. One per view.
+        default:
+          "border border-(--ink) bg-(--ink) text-(--paper) hover:bg-[color-mix(in_oklab,var(--ink)_85%,var(--paper))] hover:border-[color-mix(in_oklab,var(--ink)_85%,var(--paper))] active:shadow-[var(--press-on-ink)_999px_999px_0_inset]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border border-transparent bg-(--surface) text-(--ink) hover:border-(--line) hover:bg-(--surface-hover) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]",
+        // Outline actions share the quiet surface treatment used by the plan
+        // CTA: visible at rest, one step stronger on hover, and never mistaken
+        // for the page's solid primary action.
+        outline:
+          "border border-transparent bg-(--surface) text-(--ink) hover:border-(--line) hover:bg-(--surface-hover) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]",
+        // Field-shaped trigger: a control that opens something (date picker,
+        // combobox) and must line up with the inputs beside it.
+        field:
+          "justify-start border border-(--line) bg-(--paper) text-(--ink) font-normal hover:border-(--line-strong) hover:bg-(--surface) focus-visible:border-(--ink) focus-visible:shadow-[var(--ink)_0_0_0_1px_inset] data-[state=open]:border-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]",
+        // Destructive: an outline that states its consequence in red, and
+        // floods to a solid red on hover so the commit is unmistakable. This
+        // replaces a strike-through-on-hover trick that existed only because
+        // the system had no red to spend.
+        destructive:
+          "border border-(--danger) bg-transparent text-(--danger) hover:bg-(--danger) hover:text-(--on-consequence) active:bg-[color-mix(in_oklab,var(--danger)_88%,black)] active:shadow-[var(--press-on-ink)_999px_999px_0_inset]",
+        // Approve: the same shape in green. Used where an action resolves
+        // something — accepting, approving, confirming a request.
+        approve:
+          "border border-(--approve) bg-transparent text-(--approve) hover:bg-(--approve) hover:text-(--on-consequence) active:bg-[color-mix(in_oklab,var(--approve)_88%,black)] active:shadow-[var(--press-on-ink)_999px_999px_0_inset]",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border border-transparent bg-transparent text-(--ink) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset]",
+        link:
+          "link-sweep h-auto border border-transparent bg-transparent p-0 text-(--ink) hover:bg-(--surface) hover:px-2 hover:-mx-2 hover:rounded-(--radius-control) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] active:text-(--ink)",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
-        "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8",
-        "icon-lg": "size-10",
+        sm: "h-(--control-sm) gap-1.5 px-3.5",
+        default: "h-(--control-md) px-4",
+        lg: "h-(--control-lg) px-6",
+        icon: "size-(--control-md) p-0",
+        "icon-sm": "size-(--control-sm) p-0",
       },
     },
     defaultVariants: {

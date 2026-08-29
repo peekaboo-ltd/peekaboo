@@ -5,7 +5,7 @@ import {
   type Control,
   type FieldErrors,
 } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { LocateFixed, Pencil, TriangleAlert } from 'lucide-react';
 import type { HomeFormValues } from '../home.types';
 import type { OrderLocation } from '@/types/order.type';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
@@ -13,44 +13,47 @@ import {
   describeLocation,
   placeSearchResultToOrderLocation,
 } from '@/utils/locations.util';
+import type { GeolocationPickupState } from '@/hooks/locations/useGeolocationPickup';
 import PlaceSearch from '@/components/inputs/PlaceSearch';
-import Button from '@/components/inputs/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight, faCheckCircle, faClock, faCreditCard, faShield } from '@fortawesome/free-solid-svg-icons';
-import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import TelInput from '@/components/inputs/TelInput';
+import Button from '@/components/inputs/Button';
+import Modal from '@/components/Modal';
+import { FieldMessage } from '@/components/inputs/Field';
+import { fieldErrorClassName } from '@/components/inputs/control';
+
+export const HERO_DELIVERY_FORM_ID = 'hero-delivery-form';
 
 interface HeroFormCopy {
   formTitle: string;
   formSubtitle: string;
-  quickStartLabel: string;
   senderLabel: string;
   senderPlaceholder: string;
   recipientLabel: string;
   recipientPlaceholder: string;
-  continueLabel: string;
-  haveOrderLabel: string;
-  trackHereLabel: string;
-  verifiedRidersLabel: string;
-  realtimeTrackingLabel: string;
 }
 
 interface HeroFormProps {
   formRef: RefObject<HTMLFormElement | null>;
   onSubmit: (event?: BaseSyntheticEvent) => void | Promise<void>;
   control: Control<HomeFormValues>;
-  isLoading: boolean;
   copy: HeroFormCopy;
   errors: FieldErrors<HomeFormValues>;
+  geolocation: GeolocationPickupState;
 }
 
 const validateRwandanPhone = (value: string | undefined) => {
-  if (!value || !value.trim()) {
-    return 'Phone number is required';
-  }
+  if (!value?.trim()) return 'Phone number is required';
   const result = validateAndFormatPhoneNumber(value);
   return result.isValid ? true : (result.error ?? 'Invalid phone number');
 };
+
+const FieldError = ({ message }: { message?: string }) =>
+  message ? (
+    <span className={`mt-1.5 ${fieldErrorClassName}`} role="alert">
+      <TriangleAlert className="mt-[0.15em] size-3.5 shrink-0" aria-hidden="true" />
+      {message}
+    </span>
+  ) : null;
 
 interface LocationFieldProps {
   name: 'locationFrom' | 'locationTo';
@@ -60,12 +63,9 @@ interface LocationFieldProps {
   requiredMessage: string;
   errorMessage?: string;
   validate?: (value: OrderLocation | undefined) => true | string;
+  geolocation?: GeolocationPickupState;
 }
 
-// The picked place — coordinates included — is what gets submitted, so the form
-// value is only ever set from a dropdown selection. Free text the user types is
-// held locally and clears the selection, otherwise "required" would be satisfied
-// by an address we have no coordinates for.
 const LocationField = ({
   name,
   control,
@@ -74,8 +74,49 @@ const LocationField = ({
   requiredMessage,
   errorMessage,
   validate,
+  geolocation,
 }: LocationFieldProps) => {
   const [searchText, setSearchText] = useState('');
+  const [confirmGeoOpen, setConfirmGeoOpen] = useState(false);
+  const {
+    pickupSource,
+    setPickupSource,
+    locationError,
+    isLocating,
+    useMyLocation: requestMyLocation,
+    clearLocationError,
+  } = geolocation ?? {};
+
+  const handleUseMyLocation = async () => {
+    setConfirmGeoOpen(false);
+    await requestMyLocation?.(name);
+  };
+
+  const isPickupField = name === 'locationFrom';
+  const useCurrentLocationLabel = isPickupField
+    ? 'Set your device location as pickup'
+    : 'Set your device location as drop-off';
+
+  const renderSelectedLocation = (location: OrderLocation) => {
+    if (
+      isPickupField &&
+      pickupSource === 'geolocation' &&
+      !location.name?.trim() &&
+      !location.formattedAddress?.trim()
+    ) {
+      return 'Your location';
+    }
+
+    if (
+      !isPickupField &&
+      !location.name?.trim() &&
+      !location.formattedAddress?.trim()
+    ) {
+      return 'Your location';
+    }
+
+    return describeLocation(location);
+  };
 
   return (
     <Controller
@@ -83,50 +124,119 @@ const LocationField = ({
       control={control}
       rules={{ required: requiredMessage, validate }}
       render={({ field }) => (
-        <label className="w-full flex flex-col gap-1">
-          <p className="text-[12.5px] font-medium text-foreground">
-            {label} <span className="text-red-600">*</span>
-          </p>
+        <div>
+          <label className="type-label mb-1.5 block" htmlFor={`hero-${name}`}>
+            {label}
+          </label>
+
           {field.value ? (
-            <ul className="flex items-center gap-2 rounded-md border border-green-700/15 bg-green-700/5 px-3 py-2">
-              <FontAwesomeIcon
-                icon={faCheckCircle}
-                className="text-green-700 text-[13px]"
-                aria-hidden="true"
-              />
-              <span className="flex-1 text-[13px] text-foreground truncate">
-                {describeLocation(field.value)}
+            <div className="flex h-10 items-center gap-3 rounded-(--radius-control) border border-(--line) bg-(--paper) pl-3.5 pr-1.5">
+              <span className="min-w-0 flex-1 truncate text-sm text-(--ink)">
+                {renderSelectedLocation(field.value)}
               </span>
-              <FontAwesomeIcon
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+              <button
+                type="button"
+                onClick={() => {
                   setSearchText(describeLocation(field.value));
                   field.onChange(undefined);
                 }}
-                icon={faPenToSquare}
-                className="text-[9px] cursor-pointer"
-                aria-hidden="true"
-              />
-            </ul>
+                className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) outline-none transition-[background-color,box-shadow] duration-200 ease-(--ease-flat) hover:bg-(--surface) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+                aria-label={`Change ${label.toLowerCase()}`}
+              >
+                <Pencil className="size-3.5" aria-hidden="true" />
+              </button>
+            </div>
           ) : (
-            <>
+            <div className="relative">
               <PlaceSearch
                 value={searchText}
                 onChange={setSearchText}
                 onLocationSelect={(result) => {
                   setSearchText(result.formattedAddress || result.name);
+                  clearLocationError?.();
+                  if (name === 'locationFrom') {
+                    setPickupSource?.('search');
+                  }
                   field.onChange(placeSearchResultToOrderLocation(result));
                 }}
                 placeholder={placeholder}
                 country="rw"
+                className={geolocation ? '[&_input]:pr-10' : undefined}
+                emptyOption={
+                  geolocation
+                    ? {
+                        label: isLocating
+                          ? 'Finding your current location…'
+                          : 'Use current location',
+                        description: useCurrentLocationLabel,
+                        icon: (
+                          <LocateFixed
+                            className={`size-4 ${isLocating ? 'animate-pulse' : ''}`}
+                          />
+                        ),
+                        disabled: isLocating,
+                        onSelect: handleUseMyLocation,
+                      }
+                    : undefined
+                }
               />
-              {errorMessage ? (
-                <span className="text-[11.5px] text-red-600">{errorMessage}</span>
+              {geolocation ? (
+                <button
+                  type="button"
+                  onClick={() => setConfirmGeoOpen(true)}
+                  disabled={isLocating}
+                  className="absolute right-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-(--radius-control) text-(--muted) outline-none transition-[background-color,color,box-shadow] duration-200 ease-(--ease-flat) hover:bg-(--surface) hover:text-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px] disabled:pointer-events-none disabled:opacity-40"
+                  aria-label="Use my current location"
+                >
+                  <LocateFixed
+                    className={`size-4 ${isLocating ? 'animate-pulse' : ''}`}
+                    aria-hidden="true"
+                  />
+                </button>
               ) : null}
-            </>
+            </div>
           )}
-        </label>
+
+          {geolocation ? (
+            <FieldMessage errorMessage={locationError ?? undefined} />
+          ) : null}
+          <FieldError message={errorMessage} />
+
+          {geolocation ? (
+            <Modal
+              isOpen={confirmGeoOpen}
+              onClose={() => setConfirmGeoOpen(false)}
+              heading={
+                isPickupField
+                  ? 'Use your current location?'
+                  : 'Use your current location for drop-off?'
+              }
+              description={
+                isPickupField
+                  ? "We'll set where you are now as the pickup point. You can change it anytime."
+                  : "We'll set where you are now as the drop-off point. You can change it anytime."
+              }
+            >
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setConfirmGeoOpen(false)}
+                >
+                  Type address instead
+                </Button>
+                <Button
+                  type="button"
+                  primary
+                  onClick={handleUseMyLocation}
+                  isLoading={isLocating}
+                >
+                  Use my location
+                </Button>
+              </div>
+            </Modal>
+          ) : null}
+        </div>
       )}
     />
   );
@@ -136,9 +246,9 @@ const HeroForm = ({
   formRef,
   onSubmit,
   control,
-  isLoading,
   copy,
   errors,
+  geolocation,
 }: HeroFormProps) => {
   const senderPhoneNumber = useWatch({ control, name: 'senderPhoneNumber' });
   const locationFrom = useWatch({ control, name: 'locationFrom' });
@@ -156,140 +266,78 @@ const HeroForm = ({
 
   const validateRecipientPhone = (value: string | undefined) => {
     const baseValidation = validateRwandanPhone(value);
-    if (baseValidation !== true) {
-      return baseValidation;
-    }
-
-    if (!senderPhoneNumber) {
-      return true;
-    }
+    if (baseValidation !== true || !senderPhoneNumber) return baseValidation;
 
     const normalizedSender =
       validateAndFormatPhoneNumber(senderPhoneNumber).e164 ||
       senderPhoneNumber.trim();
     const normalizedRecipient =
-      validateAndFormatPhoneNumber(value || '').e164 ||
-      (value || '').trim();
+      validateAndFormatPhoneNumber(value || '').e164 || (value || '').trim();
 
-    if (
-      normalizedSender &&
-      normalizedRecipient &&
-      normalizedSender === normalizedRecipient
-    ) {
-      return 'Sender and recipient phone numbers must be different';
-    }
-
-    return true;
+    return normalizedSender === normalizedRecipient
+      ? 'Sender and recipient phone numbers must be different'
+      : true;
   };
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="home-scroll-target relative isolate w-full">
-      <article className="relative rounded-md border border-border bg-[var(--peekaboo-surface)] p-6 text-foreground shadow-[0_22px_70px_-42px_color-mix(in_oklab,var(--primary)_45%,transparent)] sm:p-8">
-        <header className="mb-5">
-          <p className="text-[10px] font-medium uppercase text-muted-foreground">
-            New order
-          </p>
-          <h2 className="mt-2 text-[18px] font-medium leading-tight text-card-foreground sm:text-[20px]">
-            {copy.formTitle}
-          </h2>
-          <p className="mt-1.5 text-[12.5px] font-normal leading-relaxed text-muted-foreground">
-            {copy.formSubtitle}
-          </p>
-        </header>
+    <form
+      id={HERO_DELIVERY_FORM_ID}
+      ref={formRef}
+      onSubmit={onSubmit}
+      className="home-scroll-target w-full"
+    >
+      <fieldset className="grid gap-4 sm:grid-cols-2">
+        <legend className="sr-only">{copy.formTitle}</legend>
 
-        <fieldset className="grid gap-3">
-          <Controller
-            name="senderPhoneNumber"
-            control={control}
-            rules={{ validate: validateRwandanPhone }}
-            render={({ field }) => (
-              <TelInput
-                {...field}
-                label={copy.senderLabel}
-                required
-                placeholder={copy.senderPlaceholder}
-                errorMessage={errors.senderPhoneNumber?.message}
-              />
-            )}
-          />
+        <LocationField
+          name="locationFrom"
+          control={control}
+          label="Pickup location"
+          placeholder="Where should we collect?"
+          requiredMessage="Select a pickup location from the suggestions"
+          errorMessage={errors.locationFrom?.message}
+          geolocation={geolocation}
+        />
+        <LocationField
+          name="locationTo"
+          control={control}
+          label="Drop-off location"
+          placeholder="Where is it going?"
+          requiredMessage="Select a drop-off location from the suggestions"
+          errorMessage={errors.locationTo?.message}
+          validate={validateDistinctLocation}
+          geolocation={geolocation}
+        />
 
-          <Controller
-            name="recipientPhoneNumber"
-            control={control}
-            rules={{ validate: validateRecipientPhone }}
-            render={({ field }) => (
-              <TelInput
-                {...field}
-                label={copy.recipientLabel}
-                required
-                placeholder={copy.recipientPlaceholder}
-                errorMessage={errors.recipientPhoneNumber?.message}
-              />
-            )}
-          />
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <LocationField
-              name="locationFrom"
-              control={control}
-              label="Pickup location"
-              placeholder="Pickup location"
-              requiredMessage="Select a pickup location from the suggestions"
-              errorMessage={errors.locationFrom?.message}
+        <Controller
+          name="senderPhoneNumber"
+          control={control}
+          rules={{ validate: validateRwandanPhone }}
+          render={({ field }) => (
+            <TelInput
+              {...field}
+              label={copy.senderLabel}
+              required
+              placeholder={copy.senderPlaceholder}
+              errorMessage={errors.senderPhoneNumber?.message}
             />
-
-            <LocationField
-              name="locationTo"
-              control={control}
-              label="Drop-off location"
-              placeholder="Drop-off location"
-              requiredMessage="Select a drop-off location from the suggestions"
-              errorMessage={errors.locationTo?.message}
-              validate={validateDistinctLocation}
+          )}
+        />
+        <Controller
+          name="recipientPhoneNumber"
+          control={control}
+          rules={{ validate: validateRecipientPhone }}
+          render={({ field }) => (
+            <TelInput
+              {...field}
+              label={copy.recipientLabel}
+              required
+              placeholder={copy.recipientPlaceholder}
+              errorMessage={errors.recipientPhoneNumber?.message}
             />
-          </div>
-        </fieldset>
-
-        <p className="mt-5 pt-4 text-[12px] font-normal leading-relaxed text-muted-foreground">
-          We confirm the price and ETA as soon as a rider is matched.
-        </p>
-
-        <Button
-          submit
-          primary
-          isLoading={isLoading}
-          disabled={isLoading}
-          className="mt-5 h-10 w-full rounded-md text-[13px] font-medium"
-        >
-          {isLoading ? 'Booking...' : copy.continueLabel}
-          <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" aria-hidden="true" />
-        </Button>
-
-        <nav className="mt-4 flex items-center justify-center gap-1.5 text-[12px]">
-          <span className="text-[12px] text-muted-foreground">{copy.haveOrderLabel}</span>
-          <Link
-            to="/track"
-            className="font-medium text-[12px] underline text-foreground underline-offset-2 hover:underline"
-          >
-            {copy.trackHereLabel}
-          </Link>
-        </nav>
-
-        <aside className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[9px] font-normal uppercase text-muted-foreground">
-          <span className="flex items-center gap-1.5 text-[9px]">
-            <FontAwesomeIcon icon={faShield} className="text-[9px]" aria-hidden="true" />
-            {copy.verifiedRidersLabel}
-          </span>
-          <span className="flex items-center gap-1.5 text-[9px]">
-            <FontAwesomeIcon icon={faClock} className="text-[9px]" aria-hidden="true" />
-            {copy.realtimeTrackingLabel}
-          </span>
-          <span className="flex items-center gap-1.5 text-[9px]">
-            <FontAwesomeIcon icon={faCreditCard} className="text-[9px]" aria-hidden="true" />
-            3+ payment methods
-          </span>
-        </aside>
-      </article>
+          )}
+        />
+      </fieldset>
     </form>
   );
 };

@@ -2,7 +2,11 @@ import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { AbstractEntity } from ".";
 import { UUID } from "../types";
 import { Conversation } from "./conversation.entity";
-import { MessageChannel } from "../constants/message.constants";
+import {
+  MessageChannel,
+  MessageDirection,
+  WhatsAppMessageStatus,
+} from "../constants/message.constants";
 
 @Entity("messages")
 export class Message extends AbstractEntity {
@@ -28,6 +32,25 @@ export class Message extends AbstractEntity {
     default: MessageChannel.WHATSAPP,
   })
   channel: MessageChannel;
+
+  @Column({
+    name: "direction",
+    type: "enum",
+    enum: MessageDirection,
+    default: MessageDirection.INBOUND,
+  })
+  direction: MessageDirection;
+
+  @Column({ name: "external_message_id", type: "varchar", nullable: true, unique: true })
+  externalMessageId?: string | null;
+
+  @Column({
+    name: "delivery_status",
+    type: "enum",
+    enum: WhatsAppMessageStatus,
+    nullable: true,
+  })
+  deliveryStatus?: WhatsAppMessageStatus | null;
 
   /**
    * RELATIONS

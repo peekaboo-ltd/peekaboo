@@ -14,6 +14,8 @@ import {
   InternalPage,
   InternalPageHeader,
 } from '@/components/layout/InternalPage';
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 interface FormValues extends Omit<CreateBusinessPlanPayload, 'features' | 'pricingTiers'> {
   features: { value: string }[];
@@ -105,11 +107,11 @@ const CreateBusinessPlanPage = () => {
         description="Define a new pricing plan to assign to organizations."
       />
 
-      <section className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+      <section className="bg-(--paper) border border-(--line) rounded-xl p-6">
         <form onSubmit={onSubmit} className="flex flex-col gap-6">
           {/* Basic Info */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-800 mb-3">
+            <h3 className="type-label mb-3">
               Basic Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -195,14 +197,14 @@ const CreateBusinessPlanPage = () => {
             control={control}
             render={({ field }) => (
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-slate-700 uppercase ">
+                <label className="text-[0.8125rem] text-(--ink)">
                   Description
                 </label>
                 <textarea
                   {...field}
                   rows={3}
                   placeholder="Brief description of this plan..."
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="rounded-lg border border-(--line) bg-(--paper) px-3 py-2 text-sm text-(--ink) resize-none focus:outline-none focus:ring-2 focus:ring-(--ink)"
                 />
               </div>
             )}
@@ -211,11 +213,11 @@ const CreateBusinessPlanPage = () => {
           {/* Features */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-800">Features</h3>
+              <h3 className="type-label">Features</h3>
               <button
                 type="button"
                 onClick={() => appendFeature({ value: '' })}
-                className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+                className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
               >
                 <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
                 Add Feature
@@ -223,7 +225,7 @@ const CreateBusinessPlanPage = () => {
             </div>
             <div className="flex flex-col gap-2">
               {featureFields.length === 0 && (
-                <p className="text-xs text-slate-400 italic">
+                <p className="type-meta italic">
                   No features added yet. Click "Add Feature" to add bullet points.
                 </p>
               )}
@@ -236,14 +238,14 @@ const CreateBusinessPlanPage = () => {
                       <input
                         {...inputField}
                         placeholder={`Feature ${index + 1}...`}
-                        className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        className={cn(controlClassName, 'flex-1 px-3')}
                       />
                     )}
                   />
                   <button
                     type="button"
                     onClick={() => removeFeature(index)}
-                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                    className="p-2 text-(--muted) hover:text-(--ink) transition-colors"
                   >
                     <FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5" />
                   </button>
@@ -262,11 +264,11 @@ const CreateBusinessPlanPage = () => {
                   type="checkbox"
                   checked={field.value}
                   onChange={(e) => field.onChange(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30"
+                  className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                 />
-                <span className="text-sm text-slate-700">
+                <span className="text-sm text-(--ink)">
                   Custom pricing
-                  <span className="ml-1 text-xs text-slate-400">
+                  <span className="type-meta ml-1">
                     (negotiated pricing — hides tier configuration)
                   </span>
                 </span>
@@ -278,7 +280,7 @@ const CreateBusinessPlanPage = () => {
           {!isCustomPricing && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-slate-800">
+                <h3 className="type-label">
                   Pricing Tiers
                 </h3>
                 <button
@@ -293,7 +295,7 @@ const CreateBusinessPlanPage = () => {
                       isCustom: false,
                     })
                   }
-                  className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+                  className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
                 >
                   <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
                   Add Tier
@@ -301,7 +303,7 @@ const CreateBusinessPlanPage = () => {
               </div>
 
               {tierFields.length === 0 && (
-                <p className="text-xs text-slate-400 italic">
+                <p className="type-meta italic">
                   No pricing tiers defined. Click "Add Tier" to configure
                   volume-based pricing.
                 </p>
@@ -311,16 +313,16 @@ const CreateBusinessPlanPage = () => {
                 {tierFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="border border-slate-200 rounded-lg p-4 bg-slate-50"
+                    className="rounded-lg p-4 bg-(--surface)"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-slate-500 uppercase">
+                      <span className="type-meta">
                         Tier {index + 1}
                       </span>
                       <button
                         type="button"
                         onClick={() => removeTier(index)}
-                        className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                        className="p-1 text-(--muted) hover:text-(--ink) transition-colors"
                       >
                         <FontAwesomeIcon
                           icon={faTrash}
@@ -435,9 +437,9 @@ const CreateBusinessPlanPage = () => {
                             onChange={(e) =>
                               checkboxField.onChange(e.target.checked)
                             }
-                            className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary/30"
+                            className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                           />
-                          <span className="text-xs text-slate-500">
+                          <span className="type-meta">
                             Custom / contact us tier
                           </span>
                         </label>
@@ -504,11 +506,11 @@ const CreateBusinessPlanPage = () => {
                   type="checkbox"
                   checked={field.value}
                   onChange={(e) => field.onChange(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30"
+                  className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                 />
-                <span className="text-sm text-slate-700">
+                <span className="text-sm text-(--ink)">
                   Set as default plan
-                  <span className="ml-1 text-xs text-slate-400">
+                  <span className="type-meta ml-1">
                     (assigned to organizations with no plan)
                   </span>
                 </span>

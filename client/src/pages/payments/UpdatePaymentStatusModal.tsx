@@ -56,14 +56,14 @@ const UpdatePaymentStatusModal = () => {
           <DialogTitle>Update Payment Status</DialogTitle>
           <DialogDescription>
             Update the status for payment{' '}
-            <span className="font-semibold">
+            <span className="font-normal">
               {selectedPayment?.internalReferenceId?.slice(0, 8)}...
             </span>{' '}
             ({formatCurrency(selectedPayment?.amount, selectedPayment?.currency)})
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 py-2">
-          <label className="text-sm font-medium">New Status</label>
+          <label className="text-sm font-normal">New Status</label>
           <Select
             value={status}
             onValueChange={setStatus}

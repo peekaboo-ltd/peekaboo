@@ -10,13 +10,8 @@ const TermsAndConditionsPage = () => {
   useDocumentTitle(t('legal.terms.docTitle'));
 
   return (
-    <PublicPage className="max-lg:mt-16">
-      <LegalBreadcrumb
-        currentPage={{
-          labelKey: 'legal.terms.title',
-          path: '/legal/terms-and-conditions',
-        }}
-      />
+    <PublicPage className="">
+      <LegalBreadcrumb parent="legal" />
 
       <PublicPageHero
         eyebrow={t('legal.eyebrow')}

@@ -102,21 +102,21 @@ const CompleteOnboarding = () => {
   // No token provided
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-(--surface) px-4">
         <div className="text-center max-w-md">
           <FontAwesomeIcon
             icon={faExclamationTriangle}
-            className="text-amber-500 text-4xl mb-4"
+            className="text-(--ink) text-[2rem] mb-4"
           />
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">
+          <h2 className="type-h3 mb-2">
             {t('completeOnboarding.noToken')}
           </h2>
-          <p className="text-slate-600 text-sm mb-6">
+          <p className="text-(--muted) text-sm mb-6">
             {t('completeOnboarding.noTokenDesc')}
           </p>
           <Link
             to="/"
-            className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+            className="text-(--ink) hover:text-(--ink) text-sm font-normal"
           >
             {t('onboarding.organization.backHome')}
           </Link>
@@ -128,10 +128,10 @@ const CompleteOnboarding = () => {
   // Validating token
   if (isValidating) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-(--surface)">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600 text-sm">
+          <div className="w-8 h-8 border-2 border-(--ink) border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-(--muted) text-sm">
             {t('completeOnboarding.validating')}
           </p>
         </div>
@@ -142,21 +142,21 @@ const CompleteOnboarding = () => {
   // Invalid token
   if (isTokenInvalid) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-(--surface) px-4">
         <div className="text-center max-w-md">
           <FontAwesomeIcon
             icon={faExclamationTriangle}
-            className="text-red-500 text-4xl mb-4"
+            className="text-(--ink) text-[2rem] mb-4"
           />
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">
+          <h2 className="type-h3 mb-2">
             {t('completeOnboarding.invalidToken')}
           </h2>
-          <p className="text-slate-600 text-sm mb-6">
+          <p className="text-(--muted) text-sm mb-6">
             {t('completeOnboarding.invalidTokenDesc')}
           </p>
           <Link
             to="/"
-            className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+            className="text-(--ink) hover:text-(--ink) text-sm font-normal"
           >
             {t('onboarding.organization.backHome')}
           </Link>
@@ -167,28 +167,28 @@ const CompleteOnboarding = () => {
 
   // Main form
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4">
+    <div className="min-h-screen bg-(--surface) py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-(--paper) rounded-md border border-(--line) p-8"
         >
           {/* Header */}
-          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-slate-100">
-            <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center">
+          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-(--line)">
+            <div className="w-12 h-12 rounded-xl bg-(--ink) flex items-center justify-center">
               <FontAwesomeIcon
                 icon={faBuilding}
-                className="text-primary-600 text-lg"
+                className="text-(--ink) text-lg"
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900">
+              <h1 className="type-h3">
                 {t('completeOnboarding.title')}
               </h1>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-(--muted)">
                 {tokenData?.data?.organizationName && (
-                  <span className="font-medium text-slate-700">
+                  <span className="font-normal text-(--ink)">
                     {tokenData.data.organizationName}
                   </span>
                 )}
@@ -204,9 +204,9 @@ const CompleteOnboarding = () => {
               <div className="flex items-center gap-2 mb-4">
                 <FontAwesomeIcon
                   icon={faUser}
-                  className="text-slate-400 text-sm"
+                  className="text-(--muted) text-sm"
                 />
-                <h3 className="text-sm font-semibold text-slate-900 uppercase r">
+                <h3 className="type-label">
                   {t('completeOnboarding.adminSection')}
                 </h3>
               </div>
@@ -248,9 +248,9 @@ const CompleteOnboarding = () => {
               <div className="flex items-center gap-2 mb-4">
                 <FontAwesomeIcon
                   icon={faLock}
-                  className="text-slate-400 text-sm"
+                  className="text-(--muted) text-sm"
                 />
-                <h3 className="text-sm font-semibold text-slate-900 uppercase r">
+                <h3 className="type-label">
                   {t('completeOnboarding.passwordSection')}
                 </h3>
               </div>
@@ -299,7 +299,7 @@ const CompleteOnboarding = () => {
                   )}
                 />
               </div>
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="text-xs text-(--muted) mt-2">
                 {t('onboarding.admin.passwordHint')}
               </p>
             </section>
@@ -309,13 +309,13 @@ const CompleteOnboarding = () => {
               <div className="flex items-center gap-2 mb-4">
                 <FontAwesomeIcon
                   icon={faPhone}
-                  className="text-slate-400 text-sm"
+                  className="text-(--muted) text-sm"
                 />
-                <h3 className="text-sm font-semibold text-slate-900 uppercase r">
+                <h3 className="type-label">
                   {t('completeOnboarding.orgSection')}
                 </h3>
               </div>
-              <p className="text-xs text-slate-500 mb-4">
+              <p className="text-xs text-(--muted) mb-4">
                 {t('completeOnboarding.orgSectionHint')}
               </p>
 
@@ -350,11 +350,11 @@ const CompleteOnboarding = () => {
             </section>
 
             {/* Submit */}
-            <div className="pt-4 border-t border-slate-100">
+            <div className="pt-4 border-t border-(--line)">
               <Button
                 type="submit"
                 primary
-                className="w-full !py-3 !text-sm"
+                className="w-full"
                 isLoading={isSubmitting}
                 disabled={isSubmitting}
               >

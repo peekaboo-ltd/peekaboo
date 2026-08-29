@@ -7,12 +7,14 @@ import { normalizePhoneNumber } from '@/utils/phone.util';
 import { useAppSelector } from '@/states/hooks';
 import type { LandingStats } from '@/types/landing.type';
 import type { CustomerTab, HeroCopy, HomeFormValues } from '../home.types';
-import { containerVariants, itemVariants } from '../home.animations';
+import { entranceVariants } from '../home.animations';
 import HeroTabs from './HeroTabs';
 import HeroHeadline from './HeroHeadline';
 import HeroTrustIndicators from './HeroTrustIndicators';
 import HeroBusinessCta from './HeroBusinessCta';
 import HeroForm from './HeroForm';
+import HeroLiveMap from './HeroLiveMap';
+import { useGeolocationPickup } from '@/hooks/locations/useGeolocationPickup';
 
 interface HeroSectionProps {
   formRef: RefObject<HTMLFormElement | null>;
@@ -25,7 +27,6 @@ interface HeroSectionProps {
 
 const HeroSection = ({
   formRef,
-  onScrollToForm,
   landingStats,
   heroCopy,
   onContactClick,
@@ -35,6 +36,7 @@ const HeroSection = ({
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<HomeFormValues>({
     mode: 'onChange',
@@ -43,15 +45,17 @@ const HeroSection = ({
       recipientPhoneNumber: '',
       locationFrom: undefined,
       locationTo: undefined,
+      pickupSource: 'search',
     },
   });
+  const geolocation = useGeolocationPickup(control, setValue);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const { createOrder, isLoading: isCreatingOrder } = useCreateOrder();
-  const { createPublicOrder, isLoading: isCreatingPublicOrder } = useCreatePublicOrder();
+  const { createPublicOrder, isLoading: isCreatingPublicOrder } =
+    useCreatePublicOrder();
+  const isLoading = isCreatingOrder || isCreatingPublicOrder;
 
   const onSubmit = handleSubmit((data) => {
-    // react-hook-form has already validated these fields (via TelInput and
-    // PlaceSearch in HeroForm); this only canonicalizes them to E.164 for the API.
     const senderPhoneNumber = normalizePhoneNumber(data.senderPhoneNumber);
     const recipientPhoneNumber = normalizePhoneNumber(data.recipientPhoneNumber);
     if (!senderPhoneNumber || !recipientPhoneNumber) return;
@@ -63,24 +67,20 @@ const HeroSection = ({
       locationTo: data.locationTo,
     };
 
-    if (isAuthenticated) {
-      createOrder(payload);
-    } else {
-      createPublicOrder(payload);
-    }
+    if (isAuthenticated) createOrder(payload);
+    else createPublicOrder(payload);
   });
 
   return (
-    <section className="relative isolate w-full overflow-hidden bg-[var(--peekaboo-surface)] text-foreground">
-
-      <article className="relative z-10 mx-auto max-w-[1280px] px-5 pb-12 pt-18 sm:px-8 lg:px-10 lg:pb-14 lg:pt-22">
-        <motion.section
-          className="grid min-h-[calc(100vh-7rem)] items-center gap-9 lg:grid-cols-[1.06fr_0.94fr] lg:gap-12"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.header className="flex flex-col items-start gap-6" variants={itemVariants}>
+    <section className="w-full bg-(--paper) text-(--ink) min-h-[calc(100vh-64px)] flex items-center justify-center">
+      <div className="app-container pb-10 pt-8 lg:pb-14 lg:pt-10">
+        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-14">
+          <motion.div
+            className="flex flex-col items-start gap-5"
+            variants={entranceVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <HeroTabs
               activeTab={activeTab}
               onTabChange={setActiveTab}
@@ -98,11 +98,28 @@ const HeroSection = ({
               businessSubtitle={heroCopy.businessSubtitle}
             />
 
+            {activeTab === 'personal' && <HeroForm
+              formRef={formRef}
+              onSubmit={onSubmit}
+              control={control}
+              errors={errors}
+              geolocation={geolocation}
+              copy={{
+                formTitle: heroCopy.formTitle,
+                formSubtitle: heroCopy.formSubtitle,
+                senderLabel: heroCopy.senderLabel,
+                senderPlaceholder: heroCopy.senderPlaceholder,
+                recipientLabel: heroCopy.recipientLabel,
+                recipientPlaceholder: heroCopy.recipientPlaceholder,
+              }}
+            />}
+
             <HeroBusinessCta
               isActive={activeTab === 'business'}
+              isLoading={isLoading}
               accountLabel={heroCopy.businessAccountCta}
+              primaryLabel={heroCopy.continueLabel}
               tryQuickDeliveryLabel={heroCopy.tryQuickDeliveryLabel}
-              onScrollToForm={onScrollToForm}
               onContactClick={onContactClick}
               onTrackClick={onTrackClick}
             />
@@ -113,34 +130,13 @@ const HeroSection = ({
               completedOrdersLabel={heroCopy.completedOrdersLabel}
               fallbackLabel={heroCopy.growingCommunityLabel}
             />
-          </motion.header>
+          </motion.div>
 
-          <motion.aside variants={itemVariants} className="w-full bg-white lg:justify-self-end">
-            <HeroForm
-              formRef={formRef}
-              onSubmit={onSubmit}
-              control={control}
-              isLoading={isCreatingOrder || isCreatingPublicOrder}
-              errors={errors}
-              copy={{
-                formTitle: heroCopy.formTitle,
-                formSubtitle: heroCopy.formSubtitle,
-                quickStartLabel: heroCopy.quickStartLabel,
-                senderLabel: heroCopy.senderLabel,
-                senderPlaceholder: heroCopy.senderPlaceholder,
-                recipientLabel: heroCopy.recipientLabel,
-                recipientPlaceholder: heroCopy.recipientPlaceholder,
-                continueLabel: heroCopy.continueLabel,
-                haveOrderLabel: heroCopy.haveOrderLabel,
-                trackHereLabel: heroCopy.trackHereLabel,
-                verifiedRidersLabel: heroCopy.verifiedRidersLabel,
-                realtimeTrackingLabel: heroCopy.realtimeTrackingLabel,
-              }}
-            />
-          </motion.aside>
-        </motion.section>
-      </article>
-
+          <div className="max-lg:hidden">
+            <HeroLiveMap control={control} geolocation={geolocation} />
+          </div>
+        </div>
+      </div>
     </section>
   );
 };

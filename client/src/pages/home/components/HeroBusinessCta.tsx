@@ -1,50 +1,49 @@
-import { ArrowRight, PackagePlus, Route } from 'lucide-react';
-import Button from '@/components/inputs/Button';
+import Button from "@/components/inputs/Button";
+import { Link } from "react-router-dom";
+import { HERO_DELIVERY_FORM_ID } from "./HeroForm";
 
 interface HeroBusinessCtaProps {
   isActive: boolean;
+  isLoading: boolean;
   accountLabel: string;
+  primaryLabel: string;
   tryQuickDeliveryLabel: string;
-  onScrollToForm: () => void;
   onContactClick?: () => void;
   onTrackClick?: () => void;
 }
 
 const HeroBusinessCta = ({
   isActive,
+  isLoading,
   accountLabel,
-  tryQuickDeliveryLabel,
-  onScrollToForm,
+  primaryLabel,
   onContactClick,
   onTrackClick,
 }: HeroBusinessCtaProps) => (
-  <nav className="flex flex-wrap gap-3 pt-1">
+  <nav
+    className={`flex ${isActive ? `flex` : `flex-row-reverse`} w-full flex-wrap justify-between items-center gap-4 max-sm:flex-col max-sm:items-stretch`}
+    aria-label="Delivery actions"
+  >
     <Button
-      type="button"
-      primary
-      onClick={onScrollToForm}
-      className="rounded-md font-medium"
+      onClick={isActive ? onContactClick : undefined}
+      type={isActive ? 'button' : 'submit'}
+      form={isActive ? undefined : HERO_DELIVERY_FORM_ID}
+      variant="primary"
+      size="lg"
+      disabled={isLoading}
+      className="max-sm:w-full"
     >
-      <PackagePlus className="h-3.5 w-3.5" aria-hidden="true" />
-      {isActive ? tryQuickDeliveryLabel : 'Book delivery'}
+      {isLoading ? 'Booking…' : isActive ? accountLabel : primaryLabel}
     </Button>
-    <Button
-      type="button"
-      onClick={isActive ? onContactClick : onTrackClick}
-      className={`rounded-md border-border bg-[var(--peekaboo-surface)] text-foreground`}
-    >
-      {isActive ? (
-        <>
-          {accountLabel}
-          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-        </>
-      ) : (
-        <>
-          <Route className="h-3.5 w-3.5" aria-hidden="true" />
-          Track package
-        </>
-      )}
-    </Button>
+    {!isActive ? (
+      <Link
+        onClick={onTrackClick}
+        to="/track"
+        className="link-sweep text-sm text-(--ink) max-sm:text-center"
+      >
+        Track an order
+      </Link>
+    ) : null}
   </nav>
 );
 

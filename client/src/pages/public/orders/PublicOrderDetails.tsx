@@ -1,9 +1,9 @@
 import {
   useDeferOrderPayment,
   useGetPublicOrder,
-  useGetOrderFees,
   useUpdatePublicOrder,
 } from '@/hooks/orders/orders.hooks';
+import { useQuotePublicOrderMutation } from '@/api/mutations/orders.mutations';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import {
   setOrder,
@@ -16,108 +16,112 @@ import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   DEVELOPMENT_PAYMENT_AMOUNT_RWF,
   ENVIRONMENTS,
 } from '@/constants/environments.constants';
-import RouteCalculator from '@/containers/locations/RouteCalculator';
-import AdministrativeLocation from '@/containers/locations/AdministrativeLocation';
 import NearestPlace from '@/containers/locations/NearestPlace';
-import LocationMiniMap from '@/components/orders/LocationMiniMap';
 import Button from '@/components/inputs/Button';
+import ContactMethodPicker from '@/components/orders/ContactMethodPicker';
+import LocationDetailModal, {
+  type LocationDetail,
+} from '@/components/orders/LocationDetailModal';
+import RouteSummary from '@/components/orders/RouteSummary';
 import { formatCurrency } from '@/utils/strings.util';
 import UpdateOrderLocationFrom from '@/components/modals/UpdateOrderLocationFrom';
 import UpdateOrderLocationTo from '@/components/modals/UpdateOrderLocationTo';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import OrderPayment from '@/components/modals/OrderPayment';
 import { useFetchPublicPayments } from '@/hooks/payments/payment.hooks';
 import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
-import { OrderPaymentStatus, type OrderLocation } from '@/types/order.type';
 import {
-  faLocationDot,
-  faMoneyBillWave,
-  faRoute,
-} from '@fortawesome/free-solid-svg-icons';
-import {
-  OrderStageRail,
-  PublicPage,
-  PublicPageHero,
-  PublicSectionCard,
-  PublicStatCard,
-} from '@/components/layout/PublicPage';
+  OrderPaymentStatus,
+  PreferredContactMethod,
+  type OrderLocation,
+} from '@/types/order.type';
+import { PublicPage } from '@/components/layout/PublicPage';
 import { useFetchUserById } from '@/hooks/users/users.hooks';
-
-const SkeletonLine = ({ className = '' }: { className?: string }) => (
-  <span className={`inline-block animate-pulse rounded bg-[var(--peekaboo-gray)] ${className}`} />
-);
+import { entranceVariants } from '@/pages/home/home.animations';
+import OrderSetupHeroMap from './components/OrderSetupHeroMap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 
 interface LocationCardProps {
   label: 'Pickup' | 'Destination';
   location?: OrderLocation | null;
   emptyHint: string;
   onEdit: () => void;
+  onInspect: () => void;
   onUseCurrent?: () => void;
   usingCurrentLocation?: boolean;
 }
 
+/**
+ * One end of the route, reduced to the line a person actually reads.
+ *
+ * This used to render the nearest place, the full province/district/sector
+ * breakdown, and a mini map inline — roughly 220px per card, for information
+ * most senders never check. The breakdown and the map now live one click away
+ * in LocationDetailModal, which is what makes the page fit a screen.
+ */
 const LocationCard = ({
   label,
   location,
   emptyHint,
   onEdit,
+  onInspect,
   onUseCurrent,
   usingCurrentLocation = false,
 }: LocationCardProps) => (
-  <article className="relative min-w-0">
-    <header className="mb-4 flex items-start justify-between gap-3">
-      <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
-        {label}
-      </p>
+  <article className="card-quiet flex min-w-0 flex-col gap-2 px-4 py-2">
+    <header className="flex items-center justify-between gap-3">
+      <p className="type-eyebrow">{label}</p>
       {location ? (
-        <button
-          type="button"
+        <FontAwesomeIcon
+          icon={faPenToSquare}
+          className="type-meta shrink-0 cursor-pointer text-(--ink) p-2 underline underline-offset-2 size-3.5 rounded-(--radius-control) hover:bg-(--surface-hover)"
           onClick={(e) => {
             e.preventDefault();
             onEdit();
           }}
-          aria-label={`Edit ${label.toLowerCase()} location`}
-          className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--peekaboo-line)] text-[var(--peekaboo-muted)] hover:border-[var(--peekaboo-dark)] hover:text-[var(--peekaboo-dark)]"
+          aria-label={`Change ${label.toLowerCase()} location`}
+        />
+      ) : null}
+    </header>
+
+    {location ? (
+      <>
+        <NearestPlace location={location} />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            onInspect();
+          }}
+          className="type-meta w-fit cursor-pointer text-(--ink) underline underline-offset-2"
         >
-          <FontAwesomeIcon icon={faPenToSquare} className="h-4 w-4" />
+          Address details
         </button>
-      ) : (
-        <div className="flex flex-wrap justify-end gap-2">
+      </>
+    ) : (
+      <div className="flex flex-col items-start gap-2">
+        <p className="type-meta">{emptyHint}</p>
+        <div className="flex flex-wrap gap-2">
           {onUseCurrent ? (
             <Button
               onClick={onUseCurrent}
               isLoading={usingCurrentLocation}
-              primary
-              className="py-1.5! px-3.5! text-xs cursor-pointer"
+              variant="primary"
+              size="sm"
             >
               Use current location
             </Button>
           ) : null}
-          <Button
-            onClick={onEdit}
-            className="py-1.5! px-3.5! text-xs cursor-pointer"
-          >
+          <Button onClick={onEdit} size="sm">
             Set location
           </Button>
         </div>
-      )}
-    </header>
-
-    {location ? (
-      <div className="space-y-3">
-        <NearestPlace location={location} />
-        <AdministrativeLocation location={location} />
-        <LocationMiniMap location={location} label={label} />
-      </div>
-    ) : (
-      <div className="flex min-h-[7rem] items-center justify-center">
-        <p className="text-sm text-[var(--peekaboo-muted)]">{emptyHint}</p>
       </div>
     )}
   </article>
@@ -134,6 +138,9 @@ const PublicOrderDetails = () => {
   const [distance, setDistance] = useState<number | null>(null);
   const [estimatedTime, setEstimatedTime] = useState<number | null>(null);
   const [gettingCurrentLocation, setGettingCurrentLocation] = useState(false);
+  const [locationDetail, setLocationDetail] = useState<LocationDetail | null>(null);
+  const [emailDraft, setEmailDraft] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -159,10 +166,8 @@ const PublicOrderDetails = () => {
 
   const { getPublicOrder } = useGetPublicOrder();
   const { updatePublicOrder } = useUpdatePublicOrder();
-  const { getOrderFee, orderFee } = useGetOrderFees(
-    currentOrder?.finalFee !== null && currentOrder?.finalFee !== undefined ? currentOrder.finalFee : undefined,
-    orderId,
-  );
+  const [quotePublicOrder, { isLoading: quoteIsLoading }] =
+    useQuotePublicOrderMutation();
 
   const {
     deferOrderPayment,
@@ -235,57 +240,102 @@ const PublicOrderDetails = () => {
     };
   }, []);
 
-  const handleRouteCalculated = (calculatedDistance: number, calculatedTime: number) => {
-    setDistance(calculatedDistance);
-    setEstimatedTime(calculatedTime);
-  };
+  // Same one-field patch the page already uses for locations and the fee.
+  const handleContactMethodChange = useCallback(
+    (method: PreferredContactMethod) => {
+      if (!currentOrder?.id) return;
+      setEmailError('');
 
-  useEffect(() => {
-    if (distance !== null && distance > 0 && currentOrder?.id === orderId) {
-      getOrderFee(distance);
-    }
-  }, [distance, getOrderFee, currentOrder?.id, orderId]);
+      // EMAIL is the only method the server can reject, because it is the only
+      // one that needs an address we may not have. Hold it locally until the
+      // address is valid rather than firing a request we know will fail.
+      if (method === PreferredContactMethod.EMAIL) {
+        const existing = currentOrder.contactEmail || emailDraft;
+        if (!existing) {
+          dispatch(setOrder({ ...currentOrder, preferredContactMethod: method }));
+          return;
+        }
+        updatePublicOrder({
+          id: currentOrder.id,
+          order: { preferredContactMethod: method, contactEmail: existing },
+        });
+        return;
+      }
 
-  useEffect(() => {
-    if (orderFee && currentOrder?.id) {
       updatePublicOrder({
         id: currentOrder.id,
-        order: {
-          finalFee: orderFee,
-        },
+        order: { preferredContactMethod: method },
       });
+    },
+    [currentOrder, dispatch, emailDraft, updatePublicOrder],
+  );
+
+  const handleEmailChange = useCallback(
+    (value: string) => {
+      setEmailDraft(value);
+      const trimmed = value.trim();
+      if (!trimmed) {
+        setEmailError('');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+        setEmailError('Enter a valid email address.');
+        return;
+      }
+      setEmailError('');
+      if (currentOrder?.id) {
+        updatePublicOrder({
+          id: currentOrder.id,
+          order: {
+            preferredContactMethod: PreferredContactMethod.EMAIL,
+            contactEmail: trimmed,
+          },
+        });
+      }
+    },
+    [currentOrder?.id, updatePublicOrder],
+  );
+
+  useEffect(() => {
+    if (
+      !currentOrder?.id ||
+      !currentOrder.locationFrom ||
+      !currentOrder.locationTo ||
+      (currentOrder.locationFrom.latitude === currentOrder.locationTo.latitude &&
+        currentOrder.locationFrom.longitude === currentOrder.locationTo.longitude)
+    ) {
+      setDistance(null);
+      setEstimatedTime(null);
+      return;
     }
-  }, [currentOrder?.id, orderFee, updatePublicOrder]);
-
-  const renderDeliveryTime = () => {
-    if (estimatedTime === null) return null;
-    const calculatedBaseTime = Math.round(estimatedTime);
-    const calculatedBufferTime = calculatedBaseTime + 15;
-    const baseTime = calculatedBaseTime < 20 ? 20 : calculatedBaseTime;
-    const bufferTime = calculatedBufferTime < 30 ? 30 : calculatedBufferTime;
-
-    if (bufferTime < 60) {
-      return `${baseTime}-${bufferTime}`;
-    }
-    if (baseTime < 60) {
-      const bufferHours = Math.floor(bufferTime / 60);
-      const bufferMins = bufferTime % 60;
-      return `${baseTime} min - ${bufferHours}:${String(bufferMins).padStart(2, '0')} hr`;
-    }
-
-    const baseHours = Math.floor(baseTime / 60);
-    const baseMins = baseTime % 60;
-    const bufferHours = Math.floor(bufferTime / 60);
-    const bufferMins = bufferTime % 60;
-    return `${baseHours}:${String(baseMins).padStart(2, '0')} - ${bufferHours}:${String(bufferMins).padStart(2, '0')}`;
-  };
-
-  const deliveryTimeUnit = (() => {
-    if (estimatedTime === null) return '';
-    const calculatedBufferTime = Math.round(estimatedTime) + 15;
-    const bufferTime = calculatedBufferTime < 30 ? 30 : calculatedBufferTime;
-    return bufferTime < 60 ? 'minutes' : 'hours';
-  })();
+    let active = true;
+    quotePublicOrder({ orderId: currentOrder.id })
+      .unwrap()
+      .then((response) => {
+        if (!active) return;
+        const quote = response?.data?.quote;
+        if (!quote) return;
+        setDistance(Number(quote.distanceKm));
+        setEstimatedTime(Number(quote.durationMinutes));
+        if (response.data.order) dispatch(setOrder(response.data.order));
+      })
+      .catch(() => {
+        if (!active) return;
+        setDistance(null);
+        setEstimatedTime(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [
+    currentOrder?.id,
+    currentOrder?.locationFrom?.latitude,
+    currentOrder?.locationFrom?.longitude,
+    currentOrder?.locationTo?.latitude,
+    currentOrder?.locationTo?.longitude,
+    dispatch,
+    quotePublicOrder,
+  ]);
 
   const hasSuccessfulPayment = paymentsList?.some(
     (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL,
@@ -305,264 +355,181 @@ const PublicOrderDetails = () => {
   // therefore the fee) has no meaning.
   const isSameLocation = Boolean(
     pickup &&
-      dropoff &&
-      (pickup.placeId
-        ? pickup.placeId === dropoff.placeId
-        : pickup.latitude !== null &&
-          pickup.longitude !== null &&
-          pickup.latitude === dropoff.latitude &&
-          pickup.longitude === dropoff.longitude),
+    dropoff &&
+    (pickup.placeId
+      ? pickup.placeId === dropoff.placeId
+      : pickup.latitude !== null &&
+      pickup.longitude !== null &&
+      pickup.latitude === dropoff.latitude &&
+      pickup.longitude === dropoff.longitude),
   );
   const locationsReady = hasBothLocations && !isSameLocation;
 
-  const stats = [
-    {
-      label: 'Pickup',
-      value: currentOrder?.locationFrom ? 'Set' : 'Needed',
-      icon: faLocationDot,
-    },
-    {
-      label: 'Destination',
-      value: currentOrder?.locationTo ? 'Set' : 'Needed',
-      icon: faRoute,
-    },
-    {
-      label: 'Next Action',
-      value: hasPaidEquivalent
-        ? 'Track Order'
-        : canDeferPayment
-          ? 'Defer Payment'
-          : 'Complete Payment',
-      icon: faMoneyBillWave,
-    },
-  ];
+  const feeValue = currentOrder?.finalFee ?? 0;
+
 
   return (
     // The Maps APIProvider is mounted app-wide in App.tsx.
     <>
-      {currentOrder?.locationFrom && currentOrder?.locationTo ? (
-        <RouteCalculator
-          locationFrom={{
-            latitude: currentOrder.locationFrom.latitude ?? 0,
-            longitude: currentOrder.locationFrom.longitude ?? 0,
-          }}
-          locationTo={{
-            latitude: currentOrder.locationTo.latitude ?? 0,
-            longitude: currentOrder.locationTo.longitude ?? 0,
-          }}
-          onRouteCalculated={handleRouteCalculated}
-        />
-      ) : null}
-
-      <PublicPage>
-        <PublicPageHero
-          eyebrow="Delivery setup"
-          title={currentOrder?.referenceId || 'Set delivery locations'}
-          description="Confirm where the delivery starts and ends. We’ll calculate the route and price before payment."
-        />
-
-        <OrderStageRail currentStage="locations" />
-
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {stats?.map((stat) => (
-            <PublicStatCard
-              key={stat.label}
-              label={stat.label}
-              value={currentOrder ? stat.value : 'Loading…'}
-              icon={<FontAwesomeIcon icon={stat.icon} />}
-            />
-          ))}
-        </section>
-
-        <PublicSectionCard
-          eyebrow="Route"
-          title="Pickup and destination"
-          description="Set two different locations to calculate the delivery."
+      <PublicPage viewport>
+        <motion.div
+          className="grid min-h-0 flex-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-8"
+          variants={entranceVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-10 lg:divide-x lg:divide-[var(--peekaboo-line)] [&>article:last-child]:lg:pl-10">
-            <LocationCard
-              label="Pickup"
-              location={pickup}
-              emptyHint="No pickup set yet."
-              onEdit={() => dispatch(setUpdateOrderLocationFromModal(true))}
-              onUseCurrent={handleGetCurrentLocation}
-              usingCurrentLocation={gettingCurrentLocation}
-            />
-            <LocationCard
-              label="Destination"
-              location={dropoff}
-              emptyHint="No destination set yet."
-              onEdit={() => dispatch(setUpdateOrderLocationToModal(true))}
-            />
-          </div>
+          {/* Left column is the only scroller: below the guaranteed height the
+              controls scroll inside the viewport rather than pushing the map
+              and the pay button off it. */}
+          <div className="flex min-h-0 flex-col gap-4 overflow-y-auto lg:pr-1">
+            <hgroup className="flex flex-col gap-1">
+              <p className="type-eyebrow">Delivery setup</p>
+              <h1 className="type-page-title">
+                {currentOrder?.referenceId || 'Set delivery locations'}
+              </h1>
+              <p className="type-meta max-w-[52ch]">
+                Set both ends of the route. We price it before you pay.
+              </p>
+            </hgroup>
 
-          {isSameLocation ? (
-            <p className="mt-6 rounded-md bg-[var(--peekaboo-warm)] px-4 py-3 text-sm text-[var(--peekaboo-text)]">
-              Pickup and destination are the same place. Choose a different
-              destination to continue.
-            </p>
-          ) : null}
-
-          {locationsReady ? (
-            <div className="mt-8 border-t border-[var(--peekaboo-line)] pt-6">
-              <div className="mb-5">
-                <p className="font-['IBM_Plex_Mono'] text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
-                  Route summary
-                </p>
-                <h3 className="mt-1 font-['Space_Grotesk'] text-base font-semibold text-[var(--peekaboo-dark)]">
-                  Distance, time, and fee
-                </h3>
-              </div>
-
-              {distance === null || estimatedTime === null ? (
-                <div className="grid gap-6 md:grid-cols-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="space-y-3">
-                      <SkeletonLine className="h-3 w-20" />
-                      <SkeletonLine className="h-7 w-28" />
-                      <SkeletonLine className="h-3 w-16" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <>
-                  <div className="grid gap-6 md:grid-cols-3 md:divide-x md:divide-[var(--peekaboo-line)] [&>div:not(:first-child)]:md:pl-6">
-                    <div>
-                      <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
-                        Distance
-                      </p>
-                      <p className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold text-[var(--peekaboo-dark)]">{distance.toFixed(2)}</p>
-                      <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">kilometers</p>
-                    </div>
-
-                    <div>
-                      <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
-                        Delivery time
-                      </p>
-                      <p className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold text-[var(--peekaboo-dark)]">{renderDeliveryTime()}</p>
-                      <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">{deliveryTimeUnit}</p>
-                    </div>
-
-                    <div>
-                      <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-[0.1em] text-[var(--peekaboo-muted)]">
-                        Delivery fee
-                      </p>
-                      {(orderFee !== undefined && orderFee > 0) ||
-                        (currentOrder?.finalFee !== null &&
-                          currentOrder?.finalFee !== undefined &&
-                          currentOrder.finalFee > 0) ? (
-                        <>
-                          <p className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold text-[var(--peekaboo-dark)]">
-                            {formatCurrency(orderFee ?? (currentOrder?.finalFee ?? 0))}
-                          </p>
-                          <p className="mt-1 text-xs text-[var(--peekaboo-muted)]">including VAT</p>
-                          {ENVIRONMENTS.isPaymentSimulation ? (
-                          <p className="mt-2 text-xs leading-snug text-[var(--peekaboo-text)]">
-                              Payments are simulated in this environment. No real
-                              charge will be made.
-                            </p>
-                          ) : null}
-                          {ENVIRONMENTS.isDevPrice ? (
-                            <p className="mt-2 text-xs leading-snug text-[var(--peekaboo-text)]">
-                              Catalog fee shown. You will only be charged{' '}
-                              {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} at
-                              checkout.
-                            </p>
-                          ) : null}
-                        </>
-                      ) : (
-                        <div className="mt-2 space-y-3">
-                          <SkeletonLine className="h-7 w-28" />
-                          <SkeletonLine className="h-3 w-16" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="mt-5 text-sm text-[var(--peekaboo-muted)]">
-                    Fee is based on distance between the two locations.{' '}
-                    <Link
-                      to="/about/orders/fees"
-                      className="font-medium text-[var(--peekaboo-dark)] underline underline-offset-2"
-                    >
-                      Learn more about fees
-                    </Link>
-                  </p>
-                  {ENVIRONMENTS.isPaymentSimulation ? (
-                    <p className="mt-2 text-sm text-[var(--peekaboo-text)]">
-                      Payments are simulated in this environment.
-                    </p>
-                  ) : null}
-                  {ENVIRONMENTS.isDevPrice ? (
-                    <p className="mt-2 text-sm text-[var(--peekaboo-text)]">
-                      Environment pricing: checkout charges{' '}
-                      {formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} only.
-                    </p>
-                  ) : null}
-                </>
-              )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <LocationCard
+                label="Pickup"
+                location={pickup}
+                emptyHint="Not set yet."
+                onEdit={() => dispatch(setUpdateOrderLocationFromModal(true))}
+                onInspect={() =>
+                  pickup && setLocationDetail({ label: 'Pickup', location: pickup })
+                }
+                onUseCurrent={handleGetCurrentLocation}
+                usingCurrentLocation={gettingCurrentLocation}
+              />
+              <LocationCard
+                label="Destination"
+                location={dropoff}
+                emptyHint="Not set yet."
+                onEdit={() => dispatch(setUpdateOrderLocationToModal(true))}
+                onInspect={() =>
+                  dropoff &&
+                  setLocationDetail({ label: 'Destination', location: dropoff })
+                }
+              />
             </div>
-          ) : null}
 
-          <div className="mt-5 flex items-center gap-3 justify-between">
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(-1);
-              }}
-            >
-              Back
-            </Button>
-            {hasPaidEquivalent ? (
+            {isSameLocation ? (
+              <p className="card-quiet px-4 py-3 text-sm text-(--ink)">
+                Pickup and destination are the same place. Choose a different
+                destination to continue.
+              </p>
+            ) : null}
+
+            <ContactMethodPicker
+              value={currentOrder?.preferredContactMethod}
+              onChange={handleContactMethodChange}
+              email={emailDraft || currentOrder?.contactEmail}
+              onEmailChange={handleEmailChange}
+              emailError={emailError}
+            />
+
+            {locationsReady ? (
+              <RouteSummary
+                distance={distance}
+                estimatedTime={estimatedTime}
+                fee={feeValue}
+              />
+            ) : null}
+
+            {locationsReady && feeValue > 0 ? (
+              <p className="type-meta">
+                Fee is based on the distance between the two locations.{' '}
+                <Link to="/about/orders/fees" className="link-sweep underline underline-offset-3 text-(--ink)">
+                  How fees work
+                </Link>
+                {ENVIRONMENTS.isPaymentSimulation
+                  ? ' · Payments are simulated here; no real charge is made.'
+                  : ''}
+                {ENVIRONMENTS.isDevPrice
+                  ? ` · Checkout charges ${formatCurrency(DEVELOPMENT_PAYMENT_AMOUNT_RWF)} only.`
+                  : ''}
+              </p>
+            ) : null}
+
+            <nav className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
               <Button
-                primary
                 onClick={(e) => {
                   e.preventDefault();
-                  if (currentOrder?.id) {
-                    navigate(`/p/orders/${currentOrder.id}/tracking`);
-                  }
+                  navigate(-1);
                 }}
               >
-                Track order
+                Back
               </Button>
-            ) : canDeferPayment ? (
-              <Button
-                primary
-                isLoading={deferOrderPaymentIsLoading}
-                disabled={!locationsReady}
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (currentOrder?.id) {
-                    deferOrderPayment({ id: currentOrder.id });
-                  }
-                }}
-              >
-                {!hasBothLocations
-                  ? 'Set both locations to continue'
-                  : isSameLocation
-                    ? 'Pickup and destination must differ'
-                    : 'Defer payment'}
-              </Button>
-            ) : (
-              <Button
-                primary
-                disabled={!locationsReady}
-                onClick={(e) => {
-                  e.preventDefault();
-                  dispatch(setSelectedOrder(currentOrder));
-                  dispatch(setOrderPaymentModal(true));
-                }}
-              >
-                {!hasBothLocations
-                  ? 'Set both locations to continue'
-                  : isSameLocation
-                    ? 'Pickup and destination must differ'
-                    : 'Complete payment'}
-              </Button>
-            )}
+              {hasPaidEquivalent ? (
+                <Button
+                  variant="primary"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentOrder?.id) {
+                      navigate(`/p/orders/${currentOrder.id}/tracking`);
+                    }
+                  }}
+                >
+                  Track order
+                </Button>
+              ) : canDeferPayment ? (
+                <Button
+                  variant="primary"
+                  isLoading={deferOrderPaymentIsLoading}
+                  disabled={!locationsReady}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentOrder?.id) {
+                      deferOrderPayment({ id: currentOrder.id });
+                    }
+                  }}
+                >
+                  {!hasBothLocations
+                    ? 'Set both locations to continue'
+                    : isSameLocation
+                      ? 'Pickup and destination must differ'
+                      : 'Defer payment'}
+                </Button>
+              ) : (
+                <Button
+                  variant="primary"
+                  disabled={!locationsReady || quoteIsLoading || feeValue <= 0}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    dispatch(setSelectedOrder(currentOrder));
+                    dispatch(setOrderPaymentModal(true));
+                  }}
+                >
+                  {!hasBothLocations
+                    ? 'Set both locations to continue'
+                    : isSameLocation
+                      ? 'Pickup and destination must differ'
+                      : 'Complete payment'}
+                </Button>
+              )}
+            </nav>
           </div>
-        </PublicSectionCard>
 
+          {/* The map fills its cell instead of dictating a 4/3 height, and
+              carries the route figures that used to sit in a card below. */}
+          <div className="min-h-0 max-lg:hidden">
+            <OrderSetupHeroMap
+              pickup={pickup}
+              dropoff={dropoff}
+              distance={distance}
+              estimatedTime={estimatedTime}
+              className="h-full"
+            />
+          </div>
+        </motion.div>
+
+        <LocationDetailModal
+          detail={locationDetail}
+          onClose={() => setLocationDetail(null)}
+        />
         <UpdateOrderLocationFrom />
         <UpdateOrderLocationTo />
         <OrderPayment />

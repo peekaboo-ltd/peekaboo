@@ -1,4 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
+import { publicAccentAt, publicAccentSoftClass } from '@/components/public/PublicIconBadge';
 import RoutePreviewMap from './RoutePreviewMap';
 
 const services = [
@@ -6,119 +7,113 @@ const services = [
     title: 'Same-day in Kigali',
     blurb:
       'Door-to-door across all 30 sectors of Kigali, picked up fast and dropped the same day.',
-    tone: 'black',
+    tone: 'inverted',
     tag: 'Featured',
     featured: true,
   },
   {
     title: 'Business & e-commerce',
     blurb: 'API + dashboard, batch uploads, weekly invoices.',
-    tone: 'yellow',
+    tone: 'quiet',
     tag: 'Business',
   },
   {
     title: 'Document delivery',
     blurb: 'Signed paperwork, contracts, ID cards. Tamper-evident sleeves.',
-    tone: 'white',
+    tone: 'quiet',
     tag: 'Service',
   },
   {
     title: 'Food & small parcels',
     blurb: 'Insulated bags, careful handling, restaurant integrations.',
-    tone: 'white',
+    tone: 'quiet',
     tag: 'Service',
   },
   {
     title: 'Scheduled bulk runs',
     blurb: 'Plan your week. We dispatch riders to your door at fixed slots.',
-    tone: 'white',
+    tone: 'quiet',
     tag: 'Service',
   },
 ];
 
 const toneClasses = {
-  black: {
-    card: 'group border-transparent bg-[#0a0a0a] text-white transition-all duration-300 hover:shadow-[0_18px_50px_-32px_rgba(10,10,10,0.7)]',
-    chip: 'bg-[#edb100] text-[#0a0a0a]',
-    body: 'text-white/65',
-    arrow: 'bg-white/[0.06] text-white transition-all duration-300 group-hover:bg-white/10 group-hover:scale-110',
+  // Inside .invert-surface, --ink and --paper are locally swapped, so these
+  // children read the same tokens they would on a white card and stay correct
+  // in dark mode, on focus, and under text selection.
+  inverted: {
+    card: 'invert-surface group',
+    chip: 'bg-(--surface) text-(--muted)',
+    body: 'text-(--muted)',
   },
-  yellow: {
-    card: 'group border-transparent bg-[#edb100] text-[#0a0a0a] transition-all duration-300 hover:shadow-[0_18px_50px_-32px_rgba(10,10,10,0.28)]',
-    chip: 'bg-[#0a0a0a] text-white',
-    body: 'text-black/60',
-    arrow: 'bg-[#0a0a0a] text-white transition-all duration-300 group-hover:bg-black/80 group-hover:scale-110',
-  },
-  white: {
-    card: 'home-card-interactive group bg-[var(--peekaboo-surface)] text-foreground',
-    chip: 'bg-[#fff4be] text-[#6b4d00]',
-    body: 'text-muted-foreground',
-    arrow: 'bg-[var(--peekaboo-surface)] text-foreground transition-all duration-300 group-hover:bg-[#edb100] group-hover:scale-110',
+  quiet: {
+    card: 'card-quiet group',
+    chip: 'bg-(--paper) text-(--muted)',
+    body: 'text-(--muted)',
   },
 } as const;
 
 const ServicesSection = () => (
-  <section id="services" className="w-full bg-[var(--peekaboo-surface)] py-12 lg:py-16">
-    <article className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
+  <section id="services" className="section-rhythm w-full border-(--line) bg-(--paper)">
+    <article className="app-container">
       <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <hgroup className="max-w-[660px]">
-          <p className="text-[11px] font-medium uppercase text-muted-foreground">
+          <p className="type-eyebrow">
             Top solutions
           </p>
-          <h2 className="mt-3 text-[24px] font-medium leading-[1.05] text-foreground sm:text-[34px]">
+          <h2 className="type-h2 mt-2">
             Built for the way
             <br />
             Kigali moves.
           </h2>
         </hgroup>
-        <p className="max-w-[380px] text-[13px] font-normal leading-relaxed text-muted-foreground">
+        <p className="type-body-sm max-w-[380px] text-(--muted)">
           From a single envelope to a hundred-stop run, choose the service that fits
           every order tracked end to end.
         </p>
       </header>
 
-      <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
-        {services.map((service) => {
+      <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
+        {services.map((service, index) => {
           const tone = toneClasses[service.tone as keyof typeof toneClasses];
+          const arrowAccent = publicAccentSoftClass[publicAccentAt(index)];
           return (
             <li key={service.title} className={service.featured ? 'lg:row-span-2' : undefined}>
               <article
-                className={`flex h-full min-h-[178px] flex-col justify-between rounded-md border p-5 ${tone.card} ${
+                className={`flex h-full min-h-[178px] flex-col justify-between rounded-(--radius-card) p-6 ${tone.card} ${
                   service.featured ? 'lg:min-h-[300px]' : ''
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-4">
                     <span
-                      className={`inline-flex h-[22px] items-center rounded-full px-2.5 text-[11px] font-medium ${tone.chip}`}
+                      className={`inline-flex h-6 items-center rounded-(--radius-pill) px-2.5 text-xs font-normal ${tone.chip}`}
                     >
                       {service.tag}
                     </span>
                     <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-full ${tone.arrow}`}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full transition-[background-color,color] duration-200 ${arrowAccent}`}
                     >
-                      <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-45" aria-hidden="true" />
+                      <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-200" aria-hidden="true" />
                     </span>
                   </div>
                   <h3
-                    className={`mt-5 font-medium leading-[1.15] ${
-                      service.featured ? 'text-[22px]' : 'text-[16px]'
-                    }`}
+                    className={service.featured ? 'type-h3 mt-4' : 'type-card-title mt-4'}
                   >
                     {service.title}
                   </h3>
-                  <p className={`mt-2 text-[13px] font-normal leading-relaxed ${tone.body}`}>
+                  <p className={`mt-2 text-sm font-normal leading-relaxed ${tone.body}`}>
                     {service.blurb}
                   </p>
                 </div>
 
                 {service.featured && (
-                  <footer className="mt-6 flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-end sm:justify-between">
+                  <footer className="mt-6 flex flex-col gap-4 border-t border-(--line) pt-5 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <p className="text-[15px] font-medium">
+                      <p className="text-[15px] font-normal">
                         Live tracking, end to end
                       </p>
-                      <p className="mt-1 text-[11px] font-medium uppercase text-white/60">
+                      <p className="mt-1 text-xs font-normal text-(--paper)">
                         pickup to drop-off
                       </p>
                     </div>

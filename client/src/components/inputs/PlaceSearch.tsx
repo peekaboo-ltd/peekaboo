@@ -1,6 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type ReactNode,
+} from 'react';
 import { createPortal } from 'react-dom';
-import { useMapsLibrary } from '@vis.gl/react-google-maps';
+import { controlClassName } from './control';
+import { loadGoogleMapsLibrary } from '@/utils/googleMapsApi.util';
 
 export interface PlaceSearchResult {
   place: google.maps.places.PlaceResult;
@@ -21,6 +28,13 @@ interface PlaceSearchProps {
   value?: string;
   onChange?: (value: string) => void;
   country?: string | string[];
+  emptyOption?: {
+    label: string;
+    description?: string;
+    icon?: ReactNode;
+    disabled?: boolean;
+    onSelect: () => void | Promise<void>;
+  };
 }
 
 const PlaceSearch = ({
@@ -31,6 +45,7 @@ const PlaceSearch = ({
   value,
   onChange,
   country,
+  emptyOption,
 }: PlaceSearchProps) => {
   const [inputValue, setInputValue] = useState(value || '');
   const [predictions, setPredictions] = useState<
@@ -44,12 +59,18 @@ const PlaceSearch = ({
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
-  const places = useMapsLibrary('places');
+  const placesRef = useRef<google.maps.PlacesLibrary | null>(null);
+  const predictionRequest = useRef(0);
+  const [mapsFailed, setMapsFailed] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const normalizedCountry =
     typeof country === 'string'
       ? country.toLowerCase()
       : country?.map((countryCode) => countryCode.toLowerCase());
-  const isMapsUnavailable = inputValue.length > 2 && !places;
+  const isMapsUnavailable = inputValue.length > 2 && mapsFailed;
+  const showEmptyOption = Boolean(
+    emptyOption && isFocused && inputValue.trim().length === 0,
+  );
 
   const handlePlaceSelect = useCallback(
     (place: google.maps.places.PlaceResult) => {
@@ -131,33 +152,50 @@ const PlaceSearch = ({
       onChange(newValue);
     }
 
-    if (newValue.length > 2 && places) {
-      updateDropdownPosition();
-      const service = new places.AutocompleteService();
-      service.getPlacePredictions(
-        {
-          input: newValue,
-          componentRestrictions: normalizedCountry
-            ? { country: normalizedCountry }
-            : undefined,
-        },
-        (predictions, status) => {
-          if (
-            status === google.maps.places.PlacesServiceStatus.OK &&
-            predictions
-          ) {
-            setPredictions(
-              predictions as google.maps.places.AutocompletePrediction[]
-            );
-            updateDropdownPosition();
-          } else {
-            setPredictions([]);
-          }
-        }
-      );
-    } else {
+    const requestId = ++predictionRequest.current;
+    if (newValue.length <= 2) {
       setPredictions([]);
+      setMapsFailed(false);
+      return;
     }
+
+    updateDropdownPosition();
+    void (async () => {
+      try {
+        const places =
+          placesRef.current ?? (await loadGoogleMapsLibrary('places'));
+        placesRef.current = places;
+        if (requestId !== predictionRequest.current) return;
+
+        const service = new places.AutocompleteService();
+        service.getPlacePredictions(
+          {
+            input: newValue,
+            componentRestrictions: normalizedCountry
+              ? { country: normalizedCountry }
+              : undefined,
+          },
+          (nextPredictions, status) => {
+            if (requestId !== predictionRequest.current) return;
+            if (
+              status === google.maps.places.PlacesServiceStatus.OK &&
+              nextPredictions
+            ) {
+              setPredictions(nextPredictions);
+              setMapsFailed(false);
+              updateDropdownPosition();
+            } else {
+              setPredictions([]);
+            }
+          },
+        );
+      } catch {
+        if (requestId === predictionRequest.current) {
+          setPredictions([]);
+          setMapsFailed(true);
+        }
+      }
+    })();
   };
 
   useEffect(() => {
@@ -189,6 +227,7 @@ const PlaceSearch = ({
   ) => {
     e.preventDefault();
     e.stopPropagation();
+    const places = placesRef.current;
     if (!places) return;
 
     const service = new places.PlacesService(document.createElement('div'));
@@ -215,16 +254,28 @@ const PlaceSearch = ({
     }
     // Delay closing to allow click events to fire
     setTimeout(() => {
+      setIsFocused(false);
       setPredictions([]);
       setDropdownPosition(null);
     }, 200);
   };
 
-  const dropdownContent = predictions.length > 0 && dropdownPosition ? (
+  const handleEmptyOptionSelect = () => {
+    if (!emptyOption || emptyOption.disabled) return;
+
+    setIsFocused(false);
+    setPredictions([]);
+    setDropdownPosition(null);
+    inputRef.current?.blur();
+    void emptyOption.onSelect();
+  };
+
+  const dropdownContent =
+    (showEmptyOption || predictions.length > 0) && dropdownPosition ? (
     <ul
       ref={dropdownRef}
       data-place-search-dropdown
-      className="fixed z-[10000] bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto pointer-events-auto"
+      className="pointer-events-auto fixed z-[10000] max-h-60 overflow-auto rounded-(--radius-control) border border-(--line) bg-(--paper) py-1 shadow-(--shadow-menu)"
       role="listbox"
       style={{
         top: `${dropdownPosition.top}px`,
@@ -236,18 +287,61 @@ const PlaceSearch = ({
         // Prevent input blur when clicking on dropdown
         e.preventDefault();
       }}
+      onBlur={(event) => {
+        const nextTarget = event.relatedTarget as Node | null;
+        if (nextTarget && dropdownRef.current?.contains(nextTarget)) return;
+        setIsFocused(false);
+        setPredictions([]);
+        setDropdownPosition(null);
+      }}
     >
+      {showEmptyOption && emptyOption ? (
+        <li
+          className="flex cursor-pointer items-center gap-3 px-4 py-2.5 outline-none transition-[background-color,opacity] duration-200 ease-(--ease-flat) hover:bg-(--surface) focus-visible:bg-(--surface) aria-disabled:pointer-events-none aria-disabled:opacity-50"
+          onClick={handleEmptyOptionSelect}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              handleEmptyOptionSelect();
+            }
+          }}
+          role="option"
+          aria-selected="false"
+          aria-disabled={emptyOption.disabled || undefined}
+          tabIndex={emptyOption.disabled ? -1 : 0}
+        >
+          {emptyOption.icon ? (
+            <span
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-(--surface) text-(--ink)"
+              aria-hidden="true"
+            >
+              {emptyOption.icon}
+            </span>
+          ) : null}
+          <span className="min-w-0">
+            <strong className="block text-sm font-normal text-(--ink)">
+              {emptyOption.label}
+            </strong>
+            {emptyOption.description ? (
+              <span className="mt-0.5 block text-[0.8125rem] text-(--muted)">
+                {emptyOption.description}
+              </span>
+            ) : null}
+          </span>
+        </li>
+      ) : null}
+
       {predictions.map((prediction) => (
         <li
           key={prediction.place_id}
-          className="px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+          className="cursor-pointer px-4 py-2.5 transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface)"
           onMouseDown={(e) => handleSuggestionClick(prediction, e)}
           role="option"
         >
-          <strong className="font-medium text-gray-900 text-[13px]">
+          <strong className="block text-sm font-normal text-(--ink)">
             {prediction.structured_formatting?.main_text}
           </strong>
-          <address className="text-sm text-gray-600 not-italic text-[13px]">
+          <address className="mt-0.5 block text-[0.8125rem] not-italic text-(--muted)">
             {prediction.structured_formatting?.secondary_text}
           </address>
         </li>
@@ -263,15 +357,18 @@ const PlaceSearch = ({
           type="text"
           value={inputValue}
           onChange={handleInputChange}
-          onFocus={updateDropdownPosition}
+          onFocus={() => {
+            setIsFocused(true);
+            updateDropdownPosition();
+          }}
           onBlur={handleInputBlur}
           placeholder={placeholder}
           disabled={disabled}
           autoComplete="off"
-          className="w-full px-3 py-2 placeholder:text-[13px] text-[13px] border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent"
+          className={controlClassName}
         />
         {isMapsUnavailable && (
-          <p className="mt-1 text-xs text-red-500">Maps failed to load.</p>
+          <p className="mt-1 text-xs text-(--danger)">Maps failed to load.</p>
         )}
       </section>
       {dropdownContent && createPortal(dropdownContent, document.body)}

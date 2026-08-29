@@ -10,19 +10,24 @@ interface PublicLayoutProps {
 }
 
 const PublicLayout = ({ children }: PublicLayoutProps) => {
-  // NAVIGATION
   const { pathname } = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const isAuthPage = pathname.startsWith('/auth/');
 
+  // The order-setup and tracking screens are locked to one viewport, so a site
+  // footer underneath them would reintroduce the scroll they exist to avoid.
+  // They are task screens — set a route, pay, check status — not pages someone
+  // reads to the end and then navigates onward from.
+  // Payment pending/success still scroll normally and keep theirs.
+  const isViewportOrderPage = /^\/p\/orders\/[^/]+(\/tracking)?$/.test(pathname);
+
   return (
-    <main className="relative flex min-h-screen flex-col bg-[var(--peekaboo-surface)]">
-      {!isAuthPage && (isAuthenticated ? <AuthenticatedNavbar /> : <PublicNavbar />)}
-      <section className={`flex-1 ${pathname === '/' || isAuthPage ? 'pt-0' : 'pt-22'}`}>
-        {children || <Outlet />}
-      </section>
-      {!isAuthPage && <Footer />}
-    </main>
+    <div className="flex min-h-screen flex-col bg-(--paper) text-(--ink)">
+      {!isAuthPage &&
+        (isAuthenticated ? <AuthenticatedNavbar /> : <PublicNavbar />)}
+      <div className="flex-1">{children || <Outlet />}</div>
+      {!isAuthPage && !isViewportOrderPage && <Footer />}
+    </div>
   );
 };
 

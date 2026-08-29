@@ -37,7 +37,7 @@ export function haversineDistance(
 /**
  * Get the rider's best available location (currentLocation > defaultLocation).
  */
-function getRiderLocation(rider: User): Coordinates | null {
+export function getRiderLocation(rider: User): Coordinates | null {
   if (rider.currentLocation?.latitude != null && rider.currentLocation?.longitude != null) {
     return rider.currentLocation;
   }

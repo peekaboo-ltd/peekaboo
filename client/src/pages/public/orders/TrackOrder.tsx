@@ -1,17 +1,41 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowRight, Hash, MapPinned, PackageCheck } from 'lucide-react';
 import Button from '@/components/inputs/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { useGetOrderByReferenceId } from '@/hooks/orders/orders.hooks';
+import { useGetLandingStatsQuery } from '@/api/queries/landing.queries';
 import { useI18n } from '@/i18n/i18n';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import Input from '@/components/inputs/Input';
-import {
-  PublicPage,
-  PublicPageHero,
-  PublicSectionCard,
-} from '@/components/layout/PublicPage';
+import PublicApproximateMap from '@/components/maps/PublicApproximateMap';
+import HeroTrustIndicators from '@/pages/home/components/HeroTrustIndicators';
+import SupportSection from '@/pages/home/components/SupportSection';
+import FinalCtaSection from '@/pages/home/components/FinalCtaSection';
+import { useHomeContent } from '@/pages/home/useHomeContent';
+import { entranceVariants } from '@/pages/home/home.animations';
+import { HERO_DELIVERY_FORM_ID } from '@/pages/home/components/HeroForm';
+
+const trackingFeatures = [
+  {
+    icon: Hash,
+    title: 'Reference ID or OTP',
+    description:
+      'Use the ID from your confirmation SMS or the one-time code shared with your recipient.',
+  },
+  {
+    icon: MapPinned,
+    title: 'Live route map',
+    description:
+      'Watch your rider move across Kigali from pickup to drop-off in real time.',
+  },
+  {
+    icon: PackageCheck,
+    title: 'Proof of delivery',
+    description: 'Photo confirmation and timestamp when your package arrives.',
+  },
+] as const;
 
 const TrackOrder = () => {
   const { t } = useI18n();
@@ -20,8 +44,12 @@ const TrackOrder = () => {
   const initialRef = searchParams.get('ref') || '';
   useDocumentTitle('Track Order');
 
+  const formRef = useRef<HTMLFormElement>(null);
   const [referenceId, setReferenceId] = useState(initialRef);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const { data: landingStats } = useGetLandingStatsQuery();
+  const { heroCopy, supportContacts } = useHomeContent();
 
   const {
     getOrderByReferenceId,
@@ -61,68 +89,158 @@ const TrackOrder = () => {
     }
   }, [isError, t]);
 
+  const handleContactNavigation = () => {
+    navigate('/contact');
+  };
+
+  const handleBookDelivery = () => {
+    navigate(`/#${HERO_DELIVERY_FORM_ID}`);
+  };
+
   return (
-    <PublicPage className="min-h-fit max-lg:mt-16">
-      <PublicPageHero
-        eyebrow={t('trackOrder.eyebrow')}
-        title={t('trackOrder.title')}
-        description={t('trackOrder.subtitle')}
+    <main className="home-page relative min-h-screen w-full overflow-x-clip bg-(--paper)">
+      <section className="flex min-h-[calc(100vh-64px)] w-full items-center justify-center bg-(--paper) text-(--ink)">
+        <div className="app-container pb-10 pt-8 lg:pb-14 lg:pt-10">
+          <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:gap-14">
+            <motion.div
+              className="flex flex-col items-start gap-5"
+              variants={entranceVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <hgroup className="space-y-3">
+                <p className="type-eyebrow">{t('trackOrder.eyebrow')}</p>
+                <h1 className="type-display max-w-[14ch] text-(--ink)">
+                  {t('trackOrder.title')}
+                </h1>
+                <p className="type-body max-w-[46ch] text-(--muted)">
+                  {t('trackOrder.subtitle')}
+                </p>
+              </hgroup>
+
+              <form
+                ref={formRef}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSearch();
+                }}
+                className="home-scroll-target w-full max-w-md"
+              >
+                <Input
+                  id="reference-id"
+                  label={t('trackOrder.orderIdLabel')}
+                  value={referenceId}
+                  onChange={(e) => {
+                    setReferenceId(e.target.value.toUpperCase());
+                    setErrorMessage('');
+                  }}
+                  placeholder={t('trackOrder.orderIdPlaceholder')}
+                  prefixIcon={faMagnifyingGlass}
+                  description={t('trackOrder.hint')}
+                  errorMessage={errorMessage}
+                />
+
+                <Button
+                  type="submit"
+                  primary
+                  isLoading={isFetching}
+                  className="mt-5 max-sm:w-full"
+                >
+                  {t('trackOrder.searchButton')}
+                </Button>
+              </form>
+
+              <Link
+                to={`/#${HERO_DELIVERY_FORM_ID}`}
+                className="link-sweep text-sm text-(--ink)"
+              >
+                Book a delivery instead
+              </Link>
+
+              <HeroTrustIndicators
+                landingStats={landingStats}
+                activeCustomersLabel={heroCopy.activeCustomersLabel}
+                completedOrdersLabel={heroCopy.completedOrdersLabel}
+                fallbackLabel={heroCopy.growingCommunityLabel}
+              />
+            </motion.div>
+
+            <div className="max-lg:hidden">
+              <PublicApproximateMap
+                statusLabel="Live tracking"
+                etaLabel="Kigali-wide"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-rhythm w-full border-(--line) bg-(--paper)">
+        <div className="app-container">
+          <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <hgroup>
+              <p className="type-eyebrow">Live tracking</p>
+              <h2 className="type-h2 mt-2">
+                See every step
+                <br />
+                of your delivery.
+              </h2>
+            </hgroup>
+            <p className="max-w-[46ch] text-sm leading-[1.55] text-(--muted)">
+              From the moment a rider accepts your order to the photo at the door,
+              everything stays visible in one place.
+            </p>
+          </header>
+
+          <ol className="grid gap-6 md:grid-cols-3">
+            {trackingFeatures.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <li key={feature.title} className="relative rounded-md border border-(--line) p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="type-meta">0{index + 1}</span>
+                    <span className="flex size-10 items-center justify-center rounded-(--radius-control) border border-(--ink)">
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                  </div>
+                  <h3 className="type-h3 mt-8">{feature.title}</h3>
+                  <p className="mt-3 text-sm leading-[1.55] text-(--muted)">
+                    {feature.description}
+                  </p>
+                </li>
+              );
+            })}
+          </ol>
+
+          <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="max-w-[42ch] text-sm leading-[1.55] text-(--muted)">
+              Reference IDs usually start with &ldquo;P&rdquo;. OTPs are sent to the
+              recipient when the rider is on the way.
+            </p>
+            <button
+              type="button"
+              onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="link-arrow inline-flex items-center gap-1.5 text-sm text-(--ink)"
+            >
+              Track an order
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <SupportSection
+        contacts={supportContacts}
+        onContactClick={handleContactNavigation}
       />
 
-      <PublicSectionCard
-        className="mx-auto w-full max-w-2xl"
-        eyebrow="Order reference"
-        title={t('trackOrder.searchButton')}
-        description={t('trackOrder.searchDescription')}
-      >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSearch();
-          }}
-          className="flex flex-col"
-        >
-          <label
-            htmlFor="reference-id"
-            className="mb-2 block text-sm font-medium text-[var(--peekaboo-text)]"
-          >
-            {t('trackOrder.orderIdLabel')}
-          </label>
-          <div className="relative">
-            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--peekaboo-muted)]">
-              <FontAwesomeIcon icon={faMagnifyingGlass} />
-            </span>
-            <Input
-              id="reference-id"
-              value={referenceId}
-              onChange={(e) => {
-                setReferenceId(e.target.value.toUpperCase());
-                setErrorMessage('');
-              }}
-              placeholder={t('trackOrder.orderIdPlaceholder')}
-              className="h-11 rounded-md border-[var(--peekaboo-line)] bg-white pl-10 pr-3 font-['IBM_Plex_Mono'] uppercase"
-            />
-          </div>
-          <p className="mt-2 text-xs leading-5 text-[var(--peekaboo-muted)]">
-            {t('trackOrder.hint')}
-          </p>
-          {errorMessage ? (
-            <p className="mt-3 rounded-md bg-[var(--peekaboo-warm)] px-3 py-2 text-sm text-[var(--peekaboo-text)]">
-              {errorMessage}
-            </p>
-          ) : null}
-
-          <Button
-            type="submit"
-            primary
-            isLoading={isFetching}
-            className="mt-5 self-end"
-          >
-            {t('trackOrder.searchButton')}
-          </Button>
-        </form>
-      </PublicSectionCard>
-    </PublicPage>
+      <FinalCtaSection
+        title="Need to send something?"
+        subtitle="Book a verified rider in under a minute. Pay when it arrives."
+        buttonLabel="Book delivery"
+        onScrollToForm={handleBookDelivery}
+      />
+    </main>
   );
 };
 

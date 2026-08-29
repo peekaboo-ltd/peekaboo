@@ -20,20 +20,11 @@ import {
   InternalSectionCard,
 } from '@/components/layout/InternalPage';
 
-const containerVariants: Variants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -117,8 +108,8 @@ const OrganizationSettingsPage = () => {
           title="Organization Details"
         >
           {isLoading ? (
-            <section className="mt-6 flex items-center gap-3 text-slate-500">
-              <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600" />
+            <section className="mt-6 flex items-center gap-3 text-(--muted)">
+              <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-(--ink)" />
               <span className="text-sm">Loading organization…</span>
             </section>
           ) : (
@@ -126,17 +117,17 @@ const OrganizationSettingsPage = () => {
               {details.map((item) => (
                 <li
                   key={item.label}
-                  className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                  className="rounded-lg bg-(--surface) p-4"
                 >
                   <header className="flex items-center gap-3">
-                    <span className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-700 flex items-center justify-center">
+                    <span className="h-9 w-9 rounded-full border border-(--line) bg-(--paper) text-(--ink) flex items-center justify-center">
                       <FontAwesomeIcon icon={item.icon} />
                     </span>
                     <section>
-                      <p className="text-xs uppercase text-slate-400">
+                      <p className="type-meta">
                         {item.label}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-slate-900">
+                      <p className="mt-1 text-sm font-normal text-(--ink)">
                         {item.value}
                       </p>
                     </section>
@@ -154,23 +145,23 @@ const OrganizationSettingsPage = () => {
         >
           <section className="mt-6">
             {organization?.defaultLocation ? (
-              <aside className="p-4 rounded-lg border border-slate-200 bg-slate-50 space-y-2">
+              <aside className="p-4 rounded-lg bg-(--surface) space-y-2">
                 <header className="flex items-center gap-2">
                   <FontAwesomeIcon
                     icon={faLocationDot}
-                    className="text-slate-700 text-sm"
+                    className="text-(--ink) text-sm"
                   />
-                  <p className="text-xs uppercase text-slate-400">
+                  <p className="type-meta">
                     Current Default
                   </p>
                 </header>
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-normal text-(--ink)">
                   {organization.defaultLocation.latitude.toFixed(5)},{' '}
                   {organization.defaultLocation.longitude.toFixed(5)}
                 </p>
               </aside>
             ) : (
-              <p className="text-sm text-slate-500">No default location set.</p>
+              <p className="text-sm text-(--muted)">No default location set.</p>
             )}
 
               <Button
@@ -195,8 +186,8 @@ const OrganizationSettingsPage = () => {
         <article className="space-y-6">
           <section className="space-y-4">
             <header>
-              <h4 className="text-lg font-medium text-gray-900">Search Location</h4>
-              <p className="text-sm text-gray-600">
+              <h4 className="type-card-title">Search Location</h4>
+              <p className="text-sm text-(--muted)">
                 Enter an address or place name to use as the organization's default
                 pickup point
               </p>
@@ -211,11 +202,11 @@ const OrganizationSettingsPage = () => {
           </section>
 
           {selectedLocation && (
-            <aside className="p-4 bg-gray-50 rounded-lg border">
-              <h5 className="text-sm font-medium text-gray-900 mb-2">
+            <aside className="p-4 bg-(--surface) rounded-lg border">
+              <h5 className="text-sm font-normal text-(--ink) mb-2">
                 Selected Location:
               </h5>
-              <address className="text-sm text-gray-700 not-italic">
+              <address className="text-sm text-(--ink) not-italic">
                 <strong>{selectedLocation.name}</strong>
                 <br />
                 {selectedLocation.formattedAddress}

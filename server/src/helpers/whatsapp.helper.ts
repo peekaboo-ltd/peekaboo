@@ -16,7 +16,7 @@ const {
 
 type WhatsAppInteractivePayload = Record<string, any>;
 
-const sendWhatsAppPayload = async (payload: Record<string, any>) => {
+export const sendWhatsAppPayload = async (payload: Record<string, any>) => {
   return axios.post(
     `${WHATSAPP_BUSINESS_API_URL}/${WHATSAPP_BUSINESS_API_VERSION}/${WHATSAPP_BUSINESS_PHONE_NUMBER_ID}/messages`,
     payload,
@@ -73,11 +73,17 @@ export const sendFlowMessage = async ({
   flowId,
   flowToken,
   bodyText,
+  startScreen = "SENDER_RECIPIENT",
+  data = {},
+  ctaText = "Continue",
 }: {
   phoneNumber: string;
   flowId: string;
   flowToken: string;
   bodyText: string;
+  startScreen?: string;
+  data?: Record<string, any>;
+  ctaText?: string;
 }) => {
   const message = {
     type: "flow",
@@ -90,9 +96,9 @@ export const sendFlowMessage = async ({
         flow_message_version: "3",
         flow_token: flowToken,
         flow_id: flowId,
-        flow_cta: "Place Order",
+        flow_cta: ctaText,
         flow_action: "navigate",
-        flow_action_payload: { screen: "RECIPIENT" },
+        flow_action_payload: { screen: startScreen, data },
       },
     },
   };
@@ -172,11 +178,15 @@ export const sendUtilityTemplate = async ({
   languageCode?: string;
   components?: Record<string, any>[];
 }) => {
+  const providerPhone = formatPhoneForProvider(phoneNumber);
+  if (!providerPhone) {
+    throw new ValidationError("Enter a valid Rwandan phone number");
+  }
   const payload = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     type: "template",
-    to: phoneNumber,
+    to: providerPhone,
     template: {
       name: templateName,
       language: {

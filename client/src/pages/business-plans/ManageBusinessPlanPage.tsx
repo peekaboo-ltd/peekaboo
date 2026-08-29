@@ -29,13 +29,14 @@ import {
   InternalStatCard,
 } from '@/components/layout/InternalPage';
 import { UUID } from '@/types';
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -233,7 +234,7 @@ const ManageBusinessPlanPage = () => {
   if (isFetchingPlan && !plan) {
     return (
       <main className="w-full flex items-center justify-center py-16 min-h-screen">
-        <p className="text-sm text-slate-500">Loading business plan…</p>
+        <p className="text-sm text-(--muted)">Loading business plan…</p>
       </main>
     );
   }
@@ -241,7 +242,7 @@ const ManageBusinessPlanPage = () => {
   if (!plan && !isFetchingPlan) {
     return (
       <main className="w-full flex flex-col gap-4 py-8 min-h-screen px-4">
-        <p className="text-sm text-slate-500">Business plan not found.</p>
+        <p className="text-sm text-(--muted)">Business plan not found.</p>
         <Button type="button" onClick={() => navigate(-1)}>Back</Button>
       </main>
     );
@@ -281,10 +282,10 @@ const ManageBusinessPlanPage = () => {
         variants={itemVariants}
       >
         {/* Left: Edit form */}
-        <article className="lg:col-span-2 border border-slate-200 bg-white p-6">
+        <article className="lg:col-span-2 border border-(--line) bg-(--paper) p-6">
           <header className="mb-6">
-            <p className="text-xs uppercase text-slate-500">Plan Details</p>
-            <h2 className="mt-2 text-lg font-semibold text-[#25343F]">Edit Information</h2>
+            <p className="type-meta">Plan Details</p>
+            <h2 className="type-card-title mt-2">Edit Information</h2>
           </header>
 
           <form onSubmit={onSubmit} className="flex flex-col gap-5">
@@ -369,14 +370,14 @@ const ManageBusinessPlanPage = () => {
               control={control}
               render={({ field }) => (
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-slate-700 uppercase ">
+                  <label className="text-[0.8125rem] text-(--ink)">
                     Description
                   </label>
                   <textarea
                     {...field}
                     rows={3}
                     placeholder="Brief description of this plan..."
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="rounded-lg border border-(--line) bg-(--paper) px-3 py-2 text-sm text-(--ink) resize-none focus:outline-none focus:ring-2 focus:ring-(--ink)"
                   />
                 </div>
               )}
@@ -385,13 +386,13 @@ const ManageBusinessPlanPage = () => {
             {/* Features */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="text-xs font-medium text-slate-700 uppercase ">
+                <label className="text-[0.8125rem] text-(--ink)">
                   Features
                 </label>
                 <button
                   type="button"
                   onClick={() => appendFeature({ value: '' })}
-                  className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+                  className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
                 >
                   <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
                   Add Feature
@@ -399,7 +400,7 @@ const ManageBusinessPlanPage = () => {
               </div>
               <div className="flex flex-col gap-2">
                 {featureFields.length === 0 && (
-                  <p className="text-xs text-slate-400 italic">No features added.</p>
+                  <p className="type-meta italic">No features added.</p>
                 )}
                 {featureFields.map((field, index) => (
                   <div key={field.id} className="flex items-center gap-2">
@@ -410,14 +411,14 @@ const ManageBusinessPlanPage = () => {
                         <input
                           {...inputField}
                           placeholder={`Feature ${index + 1}...`}
-                          className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          className={cn(controlClassName, 'flex-1 px-3')}
                         />
                       )}
                     />
                     <button
                       type="button"
                       onClick={() => removeFeature(index)}
-                      className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                      className="p-2 text-(--muted) hover:text-(--ink) transition-colors"
                     >
                       <FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5" />
                     </button>
@@ -436,11 +437,11 @@ const ManageBusinessPlanPage = () => {
                     type="checkbox"
                     checked={field.value}
                     onChange={(e) => field.onChange(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30"
+                    className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                   />
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-(--ink)">
                     Custom pricing
-                    <span className="ml-1 text-xs text-slate-400">
+                    <span className="type-meta ml-1">
                       (negotiated pricing — hides tier configuration)
                     </span>
                   </span>
@@ -452,7 +453,7 @@ const ManageBusinessPlanPage = () => {
             {!isCustomPricing && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-xs font-medium text-slate-700 uppercase ">
+                  <label className="text-[0.8125rem] text-(--ink)">
                     Pricing Tiers
                   </label>
                   <button
@@ -467,7 +468,7 @@ const ManageBusinessPlanPage = () => {
                         isCustom: false,
                       })
                     }
-                    className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
+                    className="text-xs text-(--ink) hover:text-(--ink) flex items-center gap-1"
                   >
                     <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
                     Add Tier
@@ -475,7 +476,7 @@ const ManageBusinessPlanPage = () => {
                 </div>
 
                 {tierFields.length === 0 && (
-                  <p className="text-xs text-slate-400 italic">
+                  <p className="type-meta italic">
                     No pricing tiers defined.
                   </p>
                 )}
@@ -484,16 +485,16 @@ const ManageBusinessPlanPage = () => {
                   {tierFields.map((field, index) => (
                     <div
                       key={field.id}
-                      className="border border-slate-200 rounded-lg p-4 bg-slate-50"
+                      className="rounded-lg p-4 bg-(--surface)"
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium text-slate-500 uppercase">
+                        <span className="type-meta">
                           Tier {index + 1}
                         </span>
                         <button
                           type="button"
                           onClick={() => removeTier(index)}
-                          className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                          className="p-1 text-(--muted) hover:text-(--ink) transition-colors"
                         >
                           <FontAwesomeIcon icon={faTrash} className="w-3.5 h-3.5" />
                         </button>
@@ -591,9 +592,9 @@ const ManageBusinessPlanPage = () => {
                               type="checkbox"
                               checked={checkboxField.value || false}
                               onChange={(e) => checkboxField.onChange(e.target.checked)}
-                              className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary/30"
+                              className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                             />
-                            <span className="text-xs text-slate-500">
+                            <span className="type-meta">
                               Custom / contact us tier
                             </span>
                           </label>
@@ -651,11 +652,11 @@ const ManageBusinessPlanPage = () => {
                     type="checkbox"
                     checked={field.value}
                     onChange={(e) => field.onChange(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30"
+                    className="size-5 rounded-(--radius-control) border border-(--ink) accent-(--ink)"
                   />
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-(--ink)">
                     Set as default plan
-                    <span className="ml-1 text-xs text-slate-400">
+                    <span className="type-meta ml-1">
                       (assigned to organizations with no plan)
                     </span>
                   </span>
@@ -673,31 +674,31 @@ const ManageBusinessPlanPage = () => {
 
         {/* Right: Organizations on this plan */}
         <aside className="flex flex-col gap-6">
-          <article className="border border-slate-200 bg-white p-6">
+          <article className="border border-(--line) bg-(--paper) p-6">
             <header className="mb-4">
-              <p className="text-xs uppercase text-slate-500">Assigned To</p>
-              <h2 className="mt-2 text-lg font-semibold text-[#25343F]">
+              <p className="type-meta">Assigned To</p>
+              <h2 className="type-card-title mt-2">
                 Organizations
-                <span className="ml-2 text-sm font-normal text-slate-500">
+                <span className="ml-2 text-sm font-normal text-(--muted)">
                   ({orgCount})
                 </span>
               </h2>
             </header>
 
             {isFetchingOrgs ? (
-              <p className="text-sm text-slate-400">Loading organizations…</p>
+              <p className="text-sm text-(--muted)">Loading organizations…</p>
             ) : orgsOnPlan.length === 0 ? (
-              <p className="text-sm text-slate-400">No organizations on this plan.</p>
+              <p className="text-sm text-(--muted)">No organizations on this plan.</p>
             ) : (
               <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
                 {orgsOnPlan.map((org) => (
                   <li
                     key={org.id}
-                    className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                    className="flex items-center justify-between rounded-lg bg-(--surface) px-3 py-2"
                   >
                     <section>
-                      <p className="text-sm font-medium text-[#25343F]">{org.name}</p>
-                      <p className="text-xs text-slate-500">{org.email || '—'}</p>
+                      <p className="text-sm font-normal text-(--ink)">{org.name}</p>
+                      <p className="type-meta">{org.email || '—'}</p>
                     </section>
                     <StatusBadge status={org.status} />
                   </li>
@@ -707,12 +708,12 @@ const ManageBusinessPlanPage = () => {
           </article>
 
           {/* Danger zone */}
-          <article className="border border-red-200 bg-red-50 p-6">
+          <article className="bg-(--surface) p-6">
             <header className="mb-4">
-              <p className="text-xs uppercase text-red-400">Danger Zone</p>
-              <h2 className="mt-2 text-lg font-semibold text-red-700">Delete Plan</h2>
+              <p className="text-[0.8125rem] text-(--ink)">Danger Zone</p>
+              <h2 className="type-card-title mt-2">Delete Plan</h2>
             </header>
-            <p className="text-xs text-red-500 mb-4">
+            <p className="text-xs text-(--ink) mb-4">
               {orgCount > 0
                 ? `This plan has ${orgCount} organization(s). Reassign them before deleting.`
                 : 'Moves this plan to deactivated plans. You can restore it there or permanently delete it.'}

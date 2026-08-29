@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import type { OrderLocation } from '@/types/order.type';
 import { calculateHaversineDistance, hasCoordinates } from '@/utils/locations.util';
+import { loadGoogleMapsLibrary } from '@/utils/googleMapsApi.util';
 
 export interface NearestPlace {
   /** Name of the closest point of interest, e.g. "Kacyiru Police Station". */
@@ -105,9 +105,6 @@ const lookupNearestPlace = async (
 export const useNearestPlace = (
   location?: OrderLocation | null
 ): NearestPlace & { isLoading: boolean } => {
-  const placesLibrary = useMapsLibrary('places');
-  const geocodingLibrary = useMapsLibrary('geocoding');
-
   const persistedName = location?.name?.trim() || null;
   const persistedAddress = location?.formattedAddress?.trim() || null;
   const isPersisted = Boolean(persistedName || persistedAddress);
@@ -125,16 +122,17 @@ export const useNearestPlace = (
       return;
     }
 
-    if (!placesLibrary || !geocodingLibrary) {
-      return;
-    }
-
     const position = { lat: Number(latitude), lng: Number(longitude) };
     const key = cacheKey(position.lat, position.lng);
 
     let cached = cache.get(key);
     if (!cached) {
-      cached = lookupNearestPlace(placesLibrary, geocodingLibrary, position);
+      cached = Promise.all([
+        loadGoogleMapsLibrary('places'),
+        loadGoogleMapsLibrary('geocoding'),
+      ]).then(([placesLibrary, geocodingLibrary]) =>
+        lookupNearestPlace(placesLibrary, geocodingLibrary, position),
+      );
       cache.set(key, cached);
     }
 
@@ -157,7 +155,7 @@ export const useNearestPlace = (
     return () => {
       active = false;
     };
-  }, [isPersisted, latitude, longitude, placesLibrary, geocodingLibrary]);
+  }, [isPersisted, latitude, longitude]);
 
   if (isPersisted) {
     return {

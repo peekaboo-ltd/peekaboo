@@ -32,12 +32,12 @@ const RejectOrderAssignment = () => {
     }, [isSuccess, closeModal, selectedOrderAssignment?.id, selectedOrderAssignment?.order?.referenceId]);
 
     return (
-        <Modal heading={`Reject Assignment for ${selectedOrderAssignment?.order?.referenceId}`} headingClassName='text-black' isOpen={rejectOrderAssignmentModal} onClose={closeModal}>
+        <Modal heading={`Reject Assignment for ${selectedOrderAssignment?.order?.referenceId}`} headingClassName='text-(--ink)' isOpen={rejectOrderAssignmentModal} onClose={closeModal}>
             <article className='w-full flex flex-col gap-4'>
-                <p className='text-[13px]'>
+                <p className='text-sm'>
                     Are you sure you want to reject this assignment?
                 </p>
-                <Button className='self-end' danger onClick={(e) => {
+                <Button danger primary className='self-end' onClick={(e) => {
                     e.preventDefault();
                     if (!selectedOrderAssignment?.id) return;
                     rejectOrderAssignment({ id: selectedOrderAssignment?.id });

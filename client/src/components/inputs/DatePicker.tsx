@@ -127,42 +127,30 @@ const DatePicker = ({
     <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild disabled={disabled}>
         <Button
-          variant={'outline'}
-          className={cn(
-            'w-full h-10 px-4 justify-start text-left font-normal text-sm text-gray-900 bg-[var(--peekaboo-surface)] backdrop-blur-sm border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 ease-in-out hover:border-gray-300 hover:bg-[var(--peekaboo-surface)]',
-            !normalizedValue && 'text-gray-400',
-          )}
+          variant="field"
+          className={cn('w-full', !normalizedValue && 'text-(--muted)')}
           onClick={() => setOpen(!open)}
         >
-          <CalendarIcon className="w-4 h-4 mr-3 text-gray-500" />
-          {normalizedValue ? (
-            selectionType === 'recurringDate' ? (
-              moment(normalizedValue).format('MMMM DD')
-            ) : !['date', 'month', 'year'].includes(String(selectionType)) ? (
-              moment(normalizedValue).format('MMMM Do, YYYY')
-            ) : (
-              moment(normalizedValue).format('MMMM DD')
-            )
-          ) : (
-            <span className="text-sm text-gray-400 font-light">
-              {placeholder}
-            </span>
-          )}
+          <CalendarIcon className="size-4 shrink-0 text-(--muted)" />
+          <span className="truncate">
+            {normalizedValue
+              ? moment(normalizedValue).format('DD/MM/YYYY')
+              : placeholder}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-full p-0 bg-[var(--peekaboo-surface)] backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg"
+        className="w-auto p-0"
         align="start"
       >
-        <menu className="flex flex-col w-full gap-3 p-4">
+        <menu className="flex w-full flex-col gap-3 p-3">
           <ul
-            className={`w-full grid gap-3 p-0 ${
+            className={`grid w-full gap-2 p-0 ${
               selectionType === 'recurringDate' ? 'grid-cols-1' : 'grid-cols-2'
             }`}
           >
             {selectionType !== 'recurringDate' && (
               <Select
-                className="!h-10"
                 placeholder="Year"
                 onChange={(e) => {
                   setYear(e);
@@ -235,7 +223,6 @@ const DatePicker = ({
               />
             )}
             <Select
-              className="!h-10"
               placeholder="Month"
               onChange={(e) => {
                 setDefaultMonth(moment(`${year}-${e}`, 'YYYY-MM-DD').toDate());
@@ -282,7 +269,7 @@ const DatePicker = ({
               hidden: 'day_hidden',
             }}
             initialFocus
-            className="bg-transparent"
+            className="p-0"
           />
         </menu>
       </PopoverContent>

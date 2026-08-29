@@ -83,7 +83,7 @@ export const useAdminPaymentsColumns = () => {
           <div className="flex flex-col">
             <span className="text-sm">{row.original.customerName || '-'}</span>
             {row.original.customerEmail && (
-              <span className="text-xs text-muted-foreground">
+              <span className="type-meta">
                 {row.original.customerEmail}
               </span>
             )}

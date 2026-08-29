@@ -20,6 +20,9 @@ import LocationDisplay from "@/containers/locations/LocationDisplay";
 import { UUID } from "@/types";
 import Select from "@/components/inputs/Select";
 import Button from "@/components/inputs/Button";
+import DatePicker from "@/components/inputs/DatePicker";
+import { controlClassName } from '@/components/inputs/control';
+import { cn } from '@/lib/utils';
 
 type CoordinateRecord = {
   id: string;
@@ -56,6 +59,13 @@ const getCoordinates = (item: CoordinateRecord) => {
 const toInputDateTime = (isoString: string) =>
   moment(isoString).format("YYYY-MM-DDTHH:mm");
 
+const toInputTime = (value: string) => moment(value).format("HH:mm");
+
+const mergeDateAndTime = (date: Date, time: string) =>
+  moment(`${moment(date).format("YYYY-MM-DD")} ${time}`, "YYYY-MM-DD HH:mm").format(
+    "YYYY-MM-DDTHH:mm",
+  );
+
 const toUtcIsoString = (value: string) => {
   if (!value) return undefined;
   return moment(value).utc().toISOString();
@@ -85,10 +95,14 @@ const TrajectoryPolyline = ({
   useEffect(() => {
     if (!map || path.length < 2) return;
 
+    const ink = getComputedStyle(document.documentElement)
+      .getPropertyValue("--ink")
+      .trim();
+
     polylineRef.current = new google.maps.Polyline({
       path,
       map,
-      strokeColor: "#4F46E5",
+      strokeColor: ink,
       strokeWeight: 3,
       strokeOpacity: 0.8,
       geodesic: true,
@@ -338,14 +352,14 @@ const UserLocationHistoryPage = () => {
     <main className="w-full flex flex-col gap-6">
       <header className="flex items-center justify-between gap-3 flex-wrap">
         <article>
-          <h1 className="text-2xl font-bold text-black">
+          <h1 className="type-page-title">
             User location history
           </h1>
           <p className="text-sm text-muted-foreground">
             Paginated timeline of the user&apos;s latest tracked locations.
           </p>
         </article>
-        <Link className="text-sm underline text-primary" to="/users/tracking">
+        <Link className="text-sm underline text-(--ink)" to="/users/tracking">
           Back to users tracking
         </Link>
       </header>
@@ -353,7 +367,7 @@ const UserLocationHistoryPage = () => {
       <section className="border rounded-md p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-semibold uppercase text-slate-600"
+            className="type-meta"
             htmlFor="assigned-order"
           >
             Assigned orders (last 7 days)
@@ -371,7 +385,7 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-semibold uppercase text-slate-600"
+            className="type-meta"
             htmlFor="order-search"
           >
             Search order (reference id or tracking id)
@@ -379,14 +393,14 @@ const UserLocationHistoryPage = () => {
           <div className="flex gap-2">
             <input
               id="order-search"
-              className="border rounded px-3 py-2 text-sm w-full"
+              className={cn(controlClassName, 'px-3')}
               placeholder="Type reference id or tracking id"
               value={orderSearchTerm}
               onChange={(event) => setOrderSearchTerm(event.target.value)}
             />
             <Button
               type="button"
-              className="px-3 py-2 rounded bg-primary text-white text-sm"
+              className="px-3 py-2 rounded bg-(--ink) text-(--paper) text-sm"
               onClick={onSearchOrders}
               disabled={isSearchingOrders}
             >
@@ -408,41 +422,82 @@ const UserLocationHistoryPage = () => {
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-semibold uppercase text-slate-600"
+            className="type-meta"
             htmlFor="start-time"
           >
             Start time (local)
           </label>
-          <input
-            id="start-time"
-            type="datetime-local"
-            className="border rounded px-3 py-2 text-sm"
-            value={dateRange.startTime}
-            onChange={(event) =>
-              setDateRange((prev) => ({
-                ...prev,
-                startTime: event.target.value,
-              }))
-            }
-          />
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+            <DatePicker
+              value={moment(dateRange.startTime).toDate()}
+              onChange={(event) => {
+                const nextDate = event as unknown as Date | undefined;
+                if (!nextDate) return;
+
+                setDateRange((prev) => ({
+                  ...prev,
+                  startTime: mergeDateAndTime(nextDate, toInputTime(prev.startTime)),
+                }));
+              }}
+              placeholder="Start date"
+              toDate={moment(dateRange.endTime).toDate()}
+            />
+            <input
+              id="start-time"
+              type="time"
+              className={cn(controlClassName, 'w-full px-3 sm:w-[140px]')}
+              value={toInputTime(dateRange.startTime)}
+              onChange={(event) =>
+                setDateRange((prev) => ({
+                  ...prev,
+                  startTime: mergeDateAndTime(
+                    moment(prev.startTime).toDate(),
+                    event.target.value,
+                  ),
+                }))
+              }
+            />
+          </div>
         </article>
 
         <article className="flex flex-col gap-2">
           <label
-            className="text-xs font-semibold uppercase text-slate-600"
+            className="type-meta"
             htmlFor="end-time"
           >
             End time (local)
           </label>
-          <input
-            id="end-time"
-            type="datetime-local"
-            className="border rounded px-3 py-2 text-sm"
-            value={dateRange.endTime}
-            onChange={(event) =>
-              setDateRange((prev) => ({ ...prev, endTime: event.target.value }))
-            }
-          />
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+            <DatePicker
+              value={moment(dateRange.endTime).toDate()}
+              onChange={(event) => {
+                const nextDate = event as unknown as Date | undefined;
+                if (!nextDate) return;
+
+                setDateRange((prev) => ({
+                  ...prev,
+                  endTime: mergeDateAndTime(nextDate, toInputTime(prev.endTime)),
+                }));
+              }}
+              placeholder="End date"
+              fromDate={moment(dateRange.startTime).toDate()}
+            />
+            <input
+              id="end-time"
+              type="time"
+              className={cn(controlClassName, 'w-full px-3 sm:w-[140px]')}
+              value={toInputTime(dateRange.endTime)}
+              onChange={(event) =>
+                setDateRange((prev) => ({
+                  ...prev,
+                  endTime: mergeDateAndTime(
+                    moment(prev.endTime).toDate(),
+                    event.target.value,
+                  ),
+                }))
+              }
+            />
+          </div>
         </article>
 
         <article className="lg:col-span-2 flex justify-end">
@@ -464,9 +519,9 @@ const UserLocationHistoryPage = () => {
             {first && (
               <AdvancedMarker position={first.coordinates} title="Start">
                 <Pin
-                  background="#22c55e"
-                  borderColor="#16a34a"
-                  glyphColor="#ffffff"
+                  background="var(--ink)"
+                  borderColor="var(--ink)"
+                  glyphColor="var(--paper)"
                 />
               </AdvancedMarker>
             )}
@@ -474,9 +529,9 @@ const UserLocationHistoryPage = () => {
             {last && last.entry.id !== first?.entry.id && (
               <AdvancedMarker position={last.coordinates} title="Latest">
                 <Pin
-                  background="#ef4444"
-                  borderColor="#dc2626"
-                  glyphColor="#ffffff"
+                  background="var(--chart-3)"
+                  borderColor="var(--ink)"
+                  glyphColor="var(--paper)"
                 />
               </AdvancedMarker>
             )}

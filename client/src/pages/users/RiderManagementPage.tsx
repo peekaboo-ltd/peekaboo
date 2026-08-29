@@ -455,19 +455,19 @@ const RiderManagementPage = () => {
         cell: ({ row }) => {
           let status = {
             icon: faCircleCheck,
-            iconColor: 'text-green-700',
+            iconColor: 'text-(--ink)',
             text: 'Check In',
           }
           if (row.original.status === UserStatus.INACTIVE) {
             status = {
               icon: faCircleXmark,
-              iconColor: 'text-red-700',
+              iconColor: 'text-(--ink)',
               text: 'Check Out',
             }
           }
           return (
-            <p className={`flex items-center gap-2 text-[11px] ${status.iconColor}`}>
-              <FontAwesomeIcon className='text-[11px]' icon={status.icon} />
+            <p className={`flex items-center gap-2 text-xs ${status.iconColor}`}>
+              <FontAwesomeIcon className='text-xs' icon={status.icon} />
               {status?.text}
             </p>
           );
@@ -576,7 +576,7 @@ const RiderManagementPage = () => {
         accessorKey: "leftValue",
         cell: ({ row }) => {
           return (
-            <p className={`text-[11px] ${row.original.winner === 'left' ? 'font-semibold text-green-700' : 'text-red-700'}`}>
+            <p className={`text-xs ${row.original.winner === 'left' ? 'font-normal text-(--ink)' : 'text-(--ink)'}`}>
               {formatComparisonValue(row.original.label, row.original.leftValue)}
             </p>
           );
@@ -587,7 +587,7 @@ const RiderManagementPage = () => {
         accessorKey: "rightValue",
         cell: ({ row }) => {
           return (
-            <p className={`text-[11px] ${row.original.winner === 'right' ? 'font-semibold text-green-700' : ''}`}>
+            <p className={`text-xs ${row.original.winner === 'right' ? 'font-normal text-(--ink)' : ''}`}>
               {formatComparisonValue(row.original.label, row.original.rightValue)}
             </p>
           );
@@ -608,34 +608,34 @@ const RiderManagementPage = () => {
   return (
     <main className="w-full flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-black">Rider Management</h1>
+        <h1 className="type-page-title">Rider Management</h1>
         <p className="text-sm text-muted-foreground">
           Admin dashboard for rider performance, ranking, and reliability tracking.
         </p>
       </header>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <article className="bg-white border border-slate-200 rounded-xl p-4">
-          <p className="text-xs uppercase text-slate-500">Riders (filtered)</p>
-          <p className="text-lg font-semibold text-slate-900 mt-1">
+        <article className="bg-(--paper) border border-(--line) rounded-xl p-4">
+          <p className="type-meta">Riders (filtered)</p>
+          <p className="type-metric mt-1">
             {formatNumbers(totalCount) || '0'}
           </p>
         </article>
-        <article className="bg-white border border-slate-200 rounded-xl p-4">
-          <p className="text-xs uppercase text-slate-500">Deliveries (page)</p>
-          <p className="text-lg font-semibold text-slate-900 mt-1">
+        <article className="bg-(--paper) border border-(--line) rounded-xl p-4">
+          <p className="type-meta">Deliveries (page)</p>
+          <p className="type-metric mt-1">
             {formatNumbers(visibleTotals.deliveries) || '0'}
           </p>
         </article>
-        <article className="bg-white border border-slate-200 rounded-xl p-4">
-          <p className="text-xs uppercase text-slate-500">Earnings (page)</p>
-          <p className="text-lg font-semibold text-slate-900 mt-1">
+        <article className="bg-(--paper) border border-(--line) rounded-xl p-4">
+          <p className="type-meta">Earnings (page)</p>
+          <p className="type-metric mt-1">
             {formatCurrency(visibleTotals.earnings, 'RWF') || 'RWF 0'}
           </p>
         </article>
       </section>
 
-      <section className="bg-white border border-slate-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-8 gap-3">
+      <section className="bg-(--paper) border border-(--line) rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-7 gap-3">
         <Input
           label="Search rider"
           placeholder="Name, email, phone..."
@@ -750,10 +750,10 @@ const RiderManagementPage = () => {
         )}
       </Modal>
 
-      <section className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-4">
+      <section className="bg-(--paper) border border-(--line) rounded-xl p-4 flex flex-col gap-4">
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-slate-900">Daily Attendance</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="type-card-title">Daily Attendance</h2>
+          <p className="type-meta">
             View all raw proof events for riders by date and name.
           </p>
         </header>
@@ -786,13 +786,13 @@ const RiderManagementPage = () => {
             isLoading={isAttendanceFetching}
             noDataMessage={isAttendanceFetching ? "Loading attendance data..." : "No attendance data found for the selected filters."}
           />
-          </div>
+        </div>
       </section>
 
-      <section className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-4">
+      <section className="bg-(--paper) border border-(--line) rounded-xl p-4 flex flex-col gap-4">
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-slate-900">Problem Reports</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="type-card-title">Problem Reports</h2>
+          <p className="type-meta">
             View rider-submitted problem evidence separately from attendance logs.
           </p>
         </header>
@@ -836,19 +836,19 @@ const RiderManagementPage = () => {
       >
         {attendanceProofRider && (
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-(--muted)">
               {attendanceProofRider.status === UserStatus.ACTIVE ? 'Check-in' : 'Check-out'} at{' '}
               {formatAttendanceDateTime(attendanceProofRider.timestamp)}
             </p>
             {attendanceProofRider.locationLabel && (
-              <p className="text-xs text-slate-500">
+              <p className="type-meta">
                 Location: {attendanceProofRider.locationLabel}
               </p>
             )}
             <img
               src={attendanceProofRider.imageUrl}
               alt={`${attendanceProofRider.riderName || 'Rider'} attendance proof`}
-              className="w-full max-h-96 object-contain rounded-lg border border-slate-200 bg-slate-50"
+              className="w-full max-h-96 object-contain rounded-lg bg-(--surface)"
             />
           </div>
         )}
@@ -865,7 +865,7 @@ const RiderManagementPage = () => {
       >
         {selectedProblemReport && (
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1 text-xs text-slate-600">
+            <div className="flex flex-col gap-1 text-xs text-(--muted)">
               <p>
                 <strong>Type:</strong> {selectedProblemReport.mediaType === 'video' ? 'Video' : 'Photo'}
               </p>
@@ -882,14 +882,14 @@ const RiderManagementPage = () => {
 
             {selectedProblemIsVideo ? (
               problemVideoPreviewError ? (
-                <div className="w-full rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                  <p className="font-medium">Unable to load video preview.</p>
+                <div className="w-full rounded-lg bg-(--surface) p-4 text-sm text-(--ink)">
+                  <p className="font-normal">Unable to load video preview.</p>
                   {selectedProblemMediaUrl && (
                     <a
                       href={selectedProblemMediaUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-2 inline-flex text-sm font-medium text-amber-900 underline"
+                      className="mt-2 inline-flex text-sm font-normal text-(--ink) underline"
                     >
                       Open video in a new tab
                     </a>
@@ -900,7 +900,7 @@ const RiderManagementPage = () => {
                   key={selectedProblemReport?.id}
                   controls
                   preload="metadata"
-                  className="w-full max-h-72 rounded-lg border border-slate-200 bg-black"
+                  className="w-full max-h-72 rounded-lg border border-(--line) bg-(--ink)"
                   onError={() => setProblemVideoPreviewError(true)}
                   onLoadedData={() => setProblemVideoPreviewError(false)}
                 >
@@ -913,21 +913,21 @@ const RiderManagementPage = () => {
               <img
                 src={selectedProblemMediaUrl}
                 alt={`${selectedProblemReport.riderName || 'Rider'} problem report proof`}
-                className="w-full max-h-72 object-contain rounded-lg border border-slate-200 bg-white"
+                className="w-full max-h-72 object-contain rounded-lg border border-(--line) bg-(--paper)"
               />
             )}
           </div>
         )}
       </Modal>
 
-      <section className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-4">
+      <section className="bg-(--paper) border border-(--line) rounded-xl p-4 flex flex-col gap-4">
         <header>
-          <h2 className="text-lg font-semibold text-slate-900">Compare Two Riders</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="type-card-title">Compare Two Riders</h2>
+          <p className="type-meta">
             Green means winner on that metric, red means lower performance for that metric.
           </p>
-          <p className="text-xs text-slate-500 mt-1">
-            Comparison data period: <span className="font-medium text-slate-700">{comparisonDateFilterLabel}</span>
+          <p className="type-meta mt-1">
+            Comparison data period: <span className="font-normal text-(--ink)">{comparisonDateFilterLabel}</span>
           </p>
         </header>
 
@@ -965,7 +965,7 @@ const RiderManagementPage = () => {
           />
           <button
             type="button"
-            className="h-10 border border-slate-200 rounded-lg px-3 text-sm text-slate-700 hover:bg-slate-50"
+            className="h-10 rounded-lg px-3 text-sm text-(--ink) hover:bg-(--surface)"
             onClick={() => {
               setStartDate('');
               setEndDate('');
@@ -994,45 +994,45 @@ const RiderManagementPage = () => {
         {leftRider && rightRider && (
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <article className="border border-slate-200 rounded-lg p-3">
-                <p className="text-xs text-slate-500 uppercase ">
+              <article className="border border-(--line) rounded-lg p-3">
+                <p className="type-meta">
                   {leftRider.riderName || 'Rider A'} Wins
                 </p>
-                <p className="text-xl font-semibold text-slate-900">
+                <p className="type-metric">
                   {comparisonSummary?.leftWins ?? 0}
                 </p>
               </article>
-              <article className="border border-slate-200 rounded-lg p-3">
-                <p className="text-xs text-slate-500 uppercase ">Result</p>
-                <p className="text-sm font-semibold mt-1">
+              <article className="border border-(--line) rounded-lg p-3">
+                <p className="type-meta">Result</p>
+                <p className="text-sm font-normal mt-1">
                   {comparisonSummary?.leader === 'tie' && (
-                    <span className="text-slate-700">Balanced comparison</span>
+                    <span className="text-(--ink)">Balanced comparison</span>
                   )}
                   {comparisonSummary?.leader === 'left' && (
-                    <span className={comparisonSummary.isFarAhead ? 'text-green-700' : 'text-emerald-700'}>
+                    <span className={comparisonSummary.isFarAhead ? 'text-(--ink)' : 'text-(--ink)'}>
                       {leftRider.riderName || 'Rider A'} is{' '}
                       {comparisonSummary.isFarAhead ? 'far ahead' : 'ahead'}
                     </span>
                   )}
                   {comparisonSummary?.leader === 'right' && (
-                    <span className={comparisonSummary.isFarAhead ? 'text-green-700' : 'text-emerald-700'}>
+                    <span className={comparisonSummary.isFarAhead ? 'text-(--ink)' : 'text-(--ink)'}>
                       {rightRider.riderName || 'Rider B'} is{' '}
                       {comparisonSummary.isFarAhead ? 'far ahead' : 'ahead'}
                     </span>
                   )}
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="type-meta mt-1">
                   Gap: {comparisonSummary?.gap ?? 0} metric{comparisonSummary?.gap === 1 ? '' : 's'}
                 </p>
               </article>
-              <article className="border border-slate-200 rounded-lg p-3">
-                <p className="text-xs text-slate-500 uppercase ">
+              <article className="border border-(--line) rounded-lg p-3">
+                <p className="type-meta">
                   {rightRider.riderName || 'Rider B'} Wins
                 </p>
-                <p className="text-xl font-semibold text-slate-900">
+                <p className="type-metric">
                   {comparisonSummary?.rightWins ?? 0}
                 </p>
-                <p className="text-xs text-slate-500 mt-1">Ties: {comparisonSummary?.ties ?? 0}</p>
+                <p className="type-meta mt-1">Ties: {comparisonSummary?.ties ?? 0}</p>
               </article>
             </div>
 
@@ -1043,7 +1043,7 @@ const RiderManagementPage = () => {
                 rightValue: row.rightValue,
                 higherIsBetter: row.higherIsBetter,
                 winner: row.winner,
-              })) : []}  />
+              })) : []} />
             </div>
           </div>
         )}

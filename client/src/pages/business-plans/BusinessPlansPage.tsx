@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { motion, Variants } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTag,
@@ -9,6 +8,7 @@ import {
   faBoxArchive,
 } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/components/table/Table';
+import Modal from '@/components/Modal';
 import Button from '@/components/inputs/Button';
 import { toast } from 'sonner';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
@@ -26,15 +26,6 @@ import {
   usePermanentlyDeleteBusinessPlanMutation,
   useRestoreBusinessPlanMutation,
 } from '@/api/mutations/businessPlan.mutations';
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-  },
-};
 
 const BusinessPlansPage = () => {
   useDocumentTitle('Business Plans');
@@ -89,13 +80,26 @@ const BusinessPlansPage = () => {
     }
   };
 
+  // The most destructive action in the admin surface asked for confirmation
+  // through a native browser dialog, which stepped outside the app entirely
+  // and named no consequence beyond "cannot be undone".
+  const [planPendingDeletion, setPlanPendingDeletion] = useState<
+    { id: string; name: string } | undefined
+  >(undefined);
+
   const handlePermanentlyDeletePlan = async (id: string, name: string) => {
-    if (!window.confirm(`Permanently delete "${name}"? This cannot be undone.`)) return;
+    setPlanPendingDeletion({ id, name });
+  };
+
+  const confirmPermanentDeletion = async () => {
+    if (!planPendingDeletion) return;
+    const { id, name } = planPendingDeletion;
 
     try {
       setActionPlanId(id);
       await permanentlyDeleteBusinessPlan(id).unwrap();
       toast.success(`Plan "${name}" permanently deleted.`);
+      setPlanPendingDeletion(undefined);
       fetchBusinessPlans({ page: 0, size: 500 });
     } catch (error) {
       const message =
@@ -117,7 +121,7 @@ const BusinessPlansPage = () => {
 
   return (
     <InternalPage>
-      <motion.section variants={itemVariants}>
+      <section>
         <InternalPageHeader
           eyebrow="Admin"
           title="Business Plans"
@@ -133,12 +137,9 @@ const BusinessPlansPage = () => {
             </Button>
           }
         />
-      </motion.section>
+      </section>
 
-      <motion.section
-        className="grid grid-cols-1 gap-4 md:grid-cols-3"
-        variants={itemVariants}
-      >
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <InternalStatCard
           label="Total Plans"
           value={stats.total.toString()}
@@ -150,14 +151,19 @@ const BusinessPlansPage = () => {
           icon={<FontAwesomeIcon icon={faCircleCheck} />}
         />
         <InternalStatCard
+          label="Deactivated"
+          value={stats.deactivated.toString()}
+          icon={<FontAwesomeIcon icon={faBoxArchive} />}
+        />
+        <InternalStatCard
           label="Default Plan"
           value={stats.defaultPlan?.name ?? '—'}
           icon={<FontAwesomeIcon icon={faTag} />}
         />
-      </motion.section>
+      </section>
 
-      <motion.section variants={itemVariants}>
-        <h3 className="mb-3 text-sm font-semibold text-slate-700 uppercase ">
+      <section>
+        <h3 className="type-label mb-3">
           Active Plans
         </h3>
         <Table
@@ -166,18 +172,10 @@ const BusinessPlansPage = () => {
           showPagination={false}
           isLoading={isFetching}
         />
-      </motion.section>
+      </section>
 
-      <motion.section variants={itemVariants}>
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-700 uppercase ">
-            Deactivated Plans
-          </h3>
-          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-            <FontAwesomeIcon icon={faBoxArchive} />
-            {stats.deactivated}
-          </span>
-        </div>
+      <section>
+        <h3 className="type-label mb-3">Deactivated Plans</h3>
         <Table
           columns={deactivatedPlansColumns}
           data={deactivatedPlans}
@@ -185,7 +183,39 @@ const BusinessPlansPage = () => {
           isLoading={isFetching}
           noDataMessage="No deactivated plans."
         />
-      </motion.section>
+      </section>
+
+      <Modal
+        isOpen={Boolean(planPendingDeletion)}
+        onClose={() => setPlanPendingDeletion(undefined)}
+        heading={`Permanently delete ${planPendingDeletion?.name}?`}
+        headingClassName="text-(--danger)"
+      >
+        <article className="flex w-full flex-col gap-5">
+          <p className="type-body-sm">
+            This removes the plan and its pricing bands for good. Organizations
+            already on it will need to be moved to another plan. Deactivating
+            instead keeps the plan recoverable.
+          </p>
+          <div className="flex flex-wrap justify-end gap-3">
+            <Button
+              type="button"
+              onClick={() => setPlanPendingDeletion(undefined)}
+              disabled={isPermanentlyDeleting}
+            >
+              Keep plan
+            </Button>
+            <Button
+              type="button"
+              danger
+              onClick={confirmPermanentDeletion}
+              isLoading={isPermanentlyDeleting}
+            >
+              Delete permanently
+            </Button>
+          </div>
+        </article>
+      </Modal>
     </InternalPage>
   );
 };

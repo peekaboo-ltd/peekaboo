@@ -1,4 +1,5 @@
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { Controller, useForm } from 'react-hook-form';
 import Input from '@/components/inputs/Input';
 import TelInput from '@/components/inputs/TelInput';
@@ -15,8 +16,12 @@ import { ENVIRONMENTS } from '@/constants/environments.constants';
 import {
   AuthCard,
   AuthDivider,
+  AuthFooterNote,
+  AuthLink,
   AuthPageShell,
-  GoogleIcon,
+  AuthSocialButton,
+  authInputClassName,
+  authPrimaryButtonClassName,
 } from './AuthPageShell';
 
 interface RegisterFormData {
@@ -26,6 +31,30 @@ interface RegisterFormData {
   name?: string;
   email?: string;
 }
+
+/**
+ * Fields that belong together sit on one row. Pairing name with email and the
+ * password with its confirmation groups them by what they ask for, without
+ * needing headings to say so — and it halves the form's height, so the whole
+ * signup fits without scrolling. Stacks below `sm`, so a narrow screen never
+ * scrolls sideways.
+ */
+const FieldRow = ({ children }: { children: ReactNode }) => (
+  <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+    {children}
+  </div>
+);
+
+/**
+ * A field nobody has to fill says so. Four asterisked fields followed by two
+ * unmarked ones left the reader inferring which were which from an absence.
+ */
+const OptionalLabel = ({ children }: { children: ReactNode }) => (
+  <>
+    {children}
+    <span className="type-meta font-normal">Optional</span>
+  </>
+);
 
 export const RegisterPage = () => {
   const location = useLocation();
@@ -44,27 +73,16 @@ export const RegisterPage = () => {
   const password = watch('password');
 
   const onRegisterSubmit = handleSubmit((data) => {
+    // The field rules already block submission on a bad password or a
+    // mismatch, so this handler only does the one thing they cannot: convert
+    // the typed number into the E.164 form the API stores. It used to re-run
+    // the length and match checks too, in branches that could never be
+    // reached.
     const phoneValidation = validateAndFormatPhoneNumber(data.phoneNumber);
-    if (!phoneValidation.isValid) {
+    if (!phoneValidation.e164) {
       setRegisterError('phoneNumber', {
         type: 'validate',
         message: phoneValidation.error,
-      });
-      return;
-    }
-
-    if (data.password !== data.confirmPassword) {
-      setRegisterError('confirmPassword', {
-        type: 'manual',
-        message: 'Passwords do not match',
-      });
-      return;
-    }
-
-    if (data.password.length < 8) {
-      setRegisterError('password', {
-        type: 'manual',
-        message: 'Password must be at least 8 characters',
       });
       return;
     }
@@ -92,99 +110,44 @@ export const RegisterPage = () => {
   }
 
   return (
-    <AuthPageShell>
+    <AuthPageShell maxWidthClassName="max-w-[560px]">
       <AuthCard title="Create account" subtitle="Start sending deliveries">
-        <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-normal text-card-foreground transition-colors hover:bg-accent"
-        >
-          <GoogleIcon />
-          Sign up with Google
-        </button>
+        <AuthSocialButton onClick={handleGoogleSignIn}>Sign up with Google</AuthSocialButton>
 
         <AuthDivider />
 
         <form className="flex flex-col gap-4" onSubmit={onRegisterSubmit}>
-          <div>
-            <Controller
-              name="phoneNumber"
-              control={control}
-              rules={{
-                required: 'Phone number is required',
-                validate: (value) => validateRwandanPhoneNumber(value),
-              }}
-              render={({ field }) => (
-                <TelInput
-                  {...field}
-                  label="Phone number"
-                  placeholder="7XXXXXXXX"
-                  required
-                  className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
-                  errorMessage={errors?.phoneNumber?.message}
-                />
-              )}
-            />
-          </div>
-
           <Controller
-            name="password"
+            name="phoneNumber"
             control={control}
             rules={{
-              required: 'Password is required',
-              minLength: {
-                value: 8,
-                message: 'Password must be at least 8 characters',
-              },
+              required: 'Phone number is required',
+              validate: (value) => validateRwandanPhoneNumber(value),
             }}
             render={({ field }) => (
-              <Input
+              <TelInput
                 {...field}
-                label="Password"
-                type="password"
-                placeholder="Min. 8 characters"
-                autoComplete="new-password"
+                label="Phone number"
+                placeholder="7XXXXXXXX"
                 required
-                showPasswordToggle
-                className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
-                errorMessage={errors?.password?.message}
+                description="You'll use this to log in."
+                className={authInputClassName}
+                errorMessage={errors?.phoneNumber?.message}
               />
             )}
           />
 
-          <Controller
-            name="confirmPassword"
-            control={control}
-            rules={{
-              required: 'Please confirm your password',
-              validate: (value) =>
-                value === password || 'Passwords do not match',
-            }}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Confirm password"
-                type="password"
-                placeholder="Confirm your password"
-                autoComplete="new-password"
-                required
-                showPasswordToggle
-                className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
-                errorMessage={errors?.confirmPassword?.message}
-              />
-            )}
-          />
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FieldRow>
             <Controller
               name="name"
               control={control}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Name"
+                  label={<OptionalLabel>Full name</OptionalLabel>}
                   placeholder="Your name"
-                  className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
+                  autoComplete="name"
+                  className={authInputClassName}
                   errorMessage={errors?.name?.message}
                 />
               )}
@@ -193,39 +156,91 @@ export const RegisterPage = () => {
             <Controller
               name="email"
               control={control}
+              rules={{
+                // Optional, but a malformed address reached the API unchecked:
+                // the field had no rule at all behind the browser's own.
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: 'Enter a valid email address',
+                },
+              }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Email"
+                  label={<OptionalLabel>Email</OptionalLabel>}
                   type="email"
                   placeholder="you@company.com"
                   autoComplete="email"
-                  className="h-10 !border-border text-sm font-normal text-foreground placeholder:text-muted-foreground focus:!border-primary"
+                  className={authInputClassName}
                   errorMessage={errors?.email?.message}
                 />
               )}
             />
-          </div>
+          </FieldRow>
+
+          <FieldRow>
+            <Controller
+              name="password"
+              control={control}
+              rules={{
+                required: 'Password is required',
+                minLength: {
+                  value: 8,
+                  message: 'Password must be at least 8 characters',
+                },
+              }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Password"
+                  type="password"
+                  placeholder="At least 8 characters"
+                  autoComplete="new-password"
+                  required
+                  showPasswordToggle
+                  className={authInputClassName}
+                  errorMessage={errors?.password?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="confirmPassword"
+              control={control}
+              rules={{
+                required: 'Please confirm your password',
+                validate: (value) =>
+                  value === password || 'Passwords do not match',
+              }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Confirm password"
+                  type="password"
+                  placeholder="Repeat password"
+                  autoComplete="new-password"
+                  required
+                  showPasswordToggle
+                  className={authInputClassName}
+                  errorMessage={errors?.confirmPassword?.message}
+                />
+              )}
+            />
+          </FieldRow>
 
           <Button
             type="submit"
             primary
+            className={authPrimaryButtonClassName}
             isLoading={isLoading}
-            className="mt-2 w-full !rounded-md !bg-primary !font-normal hover:!bg-primary-800"
           >
             Sign up
           </Button>
         </form>
 
-        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
-          <span>Already have an account? </span>
-          <Link
-            to="/auth/login"
-            className="font-normal text-primary hover:text-secondary-600 underline underline-offset-2"
-          >
-            Log in
-          </Link>
-        </div>
+        <AuthFooterNote>
+          Already have an account? <AuthLink to="/auth/login">Log in</AuthLink>
+        </AuthFooterNote>
       </AuthCard>
     </AuthPageShell>
   );

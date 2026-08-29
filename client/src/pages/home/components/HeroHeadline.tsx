@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import type { CustomerTab } from '../home.types';
 
 interface HeroHeadlineProps {
@@ -15,42 +15,49 @@ const HeroHeadline = ({
   activeTab,
   personalTitle1,
   personalTitle2,
-  personalSubtitle,
   businessTitle1,
   businessTitle2,
   businessSubtitle,
-}: HeroHeadlineProps) => (
-  <AnimatePresence mode="wait">
-    <motion.hgroup
-      key={activeTab}
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -14 }}
-      transition={{ duration: 0.22, ease: 'easeOut' }}
-      className="space-y-4"
-    >
-      <p className="inline-flex w-fit items-center gap-2 text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-        <span
-          className="h-1.5 w-1.5 rounded-full bg-[var(--peekaboo-yellow-dark)]"
-          aria-hidden="true"
-        />
-        {activeTab === 'personal'
-          ? 'Same-day delivery in Kigali'
-          : 'Delivery built for Kigali teams'}
-      </p>
-      <h1 className="max-w-[620px] text-[30px] font-medium leading-[1.08] tracking-[-0.01em] text-foreground sm:text-[40px] lg:text-[48px]">
-        {activeTab === 'personal' ? personalTitle1 : businessTitle1}
+}: HeroHeadlineProps) => {
+  const isPersonal = activeTab === 'personal';
+
+  return (
+    <hgroup className="space-y-3">
+      <h1 className="type-display max-w-[14ch] text-(--ink)">
+        {isPersonal
+          ? (
+              <>
+                {personalTitle1.split('*').map((part, i, arr) =>
+                  i < arr.length - 1 ? (
+                    <span key={i}>
+                      {part}
+                      <sup className="text-2xl align-[0.1em]">
+                        <Link
+                          to="/legal/terms-and-conditions"
+                          className="transition-all duration-200 hover:scale-150 inline-block hover:text-(--ink)"
+                          style={{ display: 'inline-block' }}
+                        >
+                          *
+                        </Link>
+                   
+                      </sup>
+                    </span>
+                  ) : (
+                    part
+                  )
+                )}
+              </>
+            )
+          : businessTitle1}
         <br />
-        <span className="text-[var(--peekaboo-yellow-dark)] text-[30px] font-medium leading-[1.08] tracking-[-0.01em]">
-          {activeTab === 'personal' ? personalTitle2 : businessTitle2}
-        </span>{' '}
-        in Kigali.
+        {isPersonal ? personalTitle2 : businessTitle2} in Kigali.
       </h1>
-      <p className="max-w-[500px] text-[13px] font-normal leading-[1.7] text-muted-foreground">
-        {activeTab === 'personal' ? personalSubtitle : businessSubtitle}
+      <p className="type-body max-w-[46ch] text-(--muted)">
+        {isPersonal ? <Link to="/legal/terms-and-conditions" className='underline text-sm underline-offset-2 hover:text-(--ink)'>Learn more</Link> : businessSubtitle}
       </p>
-    </motion.hgroup>
-  </AnimatePresence>
-);
+ 
+    </hgroup>
+  );
+};
 
 export default HeroHeadline;

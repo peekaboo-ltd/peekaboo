@@ -28,19 +28,19 @@ const DashboardQuickActions = ({ actions, variants }: DashboardQuickActionsProps
             <Link
               key={action.label}
               to={action.to}
-              className="group snap-start flex flex-col items-center gap-2.5 rounded-[22px] bg-[var(--peekaboo-surface)] px-5 py-4 transition-all duration-200 hover:-translate-y-[2px] hover:bg-[var(--peekaboo-surface)] min-w-[96px]"
+              className="group flex min-w-[96px] snap-start flex-col items-center gap-2.5 rounded-md border border-(--line) bg-(--paper) px-5 py-4 outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-(--ease-flat) hover:border-(--ink) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
             >
               <span
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--peekaboo-surface)] transition-transform duration-200 group-hover:scale-105"
+                className="flex h-10 w-10 items-center justify-center rounded-(--radius-control) bg-(--surface)"
                 aria-hidden="true"
               >
                 <FontAwesomeIcon
                   icon={action.icon}
-                  className="text-sm text-[#3D5564]"
+                  className="text-sm text-(--muted)"
                   aria-hidden="true"
                 />
               </span>
-              <span className="text-[11px] font-medium text-[color:rgba(37,52,63,0.72)] text-center leading-tight whitespace-nowrap">
+              <span className="text-xs font-normal text-(--muted) text-center leading-tight whitespace-nowrap">
                 {action.label}
               </span>
             </Link>

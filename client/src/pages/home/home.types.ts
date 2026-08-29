@@ -4,11 +4,14 @@ import type { OrderLocation } from '@/types/order.type';
 
 export type CustomerTab = 'personal' | 'business';
 
+export type PickupSource = 'geolocation' | 'search';
+
 export interface HomeFormValues {
   senderPhoneNumber: string;
   recipientPhoneNumber: string;
   locationFrom?: OrderLocation;
   locationTo?: OrderLocation;
+  pickupSource?: PickupSource;
 }
 
 export interface HeroCopy {
@@ -71,13 +74,4 @@ export interface Testimonial {
   role: string;
   content: string;
   type: TestimonialType;
-}
-
-export interface BusinessPlan {
-  name: string;
-  description: string;
-  price: string;
-  features: string[];
-  isPopular?: boolean;
-  detailsTo?: string;
 }

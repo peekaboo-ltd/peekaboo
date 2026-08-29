@@ -6,31 +6,49 @@ import { Loader } from './Loader.tsx';
 import { Button as ButtonUI } from '../ui/button';
 import { cn } from '@/lib/utils';
 
+type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'link'
+  | 'danger'
+  | 'approve';
+
 interface ButtonProps extends Omit<HTMLAttributes<HTMLButtonElement | HTMLAnchorElement>, 'onClick'> {
   route?: string;
   value?: ReactNode;
   onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
-  type?: 'submit' | 'button' | 'reset';
+  type?: 'submit' | 'button' | 'reset' | null;
   disabled?: boolean;
+  /** Shorthand for variant="primary". */
   primary?: boolean;
-  styled?: boolean;
   submit?: boolean;
+  /** Shorthand for variant="danger". */
   danger?: boolean;
+  /** Shorthand for variant="approve". */
+  approve?: boolean;
   icon?: IconProp;
   isLoading?: boolean;
   children?: ReactNode;
+  variant?: ButtonVariant;
+  size?: 'sm' | 'default' | 'lg';
+  /** Associates a submit button with a form by id when rendered outside it. */
+  form?: string;
 }
 
-const baseStyles =
-  'inline-flex items-center gap-2 justify-center text-center text-[12px] font-normal! h-9 min-h-9 py-2.5! px-5! rounded-md border transition-all duration-300 cursor-pointer';
-
-const variantStyles = {
-  default: 'border-primary-900 text-primary-900 bg-transparent hover:bg-primary-900 hover:text-white',
-  primary: 'bg-[#0a0a0a] text-white border-[#0a0a0a] hover:bg-[#1c1c1c] hover:shadow-[0_2px_4px_-1px_rgba(10,10,10,0.2)]',
-  danger: 'bg-red-600 text-white border-red-600 hover:bg-red-700',
-  unstyled: 'bg-transparent border-transparent text-primary-900 hover:opacity-70',
-  disabled: 'opacity-50 cursor-not-allowed pointer-events-none',
-};
+// This wrapper adds routing, loading, and a FontAwesome icon slot. Everything
+// visual comes from ui/button so there is exactly one button in the app —
+// it used to re-declare the full style string and drift from the primitive.
+const uiVariant = {
+  primary: 'default',
+  secondary: 'secondary',
+  outline: 'outline',
+  ghost: 'ghost',
+  link: 'link',
+  danger: 'destructive',
+  approve: 'approve',
+} as const;
 
 const Button: FC<ButtonProps> = ({
   route = '#',
@@ -39,72 +57,71 @@ const Button: FC<ButtonProps> = ({
   type = null,
   disabled = false,
   primary = false,
-  styled = true,
   className,
   submit = false,
   danger = false,
-  icon = undefined,
+  approve = false,
+  icon,
   isLoading = false,
   children,
+  variant,
+  size = 'default',
   ...rest
 }) => {
-  const variant = disabled
-    ? 'disabled'
-    : danger
-      ? 'danger'
-      : !styled
-        ? 'unstyled'
-        : primary
-          ? 'primary'
-          : 'default';
+  const resolved: ButtonVariant =
+    variant ??
+    (danger ? 'danger' : approve ? 'approve' : primary ? 'primary' : 'outline');
 
-  const classes = cn(baseStyles, variantStyles[variant], className);
+  const classes = cn(className);
 
-  if (submit || type === 'submit' || type === 'button' || type === 'reset') {
+  const content = isLoading ? (
+    <Loader className="text-current" />
+  ) : (
+    <>
+      {icon ? <FontAwesomeIcon icon={icon} aria-hidden="true" /> : null}
+      {children || value}
+    </>
+  );
+
+  if (submit || type) {
     return (
       <ButtonUI
         type={type || 'submit'}
+        variant={uiVariant[resolved]}
+        size={size}
         onClick={onClick as MouseEventHandler<HTMLButtonElement> | undefined}
         className={classes}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         {...rest}
       >
-        {isLoading ? (
-          <Loader className={primary ? 'text-white' : 'text-primary-900'} />
-        ) : (
-          <>
-            {icon && <FontAwesomeIcon icon={icon} />}
-            {children || value}
-          </>
-        )}
+        {content}
       </ButtonUI>
     );
   }
 
   return (
-    <Link
-      to={route}
-      onClick={(e) => {
-        if (disabled) {
-          e.preventDefault();
-          return;
-        }
-        if (onClick) {
-          onClick(e);
-        }
-      }}
+    <ButtonUI
+      asChild
+      variant={uiVariant[resolved]}
+      size={size}
       className={classes}
-      {...rest}
+      disabled={disabled || isLoading}
     >
-      {isLoading ? (
-        <Loader className={primary ? 'text-white' : 'text-primary-900'} />
-      ) : (
-        <>
-          {icon && <FontAwesomeIcon icon={icon} />}
-          {children || value}
-        </>
-      )}
-    </Link>
+      <Link
+        to={disabled ? '#' : route}
+        onClick={(event) => {
+          if (disabled || isLoading) {
+            event.preventDefault();
+            return;
+          }
+          onClick?.(event);
+        }}
+        aria-disabled={disabled || isLoading || undefined}
+        {...rest}
+      >
+        {content}
+      </Link>
+    </ButtonUI>
   );
 };
 

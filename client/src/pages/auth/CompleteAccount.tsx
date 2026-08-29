@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import Button from '@/components/inputs/Button';
 import Input from '@/components/inputs/Input';
@@ -11,6 +11,8 @@ import { useLazyCheckAccountQuery } from '@/api/queries/auth.queries';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
   AuthCard,
+  AuthFooterNote,
+  AuthLink,
   AuthPageShell,
   authInputClassName,
   authPrimaryButtonClassName,
@@ -117,7 +119,7 @@ const CompleteAccount = () => {
       <AuthPageShell>
         <AuthCard title="Checking your account" subtitle="We are preparing your setup.">
           <div className="flex justify-center py-4">
-            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+            <span className="h-8 w-8 animate-spin rounded-full border-b-2 border-(--ink)" />
           </div>
         </AuthCard>
       </AuthPageShell>
@@ -223,14 +225,9 @@ const CompleteAccount = () => {
           </form>
         )}
 
-        <div className="mt-7 pt-6 text-center text-sm font-normal text-foreground">
-          <Link
-            to="/auth/login"
-            className="font-normal text-primary hover:text-secondary-600 underline underline-offset-2"
-          >
-            Sign in with a different account
-          </Link>
-        </div>
+        <AuthFooterNote>
+          <AuthLink to="/auth/login">Sign in with a different account</AuthLink>
+        </AuthFooterNote>
       </AuthCard>
     </AuthPageShell>
   );

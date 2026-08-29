@@ -35,6 +35,9 @@ export class Conversation extends AbstractEntity {
   })
   status: ConversationStatus;
 
+  @Column({ name: "last_customer_message_at", type: "timestamptz", nullable: true })
+  lastCustomerMessageAt?: Date | null;
+
   /**
    * RELATIONS
    */
