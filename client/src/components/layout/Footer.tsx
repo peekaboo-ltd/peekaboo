@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import { faInstagram, faTiktok, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { InstagramIcon, TikTokIcon, WhatsAppIcon } from '@/components/icons/brands';
 import { useI18n } from '@/i18n/i18n';
 import LanguageSelector from '@/components/inputs/LanguageSelector';
 
@@ -19,7 +19,7 @@ interface ContactInfo {
 }
 
 interface SocialMedia {
-  icon: IconDefinition;
+  icon: ReactNode;
   url: string;
   label: string;
 }
@@ -54,9 +54,9 @@ const Footer = () => {
   );
   const socialMedia = useMemo<SocialMedia[]>(
     () => [
-      { icon: faInstagram, url: 'https://www.instagram.com/peekaboo.delivery/', label: t('footer.social.instagram') },
-      { icon: faWhatsapp, url: 'https://wa.me/250794892784?text=Hello, I have a question about Peekaboo', label: t('tracking.contact.whatsapp') },
-      { icon: faTiktok, url: 'https://www.tiktok.com/@peekaboo.delivery', label: t('footer.social.tiktok') },
+      { icon: <InstagramIcon className="size-4" />, url: 'https://www.instagram.com/peekaboo.delivery/', label: t('footer.social.instagram') },
+      { icon: <WhatsAppIcon className="size-4" />, url: 'https://wa.me/250794892784?text=Hello, I have a question about Peekaboo', label: t('tracking.contact.whatsapp') },
+      { icon: <TikTokIcon className="size-4" />, url: 'https://www.tiktok.com/@peekaboo.delivery', label: t('footer.social.tiktok') },
     ],
     [t],
   );
@@ -92,7 +92,7 @@ const Footer = () => {
                   aria-label={social.label}
                   className="flex size-10 items-center justify-center rounded-(--radius-control) border border-(--line) transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] hover:border-(--ink) active:shadow-[var(--press-on-ink)_999px_999px_0_inset]"
                 >
-                  <FontAwesomeIcon icon={social.icon} className="size-4" />
+                  {social.icon}
                 </a>
               ))}
             </nav>

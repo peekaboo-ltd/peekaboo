@@ -31,7 +31,7 @@ const ContactChannelsPanel = ({
         const Icon = contact.icon;
         const content = (
           <>
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-(--radius-control) border border-(--ink) text-(--ink)">
+            <span className="flex size-9 shrink-0 items-center justify-center text-(--ink)">
               <Icon className="size-4" aria-hidden="true" />
             </span>
             <span className="min-w-0 flex-1">

@@ -65,6 +65,31 @@
   --radius-card: 12px;
   --radius-pill: 999px;
 
+  /* ── Brand icons ─────────────────────────────────────────────────────────
+     Official brand colors, one token per ink. Components in
+     components/icons/brands reference these — never hard-code a brand hex
+     at a usage site and never recolor a brand mark with color utilities.
+     WhatsApp Green is the primary logo ink, so it stays green on every
+     surface; the TikTok note is a one-color mark and resolves per surface
+     below so the guideline-approved variant always renders. */
+  --brand-google-blue: #4285f4;
+  --brand-google-green: #34a853;
+  --brand-google-yellow: #fbbc05;
+  --brand-google-red: #ea4335;
+  --brand-whatsapp-mark: #25d366;
+  --brand-instagram-yellow: #feda75;
+  --brand-instagram-orange: #fa7e1e;
+  --brand-instagram-pink: #d62976;
+  --brand-instagram-purple: #962fbf;
+  --brand-instagram-blue: #4f5bd5;
+  --brand-tiktok-cyan: #25f4ee;
+  --brand-tiktok-magenta: #fe2c55;
+  --brand-tiktok-note: #000000;
+  --brand-visa-navy: #1a1f71;
+  --brand-mastercard-red: #eb001b;
+  --brand-mastercard-orange: #f79e10;
+  --brand-mastercard-center: #ff5f00;
+
   /* Control heights — one scale for every input, select, and button.
      A field and the button next to it must always share an edge. */
   --control-sm: 36px;
@@ -133,6 +158,9 @@
 
 .dark {
   color-scheme: dark;
+  /* The TikTok note is a one-color mark: white on dark grounds, per its
+     brand guidelines. WhatsApp Green stays green everywhere. */
+  --brand-tiktok-note: #ffffff;
   --paper: #000000;
   --ink: #ffffff;
   --surface: #141414;
@@ -142,10 +170,6 @@
   --line-strong: #5e5e5e;
   --muted: #a3a3a3;
   --muted-weak: #8f8f8f;
-  --brand-whatsapp: #25d366;
-  --brand-tiktok: #ffffff;
-  --brand-x-twitter: #ffffff;
-  --brand-mastercard: #f79e1b;
   --disabled-fg: #5e5e5e;
   --press-on-ink: rgba(255, 255, 255, 0.22);
   --press-on-paper: rgba(0, 0, 0, 0.1);
@@ -230,6 +254,8 @@
   --surface-hover: #2b2b2b;
   --line: #2e2e2e;
   --muted: #a3a3a3;
+  /* Inverted grounds flip the one-color TikTok note with them. */
+  --brand-tiktok-note: #ffffff;
   background-color: var(--paper);
   color: var(--ink);
 }
@@ -241,6 +267,7 @@
   --surface-hover: #e2e2e2;
   --line: #e2e2e2;
   --muted: #6e6e6e;
+  --brand-tiktok-note: #000000;
 }
 
 @layer base {
@@ -374,6 +401,32 @@ button[aria-current='page'],
 
 @utility home-scroll-target {
   scroll-margin-top: 96px;
+}
+
+/* ── Brand-icon flag ───────────────────────────────────────────────────────
+   .brand-icon opts an icon out of the monochrome theme: anything inside it
+   keeps its official brand colors and is ignored by theme recoloring. This
+   is also the FontAwesome-brand ignore flag — do not render
+   free-brands-svg-icons glyphs here. FA ships single-color outlines that
+   cannot reproduce multicolor marks (Google, Instagram, TikTok, Visa,
+   Mastercard), so brand icons must come from components/icons/brands, whose
+   artwork is official and whose inks are the --brand-* tokens above. */
+@utility brand-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+svg.brand-icon {
+  display: block;
+}
+
+/* Selection inversion belongs to the monochrome system; brand marks are
+   exempt from it. */
+.brand-icon::selection {
+  background: transparent;
 }
 
 /* ── Type scale ────────────────────────────────────────────────────────────

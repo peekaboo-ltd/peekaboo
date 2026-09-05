@@ -2,9 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import peekabooLogo from '/peekaboo.png';
 import Button from '@/components/inputs/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { GoogleGIcon } from '@/components/icons/brands';
 import { useI18n } from '@/i18n/i18n';
 
 interface AuthPageShellProps {
@@ -57,7 +55,7 @@ export const AuthSocialButton = ({
   children: ReactNode;
 }) => (
   <Button type="button" variant="secondary" onClick={onClick} className="w-full">
-    <FontAwesomeIcon icon={faGoogle as IconProp} />
+    <GoogleGIcon className="size-[18px]" />
     {children}
   </Button>
 );

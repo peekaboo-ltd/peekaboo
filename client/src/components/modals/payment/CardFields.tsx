@@ -1,7 +1,7 @@
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCcMastercard, faCcVisa } from '@fortawesome/free-brands-svg-icons';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
+import { MastercardIcon, VisaIcon } from '@/components/icons/brands';
 import Input from '@/components/inputs/Input';
 import type { PaymentFormValues } from './payment.types';
 import { useI18n } from '@/i18n/i18n';
@@ -82,8 +82,12 @@ const CardFields = ({ control, errors }: CardFieldsProps) => {
       </p>
       <p className="mt-2 flex items-center gap-2 text-(--muted)">
         <span className="sr-only">{t('orderPayment.acceptedCards')}</span>
-        <FontAwesomeIcon icon={faCcVisa} className="text-2xl" aria-hidden="true" />
-        <FontAwesomeIcon icon={faCcMastercard} className="text-2xl" aria-hidden="true" />
+        <span className="inline-flex h-7 items-center rounded-[4px] bg-white px-1.5">
+          <VisaIcon className="h-4 w-auto" />
+        </span>
+        <span className="inline-flex h-7 items-center rounded-[4px] bg-white px-1.5">
+          <MastercardIcon className="h-4 w-auto" />
+        </span>
       </p>
     </aside>
   </>

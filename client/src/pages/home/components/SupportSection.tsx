@@ -1,12 +1,12 @@
-import type { LucideIcon } from 'lucide-react';
 import { ArrowRight, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/inputs/Button';
 import PublicIconBadge, { publicAccentAt } from '@/components/public/PublicIconBadge';
+import type { SizableIcon } from '@/components/icons/brands';
 import { useI18n } from '@/i18n/i18n';
 
 interface SupportContact {
-  icon: LucideIcon;
+  icon: SizableIcon;
   title: string;
   subtitle: string;
   badge: string;

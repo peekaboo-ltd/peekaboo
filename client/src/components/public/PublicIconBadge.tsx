@@ -1,5 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { SizableIcon } from '@/components/icons/brands';
 
 export type PublicAccentTone = 'sky' | 'sage' | 'clay' | 'rose' | 'plum';
 
@@ -14,16 +14,8 @@ export const PUBLIC_ACCENT_TONES: PublicAccentTone[] = [
 export const publicAccentAt = (index: number): PublicAccentTone =>
   PUBLIC_ACCENT_TONES[index % PUBLIC_ACCENT_TONES.length]!;
 
-export const publicAccentSoftClass: Record<PublicAccentTone, string> = {
-  sky: 'bg-(--public-sky-soft) text-(--public-sky)',
-  sage: 'bg-(--public-sage-soft) text-(--public-sage)',
-  clay: 'bg-(--public-clay-soft) text-(--public-clay)',
-  rose: 'bg-(--public-rose-soft) text-(--public-rose)',
-  plum: 'bg-(--public-plum-soft) text-(--public-plum)',
-};
-
 interface PublicIconBadgeProps {
-  icon: LucideIcon;
+  icon: SizableIcon;
   tone?: PublicAccentTone;
   size?: 'sm' | 'md' | 'xs';
   className?: string;
@@ -43,15 +35,13 @@ const iconSizeClasses = {
 
 const PublicIconBadge = ({
   icon: Icon,
-  tone = 'sky',
   size = 'sm',
   className,
 }: PublicIconBadgeProps) => (
   <span
     className={cn(
-      'flex shrink-0 items-center justify-center rounded-(--radius-control)',
+      'flex shrink-0 items-center justify-center',
       sizeClasses[size],
-      publicAccentSoftClass[tone],
       className,
     )}
   >

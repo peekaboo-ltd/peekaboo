@@ -19,6 +19,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useI18n } from '@/i18n/i18n';
+import { WhatsAppIcon, type SizableIcon } from '@/components/icons/brands';
 import type { HeroCopy, HowItWorksStep, Testimonial } from './home.types';
 
 interface IconCard {
@@ -28,7 +29,7 @@ interface IconCard {
 }
 
 interface SupportContact {
-  icon: LucideIcon;
+  icon: SizableIcon;
   title: string;
   subtitle: string;
   badge: string;
@@ -202,7 +203,7 @@ export const useHomeContent = (): HomeContent => {
 
   const supportContacts: SupportContact[] = [
     {
-      icon: MessageSquare,
+      icon: WhatsAppIcon,
       title: t('home.support.whatsapp'),
       subtitle: '+250 794 892 784',
       badge: t('home.support.whatsappBadge'),
