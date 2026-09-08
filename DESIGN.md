@@ -88,6 +88,21 @@ Public marketing pages, auth screens, and public order screens carry no function
 states are expressed by fill, border style, glyph, and copy. Primary actions stay `--ink`
 everywhere; colour never marks "this is the main button", only "this is what will happen".
 
+### 1.2 Brand-accent exception (marketing emphasis only)
+
+The official brand primary `--brand-accent: #f3c70c` is the ONE permitted non-functional hue,
+and only on **public marketing pages**. It marks emphasis, never state or action:
+
+- **Allowed:** one `mark-accent` phrase per headline (flat `--brand-accent-soft` wash, never a
+  gradient), the accent underline on select marketing links, and the `testimonial-dot` bar that
+  accompanies (never replaces) the inversion-selected pager dot. Copy chooses the marked words
+  per locale with `*…*` via `AccentMarked`.
+- **Forbidden:** button fills or text, status/state carriers of any kind, focus rings, selection
+  fills, brand-mark recolouring, full-bleed accent grounds, and white text on the solid accent
+  (contrast fails — `--brand-accent-ink` black is the only text ink on accent fills).
+- Same hex in dark mode; only the wash deepens (`45%` vs `30%` mix). `forced-colors: active`
+  drops the wash and falls back to `CanvasText`.
+
 ---
 
 ## 2. Color tokens

@@ -14,7 +14,14 @@ import {
 } from '@/states/slices/order.slice';
 import type { UUID } from '@/types';
 import { getCurrentLocation } from '@/utils/locations.util';
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -269,11 +276,30 @@ const PublicOrderDetails = () => {
     [],
   );
 
-  useEffect(() => {
+  // A successful quote replaces the order in the store, so the location objects
+  // and the quoted* fields get new identities on every response. Key the quote
+  // on the coordinates themselves instead, so an unchanged route quotes once.
+  const routeKey = useMemo(() => {
     const pickup = currentOrder?.locationFrom;
     const dropoff = currentOrder?.locationTo;
+    if (!pickup || !dropoff || isSameCoordinates(pickup, dropoff)) return null;
+    const serialize = (location: OrderLocation) =>
+      `${location.placeId ?? ''}:${location.latitude ?? ''},${location.longitude ?? ''}`;
+    return `${serialize(pickup)}|${serialize(dropoff)}`;
+  }, [currentOrder?.locationFrom, currentOrder?.locationTo, isSameCoordinates]);
 
-    if (!currentOrder?.id || !pickup || !dropoff || isSameCoordinates(pickup, dropoff)) {
+  // Read at quote time only, so a new quote does not retrigger the effect.
+  const quoteFallbackRef = useRef<{
+    distanceKm?: number | null;
+    durationMinutes?: number | null;
+  }>({});
+  quoteFallbackRef.current = {
+    distanceKm: currentOrder?.quotedDistanceKm,
+    durationMinutes: currentOrder?.quotedDurationMinutes,
+  };
+
+  useEffect(() => {
+    if (!currentOrder?.id || !routeKey) {
       setDistance(null);
       setEstimatedTime(null);
       return;
@@ -294,8 +320,8 @@ const PublicOrderDetails = () => {
       })
       .catch(() => {
         if (!active) return;
-        const fallbackDistance = currentOrder.quotedDistanceKm;
-        const fallbackDuration = currentOrder.quotedDurationMinutes;
+        const fallbackDistance = quoteFallbackRef.current.distanceKm;
+        const fallbackDuration = quoteFallbackRef.current.durationMinutes;
         if (fallbackDistance != null && fallbackDuration != null) {
           setDistance(Number(fallbackDistance));
           setEstimatedTime(Number(fallbackDuration));
@@ -309,17 +335,7 @@ const PublicOrderDetails = () => {
     return () => {
       active = false;
     };
-  }, [
-    currentOrder?.id,
-    currentOrder?.locationFrom,
-    currentOrder?.locationTo,
-    currentOrder?.quotedDistanceKm,
-    currentOrder?.quotedDurationMinutes,
-    dispatch,
-    isSameCoordinates,
-    quotePublicOrder,
-    t,
-  ]);
+  }, [currentOrder?.id, routeKey, dispatch, quotePublicOrder, t]);
   const handleContactMethodChange = useCallback(
     (method: PreferredContactMethod) => {
       if (!currentOrder?.id) return;

@@ -52,10 +52,12 @@ const HeroHeadline = ({
             )
           : businessTitle1}
         <br />
-        {isPersonal ? personalTitle2 : businessTitle2} {t('home.headline.kigali')}
+        <span className="mark-accent">
+          {isPersonal ? personalTitle2 : businessTitle2} {t('home.headline.kigali')}
+        </span>
       </h1>
       <p className="type-body max-w-[46ch] text-(--muted)">
-        {isPersonal ? <Link to="/legal/terms-and-conditions" className='underline text-sm underline-offset-2 hover:text-(--ink)'>{t('home.headline.learnMore')}</Link> : businessSubtitle}
+        {isPersonal ? <Link to="/legal/terms-and-conditions" className='underline text-sm underline-offset-2 decoration-(--brand-accent) hover:text-(--ink)'>{t('home.headline.learnMore')}</Link> : businessSubtitle}
       </p>
  
     </hgroup>

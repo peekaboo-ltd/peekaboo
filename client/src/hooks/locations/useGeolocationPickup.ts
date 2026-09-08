@@ -18,6 +18,9 @@ export interface GeolocationPickupState {
   pickupSource: PickupSource;
   setPickupSource: (source: PickupSource) => void;
   locationError: string | null;
+  // Which field the pending request and any error belong to, so the other
+  // field does not mirror a failure it never triggered.
+  activeTarget: GeolocationTarget | null;
   isLocating: boolean;
   useMyLocation: (target?: GeolocationTarget) => Promise<void>;
   clearLocationError: () => void;
@@ -32,6 +35,7 @@ export const useGeolocationPickup = (
   const locationTo = useWatch({ control, name: 'locationTo' });
   const pickupSource = useWatch({ control, name: 'pickupSource' }) ?? 'search';
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [activeTarget, setActiveTarget] = useState<GeolocationTarget | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const geolocationKey = useRef<string | null>(null);
 
@@ -47,6 +51,7 @@ export const useGeolocationPickup = (
   const setPickupSource = (source: PickupSource) => {
     setValue('pickupSource', source, { shouldDirty: true });
     setLocationError(null);
+    setActiveTarget(null);
   };
 
   useEffect(() => {
@@ -57,7 +62,10 @@ export const useGeolocationPickup = (
     ) {
       setValue('pickupSource', 'search', { shouldDirty: true });
     }
-    if (locationFrom || locationTo) setLocationError(null);
+    if (locationFrom || locationTo) {
+      setLocationError(null);
+      setActiveTarget(null);
+    }
   }, [locationFrom, locationTo, pickupSource, setValue]);
 
   useEffect(() => {
@@ -120,6 +128,7 @@ export const useGeolocationPickup = (
   const useMyLocation = async (target: GeolocationTarget = 'locationFrom') => {
     setIsLocating(true);
     setLocationError(null);
+    setActiveTarget(target);
 
     try {
       // Deliberately user-triggered: never move this call into a useEffect.
@@ -167,8 +176,12 @@ export const useGeolocationPickup = (
     pickupSource,
     setPickupSource,
     locationError,
+    activeTarget,
     isLocating,
     useMyLocation,
-    clearLocationError: () => setLocationError(null),
+    clearLocationError: () => {
+      setLocationError(null);
+      setActiveTarget(null);
+    },
   };
 };

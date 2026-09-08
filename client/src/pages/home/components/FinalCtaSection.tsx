@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { containerVariants, itemVariants } from '../home.animations';
 import Button from '@/components/inputs/Button';
+import AccentMarked from '@/components/public/AccentMark';
 import { useI18n } from '@/i18n/i18n';
 
 interface FinalCtaSectionProps {
@@ -30,7 +31,7 @@ const FinalCtaSection = ({
           {t('home.finalCta.getStarted')}
         </p>
         <h2 className="type-h2 mt-2">
-          {title}
+          <AccentMarked text={title} />
         </h2>
         <p className="mx-auto mt-4 max-w-[46ch] text-base font-normal leading-[1.6] text-(--muted)">
           {subtitle}

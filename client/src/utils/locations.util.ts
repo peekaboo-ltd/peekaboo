@@ -11,16 +11,11 @@ export interface LocationError {
   message: string;
 }
 
-export const getCurrentLocation = (): Promise<LocationCoordinates> => {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject({
-        code: 0,
-        message: 'Geolocation is not supported by this browser',
-      } as LocationError);
-      return;
-    }
+const POSITION_UNAVAILABLE = 2;
+const TIMEOUT = 3;
 
+const requestPosition = (options: PositionOptions): Promise<LocationCoordinates> =>
+  new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({
@@ -34,13 +29,45 @@ export const getCurrentLocation = (): Promise<LocationCoordinates> => {
           message: error.message,
         } as LocationError);
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000,
-      }
+      options
     );
   });
+
+export const getCurrentLocation = async (): Promise<LocationCoordinates> => {
+  if (!navigator.geolocation) {
+    throw {
+      code: 0,
+      message: 'Geolocation is not supported by this browser',
+    } as LocationError;
+  }
+
+  try {
+    return await requestPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 60000,
+    });
+  } catch (error) {
+    const failure = error as LocationError;
+
+    // Machines without GPS answer a high-accuracy request with
+    // POSITION_UNAVAILABLE (kCLErrorLocationUnknown on macOS) even when the
+    // coarse Wi-Fi fix is perfectly available, so retry once without the
+    // accuracy demand and with an older cached position accepted. A denied
+    // permission is final: retrying only fails again.
+    if (failure?.code !== POSITION_UNAVAILABLE && failure?.code !== TIMEOUT) {
+      throw failure;
+    }
+
+    // Shorter than the first attempt on purpose: when both requests time out
+    // the person has already waited 10s, and a spinner past ~20s reads as
+    // broken. Typing the address is the faster path by then.
+    return await requestPosition({
+      enableHighAccuracy: false,
+      timeout: 8000,
+      maximumAge: 300000,
+    });
+  }
 };
 
 export const calculateHaversineDistance = (
