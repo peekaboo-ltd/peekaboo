@@ -78,10 +78,16 @@ const LocationField = ({
     pickupSource,
     setPickupSource,
     locationError,
-    isLocating,
+    activeTarget,
+    isLocating: isLocatingAny,
     useMyLocation: requestMyLocation,
     clearLocationError,
   } = geolocation ?? {};
+
+  // The hook serves both fields from one request, so only the field that
+  // asked shows the pending state and any failure.
+  const isLocating = isLocatingAny && activeTarget === name;
+  const fieldLocationError = activeTarget === name ? locationError : null;
 
   const handleUseMyLocation = async () => {
     setConfirmGeoOpen(false);
@@ -194,7 +200,7 @@ const LocationField = ({
           )}
 
           {geolocation ? (
-            <FieldMessage errorMessage={locationError ?? undefined} />
+            <FieldMessage errorMessage={fieldLocationError ?? undefined} />
           ) : null}
           <FieldError message={errorMessage} />
 

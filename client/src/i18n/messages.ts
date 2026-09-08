@@ -78,7 +78,7 @@ export const messages: Record<Language, Record<string, string>> = {
     'home.testimonials.t3.content':
       'I can send packages fast without any hassle.',
 
-    'home.cta.title': 'Ready to send a package?',
+    'home.cta.title': 'Ready to *send a package*?',
     'home.cta.subtitle':
       'Create an order in under a minute.',
     'home.cta.button': 'Create order',
@@ -414,7 +414,7 @@ export const messages: Record<Language, Record<string, string>> = {
     'home.testimonials.t3.content':
       'J’envoie vite, sans tracas.',
 
-    'home.cta.title': 'Prêt à envoyer un colis ?',
+    'home.cta.title': 'Prêt à *envoyer un colis* ?',
     'home.cta.subtitle':
       "Créez une commande en moins d'une minute.",
     'home.cta.button': 'Créer une commande',
@@ -750,7 +750,7 @@ export const messages: Record<Language, Record<string, string>> = {
     'home.testimonials.t3.content':
       'Nohereza vuba, nta kibazo.',
 
-    'home.cta.title': 'Witeguye kohereza paki?',
+    'home.cta.title': 'Witeguye *kohereza paki*?',
     'home.cta.subtitle':
       'Kora order mu gihe gito.',
     'home.cta.button': 'Kora order',

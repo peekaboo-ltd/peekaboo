@@ -90,6 +90,17 @@
   --brand-mastercard-orange: #f79e10;
   --brand-mastercard-center: #ff5f00;
 
+  /* ── Brand accent ──────────────────────────────────────────────────────────
+     Official primary #f3c70c, spent ONLY as marketing emphasis (marker
+     highlights, micro wayfinding) on public pages. Never a button fill, never
+     a status/state carrier, never with white text on top (white on the solid
+     accent fails contrast; --brand-accent-ink is the only text ink allowed on
+     it). The soft wash is a translucent mix so it adapts to paper, dark, and
+     inverted grounds without a second palette. */
+  --brand-accent: #f3c70c;
+  --brand-accent-soft: color-mix(in oklab, var(--brand-accent) 30%, transparent);
+  --brand-accent-ink: #000000;
+
   /* Control heights — one scale for every input, select, and button.
      A field and the button next to it must always share an edge. */
   --control-sm: 36px;
@@ -161,6 +172,9 @@
   /* The TikTok note is a one-color mark: white on dark grounds, per its
      brand guidelines. WhatsApp Green stays green everywhere. */
   --brand-tiktok-note: #ffffff;
+  /* Same accent hex in dark mode; only the wash deepens so the marker still
+     reads on black grounds. */
+  --brand-accent-soft: color-mix(in oklab, var(--brand-accent) 45%, transparent);
   --paper: #000000;
   --ink: #ffffff;
   --surface: #141414;
@@ -397,6 +411,53 @@ button[aria-current='page'],
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Brand-accent markers ────────────────────────────────────────────────────
+   The single signature for public marketing pages: a flat soft wash behind
+   one emphasized phrase per headline. Flat fill only (no gradients, per the
+   system constraints); box-decoration-break keeps multi-line wraps clean.
+   White text MUST never sit on the accent — headlines keep their ink. */
+@utility mark-accent {
+  background-color: var(--brand-accent-soft);
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding-inline: 0.12em;
+
+  &::selection {
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+}
+
+/* Wayfinding micro-accent for the testimonial pager. Inversion still carries
+   the selected state; the accent bar only accompanies it. Scoped to this
+   pager so the app-wide selection rule is untouched. */
+.testimonial-dot {
+  position: relative;
+}
+
+.testimonial-dot[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 12px;
+  height: 2px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background-color: var(--brand-accent);
+}
+
+@media (forced-colors: active) {
+  .mark-accent {
+    background-color: transparent;
+  }
+
+  .testimonial-dot[aria-selected='true']::after {
+    background-color: CanvasText;
+  }
 }
 
 @utility home-scroll-target {

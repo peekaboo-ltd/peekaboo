@@ -39,7 +39,7 @@ const ServicesSection = () => {
           <h2 className="type-h2 mt-2">
             {t('home.services.title1')}
             <br />
-            {t('home.services.title2')}
+            <span className="mark-accent">{t('home.services.title2')}</span>
           </h2>
         </hgroup>
         <p className="type-body-sm max-w-[380px] text-(--muted)">

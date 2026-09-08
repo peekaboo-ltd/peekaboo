@@ -88,7 +88,19 @@ const HeroLiveMapContent = ({
   const apiStatus = useApiLoadingStatus();
   const locationFrom = useWatch({ control, name: 'locationFrom' });
   const locationTo = useWatch({ control, name: 'locationTo' });
-  const { pickupSource, locationError, isLocating, useMyLocation } = geolocation;
+  const {
+    pickupSource,
+    locationError,
+    activeTarget,
+    isLocating: isLocatingAny,
+    useMyLocation: requestMyLocation,
+  } = geolocation;
+
+  // This button only ever asks for the pickup, so it ignores a request the
+  // drop-off field started.
+  const isLocating = isLocatingAny && activeTarget === 'locationFrom';
+  const pickupLocationError =
+    activeTarget === 'locationFrom' ? locationError : null;
 
   const origin = toPosition(locationFrom);
   const dropOff = toPosition(locationTo);
@@ -222,7 +234,7 @@ const HeroLiveMapContent = ({
             variant="secondary"
             size="sm"
             className="absolute bottom-3 left-3 z-10 bg-(--paper)"
-            onClick={useMyLocation}
+            onClick={() => requestMyLocation('locationFrom')}
             disabled={isLocating}
           >
             <LocateFixed aria-hidden="true" />
@@ -231,7 +243,7 @@ const HeroLiveMapContent = ({
         ) : null}
       </figure>
 
-      <FieldMessage errorMessage={locationError ?? undefined} />
+      <FieldMessage errorMessage={pickupLocationError ?? undefined} />
     </div>
   );
 };

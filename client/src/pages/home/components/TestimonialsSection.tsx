@@ -105,7 +105,7 @@ const TestimonialsSection = ({
                   type="button"
                   onClick={() => setActiveTestimonial(index)}
                   aria-selected={index === activeTestimonial}
-                  className="flex size-6 items-center justify-center rounded-(--radius-pill) border border-(--line) text-xs text-(--muted) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] aria-selected:border-(--ink) aria-selected:bg-(--ink) aria-selected:text-(--paper) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
+                  className="testimonial-dot flex size-6 items-center justify-center rounded-(--radius-pill) border border-(--line) text-xs text-(--muted) outline-none transition-[background-color,color,border-color,box-shadow] duration-200 ease-[cubic-bezier(0,0,1,1)] aria-selected:border-(--ink) aria-selected:bg-(--ink) aria-selected:text-(--paper) active:shadow-[var(--press-on-paper)_999px_999px_0_inset] focus-visible:shadow-[var(--paper)_0_0_0_2px_inset,var(--ink)_0_0_0_2px]"
                   aria-label={t('home.testimonials.goTo', { number: index + 1 })}
                 >
                   {index + 1}
