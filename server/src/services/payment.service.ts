@@ -136,6 +136,13 @@ export class PaymentService {
         return this.reconcileUrubutoTimeout(newPayment, result);
       }
 
+      // The provider was never reached, so no transaction exists on their side
+      // and marking this payment failed is safe. It is an outage, not a bad
+      // request: 503 keeps it out of the client-error bucket and tells callers
+      // the same request is worth retrying later.
+      const isProviderUnreachable =
+        result.error?.code === 'PROVIDER_UNREACHABLE';
+
       newPayment.status = KpayPaymentStatus.FAILED;
       newPayment.metadata = {
         ...(newPayment.metadata || {}),
@@ -146,10 +153,13 @@ export class PaymentService {
         metadata: newPayment.metadata,
       });
 
-      throw new ValidationError(
+      const failureMessage =
         result.error?.message ||
-          'UrubutoPay payment could not be initiated. Please try again.',
-      );
+        'UrubutoPay payment could not be initiated. Please try again.';
+
+      throw isProviderUnreachable
+        ? new AppError(failureMessage, 503)
+        : new ValidationError(failureMessage);
     }
 
     this.sendPaymentInitiatedEmail(payment, context.chargeAmount);

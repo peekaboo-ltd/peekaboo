@@ -107,6 +107,84 @@ function isUrubutoServiceCodeError(rawMessage?: string): boolean {
   return lower.includes('service code') || lower.includes('service_code');
 }
 
+// Node/axios codes for failures that happen before UrubutoPay ever sees the
+// request: DNS, refused or unroutable connections, and TLS handshake
+// rejections such as the provider letting its certificate expire. Deliberately
+// excludes timeouts and mid-flight resets, which may well have been delivered.
+const UNREACHABLE_ERROR_CODES = new Set([
+  'ENOTFOUND',
+  'EAI_AGAIN',
+  'ECONNREFUSED',
+  'EHOSTUNREACH',
+  'ENETUNREACH',
+  'EHOSTDOWN',
+  'ENETDOWN',
+  'CERT_HAS_EXPIRED',
+  'CERT_NOT_YET_VALID',
+  'DEPTH_ZERO_SELF_SIGNED_CERT',
+  'SELF_SIGNED_CERT_IN_CHAIN',
+  'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+  'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
+  'ERR_TLS_CERT_ALTNAME_INVALID',
+]);
+
+const AMBIGUOUS_DELIVERY_ERROR_CODES = new Set([
+  'ECONNABORTED',
+  'ETIMEDOUT',
+  'ECONNRESET',
+  'EPIPE',
+]);
+
+export function isUrubutoTimeoutError(error: any): boolean {
+  return (
+    error?.code === 'ETIMEDOUT' ||
+    error?.code === 'ECONNABORTED' ||
+    Boolean(error?.message?.toLowerCase().includes('timeout'))
+  );
+}
+
+// True only when the request provably never reached UrubutoPay, so the caller
+// can fail fast knowing no transaction was created on their side. An error
+// carrying a response came from UrubutoPay itself and is never unreachable.
+export function isUrubutoUnreachableError(error: any): boolean {
+  if (error?.response) return false;
+  if (AMBIGUOUS_DELIVERY_ERROR_CODES.has(error?.code)) return false;
+  if (UNREACHABLE_ERROR_CODES.has(error?.code)) return true;
+  if (UNREACHABLE_ERROR_CODES.has(error?.cause?.code)) return true;
+
+  // Some TLS failures reach us with the reason only in the message.
+  const lower = (error?.message || '').toLowerCase();
+  return (
+    lower.includes('certificate has expired') ||
+    lower.includes('unable to verify the first certificate') ||
+    lower.includes('self signed certificate')
+  );
+}
+
+function isCertificateError(error: any): boolean {
+  const code = error?.code || error?.cause?.code || '';
+  const lower = (error?.message || '').toLowerCase();
+  return code.includes('CERT') || lower.includes('certificate');
+}
+
+// Kept deliberately vague for the payer: an expired provider certificate is
+// not something they can act on, and naming it invites the dangerous "just
+// disable TLS verification" workaround. The operational detail goes to the log.
+export function urubutoUnreachableMessage(error: any): string {
+  return isCertificateError(error)
+    ? 'UrubutoPay is temporarily unavailable because of a problem with their secure connection. No payment was taken. Please try again shortly.'
+    : 'UrubutoPay is temporarily unreachable. No payment was taken. Please try again shortly.';
+}
+
+function unreachableLogContext(error: any): Record<string, unknown> {
+  return {
+    reason: 'PROVIDER_UNREACHABLE',
+    transportErrorCode: error?.code || error?.cause?.code,
+    certificateError: isCertificateError(error),
+    message: error?.message,
+  };
+}
+
 export class UrubutoService {
   private readonly client: AxiosInstance;
   private readonly config: UrubutoConfig;
@@ -291,6 +369,24 @@ export class UrubutoService {
             },
       };
     } catch (error: any) {
+      // Nothing about the account was actually checked when we never reached
+      // UrubutoPay, so do not blame the payer's number for an outage.
+      if (isUrubutoUnreachableError(error)) {
+        logger.error('UrubutoPay wallet validation could not reach the provider', {
+          paymentChannelName: request.channelName,
+          payerPhoneNumber: maskUrubutoValue(payerPhoneNumber),
+          ...unreachableLogContext(error),
+        });
+
+        return {
+          success: false,
+          error: {
+            code: 'PROVIDER_UNREACHABLE',
+            message: urubutoUnreachableMessage(error),
+          },
+        };
+      }
+
       logger.error('UrubutoPay wallet validation failed', {
         paymentChannelName: request.channelName,
         payerPhoneNumber: maskUrubutoValue(payerPhoneNumber),
@@ -369,6 +465,21 @@ export class UrubutoService {
             },
       };
     } catch (error: any) {
+      if (isUrubutoUnreachableError(error)) {
+        logger.error('UrubutoPay transaction status could not reach the provider', {
+          transactionId,
+          ...unreachableLogContext(error),
+        });
+
+        return {
+          success: false,
+          error: {
+            code: 'PROVIDER_UNREACHABLE',
+            message: urubutoUnreachableMessage(error),
+          },
+        };
+      }
+
       logger.error('UrubutoPay transaction status error', {
         transactionId,
         merchantCodeFingerprint: urubutoCredentialFingerprint(
@@ -590,15 +701,40 @@ export class UrubutoService {
         },
       };
     } catch (error: any) {
-      const isTimeout =
-        error.code === 'ETIMEDOUT' ||
-        error.code === 'ECONNABORTED' ||
-        error.message?.toLowerCase().includes('timeout');
+      // Timeout is checked first and deliberately wins: the request may have
+      // been delivered, so the payment has to be reconciled rather than
+      // declared undelivered.
+      const isTimeout = isUrubutoTimeoutError(error);
+      const isUnreachable = !isTimeout && isUrubutoUnreachableError(error);
       const rawMessage =
         error.response?.data?.message ||
         error.message ||
         'UrubutoPay payment initiation failed.';
       const serviceCodeError = isUrubutoServiceCodeError(rawMessage);
+
+      if (isUnreachable) {
+        logger.error('UrubutoPay payment initiation could not reach the provider', {
+          ...logContext,
+          ...unreachableLogContext(error),
+        });
+
+        return {
+          success: false,
+          error: {
+            code: 'PROVIDER_UNREACHABLE',
+            message: urubutoUnreachableMessage(error),
+            metadata: {
+              localPaymentId: request.refId,
+              transactionId: request.refId,
+              channelName,
+              payerCode: request.payerCode,
+              apiEnvironment,
+              transportErrorCode: error.code || error.cause?.code,
+              rawMessage,
+            },
+          },
+        };
+      }
 
       logger.error('UrubutoPay payment initiation error', {
         ...logContext,

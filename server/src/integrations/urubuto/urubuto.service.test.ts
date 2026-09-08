@@ -291,3 +291,144 @@ test('incomplete Urubuto initiation responses are rejected', async () => {
     restore();
   }
 });
+
+test('an expired provider certificate is reported as unreachable, not as a bad account', async () => {
+  const restore = mockAxiosPost(async (url) => {
+    assert.equal(url, '/api/v2/payment/account-holder/validate');
+    const error: any = new Error('certificate has expired');
+    error.code = 'CERT_HAS_EXPIRED';
+    throw error;
+  });
+
+  try {
+    const result = await new UrubutoService(config).validateAccountHolder({
+      customerPhone: '250788000000',
+      channelName: UrubutoChannelName.MOMO,
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.error?.code, 'PROVIDER_UNREACHABLE');
+    assert.match(result.error?.message || '', /temporarily unavailable/i);
+    assert.doesNotMatch(result.error?.message || '', /validate this mobile money account/i);
+  } finally {
+    restore();
+  }
+});
+
+test('DNS and refused connections during validation are reported as unreachable', async () => {
+  for (const code of ['ENOTFOUND', 'ECONNREFUSED']) {
+    const restore = mockAxiosPost(async () => {
+      const error: any = new Error(`connect ${code} urubuto.test`);
+      error.code = code;
+      throw error;
+    });
+
+    try {
+      const result = await new UrubutoService(config).validateAccountHolder({
+        customerPhone: '250788000000',
+        channelName: UrubutoChannelName.MOMO,
+      });
+
+      assert.equal(result.error?.code, 'PROVIDER_UNREACHABLE', `code ${code}`);
+    } finally {
+      restore();
+    }
+  }
+});
+
+test('a rejection carrying a provider response is never treated as unreachable', async () => {
+  const restore = mockAxiosPost(async () => {
+    const error: any = new Error('Request failed with status code 400');
+    error.response = {
+      status: 400,
+      data: { status: 400, message: 'Account not found' },
+    };
+    throw error;
+  });
+
+  try {
+    const result = await new UrubutoService(config).validateAccountHolder({
+      customerPhone: '250788000000',
+      channelName: UrubutoChannelName.MOMO,
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.error?.code, '400');
+    assert.equal(result.error?.message, 'Account not found');
+  } finally {
+    restore();
+  }
+});
+
+test('transaction status lookups surface unreachable separately from provider errors', async () => {
+  const restore = mockAxiosPost(async (url) => {
+    assert.equal(url, '/api/v2/payment/transaction/status');
+    const error: any = new Error('certificate has expired');
+    error.code = 'CERT_HAS_EXPIRED';
+    throw error;
+  });
+
+  try {
+    const result = await new UrubutoService(config).verifyTransactionStatus(
+      'urubuto-ref',
+    );
+
+    assert.equal(result.success, false);
+    assert.equal(result.error?.code, 'PROVIDER_UNREACHABLE');
+  } finally {
+    restore();
+  }
+});
+
+test('an unreachable provider fails initiation fast instead of reconciling', async () => {
+  const restore = mockAxiosPost(async () => {
+    const error: any = new Error('certificate has expired');
+    error.code = 'CERT_HAS_EXPIRED';
+    throw error;
+  });
+
+  try {
+    const result = await new UrubutoService(config).initiatePayment({
+      amount: 1000,
+      currency: KpayCurrency.RWF,
+      customerName: 'Momo Payer',
+      customerPhone: '250788000000',
+      refId: '11111111-1111-4111-8111-111111111116',
+      payerCode: 'ORDER-6',
+      channelName: UrubutoChannelName.MOMO,
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.error?.code, 'PROVIDER_UNREACHABLE');
+    assert.equal(result.error?.metadata?.transportErrorCode, 'CERT_HAS_EXPIRED');
+    assert.match(result.error?.message || '', /no payment was taken/i);
+  } finally {
+    restore();
+  }
+});
+
+test('an ambiguous mid-flight failure stays a timeout so the payment is reconciled', async () => {
+  for (const code of ['ECONNRESET', 'ETIMEDOUT']) {
+    const restore = mockAxiosPost(async () => {
+      const error: any = new Error(`socket hang up ${code}`);
+      error.code = code;
+      throw error;
+    });
+
+    try {
+      const result = await new UrubutoService(config).initiatePayment({
+        amount: 1000,
+        currency: KpayCurrency.RWF,
+        customerName: 'Momo Payer',
+        customerPhone: '250788000000',
+        refId: '11111111-1111-4111-8111-111111111117',
+        payerCode: 'ORDER-7',
+        channelName: UrubutoChannelName.MOMO,
+      });
+
+      assert.notEqual(result.error?.code, 'PROVIDER_UNREACHABLE', `code ${code}`);
+    } finally {
+      restore();
+    }
+  }
+});
