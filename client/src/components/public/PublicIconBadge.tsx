@@ -14,6 +14,14 @@ export const PUBLIC_ACCENT_TONES: PublicAccentTone[] = [
 export const publicAccentAt = (index: number): PublicAccentTone =>
   PUBLIC_ACCENT_TONES[index % PUBLIC_ACCENT_TONES.length]!;
 
+export const publicAccentSoftClass: Record<PublicAccentTone, string> = {
+  sky: 'bg-(--public-sky-soft) text-(--public-sky)',
+  sage: 'bg-(--public-sage-soft) text-(--public-sage)',
+  clay: 'bg-(--public-clay-soft) text-(--public-clay)',
+  rose: 'bg-(--public-rose-soft) text-(--public-rose)',
+  plum: 'bg-(--public-plum-soft) text-(--public-plum)',
+};
+
 interface PublicIconBadgeProps {
   icon: SizableIcon;
   tone?: PublicAccentTone;

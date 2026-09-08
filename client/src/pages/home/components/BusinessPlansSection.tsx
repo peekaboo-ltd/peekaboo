@@ -72,6 +72,7 @@ const BusinessPlansSection = ({
             {plans.map((plan) => (
                 <PlanCard
                   plan={plan}
+                  key={plan?.id}
                   recommendedLabel={popularLabel ?? t('plans.mostPopular')}
                   ctaLabel={ctaLabel ?? t('plans.seePricing')}
                 />
