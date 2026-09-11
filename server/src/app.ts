@@ -10,17 +10,17 @@ import logger from './helpers/logger.helper';
 import { configureGoogleAuth } from './config/passport.config';
 import { auditContextMiddleware } from './middlewares/auditContext.middleware';
 import {
-  buildUrubutoConfig,
-  validateUrubutoStartupConfig,
-} from './integrations/urubuto/urubuto.config';
+  buildPaypackConfig,
+  validatePaypackStartupConfig,
+} from './integrations/paypack/paypack.config';
 
-const urubutoConfigIssues = validateUrubutoStartupConfig(buildUrubutoConfig());
-if (urubutoConfigIssues.length) {
-  urubutoConfigIssues.forEach((issue) => logger.warning(`[UrubutoPay] ${issue}`));
+const paypackConfigIssues = validatePaypackStartupConfig(buildPaypackConfig());
+if (paypackConfigIssues.length) {
+  paypackConfigIssues.forEach((issue) => logger.warning(`[Paypack] ${issue}`));
 
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
-      `UrubutoPay configuration invalid: ${urubutoConfigIssues.join('; ')}`,
+      `Paypack configuration invalid: ${paypackConfigIssues.join('; ')}`,
     );
   }
 }

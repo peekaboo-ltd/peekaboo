@@ -12,8 +12,7 @@
     "DROPOFF_METHOD": ["DROPOFF_SEARCH", "LOCATION_REQUEST_NOTICE"],
     "DROPOFF_SEARCH": ["DROPOFF_RESULTS"],
     "DROPOFF_RESULTS": ["QUOTE", "WAITING_FOR_PAYER", "DROPOFF_SEARCH", "DROPOFF_METHOD"],
-    "QUOTE": ["CARD_DETAILS", "PAYMENT_PENDING"],
-    "CARD_DETAILS": ["PAYMENT_PENDING"],
+    "QUOTE": ["PAYMENT_PENDING"],
     "LOCATION_REQUEST_NOTICE": [],
     "INVITATION_SENT": [],
     "WAITING_FOR_PAYER": [],
@@ -421,8 +420,7 @@
                 "required": true,
                 "data-source": [
                   { "id": "MOMO", "title": "MTN MoMo" },
-                  { "id": "AIRTEL_MONEY", "title": "Airtel Money" },
-                  { "id": "CARD", "title": "Card" }
+                  { "id": "AIRTEL_MONEY", "title": "Airtel Money" }
                 ]
               },
               {
@@ -434,40 +432,6 @@
                     "session_id": "${data.session_id}",
                     "approve_quote": "${form.approve_quote}",
                     "payment_method": "${form.payment_method}"
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "CARD_DETAILS",
-      "title": "Card checkout",
-      "data": {
-        "session_id": { "type": "string", "__example__": "018f" },
-        "error": { "type": "string", "__example__": "" }
-      },
-      "layout": {
-        "type": "SingleColumnLayout",
-        "children": [
-          {
-            "type": "Form",
-            "name": "card_form",
-            "children": [
-              { "type": "TextCaption", "text": "${data.error}" },
-              { "type": "TextInput", "label": "Cardholder name", "name": "cardholder_name", "required": true },
-              { "type": "TextInput", "label": "Email", "name": "cardholder_email", "input-type": "email", "required": true },
-              {
-                "type": "Footer",
-                "label": "Create secure checkout",
-                "on-click-action": {
-                  "name": "data_exchange",
-                  "payload": {
-                    "session_id": "${data.session_id}",
-                    "cardholder_name": "${form.cardholder_name}",
-                    "cardholder_email": "${form.cardholder_email}"
                   }
                 }
               }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAppSelector } from '@/states/hooks';
 import { useGetPublicOrder } from '@/hooks/orders/orders.hooks';
-import { KpayPaymentStatus } from '@/types/payment.types';
+import { PaymentStatus } from '@/types/payment.types';
 import type { UUID } from '@/types';
 import Button from '@/components/inputs/Button';
 import { LoadingItem } from '@/components/ui/loading-item';
@@ -90,7 +90,7 @@ const PublicOrderPaymentSuccess = () => {
       id &&
       paymentId &&
       exactPayment &&
-      exactPayment.status !== KpayPaymentStatus.SUCCESSFUL
+      exactPayment.status !== PaymentStatus.SUCCESSFUL
     ) {
       navigate(`/p/orders/${id}/payment-pending?paymentId=${paymentId}`, {
         replace: true,
@@ -100,7 +100,7 @@ const PublicOrderPaymentSuccess = () => {
 
   const exactPayment = exactPaymentQuery.data?.data;
   const successfulPayment =
-    exactPayment?.status === KpayPaymentStatus.SUCCESSFUL
+    exactPayment?.status === PaymentStatus.SUCCESSFUL
       ? exactPayment
       : undefined;
 

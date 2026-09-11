@@ -20,7 +20,7 @@ import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useGetPublicOrder } from '@/hooks/orders/orders.hooks';
 import { useAppSelector } from '@/states/hooks';
 import {
-  KpayPaymentStatus,
+  PaymentStatus,
   PAYMENT_CHANNEL_LABELS,
   PaymentChannel,
 } from '@/types/payment.types';
@@ -56,8 +56,8 @@ const PublicOrderPaymentPending = () => {
   );
   const refetchPaymentStatus = statusQuery.refetch;
   const payment = statusQuery.data?.data;
-  const isFailed = payment?.status === KpayPaymentStatus.FAILED;
-  const isSuccessful = payment?.status === KpayPaymentStatus.SUCCESSFUL;
+  const isFailed = payment?.status === PaymentStatus.FAILED;
+  const isSuccessful = payment?.status === PaymentStatus.SUCCESSFUL;
 
   useEffect(() => {
     const refetchWhenVisible = () => {

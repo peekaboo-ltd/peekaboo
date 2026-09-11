@@ -3,8 +3,8 @@ import { AbstractEntity } from '.';
 import { UUID } from '../types';
 import { PaymentType } from '../constants/payment.constants';
 import { User } from './user.entity';
-import { KpayCurrency, KpayPaymentMethod, KpayPaymentStatus } from '../types/kpay.types';
-import { PaymentProvider } from '../types/urubuto.types';
+import { PaymentCurrency, PaymentStatus } from '../types/payment-status.types';
+import { PaymentProvider, PaypackChannel } from '../types/paypack.types';
 
 @Entity('payments')
 export class Payment extends AbstractEntity {
@@ -43,10 +43,10 @@ export class Payment extends AbstractEntity {
   customerPhone?: string;
 
   // CURRENCY
-  @Column({ name: 'currency', type: 'varchar', length: 3, nullable: false, default: KpayCurrency.RWF })
+  @Column({ name: 'currency', type: 'varchar', length: 3, nullable: false, default: PaymentCurrency.RWF })
   currency: 'RWF' | 'USD';
 
-  // EXTERNAL REFERENCE ID (Kpay Transaction ID)
+  // EXTERNAL REFERENCE ID (provider transaction ref, e.g. Paypack ref)
   @Column({ name: 'external_reference_id', type: 'varchar', nullable: true })
   externalReferenceId?: string;
 
@@ -55,7 +55,7 @@ export class Payment extends AbstractEntity {
     name: 'provider',
     type: 'varchar',
     nullable: false,
-    default: PaymentProvider.URUBUTO,
+    default: PaymentProvider.PAYPACK,
   })
   provider: PaymentProvider;
 
@@ -67,15 +67,15 @@ export class Payment extends AbstractEntity {
   @Column({ name: 'type', type: 'enum', nullable: false, default: PaymentType.ORDER, enum: PaymentType })
   type: PaymentType;
 
-  // STATUS (Using Kpay status enum)
+  // STATUS
   @Column({
     name: 'status',
     type: 'enum',
     nullable: false,
-    enum: KpayPaymentStatus,
-    default: KpayPaymentStatus.PENDING,
+    enum: PaymentStatus,
+    default: PaymentStatus.PENDING,
   })
-  status: KpayPaymentStatus;
+  status: PaymentStatus;
 
   // DESCRIPTION
   @Column({ name: 'description', type: 'text', nullable: true })
@@ -86,7 +86,7 @@ export class Payment extends AbstractEntity {
     name: 'method',
     type: 'varchar',
     nullable: true,
-    default: KpayPaymentMethod.MOBILE_MONEY,
+    default: PaypackChannel.MOMO,
   })
   method: string;
 

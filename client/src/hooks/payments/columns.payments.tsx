@@ -1,5 +1,5 @@
 import { StatusBadge } from '@/components/inputs/StatusBadge';
-import { Payment, KpayPaymentStatus } from '@/types/payment.types';
+import { Payment, PaymentStatus } from '@/types/payment.types';
 import { formatCurrency, formatDate, capitalizeString } from '@/utils/strings.util';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
@@ -23,9 +23,9 @@ import { Link } from 'react-router-dom';
 import { useI18n } from '@/i18n/i18n';
 
 const PAYMENT_STATUS_LABELS: Record<string, string> = {
-  [KpayPaymentStatus.PENDING]: 'PENDING',
-  [KpayPaymentStatus.SUCCESSFUL]: 'PAID',
-  [KpayPaymentStatus.FAILED]: 'CANCELLED',
+  [PaymentStatus.PENDING]: 'PENDING',
+  [PaymentStatus.SUCCESSFUL]: 'PAID',
+  [PaymentStatus.FAILED]: 'CANCELLED',
 };
 
 export const useAdminPaymentsColumns = () => {

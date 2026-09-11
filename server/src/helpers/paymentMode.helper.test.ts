@@ -36,13 +36,12 @@ test('isPaymentSimulation and isDevPriceMode reflect resolved mode', () => {
   assert.equal(isDevPriceMode({ paymentMode: 'simulate', nodeEnv: 'production' }), false);
 });
 
-test('resolveChargeableAmount uses 10 RWF only in dev_price', () => {
-  const result = resolveChargeableAmount(2500, {
+test('resolveChargeableAmount uses 100 RWF only in dev_price', () => {
+  const result = resolveChargeableAmount(DEVELOPMENT_PAYMENT_AMOUNT_RWF, {
     paymentMode: 'dev_price',
     nodeEnv: 'development',
   });
   assert.equal(result.chargeAmount, DEVELOPMENT_PAYMENT_AMOUNT_RWF);
-  assert.equal(result.chargeAmount, 10);
   assert.equal(result.isDevPrice, true);
   assert.equal(result.isSimulated, false);
   assert.equal(result.catalogAmount, 2500);

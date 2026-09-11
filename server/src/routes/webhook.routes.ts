@@ -3,11 +3,8 @@ import { WebhookController } from "../controllers/webhook.controller";
 
 const router = Router();
 
-router.post('/kpay', WebhookController.kpayWebhook);
-router.post('/urubuto/auth', WebhookController.urubutoAuth);
-router.post('/urubuto/validation', WebhookController.urubutoValidation);
-router.post('/urubuto/callback', WebhookController.urubutoCallback);
-router.post('/urubuto/notification', WebhookController.urubutoNotification);
-router.post('/urubuto/reversal', WebhookController.urubutoReversal);
+// Paypack HEAD-pings the webhook URL before delivering payloads.
+router.head('/paypack', WebhookController.paypackHead);
+router.post('/paypack', WebhookController.paypackWebhook);
 
 export default router;

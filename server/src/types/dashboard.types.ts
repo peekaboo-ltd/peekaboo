@@ -5,7 +5,7 @@ import {
   OrderAssignmentStatus,
 } from "../constants/order.constants";
 import { TierBreakdown } from "../constants/businessPlan.constants";
-import { KpayPaymentStatus } from "./kpay.types";
+import { PaymentStatus } from "./payment-status.types";
 
 export interface OrderStatusCount {
   status: OrderStatus;
@@ -40,7 +40,7 @@ export interface AssignmentStatusCount {
 }
 
 export interface PaymentStatusCount {
-  status: KpayPaymentStatus;
+  status: PaymentStatus;
   count: number;
 }
 

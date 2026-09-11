@@ -7,8 +7,4 @@ export interface PaymentFormValues {
   payerType: PayerType;
   customPhone: string;
   fallbackPhone: string;
-  /** Card only — sent to the gateway as the payer name. */
-  cardholderName: string;
-  /** Card only — where the gateway sends the receipt. */
-  payerEmail: string;
 }

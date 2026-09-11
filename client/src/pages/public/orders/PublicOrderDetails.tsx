@@ -41,7 +41,7 @@ import UpdateOrderLocationFrom from '@/components/modals/UpdateOrderLocationFrom
 import UpdateOrderLocationTo from '@/components/modals/UpdateOrderLocationTo';
 import OrderPayment from '@/components/modals/OrderPayment';
 import { useFetchPublicPayments } from '@/hooks/payments/payment.hooks';
-import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
+import { PaymentStatus, PaymentType } from '@/types/payment.types';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import {
   OrderPaymentStatus,
@@ -392,7 +392,7 @@ const PublicOrderDetails = () => {
   );
 
   const hasSuccessfulPayment = paymentsList?.some(
-    (payment) => payment.status === KpayPaymentStatus.SUCCESSFUL,
+    (payment) => payment.status === PaymentStatus.SUCCESSFUL,
   );
   const hasDeferredPayment =
     currentOrder?.paymentStatus === OrderPaymentStatus.PENDING ||

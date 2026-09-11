@@ -6,7 +6,7 @@ import { useGetOrder } from '@/hooks/orders/orders.hooks';
 import { useGetPayment } from '@/hooks/payments/payment.hooks';
 import { useAppSelector } from '@/states/hooks';
 import { UUID } from '@/types';
-import { KpayPaymentStatus, PaymentType } from '@/types/payment.types';
+import { PaymentStatus, PaymentType } from '@/types/payment.types';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -50,12 +50,12 @@ const formatDateLabel = (value?: string | Date) => {
 };
 
 const paymentStatusBadgeVariantMap: Record<
-  KpayPaymentStatus,
+  PaymentStatus,
   'default' | 'secondary' | 'destructive' | 'outline'
 > = {
-  [KpayPaymentStatus.SUCCESSFUL]: 'default',
-  [KpayPaymentStatus.PENDING]: 'secondary',
-  [KpayPaymentStatus.FAILED]: 'destructive',
+  [PaymentStatus.SUCCESSFUL]: 'default',
+  [PaymentStatus.PENDING]: 'secondary',
+  [PaymentStatus.FAILED]: 'destructive',
 };
 
 const PaymentDetailsPage = () => {
@@ -123,15 +123,15 @@ const PaymentDetailsPage = () => {
       label: t('paymentDetails.status'),
       value: paymentStatusLabel,
       icon:
-        payment.status === KpayPaymentStatus.SUCCESSFUL
+        payment.status === PaymentStatus.SUCCESSFUL
           ? faCircleCheck
-          : payment.status === KpayPaymentStatus.FAILED
+          : payment.status === PaymentStatus.FAILED
             ? faXmarkCircle
             : faClockRotateLeft,
       // Settled payments carry their outcome; one still in flight stays grey.
-      iconBg: payment.status === KpayPaymentStatus.SUCCESSFUL
+      iconBg: payment.status === PaymentStatus.SUCCESSFUL
         ? 'bg-(--approve-surface) text-(--approve)'
-        : payment.status === KpayPaymentStatus.FAILED
+        : payment.status === PaymentStatus.FAILED
           ? 'bg-(--danger-surface) text-(--danger)'
           : 'bg-(--surface) text-(--muted)',
     },
@@ -158,7 +158,7 @@ const PaymentDetailsPage = () => {
           description={t('paymentDetails.description')}
           actions={
             <Badge
-              variant={paymentStatusBadgeVariantMap[payment.status as KpayPaymentStatus] ?? 'outline'}
+              variant={paymentStatusBadgeVariantMap[payment.status as PaymentStatus] ?? 'outline'}
               className="text-xs rounded-full px-3"
             >
               {paymentStatusLabel}

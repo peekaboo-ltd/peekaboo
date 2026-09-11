@@ -116,7 +116,7 @@ export const InstagramIcon = (props: BrandIconProps) => {
 
 /**
  * Visa wordmark in official Visa Navy. Navy needs a light ground, so render
- * it on a white badge (see CardFields) — never recolor the mark itself.
+ * it on a white badge — never recolor the mark itself.
  * The viewBox is cropped to the glyph bounds; the path data is untouched.
  */
 export const VisaIcon = (props: BrandIconProps) => (

@@ -41,4 +41,4 @@ export const ENVIRONMENTS = {
 };
 
 /** Fixed checkout amount charged in dev_price mode (server is source of truth). */
-export const DEVELOPMENT_PAYMENT_AMOUNT_RWF = 10;
+export const DEVELOPMENT_PAYMENT_AMOUNT_RWF = 100;

@@ -57,7 +57,7 @@ import {
 } from '../integrations/sms/sms.messages';
 import { Payment } from '../entities/payment.entity';
 import { PaymentType } from '../constants/payment.constants';
-import { KpayPaymentStatus } from '../types/kpay.types';
+import { PaymentStatus } from '../types/payment-status.types';
 
 type OrderLocation = NonNullable<Order['locationFrom']>;
 
@@ -1081,7 +1081,7 @@ export class OrderService {
       where: {
         entityId: id,
         type: PaymentType.ORDER,
-        status: KpayPaymentStatus.SUCCESSFUL,
+        status: PaymentStatus.SUCCESSFUL,
       },
       order: {
         createdAt: 'DESC',
