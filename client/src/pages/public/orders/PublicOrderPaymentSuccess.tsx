@@ -6,7 +6,10 @@ import { PaymentStatus } from '@/types/payment.types';
 import type { UUID } from '@/types';
 import Button from '@/components/inputs/Button';
 import { LoadingItem } from '@/components/ui/loading-item';
-import AdministrativeLocation from '@/containers/locations/AdministrativeLocation';
+import NearestPlace from '@/containers/locations/NearestPlace';
+import LocationDetailModal, {
+  type LocationDetail,
+} from '@/components/orders/LocationDetailModal';
 import { formatCurrency } from '@/utils/strings.util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faCopy } from '@fortawesome/free-regular-svg-icons';
@@ -65,6 +68,9 @@ const PublicOrderPaymentSuccess = () => {
   const [copiedReference, setCopiedReference] = useState<
     'payment' | 'order' | null
   >(null);
+  const [locationDetail, setLocationDetail] = useState<LocationDetail | null>(
+    null,
+  );
   useDocumentTitle(t('payment.success.docTitle'));
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -105,6 +111,7 @@ const PublicOrderPaymentSuccess = () => {
       : undefined;
 
   const copyReference = (value: string, field: 'payment' | 'order') => {
+    if (!value) return;
     void navigator.clipboard.writeText(value);
     toast.success(t('payment.success.referenceCopied', {
       type: field === 'payment' ? t('payment.label') : t('tracking.orderReference'),
@@ -122,17 +129,68 @@ const PublicOrderPaymentSuccess = () => {
   ) {
     return (
       <PublicPage>
-        <PublicSectionCard className="mx-auto mt-8 w-full max-w-xl">
-          <div className="py-5" role="status" aria-live="polite">
-            <LoadingItem
-              title={t('payment.success.confirmingTitle')}
-              className="mx-auto max-w-md"
-            />
-            <p className="mx-auto mt-2 max-w-md text-center text-sm leading-6 text-(--muted)">
-              {t('payment.success.confirmingDescription')}
-            </p>
+        <PublicPageHero
+          eyebrow={t('payment.success.complete')}
+          title={t('payment.success.confirmingTitle')}
+          description={t('payment.success.confirmingDescription')}
+        />
+
+        <div
+          className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(17rem,0.8fr)] lg:items-start"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="space-y-5">
+            <PublicSectionCard
+              eyebrow={t('payment.success.receipt')}
+              title={t('payment.success.details')}
+              description={t('payment.success.detailsDescription')}
+            >
+              <LoadingItem
+                title={t('payment.success.confirmingTitle')}
+                className="max-w-md"
+              />
+              <dl className="mt-5 divide-y divide-(--line)">
+                {['payment', 'order', 'amount'].map((row) => (
+                  <div
+                    key={row}
+                    className="grid gap-2 py-4 first:pt-0 sm:grid-cols-[10rem_1fr] sm:items-center"
+                  >
+                    <SkeletonLine className="h-3 w-20" />
+                    <SkeletonLine className="h-6 w-36 sm:justify-self-end" />
+                  </div>
+                ))}
+              </dl>
+            </PublicSectionCard>
+
+            <PublicSectionCard
+              eyebrow={t('payment.success.route')}
+              title={t('payment.success.pickupDestination')}
+            >
+              <div className="grid gap-6 sm:grid-cols-2">
+                {[1, 2].map((item) => (
+                  <div key={item} className="space-y-3">
+                    <SkeletonLine className="h-3 w-20" />
+                    <SkeletonLine className="h-4 w-36" />
+                    <SkeletonLine className="h-4 w-28" />
+                  </div>
+                ))}
+              </div>
+            </PublicSectionCard>
           </div>
-        </PublicSectionCard>
+
+          <PublicSectionCard
+            eyebrow={t('payment.success.next')}
+            title={t('payment.success.trackAssignment')}
+            description={t('payment.success.trackDescription')}
+          >
+            <div className="space-y-3">
+              <SkeletonLine className="h-4 w-full" />
+              <SkeletonLine className="h-4 w-3/4" />
+              <SkeletonLine className="h-10 w-full" />
+            </div>
+          </PublicSectionCard>
+        </div>
       </PublicPage>
     );
   }
@@ -193,7 +251,7 @@ const PublicOrderPaymentSuccess = () => {
                       copied={copiedReference === 'payment'}
                       onCopy={() =>
                         copyReference(
-                          successfulPayment.externalReferenceId,
+                          successfulPayment?.externalReferenceId ?? '',
                           'payment',
                         )
                       }
@@ -247,11 +305,7 @@ const PublicOrderPaymentSuccess = () => {
                 ))}
               </div>
             ) : (
-              <div className="relative grid gap-6 sm:grid-cols-2 sm:gap-10">
-                <span
-                  aria-hidden="true"
-                  className="absolute left-2 top-5 hidden h-px w-[calc(50%-0.5rem)] bg-(--ink) sm:block"
-                />
+              <div className="grid gap-6 sm:grid-cols-2 sm:gap-10">
                 {[
                   {
                     label: t('payment.pickup'),
@@ -267,11 +321,28 @@ const PublicOrderPaymentSuccess = () => {
                     <p className="type-meta">
                       {stop.label}
                     </p>
-                    <div className="mt-3 text-sm text-(--ink)">
+                    <div className="mt-3">
                       {stop.location ? (
-                        <AdministrativeLocation location={stop.location} />
+                        <>
+                          <NearestPlace location={stop.location} />
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              if (stop.location) {
+                                setLocationDetail({
+                                  label: stop.label,
+                                  location: stop.location,
+                                });
+                              }
+                            }}
+                            className="type-meta mt-2 w-fit cursor-pointer text-(--ink) underline underline-offset-2"
+                          >
+                            {t('publicOrder.addressDetails')}
+                          </button>
+                        </>
                       ) : (
-                        <p>{t('common.notSet')}</p>
+                        <p className="type-meta">{t('common.notSet')}</p>
                       )}
                     </div>
                   </article>
@@ -323,6 +394,11 @@ const PublicOrderPaymentSuccess = () => {
           {t('tracking.back')}
         </Button>
       </footer>
+
+      <LocationDetailModal
+        detail={locationDetail}
+        onClose={() => setLocationDetail(null)}
+      />
     </PublicPage>
   );
 };
