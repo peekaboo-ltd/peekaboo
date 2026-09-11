@@ -6,15 +6,14 @@ import { PendingOrderSessionStatus } from "../constants/pendingOrderSession.cons
 import { WhatsAppMessageStatus } from "../constants/message.constants";
 import { PaymentType } from "../constants/payment.constants";
 import { RoleTypes } from "../constants/role.constants";
-import { KpayCurrency, KpayPaymentStatus } from "../types/kpay.types";
-import { PaymentProvider, UrubutoChannelName } from "../types/urubuto.types";
+import { PaymentCurrency, PaymentStatus } from "../types/payment-status.types";
+import { PaymentProvider, PaypackChannel } from "../types/paypack.types";
 import {
   formatPhoneForProvider,
   normalizePhoneNumber,
   validateAndFormatPhoneNumber,
 } from "../helpers/phone.helper";
 import {
-  sendCtaUrlButton,
   sendFlowMessage,
   sendLocationRequestMessage,
   sendMessage,
@@ -232,7 +231,7 @@ export class WhatsappService {
         : null;
       if (
         payerSession.status === PendingOrderSessionStatus.AWAITING_QUOTE_CONFIRMATION ||
-        payment?.status === KpayPaymentStatus.FAILED
+        payment?.status === PaymentStatus.FAILED
       ) {
         await this.sendSessionFlow(
           payerSession,
@@ -538,25 +537,12 @@ export class WhatsappService {
         if (data.approve_quote !== true && data.approve_quote !== "true") {
           return respond(screen, { ...this.quoteScreenData(session), error: "Approve the calculated fee to continue." });
         }
-        const method = String(data.payment_method || "") as UrubutoChannelName;
-        if (!Object.values(UrubutoChannelName).includes(method)) {
-          return respond(screen, { ...this.quoteScreenData(session), error: "Choose a payment method." });
-        }
-        if (method === UrubutoChannelName.CARD) {
-          return respond("CARD_DETAILS", { session_id: session.id });
+        const method = String(data.payment_method || "") as PaypackChannel;
+        if (!Object.values(PaypackChannel).includes(method)) {
+          return respond(screen, { ...this.quoteScreenData(session), error: "Choose MTN Mobile Money or Airtel Money." });
         }
         await this.initiatePayment(session, method, senderPhone);
         return respond("PAYMENT_PENDING", { payment_method: method });
-      }
-
-      if (screen === "CARD_DETAILS") {
-        const name = String(data.cardholder_name || "").trim();
-        const email = String(data.cardholder_email || "").trim().toLowerCase();
-        if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          return respond(screen, { session_id: session.id, error: "Enter the cardholder name and a valid email." });
-        }
-        await this.initiatePayment(session, UrubutoChannelName.CARD, senderPhone, name, email);
-        return respond("PAYMENT_PENDING", { payment_method: UrubutoChannelName.CARD });
       }
 
       return respond(screen, { error: "Unsupported booking step." });
@@ -672,7 +658,7 @@ export class WhatsappService {
 
   private async initiatePayment(
     session: PendingOrderSession,
-    method: UrubutoChannelName,
+    method: PaypackChannel,
     payerPhone: string,
     customerName = "",
     customerEmail = "",
@@ -683,7 +669,7 @@ export class WhatsappService {
     const existing = session.paymentId
       ? await AppDataSource.getRepository(Payment).findOne({ where: { id: session.paymentId } })
       : null;
-    if (existing && existing.status !== KpayPaymentStatus.FAILED) return existing;
+    if (existing && existing.status !== PaymentStatus.FAILED) return existing;
 
     const order = await this.orderService.confirmWhatsappQuote(session.orderId);
     const payer = await this.userService.getUserByCondition({ phoneNumber: payerPhone });
@@ -695,13 +681,13 @@ export class WhatsappService {
         idempotencyKey,
         entityId: order.id,
         amount: Number(order.finalFee),
-        currency: KpayCurrency.RWF,
+        currency: PaymentCurrency.RWF,
         type: PaymentType.ORDER,
         customerPhone: payerPhone,
         customerName: customerName || payer?.name || "WhatsApp customer",
         customerEmail: customerEmail || payer?.email || "",
         createdById: payer?.id,
-        provider: PaymentProvider.URUBUTO,
+        provider: PaymentProvider.PAYPACK,
         channelName: method,
         metadata: {
           source: "whatsapp_personal",
@@ -728,7 +714,7 @@ export class WhatsappService {
         ...(session.metadataJson || {}),
         paymentAttemptNumber,
       },
-      status: payment.status === KpayPaymentStatus.SUCCESSFUL
+      status: payment.status === PaymentStatus.SUCCESSFUL
         ? PendingOrderSessionStatus.PAID
         : PendingOrderSessionStatus.PAYMENT_PENDING,
     });
@@ -737,24 +723,11 @@ export class WhatsappService {
       ? session.conversationId
       : session.recipientConversationId;
     if (conversationId) {
-      if (method === UrubutoChannelName.CARD) {
-        const paymentUrl = payment.paymentUrl || payment.metadata?.paymentUrl;
-        if (!paymentUrl) throw new Error("The hosted card checkout link was not returned");
-        const response = await sendCtaUrlButton({
-          phoneNumber: payerPhone,
-          displayText: `Pay ${Number(order.finalFee).toLocaleString()} RWF`,
-          url: paymentUrl,
-          bodyText: `Complete payment for order ${order.referenceId}. This unique checkout expires with the quote.`,
-          footerText: "Order-bound secure checkout",
-        });
-        await this.recordOutbound(conversationId, response, { kind: "card_checkout", paymentId: payment.id });
-      } else {
-        await this.sendText(
-          payerPhone,
-          conversationId,
-          `Approve the ${method === UrubutoChannelName.MOMO ? "MTN MoMo" : "Airtel Money"} wallet prompt for order ${order.referenceId}. No payment link is required.`,
-        );
-      }
+      await this.sendText(
+        payerPhone,
+        conversationId,
+        `Approve the ${method === PaypackChannel.MOMO ? "MTN MoMo" : "Airtel Money"} wallet prompt for order ${order.referenceId}. No payment link is required.`,
+      );
       await this.conversationService.updateConversation(conversationId, {
         step: ConversationStep.PAYMENT_PENDING,
       });
@@ -805,7 +778,7 @@ export class WhatsappService {
       "DROPOFF_SEARCH",
       "DROPOFF_RESULTS",
     ]);
-    const payerScreens = new Set(["QUOTE", "CARD_DETAILS"]);
+    const payerScreens = new Set(["QUOTE"]);
 
     if (senderScreens.has(screen) && normalized !== session.waPhone) {
       throw new ValidationError("Only the sender can complete this booking step");

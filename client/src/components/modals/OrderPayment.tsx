@@ -5,11 +5,7 @@ import { toast } from 'sonner';
 import Modal from '../Modal';
 import { useAppDispatch, useAppSelector } from '@/states/hooks';
 import { setOrderPaymentModal, setSelectedOrder } from '@/states/slices/order.slice';
-import {
-  PaymentChannel,
-  PaymentType,
-  isMobileMoneyChannel,
-} from '@/types/payment.types';
+import { PaymentChannel, PaymentType } from '@/types/payment.types';
 import { formatCurrency, formatPhone } from '@/utils/strings.util';
 import { validateAndFormatPhoneNumber } from '@/utils/phone.util';
 import Button from '../inputs/Button';
@@ -23,7 +19,6 @@ import {
 } from '@/constants/environments.constants';
 import PaymentChannelSelect from './payment/PaymentChannelSelect';
 import MobileMoneyFields from './payment/MobileMoneyFields';
-import CardFields from './payment/CardFields';
 import type { PaymentFormValues } from './payment/payment.types';
 import { useI18n } from '@/i18n/i18n';
 
@@ -34,8 +29,6 @@ const defaultValues: PaymentFormValues = {
   payerType: 'sender',
   customPhone: '',
   fallbackPhone: '',
-  cardholderName: '',
-  payerEmail: '',
 };
 
 const OrderPayment = () => {
@@ -50,7 +43,6 @@ const OrderPayment = () => {
   // Payers picked from the order have no form field of their own, so their
   // validation error is held here rather than in the form state.
   const [payerPhoneError, setPayerPhoneError] = useState('');
-  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const {
     control,
@@ -62,7 +54,6 @@ const OrderPayment = () => {
   const channelName = useWatch({ control, name: 'channelName' });
   const payerType = useWatch({ control, name: 'payerType' });
   const customPhone = useWatch({ control, name: 'customPhone' });
-  const isMobileMoney = isMobileMoneyChannel(channelName);
 
   const amount =
     selectedOrder?.finalFee ??
@@ -76,7 +67,6 @@ const OrderPayment = () => {
     dispatch(setSelectedOrder(undefined));
     reset(defaultValues);
     setPayerPhoneError('');
-    setIsRedirecting(false);
   }, [dispatch, reset]);
 
   const { createPayment: createAuthPaymentMutation, isLoading: authPaymentLoading } =
@@ -135,24 +125,20 @@ const OrderPayment = () => {
     async (values: PaymentFormValues) => {
       setPayerPhoneError('');
       const payerInfo = getPayerInfo(values);
-      const isCard = values.channelName === PaymentChannel.CARD;
 
       const phoneValidation = validateAndFormatPhoneNumber(payerInfo.phone || '');
       const payerPhone = phoneValidation.isValid ? phoneValidation.e164 : null;
 
-      // Mobile money charges a phone; cards don't need one at all.
-      if (!isCard) {
-        if (!payerPhone) {
-          const message = !payerInfo.phone?.trim()
-            ? t('orderPayment.noPayerPhone')
-            : t('orderPayment.invalidPhone');
-          setPayerPhoneError(message);
-          return;
-        }
-        if (phoneValidation.type !== 'MOBILE') {
-          setPayerPhoneError(t('orderPayment.mobilePhone'));
-          return;
-        }
+      if (!payerPhone) {
+        const message = !payerInfo.phone?.trim()
+          ? t('orderPayment.noPayerPhone')
+          : t('orderPayment.invalidPhone');
+        setPayerPhoneError(message);
+        return;
+      }
+      if (phoneValidation.type !== 'MOBILE') {
+        setPayerPhoneError(t('orderPayment.mobilePhone'));
+        return;
       }
 
       const fallbackValidation = validateAndFormatPhoneNumber(values.fallbackPhone || '');
@@ -167,9 +153,9 @@ const OrderPayment = () => {
         currency: 'RWF',
         type: PaymentType.ORDER,
         description: selectedOrder?.notes,
-        customerEmail: isCard ? values.payerEmail.trim() : payerInfo.email,
-        customerName: isCard ? values.cardholderName.trim() : payerInfo.name,
-        ...(payerPhone ? { customerPhone: payerPhone } : {}),
+        customerEmail: payerInfo.email,
+        customerName: payerInfo.name,
+        customerPhone: payerPhone,
         channelName: values.channelName,
         method: values.channelName,
         metadata: {
@@ -181,10 +167,6 @@ const OrderPayment = () => {
       try {
         const response = await createPaymentMutation(payload).unwrap();
         const paymentId = response?.data?.id;
-        const paymentUrl =
-          response?.paymentUrl ||
-          response?.data?.paymentUrl ||
-          response?.data?.metadata?.cardProcessingUrl;
         const initiationError = response?.data?.metadata?.initiationError;
         const orderId = selectedOrder?.id;
 
@@ -193,20 +175,6 @@ const OrderPayment = () => {
             initiationError?.message ||
               t('orderPayment.initiationError'),
           );
-          return;
-        }
-
-        if (isCard) {
-          // Without a hosted checkout URL the card payment never started, so
-          // don't send the user to the success page.
-          if (!paymentUrl || !paymentId) {
-            toast.error(
-              t('orderPayment.cardStartError'),
-            );
-            return;
-          }
-          setIsRedirecting(true);
-          window.location.href = paymentUrl;
           return;
         }
 
@@ -228,7 +196,7 @@ const OrderPayment = () => {
           apiError?.data?.message ||
           apiError?.error ||
           t('orderPayment.initiationError');
-        if (!isCard && /phone|mobile money|wallet/i.test(message)) {
+        if (/phone|mobile money|wallet/i.test(message)) {
           setPayerPhoneError(message);
         }
         toast.error(message);
@@ -250,28 +218,6 @@ const OrderPayment = () => {
   useEffect(() => {
     setPayerPhoneError('');
   }, [payerType, channelName]);
-
-  // PREFILL CARD DETAILS FROM THE ORDER
-  useEffect(() => {
-    if (!selectedOrder) return;
-    reset(
-      (current) => ({
-        ...current,
-        cardholderName:
-          current.cardholderName ||
-          selectedOrder.sender?.name ||
-          selectedOrder.senderName ||
-          '',
-        payerEmail:
-          current.payerEmail ||
-          selectedOrder.contactEmail ||
-          (selectedOrder.sender?.email !== FALLBACK_EMAIL
-            ? (selectedOrder.sender?.email ?? '')
-            : ''),
-      }),
-      { keepDefaultValues: true },
-    );
-  }, [selectedOrder, reset]);
 
   return (
     <Modal
@@ -295,22 +241,18 @@ const OrderPayment = () => {
           }
         />
 
-        {isMobileMoney ? (
-          <MobileMoneyFields
-            control={control}
-            errors={errors}
-            channelName={channelName}
-            payerType={payerType}
-            senderLabel={selectedOrder?.senderName || selectedOrder?.sender?.name}
-            recipientLabel={
-              selectedOrder?.recipientName || selectedOrder?.recipient?.name
-            }
-            payerPhone={resolvedPayerPhone}
-            payerPhoneError={payerPhoneError}
-          />
-        ) : (
-          <CardFields control={control} errors={errors} />
-        )}
+        <MobileMoneyFields
+          control={control}
+          errors={errors}
+          channelName={channelName}
+          payerType={payerType}
+          senderLabel={selectedOrder?.senderName || selectedOrder?.sender?.name}
+          recipientLabel={
+            selectedOrder?.recipientName || selectedOrder?.recipient?.name
+          }
+          payerPhone={resolvedPayerPhone}
+          payerPhoneError={payerPhoneError}
+        />
 
         <p className="flex items-center justify-between border-t border-(--line) pt-3 text-sm">
           <span className="text-(--muted)">{t('orderPayment.amountDue')}</span>
@@ -331,12 +273,8 @@ const OrderPayment = () => {
           </p>
         ) : null}
 
-        <Button submit primary isLoading={isLoading || isRedirecting}>
-          {isRedirecting
-            ? t('orderPayment.redirecting')
-            : isMobileMoney
-              ? t('orderPayment.payAmount', { amount: formatCurrency(amount) })
-              : t('orderPayment.continueCard')}
+        <Button submit primary isLoading={isLoading}>
+          {t('orderPayment.payAmount', { amount: formatCurrency(amount) })}
         </Button>
       </form>
     </Modal>

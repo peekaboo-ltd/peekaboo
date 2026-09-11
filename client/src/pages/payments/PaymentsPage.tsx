@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { KpayPaymentStatus, Payment } from '@/types/payment.types';
+import { PaymentStatus, Payment } from '@/types/payment.types';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { AdminPaymentsQueryParams } from '@/api/queries/payments.queries';
@@ -46,9 +46,9 @@ const formatDateParam = (date?: Date) => {
 
 const PAYMENT_STATUS_OPTIONS = [
   { value: 'all', labelKey: 'payments.allStatuses' },
-  { value: KpayPaymentStatus.PENDING, labelKey: 'status.pending' },
-  { value: KpayPaymentStatus.SUCCESSFUL, labelKey: 'status.successful' },
-  { value: KpayPaymentStatus.FAILED, labelKey: 'status.failed' },
+  { value: PaymentStatus.PENDING, labelKey: 'status.pending' },
+  { value: PaymentStatus.SUCCESSFUL, labelKey: 'status.successful' },
+  { value: PaymentStatus.FAILED, labelKey: 'status.failed' },
 ];
 
 const CURRENCY_OPTIONS = [
@@ -236,9 +236,9 @@ const PaymentsPage = () => {
     ];
 
     const statusLabels: Record<string, string> = {
-      [KpayPaymentStatus.PENDING]: t('status.pending'),
-      [KpayPaymentStatus.SUCCESSFUL]: t('status.successful'),
-      [KpayPaymentStatus.FAILED]: t('status.failed'),
+      [PaymentStatus.PENDING]: t('status.pending'),
+      [PaymentStatus.SUCCESSFUL]: t('status.successful'),
+      [PaymentStatus.FAILED]: t('status.failed'),
     };
 
     const methodLabels: Record<string, string> = {

@@ -64,42 +64,23 @@ This document is the exhaustive reference for every environment variable used ac
 | `WHATSAPP_FLOW_PRIVATE_KEY` | — | Optional (for Flows) | RSA private key used to decrypt WhatsApp Flow **data-exchange** requests. **Gotcha:** when set through an env file, newlines must be escaped (`\n`). | `whatsapp.flows.helper.ts:25` |
 | `WHATSAPP_ORDER_INITIAL_FEE` | `1500` | Optional | Initial fee applied to orders created via WhatsApp. **Not in `.env.example`** — set it to override `DEFAULT_ORDER_FEE` in `whatsapp.service.ts:32`. | `whatsapp.service.ts:574` |
 
-### Kpay (secondary payment gateway)
+### Paypack (payment gateway)
 
 | Variable | Default | Required | Purpose & behavior | Read at |
 | --- | --- | --- | --- | --- |
-| `KPAY_USERNAME` | — | Only if using Kpay | Basic-auth username for the Kpay API. | `kpay.service.ts:26` |
-| `KPAY_PASSWORD` | — | Only if using Kpay | Basic-auth password for the Kpay API. | `kpay.service.ts:27` |
-| `KPAY_BASE_URL` | `https://pay.esicia.com` | Only if using Kpay | Kpay endpoint. `pay.esicia.rw` = production, `pay.esicia.com` = sandbox. | `kpay.service.ts:28` |
-| `KPAY_RETAILER_ID` | — | Only if using Kpay | Retailer ID provided by Kpay. | `kpay.service.ts:29` |
-| `KPAY_WEBHOOK_URL` | — | Only if using Kpay | URL Kpay calls for payment notifications (example: `https://your-domain.com/api/v1/webhooks/kpay`). | `kpay.service.ts:30` |
-| `KPAY_API_KEY` | — | Only if using Kpay | API key. **Not in `.env.example`** — used by the Kpay service. | `kpay.service.ts:32` |
-| `KPAY_SECRET_KEY` | — | Only if using Kpay | Secret key. **Not in `.env.example`** — used by the Kpay service. | `kpay.service.ts:33` |
-| `KPAY_MERCHANT_ID` | — | Only if using Kpay | Merchant ID. **Not in `.env.example`** — used by the Kpay service. | `kpay.service.ts:34` |
+| `PAYPACK_CLIENT_ID` | — | Yes | Client ID of the Paypack dashboard application. | `paypack.config.ts` |
+| `PAYPACK_CLIENT_SECRET` | — | Yes | Client secret of the Paypack dashboard application. | `paypack.config.ts` |
+| `PAYPACK_WEBHOOK_SECRET` | — | Yes | Webhook secret from the Paypack dashboard. Verifies the `x-paypack-signature` header (base64 HMAC-SHA256 of the raw body) on `transaction:processed` events. | `paypack.service.ts` |
+| `PAYPACK_ENV` | `production` when `NODE_ENV=production`, else `development` | Optional | Sent as the `X-Webhook-Mode` header on cashin. **Must match the mode registered on the Paypack dashboard webhook** or no webhook is delivered. | `paypack.config.ts` |
+| `PAYPACK_BASE_URL` | `https://payments.paypack.rw/api` | Optional | Paypack API base URL override. | `paypack.config.ts` |
 
-### UrubutoPay (primary payment gateway)
-
-| Variable | Default | Required | Purpose & behavior | Read at |
-| --- | --- | --- | --- | --- |
-| `URUBUTO_BASE_URL` | `https://staging.urubutopay.rw` | Yes (for Urubuto) | API base URL. `staging.urubutopay.rw` = staging, `urubutopay.rw` = production. The environment is auto-detected from this URL and cross-checked against the checkout URL. | `urubuto.config.ts:53` |
-| `URUBUTO_API_KEY` | — | Yes (for Urubuto) | API key from the UrubutoPay developer menu (format `upg:...`). Startup validation warns on missing/placeholder/test-looking keys. | `urubuto.config.ts:57,115-129` |
-| `URUBUTO_MERCHANT_CODE` | — | Yes (for Urubuto) | Merchant code. Validation rejects placeholder values and codes identical to the service code. | `urubuto.config.ts:58,131-151` |
-| `URUBUTO_SERVICE_CODE` | — | Yes (for Urubuto) | Service code **linked to the merchant** in the same environment as `URUBUTO_BASE_URL`. | `urubuto.config.ts:59` |
-| `URUBUTO_WEBHOOK_USERNAME` | — | Yes (for Urubuto) | Basic-auth username for inbound Urubuto webhooks. | `urubuto.config.ts:60` |
-| `URUBUTO_WEBHOOK_PASSWORD` | — | Yes (for Urubuto) | Basic-auth password for inbound Urubuto webhooks. | `urubuto.config.ts:61` |
-| `URUBUTO_WEBHOOK_JWT_SECRET` | falls back to `JWT_SECRET`, then `peekaboo` | Optional | Secret for verifying webhook JWTs. Set a strong, dedicated value. | `urubuto.config.ts:62-65` |
-| `URUBUTO_CHECKOUT_BASE_URL` | derived from `URUBUTO_BASE_URL` | Optional | Public checkout URL used in redirects. When unset, resolves from the API base (staging → `https://staging.urubutopay.rw`, otherwise `https://urubutopay.rw`). Startup validation rejects mismatched staging/production combinations. | `urubuto.config.ts:36-49,66-69,96-113` |
-| `URUBUTO_CARD_REDIRECT_BASE_URL` | falls back to `FRONTEND_URL` | Optional | Public HTTPS origin approved by UrubutoPay for `CARD` payment redirects. Server builds `{base}/p/orders/{orderId}/payment-pending?paymentId={paymentId}` after trimming whitespace/trailing slashes. **Must be the approved domain in production.** | `payment.service.ts` |
-
-**UrubutoPay webhook URLs** registered with the provider (constructed from `PUBLIC_API_BASE_URL`):
+**Paypack webhook URL** registered on the Paypack dashboard (constructed from `PUBLIC_API_BASE_URL`):
 
 ```
-${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/auth
-${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/validation
-${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/callback
-${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/notification
-${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/reversal
+${PUBLIC_API_BASE_URL}/api/v1/webhooks/paypack
 ```
+
+Paypack HEAD-pings this URL before delivering payloads; the server answers HEAD with 200. Cashin requires a minimum of 100 RWF — smaller charges (e.g. `dev_price` mode) complete as simulated and are flagged `paypackMinimumNotMet` in the payment metadata.
 
 ### Google OAuth
 

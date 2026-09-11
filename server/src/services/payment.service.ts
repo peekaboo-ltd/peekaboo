@@ -10,16 +10,18 @@ import {
   CreatePaymentDto,
   PublicPaymentStatusDto,
 } from '../types/payment.types';
-import { KpayService } from '../integrations/kpay/kpay.service';
-import { KpayPaymentMethod, KpayPaymentStatus } from '../types/kpay.types';
-import { UrubutoService } from '../integrations/urubuto/urubuto.service';
+import { PaymentStatus } from '../types/payment-status.types';
+import {
+  PAYPACK_TIMEOUT,
+  PROVIDER_UNREACHABLE,
+  PaypackService,
+} from '../integrations/paypack/paypack.service';
+import { PAYPACK_MIN_CASHIN_RWF } from '../integrations/paypack/paypack.config';
 import {
   PaymentProvider,
-  UrubutoChannelName,
-  UrubutoPaymentWebhookPayload,
-  UrubutoPayerValidationRequest,
-  UrubutoTransactionStatus,
-} from '../types/urubuto.types';
+  PaypackChannel,
+  PaypackWebhookPayload,
+} from '../types/paypack.types';
 import { Request } from 'express';
 import {
   getPagination,
@@ -44,6 +46,7 @@ import { Conversation } from '../entities/conversation.entity';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import {
+  formatPhoneForPaypack,
   validateAndFormatPhoneNumber,
 } from '../helpers/phone.helper';
 import { ConversationStatus } from '../constants/conversation.constants';
@@ -70,8 +73,7 @@ type InitiationContext = {
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
-  private readonly kpayService: KpayService;
-  private readonly urubutoService: UrubutoService;
+  private readonly paypackService: PaypackService;
   private readonly orderActivityService: OrderActivityService;
   private readonly orderAssignmentService: OrderAssignmentService;
   private readonly emailService: EmailService;
@@ -79,8 +81,7 @@ export class PaymentService {
 
   constructor() {
     this.paymentRepository = AppDataSource.getRepository(Payment);
-    this.kpayService = new KpayService();
-    this.urubutoService = new UrubutoService();
+    this.paypackService = new PaypackService();
     this.orderActivityService = new OrderActivityService();
     this.orderAssignmentService = new OrderAssignmentService();
     this.emailService = new EmailService();
@@ -95,8 +96,6 @@ export class PaymentService {
   async createPayment(payment: CreatePaymentDto): Promise<Payment> {
     const context = this.resolveInitiationContext(payment);
 
-    await this.validateUrubutoWallet(context);
-
     const newPayment = await this.paymentRepository.save(
       this.buildPaymentRecord(payment, context),
     );
@@ -104,6 +103,19 @@ export class PaymentService {
     if (context.isSimulated) {
       return this.completeSimulatedPayment(newPayment, payment, context);
     }
+
+    logger.debug('Initiating provider payment payload', {
+      paymentId: newPayment.id,
+      entityId: payment.entityId,
+      provider: context.provider,
+      channelName: context.requestedMethod,
+      chargeAmount: context.chargeAmount,
+      catalogAmount: context.catalogAmount,
+      isDevPrice: context.isDevPrice,
+      isSimulated: context.isSimulated,
+      phoneNumber: context.customerPhone,
+      phoneNumberFormatted: formatPhoneForPaypack(context.customerPhone),
+    });
 
     const result = await this.initiateProviderPayment(
       payment,
@@ -128,12 +140,8 @@ export class PaymentService {
     }
 
     if (result && !result.success) {
-      const isUrubutoTimeout =
-        context.provider === PaymentProvider.URUBUTO &&
-        result.error?.code === 'URUBUTO_TIMEOUT';
-
-      if (isUrubutoTimeout) {
-        return this.reconcileUrubutoTimeout(newPayment, result);
+      if (result.error?.code === PAYPACK_TIMEOUT) {
+        return this.reconcilePaypackTimeout(newPayment, payment, context, result);
       }
 
       // The provider was never reached, so no transaction exists on their side
@@ -141,9 +149,9 @@ export class PaymentService {
       // request: 503 keeps it out of the client-error bucket and tells callers
       // the same request is worth retrying later.
       const isProviderUnreachable =
-        result.error?.code === 'PROVIDER_UNREACHABLE';
+        result.error?.code === PROVIDER_UNREACHABLE;
 
-      newPayment.status = KpayPaymentStatus.FAILED;
+      newPayment.status = PaymentStatus.FAILED;
       newPayment.metadata = {
         ...(newPayment.metadata || {}),
         initiationError: result.error,
@@ -155,7 +163,7 @@ export class PaymentService {
 
       const failureMessage =
         result.error?.message ||
-        'UrubutoPay payment could not be initiated. Please try again.';
+        'Paypack payment could not be initiated. Please try again.';
 
       throw isProviderUnreachable
         ? new AppError(failureMessage, 503)
@@ -194,7 +202,7 @@ export class PaymentService {
     }
 
     if (status) {
-      condition.status = status as KpayPaymentStatus;
+      condition.status = status as PaymentStatus;
     }
 
     if (startDate) {
@@ -257,7 +265,7 @@ export class PaymentService {
   })
   async updatePaymentStatus(
     paymentId: UUID,
-    status: KpayPaymentStatus,
+    status: PaymentStatus,
     metadata?: Record<string, any>,
   ): Promise<Payment> {
     const payment = await this.paymentRepository.findOne({
@@ -281,10 +289,10 @@ export class PaymentService {
     const previousStatus = payment.status;
     const existingMetadata = payment.metadata || {};
     const paidAfterWhatsappSessionExpired =
-      status === KpayPaymentStatus.SUCCESSFUL &&
+      status === PaymentStatus.SUCCESSFUL &&
       (await this.isWhatsappSessionExpired(existingMetadata));
 
-    payment.status = status as KpayPaymentStatus;
+    payment.status = status as PaymentStatus;
     payment.metadata = {
       ...existingMetadata,
       ...(metadata || {}),
@@ -294,15 +302,15 @@ export class PaymentService {
     };
     await this.paymentRepository.update(payment?.id as UUID, payment);
 
-    const latestOrder = status === KpayPaymentStatus.SUCCESSFUL
+    const latestOrder = status === PaymentStatus.SUCCESSFUL
       ? await AppDataSource.getRepository(Order).findOne({
           where: { id: payment.entityId },
         })
       : order;
 
     if (
-      status === KpayPaymentStatus.SUCCESSFUL &&
-      previousStatus !== KpayPaymentStatus.SUCCESSFUL &&
+      status === PaymentStatus.SUCCESSFUL &&
+      previousStatus !== PaymentStatus.SUCCESSFUL &&
       latestOrder?.status === OrderStatus.CANCELLED
     ) {
       payment.metadata = {
@@ -325,8 +333,8 @@ export class PaymentService {
     }
 
     if (
-      status === KpayPaymentStatus.SUCCESSFUL &&
-      previousStatus !== KpayPaymentStatus.SUCCESSFUL
+      status === PaymentStatus.SUCCESSFUL &&
+      previousStatus !== PaymentStatus.SUCCESSFUL
     ) {
       const whatsappSessionId = payment.metadata?.whatsappBookingSessionId as UUID | undefined;
       if (whatsappSessionId) {
@@ -361,8 +369,8 @@ export class PaymentService {
     }
 
     if (
-      status === KpayPaymentStatus?.FAILED &&
-      previousStatus !== KpayPaymentStatus.FAILED &&
+      status === PaymentStatus?.FAILED &&
+      previousStatus !== PaymentStatus.FAILED &&
       payment?.customerEmail
     ) {
       // Send payment failed email (non-blocking)
@@ -386,81 +394,21 @@ export class PaymentService {
     return payment;
   }
 
-  async validateUrubutoPayer(request: UrubutoPayerValidationRequest): Promise<{
-    merchant_code: string;
-    payer_code: string;
-    payer_names: string;
-    amount: number;
-    currency: string;
-    payer_must_pay_total_amount: string;
-    comment: string;
-  }> {
-    if (
-      !request.merchant_code ||
-      request.merchant_code !== this.urubutoService.getMerchantCode()
-    ) {
-      throw new NotFoundError('merchant not found');
+  // Signature verification itself happens in the webhook controller, which
+  // rejects forged payloads before this runs.
+  async processPaypackWebhook(payload: PaypackWebhookPayload): Promise<Payment> {
+    if (payload.kind !== 'transaction:processed' || !payload.data) {
+      throw new ValidationError('Unsupported Paypack webhook event');
     }
 
-    if (!request.payer_code) {
-      throw new NotFoundError('no data found for the given payer code');
-    }
-
-    const order = await AppDataSource.getRepository(Order).findOne({
-      where: { referenceId: request.payer_code },
-      relations: {
-        sender: true,
-        recipient: true,
-      },
+    const data = payload.data;
+    const payment = await this.paymentRepository.findOne({
+      where: { externalReferenceId: data.ref },
     });
 
-    if (!order) {
-      throw new NotFoundError('no data found for the given payer code');
-    }
-
-    const catalogAmount = Number(order.finalFee || order.initialFee || 0);
-    const { chargeAmount } = resolveChargeableAmount(catalogAmount);
-
-    return {
-      merchant_code: request.merchant_code,
-      payer_code: request.payer_code,
-      payer_names:
-        order.sender?.name ||
-        order.recipient?.name ||
-        order.externalReferenceId ||
-        order.referenceId,
-      amount: chargeAmount,
-      currency: 'RWF',
-      payer_must_pay_total_amount: 'YES',
-      comment: order.notes || order.description || 'Peekaboo order payment',
-    };
-  }
-
-  async processUrubutoPaymentWebhook(
-    payload: UrubutoPaymentWebhookPayload,
-    source: 'callback' | 'notification' | 'reversal',
-  ): Promise<Payment> {
-    if (
-      !payload.merchant_code ||
-      payload.merchant_code !== this.urubutoService.getMerchantCode()
-    ) {
-      throw new ValidationError('UrubutoPay merchant code does not match');
-    }
-
-    if (
-      source === 'callback' &&
-      payload.callback_type &&
-      payload.callback_type !== 'PAYMENT'
-    ) {
-      throw new ValidationError('Unsupported UrubutoPay callback type');
-    }
-
-    const payment = await this.findUrubutoPayment(payload);
-
-    logger.debug('UrubutoPay webhook payment lookup', {
-      source,
-      transactionId: payload.transaction_id || payload.internal_transaction_id,
-      payerCode: payload.payer_code,
+    logger.debug('Paypack webhook payment lookup', {
+      ref: data.ref,
+      transactionStatus: data.status,
       matchedPaymentId: payment?.id,
     });
 
@@ -468,83 +416,70 @@ export class PaymentService {
       throw new NotFoundError('Payment not found');
     }
 
-    this.validateUrubutoWebhookPayment(payment, payload);
+    if (
+      data.amount !== undefined &&
+      (!Number.isFinite(Number(data.amount)) ||
+        Math.abs(Number(data.amount) - Number(payment.amount)) > 0.001)
+    ) {
+      throw new ValidationError('Paypack webhook amount does not match');
+    }
 
-    const inferredStatus =
-      source === 'reversal'
-        ? UrubutoTransactionStatus.CANCELED
-        : payload.transaction_status ||
-          (payload.slip_number
-            ? UrubutoTransactionStatus.VALID
-            : UrubutoTransactionStatus.PENDING_SETTLEMENT);
-
-    const status = this.urubutoService.mapStatusToInternal(inferredStatus);
-    const externalReference = this.resolveUrubutoExternalReference(
-      payment,
-      payload,
-      source,
-    );
+    const status = this.paypackService.mapStatusToInternal(data.status);
+    // Never let a late "pending" event reopen a terminal payment.
     const nextStatus =
-      source !== 'reversal' &&
-      status === KpayPaymentStatus.PENDING &&
-      (payment.status === KpayPaymentStatus.SUCCESSFUL ||
-        payment.status === KpayPaymentStatus.FAILED)
+      status === PaymentStatus.PENDING &&
+      (payment.status === PaymentStatus.SUCCESSFUL ||
+        payment.status === PaymentStatus.FAILED)
         ? payment.status
         : status;
 
-    payment.externalReferenceId = externalReference;
-    await this.paymentRepository.update(payment.id, {
-      externalReferenceId: externalReference,
-    });
-
     return this.updatePaymentStatus(payment.id as UUID, nextStatus, {
-      [`urubuto${this.capitalize(source)}Payload`]: payload,
-      urubutoLastStatus: inferredStatus,
-      urubutoLastWebhookSource: source,
-      urubutoLastWebhookAt: new Date().toISOString(),
-      ...(payload.slip_number ? { slipNumber: payload.slip_number } : {}),
-      ...(payload.initial_slip_number
-        ? { initialSlipNumber: payload.initial_slip_number }
-        : {}),
+      paypackWebhookPayload: payload,
+      paypackLastStatus: data.status,
+      paypackProcessedAt: data.processed_at,
+      paypackFee: data.fee,
+      paypackProvider: data.provider,
+      paypackLastWebhookAt: new Date().toISOString(),
     });
+  }
+
+  async verifyPaypackTransactionStatus(ref: string) {
+    const lookup = await this.paypackService.findTransaction(ref);
+    if (!lookup.success || !lookup.data) {
+      throw new NotFoundError(lookup.error?.message || 'Transaction not found');
+    }
+    return {
+      status: this.paypackService.mapStatusToInternal(lookup.data.status),
+      data: lookup.data,
+    };
   }
 
 
   private resolveInitiationContext(payment: CreatePaymentDto): InitiationContext {
     const mode = getPaymentMode();
     const isSimulated = mode === 'simulate';
-    const provider = this.resolvePaymentProvider(payment.provider);
+    const provider = PaymentProvider.PAYPACK;
     const requestedMethod =
-      payment.channelName ||
-      payment.method ||
-      payment.metadata?.channelName ||
-      (provider === PaymentProvider.URUBUTO
-        ? UrubutoChannelName.MOMO
-        : KpayPaymentMethod.MOBILE_MONEY);
+      payment.channelName || payment.method || payment.metadata?.channelName || PaypackChannel.MOMO;
+
+    if (
+      !Object.values(PaypackChannel).includes(requestedMethod as PaypackChannel)
+    ) {
+      throw new ValidationError(
+        'Unsupported payment channel. Choose MTN Mobile Money or Airtel Money.',
+      );
+    }
 
     const phoneValidation = payment.customerPhone
       ? validateAndFormatPhoneNumber(payment.customerPhone)
       : undefined;
     const customerPhone = phoneValidation?.e164;
 
-    const requiresPhone =
-      !isSimulated &&
-      (provider === PaymentProvider.KPAY ||
-        requestedMethod === UrubutoChannelName.MOMO ||
-        requestedMethod === UrubutoChannelName.AIRTEL_MONEY ||
-        requestedMethod === KpayPaymentMethod.MOBILE_MONEY);
-
-    if (requiresPhone && !customerPhone) {
+    if (!isSimulated && !customerPhone) {
       throw new ValidationError('A valid payer phone number is required');
     }
 
-    const requiresMobile =
-      !isSimulated &&
-      (requestedMethod === UrubutoChannelName.MOMO ||
-        requestedMethod === UrubutoChannelName.AIRTEL_MONEY ||
-        requestedMethod === KpayPaymentMethod.MOBILE_MONEY);
-
-    if (requiresMobile && phoneValidation?.type !== 'MOBILE') {
+    if (!isSimulated && phoneValidation?.type !== 'MOBILE') {
       throw new ValidationError(
         'A valid Rwandan mobile number is required for mobile money',
       );
@@ -552,6 +487,12 @@ export class PaymentService {
 
     const { chargeAmount, isDevPrice, catalogAmount, isSimulated: simulated } =
       resolveChargeableAmount(Number(payment.amount));
+
+    // Paypack cashin rejects amounts below its minimum. Never charge a
+    // different amount than displayed, so complete these as simulated and say
+    // so in the metadata (affects dev_price mode, which charges 10 RWF).
+    const belowProviderMinimum =
+      !simulated && chargeAmount < PAYPACK_MIN_CASHIN_RWF;
 
     const metadata: Record<string, any> = {
       ...(payment.metadata || {}),
@@ -563,10 +504,16 @@ export class PaymentService {
             chargedAmount: DEVELOPMENT_PAYMENT_AMOUNT_RWF,
           }
         : {}),
-      ...(simulated
+      ...(simulated || belowProviderMinimum
         ? {
             simulated: true,
             catalogAmount,
+          }
+        : {}),
+      ...(belowProviderMinimum
+        ? {
+            paypackMinimumNotMet: true,
+            paypackMinimum: PAYPACK_MIN_CASHIN_RWF,
           }
         : {}),
     };
@@ -579,6 +526,14 @@ export class PaymentService {
       });
     }
 
+    if (belowProviderMinimum) {
+      logger.info('Charge below Paypack minimum, completing as simulated', {
+        entityId: payment.entityId,
+        chargeAmount,
+        minimum: PAYPACK_MIN_CASHIN_RWF,
+      });
+    }
+
     return {
       provider,
       requestedMethod,
@@ -586,7 +541,7 @@ export class PaymentService {
       chargeAmount,
       catalogAmount,
       isDevPrice,
-      isSimulated: simulated,
+      isSimulated: simulated || belowProviderMinimum,
       metadata,
     };
   }
@@ -601,7 +556,7 @@ export class PaymentService {
       amount: context.chargeAmount,
       externalReferenceId: undefined,
       internalReferenceId: payment?.entityId,
-      status: KpayPaymentStatus.PENDING,
+      status: PaymentStatus.PENDING,
       customerEmail: payment?.customerEmail,
       customerName: payment?.customerName,
       customerPhone: context.customerPhone,
@@ -646,7 +601,7 @@ export class PaymentService {
 
     const updated = await this.updatePaymentStatus(
       newPayment.id as UUID,
-      KpayPaymentStatus.SUCCESSFUL,
+      PaymentStatus.SUCCESSFUL,
       newPayment.metadata,
     );
 
@@ -661,87 +616,27 @@ export class PaymentService {
     newPayment: Payment,
     context: InitiationContext,
   ): Promise<any> {
-    if (context.provider === PaymentProvider.KPAY) {
-      return this.kpayService.initiatePayment({
-        amount: context.chargeAmount,
-        currency: payment.currency,
-        customerEmail: payment?.customerEmail,
-        customerName: payment?.customerName,
-        customerPhone: context.customerPhone,
-        refId: newPayment?.id as UUID,
-        description: payment.description,
-      });
+    const localNumber = formatPhoneForPaypack(context.customerPhone);
+    if (!localNumber) {
+      return {
+        success: false,
+        error: {
+          code: 'INVALID_PHONE',
+          message: 'A valid Rwandan mobile number is required for mobile money',
+        },
+      };
     }
 
-    const payerCode = await this.resolveUrubutoPayerCode(payment.entityId);
-    const redirectUrl = this.getPaymentPendingUrl(
-      payment.entityId,
-      newPayment.id,
-    );
-
-    if (context.requestedMethod === UrubutoChannelName.CARD) {
-      this.validateCardPaymentRedirectUrl(redirectUrl);
-      logger.debug('Resolved CARD payment redirect URL', {
-        entityId: payment.entityId,
-        paymentId: newPayment.id,
-        provider: context.provider,
-        channelName: context.requestedMethod,
-        redirectUrl,
-      });
-    }
-
-    return this.urubutoService.initiatePayment({
+    return this.paypackService.cashin({
       amount: context.chargeAmount,
       currency: payment.currency,
-      customerEmail: payment?.customerEmail,
-      customerName: payment?.customerName,
-      customerPhone: context.customerPhone,
+      customerPhone: localNumber,
       refId: newPayment?.id as UUID,
-      payerCode,
-      channelName: context.requestedMethod,
-      redirectUrl,
+      // UUID hex is exactly 32 chars, the max Idempotency-Key length, so a
+      // retried cashin for the same payment can never double-charge.
+      idempotencyKey: String(newPayment?.id).replace(/-/g, ''),
+      channel: context.requestedMethod as PaypackChannel,
     });
-  }
-
-  private async validateUrubutoWallet(
-    context: InitiationContext,
-  ): Promise<void> {
-    if (
-      context.isSimulated ||
-      context.provider !== PaymentProvider.URUBUTO ||
-      (context.requestedMethod !== UrubutoChannelName.MOMO &&
-        context.requestedMethod !== UrubutoChannelName.AIRTEL_MONEY)
-    ) {
-      return;
-    }
-
-    if (!context.customerPhone) {
-      throw new ValidationError('A valid payer phone number is required');
-    }
-
-    const result = await this.urubutoService.validateAccountHolder({
-      customerPhone: context.customerPhone,
-      channelName: context.requestedMethod,
-    });
-
-    if (!result.success) {
-      throw new AppError(
-        result.error?.message ||
-          'We could not verify this mobile money account. Please try again.',
-        503,
-      );
-    }
-
-    if (!result.valid) {
-      const providerName =
-        context.requestedMethod === UrubutoChannelName.AIRTEL_MONEY
-          ? 'Airtel Money'
-          : 'MTN Mobile Money';
-      throw new ValidationError(
-        result.message ||
-          `This phone number is not registered for ${providerName}. Check the number or choose the correct network.`,
-      );
-    }
   }
 
   private async applyInitiationResult(
@@ -749,7 +644,7 @@ export class PaymentService {
     result: any,
   ): Promise<void> {
     newPayment.externalReferenceId = result.data?.transactionId;
-    newPayment.status = result.data?.status as KpayPaymentStatus;
+    newPayment.status = result.data?.status as PaymentStatus;
     newPayment.metadata = {
       ...(newPayment.metadata || {}),
       ...(result.data?.metadata || {}),
@@ -767,42 +662,57 @@ export class PaymentService {
       method: newPayment.method,
     });
 
-    if (result.data?.status === KpayPaymentStatus.SUCCESSFUL) {
+    if (result.data?.status === PaymentStatus.SUCCESSFUL) {
       await this.updatePaymentStatus(
         newPayment.id as UUID,
-        result.data?.status as KpayPaymentStatus,
+        result.data?.status as PaymentStatus,
       );
     }
   }
 
-  private async reconcileUrubutoTimeout(
+  // The cashin POST timed out, so a transaction may or may not exist at
+  // Paypack. First look for a transaction the timed-out request may have
+  // created, then retry once with the same idempotency key (Paypack rejects
+  // the duplicate instead of double-charging). Either way the payment stays
+  // PENDING and the webhook settles it.
+  private async reconcilePaypackTimeout(
     newPayment: Payment,
+    payment: CreatePaymentDto,
+    context: InitiationContext,
     result: any,
   ): Promise<Payment> {
-    const timeoutMetadata = result.error?.metadata || {};
-    const transactionId =
-      timeoutMetadata.transactionId ||
-      timeoutMetadata.localPaymentId ||
-      newPayment.id;
-    const verification =
-      await this.verifyUrubutoTransactionStatus(transactionId as string);
-    const verifiedTransactionId =
-      verification.data?.internal_transaction_id ||
-      verification.data?.transaction_id ||
-      transactionId;
+    const reconciliation: Record<string, any> = {
+      checkedAt: new Date().toISOString(),
+      initiationError: result.error,
+    };
 
-    // A provider status lookup helps correlate a timed-out request, but only
-    // an authenticated UrubutoPay webhook may complete the payment.
-    newPayment.status = KpayPaymentStatus.PENDING;
-    newPayment.externalReferenceId = verifiedTransactionId;
+    const adopted = await this.adoptTimedOutTransaction(newPayment, context);
+    if (adopted) {
+      reconciliation.adoptedRef = adopted;
+      newPayment.status = PaymentStatus.PENDING;
+      newPayment.externalReferenceId = adopted;
+    } else {
+      const retry = await this.initiateProviderPayment(payment, newPayment, context);
+      reconciliation.retry = { success: retry?.success, error: retry?.error };
+      if (retry?.success && retry.data?.transactionId) {
+        await this.applyInitiationResult(newPayment, retry);
+        this.sendPaymentInitiatedEmail(payment, context.chargeAmount);
+        newPayment.metadata = {
+          ...(newPayment.metadata || {}),
+          paypackTimeoutReconciliation: reconciliation,
+        };
+        await this.paymentRepository.update(newPayment.id, {
+          metadata: newPayment.metadata,
+        });
+        return newPayment;
+      }
+      newPayment.status = PaymentStatus.PENDING;
+    }
+
     newPayment.metadata = {
       ...(newPayment.metadata || {}),
       initiationError: result.error,
-      urubutoTimeoutReconciliation: {
-        checkedAt: new Date().toISOString(),
-        transactionId,
-        verification,
-      },
+      paypackTimeoutReconciliation: reconciliation,
     };
 
     await this.paymentRepository.update(newPayment.id, {
@@ -812,6 +722,38 @@ export class PaymentService {
     });
 
     return newPayment;
+  }
+
+  // Find a CASHIN for our number+amount created in the last 15 minutes and
+  // adopt its ref when the timed-out cashin never returned one.
+  private async adoptTimedOutTransaction(
+    newPayment: Payment,
+    context: InitiationContext,
+  ): Promise<string | undefined> {
+    try {
+      const localNumber = formatPhoneForPaypack(context.customerPhone);
+      if (!localNumber) return undefined;
+      const listing = await this.paypackService.listTransactions({
+        limit: 20,
+        offset: 0,
+        kind: 'CASHIN',
+        client: localNumber,
+      });
+      const candidates = listing.data?.transactions || [];
+      const cutoff = Date.now() - 15 * 60_000;
+      const match = candidates.find(
+        (tx: any) =>
+          Number(tx.amount) === Number(newPayment.amount) &&
+          Date.parse(tx.timestamp) >= cutoff,
+      );
+      return match?.ref;
+    } catch (error) {
+      logger.error('Paypack timeout reconciliation lookup failed', {
+        paymentId: newPayment.id,
+        message: (error as any)?.message,
+      });
+      return undefined;
+    }
   }
 
   private sendPaymentInitiatedEmail(
@@ -857,48 +799,8 @@ export class PaymentService {
     return false;
   }
 
-  async verifyUrubutoTransactionStatus(transactionId: string) {
-    return this.urubutoService.verifyTransactionStatus(transactionId);
-  }
-
-  private async resolveUrubutoPayerCode(entityId: UUID): Promise<string> {
-    const order = await AppDataSource.getRepository(Order).findOne({
-      where: { id: entityId },
-    });
-
-    if (!order) {
-      throw new NotFoundError('Order not found for UrubutoPay payment', {
-        referenceId: entityId,
-        referenceType: LogReferenceTypes.ORDER,
-      });
-    }
-
-    if (!order.referenceId) {
-      throw new ValidationError(
-        'Order is missing a reference ID required for UrubutoPay payment',
-        {
-          referenceId: entityId,
-          referenceType: LogReferenceTypes.ORDER,
-        },
-      );
-    }
-
-    return order.referenceId;
-  }
-
-  private resolvePaymentProvider(provider?: PaymentProvider): PaymentProvider {
-    if (provider === PaymentProvider.KPAY) return PaymentProvider.KPAY;
-
-    const configuredProvider = process.env.PAYMENT_PROVIDER_DEFAULT;
-    if (configuredProvider === PaymentProvider.KPAY) return PaymentProvider.KPAY;
-
-    return PaymentProvider.URUBUTO;
-  }
-
   private getPaymentPendingUrl(orderId: UUID, paymentId: UUID): string {
-    const baseUrl =
-      this.normalizeBaseUrl(process.env.URUBUTO_CARD_REDIRECT_BASE_URL) ||
-      this.normalizeBaseUrl(process.env.FRONTEND_URL);
+    const baseUrl = this.normalizeBaseUrl(process.env.FRONTEND_URL);
 
     if (baseUrl) {
       return `${baseUrl}/p/orders/${orderId}/payment-pending?paymentId=${paymentId}`;
@@ -907,157 +809,8 @@ export class PaymentService {
     return `https://peekaboo.co.rw/p/orders/${orderId}/payment-pending?paymentId=${paymentId}`;
   }
 
-  private validateUrubutoWebhookPayment(
-    payment: Payment,
-    payload: UrubutoPaymentWebhookPayload,
-  ): void {
-    if (payload.amount !== undefined) {
-      const webhookAmount = Number(payload.amount);
-      if (
-        !Number.isFinite(webhookAmount) ||
-        Math.abs(webhookAmount - Number(payment.amount)) > 0.001
-      ) {
-        throw new ValidationError('UrubutoPay webhook amount does not match');
-      }
-    }
-
-    if (
-      payload.currency &&
-      payload.currency.toUpperCase() !== payment.currency.toUpperCase()
-    ) {
-      throw new ValidationError('UrubutoPay webhook currency does not match');
-    }
-
-    const expectedPayerCode = payment.metadata?.payerCode;
-    if (
-      expectedPayerCode &&
-      payload.payer_code &&
-      payload.payer_code !== expectedPayerCode
-    ) {
-      throw new ValidationError('UrubutoPay webhook payer code does not match');
-    }
-  }
-
-  private resolveUrubutoExternalReference(
-    payment: Payment,
-    payload: UrubutoPaymentWebhookPayload,
-    source: 'callback' | 'notification' | 'reversal',
-  ): string | undefined {
-    if (payload.internal_transaction_id) {
-      return payload.internal_transaction_id;
-    }
-
-    if (payment.externalReferenceId) {
-      return payment.externalReferenceId;
-    }
-
-    if (
-      payload.transaction_id &&
-      (source !== 'callback' || payload.transaction_id !== payment.id)
-    ) {
-      return payload.transaction_id;
-    }
-
-    return undefined;
-  }
-
-  private validateCardPaymentRedirectUrl(redirectUrl: string): void {
-    let parsedUrl: URL;
-
-    try {
-      parsedUrl = new URL(redirectUrl);
-    } catch {
-      throw new ValidationError(
-        'CARD payments require a valid absolute HTTPS FRONTEND_URL',
-      );
-    }
-
-    if (
-      !this.isLocalRedirectHost(parsedUrl.hostname) &&
-      parsedUrl.protocol !== 'https:'
-    ) {
-      throw new ValidationError(
-        'CARD payments require a valid absolute HTTPS FRONTEND_URL',
-      );
-    }
-  }
-
-  private isLocalRedirectHost(hostname: string): boolean {
-    const normalizedHostname = hostname.toLowerCase();
-
-    return (
-      normalizedHostname === 'localhost' ||
-      normalizedHostname === '127.0.0.1' ||
-      normalizedHostname === '::1' ||
-      normalizedHostname.endsWith('.localhost')
-    );
-  }
-
   private normalizeBaseUrl(url?: string): string {
     return (url || '').trim().replace(/\/+$/, '');
-  }
-
-  private async findUrubutoPayment(
-    payload: UrubutoPaymentWebhookPayload,
-  ): Promise<Payment | null> {
-    const transactionId =
-      payload.transaction_id || payload.internal_transaction_id || '';
-
-    if (this.isUuid(transactionId)) {
-      const paymentById = await this.paymentRepository.findOne({
-        where: { id: transactionId as UUID },
-      });
-
-      if (paymentById) return paymentById;
-    }
-
-    const queryBuilder = this.paymentRepository
-      .createQueryBuilder('payment')
-      .where('payment.provider = :provider', {
-        provider: PaymentProvider.URUBUTO,
-      });
-
-    const clauses: string[] = [];
-    const params: Record<string, string> = {};
-
-    if (transactionId) {
-      clauses.push('payment.externalReferenceId = :transactionId');
-      clauses.push(
-        "payment.metadata ->> 'urubutoInternalTransactionRef' = :transactionId",
-      );
-      params.transactionId = transactionId;
-    }
-
-    if (payload.payer_code) {
-      clauses.push("payment.metadata ->> 'payerCode' = :payerCode");
-      params.payerCode = payload.payer_code;
-
-      const order = await AppDataSource.getRepository(Order).findOne({
-        where: { referenceId: payload.payer_code },
-      });
-
-      if (order) {
-        clauses.push('payment.entityId = :entityId');
-        params.entityId = order.id;
-      }
-    }
-
-    if (!clauses.length) return null;
-
-    return queryBuilder
-      .andWhere(`(${clauses.join(' OR ')})`, params)
-      .orderBy('payment.createdAt', 'DESC')
-      .getOne();
-  }
-
-  private isUuid(value: string): boolean {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-      value,
-    );
-  }
-
-  private capitalize(value: string): string {
-    return value.charAt(0).toUpperCase() + value.slice(1);
   }
 
   // ADMIN: FETCH PAYMENTS WITH COMPREHENSIVE FILTERS
@@ -1221,9 +974,9 @@ export class PaymentService {
         'COALESCE(SUM(payment.amount) FILTER (WHERE payment.status = :failed), 0)::numeric AS "failedAmount"',
       ])
       .setParameters({
-        pending: KpayPaymentStatus.PENDING,
-        successful: KpayPaymentStatus.SUCCESSFUL,
-        failed: KpayPaymentStatus.FAILED,
+        pending: PaymentStatus.PENDING,
+        successful: PaymentStatus.SUCCESSFUL,
+        failed: PaymentStatus.FAILED,
       })
       .getRawOne();
 
@@ -1242,7 +995,7 @@ export class PaymentService {
   // ADMIN: UPDATE PAYMENT STATUS (manual)
   async adminUpdatePaymentStatus(
     paymentId: UUID,
-    status: KpayPaymentStatus,
+    status: PaymentStatus,
   ): Promise<Payment> {
     return this.updatePaymentStatus(paymentId, status);
   }

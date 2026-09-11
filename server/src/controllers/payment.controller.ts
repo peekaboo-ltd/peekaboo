@@ -3,7 +3,7 @@ import { PaymentService } from '../services/payment.service';
 import { OrderService } from '../services/order.service';
 
 import { AuthenticatedRequest } from '../types/auth.types';
-import { KpayPaymentStatus } from '../types/kpay.types';
+import { PaymentStatus } from '../types/payment-status.types';
 import { UUID } from '../types';
 import { ValidationError } from '../helpers/errors.helper';
 
@@ -191,7 +191,7 @@ export const PaymentController = {
       const { status } = req.body;
       const payment = await paymentService.adminUpdatePaymentStatus(
         id as UUID,
-        status as KpayPaymentStatus,
+        status as PaymentStatus,
       );
       return res.status(200).json({
         message: 'Payment status updated successfully',

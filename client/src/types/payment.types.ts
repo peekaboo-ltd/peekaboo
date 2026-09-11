@@ -3,23 +3,24 @@ export enum PaymentType {
   ORDER = 'ORDER',
 }
 
-// Payment Status (Based on Kpay)
-export enum KpayPaymentStatus {
+// Payment Status (stored codes shared with the server PaymentStatus enum)
+export enum PaymentStatus {
   PENDING = '03',
   SUCCESSFUL = '01',
   FAILED = '02',
 }
 
 export enum PaymentProvider {
+  PAYPACK = 'PAYPACK',
+  // Retired providers, kept so historical payments still map.
   URUBUTO = 'URUBUTO',
   KPAY = 'KPAY',
 }
 
-/** Mirrors the server's UrubutoChannelName (server/src/types/urubuto.types.ts). */
+/** Mirrors the server's PaypackChannel (server/src/types/paypack.types.ts). */
 export enum PaymentChannel {
   MOMO = 'MOMO',
   AIRTEL_MONEY = 'AIRTEL_MONEY',
-  CARD = 'CARD',
 }
 
 export const MOBILE_MONEY_CHANNELS = [
@@ -28,12 +29,11 @@ export const MOBILE_MONEY_CHANNELS = [
 ] as const;
 
 export const isMobileMoneyChannel = (channel: PaymentChannel): boolean =>
-  channel !== PaymentChannel.CARD;
+  (MOBILE_MONEY_CHANNELS as readonly string[]).includes(channel);
 
 export const PAYMENT_CHANNEL_LABELS: Record<PaymentChannel, string> = {
   [PaymentChannel.MOMO]: 'MTN Mobile Money',
   [PaymentChannel.AIRTEL_MONEY]: 'Airtel Money',
-  [PaymentChannel.CARD]: 'Card (Visa / Mastercard)',
 };
 
 // Payment Entity (matches backend Payment entity)
@@ -52,7 +52,7 @@ export interface Payment {
   externalReferenceId: string;
   createdById: string;
   type: PaymentType;
-  status: KpayPaymentStatus;
+  status: PaymentStatus;
   description: string;
   method: string;
   provider: PaymentProvider;
@@ -95,7 +95,7 @@ export interface PublicPaymentStatus {
   amount: number;
   currency: 'RWF' | 'USD';
   externalReferenceId?: string;
-  status: KpayPaymentStatus;
+  status: PaymentStatus;
   method: string;
   provider: PaymentProvider;
   updatedAt: string;

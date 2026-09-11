@@ -8,7 +8,7 @@ import { RoleTypes } from '../constants/role.constants';
 import { OrderStatus, OrderAssignmentStatus } from '../constants/order.constants';
 import { TierBreakdown } from '../constants/businessPlan.constants';
 import { PaymentType } from '../constants/payment.constants';
-import { KpayPaymentStatus } from '../types/kpay.types';
+import { PaymentStatus } from '../types/payment-status.types';
 import {
   DashboardMetrics,
   AdminMetrics,
@@ -417,14 +417,14 @@ export class DashboardService {
     // Payment metrics
     const pendingPaymentsQb = this.paymentRepository
       .createQueryBuilder('payment')
-      .where('payment.status = :status', { status: KpayPaymentStatus.PENDING })
+      .where('payment.status = :status', { status: PaymentStatus.PENDING })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER });
     this.applyDateRange(pendingPaymentsQb, 'payment', 'createdAt', range);
     const pendingPayments = await pendingPaymentsQb.getCount();
 
     const completedPaymentsQb = this.paymentRepository
       .createQueryBuilder('payment')
-      .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .where('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER });
     this.applyDateRange(completedPaymentsQb, 'payment', 'createdAt', range);
     const completedPayments = await completedPaymentsQb.getCount();
@@ -655,7 +655,7 @@ export class DashboardService {
       .createQueryBuilder('payment')
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
       .where('payment.createdById = :userId', { userId })
-      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .andWhere('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
       .getRawOne();
     const totalSpent = parseFloat(totalSpentResult?.total || '0');
@@ -667,7 +667,7 @@ export class DashboardService {
       .createQueryBuilder('payment')
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
       .where('payment.createdById = :userId', { userId })
-      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .andWhere('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER });
     if (startDate && endDate) {
       spendingThisMonthQb.andWhere('payment.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate });
@@ -737,7 +737,7 @@ export class DashboardService {
     // Pending payments
     const pendingPaymentsQb = this.paymentRepository
       .createQueryBuilder('payment')
-      .where('payment.status = :status', { status: KpayPaymentStatus.PENDING })
+      .where('payment.status = :status', { status: PaymentStatus.PENDING })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER });
     this.applyDateRange(pendingPaymentsQb, 'payment', 'createdAt', range);
     if (hasScopedOrders) {
@@ -751,7 +751,7 @@ export class DashboardService {
 
     const completedPaymentsQb = this.paymentRepository
       .createQueryBuilder('payment')
-      .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .where('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER });
     this.applyDateRange(completedPaymentsQb, 'payment', 'createdAt', range);
     if (hasScopedOrders) {
@@ -766,7 +766,7 @@ export class DashboardService {
     const billingAndPaymentsThisMonthQb = this.paymentRepository
       .createQueryBuilder('payment')
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
-      .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .where('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
       .andWhere(
         hasScopedOrders
@@ -784,7 +784,7 @@ export class DashboardService {
     const totalPaidQb = this.paymentRepository
       .createQueryBuilder('payment')
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
-      .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .where('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
       .andWhere(
         hasScopedOrders
@@ -896,7 +896,7 @@ export class DashboardService {
           .getCount(),
         this.paymentRepository
           .createQueryBuilder('payment')
-          .where('payment.status = :status', { status: KpayPaymentStatus.PENDING })
+          .where('payment.status = :status', { status: PaymentStatus.PENDING })
           .andWhere(
             hasScopedOrders
               ? 'payment.entityId IN (:...scopedOrderIds)'
@@ -906,7 +906,7 @@ export class DashboardService {
           .getCount(),
         this.paymentRepository
           .createQueryBuilder('payment')
-          .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+          .where('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
           .andWhere(
             hasScopedOrders
               ? 'payment.entityId IN (:...scopedOrderIds)'
@@ -919,7 +919,7 @@ export class DashboardService {
     const totalRevenueResult = await this.paymentRepository
       .createQueryBuilder('payment')
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
-      .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .where('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
       .andWhere(
         hasScopedOrders
           ? 'payment.entityId IN (:...scopedOrderIds)'
@@ -1360,7 +1360,7 @@ export class DashboardService {
       .andWhere('payment.createdAt <= :end', { end: now })
       // Payment scope contract: order revenue uses ORDER payments where entityId = orders.id.
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
-      .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL });
+      .andWhere('payment.status = :status', { status: PaymentStatus.SUCCESSFUL });
 
     if (!scopeIsAdmin) {
       const scopedOrderIds = await this.getScopedOrderIdsForBusinessUser(userId);
@@ -1498,7 +1498,7 @@ export class DashboardService {
           .where('payment.createdAt >= :start', { start: effectiveStart })
           // Payment scope contract: order revenue uses ORDER payments where entityId = orders.id.
           .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER })
-          .andWhere('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL });
+          .andWhere('payment.status = :status', { status: PaymentStatus.SUCCESSFUL });
 
         if (!isAdmin) {
           const scopedOrderIds = await this.getScopedOrderIdsForBusinessUser(userId);
@@ -1792,7 +1792,7 @@ export class DashboardService {
     const totalRevenueQb = this.paymentRepository
       .createQueryBuilder('payment')
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
-      .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .where('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER });
     this.applyDateRange(totalRevenueQb, 'payment', 'createdAt', range);
     const totalRevenueResult = await totalRevenueQb.getRawOne();
@@ -1801,7 +1801,7 @@ export class DashboardService {
     const billingAndPaymentsThisMonthQb = this.paymentRepository
       .createQueryBuilder('payment')
       .select('COALESCE(SUM(payment.amount), 0)', 'total')
-      .where('payment.status = :status', { status: KpayPaymentStatus.SUCCESSFUL })
+      .where('payment.status = :status', { status: PaymentStatus.SUCCESSFUL })
       .andWhere('payment.type = :paymentType', { paymentType: PaymentType.ORDER });
     this.applyDateRange(billingAndPaymentsThisMonthQb, 'payment', 'createdAt', range);
     const billingAndPaymentsThisMonthResult = await billingAndPaymentsThisMonthQb.getRawOne();

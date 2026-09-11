@@ -20,15 +20,15 @@ import {
   setUpdateStatusModal,
 } from '@/states/slices/payment.slice';
 import { useAdminUpdatePaymentStatus } from '@/hooks/payments/payment.hooks';
-import { KpayPaymentStatus } from '@/types/payment.types';
+import { PaymentStatus } from '@/types/payment.types';
 import { useState } from 'react';
 import { formatCurrency } from '@/utils/strings.util';
 import { useI18n } from '@/i18n/i18n';
 
 const STATUS_OPTIONS = [
-  { value: KpayPaymentStatus.PENDING, labelKey: 'status.pending' },
-  { value: KpayPaymentStatus.SUCCESSFUL, labelKey: 'status.successful' },
-  { value: KpayPaymentStatus.FAILED, labelKey: 'status.failed' },
+  { value: PaymentStatus.PENDING, labelKey: 'status.pending' },
+  { value: PaymentStatus.SUCCESSFUL, labelKey: 'status.successful' },
+  { value: PaymentStatus.FAILED, labelKey: 'status.failed' },
 ];
 
 const UpdatePaymentStatusModal = () => {

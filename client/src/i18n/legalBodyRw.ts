@@ -64,7 +64,7 @@ export const legalBodyRw: Record<string, string> = {
   // --- Terms: s06 Payment ---
   'legal.terms.s06.title': 'Kwishyura',
   'legal.terms.s06.p1':
-    'Kwishyura bikorwa mu mafranga y’u Rwanda (RWF) binyuze mu mufatanyabikorwa wacu wo kwishyura (ubu Kpay cyangwa uwundi tuzashyira ahagaragara). Mu kwemera kwishyura, wemera amabwiriza y’uwukora kwishyura no kutwishyura umubare wagaragaye.',
+    'Kwishyura bikorwa mu mafranga y’u Rwanda (RWF) binyuze mu mufatanyabikorwa wacu wo kwishyura (ubu Paypack cyangwa uwundi tuzashyira ahagaragara). Mu kwemera kwishyura, wemera amabwiriza y’uwukora kwishyura no kutwishyura umubare wagaragaye.',
   'legal.terms.s06.p2':
     'Kwishyura byagenze neza bishobora gutera gutanga umujyanama no gukomeza itegeko mu sisitemu zacu. Kwishyura byanze cyangwa byasubijwe inyuma bishobora gutinda cyangwa guhagarika gukora. Uri inshingano yo kugira amafaranga ahagije n’ibikoresho byo kwishyura byemewe.',
   'legal.terms.s06.p3':
@@ -218,7 +218,7 @@ export const legalBodyRw: Record<string, string> = {
   // --- Refund: r06 ---
   'legal.refund.r06.title': 'Igihe n’uburyo bwo gukora',
   'legal.refund.r06.p1':
-    'Dushaka kwemeza ko twakiriye ibisaba mu minsi itatu (3) y’akazi no kurangiza isuzuma ry’imbere mu minsi indwi (7) kugeza ku cumi na kane (14) y’akazi iyo amakuru aruzuye. Gushyira amafaranga mu wallet, konti ya banki, cyangwa karita bishobora gufata igihe cyongeyeho bitewe na Kpay, amabanki, cyangwa abatanga mobile money.',
+    'Dushaka kwemeza ko twakiriye ibisaba mu minsi itatu (3) y’akazi no kurangiza isuzuma ry’imbere mu minsi indwi (7) kugeza ku cumi na kane (14) y’akazi iyo amakuru aruzuye. Gushyira amafaranga mu wallet, konti ya banki, cyangwa karita bishobora gufata igihe cyongeyeho bitewe na Paypack, amabanki, cyangwa abatanga mobile money.',
   'legal.refund.r06.p2':
     'Kwishyura, iyo byemewe, bisanzwe bishyurwa binyuze mu nzira y’amafaranga nk’uko byakozwe. Niba iyo nzira idashobora kwakira gusubizwa inyuma, dushobora gutanga ubundi buryo bukwiye (urug.: kohereza muri banki) nyuma yo gusuzuma.',
   'legal.refund.r06.p3':

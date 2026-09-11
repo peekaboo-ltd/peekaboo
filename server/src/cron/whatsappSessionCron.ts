@@ -6,7 +6,7 @@ import { Order } from "../entities/order.entity";
 import { OrderActivity } from "../entities/orderActivity.entity";
 import { Payment } from "../entities/payment.entity";
 import { PendingOrderSession } from "../entities/pendingOrderSession.entity";
-import { KpayPaymentStatus } from "../types/kpay.types";
+import { PaymentStatus } from "../types/payment-status.types";
 import { PendingOrderSessionService } from "../services/pendingOrderSession.service";
 import { WhatsappNotificationService } from "../services/whatsappNotification.service";
 import logger from "../helpers/logger.helper";
@@ -39,7 +39,7 @@ export async function expireStaleWhatsappSessions(): Promise<void> {
             lock: { mode: "pessimistic_write" },
           })
         : null;
-      if (payment?.status === KpayPaymentStatus.SUCCESSFUL) {
+      if (payment?.status === PaymentStatus.SUCCESSFUL) {
         session.status = PendingOrderSessionStatus.PAID;
         return manager.getRepository(PendingOrderSession).save(session).then(() => null);
       }

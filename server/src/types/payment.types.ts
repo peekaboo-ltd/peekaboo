@@ -1,14 +1,14 @@
 import { UUID } from ".";
 import { PaymentType } from "../constants/payment.constants";
-import { KpayCurrency, KpayPaymentStatus } from "./kpay.types";
-import { PaymentProvider, UrubutoChannelName } from "./urubuto.types";
+import { PaymentCurrency, PaymentStatus } from "./payment-status.types";
+import { PaymentProvider, PaypackChannel } from "./paypack.types";
 
 // Payment creation DTO
 export interface CreatePaymentDto {
   idempotencyKey?: string;
   entityId: UUID;
   amount: number;
-  currency: KpayCurrency;
+  currency: PaymentCurrency;
   type: PaymentType;
   description?: string;
   customerEmail: string;
@@ -17,7 +17,7 @@ export interface CreatePaymentDto {
   createdById?: UUID;
   provider?: PaymentProvider;
   method?: string;
-  channelName?: UrubutoChannelName;
+  channelName?: PaypackChannel;
   metadata?: Record<string, any>;
 }
 
@@ -29,7 +29,7 @@ export interface PaymentResponseDto {
   amount: number;
   currency: 'RWF' | 'USD';
   type: PaymentType;
-  status: KpayPaymentStatus;
+  status: PaymentStatus;
   description?: string;
   method: string;
   provider: PaymentProvider;
@@ -50,7 +50,7 @@ export interface PaymentResponseDto {
 export interface PublicPaymentStatusDto {
   id: UUID;
   entityId: UUID;
-  status: KpayPaymentStatus;
+  status: PaymentStatus;
   provider: PaymentProvider;
   method: string;
   amount: number;
@@ -63,7 +63,7 @@ export interface PublicPaymentStatusDto {
 export interface PaymentQueryParams {
   entityId?: UUID;
   type?: PaymentType;
-  status?: KpayPaymentStatus;
+  status?: PaymentStatus;
   startDate?: Date;
   endDate?: Date;
   page?: number;

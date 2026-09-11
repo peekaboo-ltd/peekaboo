@@ -10,7 +10,7 @@
 
 import logger from './logger.helper';
 
-export const DEVELOPMENT_PAYMENT_AMOUNT_RWF = 10;
+export const DEVELOPMENT_PAYMENT_AMOUNT_RWF = 100;
 
 export type PaymentMode = 'simulate' | 'dev_price' | 'live';
 

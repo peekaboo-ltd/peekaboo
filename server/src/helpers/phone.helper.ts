@@ -112,3 +112,12 @@ export function formatPhoneForProvider(
   const e164 = normalizePhoneNumber(input);
   return e164 ? e164.slice(1) : null;
 }
+
+// Paypack cashin expects the local MSISDN form (078xxxxxxx).
+export function formatPhoneForPaypack(
+  input: string | null | undefined,
+): string | null {
+  const e164 = normalizePhoneNumber(input);
+  if (!e164 || !e164.startsWith(RWANDA_COUNTRY.dial_code)) return null;
+  return `250${e164.slice(RWANDA_COUNTRY.dial_code.length)}`;
+}
