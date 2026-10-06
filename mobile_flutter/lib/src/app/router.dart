@@ -16,6 +16,15 @@ import '../state/auth_state.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
 
+/// Auth redirect decision, extracted as a pure function for testing.
+String? redirectFor({required AuthState auth, required String location}) {
+  if (!auth.isBootstrapped) return null;
+  final onAuth = location == '/login' || location == '/support';
+  if (!auth.isAuthenticated && !onAuth) return '/login';
+  if (auth.isAuthenticated && location == '/login') return '/dashboard';
+  return null;
+}
+
 /// Routes mirror the Expo Router structure: (auth)/login + support, tabs
 /// dashboard/assignments/profile, assignment/:id, and a not-found page.
 final routerProvider = Provider<GoRouter>((ref) {
@@ -23,15 +32,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     navigatorKey: _rootKey,
     initialLocation: '/dashboard',
     refreshListenable: ref.watch(routerRefreshProvider),
-    redirect: (context, state) {
-      final auth = ref.read(authProvider);
-      if (!auth.isBootstrapped) return null;
-      final location = state.matchedLocation;
-      final onAuth = location == '/login' || location == '/support';
-      if (!auth.isAuthenticated && !onAuth) return '/login';
-      if (auth.isAuthenticated && location == '/login') return '/dashboard';
-      return null;
-    },
+    redirect: (context, state) => redirectFor(
+      auth: ref.read(authProvider),
+      location: state.matchedLocation,
+    ),
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
