@@ -58,10 +58,15 @@ platform :ios do
       </plist>
     PLIST
 
-    Dir.chdir("../..") do
+    # CI runs this lane from mobile_flutter/ios, so one level up is the
+    # Flutter project root. ExportOptions.plist was written to ios/ above,
+    # which is what the path below resolves to.
+    Dir.chdir("..") do
       sh(
         "flutter", "build", "ipa", "--release",
         "--export-options-plist=#{File.expand_path('ios/ExportOptions.plist')}",
+        "--build-name=#{ENV.fetch('BUILD_NAME', '1.0.0')}",
+        "--build-number=#{ENV.fetch('BUILD_NUMBER', '1')}",
         "--dart-define", "API_BASE_URL=#{ENV.fetch('RIDER_API_BASE_URL', 'https://server.peekaboo.co.rw/api/v1')}",
         "--dart-define", "ONESIGNAL_APP_ID=#{ENV.fetch('ONESIGNAL_APP_ID', '')}",
         "--dart-define", "LOCATION_UPDATE_INTERVAL_MINUTES=#{ENV.fetch('LOCATION_UPDATE_INTERVAL_MINUTES', '5')}"

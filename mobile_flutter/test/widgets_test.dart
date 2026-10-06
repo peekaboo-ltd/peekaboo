@@ -80,6 +80,29 @@ void main() {
     expect(result, 'Too far away');
   });
 
+  test('statusKind maps assignment and order codes to one chip set', () {
+    expect(statusKind('COMPLETED'), PkBadgeKind.completed);
+    expect(statusKind('DELIVERED'), PkBadgeKind.completed);
+    expect(statusKind('PENDING'), PkBadgeKind.pending);
+    expect(statusKind('CONFIRMED'), PkBadgeKind.pending);
+    expect(statusKind('ACTIVE'), PkBadgeKind.active);
+    expect(statusKind('IN_TRANSIT'), PkBadgeKind.active);
+    expect(statusKind('REJECTED'), PkBadgeKind.failed);
+    expect(statusKind('CANCELLED'), PkBadgeKind.failed);
+    expect(statusKind(null), PkBadgeKind.inactive);
+    expect(statusKind(''), PkBadgeKind.inactive);
+    expect(statusKind('SOMETHING_NEW'), PkBadgeKind.inactive);
+  });
+
+  testWidgets('PkBadge.status renders the translated status label',
+      (tester) async {
+    await tester.pumpWidget(_harness(PkBadge.status('IN_TRANSIT', _en)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('In transit'), findsOneWidget);
+    expect(find.byIcon(Icons.autorenew), findsOneWidget);
+  });
+
   testWidgets('reject sheet cancel returns null', (tester) async {
     var called = false;
     String? result = 'unset';
