@@ -1,6 +1,8 @@
 // Formatting helpers ported from mobile/utils/formatters.ts.
 import 'dart:math' as math;
 
+import '../i18n/localizations.dart';
+
 const _months = <String>[
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
@@ -79,15 +81,15 @@ String formatRelativeTime(String? dateString) {
 bool _isSameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
 
-String formatSmartDate(String? dateString) {
+String formatSmartDate(String? dateString, Translate tr) {
   if (dateString == null || dateString.isEmpty) return 'N/A';
   final date = DateTime.tryParse(dateString)?.toLocal();
   if (date == null) return 'Invalid Date';
   final now = DateTime.now();
   final time = '${_twoDigits(date.hour)}:${_twoDigits(date.minute)}';
-  if (_isSameDay(date, now)) return 'Today, $time';
+  if (_isSameDay(date, now)) return "${tr('date.today')}, $time";
   if (_isSameDay(date, now.subtract(const Duration(days: 1)))) {
-    return 'Yesterday, $time';
+    return "${tr('date.yesterday')}, $time";
   }
   return '${_months[date.month - 1]} ${_twoDigits(date.day)}, $time';
 }

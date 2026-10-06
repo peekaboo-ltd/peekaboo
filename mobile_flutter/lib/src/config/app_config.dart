@@ -20,7 +20,8 @@ class AppConfig {
   );
 
   /// Effective API base URL with the same fallback rules as the Expo app:
-  /// explicit value wins, otherwise localhost in debug builds, otherwise empty.
+  /// explicit value wins, otherwise localhost in debug builds. Release
+  /// builds refuse to start without an explicit value (CI must inject it).
   static String get effectiveApiBaseUrl {
     if (apiBaseUrl.isNotEmpty) return apiBaseUrl;
     if (kDebugMode) {
@@ -29,8 +30,9 @@ class AppConfig {
       );
       return 'http://localhost:8080/api/v1';
     }
-    debugPrint('API_BASE_URL is missing in this build. Check CI secrets.');
-    return '';
+    throw StateError(
+      'API_BASE_URL is missing in this release build. Check CI secrets.',
+    );
   }
 
   /// Mirrors the Expo fallback: invalid/non-positive values become 1 minute.

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,10 +28,20 @@ class AssignmentDetails extends ConsumerWidget {
   }
 
   Future<void> _openMaps(double lat, double lng) async {
-    final url = Platform.isIOS ? 'maps:0,0?q=$lat,$lng' : 'geo:0,0?q=$lat,$lng';
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+    // Google Maps only — never Apple Maps (product decision). Tries the
+    // native app first, then the universal web URL.
+    final appUri = Uri.parse(
+      'comgooglemaps://?daddr=$lat,$lng&directionsmode=driving',
+    );
+    if (await canLaunchUrl(appUri)) {
+      await launchUrl(appUri);
+      return;
+    }
+    final webUri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
+    );
+    if (await canLaunchUrl(webUri)) {
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
     }
   }
 

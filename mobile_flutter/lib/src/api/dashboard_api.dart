@@ -48,14 +48,22 @@ List<RecentActivity> mapRecentActivity(List<dynamic>? items) {
   return items.whereType<Map<String, dynamic>>().map((a) {
     final rawTimestamp = a['timestamp']?.toString() ?? '';
     final parsed = DateTime.tryParse(rawTimestamp);
+    final kind = a['type']?.toString() ?? '';
+    final id = a['id']?.toString() ?? '';
+    // Rider rows carry the assignment id as `id` with no separate
+    // assignmentId/orderId fields (dashboard.service.ts), so the row id
+    // doubles as the deep-link target by row kind.
     return RecentActivity(
-      id: a['id']?.toString() ?? '',
-      type: _activityTypeFrom(
-        a['type']?.toString() ?? '',
-        a['status']?.toString() ?? '',
-      ),
+      id: id,
+      type: _activityTypeFrom(kind, a['status']?.toString() ?? ''),
       description: (a['description'] ?? a['title'] ?? 'Activity').toString(),
       timestamp: parsed?.toIso8601String() ?? DateTime.now().toIso8601String(),
+      assignmentId:
+          a['assignmentId']?.toString() ??
+          (kind == 'assignment' && id.isNotEmpty ? id : null),
+      orderId:
+          a['orderId']?.toString() ??
+          (kind == 'order' && id.isNotEmpty ? id : null),
     );
   }).toList();
 }
@@ -83,8 +91,9 @@ DashboardData buildRiderDashboardData(Map<String, dynamic> rider) {
       totalAssignments: totalAssignments,
       bonusActive: rider['bonusActive'] == true,
     ),
-    recentActivity:
-        mapRecentActivity(rider['recentActivity'] as List<dynamic>?),
+    recentActivity: mapRecentActivity(
+      rider['recentActivity'] as List<dynamic>?,
+    ),
   );
 }
 
@@ -97,7 +106,8 @@ class DashboardApi {
     final day = date ?? DateTime.now();
     final start = DateTime(day.year, day.month, day.day);
     final end = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
-    final dayStr = '${start.year.toString().padLeft(4, '0')}-'
+    final dayStr =
+        '${start.year.toString().padLeft(4, '0')}-'
         '${start.month.toString().padLeft(2, '0')}-'
         '${start.day.toString().padLeft(2, '0')}';
     final response = await _client.dio.get(
@@ -112,7 +122,8 @@ class DashboardApi {
     final payload = envelopeData<Map<String, dynamic>>(response);
     if (payload['role'] == 'RIDER' && payload['metrics'] is Map) {
       return buildRiderDashboardData(
-          Map<String, dynamic>.from(payload['metrics'] as Map));
+        Map<String, dynamic>.from(payload['metrics'] as Map),
+      );
     }
     // Fallback for other roles: keep the UI working with safe defaults.
     return DashboardData(stats: DashboardStats.empty(), recentActivity: []);

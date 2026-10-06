@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/api_client.dart';
 import '../api/auth_api.dart';
+import '../i18n/localizations.dart';
 import '../models/user.dart';
 import '../services/push_notifications.dart';
 import '../storage/secure_storage.dart';
@@ -14,8 +15,7 @@ class RouterRefresh extends ChangeNotifier {
   void ping() => notifyListeners();
 }
 
-final routerRefreshProvider =
-    Provider<RouterRefresh>((_) => RouterRefresh());
+final routerRefreshProvider = Provider<RouterRefresh>((_) => RouterRefresh());
 
 class AuthState {
   final User? user;
@@ -98,7 +98,7 @@ class AuthNotifier extends Notifier<AuthState> {
       state = state.copyWith(
         isLoading: false,
         isAuthenticated: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
       return false;
     }
@@ -151,10 +151,16 @@ class AuthNotifier extends Notifier<AuthState> {
           await _push.login(user.id);
         } catch (_) {}
         return true;
-      } catch (_) {
-        await _storage.clearAllData();
-        state = const AuthState(isBootstrapped: true);
-        return false;
+      } catch (e) {
+        // Only a 401 invalidates the session. On network/transient errors
+        // (e.g. offline start) keep the cached user instead of logging out.
+        if (handleApiError(e).code == 401) {
+          await _storage.clearAllData();
+          state = const AuthState(isBootstrapped: true);
+          return false;
+        }
+        state = state.copyWith(isLoading: false);
+        return state.isAuthenticated;
       }
     } catch (_) {
       state = const AuthState(isBootstrapped: true);
@@ -166,6 +172,11 @@ class AuthNotifier extends Notifier<AuthState> {
   /// (mirrors the axios response interceptor + router.replace in client.ts).
   Future<void> handleUnauthorized() async {
     if (!state.isAuthenticated && state.user == null) return;
+    try {
+      await _push.logout();
+    } catch (_) {
+      // Push logout must never block the session clear.
+    }
     await _storage.clearAllData();
     state = const AuthState(isBootstrapped: true);
     _pingRouter();
@@ -179,5 +190,6 @@ class AuthNotifier extends Notifier<AuthState> {
   void clearError() => state = state.copyWith();
 }
 
-final authProvider =
-    NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
+);

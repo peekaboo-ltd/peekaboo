@@ -8,7 +8,7 @@ import 'dialogs.dart';
 import 'pk_button.dart';
 
 /// Detail-screen action footer ported from AssignmentActions.tsx.
-/// Reject is outline (destructive by copy, not hue); everything else primary.
+/// The reject button opens the reject sheet (with reason) via [onReject].
 class AssignmentActions extends ConsumerWidget {
   final AssignmentStatus status;
   final bool showConfirmDispatch;
@@ -80,14 +80,8 @@ class AssignmentActions extends ConsumerWidget {
         [
           PkButton(
             title: tr('assignment.reject'),
-            onPress: () => showPkConfirm(
-              context,
-              title: tr('assignmentActions.rejectTitle'),
-              message: tr('assignmentActions.rejectMessage'),
-              confirmLabel: tr('assignment.reject'),
-              onConfirm: onReject,
-            ),
-            variant: PkButtonVariant.outline,
+            onPress: onReject,
+            variant: PkButtonVariant.destructive,
             disabled: isLoading,
           ),
           PkButton(

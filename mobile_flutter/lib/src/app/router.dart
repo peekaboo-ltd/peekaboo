@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,10 +33,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/support',
         builder: (context, state) => const SupportScreen(),
@@ -56,8 +54,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/assignments',
                 builder: (context, state) => AssignmentsScreen(
-                  initialFilterParam:
-                      state.uri.queryParameters['filter'],
+                  initialFilterParam: state.uri.queryParameters['filter'],
                 ),
               ),
             ],
@@ -75,16 +72,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/assignment/:id',
         parentNavigatorKey: _rootKey,
-        builder: (context, state) => AssignmentDetailScreen(
-          id: state.pathParameters['id'] ?? '',
+        builder: (context, state) =>
+            AssignmentDetailScreen(id: state.pathParameters['id'] ?? ''),
+      ),
+      // Dev-only theme gallery: registered in debug builds only, so
+      // release builds 404 on /gallery. Not linked from any UI.
+      if (kDebugMode)
+        GoRoute(
+          path: '/gallery',
+          parentNavigatorKey: _rootKey,
+          builder: (context, state) => const GalleryScreen(),
         ),
-      ),
-      // Dev-only theme gallery; not linked from any production UI.
-      GoRoute(
-        path: '/gallery',
-        parentNavigatorKey: _rootKey,
-        builder: (context, state) => const GalleryScreen(),
-      ),
     ],
     errorBuilder: (context, state) => const NotFoundScreen(),
   );

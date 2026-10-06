@@ -81,7 +81,10 @@ void main() {
     ]);
     expect(items[0].type, ActivityType.assignmentRejected);
     expect(items[0].timestamp, isNotEmpty); // invalid date falls back to now
+    expect(items[0].assignmentId, 'r1'); // row id is the deep-link target
     expect(items[1].type, ActivityType.orderDelivered);
+    expect(items[1].orderId, 'o1');
+    expect(items[1].assignmentId, isNull);
     expect(mapRecentActivity(null), isEmpty);
   });
 }

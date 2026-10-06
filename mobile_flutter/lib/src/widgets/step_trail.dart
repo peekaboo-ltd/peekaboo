@@ -54,7 +54,8 @@ int _orderRank(OrderStatus? status) {
   }
 }
 
-String? _stepTimestamp(Order order, Set<OrderStatus> matches) {
+String? _stepTimestamp(
+    Order order, Set<OrderStatus> matches, Translate t) {
   final hits = (order.activities ?? [])
       .where((a) => a.status != null && matches.contains(a.status))
       .toList()
@@ -62,7 +63,7 @@ String? _stepTimestamp(Order order, Set<OrderStatus> matches) {
             0) -
         (DateTime.tryParse(a.createdAt)?.millisecondsSinceEpoch ?? 0));
   if (hits.isEmpty) return null;
-  return formatSmartDate(hits.first.createdAt);
+  return formatSmartDate(hits.first.createdAt, t);
 }
 
 /// Order progress as trail steps: accepted, then confirmed/in transit, then
@@ -84,7 +85,7 @@ List<TrailStep> orderProgressSteps(Order order, Translate t) {
     TrailStep(
       key: 'accepted',
       label: t('status.accepted'),
-      timestamp: _stepTimestamp(order, {OrderStatus.accepted}),
+      timestamp: _stepTimestamp(order, {OrderStatus.accepted}, t),
       state: stateAt(0),
     ),
     TrailStep(
@@ -93,6 +94,7 @@ List<TrailStep> orderProgressSteps(Order order, Translate t) {
       timestamp: _stepTimestamp(
         order,
         {OrderStatus.confirmed, OrderStatus.inTransit},
+        t,
       ),
       state: stateAt(1),
     ),
@@ -102,6 +104,7 @@ List<TrailStep> orderProgressSteps(Order order, Translate t) {
       timestamp: _stepTimestamp(
         order,
         {OrderStatus.completed, OrderStatus.delivered},
+        t,
       ),
       state: stateAt(2),
     ),

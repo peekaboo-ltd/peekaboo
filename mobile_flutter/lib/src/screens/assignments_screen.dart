@@ -13,6 +13,7 @@ import '../widgets/dialogs.dart';
 import '../widgets/error_view.dart' show AssignmentSkeletonCard;
 import '../widgets/pk_button.dart';
 import '../widgets/pk_page_header.dart';
+import '../widgets/reject_sheet.dart';
 import '../widgets/stat_card.dart';
 
 /// Assignments queue ported from mobile/app/(tabs)/assignments.tsx.
@@ -84,8 +85,12 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
   }
 
   Future<void> _reject(String id, Translate tr) async {
-    final ok =
-        await ref.read(assignmentsProvider.notifier).reject(id);
+    final reason = await showRejectSheet(context, tr);
+    if (reason == null || !mounted) return;
+    final trimmed = reason.trim();
+    final ok = await ref
+        .read(assignmentsProvider.notifier)
+        .reject(id, reason: trimmed.isEmpty ? null : trimmed);
     if (!ok && mounted) {
       final message = ref.read(assignmentsProvider).error ??
           tr('assignments.rejectFailed');
