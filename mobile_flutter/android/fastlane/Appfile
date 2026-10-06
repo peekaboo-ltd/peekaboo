@@ -1,0 +1,2 @@
+json_key_file("") # via PLAY_JSON_KEY env (json_key_data)
+package_name("com.peekaboo.rider")

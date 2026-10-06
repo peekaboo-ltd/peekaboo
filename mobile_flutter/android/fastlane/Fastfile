@@ -1,0 +1,20 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build release AAB and upload to the Play internal track"
+  lane :internal do
+    Dir.chdir("../..") do
+      sh(
+        "flutter", "build", "appbundle", "--release",
+        "--dart-define", "API_BASE_URL=#{ENV.fetch('RIDER_API_BASE_URL', 'https://server.peekaboo.co.rw/api/v1')}",
+        "--dart-define", "ONESIGNAL_APP_ID=#{ENV.fetch('ONESIGNAL_APP_ID', '')}",
+        "--dart-define", "LOCATION_UPDATE_INTERVAL_MINUTES=#{ENV.fetch('LOCATION_UPDATE_INTERVAL_MINUTES', '5')}"
+      )
+    end
+    supply(
+      track: "internal",
+      aab: "build/app/outputs/bundle/release/app-release.aab",
+      json_key_data: ENV["PLAY_JSON_KEY"]
+    )
+  end
+end
