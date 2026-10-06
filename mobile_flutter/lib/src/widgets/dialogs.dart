@@ -48,6 +48,48 @@ Future<void> showPkAlert(
   );
 }
 
+/// Toast matching the client's sonner style: paper ground, line edge,
+/// 8px radius. Success and error take the outcome colors on the edge and
+/// the text; the ground stays paper so the toast reads as part of the app.
+enum PkSnackKind { info, success, error }
+
+void showPkSnackBar(
+  BuildContext context, {
+  required String message,
+  PkSnackKind kind = PkSnackKind.info,
+}) {
+  final t = context.tokens;
+  final type = context.type;
+  Color ground = t.paper;
+  Color edge = t.line;
+  var fg = t.ink;
+  switch (kind) {
+    case PkSnackKind.success:
+      ground = t.approve.surface;
+      edge = t.approve.line;
+      fg = t.approve.main;
+    case PkSnackKind.error:
+      ground = t.danger.surface;
+      edge = t.danger.line;
+      fg = t.danger.main;
+    case PkSnackKind.info:
+      break;
+  }
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        backgroundColor: ground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(PkSpace.radiusControl),
+          side: BorderSide(color: edge),
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: Text(message, style: type.bodySm.copyWith(color: fg)),
+      ),
+    );
+}
+
 /// Confirm dialog with cancel + confirm actions (Alert.alert parity).
 Future<void> showPkConfirm(
   BuildContext context, {

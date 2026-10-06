@@ -12,7 +12,8 @@ import '../widgets/assignment_filters.dart';
 import '../widgets/dialogs.dart';
 import '../widgets/error_view.dart' show AssignmentSkeletonCard;
 import '../widgets/pk_button.dart';
-import '../widgets/pk_card.dart';
+import '../widgets/pk_page_header.dart';
+import '../widgets/stat_card.dart';
 
 /// Assignments queue ported from mobile/app/(tabs)/assignments.tsx.
 class AssignmentsScreen extends ConsumerStatefulWidget {
@@ -166,89 +167,49 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
               padding: const EdgeInsets.all(PkSpace.s16),
               child: Column(
                 children: [
-                  PkCard(
-                    padding: PkCardPadding.lg,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: t.ink,
-                                    ),
-                                  ),
-                                  const SizedBox(width: PkSpace.s8),
-                                  Text(
-                                    tr('assignments.title'),
-                                    style: type.eyebrow,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: PkSpace.s4),
-                              Text(
-                                tr('assignments.queueTitle'),
-                                style: type.h3,
-                              ),
-                              Text(
-                                tr(
-                                  'assignments.totalAssignments',
-                                  {'count': full.assignments.length},
-                                ),
-                                style: type.bodySm.copyWith(color: t.muted),
-                              ),
-                            ],
-                          ),
+                  PkPageHeader(
+                    eyebrow: tr('assignments.title'),
+                    title: tr('assignments.queueTitle'),
+                    description: tr(
+                      'assignments.totalAssignments',
+                      {'count': full.assignments.length},
+                    ),
+                    actions: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: PkSpace.s12,
+                        vertical: PkSpace.s4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: t.ink,
+                        borderRadius: BorderRadius.circular(
+                          PkSpace.radiusPill,
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: PkSpace.s16,
-                            vertical: PkSpace.s8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: t.ink,
-                            borderRadius: BorderRadius.circular(
-                              PkSpace.radiusCard,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                tr('assignments.active'),
-                                style: type.meta.copyWith(color: t.paper),
-                              ),
-                              Text(
-                                '${summary.active}',
-                                style:
-                                    type.h3.copyWith(color: t.paper),
-                              ),
-                            ],
-                          ),
+                      ),
+                      child: Text(
+                        '${summary.active} ${tr('assignments.active')}',
+                        style: type.meta.copyWith(
+                          color: t.paper,
+                          fontWeight: PkType.medium,
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: PkSpace.s16),
                   Row(
                     children: [
                       Expanded(
-                        child: _SummaryCard(
-                          label: tr('assignments.pending'),
-                          value: summary.pending,
+                        child: StatCard(
+                          title: tr('assignments.pending'),
+                          value: '${summary.pending}',
+                          icon: Icons.schedule_outlined,
                         ),
                       ),
                       const SizedBox(width: PkSpace.s16),
                       Expanded(
-                        child: _SummaryCard(
-                          label: tr('assignments.completed'),
-                          value: summary.completed,
+                        child: StatCard(
+                          title: tr('assignments.completed'),
+                          value: '${summary.completed}',
+                          icon: Icons.check_circle_outline,
                         ),
                       ),
                     ],
@@ -411,29 +372,6 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SummaryCard extends StatelessWidget {
-  final String label;
-  final int value;
-
-  const _SummaryCard({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final type = context.type;
-    return PkCard(
-      variant: PkCardVariant.quiet,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: type.meta),
-          const SizedBox(height: PkSpace.s4),
-          Text('$value', style: type.h3),
-        ],
       ),
     );
   }

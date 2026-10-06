@@ -2,11 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-/// Button ported from mobile/components/ui/Button.tsx onto the DESIGN.md §6.1
-/// system. Variants: primary / secondary / outline / ghost (+ link text).
-/// The Expo `danger` variant maps to [PkButtonVariant.outline]: destructive
-/// is communicated by copy + icon, not hue (§2 shadcn mapping).
-enum PkButtonVariant { primary, secondary, outline, ghost }
+/// Button matching the client's `ui/button.tsx`: primary, secondary, outline
+/// (same quiet surface treatment as secondary), ghost, destructive, approve,
+/// and field. Labels are 14/500; press is a full-surface flood; disabled is
+/// a 40% wash with no pointer.
+enum PkButtonVariant {
+  primary,
+  secondary,
+  outline,
+  ghost,
+  destructive,
+  approve,
+  field,
+}
 
 enum PkButtonSize { sm, md, lg }
 
@@ -60,27 +68,138 @@ class PkButton extends StatelessWidget {
     final type = context.type;
     final effectiveOnPress = (disabled || loading) ? null : onPress;
 
-    final label = loading
+    // Per-variant ground, edge, and label. Destructive/approve flood to a
+    // solid fill on press so the commit is unmistakable.
+    Color ground(Set<WidgetState> states) {
+      final pressed = states.contains(WidgetState.pressed);
+      switch (variant) {
+        case PkButtonVariant.primary:
+          return t.ink;
+        case PkButtonVariant.secondary:
+        case PkButtonVariant.outline:
+          return states.contains(WidgetState.hovered)
+              ? t.surfaceHover
+              : t.surface;
+        case PkButtonVariant.ghost:
+          return Colors.transparent;
+        case PkButtonVariant.destructive:
+          return pressed ? t.danger.main : Colors.transparent;
+        case PkButtonVariant.approve:
+          return pressed ? t.approve.main : Colors.transparent;
+        case PkButtonVariant.field:
+          return t.paper;
+      }
+    }
+
+    Color edge(Set<WidgetState> states) {
+      switch (variant) {
+        case PkButtonVariant.primary:
+          return t.ink;
+        case PkButtonVariant.secondary:
+        case PkButtonVariant.outline:
+        case PkButtonVariant.ghost:
+          return Colors.transparent;
+        case PkButtonVariant.destructive:
+          return t.danger.main;
+        case PkButtonVariant.approve:
+          return t.approve.main;
+        case PkButtonVariant.field:
+          return t.line;
+      }
+    }
+
+    Color label(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) return t.disabledFg;
+      final pressed = states.contains(WidgetState.pressed);
+      switch (variant) {
+        case PkButtonVariant.primary:
+          return t.paper;
+        case PkButtonVariant.destructive:
+          return pressed ? t.onConsequence : t.danger.main;
+        case PkButtonVariant.approve:
+          return pressed ? t.onConsequence : t.approve.main;
+        case PkButtonVariant.secondary:
+        case PkButtonVariant.outline:
+        case PkButtonVariant.ghost:
+        case PkButtonVariant.field:
+          return t.ink;
+      }
+    }
+
+    Color? overlay(Set<WidgetState> states) {
+      if (!states.contains(WidgetState.pressed)) {
+        if (states.contains(WidgetState.hovered) &&
+            (variant == PkButtonVariant.secondary ||
+                variant == PkButtonVariant.outline ||
+                variant == PkButtonVariant.ghost)) {
+          return t.surface;
+        }
+        return Colors.transparent;
+      }
+      switch (variant) {
+        case PkButtonVariant.primary:
+        case PkButtonVariant.destructive:
+        case PkButtonVariant.approve:
+          return t.pressOnInk;
+        case PkButtonVariant.secondary:
+        case PkButtonVariant.outline:
+        case PkButtonVariant.ghost:
+        case PkButtonVariant.field:
+          return t.pressOnPaper;
+      }
+    }
+
+    final style = ButtonStyle(
+      minimumSize: WidgetStatePropertyAll(
+        Size(fullWidth ? double.infinity : 0, _height),
+      ),
+      padding: WidgetStatePropertyAll(_padding),
+      backgroundColor: WidgetStateProperty.resolveWith(ground),
+      foregroundColor: WidgetStateProperty.resolveWith(label),
+      overlayColor: WidgetStateProperty.resolveWith(overlay),
+      side: WidgetStateProperty.resolveWith(
+        (states) => BorderSide(color: edge(states)),
+      ),
+      textStyle: WidgetStatePropertyAll(type.label),
+      shape: WidgetStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(PkSpace.radiusControl),
+        ),
+      ),
+      elevation: const WidgetStatePropertyAll(0),
+      shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+      animationDuration: PkMotion.durState,
+    );
+
+    final content = loading
         ? SizedBox(
             width: 18,
             height: 18,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: variant == PkButtonVariant.primary ? t.paper : t.ink,
+              color: variant == PkButtonVariant.primary
+                  ? t.paper
+                  : variant == PkButtonVariant.destructive
+                      ? t.danger.main
+                      : variant == PkButtonVariant.approve
+                          ? t.approve.main
+                          : t.ink,
             ),
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: variant == PkButtonVariant.field
+                ? MainAxisAlignment.start
+                : MainAxisAlignment.center,
             children: [
               if (icon != null) ...[icon!, const SizedBox(width: 8)],
               Flexible(
                 child: Text(
                   title,
                   style: type.label.copyWith(
-                    color: variant == PkButtonVariant.primary
-                        ? t.paper
-                        : null,
+                    fontWeight: variant == PkButtonVariant.field
+                        ? PkType.regular
+                        : PkType.medium,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -88,46 +207,19 @@ class PkButton extends StatelessWidget {
             ],
           );
 
-    final style = ButtonStyle(
-      minimumSize: WidgetStatePropertyAll(Size(fullWidth ? double.infinity : 0, _height)),
-      padding: WidgetStatePropertyAll(_padding),
-      // Disabled: 40% opacity wash, no pointer (theme handles the rest).
-      foregroundColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.disabled)) {
-          return t.disabledFg;
-        }
-        return variant == PkButtonVariant.primary ? t.paper : t.ink;
-      }),
-    );
-
-    final child = switch (variant) {
-      PkButtonVariant.primary => ElevatedButton(
-          onPressed: effectiveOnPress,
-          style: style,
-          child: label,
-        ),
-      PkButtonVariant.secondary => FilledButton(
-          onPressed: effectiveOnPress,
-          style: style,
-          child: label,
-        ),
-      PkButtonVariant.outline => OutlinedButton(
-          onPressed: effectiveOnPress,
-          style: style,
-          child: label,
-        ),
-      PkButtonVariant.ghost => TextButton(
-          onPressed: effectiveOnPress,
-          style: style,
-          child: label,
-        ),
-    };
-
     final button = Opacity(
-      opacity: (disabled || loading) && variant != PkButtonVariant.primary
-          ? 0.4
-          : 1,
-      child: child,
+      opacity: (disabled || loading) ? 0.4 : 1,
+      child: variant == PkButtonVariant.field
+          ? OutlinedButton(
+              onPressed: effectiveOnPress,
+              style: style,
+              child: content,
+            )
+          : ElevatedButton(
+              onPressed: effectiveOnPress,
+              style: style,
+              child: content,
+            ),
     );
     if (fullWidth) {
       return SizedBox(width: double.infinity, child: button);

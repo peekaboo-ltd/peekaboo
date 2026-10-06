@@ -50,22 +50,6 @@ OrderStatus? orderStatusFromJson(String? value) {
   }
 }
 
-/// English labels ported from mobile/constants/order.constants.ts (not
-/// translated in the Expo app either).
-const orderStatusLabels = <OrderStatus, String>{
-  OrderStatus.draft: 'Draft',
-  OrderStatus.created: 'Created',
-  OrderStatus.pending: 'Pending payment',
-  OrderStatus.paid: 'Paid',
-  OrderStatus.confirmed: 'Confirmed',
-  OrderStatus.accepted: 'Accepted',
-  OrderStatus.active: 'Active',
-  OrderStatus.inTransit: 'In Transit',
-  OrderStatus.delivered: 'Delivered',
-  OrderStatus.completed: 'Completed',
-  OrderStatus.cancelled: 'Cancelled',
-};
-
 String orderStatusToJson(OrderStatus status) {
   switch (status) {
     case OrderStatus.draft:
@@ -91,11 +75,6 @@ String orderStatusToJson(OrderStatus status) {
     case OrderStatus.cancelled:
       return 'CANCELLED';
   }
-}
-
-String orderStatusLabel(OrderStatus? status) {
-  if (status == null) return '—';
-  return orderStatusLabels[status] ?? status.name;
 }
 
 /// Sort rank for the assignments queue (mobile/app/(tabs)/assignments.tsx).

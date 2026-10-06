@@ -11,8 +11,10 @@ import '../theme/tokens.dart';
 import '../utils/formatters.dart';
 import '../widgets/dialogs.dart';
 import '../widgets/language_switcher.dart';
+import '../widgets/pk_badge.dart';
 import '../widgets/pk_button.dart';
 import '../widgets/pk_card.dart';
+import '../widgets/pk_section_card.dart';
 import '../widgets/pk_text_field.dart';
 
 /// Profile screen ported from mobile/app/(tabs)/profile.tsx: avatar
@@ -68,12 +70,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       return user.phoneNumber.substring(user.phoneNumber.length - 2);
     }
     return '--';
-  }
-
-  String _statusLabel(User user, Translate tr) {
-    if (user.status == UserStatus.active) return tr('assignment.active');
-    final raw = userStatusToJson(user.status);
-    return raw[0] + raw.substring(1).toLowerCase();
   }
 
   Future<void> _pickImage(bool fromCamera, Translate tr) async {
@@ -305,86 +301,63 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: PkSpace.s12,
-                        vertical: PkSpace.s4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: t.ink,
-                        borderRadius: BorderRadius.circular(
-                          PkSpace.radiusPill,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            user.status == UserStatus.active
-                                ? Icons.check_circle
-                                : Icons.warning,
-                            size: 16,
-                            color: t.paper,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _statusLabel(user, tr),
-                            style: type.meta.copyWith(
-                              color: t.paper,
-                              fontWeight: PkType.medium,
-                            ),
-                          ),
-                        ],
-                      ),
+                    PkBadge.status(
+                      userStatusToJson(user.status),
+                      tr,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: PkSpace.s24),
-              Text(tr('profile.infoTitle'), style: type.cardTitle),
-              const SizedBox(height: PkSpace.s12),
-              const LanguageSwitcher(),
-              const SizedBox(height: PkSpace.s16),
-              PkTextField(
-                controller: _name,
-                label: tr('profile.fullName'),
-                placeholder: tr('profile.fullNamePlaceholder'),
-                enabled: _editing,
-              ),
-              const SizedBox(height: PkSpace.s16),
-              PkTextField(
-                controller: _email,
-                label: tr('profile.email'),
-                placeholder: tr('profile.emailPlaceholder'),
-                keyboardType: TextInputType.emailAddress,
-                enabled: false,
-              ),
-              const SizedBox(height: PkSpace.s16),
-              PkTextField(
-                controller: _phone,
-                label: tr('profile.phoneNumber'),
-                placeholder: tr('profile.phonePlaceholder'),
-                keyboardType: TextInputType.phone,
-                enabled: _editing,
-              ),
-              const SizedBox(height: PkSpace.s16),
-              PkTextField(
-                controller: _dob,
-                label: tr('profile.dateOfBirth'),
-                placeholder: 'YYYY-MM-DD',
-                enabled: _editing,
-              ),
-              const SizedBox(height: PkSpace.s16),
-              PkTextField(
-                controller: _nationality,
-                label: tr('profile.nationality'),
-                placeholder: tr('profile.nationalityPlaceholder'),
-                enabled: _editing,
+              PkSectionCard(
+                title: tr('profile.infoTitle'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const LanguageSwitcher(),
+                    const SizedBox(height: PkSpace.s16),
+                    PkTextField(
+                      controller: _name,
+                      label: tr('profile.fullName'),
+                      placeholder: tr('profile.fullNamePlaceholder'),
+                      enabled: _editing,
+                    ),
+                    const SizedBox(height: PkSpace.s16),
+                    PkTextField(
+                      controller: _email,
+                      label: tr('profile.email'),
+                      placeholder: tr('profile.emailPlaceholder'),
+                      keyboardType: TextInputType.emailAddress,
+                      enabled: false,
+                    ),
+                    const SizedBox(height: PkSpace.s16),
+                    PkTextField(
+                      controller: _phone,
+                      label: tr('profile.phoneNumber'),
+                      placeholder: tr('profile.phonePlaceholder'),
+                      keyboardType: TextInputType.phone,
+                      enabled: _editing,
+                    ),
+                    const SizedBox(height: PkSpace.s16),
+                    PkTextField(
+                      controller: _dob,
+                      label: tr('profile.dateOfBirth'),
+                      placeholder: 'YYYY-MM-DD',
+                      enabled: _editing,
+                    ),
+                    const SizedBox(height: PkSpace.s16),
+                    PkTextField(
+                      controller: _nationality,
+                      label: tr('profile.nationality'),
+                      placeholder: tr('profile.nationalityPlaceholder'),
+                      enabled: _editing,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: PkSpace.s24),
-              Text(tr('profile.performanceTitle'), style: type.cardTitle),
-              const SizedBox(height: PkSpace.s12),
-              PkCard(
+              PkSectionCard(
+                title: tr('profile.performanceTitle'),
                 child: Column(
                   children: [
                     _MetaRow(

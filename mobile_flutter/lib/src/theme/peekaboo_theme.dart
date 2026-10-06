@@ -16,8 +16,8 @@ ThemeData buildPeekabooTheme(Brightness brightness) {
     onSecondary: t.ink,
     surface: t.paper,
     onSurface: t.ink,
-    error: t.ink,
-    onError: t.paper,
+    error: t.danger.main,
+    onError: t.onConsequence,
   );
 
   final textTheme = TextTheme(
@@ -152,7 +152,8 @@ ThemeData buildPeekabooTheme(Brightness brightness) {
         animationDuration: PkMotion.durState,
       ),
     ),
-    // One input everywhere: bordered on paper, 40px, ink focus border.
+    // Client control contract: 40px, 1px line border, ink border + 1px
+    // ring on focus (rendered as a 2px ink edge), danger border on error.
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: t.paper,
@@ -160,10 +161,11 @@ ThemeData buildPeekabooTheme(Brightness brightness) {
         horizontal: 14,
         vertical: 10,
       ),
+      constraints: const BoxConstraints(minHeight: PkSpace.controlMd),
       hintStyle: type.bodySm.copyWith(color: t.muted),
       labelStyle: type.label,
       helperStyle: type.meta,
-      errorStyle: type.meta.copyWith(color: t.ink),
+      errorStyle: type.meta.copyWith(color: t.danger.main),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(PkSpace.radiusControl),
         borderSide: BorderSide(color: t.line),
@@ -175,16 +177,16 @@ ThemeData buildPeekabooTheme(Brightness brightness) {
       hoverColor: Colors.transparent,
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(PkSpace.radiusControl),
-        borderSide: BorderSide(color: t.ink, width: 1.5),
+        borderSide: BorderSide(color: t.ink, width: 2),
       ),
-      // Error state without color: ink border + ink message (§6.3).
+      // Invalid is the one place a field is allowed color.
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(PkSpace.radiusControl),
-        borderSide: BorderSide(color: t.ink),
+        borderSide: BorderSide(color: t.danger.main),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(PkSpace.radiusControl),
-        borderSide: BorderSide(color: t.ink, width: 1.5),
+        borderSide: BorderSide(color: t.danger.main, width: 2),
       ),
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(PkSpace.radiusControl),

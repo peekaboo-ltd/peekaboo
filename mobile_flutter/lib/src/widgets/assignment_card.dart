@@ -10,16 +10,6 @@ import 'pk_badge.dart';
 import 'pk_button.dart';
 import 'pk_card.dart';
 
-String assignmentStatusLabel(AssignmentStatus status, Translate t) {
-  return switch (status) {
-    AssignmentStatus.pending => t('assignment.pending'),
-    AssignmentStatus.active => t('assignment.active'),
-    AssignmentStatus.completed => t('assignment.completed'),
-    AssignmentStatus.rejected => t('assignment.rejected'),
-    AssignmentStatus.cancelled => t('assignment.cancelled'),
-  };
-}
-
 /// Assignment queue row ported from AssignmentCard.tsx.
 class AssignmentCard extends ConsumerWidget {
   final Assignment assignment;
@@ -66,22 +56,19 @@ class AssignmentCard extends ConsumerWidget {
                       style: type.cardTitle,
                     ),
                     const SizedBox(height: PkSpace.s8),
-                    Row(
+                    Wrap(
+                      spacing: PkSpace.s8,
+                      runSpacing: PkSpace.s8,
                       children: [
-                        PkBadge.assignment(
-                          a.status,
-                          assignmentStatusLabel(a.status, tr),
+                        PkBadge.status(
+                          assignmentStatusToJson(a.status),
+                          tr,
                         ),
-                        if (order?.latestStatus != null) ...[
-                          const SizedBox(width: PkSpace.s8),
-                          Flexible(
-                            child: Text(
-                              orderStatusLabel(order!.latestStatus),
-                              style: type.meta,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                        if (order?.latestStatus != null)
+                          PkBadge.status(
+                            orderStatusToJson(order!.latestStatus!),
+                            tr,
                           ),
-                        ],
                       ],
                     ),
                   ],

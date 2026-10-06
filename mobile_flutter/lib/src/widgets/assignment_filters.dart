@@ -5,8 +5,8 @@ import '../i18n/localizations.dart';
 import '../state/assignments_state.dart';
 import '../theme/tokens.dart';
 
-/// Filter chips ported from AssignmentFilters.tsx. Active chip follows the
-/// inversion rule (DESIGN.md §2.1).
+/// Filter tabs matching the client's tabs style: a 40px surface pill track
+/// holding 32px trigger pills; the active trigger is inverted.
 class AssignmentFilters extends ConsumerWidget {
   final AssignmentFilter activeFilter;
   final ValueChanged<AssignmentFilter> onFilterChange;
@@ -20,6 +20,7 @@ class AssignmentFilters extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
+    final type = context.type;
     final tr = ref.watch(tProvider);
 
     final options = [
@@ -38,54 +39,44 @@ class AssignmentFilters extends ConsumerWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: PkSpace.s16),
-        child: Row(
-          children: [
-            for (var i = 0; i < options.length; i++) ...[
-              if (i > 0) const SizedBox(width: PkSpace.s8),
-              _Chip(
-                label: options[i].$2,
-                selected: activeFilter == options[i].$1,
-                onTap: () => onFilterChange(options[i].$1),
-              ),
+        child: Container(
+          height: PkSpace.controlMd,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: t.surface,
+            borderRadius: BorderRadius.circular(PkSpace.radiusPill),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final option in options)
+                GestureDetector(
+                  onTap: () => onFilterChange(option.$1),
+                  child: AnimatedContainer(
+                    duration: PkMotion.durState,
+                    curve: PkMotion.easeFlat,
+                    height: 32,
+                    padding: const EdgeInsets.symmetric(horizontal: PkSpace.s16),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: activeFilter == option.$1
+                          ? t.ink
+                          : Colors.transparent,
+                      borderRadius:
+                          BorderRadius.circular(PkSpace.radiusPill),
+                    ),
+                    child: Text(
+                      option.$2,
+                      style: type.label.copyWith(
+                        color: activeFilter == option.$1
+                            ? t.paper
+                            : t.muted,
+                      ),
+                    ),
+                  ),
+                ),
             ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _Chip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    final type = context.type;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: PkMotion.durState,
-        curve: PkMotion.easeFlat,
-        height: PkSpace.controlSm,
-        padding: const EdgeInsets.symmetric(horizontal: PkSpace.s16),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? t.ink : t.paper,
-          borderRadius: BorderRadius.circular(PkSpace.radiusPill),
-          border: Border.all(color: selected ? t.ink : t.line),
-        ),
-        child: Text(
-          label,
-          style: type.label.copyWith(color: selected ? t.paper : t.muted),
+          ),
         ),
       ),
     );

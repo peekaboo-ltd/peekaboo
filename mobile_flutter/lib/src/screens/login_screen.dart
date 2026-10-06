@@ -7,14 +7,15 @@ import '../models/user.dart';
 import '../state/auth_state.dart';
 import '../theme/tokens.dart';
 import '../utils/validators.dart';
-import '../widgets/dialogs.dart';
 import '../widgets/language_switcher.dart';
 import '../widgets/pk_button.dart';
-import '../widgets/pk_card.dart';
 import '../widgets/pk_text_field.dart';
 
-/// Login screen ported from mobile/app/(auth)/login.tsx. Entrance is the
-/// single §5 motion (opacity + 8px rise, 200ms) — no stagger cascades.
+/// Login screen matching the client's AuthPageShell: surface ground, centred
+/// logo, a max-440px card with a 1px line border, centred h3 title with a
+/// muted subtitle, inputs, a primary button, and an AuthLink-style support
+/// line. No social button — riders sign in with username and password.
+/// Errors render as an AuthNotice panel (danger surface/line/text).
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -55,7 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     super.dispose();
   }
 
-  Future<void> _handleLogin(Translate tr) async {
+  Future<void> _handleLogin() async {
     ref.read(authProvider.notifier).clearError();
     final usernameError = getUsernameError(_username.text);
     final passwordError = getPasswordError(_password.text);
@@ -64,26 +65,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       _passwordError = passwordError;
     });
     if (usernameError != null || passwordError != null) return;
-
-    final ok = await ref.read(authProvider.notifier).login(
+    await ref.read(authProvider.notifier).login(
           LoginCredentials(
             username: _username.text,
             password: _password.text,
           ),
         );
     if (!mounted) return;
-    if (ok) {
+    if (ref.read(authProvider).isAuthenticated) {
       context.go('/dashboard');
-    } else {
-      final error = ref.read(authProvider).error;
-      if (error != null && error.isNotEmpty) {
-        await showPkAlert(
-          context,
-          title: tr('auth.loginFailed'),
-          message: error,
-        );
-      }
     }
+    // Failures surface through the AuthNotice panel below; no alert needed.
   }
 
   @override
@@ -92,180 +84,156 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final type = context.type;
     final tr = ref.watch(tProvider);
     final auth = ref.watch(authProvider);
-    final compact = MediaQuery.widthOf(context) < 380;
 
     return Scaffold(
+      backgroundColor: t.surface,
       body: SafeArea(
         child: FadeTransition(
           opacity: _opacity,
           child: SlideTransition(
             position: _rise,
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: compact ? PkSpace.s16 : PkSpace.s24,
-                vertical: PkSpace.s32,
+              padding: const EdgeInsets.symmetric(
+                horizontal: PkSpace.s20,
+                vertical: PkSpace.s24,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440),
+                  child: Column(
                     children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: t.ink,
-                        ),
+                      Image.asset(
+                        'assets/images/icon.png',
+                        height: 40,
+                        fit: BoxFit.contain,
                       ),
-                      const SizedBox(width: PkSpace.s8),
-                      Text(tr('auth.riderPortal'), style: type.eyebrow),
-                    ],
-                  ),
-                  const SizedBox(height: PkSpace.s8),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: LanguageSwitcher(compact: true),
-                  ),
-                  const SizedBox(height: PkSpace.s24),
-                  Container(
-                    width: 76,
-                    height: 76,
-                    decoration: BoxDecoration(
-                      color: t.ink,
-                      borderRadius: BorderRadius.circular(PkSpace.radiusCard),
-                    ),
-                    child: Icon(
-                      Icons.pedal_bike,
-                      size: 40,
-                      color: t.paper,
-                    ),
-                  ),
-                  const SizedBox(height: PkSpace.s16),
-                  Text(tr('auth.title'), style: type.h2),
-                  const SizedBox(height: PkSpace.s4),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 260),
-                    child: Text(
-                      tr('auth.subtitle'),
-                      style: type.bodySm.copyWith(color: t.muted),
-                    ),
-                  ),
-                  const SizedBox(height: PkSpace.s24),
-                  PkCard(
-                    padding: PkCardPadding.lg,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(tr('auth.signIn'), style: type.h3),
-                        const SizedBox(height: PkSpace.s4),
-                        Text(
-                          tr('auth.formSubtitle'),
-                          style: type.bodySm.copyWith(color: t.muted),
-                        ),
-                        const SizedBox(height: PkSpace.s16),
-                        PkTextField(
-                          controller: _username,
-                          onChanged: (_) => setState(
-                            () => _usernameError = null,
-                          ),
-                          label: tr('auth.usernameOrEmail'),
-                          placeholder: tr('auth.usernamePlaceholder'),
-                          keyboardType: TextInputType.emailAddress,
-                          error: _usernameError,
-                          prefixIcon: Icon(
-                            Icons.person_outline,
-                            size: 20,
-                            color: t.muted,
-                          ),
-                        ),
-                        const SizedBox(height: PkSpace.s16),
-                        PkTextField(
-                          controller: _password,
-                          onChanged: (_) => setState(
-                            () => _passwordError = null,
-                          ),
-                          label: tr('auth.password'),
-                          placeholder: tr('auth.passwordPlaceholder'),
-                          obscureText: true,
-                          error: _passwordError,
-                          onSubmitted: (_) => _handleLogin(tr),
-                          prefixIcon: Icon(
-                            Icons.lock_outline,
-                            size: 20,
-                            color: t.muted,
-                          ),
-                        ),
-                        if (auth.error != null &&
-                            auth.error!.isNotEmpty) ...[
-                          const SizedBox(height: PkSpace.s16),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.warning_outlined,
-                                size: 18,
-                                color: t.ink,
-                              ),
-                              const SizedBox(width: PkSpace.s8),
-                              Expanded(
-                                child: Text(
-                                  auth.error!,
-                                  style: type.bodySm,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                        const SizedBox(height: PkSpace.s16),
-                        PkButton(
-                          title: tr('auth.signInButton'),
-                          onPress: () => _handleLogin(tr),
-                          loading: auth.isLoading,
-                          fullWidth: true,
-                          size: PkButtonSize.lg,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: PkSpace.s24),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () => context.push('/support'),
-                      child: Container(
+                      const SizedBox(height: PkSpace.s20),
+                      Container(
+                        width: double.infinity,
                         padding: const EdgeInsets.symmetric(
-                          horizontal: PkSpace.s16,
-                          vertical: PkSpace.s8,
+                          horizontal: PkSpace.s32,
+                          vertical: PkSpace.s32,
                         ),
                         decoration: BoxDecoration(
+                          color: t.paper,
                           borderRadius: BorderRadius.circular(
-                            PkSpace.radiusPill,
+                            PkSpace.radiusControl,
                           ),
                           border: Border.all(color: t.line),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Icon(
-                              Icons.help_outline,
-                              size: 18,
-                              color: t.ink,
-                            ),
-                            const SizedBox(width: PkSpace.s4),
                             Text(
-                              tr('auth.troubleSigningIn'),
+                              tr('auth.signIn'),
+                              style: type.h3,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              tr('auth.formSubtitle'),
                               style: type.bodySm.copyWith(color: t.muted),
+                              textAlign: TextAlign.center,
                             ),
-                            const SizedBox(width: PkSpace.s4),
-                            Text(
-                              tr('auth.contactSupport'),
-                              style: type.label,
+                            const SizedBox(height: PkSpace.s24),
+                            PkTextField(
+                              controller: _username,
+                              onChanged: (_) => setState(
+                                () => _usernameError = null,
+                              ),
+                              label: tr('auth.usernameOrEmail'),
+                              placeholder: tr('auth.usernamePlaceholder'),
+                              keyboardType: TextInputType.emailAddress,
+                              error: _usernameError,
+                              onSubmitted: (_) => _handleLogin(),
+                            ),
+                            const SizedBox(height: PkSpace.s16),
+                            PkTextField(
+                              controller: _password,
+                              onChanged: (_) => setState(
+                                () => _passwordError = null,
+                              ),
+                              label: tr('auth.password'),
+                              placeholder: tr('auth.passwordPlaceholder'),
+                              obscureText: true,
+                              error: _passwordError,
+                              onSubmitted: (_) => _handleLogin(),
+                            ),
+                            if (auth.error != null &&
+                                auth.error!.isNotEmpty) ...[
+                              const SizedBox(height: PkSpace.s16),
+                              Container(
+                                padding: const EdgeInsets.all(PkSpace.s16),
+                                decoration: BoxDecoration(
+                                  color: t.danger.surface,
+                                  borderRadius: BorderRadius.circular(
+                                    PkSpace.radiusControl,
+                                  ),
+                                  border: Border.all(
+                                    color: t.danger.line,
+                                  ),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.warning_outlined,
+                                      size: 18,
+                                      color: t.danger.main,
+                                    ),
+                                    const SizedBox(width: PkSpace.s8),
+                                    Expanded(
+                                      child: Text(
+                                        auth.error!,
+                                        style: type.bodySm.copyWith(
+                                          color: t.danger.main,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: PkSpace.s16),
+                            PkButton(
+                              title: tr('auth.signInButton'),
+                              onPress: _handleLogin,
+                              loading: auth.isLoading,
+                              fullWidth: true,
+                              size: PkButtonSize.lg,
                             ),
                           ],
                         ),
                       ),
-                    ),
+                      const SizedBox(height: PkSpace.s24),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            '${tr('auth.troubleSigningIn')} ',
+                            style: type.bodySm,
+                          ),
+                          GestureDetector(
+                            onTap: () => context.push('/support'),
+                            child: Text(
+                              tr('auth.contactSupport'),
+                              style: type.bodySm.copyWith(
+                                fontWeight: PkType.medium,
+                                decoration: TextDecoration.underline,
+                                decorationColor: t.lineStrong,
+                                decorationThickness: 1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: PkSpace.s16),
+                      const LanguageSwitcher(compact: true),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
