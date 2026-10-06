@@ -4,8 +4,13 @@
 interview closed 2026-10-06).
 
 **Goal:** Rebuild `mobile/` (Expo React Native rider app) in Flutter and
-redesign it to match the updated `client/` UI (monochrome DM Sans system in
-`DESIGN.md`).
+redesign it to match the updated `client/` UI.
+
+**Visual source of truth:** the implemented client UI (`client/src/index.css`
+plus its components), not the `DESIGN.md` prose. Where the two disagree —
+outcome colours, filled status pills, red invalid-input borders, the 64px
+black top bar — the client code wins and the Flutter app follows it.
+(Ruled during gap closure, 2026-10-06, per user instruction.)
 
 ## Settled constraints (from the request itself)
 
@@ -55,8 +60,6 @@ redesign it to match the updated `client/` UI (monochrome DM Sans system in
    `flutter run` on emulator/physical device. EAS retires with the Expo app.
    (Accepted: user chose option (a), 2026-10-06.)
 
-## Open questions
-
 7. **i18n: English + Kinyarwanda at parity.** Default Kinyarwanda, same as
    today. French is explicitly out (client-only; adding it would be new
    translation work, a deliberate follow-up if riders need it).
@@ -69,8 +72,17 @@ redesign it to match the updated `client/` UI (monochrome DM Sans system in
 
 ## Open questions
 
-_None — decision tree exhausted. Awaiting explicit acceptance of the scope
-contract below._
+_None — decision tree exhausted. The cutover itself (scope item c) is the
+only remaining execution step and stays gated on the real-device checklist
+in "Done means" plus explicit user approval._
+
+## Execution notes (gap closure, 2026-10-06)
+
+- Directions open Google Maps only, never Apple Maps (product decision).
+- Release builds refuse an empty `API_BASE_URL`; cleartext HTTP and the
+  `/gallery` theme route are debug-only.
+- iOS push ships without a Notification Service Extension; rich-media
+  handling on iOS is a follow-up, not a cutover blocker.
 
 ## Scope contract (ACCEPTED — user replied "accept", chat, 2026-10-06;
 no owning issue exists in this repo, so this record is the acceptance evidence)
