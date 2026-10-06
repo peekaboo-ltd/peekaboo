@@ -47,6 +47,8 @@ jobs:
           if grep -rn "LinearGradient\|RadialGradient\|SweepGradient" lib test; then exit 1; fi
           echo '-- no letter spacing --'
           if grep -rn "letterSpacing" lib; then exit 1; fi
+          echo '-- no hard-coded colors outside tokens.dart --'
+          if grep -rn "Color(0x" lib --include="*.dart" | grep -v "theme/tokens.dart"; then exit 1; fi
           echo '-- single font family --'
           test "$(grep -rhoE "fontFamily: [A-Za-z.]+" lib | sort -u | wc -l)" -le 2
           echo OK

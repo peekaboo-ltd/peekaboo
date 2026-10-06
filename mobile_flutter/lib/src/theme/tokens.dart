@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 
-/// Peekaboo design tokens ported from DESIGN.md §§1–5 for Flutter.
-/// Semantic (not literal): dark mode mirrors light by swapping paper/ink.
+/// Peekaboo design tokens for Flutter. The visual source of truth is the
+/// implemented client UI (`client/src/index.css` and its components); the
+/// values below are that system's tokens, ported 1:1.
 ///
-/// Hard constraints enforced here: monochrome structure, inversion-only
-/// selection, DM Sans only, 400 default / 500 ceiling, no gradients,
+/// Structure stays monochrome; consequence color (danger/approve/warning/
+/// info) is spent only where something failed, is about to be destroyed, or
+/// has been resolved. DM Sans only, 400 default / 500 ceiling, no gradients,
 /// press = full-surface inset overlay (never a transform), borders over
 /// shadows (only menus/popovers/modals cast one).
+class PkConsequence {
+  final Color main;
+  final Color strong;
+  final Color surface;
+  final Color line;
+
+  const PkConsequence({
+    required this.main,
+    required this.strong,
+    required this.surface,
+    required this.line,
+  });
+}
+
 class PkTokens {
   final Brightness brightness;
 
@@ -25,6 +41,11 @@ class PkTokens {
   final Color overlay;
   final List<BoxShadow> shadowMenu;
   final List<BoxShadow> shadowModal;
+  final PkConsequence danger;
+  final PkConsequence approve;
+  final PkConsequence warning;
+  final PkConsequence info;
+  final Color onConsequence;
 
   const PkTokens._({
     required this.brightness,
@@ -43,6 +64,11 @@ class PkTokens {
     required this.overlay,
     required this.shadowMenu,
     required this.shadowModal,
+    required this.danger,
+    required this.approve,
+    required this.warning,
+    required this.info,
+    required this.onConsequence,
   });
 
   factory PkTokens.light() => const PkTokens._(
@@ -57,8 +83,8 @@ class PkTokens {
         muted: Color(0xFF6E6E6E),
         mutedWeak: Color(0xFF757575),
         disabledFg: Color(0xFFAFAFAF),
-        pressOnInk: Color.fromRGBO(255, 255, 255, 0.20),
-        pressOnPaper: Color.fromRGBO(0, 0, 0, 0.08),
+        pressOnInk: Color.fromRGBO(255, 255, 255, 0.22),
+        pressOnPaper: Color.fromRGBO(0, 0, 0, 0.10),
         overlay: Color.fromRGBO(0, 0, 0, 0.60),
         shadowMenu: [
           BoxShadow(
@@ -74,6 +100,31 @@ class PkTokens {
             color: Color.fromRGBO(0, 0, 0, 0.24),
           ),
         ],
+        danger: PkConsequence(
+          main: Color(0xFFB91C1C),
+          strong: Color(0xFF991B1B),
+          surface: Color(0xFFFEF2F2),
+          line: Color(0xFFFECACA),
+        ),
+        approve: PkConsequence(
+          main: Color(0xFF15803D),
+          strong: Color(0xFF166534),
+          surface: Color(0xFFF0FDF4),
+          line: Color(0xFFBBF7D0),
+        ),
+        warning: PkConsequence(
+          main: Color(0xFFB45309),
+          strong: Color(0xFF92400E),
+          surface: Color(0xFFFFFBEB),
+          line: Color(0xFFFDE68A),
+        ),
+        info: PkConsequence(
+          main: Color(0xFF1D4ED8),
+          strong: Color(0xFF1E40AF),
+          surface: Color(0xFFEFF6FF),
+          line: Color(0xFFBFDBFE),
+        ),
+        onConsequence: Color(0xFFFFFFFF),
       );
 
   factory PkTokens.dark() => const PkTokens._(
@@ -89,9 +140,9 @@ class PkTokens {
         mutedWeak: Color(0xFF8F8F8F),
         disabledFg: Color(0xFF5E5E5E),
         // Overlays do NOT flip with theme — chosen by the surface the
-        // control sits on (DESIGN.md §2).
-        pressOnInk: Color.fromRGBO(255, 255, 255, 0.20),
-        pressOnPaper: Color.fromRGBO(0, 0, 0, 0.08),
+        // control sits on.
+        pressOnInk: Color.fromRGBO(255, 255, 255, 0.22),
+        pressOnPaper: Color.fromRGBO(0, 0, 0, 0.10),
         overlay: Color.fromRGBO(0, 0, 0, 0.72),
         shadowMenu: [
           BoxShadow(
@@ -107,7 +158,87 @@ class PkTokens {
             color: Color.fromRGBO(0, 0, 0, 0.70),
           ),
         ],
+        danger: PkConsequence(
+          main: Color(0xFFF87171),
+          strong: Color(0xFFFCA5A5),
+          surface: Color(0xFF1C1011),
+          line: Color(0xFF4C1D1D),
+        ),
+        approve: PkConsequence(
+          main: Color(0xFF4ADE80),
+          strong: Color(0xFF86EFAC),
+          surface: Color(0xFF0C1A10),
+          line: Color(0xFF14532D),
+        ),
+        warning: PkConsequence(
+          main: Color(0xFFFBBF24),
+          strong: Color(0xFFFCD34D),
+          surface: Color(0xFF1F1608),
+          line: Color(0xFF573B0C),
+        ),
+        info: PkConsequence(
+          main: Color(0xFF60A5FA),
+          strong: Color(0xFF93C5FD),
+          surface: Color(0xFF0D1526),
+          line: Color(0xFF1E3A5F),
+        ),
+        onConsequence: Color(0xFF000000),
       );
+
+  /// Inverted ground matching the client's `.invert-surface`: on a light
+  /// page the ground goes black, on a dark page it goes white.
+  factory PkTokens.inverted(Brightness page) {
+    final base =
+        page == Brightness.dark ? PkTokens.light() : PkTokens.dark();
+    if (page == Brightness.dark) {
+      return PkTokens._(
+        brightness: Brightness.light,
+        paper: const Color(0xFFFFFFFF),
+        ink: const Color(0xFF000000),
+        surface: const Color(0xFFF3F3F3),
+        surfaceHover: const Color(0xFFE2E2E2),
+        surfaceSunken: base.surfaceSunken,
+        line: const Color(0xFFE2E2E2),
+        lineStrong: base.lineStrong,
+        muted: const Color(0xFF6E6E6E),
+        mutedWeak: base.mutedWeak,
+        disabledFg: base.disabledFg,
+        pressOnInk: base.pressOnInk,
+        pressOnPaper: base.pressOnPaper,
+        overlay: base.overlay,
+        shadowMenu: base.shadowMenu,
+        shadowModal: base.shadowModal,
+        danger: base.danger,
+        approve: base.approve,
+        warning: base.warning,
+        info: base.info,
+        onConsequence: base.onConsequence,
+      );
+    }
+    return PkTokens._(
+      brightness: Brightness.dark,
+      paper: const Color(0xFF000000),
+      ink: const Color(0xFFFFFFFF),
+      surface: const Color(0xFF1A1A1A),
+      surfaceHover: const Color(0xFF2B2B2B),
+      surfaceSunken: base.surfaceSunken,
+      line: const Color(0xFF2E2E2E),
+      lineStrong: base.lineStrong,
+      muted: const Color(0xFFA3A3A3),
+      mutedWeak: base.mutedWeak,
+      disabledFg: base.disabledFg,
+      pressOnInk: base.pressOnInk,
+      pressOnPaper: base.pressOnPaper,
+      overlay: base.overlay,
+      shadowMenu: base.shadowMenu,
+      shadowModal: base.shadowModal,
+      danger: base.danger,
+      approve: base.approve,
+      warning: base.warning,
+      info: base.info,
+      onConsequence: base.onConsequence,
+    );
+  }
 
   bool get isDark => brightness == Brightness.dark;
 }

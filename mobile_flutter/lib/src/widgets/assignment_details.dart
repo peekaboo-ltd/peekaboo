@@ -7,14 +7,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../api/boundaries_api.dart';
 import '../i18n/localizations.dart';
 import '../models/assignment.dart';
-import '../models/order.dart';
 import '../theme/tokens.dart';
 import '../utils/formatters.dart';
-import 'assignment_card.dart' show assignmentStatusLabel;
 import 'directions_map.dart';
 import 'pk_badge.dart';
 import 'pk_button.dart';
-import 'pk_card.dart';
+import 'pk_section_card.dart';
+import 'step_trail.dart';
 
 /// Full order/customer/location/payment breakdown ported from
 /// AssignmentDetails.tsx, including the Rwanda admin-boundary label lookup.
@@ -88,11 +87,21 @@ class AssignmentDetails extends ConsumerWidget {
 
     return Column(
       children: [
-        PkCard(
+        if (order != null) ...[
+          PkSectionCard(
+            title: tr('assignmentInfo.orderStatus'),
+            child: StepTrail(
+              label: tr('assignmentInfo.orderStatus'),
+              steps: orderProgressSteps(order, tr),
+            ),
+          ),
+          const SizedBox(height: PkSpace.s16),
+        ],
+        PkSectionCard(
+          title: tr('assignmentInfo.orderInformation'),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SectionTitle(text: tr('assignmentInfo.orderInformation')),
               _Row(
                 label: tr('assignmentInfo.orderId'),
                 value: order != null && order.referenceId.isNotEmpty
@@ -101,16 +110,11 @@ class AssignmentDetails extends ConsumerWidget {
               ),
               _Row(
                 label: tr('assignmentInfo.assignment'),
-                trailing: PkBadge.assignment(
-                  a.status,
-                  assignmentStatusLabel(a.status, tr),
+                trailing: PkBadge.status(
+                  assignmentStatusToJson(a.status),
+                  tr,
                 ),
               ),
-              if (order != null)
-                _Row(
-                  label: tr('assignmentInfo.orderStatus'),
-                  value: orderStatusLabel(order.latestStatus),
-                ),
               _Row(
                 label: tr('assignmentInfo.created'),
                 value: formatDateTime(a.createdAt),
@@ -141,13 +145,11 @@ class AssignmentDetails extends ConsumerWidget {
         ),
         if (order?.recipient != null) ...[
           const SizedBox(height: PkSpace.s16),
-          PkCard(
+          PkSectionCard(
+            title: tr('assignmentInfo.customerInformation'),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionTitle(
-                  text: tr('assignmentInfo.customerInformation'),
-                ),
                 _Row(
                   label: tr('assignmentInfo.name'),
                   value: order!.recipient!.name?.isNotEmpty == true
@@ -175,11 +177,11 @@ class AssignmentDetails extends ConsumerWidget {
         if (order != null &&
             (order.locationFrom != null || order.locationTo != null)) ...[
           const SizedBox(height: PkSpace.s16),
-          PkCard(
+          PkSectionCard(
+            title: tr('assignmentInfo.locations'),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionTitle(text: tr('assignmentInfo.locations')),
                 if (order.locationFrom != null &&
                     order.locationTo != null) ...[
                   PkButton(
@@ -223,13 +225,11 @@ class AssignmentDetails extends ConsumerWidget {
         ],
         if (order != null) ...[
           const SizedBox(height: PkSpace.s16),
-          PkCard(
+          PkSectionCard(
+            title: tr('assignmentInfo.paymentInformation'),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionTitle(
-                  text: tr('assignmentInfo.paymentInformation'),
-                ),
                 _Row(
                   label: tr('assignmentInfo.initialFee'),
                   value: formatCurrency(order.initialFee),
@@ -270,20 +270,6 @@ class AssignmentDetails extends ConsumerWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final String text;
-
-  const _SectionTitle({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: PkSpace.s16),
-      child: Text(text, style: context.type.label),
     );
   }
 }

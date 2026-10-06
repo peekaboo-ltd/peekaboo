@@ -1,140 +1,115 @@
 import 'package:flutter/material.dart';
 
-import '../models/assignment.dart';
+import '../i18n/localizations.dart';
 import '../theme/tokens.dart';
 
-/// Status chip implementing the DESIGN.md §2.2 shape + fill + icon system.
-/// Every badge carries an icon and a text label; the treatment only reinforces.
-enum PkBadgeKind { active, completed, pending, failed, draft }
+/// Status meaning ported from client/src/components/inputs/StatusBadge.tsx.
+enum PkBadgeKind { active, completed, pending, failed, inactive }
 
+const _completedStatuses = {
+  'COMPLETED',
+  'ACCEPTED',
+  'DELIVERED',
+  'PAID',
+  'PAYMENT_DEFERRED',
+  'SUCCESSFUL',
+};
+const _pendingStatuses = {'CONFIRMED', 'PENDING', 'WAITING', 'PROCESSING'};
+const _activeStatuses = {'IN_TRANSIT', 'IN_PROGRESS', 'ASSIGNED', 'ACTIVE'};
+const _failedStatuses = {'CANCELLED', 'REJECTED', 'FAILED'};
+
+/// Shared status map covering assignment and order statuses, so the list
+/// card, detail screen, and activity feed render the same chips.
+PkBadgeKind statusKind(String? status) {
+  if (status == null || status.isEmpty) return PkBadgeKind.inactive;
+  if (_completedStatuses.contains(status)) return PkBadgeKind.completed;
+  if (_pendingStatuses.contains(status)) return PkBadgeKind.pending;
+  if (_activeStatuses.contains(status)) return PkBadgeKind.active;
+  if (_failedStatuses.contains(status)) return PkBadgeKind.failed;
+  return PkBadgeKind.inactive;
+}
+
+/// Translated status label (`status.*` keys shared with the client).
+String statusLabel(Translate t, String? status) {
+  return t('status.${(status ?? 'inactive').toLowerCase()}');
+}
+
+/// Status pill matching the client's StatusBadge: 24px pill, 10px side
+/// padding, 12/500 text, 12px icon. Color marks resolved/failed/waiting;
+/// active stays ink; every treatment keeps icon + label.
 class PkBadge extends StatelessWidget {
   final String text;
   final PkBadgeKind kind;
-  final bool small;
 
-  const PkBadge({
-    super.key,
-    required this.text,
-    required this.kind,
-    this.small = false,
-  });
+  const PkBadge({super.key, required this.text, required this.kind});
 
-  /// Maps assignment statuses onto chip kinds (replaces the Expo
-  /// success/warning/danger/info hue variants).
-  factory PkBadge.assignment(AssignmentStatus status, String label) {
-    return PkBadge(
-      text: label,
-      kind: switch (status) {
-        AssignmentStatus.active => PkBadgeKind.active,
-        AssignmentStatus.completed => PkBadgeKind.completed,
-        AssignmentStatus.pending => PkBadgeKind.pending,
-        AssignmentStatus.rejected => PkBadgeKind.failed,
-        AssignmentStatus.cancelled => PkBadgeKind.failed,
-      },
-    );
+  /// Badge for a raw API status code (assignment or order).
+  factory PkBadge.status(String? code, Translate t) {
+    return PkBadge(text: statusLabel(t, code), kind: statusKind(code));
   }
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final type = context.type;
 
     final IconData icon;
-    Color fill = Colors.transparent;
-    Color fg = t.ink;
-    bool dashed = false;
-    bool strikethrough = false;
-    Border? border;
+    Color fill;
+    Color edge;
+    Color fg;
 
     switch (kind) {
       case PkBadgeKind.active:
-        icon = Icons.play_arrow;
+        icon = Icons.autorenew;
         fill = t.ink;
+        edge = Colors.transparent;
         fg = t.paper;
       case PkBadgeKind.completed:
         icon = Icons.check;
-        fg = t.ink;
-        border = Border.all(color: t.ink);
+        fill = t.approve.surface;
+        edge = t.approve.line;
+        fg = t.approve.main;
       case PkBadgeKind.pending:
         icon = Icons.schedule;
-        fg = t.muted;
-        dashed = true;
+        fill = t.warning.surface;
+        edge = t.warning.line;
+        fg = t.warning.main;
       case PkBadgeKind.failed:
         icon = Icons.close;
-        fg = t.ink;
-        strikethrough = true;
-        border = Border.all(color: t.ink);
-      case PkBadgeKind.draft:
+        fill = t.danger.surface;
+        edge = t.danger.line;
+        fg = t.danger.main;
+      case PkBadgeKind.inactive:
         icon = Icons.circle_outlined;
         fill = t.surface;
+        edge = Colors.transparent;
         fg = t.muted;
     }
 
-    final label = Text(
-      text,
-      style: (small ? type.meta : type.bodySm).copyWith(
-        color: fg,
-        fontWeight: PkType.medium,
-        decoration: strikethrough ? TextDecoration.lineThrough : null,
-      ),
-    );
-
-    final content = Container(
-      height: small ? 24 : 28,
+    return Container(
+      height: 24,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: fill,
         borderRadius: BorderRadius.circular(PkSpace.radiusPill),
-        border: dashed ? null : border,
+        border: Border.all(color: edge),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: fg),
-          const SizedBox(width: 4),
-          label,
+          Icon(icon, size: 12, color: fg),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontFamily: PkType.family,
+              fontWeight: PkType.medium,
+              fontSize: 12,
+              height: 1.4,
+              color: fg,
+            ),
+          ),
         ],
       ),
     );
-
-    if (!dashed) return content;
-    return CustomPaint(
-      painter: _DashedPillPainter(color: t.lineStrong),
-      child: content,
-    );
   }
-}
-
-/// Dashed pill outline for the pending treatment.
-class _DashedPillPainter extends CustomPainter {
-  final Color color;
-
-  _DashedPillPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      const Radius.circular(PkSpace.radiusPill),
-    );
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    const dash = 4.0;
-    const gap = 3.0;
-    final path = Path()..addRRect(rrect);
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final end = (distance + dash).clamp(0.0, metric.length);
-        canvas.drawPath(metric.extractPath(distance, end), paint);
-        distance = end + gap;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedPillPainter old) =>
-      old.color != color;
 }

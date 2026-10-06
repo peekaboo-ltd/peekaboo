@@ -53,7 +53,11 @@ class _PeekabooAppState extends ConsumerState<PeekabooApp> {
     final bootstrapped = ref.watch(authProvider).isBootstrapped;
 
     if (!bootstrapped) {
-      final t = PkTokens.light();
+      final platform =
+          WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      final t = platform == Brightness.dark
+          ? PkTokens.dark()
+          : PkTokens.light();
       return MaterialApp(
         home: Scaffold(
           backgroundColor: t.paper,

@@ -5,11 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../i18n/localizations.dart';
 import '../models/assignment.dart';
 import '../theme/tokens.dart';
-import '../widgets/assignment_card.dart' show assignmentStatusLabel;
 import '../widgets/pk_badge.dart';
 import '../widgets/pk_button.dart';
 import '../widgets/pk_card.dart';
+import '../widgets/pk_page_header.dart';
+import '../widgets/pk_section_card.dart';
 import '../widgets/pk_text_field.dart';
+import '../widgets/step_trail.dart';
 
 /// Dev-only theme gallery for visual review of the DESIGN.md port.
 /// Reachable at the `/gallery` route; not linked from any production UI.
@@ -89,6 +91,21 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                     variant: PkButtonVariant.ghost,
                   ),
                   PkButton(
+                    title: 'Destructive',
+                    onPress: _noop,
+                    variant: PkButtonVariant.destructive,
+                  ),
+                  PkButton(
+                    title: 'Approve',
+                    onPress: _noop,
+                    variant: PkButtonVariant.approve,
+                  ),
+                  PkButton(
+                    title: 'Field',
+                    onPress: _noop,
+                    variant: PkButtonVariant.field,
+                  ),
+                  PkButton(
                     title: 'Small',
                     onPress: _noop,
                     size: PkButtonSize.sm,
@@ -118,8 +135,50 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 runSpacing: PkSpace.s8,
                 children: [
                   for (final s in AssignmentStatus.values)
-                    PkBadge.assignment(s, assignmentStatusLabel(s, tr)),
+                    PkBadge.status(assignmentStatusToJson(s), tr),
+                  PkBadge.status('IN_TRANSIT', tr),
+                  PkBadge.status('DRAFT', tr),
+                  const PkBadge(
+                    text: 'Inactive',
+                    kind: PkBadgeKind.inactive,
+                  ),
                 ],
+              ),
+            ),
+            section(
+              'Page header',
+              const PkPageHeader(
+                eyebrow: 'Eyebrow',
+                title: 'Page title',
+                description: 'Muted description over a line border.',
+              ),
+            ),
+            section(
+              'Section card + step trail',
+              PkSectionCard(
+                title: 'Order progress',
+                child: StepTrail(
+                  label: 'Order progress',
+                  steps: [
+                    TrailStep(
+                      key: 'accepted',
+                      label: tr('status.accepted'),
+                      timestamp: 'Today, 10:20',
+                      state: TrailStepState.done,
+                    ),
+                    TrailStep(
+                      key: 'transit',
+                      label: tr('status.in_transit'),
+                      timestamp: 'Today, 11:05',
+                      state: TrailStepState.current,
+                    ),
+                    const TrailStep(
+                      key: 'completed',
+                      label: 'Completed',
+                      state: TrailStepState.upcoming,
+                    ),
+                  ],
+                ),
               ),
             ),
             section(

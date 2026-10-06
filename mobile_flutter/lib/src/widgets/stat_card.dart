@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 import 'pk_card.dart';
 
-/// Metric tile ported from StatCard.tsx (quiet treatment: stats use the
-/// surface step, no border — §6.4).
+/// Metric tile matching the client's MetricCard header: a 36px surface icon
+/// chip beside a muted label, with the metric value below. No sparkline or
+/// trend — the rider API provides neither.
 class StatCard extends StatelessWidget {
   final String title;
   final String value;
@@ -24,28 +25,40 @@ class StatCard extends StatelessWidget {
     final t = context.tokens;
     final type = context.type;
     return PkCard(
-      variant: PkCardVariant.quiet,
       onPress: onPress,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: t.ink,
-              borderRadius: BorderRadius.circular(PkSpace.radiusControl),
-            ),
-            child: Icon(icon, size: 22, color: t.paper),
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: t.surface,
+                  borderRadius:
+                      BorderRadius.circular(PkSpace.radiusControl),
+                ),
+                child: Icon(icon, size: 18, color: t.ink),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: type.bodySm.copyWith(color: t.muted),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: PkSpace.s16),
+          const SizedBox(height: PkSpace.s12),
           Text(
             value,
             style: type.metric,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          Text(title, style: type.meta),
         ],
       ),
     );

@@ -49,6 +49,6 @@ void main() {
     expect(find.text('Pending'), findsOneWidget);
     expect(find.text('Active'), findsOneWidget);
     expect(find.byIcon(Icons.schedule), findsOneWidget);
-    expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+    expect(find.byIcon(Icons.autorenew), findsOneWidget);
   });
 }

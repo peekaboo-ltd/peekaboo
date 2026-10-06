@@ -18,6 +18,7 @@ import '../utils/formatters.dart';
 import '../widgets/dialogs.dart';
 import '../widgets/error_view.dart';
 import '../widgets/pk_card.dart';
+import '../widgets/pk_page_header.dart';
 import '../widgets/recent_activity.dart';
 import '../widgets/stat_card.dart';
 import 'proof_sheet.dart';
@@ -88,11 +89,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   void _goAssignments(String filter) {
     context.go('/assignments?filter=$filter');
-  }
-
-  Future<void> _logout() async {
-    await ref.read(authProvider.notifier).logout();
-    if (mounted) context.go('/login');
   }
 
   // --- Availability / check-in-out proof flow ---
@@ -464,135 +460,57 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 PkSpace.s16,
                 PkSpace.s8,
               ),
-              child: PkCard(
-                padding: PkCardPadding.lg,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: PkPageHeader(
+                eyebrow: tr('dashboard.kicker'),
+                title:
+                    '${tr('dashboard.welcomeBack')} ${user?.name?.isNotEmpty == true ? user!.name! : tr('dashboard.defaultRider')}',
+                description: tr('dashboard.readyRoutes'),
+                actions: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: PkSpace.s8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: shiftActive ? t.ink : t.surface,
+                        borderRadius: BorderRadius.circular(
+                          PkSpace.radiusPill,
+                        ),
+                        border: shiftActive
+                            ? null
+                            : Border.all(color: t.line),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: t.ink,
-                                ),
-                              ),
-                              const SizedBox(width: PkSpace.s8),
-                              Text(
-                                tr('dashboard.kicker'),
-                                style: type.eyebrow,
-                              ),
-                            ],
+                          Icon(
+                            shiftActive
+                                ? Icons.bolt
+                                : Icons.pause_circle_outline,
+                            size: 14,
+                            color: shiftActive ? t.paper : t.muted,
                           ),
-                          const SizedBox(height: PkSpace.s4),
+                          const SizedBox(width: 4),
                           Text(
-                            tr('dashboard.welcomeBack'),
-                            style: type.bodySm.copyWith(color: t.muted),
-                          ),
-                          Text(
-                            user?.name?.isNotEmpty == true
-                                ? user!.name!
-                                : tr('dashboard.defaultRider'),
-                            style: type.h3,
-                          ),
-                          Text(
-                            tr('dashboard.readyRoutes'),
-                            style: type.meta,
+                            shiftActive
+                                ? tr('dashboard.shiftActive')
+                                : tr('dashboard.shiftInactive'),
+                            style: type.meta.copyWith(
+                              color: shiftActive ? t.paper : t.muted,
+                              fontWeight: PkType.medium,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: PkSpace.s8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: shiftActive ? t.ink : t.surface,
-                                borderRadius: BorderRadius.circular(
-                                  PkSpace.radiusPill,
-                                ),
-                                border: shiftActive
-                                    ? null
-                                    : Border.all(color: t.line),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    shiftActive
-                                        ? Icons.bolt
-                                        : Icons.pause_circle_outline,
-                                    size: 14,
-                                    color: shiftActive ? t.paper : t.muted,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    shiftActive
-                                        ? tr('dashboard.shiftActive')
-                                        : tr('dashboard.shiftInactive'),
-                                    style: type.meta.copyWith(
-                                      color: shiftActive ? t.paper : t.muted,
-                                      fontWeight: PkType.medium,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: PkSpace.s4),
-                            Switch(
-                              value: shiftActive,
-                              onChanged: _availabilityUpdating
-                                  ? null
-                                  : _toggleAvailability,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: PkSpace.s8),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: t.ink,
-                                borderRadius: BorderRadius.circular(
-                                  PkSpace.radiusCard,
-                                ),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                (user?.name?.isNotEmpty == true
-                                        ? user!.name![0]
-                                        : 'R')
-                                    .toUpperCase(),
-                                style: type.h3.copyWith(color: t.paper),
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: _logout,
-                              icon: Icon(
-                                Icons.logout,
-                                size: 22,
-                                color: t.muted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    const SizedBox(width: PkSpace.s4),
+                    Switch(
+                      value: shiftActive,
+                      onChanged: _availabilityUpdating
+                          ? null
+                          : _toggleAvailability,
                     ),
                   ],
                 ),

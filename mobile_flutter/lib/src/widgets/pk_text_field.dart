@@ -83,8 +83,28 @@ class _PkTextFieldState extends State<PkTextField> {
             style: type.bodySm,
             decoration: InputDecoration(
               hintText: widget.placeholder,
-              helperText: widget.helper,
-              errorText: widget.error,
+              helperText: widget.error == null ? widget.helper : null,
+              error: widget.error == null
+                  ? null
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.warning_outlined,
+                          size: 16,
+                          color: t.danger.main,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            widget.error!,
+                            style: type.meta.copyWith(
+                              color: t.danger.main,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
               prefixIcon: widget.prefixIcon,
               prefixIconConstraints: const BoxConstraints(
                 minWidth: 44,
