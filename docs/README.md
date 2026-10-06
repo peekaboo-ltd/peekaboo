@@ -30,6 +30,7 @@ Each app is an independent npm project (own `package.json`, lockfile, README). T
 | [server-layout.md](server-layout.md) | Backend folder-by-folder guide: entry points, routing, services, entities, integrations, webhooks, cron jobs, and scripts. |
 | [client-layout.md](client-layout.md) | Web client folder-by-folder guide: pages, containers, hooks, API layer, state, and routing. |
 | [mobile-layout.md](mobile-layout.md) | Rider mobile app folder-by-folder guide: screens, components, services, stores, and config. |
+| [mobile-flutter-rebuild.md](mobile-flutter-rebuild.md) | Decision record for the Flutter rebuild of the rider app (Final). |
 
 **Recommended reading order:** `project-layout.md` → `server-layout.md` → `client-layout.md` → `mobile-layout.md`. Read `environment-variables.md` whenever you need to configure or debug an integration.
 
