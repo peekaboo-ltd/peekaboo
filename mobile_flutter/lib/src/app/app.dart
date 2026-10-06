@@ -20,31 +20,46 @@ class PeekabooApp extends ConsumerStatefulWidget {
 }
 
 class _PeekabooAppState extends ConsumerState<PeekabooApp> {
+  /// Tap that arrived before auth restore finished (cold start). Drained
+  /// once bootstrap completes so the deep link is not lost.
+  PushData? _pendingTap;
+
+  void _handleOpened(PushData data) {
+    if (!ref.read(authProvider).isBootstrapped) {
+      _pendingTap = data;
+      return;
+    }
+    if (!ref.read(authProvider).isAuthenticated) return;
+    if (data.assignmentId != null && data.assignmentId!.isNotEmpty) {
+      ref.read(routerProvider).push('/assignment/${data.assignmentId}');
+    } else if (data.type == 'assignment') {
+      ref.read(routerProvider).go('/assignments');
+    }
+    if (data.type == 'assignment') {
+      ref.read(assignmentsProvider.notifier).refresh().ignore();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     final push = ref.read(pushServiceProvider);
     push.initialize();
-    push.onNotificationOpened = (data) {
-      if (!ref.read(authProvider).isAuthenticated) return;
-      if (data.assignmentId != null && data.assignmentId!.isNotEmpty) {
-        ref.read(routerProvider).push('/assignment/${data.assignmentId}');
-      } else if (data.type == 'assignment') {
-        ref.read(routerProvider).go('/assignments');
-      }
-      if (data.type == 'assignment') {
-        ref.read(assignmentsProvider.notifier).refresh().ignore();
-      }
-    };
+    push.onNotificationOpened = _handleOpened;
     push.onNotificationForeground = (data) {
-      if (data.type == 'assignment' &&
-          ref.read(authProvider).isAuthenticated) {
+      if (data.type == 'assignment' && ref.read(authProvider).isAuthenticated) {
         ref.read(assignmentsProvider.notifier).refresh().ignore();
       }
     };
     // Location tracking self-manages against the auth session.
     ref.read(locationTrackingProvider);
-    Future.microtask(() => ref.read(authProvider.notifier).bootstrap());
+    Future.microtask(() async {
+      await ref.read(authProvider.notifier).bootstrap();
+      if (!mounted) return;
+      final pending = _pendingTap;
+      _pendingTap = null;
+      if (pending != null) _handleOpened(pending);
+    });
   }
 
   @override
@@ -61,9 +76,7 @@ class _PeekabooAppState extends ConsumerState<PeekabooApp> {
       return MaterialApp(
         home: Scaffold(
           backgroundColor: t.paper,
-          body: Center(
-            child: CircularProgressIndicator(color: t.ink),
-          ),
+          body: Center(child: CircularProgressIndicator(color: t.ink)),
         ),
       );
     }

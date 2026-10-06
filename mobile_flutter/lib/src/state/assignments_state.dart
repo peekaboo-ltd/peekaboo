@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/assignments_api.dart';
 import '../config/app_config.dart';
+import '../i18n/localizations.dart';
 import '../models/assignment.dart';
 import '../models/order.dart';
 import '../utils/app_error.dart';
@@ -140,7 +141,7 @@ class AssignmentsNotifier extends Notifier<AssignmentsState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
     }
   }
@@ -165,7 +166,7 @@ class AssignmentsNotifier extends Notifier<AssignmentsState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
     }
   }
@@ -180,7 +181,7 @@ class AssignmentsNotifier extends Notifier<AssignmentsState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
       return null;
     }
@@ -207,7 +208,7 @@ class AssignmentsNotifier extends Notifier<AssignmentsState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
       return false;
     }
@@ -223,7 +224,7 @@ class AssignmentsNotifier extends Notifier<AssignmentsState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
       return false;
     }
@@ -237,7 +238,7 @@ class AssignmentsNotifier extends Notifier<AssignmentsState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
       return false;
     }
@@ -262,7 +263,7 @@ class AssignmentsNotifier extends Notifier<AssignmentsState> {
       );
       return true;
     } catch (e) {
-      state = state.copyWith(error: getErrorMessage(handleApiError(e)));
+      state = state.copyWith(error: getErrorMessage(handleApiError(e), ref.read(tProvider)));
       return false;
     }
   }
@@ -300,7 +301,7 @@ class AssignmentsNotifier extends Notifier<AssignmentsState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
       return false;
     }
@@ -323,7 +324,7 @@ class AssignmentsNotifier extends Notifier<AssignmentsState> {
     } catch (e) {
       state = state.copyWith(
         isRefreshing: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
     }
   }

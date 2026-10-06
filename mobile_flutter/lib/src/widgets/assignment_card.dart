@@ -74,7 +74,7 @@ class AssignmentCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              Text(formatSmartDate(a.createdAt), style: type.meta),
+              Text(formatSmartDate(a.createdAt, tr), style: type.meta),
             ],
           ),
           if (order != null) ...[

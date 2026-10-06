@@ -13,6 +13,7 @@ import '../widgets/dialogs.dart';
 import '../widgets/error_view.dart';
 import '../widgets/pk_card.dart';
 import '../widgets/pk_text_field.dart';
+import '../widgets/reject_sheet.dart';
 
 /// Assignment detail screen ported from mobile/app/assignment/[id].tsx.
 class AssignmentDetailScreen extends ConsumerStatefulWidget {
@@ -52,8 +53,7 @@ class _AssignmentDetailScreenState
 
   Future<void> _accept(Translate tr) async {
     setState(() => _actionLoading = true);
-    final ok =
-        await ref.read(assignmentsProvider.notifier).accept(widget.id);
+    final ok = await ref.read(assignmentsProvider.notifier).accept(widget.id);
     if (!mounted) return;
     setState(() => _actionLoading = false);
     if (ok) {
@@ -64,20 +64,17 @@ class _AssignmentDetailScreenState
         message: tr('assignmentDetail.acceptedMessage'),
       );
     } else {
-      final message = ref.read(assignmentsProvider).error ??
-          tr('assignments.acceptFailed');
-      await showPkAlert(
-        context,
-        title: tr('common.error'),
-        message: message,
-      );
+      final message =
+          ref.read(assignmentsProvider).error ?? tr('assignments.acceptFailed');
+      await showPkAlert(context, title: tr('common.error'), message: message);
     }
   }
 
-  Future<void> _reject(Translate tr) async {
+  Future<void> _reject(Translate tr, {String? reason}) async {
     setState(() => _actionLoading = true);
-    final ok =
-        await ref.read(assignmentsProvider.notifier).reject(widget.id);
+    final ok = await ref
+        .read(assignmentsProvider.notifier)
+        .reject(widget.id, reason: reason);
     if (!mounted) return;
     setState(() => _actionLoading = false);
     if (ok) {
@@ -88,13 +85,9 @@ class _AssignmentDetailScreenState
         onOk: () => context.pop(),
       );
     } else {
-      final message = ref.read(assignmentsProvider).error ??
-          tr('assignments.rejectFailed');
-      await showPkAlert(
-        context,
-        title: tr('common.error'),
-        message: message,
-      );
+      final message =
+          ref.read(assignmentsProvider).error ?? tr('assignments.rejectFailed');
+      await showPkAlert(context, title: tr('common.error'), message: message);
     }
   }
 
@@ -113,20 +106,16 @@ class _AssignmentDetailScreenState
         message: tr('assignmentDetail.transitMessage'),
       );
     } else {
-      final message = ref.read(assignmentsProvider).error ??
+      final message =
+          ref.read(assignmentsProvider).error ??
           tr('assignmentDetail.confirmDispatchFailed');
-      await showPkAlert(
-        context,
-        title: tr('common.error'),
-        message: message,
-      );
+      await showPkAlert(context, title: tr('common.error'), message: message);
     }
   }
 
   Future<void> _recover(Translate tr) async {
     setState(() => _actionLoading = true);
-    final ok =
-        await ref.read(assignmentsProvider.notifier).recover(widget.id);
+    final ok = await ref.read(assignmentsProvider.notifier).recover(widget.id);
     if (!mounted) return;
     setState(() => _actionLoading = false);
     if (ok) {
@@ -137,7 +126,8 @@ class _AssignmentDetailScreenState
         message: tr('assignmentDetail.recoveredMessage'),
       );
     } else {
-      final message = ref.read(assignmentsProvider).error ??
+      final message =
+          ref.read(assignmentsProvider).error ??
           tr('assignmentDetail.recoverFailed');
       await showPkAlert(
         context,
@@ -172,13 +162,10 @@ class _AssignmentDetailScreenState
         message: tr('assignmentDetail.completedMessage'),
       );
     } else {
-      final message = ref.read(assignmentsProvider).error ??
+      final message =
+          ref.read(assignmentsProvider).error ??
           tr('assignmentDetail.completeFailed');
-      await showPkAlert(
-        context,
-        title: tr('common.error'),
-        message: message,
-      );
+      await showPkAlert(context, title: tr('common.error'), message: message);
       _refresh();
     }
   }
@@ -209,11 +196,12 @@ class _AssignmentDetailScreenState
     final latest = selected.order?.latestStatus;
     final isActive = selected.status == AssignmentStatus.active;
     final canConfirm = isActive && latest == OrderStatus.accepted;
-    final canComplete = isActive &&
+    final canComplete =
+        isActive &&
         (latest == OrderStatus.inTransit || latest == OrderStatus.delivered);
-    final title = selected.order != null &&
-            selected.order!.referenceId.isNotEmpty
-        ? 'Order #${selected.order!.referenceId}'
+    final title =
+        selected.order != null && selected.order!.referenceId.isNotEmpty
+        ? tr('assignmentInfo.orderNumber', {'ref': selected.order!.referenceId})
         : tr('assignmentDetail.title');
 
     return Scaffold(
@@ -221,33 +209,38 @@ class _AssignmentDetailScreenState
       body: Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              controller: _scroll,
-              padding: const EdgeInsets.all(PkSpace.s16),
-              child: Column(
-                children: [
-                  AssignmentDetails(assignment: selected),
-                  if (canComplete) ...[
-                    const SizedBox(height: PkSpace.s16),
-                    PkCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tr('assignmentDetail.completeVerification'),
-                            style: type.label,
-                          ),
-                          const SizedBox(height: PkSpace.s8),
-                          PkTextField(
-                            controller: _tracking,
-                            placeholder: tr('assignmentDetail.enterOtp'),
-                            keyboardType: TextInputType.number,
-                          ),
-                        ],
+            child: RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(assignmentsProvider.notifier).fetchById(widget.id),
+              child: SingleChildScrollView(
+                controller: _scroll,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(PkSpace.s16),
+                child: Column(
+                  children: [
+                    AssignmentDetails(assignment: selected),
+                    if (canComplete) ...[
+                      const SizedBox(height: PkSpace.s16),
+                      PkCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tr('assignmentDetail.completeVerification'),
+                              style: type.label,
+                            ),
+                            const SizedBox(height: PkSpace.s8),
+                            PkTextField(
+                              controller: _tracking,
+                              placeholder: tr('assignmentDetail.enterOtp'),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -255,15 +248,21 @@ class _AssignmentDetailScreenState
             status: selected.status,
             showConfirmDispatch: canConfirm,
             onAccept: () => _accept(tr),
-            onReject: () => _reject(tr),
+            onReject: () async {
+              final reason = await showRejectSheet(context, tr);
+              if (reason == null || !mounted) return;
+              final trimmed = reason.trim();
+              await _reject(tr, reason: trimmed.isEmpty ? null : trimmed);
+            },
             onRecover: selected.status == AssignmentStatus.rejected
                 ? () => _recover(tr)
                 : null,
             onConfirmDispatch: canConfirm
                 ? () => _confirmDispatch(selected.orderId, tr)
                 : null,
-            onComplete:
-                canComplete ? () => _complete(selected.orderId, tr) : null,
+            onComplete: canComplete
+                ? () => _complete(selected.orderId, tr)
+                : null,
             isLoading: _actionLoading,
           ),
         ],

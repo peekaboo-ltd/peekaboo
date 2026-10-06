@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import '../i18n/localizations.dart';
+
 /// Error classification ported from mobile/utils/errorHandler.ts.
 
 enum ErrorType { network, auth, validation, server, unknown }
@@ -79,20 +81,18 @@ AppError handleApiError(Object error) {
   );
 }
 
-String getErrorMessage(AppError error) {
+String getErrorMessage(AppError error, Translate tr) {
   switch (error.type) {
     case ErrorType.network:
-      return 'Unable to connect. Please check your internet connection.';
+      return tr('error.network');
     case ErrorType.auth:
-      return 'Your session has expired. Please login again.';
+      return tr('error.auth');
     case ErrorType.validation:
       return error.message;
     case ErrorType.server:
-      return 'Something went wrong. Please try again later.';
+      return tr('error.server');
     case ErrorType.unknown:
-      return error.message.isEmpty
-          ? 'An unexpected error occurred.'
-          : error.message;
+      return error.message.isEmpty ? tr('error.unknown') : error.message;
   }
 }
 

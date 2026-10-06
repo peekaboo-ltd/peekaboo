@@ -1,5 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_flutter/src/i18n/localizations.dart';
 import 'package:mobile_flutter/src/utils/formatters.dart';
+
+String _en(String key, [Map<String, Object>? values]) =>
+    translate(AppLanguage.en, key, values);
+String _rw(String key, [Map<String, Object>? values]) =>
+    translate(AppLanguage.rw, key, values);
 
 void main() {
   test('formatCurrency groups thousands and defaults safely', () {
@@ -17,14 +23,33 @@ void main() {
 
   test('formatSmartDate labels today and yesterday', () {
     final now = DateTime.now();
-    expect(formatSmartDate(now.toIso8601String()), startsWith('Today, '));
+    expect(
+      formatSmartDate(now.toIso8601String(), _en),
+      startsWith('Today, '),
+    );
     expect(
       formatSmartDate(
         now.subtract(const Duration(days: 1)).toIso8601String(),
+        _en,
       ),
       startsWith('Yesterday, '),
     );
-    expect(formatSmartDate(null), 'N/A');
+    expect(formatSmartDate(null, _en), 'N/A');
+  });
+
+  test('formatSmartDate translates day labels to Kinyarwanda', () {
+    final now = DateTime.now();
+    expect(
+      formatSmartDate(now.toIso8601String(), _rw),
+      startsWith('Uyu munsi, '),
+    );
+    expect(
+      formatSmartDate(
+        now.subtract(const Duration(days: 1)).toIso8601String(),
+        _rw,
+      ),
+      startsWith('Ejo, '),
+    );
   });
 
   test('formatRelativeTime approximates date-fns buckets', () {

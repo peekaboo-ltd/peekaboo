@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/dashboard_api.dart';
+import '../i18n/localizations.dart';
 import '../models/dashboard.dart';
 import '../utils/app_error.dart';
 
@@ -58,7 +59,7 @@ class DashboardNotifier extends Notifier<DashboardState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
     }
   }
@@ -76,7 +77,7 @@ class DashboardNotifier extends Notifier<DashboardState> {
     } catch (e) {
       state = state.copyWith(
         isRefreshing: false,
-        error: getErrorMessage(handleApiError(e)),
+        error: getErrorMessage(handleApiError(e), ref.read(tProvider)),
       );
     }
   }

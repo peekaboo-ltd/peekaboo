@@ -5,6 +5,10 @@ import 'package:mobile_flutter/src/i18n/localizations.dart';
 import 'package:mobile_flutter/src/theme/peekaboo_theme.dart';
 import 'package:mobile_flutter/src/widgets/language_switcher.dart';
 import 'package:mobile_flutter/src/widgets/pk_badge.dart';
+import 'package:mobile_flutter/src/widgets/reject_sheet.dart';
+
+String _en(String key, [Map<String, Object>? values]) =>
+    translate(AppLanguage.en, key, values);
 
 Widget _harness(Widget child) {
   return ProviderScope(
@@ -50,5 +54,54 @@ void main() {
     expect(find.text('Active'), findsOneWidget);
     expect(find.byIcon(Icons.schedule), findsOneWidget);
     expect(find.byIcon(Icons.autorenew), findsOneWidget);
+  });
+
+  testWidgets('reject sheet returns the typed reason', (tester) async {
+    String? result;
+    await tester.pumpWidget(
+      _harness(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              result = await showRejectSheet(context, _en);
+            },
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reject Assignment'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Too far away');
+    await tester.tap(find.text('Reject').last);
+    await tester.pumpAndSettle();
+    expect(result, 'Too far away');
+  });
+
+  testWidgets('reject sheet cancel returns null', (tester) async {
+    var called = false;
+    String? result = 'unset';
+    await tester.pumpWidget(
+      _harness(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              called = true;
+              result = await showRejectSheet(context, _en);
+            },
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(called, isTrue);
+    expect(result, isNull);
   });
 }
