@@ -9,6 +9,7 @@ import routes from './routes';
 import logger from './helpers/logger.helper';
 import { configureGoogleAuth } from './config/passport.config';
 import { auditContextMiddleware } from './middlewares/auditContext.middleware';
+import { requireDatabase } from './middlewares/database.middleware';
 import {
   buildPaypackConfig,
   validatePaypackStartupConfig,
@@ -47,17 +48,30 @@ configureGoogleAuth();
 // Audit context — wraps every request in AsyncLocalStorage
 app.use(auditContextMiddleware);
 
-app.use('/api/v1', routes);
+// Health check — always available, reports database reachability
+app.get('/api/v1/health', (_req, res) => {
+  if (AppDataSource.isInitialized) {
+    return res.status(200).json({ status: 'ok' });
+  }
+  return res.status(503).json({ status: 'unavailable' });
+});
+
+app.use('/api/v1', requireDatabase, routes);
 app.use('/api/v1/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use(errorHandler);
 
 // DATABASE CONNECTION
-AppDataSource.initialize()
+const initialization = AppDataSource.initialize();
+initialization
   .then(() => {
     logger.success(`${process.env.DB_NAME} connected`);
   })
   .catch((error) => {
     logger.error('Database connection failed', error);
   });
+
+// Awaited by the worker entrypoint so the server only accepts traffic
+// once the database is connected.
+export const databaseReady = initialization;
 
 export default app;

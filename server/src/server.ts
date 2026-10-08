@@ -29,16 +29,35 @@ if (cluster.isPrimary) {
   }
 
   cluster.on("exit", (worker, code, signal) => {
-    logger.info(`Worker ${worker.process.pid} died`);
-    cluster.fork();
+    logger.info(`Worker ${worker.process.pid} died with code ${code}`);
+    // Back off before replacing a crashed worker so a persistent
+    // failure (e.g. database down) does not hot-loop forks.
+    const delayMs = code === 0 ? 0 : 5000;
+    setTimeout(() => cluster.fork(), delayMs);
   });
 } else {
-  import("./app").then(({ default: app }) => {
-    const { PORT = 8080, DB_NAME } = process.env;
-    app.listen(PORT, () => {
-      logger.success(
-        `Worker ${process.pid} started on port ${PORT}`
+  import("./app")
+    .then(({ default: app, databaseReady }) => {
+      const { PORT = 8080 } = process.env;
+      return databaseReady.then(
+        () => {
+          app.listen(PORT, () => {
+            logger.success(
+              `Worker ${process.pid} started on port ${PORT}`
+            );
+          });
+        },
+        (error: unknown) => {
+          logger.error(
+            `Worker ${process.pid} failed to connect to database, exiting`,
+            error
+          );
+          process.exit(1);
+        }
       );
+    })
+    .catch((error) => {
+      logger.error(`Worker ${process.pid} failed to start`, error);
+      process.exit(1);
     });
-  });
 }
