@@ -1,143 +1,165 @@
-# Mobile Layout — Rider App
+# Mobile Layout — Rider App (Flutter)
 
-React Native app for delivery riders (Expo SDK 54, Expo Router file-based routing, Zustand state, OneSignal push). Full feature/setup docs live in [mobile/README.md](../mobile/README.md); this file maps the directory layout.
+Rider app for delivery riders, built with Flutter (go_router navigation,
+Riverpod state, OneSignal push). Full run/release docs live in
+[mobile_flutter/README.md](../mobile_flutter/README.md); this file maps the
+directory layout.
 
-> **Configuration:** mobile env vars (`EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_ONESIGNAL_APP_ID`, `EXPO_PUBLIC_PROJECT_ID`, `EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES`) are documented in [environment-variables.md](environment-variables.md).
+> **Configuration:** all rider config is `--dart-define`
+> (`API_BASE_URL`, `ONESIGNAL_APP_ID`,
+> `LOCATION_UPDATE_INTERVAL_MINUTES`), documented in
+> [environment-variables.md](environment-variables.md).
+>
+> **Legacy Expo app:** `mobile/` (React Native) stays runnable until the
+> flag-day cutover, then is deleted (see
+> [mobile-flutter-rebuild.md](mobile-flutter-rebuild.md)). Its layout is
+> described in [mobile/README.md](../mobile/README.md).
 
 ## Entry points
 
 | File | Responsibility |
 | --- | --- |
-| `app/_layout.tsx` | Root layout: `I18nProvider` wrapper, auth bootstrap, OneSignal init, location tracking hook, root `Stack`. |
-| `app.json` / `app.config.ts` | Expo app config; `app.config.ts` computes OneSignal APNs mode from the EAS build profile. |
-| `eas.json` | EAS build profiles (development, preview, production). |
-| `package.json` | Scripts (Expo/EAS builds); `postinstall` runs `patch-package` (see `patches/`). |
+| `lib/main.dart` | Entry: `ProviderScope` + `PeekabooApp`. |
+| `lib/src/app/app.dart` | Bootstrap: OneSignal init, auth restore, location tracking, notification deep links; cold-start tap queue. |
+| `lib/src/app/router.dart` | go_router routes + auth redirects (`redirectFor`). |
+| `pubspec.yaml` | Deps, fonts/assets, launcher-icon and splash generator config. |
+| `android/fastlane/`, `ios/fastlane/` | Store-upload lanes (Play internal, TestFlight). |
+| `.github/workflows/mobile-flutter.yaml` | CI: checks, main-branch internal builds, tag releases. |
 
-## File-based routing (`app/`)
+## Routes (`lib/src/app/router.dart`)
 
-Expo Router derives navigation from the folder structure:
+| Path | Screen | Notes |
+| --- | --- | --- |
+| `/login` | `screens/login_screen.dart` | Rider sign-in (auth shell). |
+| `/support` | `screens/support_screen.dart` | Support, reachable logged out. |
+| `/dashboard` | `screens/dashboard_screen.dart` | Tab 1: metrics, shift toggle, activity. |
+| `/assignments` | `screens/assignments_screen.dart` | Tab 2: filterable assignment queue (`?filter=`). |
+| `/profile` | `screens/profile_screen.dart` | Tab 3: rider profile, language. |
+| `/assignment/:id` | `screens/assignment_detail_screen.dart` | Detail + accept/reject/dispatch/complete. |
+| `/gallery` | `screens/gallery_screen.dart` | Debug-only theme gallery (404 in release). |
 
-```
-app/
-├── _layout.tsx            # Root Stack
-├── (auth)/
-│   ├── _layout.tsx        # Auth stack
-│   ├── login.tsx          # Login screen
-│   └── support.tsx        # Support screen
-├── (tabs)/
-│   ├── _layout.tsx        # Bottom tab bar (redirects to login if unauthenticated)
-│   ├── dashboard.tsx      # Rider dashboard
-│   ├── assignments.tsx    # Assignment list
-│   ├── profile.tsx        # Rider profile
-│   ├── index.tsx / two.tsx# Template leftovers, hidden via href: null
-├── assignment/
-│   └── [id].tsx           # Assignment detail screen (dynamic route)
-└── +not-found.tsx
-```
+Tabs share the `TabsShell` (black top bar + account menu, bottom nav).
+Unauthenticated users redirect to `/login`; authenticated users leaving
+`/login` land on `/dashboard`.
 
-`(auth)` and `(tabs)` are route groups: they organize screens without adding a path segment.
+## Directory reference (`lib/src/`)
 
-## Directory reference
+### `theme/`
+Single source of truth for the look: `tokens.dart` (paper/ink/surface/line,
+outcome colours, type, spacing) and `peekaboo_theme.dart` (`ThemeData`).
+Follows the implemented client UI, not the `DESIGN.md` prose.
 
-### `components/`
-- `ui/` — reusable primitives: `Button`, `Input`, `Card`, `Badge`, `LanguageSwitcher` (re-exported from `index.ts`).
-- `assignments/` — `AssignmentCard`, `AssignmentDetails`, `AssignmentActions`, `AssignmentFilters`, `AssignmentDirectionsMap`, skeletons; `index.ts` barrel.
-- `dashboard/` — `StatCard`, `RecentActivity`; `index.ts` barrel.
+### `widgets/`
+- Design-system primitives: `pk_button.dart`, `pk_card.dart`,
+  `pk_text_field.dart`, `pk_badge.dart`, `pk_page_header.dart`,
+  `pk_section_card.dart`, `dialogs.dart` (alert/confirm/snackbar),
+  `step_trail.dart` (order progress), `reject_sheet.dart`.
+- Feature widgets: `assignment_card.dart`, `assignment_actions.dart`,
+  `assignment_details.dart`, `assignment_filters.dart`, `stat_card.dart`,
+  `directions_map.dart`, `language_switcher.dart`, `error_view.dart`.
 
-### `hooks/`
-- `useAuth.ts`, `useAssignments.ts`, `useDashboard.ts` — screen-facing data hooks over the stores/services.
-- `useLocationTracking.ts` — periodic rider-location reporting (interval from `EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES`).
-- `index.ts` — barrel.
+### `screens/`
+Login, support, tabs shell, dashboard, assignments, assignment detail,
+profile, not-found, gallery (debug only).
+
+### `state/` (Riverpod notifiers)
+- `auth_state.dart` — session, login/logout/checkAuth, 401 clearing.
+  Offline restores keep the cached user; only a 401 logs out.
+- `assignments_state.dart` — queue (newest row per order, sorted by order
+  status), paging, accept/reject/recover/dispatch/complete.
+- `dashboard_state.dart` — dashboard metrics + recent activity.
+
+### `api/`
+dio client (`api_client.dart`: Bearer [REDACTED] 401 delegation) + typed modules:
+`auth_api.dart`, `assignments_api.dart`, `dashboard_api.dart`,
+`boundaries_api.dart`, `users_api.dart`, `location_api.dart`.
+
+### `models/`
+`user.dart`, `order.dart`, `assignment.dart`, `dashboard.dart`.
 
 ### `services/`
-- `api/` — axios client + typed endpoints: `client.ts`, `auth.ts`, `assignments.ts`, `orders.ts`, `dashboard.ts`, `users.ts`; `index.ts` barrel.
-- `storage/` — `secureStorage.ts` (expo-secure-store token persistence).
-- `notifications/` — `pushNotifications.ts` (OneSignal init/listeners), `index.ts`.
+`push_notifications.dart` (OneSignal wrapper), `location_tracking.dart`
+(foreground periodic GPS), `media_service.dart` (proof photos).
 
-### `store/`
-Zustand stores (state + async actions):
-- `authStore.ts` — token/user session, login/logout/checkAuth.
-- `assignmentStore.ts` — assignment list, refresh, accept/reject actions.
-- `dashboardStore.ts` — dashboard data.
-- `index.ts` — barrel.
-
-### `types/`
-TypeScript domain types: `auth.ts`, `assignment.ts`, `order.ts`, `dashboard.ts` (plus `index.ts`).
-
-### `utils/`
-- `constants.ts` — design tokens (`colors`, spacing).
-- `formatters.ts`, `validators.ts`, `errorHandler.ts` — helpers.
-
-### `constants/`
-- `Colors.ts` — color palette.
-- `order.constants.ts` — order/assignment status constants.
+### `storage/`
+`secure_storage.dart` — keychain/keystore token + user + language
+persistence (same keys as the Expo app).
 
 ### `i18n/`
-`index.tsx` — `I18nProvider` + `useI18n` hook + translation strings.
+`localizations.dart` (`localeProvider`, `tProvider`, `{{value}}`
+interpolation) + `strings_en.dart` / `strings_rw.dart` (default rw).
+Key parity is enforced by `test/i18n_test.dart`.
+
+### `utils/`
+`formatters.dart`, `validators.dart`, `app_error.dart` (Dio → translated
+`AppError`), `order_helpers.dart`.
+
+### `config/`
+`app_config.dart` — `--dart-define` values. Release builds throw without
+`API_BASE_URL`; debug falls back to localhost.
 
 ### `assets/`
-Icons, splash, and adaptive icons referenced by `app.config.ts`.
-
-### `patches/`
-`patch-package` patches applied automatically on `npm install`.
+- `assets/images/` — bundled images (app logo, fonts' companions).
+- `assets/branding/` — generator sources (not bundled): iOS icon,
+  adaptive foreground, light/dark splash art. Regenerate with
+  `dart run flutter_launcher_icons` and
+  `dart run flutter_native_splash:create`.
 
 ## Data flow
 
 ```
-Screen (app/**) ──► hooks/* ──► store/* (Zustand) ──► services/api/* (axios)
-                              └── services/storage (token)          └──► server /api/v1
+Screen (screens/*) ──► state/* (Riverpod) ──► api/* (dio) ──► server /api/v1
+                            └── storage (token/user)
 ```
 
-Push notifications (OneSignal) arrive in `services/notifications`; assignment notifications trigger a store refresh so lists update without a manual pull.
+Push taps deep-link to `/assignment/:id` (queued across cold start);
+assignment pushes refresh the queue. Rejects carry an optional reason to
+`PATCH /order-assignments/:id/reject`.
 
 ## Environment
 
-`mobile/.env` (see `mobile/.env.example`):
-```env
-EXPO_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1
-EXPO_PUBLIC_ONESIGNAL_APP_ID=...
-EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES=5
+```bash
+# Simulator/emulator (localhost API works here)
+flutter run
+
+# Physical device: LAN IP, never localhost
+flutter run --dart-define API_BASE_URL=http://<LAN_IP>:8080/api/v1
 ```
 
-> For physical devices, use a LAN IP (not `localhost`) in `EXPO_PUBLIC_API_BASE_URL`. EAS cloud builds need `EXPO_PUBLIC_*` values provided in `eas.json` env or EAS secrets — local `.env` files are not used. Every variable is documented in [environment-variables.md](environment-variables.md).
+> Release builds require an explicit `API_BASE_URL` and HTTPS (cleartext is
+> debug-only on both platforms).
 
-### Local development on a physical device (LAN)
+### CI builds (`.github/workflows/mobile-flutter.yaml`)
 
-1. Find your machine's LAN IP: `ipconfig getifaddr en0` (macOS Wi-Fi).
-2. Set `EXPO_PUBLIC_API_BASE_URL=http://<LAN_IP>:8080/api/v1` (never `localhost` — that points at the phone itself).
-3. Start the backend bound to `0.0.0.0` so it's reachable on the network.
-4. Run `npx expo start --lan`; teammates scan the QR code with Expo Go.
+| Trigger | Android | iOS |
+| --- | --- | --- |
+| `main` push | Signed release APK artifact | TestFlight upload |
+| `rider-v*` tag | Play internal AAB | TestFlight IPA |
 
-### EAS build profiles (`eas.json`)
-
-| Profile | Distribution | `EXPO_PUBLIC_API_BASE_URL` | Use case |
-| --- | --- | --- | --- |
-| `development` | internal, dev client | LAN IP (e.g. `http://192.168.1.64:8080/api/v1`) | Local testing on simulator/device |
-| `development-device` | internal, dev client | LAN IP | Local testing on a physical device |
-| `preview` | internal (APK/IPA) | `https://server.peekaboo.co.rw/api/v1` | Test builds for the team |
-| `production` | store (app-bundle) | `https://server.peekaboo.co.rw/api/v1` | App Store / Play Store releases |
-
-`app.config.ts` derives the OneSignal APNs environment (`development` vs `production`) from `EAS_BUILD_PROFILE` so entitlements match the profile.
+Build numbers come from `github.run_number`; build names from the tag
+(`1.0.0` on main). Secrets are listed in
+[mobile_flutter/README.md](../mobile_flutter/README.md#store-releases).
 
 ### Push notifications (OneSignal)
 
-- Set `EXPO_PUBLIC_ONESIGNAL_APP_ID` locally and per EAS profile. It **must match** the server's `ONESIGNAL_APP_ID`.
-- Push registration only works on a **physical device** with a dev-client build and requires notification permission.
-- After a rider logs in, verify the subscription under OneSignal Audience → Subscriptions (External ID = API user UUID).
-- If push isn't needed locally, set `PUSH_NOTIFICATIONS_DISABLED=true` on the server (assignment flows still work).
+- `ONESIGNAL_APP_ID` must match the server's value.
+- External ID = API user UUID, so the Expo audience carries over.
+- After login, verify the subscription under OneSignal Audience →
+  Subscriptions. iOS ships without a Notification Service Extension
+  (follow-up, not a cutover blocker).
 
-## Key commands (from `mobile/`)
+## Key commands (from `mobile_flutter/`)
 
 ```bash
-npx expo start                     # dev server (LAN; press i/a for simulators)
-npx expo start --lan               # force LAN mode
-npm run ios / npm run android      # native dev builds (expo run:*)
-npm run build:android / build:ios  # EAS cloud builds (production profile)
-npm run build:android:preview      # EAS preview build
+flutter pub get
+flutter analyze && flutter test
+flutter run --dart-define API_BASE_URL=... --dart-define ONESIGNAL_APP_ID=...
 ```
 
 ## Conventions
 
-- Use the shared UI primitives in `components/ui` instead of raw `react-native` components where possible.
-- Feature components live in `components/<feature>/`; shared business logic lives in hooks + Zustand stores.
-- OneSignal app IDs must match between `mobile/.env` (`EXPO_PUBLIC_ONESIGNAL_APP_ID`) and the server (`ONESIGNAL_APP_ID`).
+- No hard-coded `Color(0x…)` outside `theme/tokens.dart` (CI-enforced), no
+  `FontWeight` above 500, no gradients, no `letterSpacing`.
+- User-facing strings go through `tr('key')` with en/rw tables kept at
+  key parity; errors and dates take `Translate` explicitly.
+- Directions always open Google Maps — never Apple Maps.

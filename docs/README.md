@@ -12,14 +12,15 @@ The repository is a monorepo with three applications and a shared deployment scr
 
 ```
 peekaboo/
-├── client/    # Web dashboard & public site (React + Vite + TypeScript)
-├── mobile/    # Rider mobile app (React Native + Expo Router)
-├── server/    # Backend API (Node.js + Express + TypeORM + PostgreSQL)
-├── scripts/   # Shared deployment automation (deploy.sh)
-└── docs/      # This documentation
+├── client/         # Web dashboard & public site (React + Vite + TypeScript)
+├── mobile_flutter/ # Rider mobile app (Flutter; replaces mobile/ at cutover)
+├── mobile/         # Legacy rider app (React Native + Expo Router; deleted at cutover)
+├── server/         # Backend API (Node.js + Express + TypeORM + PostgreSQL)
+├── scripts/        # Shared deployment automation (deploy.sh)
+└── docs/           # This documentation
 ```
 
-Each app is an independent npm project (own `package.json`, lockfile, README). There is no workspace/turbo setup — install dependencies per app.
+Each app is an independent project (own lockfile, README). There is no workspace/turbo setup — install dependencies per app (`npm install` for the Node apps, `flutter pub get` for the rider app).
 
 ## Documentation index
 
@@ -29,7 +30,8 @@ Each app is an independent npm project (own `package.json`, lockfile, README). T
 | [environment-variables.md](environment-variables.md) | **Complete reference for every environment variable** across server, client, mobile, and the deploy script — including defaults, required flags, and where each is read. |
 | [server-layout.md](server-layout.md) | Backend folder-by-folder guide: entry points, routing, services, entities, integrations, webhooks, cron jobs, and scripts. |
 | [client-layout.md](client-layout.md) | Web client folder-by-folder guide: pages, containers, hooks, API layer, state, and routing. |
-| [mobile-layout.md](mobile-layout.md) | Rider mobile app folder-by-folder guide: screens, components, services, stores, and config. |
+| [mobile-layout.md](mobile-layout.md) | Rider mobile app (Flutter) folder-by-folder guide: screens, widgets, state, services, and config. |
+| [mobile-flutter-rebuild.md](mobile-flutter-rebuild.md) | Decision record for the Flutter rebuild of the rider app (Final). |
 
 **Recommended reading order:** `project-layout.md` → `server-layout.md` → `client-layout.md` → `mobile-layout.md`. Read `environment-variables.md` whenever you need to configure or debug an integration.
 
@@ -41,7 +43,8 @@ Each app is an independent npm project (own `package.json`, lockfile, README). T
 | npm | bundled with Node | |
 | PostgreSQL | any recent version | Used by the server. |
 | Git | any | |
-| Expo CLI (optional) | latest | Only needed for the mobile app; `npx expo` works too. |
+| Flutter | 3.47.6 | Only needed for the rider app (`mobile_flutter/`). |
+| Expo CLI (legacy) | latest | Only for the pre-cutover `mobile/` app; `npx expo` works too. |
 
 You will also need accounts/credentials for the integrations you plan to use (see [environment-variables.md](environment-variables.md)): WhatsApp Business API, UrubutoPay/Kpay, Google OAuth + Maps, Resend, Pindo, OneSignal, Cloudinary.
 
@@ -73,16 +76,16 @@ npm run dev                 # Vite dev server (default http://localhost:5173)
 
 Client env vars include `VITE_API_BASE_URL`, `VITE_GOOGLE_MAPS_API_KEY`, `VITE_GOOGLE_MAPS_MAP_ID`, `VITE_INACTIVITY_TIMEOUT`, `VITE_NODE_ENVIRONMENT`, and `VITE_PAYMENT_MODE`. See [environment-variables.md](environment-variables.md).
 
-### 3. Mobile app — `mobile/`
+### 3. Rider app — `mobile_flutter/`
 
 ```bash
-cd mobile
-npm install
-cp .env.example .env        # set EXPO_PUBLIC_API_BASE_URL
-npx expo start              # press i / a for simulators, or scan QR in Expo Go
+cd mobile_flutter
+flutter pub get
+flutter run --dart-define API_BASE_URL=http://localhost:8080/api/v1 \
+  --dart-define ONESIGNAL_APP_ID=...
 ```
 
-For teammates on physical devices, use your **LAN IP** (e.g. `http://192.168.1.20:8080/api/v1`), not `localhost`. For EAS cloud builds, values go in `eas.json` profile env or EAS secrets. See [mobile-layout.md](mobile-layout.md) and [environment-variables.md](environment-variables.md).
+For teammates on physical devices, use your **LAN IP** (e.g. `http://192.168.1.20:8080/api/v1`), not `localhost`. Internal builds ship from CI on every `main` merge (signed APK + TestFlight); store uploads go out on `rider-v*` tags. See [mobile-layout.md](mobile-layout.md) and [environment-variables.md](environment-variables.md).
 
 > The backend must be running (and reachable) before the web client and mobile app can serve data.
 
@@ -100,15 +103,15 @@ For teammates on physical devices, use your **LAN IP** (e.g. `http://192.168.1.2
 | Symptom | Likely cause / fix |
 | --- | --- |
 | Server logs "database connection failed" | `DB_*` vars wrong, or Postgres not running on `DB_HOST:DB_PORT`. |
-| Mobile app can't reach API on a phone | `EXPO_PUBLIC_API_BASE_URL` uses `localhost`; use your LAN IP and ensure the backend binds to `0.0.0.0`. |
+| Rider app can't reach API on a phone | `API_BASE_URL` uses `localhost`; use your LAN IP and ensure the backend binds to `0.0.0.0`. |
 | Payments fail on a new machine | UrubutoPay vars missing or invalid — check startup warnings; see [environment-variables.md](environment-variables.md). |
 | WhatsApp messages/orders not working | `WHATSAPP_BUSINESS_*` or `WHATSAPP_FLOW_*` vars incomplete; verify the webhook is registered with the verify token. |
 | Emails/SMS/push not sent | Respective API keys unset (`RESEND_API_KEY`, `PINDO_TOKEN`, `ONESIGNAL_*`). Emails degrade gracefully. |
 | 10 RWF charges locally | Expected: `NODE_ENV=development` forces dev pricing. Use `NODE_ENV=production` for full fees. |
-| Push subscriptions don't appear in OneSignal | Must use a dev client on a physical device; `EXPO_PUBLIC_ONESIGNAL_APP_ID` must match server `ONESIGNAL_APP_ID`. |
+| Push subscriptions don't appear in OneSignal | Must run on a physical device; the rider `ONESIGNAL_APP_ID` must match server `ONESIGNAL_APP_ID`. |
 | Client can't load maps | `VITE_GOOGLE_MAPS_API_KEY` unset/invalid. |
 
-See each app README for deeper troubleshooting (`server/README.md`, `client/README.md`, `mobile/README.md`).
+See each app README for deeper troubleshooting (`server/README.md`, `client/README.md`, `mobile_flutter/README.md`).
 
 ## Glossary
 
@@ -122,8 +125,8 @@ See each app README for deeper troubleshooting (`server/README.md`, `client/READ
 | **Business plan / Organization** | B2B tiering: organizations subscribe to business plans, get members, batches, and billing. |
 | **Batch** | A bulk import of orders (e.g. spreadsheet) for B2B clients. |
 | **UrubutoPay / Kpay** | Rwandan payment gateways used for order checkout. |
-| **EAS** | Expo Application Services — cloud builds for the mobile app. |
-| **LAN mode** | Expo dev server reachable over the local network for physical devices. |
+| **EAS** | Expo Application Services — cloud builds for the legacy mobile app (retires at cutover). |
+| **LAN mode** | Dev API reachable over the local network for physical devices (use a LAN IP, not `localhost`). |
 
 ## Where to go next
 

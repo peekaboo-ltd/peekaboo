@@ -1,0 +1,82 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build release IPA and upload to TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_content: ENV["ASC_KEY_P8_BASE64"],
+      is_key_content_base64: true
+    )
+
+    # Import the distribution certificate into a throwaway keychain.
+    cert_path = "#{Dir.tmpdir}/rider-dist.p12"
+    File.write(cert_path, Base64.decode64(ENV["IOS_CERT_P12_BASE64"]))
+    create_keychain(
+      name: "ci",
+      password: "ci",
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600
+    )
+    import_certificate(
+      certificate_path: cert_path,
+      certificate_password: ENV["IOS_CERT_PASSWORD"],
+      keychain_name: "ci",
+      keychain_password: "ci"
+    )
+
+    # Install the App Store provisioning profile.
+    profile_path = "#{Dir.home}/Library/MobileDevice/Provisioning Profiles/ci.mobileprovision"
+    FileUtils.mkdir_p(File.dirname(profile_path))
+    File.write(profile_path, Base64.decode64(ENV["IOS_PROFILE_BASE64"]))
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: ENV["APPLE_TEAM_ID"],
+      code_sign_identity: "Apple Distribution"
+    )
+
+    # Export options reference the CI-provided profile by name.
+    File.write("ExportOptions.plist", <<~PLIST)
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>method</key>
+        <string>app-store</string>
+        <key>teamID</key>
+        <string>#{ENV["APPLE_TEAM_ID"]}</string>
+        <key>provisioningProfiles</key>
+        <dict>
+          <key>com.peekaboo.rider</key>
+          <string>#{ENV["IOS_PROFILE_NAME"]}</string>
+        </dict>
+      </dict>
+      </plist>
+    PLIST
+
+    # CI runs this lane from mobile_flutter/ios, so one level up is the
+    # Flutter project root. ExportOptions.plist was written to ios/ above,
+    # which is what the path below resolves to.
+    Dir.chdir("..") do
+      sh(
+        "flutter", "build", "ipa", "--release",
+        "--export-options-plist=#{File.expand_path('ios/ExportOptions.plist')}",
+        "--build-name=#{ENV.fetch('BUILD_NAME', '1.0.0')}",
+        "--build-number=#{ENV.fetch('BUILD_NUMBER', '1')}",
+        "--dart-define", "API_BASE_URL=#{ENV.fetch('RIDER_API_BASE_URL', 'https://server.peekaboo.co.rw/api/v1')}",
+        "--dart-define", "ONESIGNAL_APP_ID=#{ENV.fetch('ONESIGNAL_APP_ID', '')}",
+        "--dart-define", "LOCATION_UPDATE_INTERVAL_MINUTES=#{ENV.fetch('LOCATION_UPDATE_INTERVAL_MINUTES', '5')}"
+      )
+    end
+
+    pilot(
+      api_key: api_key,
+      distribute_external: false,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

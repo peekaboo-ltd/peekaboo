@@ -7,7 +7,10 @@
 
 **Scope:** the whole `client/` web app — public marketing pages, auth screens, and the
 authenticated dashboard (tables, modals, charts, sidebars).
-**Out of scope:** `mobile/` (React Native) and `server/`. Do not touch them.
+**Out of scope:** `server/`. Do not touch it. (The Flutter rider app in
+`mobile_flutter/` follows these tokens; where this prose and the implemented
+client UI disagree, the client code wins — see
+`docs/mobile-flutter-rebuild.md`.)
 
 **Reference:** interaction and layout behaviour is modelled on `uber.com` (values below were
 measured from the live site, not guessed). Peekaboo is **not** a clone — its own structural palette

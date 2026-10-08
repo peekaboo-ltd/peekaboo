@@ -1,0 +1,70 @@
+name: mobile_flutter
+description: "Peekaboo Rider app (Flutter rebuild)."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.11.1
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.0.2
+  flutter_secure_storage: ^11.2.0
+  onesignal_flutter: ^5.7.0
+  geolocator: ^14.1.1
+  geocoding: ^5.0.0
+  webview_flutter: ^4.14.1
+  image_picker: ^1.2.4
+  url_launcher: ^6.3.3
+  gal: ^2.3.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
+
+# Brand art staged from mobile/assets/images (see assets/branding/).
+# Regenerate with: dart run flutter_launcher_icons &&
+#   dart run flutter_native_splash:create
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path_android: assets/images/icon.png
+  image_path_ios: assets/branding/icon-ios.png
+  adaptive_icon_foreground: assets/branding/adaptive-icon.png
+  adaptive_icon_background: '#1D546D'
+  remove_alpha_ios: false
+
+flutter_native_splash:
+  android: true
+  ios: true
+  color: '#FFFFFF'
+  color_dark: '#000000'
+  image: assets/branding/splash-icon.png
+  image_dark: assets/branding/splash-icon-dark.png
+  android_12:
+    color: '#FFFFFF'
+    color_dark: '#000000'
+    image: assets/branding/splash-icon.png
+    image_dark: assets/branding/splash-icon-dark.png
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: DM Sans
+      fonts:
+        - asset: assets/fonts/DMSans-Light.ttf
+          weight: 300
+        - asset: assets/fonts/DMSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/DMSans-Medium.ttf
+          weight: 500
