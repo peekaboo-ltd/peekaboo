@@ -1,8 +1,15 @@
 name: mobile-flutter
 
-# Rider app pipeline: static checks + tests on every push/PR, installable
-# internal builds on main (signed release APK artifact + TestFlight upload),
-# store uploads on rider-v* tags (Play internal AAB + TestFlight IPA).
+# Rider app pipeline: static checks + tests on every push/PR, a test APK on
+# every push/PR/manual run, installable internal builds on main (signed release
+# APK artifact + TestFlight upload), store uploads on rider-v* tags (Play
+# internal AAB + TestFlight IPA).
+#
+# The test APK needs no secrets: it writes no key.properties, so the Gradle
+# release buildType falls back to the debug key (see android/app/build.gradle.kts).
+# It is for sideloading only -- never for the stores, and its signature differs
+# from the release key, so you must uninstall a release build before installing
+# it (and vice versa).
 #
 # Tag convention: push `rider-vX.Y.Z` to ship internal tracks
 # (Play internal + TestFlight). Promote to production in the store consoles.
@@ -13,6 +20,7 @@ on:
     branches: ['**']
     tags: ['rider-v*']
   pull_request:
+  workflow_dispatch:
 
 env:
   FLUTTER_VERSION: '3.47.6'
@@ -55,6 +63,47 @@ jobs:
           echo '-- single font family --'
           test "$(grep -rhoE "fontFamily: [A-Za-z.]+" lib | sort -u | wc -l)" -le 2
           echo OK
+
+  build-test-apk:
+    name: test APK (debug key, unsigned for release)
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" \
+            https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - run: flutter --disable-analytics
+      - run: flutter precache --android
+      - name: Build version
+        run: |
+          echo "BUILD_NAME=1.0.0" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=${{ github.run_number }}" >> "$GITHUB_ENV"
+      # Deliberately no signing config and no secrets, so this job also works
+      # on pull requests from forks.
+      - name: Build release APK (debug key)
+        working-directory: ${{ env.WORKDIR }}
+        run: >
+          flutter build apk --release
+          --build-name=${{ env.BUILD_NAME }}
+          --build-number=${{ env.BUILD_NUMBER }}
+          --dart-define API_BASE_URL=${{ secrets.RIDER_API_BASE_URL || 'https://server.peekaboo.co.rw/api/v1' }}
+          --dart-define ONESIGNAL_APP_ID=${{ secrets.ONESIGNAL_APP_ID || '276e86c4-5af1-4ad2-ba8a-20908c155564' }}
+          --dart-define LOCATION_UPDATE_INTERVAL_MINUTES=${{ vars.LOCATION_UPDATE_INTERVAL_MINUTES || '5' }}
+      - name: Report the signer
+        run: |
+          apksigner=$(ls "$ANDROID_SDK_ROOT"/build-tools/*/apksigner 2>/dev/null | tail -1)
+          if [ -n "$apksigner" ]; then
+            "$apksigner" verify --print-certs \
+              mobile_flutter/build/app/outputs/flutter-apk/app-release.apk \
+              | grep -i "certificate DN" || true
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rider-test-apk
+          path: mobile_flutter/build/app/outputs/flutter-apk/app-release.apk
 
   build-android:
     name: internal APK (release)
