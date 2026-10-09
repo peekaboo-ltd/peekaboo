@@ -8,6 +8,7 @@ import '../theme/tokens.dart';
 import '../widgets/dialogs.dart';
 import '../widgets/pk_button.dart';
 import '../widgets/pk_card.dart';
+import '../widgets/pk_icon_button.dart';
 
 enum ReportCategory { problem, receipt }
 
@@ -313,26 +314,23 @@ class _ReportSheetState extends ConsumerState<ReportSheet> {
                   )
                 : Row(
                     children: [
-                      Expanded(
-                        child: PkButton(
-                          title: tr('dashboard.reportRetake'),
-                          onPress: widget.onRetake,
-                          variant: PkButtonVariant.outline,
-                          disabled: _sending,
-                        ),
+                      PkIconButton(
+                        icon: Icons.replay,
+                        tooltip: tr('dashboard.reportRetake'),
+                        variant: PkIconButtonVariant.outline,
+                        size: PkIconButtonSize.lg,
+                        onPress: _sending ? null : widget.onRetake,
                       ),
                       const SizedBox(width: PkSpace.s8),
                       Expanded(
                         child: PkButton(
                           title: tr('dashboard.reportConfirm'),
                           onPress: () => _confirm(tr),
+                          variant: PkButtonVariant.approve,
+                          size: PkButtonSize.lg,
                           disabled:
                               _category == null || _sending,
-                          icon: Icon(
-                            Icons.check,
-                            size: 16,
-                            color: t.paper,
-                          ),
+                          icon: const Icon(Icons.check, size: 16),
                         ),
                       ),
                     ],

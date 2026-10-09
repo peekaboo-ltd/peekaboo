@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
-import 'pk_button.dart';
 import 'pk_card.dart';
+import 'pk_icon_button.dart';
 
 /// Inline error card: icon + copy, no colored variants (toast rule, §6.4).
 class ErrorView extends StatelessWidget {
@@ -25,15 +25,15 @@ class ErrorView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.warning_outlined, size: 24, color: t.ink),
+          Icon(Icons.error_outline, size: 24, color: t.danger.main),
           const SizedBox(height: PkSpace.s8),
           Text(message, style: type.bodySm, textAlign: TextAlign.center),
           const SizedBox(height: PkSpace.s12),
-          PkButton(
-            title: retryLabel,
+          PkIconButton(
+            icon: Icons.refresh,
+            tooltip: retryLabel,
+            variant: PkIconButtonVariant.outline,
             onPress: onRetry,
-            variant: PkButtonVariant.outline,
-            size: PkButtonSize.sm,
           ),
         ],
       ),

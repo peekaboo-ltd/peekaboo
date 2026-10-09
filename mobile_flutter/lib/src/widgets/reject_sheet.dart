@@ -97,6 +97,7 @@ class _RejectSheetState extends State<_RejectSheet> {
                     onPress: () =>
                         Navigator.of(context).pop(_reason.text),
                     variant: PkButtonVariant.destructive,
+                    icon: const Icon(Icons.close, size: 16),
                   ),
                 ),
               ],
