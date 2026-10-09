@@ -56,9 +56,14 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
     super.didUpdateWidget(old);
     if (widget.initialFilterParam != null &&
         widget.initialFilterParam != old.initialFilterParam) {
-      ref.read(assignmentsProvider.notifier).setFilter(
-            filterFromParam(widget.initialFilterParam),
-          );
+      // didUpdateWidget runs during build; Riverpod forbids provider writes
+      // there, so defer like initState does.
+      final filter = filterFromParam(widget.initialFilterParam);
+      Future.microtask(() {
+        if (mounted) {
+          ref.read(assignmentsProvider.notifier).setFilter(filter);
+        }
+      });
     }
   }
 
