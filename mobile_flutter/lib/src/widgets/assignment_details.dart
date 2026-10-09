@@ -9,7 +9,7 @@ import '../theme/tokens.dart';
 import '../utils/formatters.dart';
 import 'directions_map.dart';
 import 'pk_badge.dart';
-import 'pk_button.dart';
+import 'pk_icon_button.dart';
 import 'pk_section_card.dart';
 import 'step_trail.dart';
 
@@ -172,10 +172,13 @@ class AssignmentDetails extends ConsumerWidget {
                     ),
                     tabular: true,
                     last: true,
-                    trailingAction: IconButton(
-                      onPressed: () =>
+                    trailingAction: PkIconButton(
+                      icon: Icons.call_outlined,
+                      tooltip: tr('assignmentInfo.phone'),
+                      variant: PkIconButtonVariant.outline,
+                      size: PkIconButtonSize.sm,
+                      onPress: () =>
                           _openDialer(order.recipient!.phoneNumber),
-                      icon: Icon(Icons.call, size: 18, color: t.ink),
                     ),
                   ),
               ],
@@ -187,20 +190,17 @@ class AssignmentDetails extends ConsumerWidget {
           const SizedBox(height: PkSpace.s16),
           PkSectionCard(
             title: tr('assignmentInfo.locations'),
+            trailing: order.locationFrom != null && order.locationTo != null
+                ? PkIconButton(
+                    icon: Icons.map_outlined,
+                    tooltip: tr('assignmentInfo.showRoute'),
+                    variant: PkIconButtonVariant.outline,
+                    onPress: () => _showRoute(context, tr),
+                  )
+                : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (order.locationFrom != null &&
-                    order.locationTo != null) ...[
-                  PkButton(
-                    title: tr('assignmentInfo.showRoute'),
-                    onPress: () => _showRoute(context, tr),
-                    variant: PkButtonVariant.outline,
-                    size: PkButtonSize.sm,
-                    icon: Icon(Icons.map_outlined, size: 16, color: t.ink),
-                  ),
-                  const SizedBox(height: PkSpace.s16),
-                ],
                 if (order.locationFrom != null)
                   _LocationBlock(
                     dotFilled: true,
@@ -383,19 +383,17 @@ class _LocationBlock extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: PkSpace.s8),
-              Text(label, style: type.label),
+              Expanded(child: Text(label, style: type.label)),
+              PkIconButton(
+                icon: Icons.navigation_outlined,
+                tooltip: directionsLabel,
+                variant: PkIconButtonVariant.outline,
+                size: PkIconButtonSize.sm,
+                onPress: onDirections,
+              ),
             ],
           ),
-          const SizedBox(height: PkSpace.s8),
           _AdminLabel(latitude: latitude, longitude: longitude),
-          const SizedBox(height: PkSpace.s8),
-          PkButton(
-            title: directionsLabel,
-            onPress: onDirections,
-            variant: PkButtonVariant.outline,
-            size: PkButtonSize.sm,
-            icon: Icon(Icons.navigation_outlined, size: 16, color: t.ink),
-          ),
         ],
       ),
     );

@@ -12,6 +12,7 @@ const stringsRw = <String, String>{
   'common.yes': 'Yego',
   'common.no': 'Oya',
   'common.now': 'Ubu',
+  'common.account': 'Konti',
   'common.logout': 'Gusohoka',
   'error.network': 'Ntabwo dushoboye kwihuza. Reba niba interineti igukorera.',
   'error.auth': 'Sesiyo yawe yarangiye. Ongera winjire.',

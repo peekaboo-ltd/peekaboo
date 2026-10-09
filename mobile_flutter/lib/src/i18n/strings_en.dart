@@ -12,6 +12,7 @@ const stringsEn = <String, String>{
   'common.yes': 'YES',
   'common.no': 'NO',
   'common.now': 'Now',
+  'common.account': 'Account',
   'common.logout': 'Sign out',
   'error.network': 'Unable to connect. Please check your internet connection.',
   'error.auth': 'Your session has expired. Please login again.',

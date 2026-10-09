@@ -7,6 +7,7 @@ import '../models/assignment.dart';
 import '../theme/tokens.dart';
 import '../widgets/pk_badge.dart';
 import '../widgets/pk_button.dart';
+import '../widgets/pk_icon_button.dart';
 import '../widgets/pk_card.dart';
 import '../widgets/pk_page_header.dart';
 import '../widgets/pk_section_card.dart';
@@ -65,6 +66,64 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   Text('Label 14/500', style: type.label),
                   Text('Meta 13 muted', style: type.meta),
                   Text('Eyebrow 12 muted', style: type.eyebrow),
+                ],
+              ),
+            ),
+            section(
+              'Icon buttons',
+              const Wrap(
+                spacing: PkSpace.s4,
+                runSpacing: PkSpace.s4,
+                children: [
+                  PkIconButton(
+                    icon: Icons.edit_outlined,
+                    tooltip: 'Ghost',
+                    onPress: _noop,
+                  ),
+                  PkIconButton(
+                    icon: Icons.map_outlined,
+                    tooltip: 'Outline',
+                    variant: PkIconButtonVariant.outline,
+                    onPress: _noop,
+                  ),
+                  PkIconButton(
+                    icon: Icons.send,
+                    tooltip: 'Primary',
+                    variant: PkIconButtonVariant.primary,
+                    onPress: _noop,
+                  ),
+                  PkIconButton(
+                    icon: Icons.logout,
+                    tooltip: 'Destructive',
+                    variant: PkIconButtonVariant.destructive,
+                    onPress: _noop,
+                  ),
+                  PkIconButton(
+                    icon: Icons.check,
+                    tooltip: 'Approve',
+                    variant: PkIconButtonVariant.approve,
+                    onPress: _noop,
+                  ),
+                  PkIconButton(
+                    icon: Icons.warning_amber_outlined,
+                    tooltip: 'Warning',
+                    variant: PkIconButtonVariant.warning,
+                    onPress: _noop,
+                  ),
+                  PkIconButton(
+                    icon: Icons.photo_camera_outlined,
+                    tooltip: 'Circle large',
+                    variant: PkIconButtonVariant.outline,
+                    size: PkIconButtonSize.lg,
+                    circle: true,
+                    onPress: _noop,
+                  ),
+                  PkIconButton(
+                    icon: Icons.refresh,
+                    tooltip: 'Disabled',
+                    variant: PkIconButtonVariant.outline,
+                    onPress: null,
+                  ),
                 ],
               ),
             ),

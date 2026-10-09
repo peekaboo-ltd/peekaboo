@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
 
-/// Build-time configuration. Values come from `--dart-define` (CI) and fall
-/// back to LAN-friendly development defaults. Mirrors the semantics of the
-/// Expo app's `EXPO_PUBLIC_*` variables (see mobile/utils/constants.ts).
+/// Build-time configuration. Values come from `--dart-define`; the API
+/// defaults to the hosted server so every build works out of the box.
+/// Mirrors the semantics of the Expo app's `EXPO_PUBLIC_*` variables (see
+/// mobile/utils/constants.ts).
 class AppConfig {
+  static const String hostedApiBaseUrl = 'https://server.peekaboo.co.rw/api/v1';
+
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: '',
+    defaultValue: hostedApiBaseUrl,
   );
 
   static const String oneSignalAppId = String.fromEnvironment(
@@ -19,21 +22,11 @@ class AppConfig {
     defaultValue: 5,
   );
 
-  /// Effective API base URL with the same fallback rules as the Expo app:
-  /// explicit value wins, otherwise localhost in debug builds. Release
-  /// builds refuse to start without an explicit value (CI must inject it).
-  static String get effectiveApiBaseUrl {
-    if (apiBaseUrl.isNotEmpty) return apiBaseUrl;
-    if (kDebugMode) {
-      debugPrint(
-        'API_BASE_URL is missing; using localhost fallback for development.',
-      );
-      return 'http://localhost:8080/api/v1';
-    }
-    throw StateError(
-      'API_BASE_URL is missing in this release build. Check CI secrets.',
-    );
-  }
+  /// Effective API base URL: an explicit `API_BASE_URL` wins (for example a
+  /// local server), otherwise the hosted API. An empty override also falls
+  /// back to the hosted API rather than failing at runtime.
+  static String get effectiveApiBaseUrl =>
+      apiBaseUrl.isNotEmpty ? apiBaseUrl : hostedApiBaseUrl;
 
   /// Mirrors the Expo fallback: invalid/non-positive values become 1 minute.
   static Duration get locationUpdateInterval {

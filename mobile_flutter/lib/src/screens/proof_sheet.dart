@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../i18n/localizations.dart';
 import '../theme/tokens.dart';
 import '../widgets/pk_button.dart';
+import '../widgets/pk_icon_button.dart';
 
 class ProofDraft {
   final String imageUri;
@@ -115,7 +116,12 @@ class _ProofSheetState extends ConsumerState<ProofSheet> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Image.asset('assets/images/icon.png', height: 32),
+        title: Image.asset(
+          'assets/images/logo.png',
+          height: 24,
+          color: t.ink,
+          colorBlendMode: BlendMode.srcIn,
+        ),
         centerTitle: false,
         leading: IconButton(
           onPressed: _sending ? null : widget.onClose,
@@ -183,40 +189,42 @@ class _ProofSheetState extends ConsumerState<ProofSheet> {
             decoration: BoxDecoration(
               border: Border(top: BorderSide(color: t.line)),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                PkButton(
-                  title: tr('dashboard.reportRetake'),
-                  onPress: () => widget.onRetake(),
-                  variant: PkButtonVariant.outline,
-                  fullWidth: true,
-                  disabled: _sending || _saving,
-                ),
-                const SizedBox(height: PkSpace.s8),
-                PkButton(
-                  title: tr('dashboard.proofSave'),
-                  onPress: () => _save(tr),
-                  variant: PkButtonVariant.secondary,
-                  fullWidth: true,
-                  loading: _saving,
-                  disabled: _sending,
-                  icon: Icon(
-                    Icons.download_outlined,
-                    size: 16,
-                    color: t.ink,
+            child: SafeArea(
+              top: false,
+              child: Row(
+                children: [
+                  PkIconButton(
+                    icon: Icons.replay,
+                    tooltip: tr('dashboard.reportRetake'),
+                    variant: PkIconButtonVariant.outline,
+                    size: PkIconButtonSize.lg,
+                    onPress: _sending || _saving
+                        ? null
+                        : () => widget.onRetake(),
                   ),
-                ),
-                const SizedBox(height: PkSpace.s8),
-                PkButton(
-                  title: widget.actionLabel,
-                  onPress: _send,
-                  fullWidth: true,
-                  loading: _sending,
-                  disabled: _saving,
-                  icon: Icon(Icons.send, size: 16, color: t.paper),
-                ),
-              ],
+                  const SizedBox(width: PkSpace.s8),
+                  PkIconButton(
+                    icon: Icons.download_outlined,
+                    tooltip: tr('dashboard.proofSave'),
+                    variant: PkIconButtonVariant.outline,
+                    size: PkIconButtonSize.lg,
+                    loading: _saving,
+                    onPress: _sending ? null : () => _save(tr),
+                  ),
+                  const SizedBox(width: PkSpace.s8),
+                  Expanded(
+                    child: PkButton(
+                      title: widget.actionLabel,
+                      onPress: _send,
+                      size: PkButtonSize.lg,
+                      fullWidth: true,
+                      loading: _sending,
+                      disabled: _saving,
+                      icon: Icon(Icons.send, size: 16, color: t.paper),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

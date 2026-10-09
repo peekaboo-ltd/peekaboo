@@ -6,7 +6,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../i18n/localizations.dart';
 import '../theme/tokens.dart';
 import '../utils/formatters.dart';
-import 'pk_button.dart';
+import 'pk_icon_button.dart';
 
 /// Directions preview ported from AssignmentDirectionsMap.tsx: an embedded
 /// Google Maps directions page plus an external deep link. No map SDK.
@@ -87,21 +87,18 @@ class _DirectionsMapState extends ConsumerState<DirectionsMap> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              PkButton(
-                title: tr('map.openGoogleMaps'),
+              PkIconButton(
+                icon: Icons.open_in_new,
+                tooltip: tr('map.openGoogleMaps'),
+                variant: PkIconButtonVariant.outline,
                 onPress: _openExternal,
-                variant: PkButtonVariant.outline,
-                size: PkButtonSize.sm,
               ),
-              if (widget.onClose != null) ...[
-                const SizedBox(width: PkSpace.s8),
-                PkButton(
-                  title: tr('common.close'),
+              if (widget.onClose != null)
+                PkIconButton(
+                  icon: Icons.close,
+                  tooltip: tr('common.close'),
                   onPress: widget.onClose,
-                  variant: PkButtonVariant.ghost,
-                  size: PkButtonSize.sm,
                 ),
-              ],
             ],
           ),
         ],

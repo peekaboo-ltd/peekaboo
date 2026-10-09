@@ -91,6 +91,8 @@ void showPkSnackBar(
 }
 
 /// Confirm dialog with cancel + confirm actions (Alert.alert parity).
+/// [confirmVariant] colors the commit by consequence: destructive (red-700)
+/// for removals, approve (green-700) for confirmations.
 Future<void> showPkConfirm(
   BuildContext context, {
   required String title,
@@ -98,6 +100,7 @@ Future<void> showPkConfirm(
   required String confirmLabel,
   required VoidCallback onConfirm,
   String? cancelLabel,
+  PkButtonVariant confirmVariant = PkButtonVariant.primary,
   List<({String label, VoidCallback onTap})>? extraActions,
 }) {
   return showDialog<void>(
@@ -135,6 +138,7 @@ Future<void> showPkConfirm(
                   Navigator.of(context).pop();
                   onConfirm();
                 },
+                variant: confirmVariant,
                 size: PkButtonSize.sm,
               ),
             ],

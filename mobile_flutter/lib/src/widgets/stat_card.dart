@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 import 'pk_card.dart';
 
-/// Metric tile matching the client's MetricCard header: a 36px surface icon
-/// chip beside a muted label, with the metric value below. No sparkline or
-/// trend — the rider API provides neither.
+/// Metric tile: a 36px surface icon chip beside the value. The title is
+/// not printed; it lives in the tooltip and the semantics label, so long
+/// Kinyarwanda titles never truncate on a phone-width grid.
 class StatCard extends StatelessWidget {
   final String title;
   final String value;
@@ -24,12 +24,18 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final type = context.type;
-    return PkCard(
-      onPress: onPress,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Semantics(
+      label: '$title: $value',
+      button: onPress != null,
+      onTap: onPress,
+      excludeSemantics: true,
+      child: Tooltip(
+        message: title,
+        excludeFromSemantics: true,
+        child: PkCard(
+          onPress: onPress,
+          padding: PkCardPadding.sm,
+          child: Row(
             children: [
               Container(
                 width: 36,
@@ -41,25 +47,17 @@ class StatCard extends StatelessWidget {
                 ),
                 child: Icon(icon, size: 18, color: t.ink),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: PkSpace.s12),
               Expanded(
-                child: Text(
-                  title,
-                  style: type.bodySm.copyWith(color: t.muted),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(value, style: type.metric, maxLines: 1),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: PkSpace.s12),
-          Text(
-            value,
-            style: type.metric,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        ),
       ),
     );
   }

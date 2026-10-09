@@ -9,7 +9,8 @@ map: [docs/mobile-layout.md](../docs/mobile-layout.md).
 ## Prerequisites
 
 - Flutter stable `3.47.6` (`flutter --version`)
-- A running backend (`server/`, default `http://localhost:8080/api/v1`)
+- Nothing else for the API: builds talk to the hosted server
+  (`https://server.peekaboo.co.rw/api/v1`) unless `API_BASE_URL` overrides it
 - For device builds: Android SDK and/or Xcode with CocoaPods
 
 ## Run
@@ -18,10 +19,11 @@ map: [docs/mobile-layout.md](../docs/mobile-layout.md).
 cd mobile_flutter
 flutter pub get
 
-# Simulator/emulator (localhost API works here)
+# Hosted API (default)
 flutter run --dart-define ONESIGNAL_APP_ID=...
 
-# Physical device: point at your machine's LAN IP, e.g.
+# Local server instead: Android emulator reaches your machine at 10.0.2.2;
+# a physical device needs your machine's LAN IP, e.g.
 flutter run --dart-define API_BASE_URL=http://192.168.1.20:8080/api/v1 \
   --dart-define ONESIGNAL_APP_ID=...
 ```
@@ -30,7 +32,7 @@ All configuration is `--dart-define` (no `.env` files):
 
 | Define | Default | Notes |
 | --- | --- | --- |
-| `API_BASE_URL` | `http://localhost:8080/api/v1` (debug) | Prod: `https://server.peekaboo.co.rw/api/v1`. Release builds refuse to start without it. |
+| `API_BASE_URL` | `https://server.peekaboo.co.rw/api/v1` | Override to use a local server (`http://10.0.2.2:8080/api/v1` on the Android emulator). |
 | `ONESIGNAL_APP_ID` | empty (push disabled) | Must match server `ONESIGNAL_APP_ID` |
 | `LOCATION_UPDATE_INTERVAL_MINUTES` | `5` | Foreground location reporting |
 
