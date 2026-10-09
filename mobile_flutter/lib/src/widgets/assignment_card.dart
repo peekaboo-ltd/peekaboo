@@ -48,7 +48,6 @@ class AssignmentCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(tr('assignment.order'), style: type.meta),
                     Text(
                       order?.referenceId.isNotEmpty == true
                           ? formatOrderRef(order!.referenceId)
@@ -119,9 +118,10 @@ class AssignmentCard extends ConsumerWidget {
                     child: PkButton(
                       title: tr('assignment.reject'),
                       onPress: onReject,
-                      variant: PkButtonVariant.outline,
+                      variant: PkButtonVariant.destructive,
                       size: PkButtonSize.sm,
                       disabled: isLoading,
+                      icon: const Icon(Icons.close, size: 16),
                     ),
                   ),
                 if (onReject != null && onAccept != null)
@@ -132,8 +132,10 @@ class AssignmentCard extends ConsumerWidget {
                     child: PkButton(
                       title: tr('assignment.accept'),
                       onPress: onAccept,
+                      variant: PkButtonVariant.approve,
                       size: PkButtonSize.sm,
                       loading: isLoading,
+                      icon: const Icon(Icons.check, size: 16),
                     ),
                   ),
               ],

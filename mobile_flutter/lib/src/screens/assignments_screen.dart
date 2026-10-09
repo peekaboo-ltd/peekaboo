@@ -12,9 +12,7 @@ import '../widgets/assignment_filters.dart';
 import '../widgets/dialogs.dart';
 import '../widgets/error_view.dart' show AssignmentSkeletonCard;
 import '../widgets/pk_button.dart';
-import '../widgets/pk_page_header.dart';
 import '../widgets/reject_sheet.dart';
-import '../widgets/stat_card.dart';
 
 /// Assignments queue ported from mobile/app/(tabs)/assignments.tsx.
 class AssignmentsScreen extends ConsumerStatefulWidget {
@@ -169,61 +167,25 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(PkSpace.s16),
-              child: Column(
-                children: [
-                  PkPageHeader(
-                    eyebrow: tr('assignments.title'),
-                    title: tr('assignments.queueTitle'),
-                    description: tr(
-                      'assignments.totalAssignments',
-                      {'count': full.assignments.length},
-                    ),
-                    actions: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: PkSpace.s12,
-                        vertical: PkSpace.s4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: t.ink,
-                        borderRadius: BorderRadius.circular(
-                          PkSpace.radiusPill,
-                        ),
-                      ),
-                      child: Text(
-                        '${summary.active} ${tr('assignments.active')}',
-                        style: type.meta.copyWith(
-                          color: t.paper,
-                          fontWeight: PkType.medium,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: PkSpace.s16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: StatCard(
-                          title: tr('assignments.pending'),
-                          value: '${summary.pending}',
-                          icon: Icons.schedule_outlined,
-                        ),
-                      ),
-                      const SizedBox(width: PkSpace.s16),
-                      Expanded(
-                        child: StatCard(
-                          title: tr('assignments.completed'),
-                          value: '${summary.completed}',
-                          icon: Icons.check_circle_outline,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(
+                PkSpace.s16,
+                PkSpace.s16,
+                PkSpace.s16,
+                PkSpace.s12,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(tr('assignments.queueTitle'), style: type.h2),
               ),
             ),
             AssignmentFilters(
               activeFilter: full.filter,
+              counts: {
+                AssignmentFilter.all: full.assignments.length,
+                AssignmentFilter.pending: summary.pending,
+                AssignmentFilter.active: summary.active,
+                AssignmentFilter.completed: summary.completed,
+              },
               onFilterChange: (f) => ref
                   .read(assignmentsProvider.notifier)
                   .setFilter(f),
@@ -241,13 +203,18 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                   vertical: PkSpace.s8,
                 ),
                 decoration: BoxDecoration(
+                  color: t.danger.surface,
                   borderRadius:
                       BorderRadius.circular(PkSpace.radiusCard),
-                  border: Border.all(color: t.line),
+                  border: Border.all(color: t.danger.line),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_outlined, size: 18, color: t.ink),
+                    Icon(
+                      Icons.error_outline,
+                      size: 18,
+                      color: t.danger.main,
+                    ),
                     const SizedBox(width: PkSpace.s8),
                     Expanded(
                       child: Text(full.error!, style: type.bodySm),
@@ -362,6 +329,11 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                                         ),
                                         onPress: () =>
                                             _confirmTransit(a, tr),
+                                        variant: PkButtonVariant.approve,
+                                        icon: const Icon(
+                                          Icons.local_shipping_outlined,
+                                          size: 16,
+                                        ),
                                         fullWidth: true,
                                         loading: _confirmingOrderId ==
                                             a.orderId,

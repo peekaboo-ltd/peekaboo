@@ -18,6 +18,7 @@ import '../utils/formatters.dart';
 import '../widgets/dialogs.dart';
 import '../widgets/error_view.dart';
 import '../widgets/pk_card.dart';
+import '../widgets/pk_icon_button.dart';
 import '../widgets/pk_page_header.dart';
 import '../widgets/recent_activity.dart';
 import '../widgets/stat_card.dart';
@@ -448,6 +449,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final displayStatus =
         _pendingStatus ?? user?.status ?? UserStatus.inactive;
     final shiftActive = displayStatus == UserStatus.active;
+    final hero = PkTokens.inverted(Theme.of(context).brightness);
+    final earnings = formatCurrency(stats?.totalEarnings ?? 0);
+    final completed = '${(stats?.completedToday ?? 0).toInt()}';
 
     return Scaffold(
       body: SafeArea(
@@ -461,53 +465,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 PkSpace.s8,
               ),
               child: PkPageHeader(
-                eyebrow: tr('dashboard.kicker'),
                 title:
                     '${tr('dashboard.welcomeBack')} ${user?.name?.isNotEmpty == true ? user!.name! : tr('dashboard.defaultRider')}',
-                description: tr('dashboard.readyRoutes'),
-                actions: Row(
+                trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: PkSpace.s8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: shiftActive ? t.ink : t.surface,
-                        borderRadius: BorderRadius.circular(
-                          PkSpace.radiusPill,
-                        ),
-                        border: shiftActive
-                            ? null
-                            : Border.all(color: t.line),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            shiftActive
-                                ? Icons.bolt
-                                : Icons.pause_circle_outline,
-                            size: 14,
-                            color: shiftActive ? t.paper : t.muted,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            shiftActive
-                                ? tr('dashboard.shiftActive')
-                                : tr('dashboard.shiftInactive'),
-                            style: type.meta.copyWith(
-                              color: shiftActive ? t.paper : t.muted,
-                              fontWeight: PkType.medium,
-                            ),
-                          ),
-                        ],
-                      ),
+                    PkIconButton(
+                      icon: Icons.report_gmailerrorred_outlined,
+                      tooltip: tr('dashboard.reportActionTitle'),
+                      variant: PkIconButtonVariant.outline,
+                      onPress: _openReportProblem,
                     ),
                     const SizedBox(width: PkSpace.s4),
-                    Switch(
-                      value: shiftActive,
+                    _ShiftSwitch(
+                      active: shiftActive,
+                      label: shiftActive
+                          ? tr('dashboard.shiftActive')
+                          : tr('dashboard.shiftInactive'),
                       onChanged: _availabilityUpdating
                           ? null
                           : _toggleAvailability,
@@ -534,228 +508,88 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     children: [
                       PkCard(
                         variant: PkCardVariant.inverted,
-                        padding: PkCardPadding.lg,
+                        padding: PkCardPadding.md,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        tr('dashboard.todaysFocus'),
-                                        style: type.eyebrow.copyWith(
-                                          color: t.paper,
-                                        ),
-                                      ),
-                                      Text(
-                                        tr('dashboard.keepMomentum'),
-                                        style: type.meta.copyWith(
-                                          color: t.paper,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                _HeroChip(
+                                  ground: hero,
+                                  icon: Icons.schedule,
+                                  text: '$pendingCount',
+                                  tooltip: pendingCount == 1
+                                      ? tr('dashboard.pendingAssignment',
+                                          {'count': pendingCount})
+                                      : tr('dashboard.pendingAssignments',
+                                          {'count': pendingCount}),
+                                  onTap: () => _goAssignments('PENDING'),
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: PkSpace.s12,
-                                    vertical: PkSpace.s4,
+                                if (stats?.bonusActive == true) ...[
+                                  const SizedBox(width: PkSpace.s8),
+                                  _HeroChip(
+                                    ground: hero,
+                                    icon: Icons.workspace_premium_outlined,
+                                    tooltip: tr('dashboard.bonusActivated'),
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: t.paper,
-                                    borderRadius: BorderRadius.circular(
-                                      PkSpace.radiusPill,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.schedule,
-                                        size: 14,
-                                        color: t.ink,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '$pendingCount ${tr('dashboard.pending')}',
-                                        style: type.meta.copyWith(
-                                          color: t.ink,
-                                          fontWeight: PkType.medium,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                ],
                               ],
                             ),
-                            const SizedBox(height: PkSpace.s12),
-                            Text(
-                              tr('dashboard.stayTop'),
-                              style: type.h3.copyWith(color: t.paper),
-                            ),
-                            const SizedBox(height: PkSpace.s12),
+                            const SizedBox(height: PkSpace.s20),
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        tr('dashboard.earnings'),
-                                        style: type.meta.copyWith(
-                                          color: t.paper,
-                                        ),
-                                      ),
-                                      Text(
-                                        formatCurrency(
-                                          stats?.totalEarnings ?? 0,
-                                        ),
-                                        style: type.tabular(
-                                          type.h2.copyWith(color: t.paper),
-                                        ),
-                                      ),
-                                    ],
+                                  child: _HeroFigure(
+                                    ground: hero,
+                                    icon: Icons.payments_outlined,
+                                    label: tr('dashboard.earnings'),
+                                    value: earnings,
+                                    style: type.tabular(type.h2),
                                   ),
                                 ),
-                                Container(
-                                  width: 1,
-                                  height: 40,
-                                  color: t.paper.withValues(alpha: 0.25),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                      left: PkSpace.s16,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          tr('dashboard.completed'),
-                                          style: type.meta.copyWith(
-                                            color: t.paper,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${(stats?.completedToday ?? 0).toInt()}',
-                                          style: type.metric.copyWith(
-                                            color: t.paper,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                const SizedBox(width: PkSpace.s16),
+                                _HeroFigure(
+                                  ground: hero,
+                                  icon: Icons.check_circle_outline,
+                                  label: tr('dashboard.completed'),
+                                  value: completed,
+                                  style: type.metric,
                                 ),
                               ],
                             ),
-                            if (pendingCount > 0) ...[
-                              const SizedBox(height: PkSpace.s12),
-                              GestureDetector(
-                                onTap: () => _goAssignments('ALL'),
-                                child: Container(
-                                  padding: const EdgeInsets.all(
-                                    PkSpace.s12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: t.paper,
-                                    borderRadius: BorderRadius.circular(
-                                      PkSpace.radiusControl,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.notifications_outlined,
-                                        size: 18,
-                                        color: t.ink,
-                                      ),
-                                      const SizedBox(width: PkSpace.s8),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              pendingCount == 1
-                                                  ? tr(
-                                                      'dashboard.pendingAssignment',
-                                                      {
-                                                        'count': pendingCount,
-                                                      },
-                                                    )
-                                                  : tr(
-                                                      'dashboard.pendingAssignments',
-                                                      {
-                                                        'count': pendingCount,
-                                                      },
-                                                    ),
-                                              style: type.label.copyWith(
-                                                color: t.ink,
-                                              ),
-                                            ),
-                                            Text(
-                                              tr('dashboard.tapToView'),
-                                              style: type.meta.copyWith(
-                                                color: t.ink,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.chevron_right,
-                                        size: 18,
-                                        color: t.ink,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
                           ],
                         ),
                       ),
-                      const SizedBox(height: PkSpace.s16),
-                      PkCard(
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              size: 16,
-                              color: t.muted,
+                      const SizedBox(height: PkSpace.s12),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 14,
+                            color: t.muted,
+                          ),
+                          const SizedBox(width: PkSpace.s4),
+                          Expanded(
+                            child: Text(
+                              locationText,
+                              style: type.meta,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(width: PkSpace.s8),
-                            Expanded(
-                              child: Text(
-                                locationText,
-                                style: type.bodySm.copyWith(color: t.muted),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: PkSpace.s24),
-                      _SectionHeader(
-                        kicker: tr('dashboard.overview'),
-                        title: tr('dashboard.snapshot'),
-                        hint: tr('dashboard.updatedNow'),
-                      ),
+                      Text(tr('dashboard.snapshot'), style: type.cardTitle),
                       const SizedBox(height: PkSpace.s12),
                       GridView.count(
                         crossAxisCount: 2,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: PkSpace.s16,
-                        crossAxisSpacing: PkSpace.s16,
-                        childAspectRatio: 1.15,
+                        mainAxisSpacing: PkSpace.s12,
+                        crossAxisSpacing: PkSpace.s12,
+                        childAspectRatio: 2.1,
                         children: [
                           StatCard(
                             title: tr('dashboard.deliveries'),
@@ -773,122 +607,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                           StatCard(
                             title: tr('assignments.completed'),
-                            value:
-                                '${(stats?.completedToday ?? 0).toInt()}',
+                            value: completed,
                             icon: Icons.check_circle_outline,
                             onPress: () => _goAssignments('COMPLETED'),
                           ),
                           StatCard(
                             title: tr('dashboard.earnings'),
-                            value: formatCurrency(
-                              stats?.totalEarnings ?? 0,
-                            ),
+                            value: earnings,
                             icon: Icons.payments_outlined,
                             onPress: () => _goAssignments('ALL'),
                           ),
                         ],
                       ),
-                      const SizedBox(height: PkSpace.s16),
-                      PkCard(
-                        child: Column(
-                          children: [
-                            _MetaRow(
-                              label: tr('profile.deliveriesToday'),
-                              value:
-                                  '${(stats?.completedToday ?? 0).toInt()}',
-                            ),
-                            _MetaRow(
-                              label: tr('dashboard.bonusActivated'),
-                              value: stats?.bonusActive == true
-                                  ? tr('common.yes')
-                                  : tr('common.no'),
-                            ),
-                            _MetaRow(
-                              label: tr('dashboard.earnings'),
-                              value: formatCurrency(
-                                stats?.totalEarnings ?? 0,
-                              ),
-                              tabular: true,
-                              last: true,
-                            ),
-                          ],
-                        ),
-                      ),
                       const SizedBox(height: PkSpace.s24),
-                      _SectionHeader(
-                        kicker: tr('dashboard.shortcuts'),
-                        title: tr('dashboard.quickActions'),
-                        hint: tr('dashboard.stayOnTrack'),
-                      ),
-                      const SizedBox(height: PkSpace.s12),
-                      PkCard(
-                        onPress: () => _goAssignments('ALL'),
-                        child: Row(
-                          children: [
-                            _ActionIcon(icon: Icons.list_alt_outlined),
-                            const SizedBox(width: PkSpace.s12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    tr('dashboard.viewAssignments'),
-                                    style: type.label,
-                                  ),
-                                  Text(
-                                    tr('dashboard.acceptAndStart'),
-                                    style: type.meta,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Icon(
-                              Icons.chevron_right,
-                              size: 16,
-                              color: t.muted,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: PkSpace.s12),
-                      PkCard(
-                        onPress: _openReportProblem,
-                        child: Row(
-                          children: [
-                            _ActionIcon(
-                              icon: Icons.warning_outlined,
-                            ),
-                            const SizedBox(width: PkSpace.s12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    tr('dashboard.reportActionTitle'),
-                                    style: type.label,
-                                  ),
-                                  Text(
-                                    tr('dashboard.reportActionSubtitle'),
-                                    style: type.meta,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Icon(
-                              Icons.chevron_right,
-                              size: 16,
-                              color: t.muted,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: PkSpace.s24),
-                      _SectionHeader(
-                        kicker: tr('dashboard.timeline'),
-                        title: tr('dashboard.recentActivity'),
-                        hint: tr('dashboard.last7Days'),
+                      Text(
+                        tr('dashboard.recentActivity'),
+                        style: type.cardTitle,
                       ),
                       const SizedBox(height: PkSpace.s12),
                       RecentActivityList(
@@ -925,92 +659,159 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final String kicker;
-  final String title;
-  final String hint;
+/// Shift on/off as one switch: green-700 track with a bolt thumb when on,
+/// a quiet track with a pause thumb when off. The state name is the tooltip.
+class _ShiftSwitch extends StatelessWidget {
+  final bool active;
+  final String label;
+  final ValueChanged<bool>? onChanged;
 
-  const _SectionHeader({
-    required this.kicker,
-    required this.title,
-    required this.hint,
+  const _ShiftSwitch({
+    required this.active,
+    required this.label,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        label: label,
+        child: Switch(
+          value: active,
+          onChanged: onChanged,
+          trackColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? t.approve.main
+                : t.surface,
+          ),
+          trackOutlineColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? t.approve.main
+                : t.lineStrong,
+          ),
+          thumbColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? t.onConsequence
+                : t.muted,
+          ),
+          thumbIcon: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? Icon(Icons.bolt, color: t.approve.main)
+                : Icon(Icons.pause, color: t.paper),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Icon (+ optional count) chip on the inverted hero; tappable when [onTap]
+/// is given. The meaning is carried by the icon and the tooltip.
+class _HeroChip extends StatelessWidget {
+  final PkTokens ground;
+  final IconData icon;
+  final String? text;
+  final String tooltip;
+  final VoidCallback? onTap;
+
+  const _HeroChip({
+    required this.ground,
+    required this.icon,
+    required this.tooltip,
+    this.text,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final type = context.type;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(kicker, style: type.eyebrow),
-            Text(title, style: type.cardTitle),
-          ],
+    return Semantics(
+      label: tooltip,
+      button: onTap != null,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: Tooltip(
+        message: tooltip,
+        excludeFromSemantics: true,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: PkSpace.s12),
+            decoration: BoxDecoration(
+              color: ground.ink,
+              borderRadius: BorderRadius.circular(PkSpace.radiusPill),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 16, color: ground.paper),
+                if (text != null) ...[
+                  const SizedBox(width: 6),
+                  Text(
+                    text!,
+                    style: type.tabular(type.label).copyWith(
+                          color: ground.paper,
+                        ),
+                  ),
+                ],
+                if (onTap != null) ...[
+                  const SizedBox(width: 2),
+                  Icon(Icons.chevron_right, size: 16, color: ground.paper),
+                ],
+              ],
+            ),
+          ),
         ),
-        Text(hint, style: type.meta),
-      ],
+      ),
     );
   }
 }
 
-class _MetaRow extends StatelessWidget {
+/// A hero figure: small muted icon over the value, label in semantics.
+class _HeroFigure extends StatelessWidget {
+  final PkTokens ground;
+  final IconData icon;
   final String label;
   final String value;
-  final bool tabular;
-  final bool last;
+  final TextStyle style;
 
-  const _MetaRow({
+  const _HeroFigure({
+    required this.ground,
+    required this.icon,
     required this.label,
     required this.value,
-    this.tabular = false,
-    this.last = false,
+    required this.style,
   });
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
-    final type = context.type;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: PkSpace.s8),
-      decoration: last
-          ? null
-          : BoxDecoration(
-              border: Border(bottom: BorderSide(color: t.line)),
+    return Semantics(
+      label: '$label: $value',
+      excludeSemantics: true,
+      child: Tooltip(
+        message: label,
+        excludeFromSemantics: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 18, color: ground.muted),
+            const SizedBox(height: PkSpace.s4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: style.copyWith(color: ground.ink),
+                maxLines: 1,
+              ),
             ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: type.bodySm),
-          Text(
-            value,
-            style: (tabular ? type.tabular(type.bodySm) : type.bodySm)
-                .copyWith(fontWeight: PkType.medium),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-}
-
-class _ActionIcon extends StatelessWidget {
-  final IconData icon;
-
-  const _ActionIcon({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: t.surface,
-        borderRadius: BorderRadius.circular(PkSpace.radiusControl),
-      ),
-      child: Icon(icon, size: 22, color: t.ink),
     );
   }
 }

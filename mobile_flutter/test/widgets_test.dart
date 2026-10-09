@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_flutter/src/i18n/localizations.dart';
+import 'package:mobile_flutter/src/state/assignments_state.dart';
 import 'package:mobile_flutter/src/theme/peekaboo_theme.dart';
+import 'package:mobile_flutter/src/widgets/assignment_filters.dart';
 import 'package:mobile_flutter/src/widgets/language_switcher.dart';
 import 'package:mobile_flutter/src/widgets/pk_badge.dart';
+import 'package:mobile_flutter/src/widgets/pk_icon_button.dart';
 import 'package:mobile_flutter/src/widgets/reject_sheet.dart';
 
 String _en(String key, [Map<String, Object>? values]) =>
@@ -126,5 +129,60 @@ void main() {
     await tester.pumpAndSettle();
     expect(called, isTrue);
     expect(result, isNull);
+  });
+
+  testWidgets('PkIconButton is named by its tooltip and fires onPress',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    var taps = 0;
+    await tester.pumpWidget(
+      _harness(
+        PkIconButton(
+          icon: Icons.logout,
+          tooltip: 'Sign out',
+          variant: PkIconButtonVariant.destructive,
+          onPress: () => taps++,
+        ),
+      ),
+    );
+
+    expect(find.byTooltip('Sign out'), findsOneWidget);
+    expect(find.bySemanticsLabel('Sign out'), findsOneWidget);
+    expect(find.text('Sign out'), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.logout));
+    await tester.pumpAndSettle();
+    expect(taps, 1);
+    handle.dispose();
+  });
+
+  testWidgets('AssignmentFilters shows counts, not labels, and filters',
+      (tester) async {
+    AssignmentFilter? picked;
+    await tester.pumpWidget(
+      _harness(
+        AssignmentFilters(
+          activeFilter: AssignmentFilter.all,
+          counts: const {
+            AssignmentFilter.all: 7,
+            AssignmentFilter.pending: 2,
+            AssignmentFilter.active: 1,
+            AssignmentFilter.completed: 4,
+          },
+          onFilterChange: (f) => picked = f,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('7'), findsOneWidget);
+    expect(find.text('4'), findsOneWidget);
+    // Kinyarwanda is the default; the label lives only in the tooltip.
+    final pending = translate(AppLanguage.rw, 'assignments.pending');
+    expect(find.text(pending), findsNothing);
+    expect(find.byTooltip(pending), findsOneWidget);
+
+    await tester.tap(find.byTooltip(pending));
+    expect(picked, AssignmentFilter.pending);
   });
 }
