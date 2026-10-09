@@ -14,6 +14,7 @@ import '../widgets/language_switcher.dart';
 import '../widgets/pk_badge.dart';
 import '../widgets/pk_button.dart';
 import '../widgets/pk_card.dart';
+import '../widgets/pk_icon_button.dart';
 import '../widgets/pk_section_card.dart';
 import '../widgets/pk_text_field.dart';
 
@@ -120,6 +121,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       title: tr('profile.removePhotoTitle'),
       message: tr('profile.removePhotoMessage'),
       confirmLabel: tr('profile.remove'),
+      confirmVariant: PkButtonVariant.destructive,
       onConfirm: () async {
         setState(() => _avatarLoading = true);
         try {
@@ -141,24 +143,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  void _changePhoto(Translate tr) {
-    showPkConfirm(
-      context,
-      title: tr('profile.photoTitle'),
-      message: tr('profile.photoMessage'),
-      confirmLabel: tr('profile.takePhoto'),
-      cancelLabel: tr('profile.cancel'),
-      extraActions: [
-        (
-          label: tr('profile.chooseFromLibrary'),
-          onTap: () => _pickImage(false, tr),
-        ),
-        (
-          label: tr('profile.removePhoto'),
-          onTap: () => _removeAvatar(tr),
-        ),
-      ],
-      onConfirm: () => _pickImage(true, tr),
+  void _changePhoto(Translate tr, User user) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheet) {
+        final type = sheet.type;
+        void run(VoidCallback action) {
+          Navigator.of(sheet).pop();
+          action();
+        }
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(PkSpace.s24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(tr('profile.photoTitle'), style: type.cardTitle),
+                const SizedBox(height: PkSpace.s16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    PkIconButton(
+                      icon: Icons.photo_camera_outlined,
+                      tooltip: tr('profile.takePhoto'),
+                      variant: PkIconButtonVariant.outline,
+                      size: PkIconButtonSize.lg,
+                      circle: true,
+                      onPress: () => run(() => _pickImage(true, tr)),
+                    ),
+                    const SizedBox(width: PkSpace.s16),
+                    PkIconButton(
+                      icon: Icons.photo_library_outlined,
+                      tooltip: tr('profile.chooseFromLibrary'),
+                      variant: PkIconButtonVariant.outline,
+                      size: PkIconButtonSize.lg,
+                      circle: true,
+                      onPress: () => run(() => _pickImage(false, tr)),
+                    ),
+                    if (user.profilePhotoUrl?.isNotEmpty == true) ...[
+                      const SizedBox(width: PkSpace.s16),
+                      PkIconButton(
+                        icon: Icons.delete_outline,
+                        tooltip: tr('profile.removePhoto'),
+                        variant: PkIconButtonVariant.destructive,
+                        size: PkIconButtonSize.lg,
+                        circle: true,
+                        onPress: () => run(() => _removeAvatar(tr)),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -239,46 +279,73 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(PkSpace.s24),
+          padding: const EdgeInsets.all(PkSpace.s16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               PkCard(
-                padding: PkCardPadding.lg,
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: _avatarLoading
-                          ? null
-                          : () => _changePhoto(tr),
-                      child: Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: t.ink,
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        alignment: Alignment.center,
-                        child: _avatarLoading
-                            ? SizedBox(
+                    Semantics(
+                      button: true,
+                      label: tr('profile.photoTitle'),
+                      child: GestureDetector(
+                        onTap: _avatarLoading
+                            ? null
+                            : () => _changePhoto(tr, user),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: t.ink,
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              alignment: Alignment.center,
+                              child: _avatarLoading
+                                  ? SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: t.paper,
+                                      ),
+                                    )
+                                  : user.profilePhotoUrl?.isNotEmpty == true
+                                      ? Image.network(
+                                          user.profilePhotoUrl!,
+                                          width: 64,
+                                          height: 64,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, _, _) =>
+                                              _initialsText(user),
+                                        )
+                                      : _initialsText(user),
+                            ),
+                            Positioned(
+                              right: -2,
+                              bottom: -2,
+                              child: Container(
                                 width: 24,
                                 height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
                                   color: t.paper,
+                                  border: Border.all(color: t.line),
                                 ),
-                              )
-                            : user.profilePhotoUrl?.isNotEmpty == true
-                                ? Image.network(
-                                    user.profilePhotoUrl!,
-                                    width: 64,
-                                    height: 64,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) =>
-                                        _initialsText(user),
-                                  )
-                                : _initialsText(user),
+                                child: Icon(
+                                  Icons.photo_camera_outlined,
+                                  size: 14,
+                                  color: t.ink,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(width: PkSpace.s16),
@@ -291,19 +358,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 ? user.name!
                                 : tr('profile.unnamedRider'),
                             style: type.h3,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          Text(
-                            user.phoneNumber,
-                            style: type.tabular(type.bodySm),
+                          const SizedBox(height: PkSpace.s4),
+                          PkBadge.status(
+                            userStatusToJson(user.status),
+                            tr,
+                          ),
+                          const SizedBox(height: PkSpace.s8),
+                          _ContactLine(
+                            icon: Icons.call_outlined,
+                            text: user.phoneNumber,
+                            tabular: true,
                           ),
                           if (user.email?.isNotEmpty == true)
-                            Text(user.email!, style: type.bodySm),
+                            _ContactLine(
+                              icon: Icons.mail_outline,
+                              text: user.email!,
+                            ),
                         ],
                       ),
-                    ),
-                    PkBadge.status(
-                      userStatusToJson(user.status),
-                      tr,
                     ),
                   ],
                 ),
@@ -311,6 +386,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: PkSpace.s24),
               PkSectionCard(
                 title: tr('profile.infoTitle'),
+                trailing: _editing
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          PkIconButton(
+                            icon: Icons.close,
+                            tooltip: tr('common.cancel'),
+                            onPress:
+                                _saving ? null : () => _cancelEdit(user),
+                          ),
+                          PkIconButton(
+                            icon: Icons.check,
+                            tooltip: tr('profile.saveChanges'),
+                            variant: PkIconButtonVariant.approve,
+                            loading: _saving,
+                            onPress: () => _save(user, tr),
+                          ),
+                        ],
+                      )
+                    : PkIconButton(
+                        icon: Icons.edit_outlined,
+                        tooltip: tr('profile.editProfile'),
+                        variant: PkIconButtonVariant.outline,
+                        onPress: () => _startEdit(user),
+                      ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -383,37 +483,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               if (_error != null) ...[
                 const SizedBox(height: PkSpace.s12),
-                Text(_error!, style: type.bodySm),
-              ],
-              const SizedBox(height: PkSpace.s16),
-              if (_editing)
                 Row(
                   children: [
+                    Icon(Icons.error_outline, size: 16, color: t.danger.main),
+                    const SizedBox(width: PkSpace.s8),
                     Expanded(
-                      child: PkButton(
-                        title: tr('common.cancel'),
-                        onPress: () => _cancelEdit(user),
-                        variant: PkButtonVariant.outline,
-                        disabled: _saving,
-                      ),
-                    ),
-                    const SizedBox(width: PkSpace.s12),
-                    Expanded(
-                      child: PkButton(
-                        title: tr('profile.saveChanges'),
-                        onPress: () => _save(user, tr),
-                        loading: _saving,
-                        disabled: _saving,
+                      child: Text(
+                        _error!,
+                        style: type.bodySm.copyWith(color: t.danger.main),
                       ),
                     ),
                   ],
-                )
-              else
-                PkButton(
-                  title: tr('profile.editProfile'),
-                  onPress: () => _startEdit(user),
-                  icon: Icon(Icons.edit_outlined, size: 18, color: t.paper),
                 ),
+              ],
             ],
           ),
         ),
@@ -463,6 +545,44 @@ class _MetaRow extends StatelessWidget {
             value,
             style: (tabular ? type.tabular(type.bodySm) : type.bodySm)
                 .copyWith(fontWeight: PkType.medium),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One contact line in the profile header: icon plus a single ellipsized
+/// line, so long emails never break mid-word.
+class _ContactLine extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final bool tabular;
+
+  const _ContactLine({
+    required this.icon,
+    required this.text,
+    this.tabular = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final type = context.type;
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: t.muted),
+          const SizedBox(width: PkSpace.s8),
+          Expanded(
+            child: Text(
+              text,
+              style: (tabular ? type.tabular(type.bodySm) : type.bodySm)
+                  .copyWith(color: t.muted),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
