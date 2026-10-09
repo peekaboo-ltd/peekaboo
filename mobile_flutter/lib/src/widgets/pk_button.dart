@@ -194,9 +194,14 @@ class PkButton extends StatelessWidget {
             children: [
               if (icon != null) ...[icon!, const SizedBox(width: 8)],
               Flexible(
+                // No color here: the label inherits the button's resolved
+                // foreground, so destructive/approve read red/green.
                 child: Text(
                   title,
-                  style: type.label.copyWith(
+                  style: TextStyle(
+                    fontFamily: PkType.family,
+                    fontSize: type.label.fontSize,
+                    height: type.label.height,
                     fontWeight: variant == PkButtonVariant.field
                         ? PkType.regular
                         : PkType.medium,

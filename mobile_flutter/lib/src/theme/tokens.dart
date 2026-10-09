@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 ///
 /// Structure stays monochrome; consequence color (danger/approve/warning/
 /// info) is spent only where something failed, is about to be destroyed, or
-/// has been resolved. DM Sans only, 400 default / 500 ceiling, no gradients,
+/// has been resolved. Light uses Tailwind 700s (red/green/yellow); dark
+/// uses the 400s so they hold contrast on black. DM Sans only, 400 default / 500 ceiling, no gradients,
 /// press = full-surface inset overlay (never a transform), borders over
 /// shadows (only menus/popovers/modals cast one).
 class PkConsequence {
@@ -113,10 +114,10 @@ class PkTokens {
           line: Color(0xFFBBF7D0),
         ),
         warning: PkConsequence(
-          main: Color(0xFFB45309),
-          strong: Color(0xFF92400E),
-          surface: Color(0xFFFFFBEB),
-          line: Color(0xFFFDE68A),
+          main: Color(0xFFA16207),
+          strong: Color(0xFF854D0E),
+          surface: Color(0xFFFEFCE8),
+          line: Color(0xFFFEF08A),
         ),
         info: PkConsequence(
           main: Color(0xFF1D4ED8),
@@ -171,10 +172,10 @@ class PkTokens {
           line: Color(0xFF14532D),
         ),
         warning: PkConsequence(
-          main: Color(0xFFFBBF24),
-          strong: Color(0xFFFCD34D),
-          surface: Color(0xFF1F1608),
-          line: Color(0xFF573B0C),
+          main: Color(0xFFFACC15),
+          strong: Color(0xFFFDE047),
+          surface: Color(0xFF1C1A08),
+          line: Color(0xFF543F0B),
         ),
         info: PkConsequence(
           main: Color(0xFF60A5FA),

@@ -11,6 +11,9 @@ class PkSectionCard extends StatelessWidget {
   final String? eyebrow;
   final Widget? actions;
 
+  /// Icon controls placed on the title line (edit, save, cancel).
+  final Widget? trailing;
+
   const PkSectionCard({
     super.key,
     required this.child,
@@ -18,6 +21,7 @@ class PkSectionCard extends StatelessWidget {
     this.description,
     this.eyebrow,
     this.actions,
+    this.trailing,
   });
 
   @override
@@ -27,7 +31,8 @@ class PkSectionCard extends StatelessWidget {
     final hasHeader = title != null ||
         description != null ||
         eyebrow != null ||
-        actions != null;
+        actions != null ||
+        trailing != null;
 
     return Container(
       decoration: BoxDecoration(
@@ -41,7 +46,14 @@ class PkSectionCard extends StatelessWidget {
         children: [
           if (hasHeader)
             Container(
-              padding: const EdgeInsets.all(PkSpace.s24),
+              padding: trailing == null
+                  ? const EdgeInsets.all(PkSpace.s24)
+                  : const EdgeInsets.fromLTRB(
+                      PkSpace.s24,
+                      PkSpace.s12,
+                      PkSpace.s12,
+                      PkSpace.s12,
+                    ),
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: t.line)),
               ),
@@ -49,9 +61,16 @@ class PkSectionCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (eyebrow != null) Text(eyebrow!, style: type.eyebrow),
-                  if (title != null) ...[
-                    const SizedBox(height: 4),
-                    Text(title!, style: type.cardTitle),
+                  if (title != null || trailing != null) ...[
+                    if (eyebrow != null) const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(title ?? '', style: type.cardTitle),
+                        ),
+                        ?trailing,
+                      ],
+                    ),
                   ],
                   if (description != null) ...[
                     const SizedBox(height: 4),
