@@ -102,10 +102,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   constraints: const BoxConstraints(maxWidth: 440),
                   child: Column(
                     children: [
-                      Image.asset(
-                        'assets/images/icon.png',
-                        height: 40,
-                        fit: BoxFit.contain,
+                      Semantics(
+                        label: 'Peekaboo',
+                        image: true,
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          height: 40,
+                          fit: BoxFit.contain,
+                          color: t.ink,
+                          colorBlendMode: BlendMode.srcIn,
+                        ),
                       ),
                       const SizedBox(height: PkSpace.s20),
                       Container(
