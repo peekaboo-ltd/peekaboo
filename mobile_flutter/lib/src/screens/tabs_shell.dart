@@ -6,10 +6,12 @@ import '../i18n/localizations.dart';
 import '../models/user.dart';
 import '../state/auth_state.dart';
 import '../theme/tokens.dart';
+import '../widgets/language_switcher.dart';
+import '../widgets/pk_icon_button.dart';
 
-/// App shell matching the client's authenticated layout: an inverted (black)
-/// 64px top bar with the logo and an account menu, over bottom tabs on paper
-/// with a top line border. The selected tab is an inverted pill.
+/// App shell: an inverted (black) 64px top bar with the bare logo mark and
+/// an avatar trigger, over icon-only bottom tabs. Labels live in tooltips
+/// and semantics so long Kinyarwanda strings never wrap the bar.
 class TabsShell extends ConsumerWidget {
   final StatefulNavigationShell shell;
 
@@ -19,7 +21,6 @@ class TabsShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final page = context.tokens;
     final ground = PkTokens.inverted(Theme.of(context).brightness);
-    final type = context.type;
     final tr = ref.watch(tProvider);
 
     final tabs = [
@@ -32,21 +33,29 @@ class TabsShell extends ConsumerWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: Container(
-          height: 64,
           color: ground.paper,
           padding: const EdgeInsets.symmetric(horizontal: PkSpace.s16),
           child: SafeArea(
             bottom: false,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  'assets/images/icon.png',
-                  height: 40,
-                  fit: BoxFit.contain,
-                ),
-                _AccountMenuButton(shell: shell),
-              ],
+            child: SizedBox(
+              height: 64,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Semantics(
+                    label: 'Peekaboo',
+                    image: true,
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      height: 28,
+                      fit: BoxFit.contain,
+                      color: ground.ink,
+                      colorBlendMode: BlendMode.srcIn,
+                    ),
+                  ),
+                  _AccountMenuButton(shell: shell),
+                ],
+              ),
             ),
           ),
         ),
@@ -58,58 +67,25 @@ class TabsShell extends ConsumerWidget {
           border: Border(top: BorderSide(color: page.line)),
         ),
         child: SafeArea(
-          child: Row(
-            children: [
-              for (var i = 0; i < tabs.length; i++)
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => shell.goBranch(
-                      i,
-                      initialLocation: i == shell.currentIndex,
-                    ),
-                    child: AnimatedContainer(
-                      duration: PkMotion.durState,
-                      curve: PkMotion.easeFlat,
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: PkSpace.s8,
-                        vertical: PkSpace.s4,
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      decoration: BoxDecoration(
-                        color: shell.currentIndex == i
-                            ? page.ink
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(
-                          PkSpace.radiusPill,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            shell.currentIndex == i
-                                ? tabs[i].$2
-                                : tabs[i].$1,
-                            size: 22,
-                            color: shell.currentIndex == i
-                                ? page.paper
-                                : page.muted,
-                          ),
-                          Text(
-                            tabs[i].$3,
-                            style: type.eyebrow.copyWith(
-                              color: shell.currentIndex == i
-                                  ? page.paper
-                                  : page.muted,
-                            ),
-                          ),
-                        ],
+          child: SizedBox(
+            height: 60,
+            child: Row(
+              children: [
+                for (var i = 0; i < tabs.length; i++)
+                  Expanded(
+                    child: _TabButton(
+                      icon: tabs[i].$1,
+                      selectedIcon: tabs[i].$2,
+                      label: tabs[i].$3,
+                      selected: shell.currentIndex == i,
+                      onTap: () => shell.goBranch(
+                        i,
+                        initialLocation: i == shell.currentIndex,
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -117,8 +93,61 @@ class TabsShell extends ConsumerWidget {
   }
 }
 
-/// Avatar trigger opening the account dropdown (client's account menu:
-/// user header, bordered Profile/Language/Support rows, danger Logout row).
+/// One bottom tab: the selected tab is an ink pill holding the filled icon.
+class _TabButton extends StatelessWidget {
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TabButton({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: Tooltip(
+        message: label,
+        excludeFromSemantics: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Center(
+            child: AnimatedContainer(
+              duration: PkMotion.durState,
+              curve: PkMotion.easeFlat,
+              width: 64,
+              height: 40,
+              decoration: BoxDecoration(
+                color: selected ? t.ink : Colors.transparent,
+                borderRadius: BorderRadius.circular(PkSpace.radiusPill),
+              ),
+              child: Icon(
+                selected ? selectedIcon : icon,
+                size: 24,
+                color: selected ? t.paper : t.muted,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Avatar trigger opening the account menu.
 class _AccountMenuButton extends ConsumerWidget {
   final StatefulNavigationShell shell;
 
@@ -142,26 +171,35 @@ class _AccountMenuButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ground = PkTokens.inverted(Theme.of(context).brightness);
     final user = ref.watch(authProvider).user;
-    return GestureDetector(
+    final tr = ref.watch(tProvider);
+    final initial = Text(
+      _initial(user),
+      style: TextStyle(
+        fontFamily: PkType.family,
+        fontWeight: PkType.medium,
+        fontSize: 15,
+        color: ground.ink,
+      ),
+    );
+    return Semantics(
+      button: true,
+      label: tr('common.account'),
       onTap: () => _openMenu(context),
-      child: Container(
-        height: PkSpace.controlLg,
-        padding: const EdgeInsets.symmetric(horizontal: PkSpace.s12),
-        decoration: BoxDecoration(
-          color: ground.paper,
-          borderRadius: BorderRadius.circular(PkSpace.radiusControl),
-          border: Border.all(color: ground.line),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 32,
-              height: 32,
+      excludeSemantics: true,
+      child: Tooltip(
+        message: tr('common.account'),
+        excludeFromSemantics: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _openMenu(context),
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Container(
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: ground.surface,
-                borderRadius:
-                    BorderRadius.circular(PkSpace.radiusControl),
+                shape: BoxShape.circle,
                 border: Border.all(color: ground.line),
               ),
               clipBehavior: Clip.antiAlias,
@@ -169,36 +207,22 @@ class _AccountMenuButton extends ConsumerWidget {
               child: user?.profilePhotoUrl?.isNotEmpty == true
                   ? Image.network(
                       user!.profilePhotoUrl!,
-                      width: 32,
-                      height: 32,
+                      width: 36,
+                      height: 36,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Text(
-                        _initial(user),
-                        style: TextStyle(
-                          fontFamily: PkType.family,
-                          fontSize: 14,
-                          color: ground.ink,
-                        ),
-                      ),
+                      errorBuilder: (_, _, _) => initial,
                     )
-                  : Text(
-                      _initial(user),
-                      style: TextStyle(
-                        fontFamily: PkType.family,
-                        fontSize: 14,
-                        color: ground.ink,
-                      ),
-                    ),
+                  : initial,
             ),
-            const SizedBox(width: PkSpace.s8),
-            Icon(Icons.expand_more, size: 16, color: ground.muted),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
+/// Account menu: who is signed in plus a red-700 sign-out icon on the
+/// first row; profile and support icons with the EN/KIN switch below.
 class _AccountMenu extends ConsumerWidget {
   final StatefulNavigationShell shell;
 
@@ -210,52 +234,18 @@ class _AccountMenu extends ConsumerWidget {
     if (context.mounted) context.go('/login');
   }
 
-  void _pickLanguage(BuildContext context, WidgetRef ref) {
-    Navigator.of(context).pop();
-    showDialog<void>(
-      context: context,
-      builder: (context) => Consumer(
-        builder: (context, ref, _) {
-          final t = context.tokens;
-          final type = context.type;
-          final tr = ref.watch(tProvider);
-          final language = ref.watch(localeProvider).language;
-          return AlertDialog(
-            title: Text(tr('language.label')),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final option in [
-                  (AppLanguage.en, tr('language.english')),
-                  (AppLanguage.rw, tr('language.kinyarwanda')),
-                ])
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(option.$2, style: type.bodySm),
-                    trailing: language == option.$1
-                        ? Icon(Icons.check, size: 18, color: t.ink)
-                        : null,
-                    onTap: () {
-                      ref
-                          .read(localeProvider.notifier)
-                          .setLanguage(option.$1);
-                      Navigator.of(context).pop();
-                    },
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final type = context.type;
     final tr = ref.watch(tProvider);
     final user = ref.watch(authProvider).user;
+    final name = user?.name?.isNotEmpty == true
+        ? user!.name!
+        : (user?.phoneNumber ?? '');
+    final contact = user?.email?.isNotEmpty == true
+        ? user!.email!
+        : (user?.phoneNumber ?? '');
 
     return Stack(
       children: [
@@ -265,10 +255,10 @@ class _AccountMenu extends ConsumerWidget {
           ),
         ),
         Positioned(
-          top: 70,
+          top: MediaQuery.paddingOf(context).top + 64,
           right: PkSpace.s16,
           child: Container(
-            width: 320,
+            width: 300,
             constraints: BoxConstraints(
               maxWidth: MediaQuery.widthOf(context) - 32,
             ),
@@ -285,59 +275,62 @@ class _AccountMenu extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user?.name?.isNotEmpty == true
-                              ? user!.name!
-                              : (user?.phoneNumber ?? ''),
-                          style: type.label,
+                  Row(
+                    children: [
+                      const SizedBox(width: PkSpace.s4),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: type.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              contact,
+                              style: type.meta,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        Text(
-                          user?.email?.isNotEmpty == true
-                              ? user!.email!
-                              : (user?.phoneNumber ?? ''),
-                          style: type.meta,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+                      ),
+                      PkIconButton(
+                        icon: Icons.logout,
+                        tooltip: tr('common.logout'),
+                        variant: PkIconButtonVariant.destructive,
+                        onPress: () => _logout(context, ref),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: PkSpace.s8),
                   Container(height: 1, color: t.line),
                   const SizedBox(height: PkSpace.s8),
-                  _MenuRow(
-                    icon: Icons.person_outline,
-                    label: tr('tab.profile'),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      shell.goBranch(2);
-                    },
-                  ),
-                  const SizedBox(height: PkSpace.s8),
-                  _MenuRow(
-                    icon: Icons.translate_outlined,
-                    label: tr('language.label'),
-                    onTap: () => _pickLanguage(context, ref),
-                  ),
-                  const SizedBox(height: PkSpace.s8),
-                  _MenuRow(
-                    icon: Icons.help_outline,
-                    label: tr('support.title'),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      context.push('/support');
-                    },
-                  ),
-                  const SizedBox(height: PkSpace.s8),
-                  _MenuRow(
-                    icon: Icons.logout,
-                    label: tr('common.logout'),
-                    danger: true,
-                    onTap: () => _logout(context, ref),
+                  Row(
+                    children: [
+                      PkIconButton(
+                        icon: Icons.person_outline,
+                        tooltip: tr('tab.profile'),
+                        variant: PkIconButtonVariant.outline,
+                        onPress: () {
+                          Navigator.of(context).pop();
+                          shell.goBranch(2);
+                        },
+                      ),
+                      PkIconButton(
+                        icon: Icons.support_agent_outlined,
+                        tooltip: tr('support.title'),
+                        variant: PkIconButtonVariant.outline,
+                        onPress: () {
+                          Navigator.of(context).pop();
+                          context.push('/support');
+                        },
+                      ),
+                      const Spacer(),
+                      const LanguageSwitcher(compact: true),
+                    ],
                   ),
                 ],
               ),
@@ -345,71 +338,6 @@ class _AccountMenu extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _MenuRow extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final bool danger;
-  final VoidCallback onTap;
-
-  const _MenuRow({
-    required this.icon,
-    required this.label,
-    this.danger = false,
-    required this.onTap,
-  });
-
-  @override
-  State<_MenuRow> createState() => _MenuRowState();
-}
-
-class _MenuRowState extends State<_MenuRow> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    final type = context.type;
-    final fg = widget.danger ? t.danger.main : t.ink;
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedContainer(
-        duration: PkMotion.durState,
-        curve: PkMotion.easeFlat,
-        padding: const EdgeInsets.symmetric(
-          horizontal: PkSpace.s16,
-          vertical: PkSpace.s12,
-        ),
-        decoration: BoxDecoration(
-          color: !_pressed
-              ? t.paper
-              : widget.danger
-                  ? t.danger.surface
-                  : t.surface,
-          borderRadius: BorderRadius.circular(PkSpace.radiusControl),
-          border: Border.all(
-            color: _pressed ? t.lineStrong : t.line,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(widget.icon, size: 16, color: fg),
-            const SizedBox(width: PkSpace.s12),
-            Text(
-              widget.label,
-              style: type.label.copyWith(color: fg),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
