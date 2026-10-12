@@ -1,7 +1,8 @@
 # Mobile Flutter Rebuild — Decision Record
 
-**Status:** Final (scope contract explicitly accepted by the user;
-interview closed 2026-10-06).
+**Status:** Final. Cutover done 2026-10-12: the Expo app was deleted and
+the Flutter app moved from `mobile_flutter/` to `mobile/`. The decisions
+below record the plan as accepted on 2026-10-06.
 
 **Goal:** Rebuild `mobile/` (Expo React Native rider app) in Flutter and
 redesign it to match the updated `client/` UI.
@@ -72,9 +73,8 @@ black top bar — the client code wins and the Flutter app follows it.
 
 ## Open questions
 
-_None — decision tree exhausted. The cutover itself (scope item c) is the
-only remaining execution step and stays gated on the real-device checklist
-in "Done means" plus explicit user approval._
+_None. Cutover (scope item c) was executed on 2026-10-12: `mobile/` is the
+Flutter rider app, and the Expo tree is gone._
 
 ## Execution notes (gap closure, 2026-10-06)
 

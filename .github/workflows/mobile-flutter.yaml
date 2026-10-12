@@ -24,7 +24,7 @@ on:
 
 env:
   FLUTTER_VERSION: '3.47.6'
-  WORKDIR: mobile_flutter
+  WORKDIR: mobile
 
 jobs:
   check:
@@ -97,13 +97,13 @@ jobs:
           apksigner=$(ls "$ANDROID_SDK_ROOT"/build-tools/*/apksigner 2>/dev/null | tail -1)
           if [ -n "$apksigner" ]; then
             "$apksigner" verify --print-certs \
-              mobile_flutter/build/app/outputs/flutter-apk/app-release.apk \
+              mobile/build/app/outputs/flutter-apk/app-release.apk \
               | grep -i "certificate DN" || true
           fi
       - uses: actions/upload-artifact@v4
         with:
           name: rider-test-apk
-          path: mobile_flutter/build/app/outputs/flutter-apk/app-release.apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
 
   build-android:
     name: internal APK (release)
@@ -138,7 +138,7 @@ jobs:
           keytool -list -keystore "$RUNNER_TEMP/rider.jks" \
             -storepass "$ANDROID_STORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" > /dev/null \
             || { echo "::error::ANDROID_KEYSTORE_BASE64 does not decode to a keystore readable with ANDROID_STORE_PASSWORD / ANDROID_KEY_ALIAS (encode with: base64 -i rider.jks | tr -d '\\n')"; exit 1; }
-          cat > mobile_flutter/android/key.properties <<EOF
+          cat > mobile/android/key.properties <<EOF
           storePassword=$ANDROID_STORE_PASSWORD
           keyPassword=$ANDROID_KEY_PASSWORD
           keyAlias=$ANDROID_KEY_ALIAS
@@ -156,7 +156,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: rider-release-apk
-          path: mobile_flutter/build/app/outputs/flutter-apk/app-release.apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
 
   release-android:
     name: Play internal track
@@ -192,14 +192,14 @@ jobs:
           keytool -list -keystore "$RUNNER_TEMP/rider.jks" \
             -storepass "$ANDROID_STORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" > /dev/null \
             || { echo "::error::ANDROID_KEYSTORE_BASE64 does not decode to a keystore readable with ANDROID_STORE_PASSWORD / ANDROID_KEY_ALIAS (encode with: base64 -i rider.jks | tr -d '\\n')"; exit 1; }
-          cat > mobile_flutter/android/key.properties <<EOF
+          cat > mobile/android/key.properties <<EOF
           storePassword=$ANDROID_STORE_PASSWORD
           keyPassword=$ANDROID_KEY_PASSWORD
           keyAlias=$ANDROID_KEY_ALIAS
           storeFile=$RUNNER_TEMP/rider.jks
           EOF
       - name: Build + upload (internal track)
-        working-directory: mobile_flutter/android
+        working-directory: mobile/android
         env:
           RIDER_API_BASE_URL: ${{ secrets.RIDER_API_BASE_URL || 'https://server.peekaboo.co.rw/api/v1' }}
           ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID || '276e86c4-5af1-4ad2-ba8a-20908c155564' }}
@@ -262,7 +262,7 @@ jobs:
           echo "BUILD_NUMBER=${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: Build + upload (TestFlight)
         if: steps.secrets.outputs.ok == 'true'
-        working-directory: mobile_flutter/ios
+        working-directory: mobile/ios
         env:
           RIDER_API_BASE_URL: ${{ secrets.RIDER_API_BASE_URL || 'https://server.peekaboo.co.rw/api/v1' }}
           ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID || '276e86c4-5af1-4ad2-ba8a-20908c155564' }}

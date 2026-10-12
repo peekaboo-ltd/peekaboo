@@ -7,7 +7,7 @@ This document describes the overall layout of the Peekaboo repository: what each
 ```
 peekaboo/
 ├── client/          # Web frontend (React + TypeScript + Vite + Tailwind)
-├── mobile/          # Rider mobile app (React Native + Expo)
+├── mobile/          # Rider mobile app (Flutter)
 ├── server/          # Backend API (Node.js + Express + TypeORM)
 ├── scripts/         # Shared deployment script (PM2)
 ├── docs/            # Developer documentation (this folder)
@@ -15,7 +15,7 @@ peekaboo/
 └── .gitignore
 ```
 
-Each app is a self-contained npm project with its own `package.json`, lockfile, and README. There is no workspace/turbo setup — dependencies are installed per app.
+`server/` and `client/` are self-contained npm projects. `mobile/` is a Flutter project. There is no workspace/turbo setup — dependencies are installed per app.
 
 ## Ports & services
 
@@ -39,7 +39,7 @@ Ports for the deployed server/client can be overridden via `PORT` / `CLIENT_PORT
 | Media | Cloudinary |
 | Maps | Google Maps, Mapbox (configurable provider) |
 | Web client | React 19, Vite, Redux Toolkit, TanStack Table, Tailwind CSS, shadcn/ui |
-| Mobile | React Native (Expo 54), Expo Router, Zustand, Axios, OneSignal |
+| Mobile | Flutter, go_router, Riverpod, dio, OneSignal |
 | Deployment | PM2, `scripts/deploy.sh` |
 
 ## How the apps communicate
@@ -120,13 +120,13 @@ Pages are organized by feature under `pages/`, with shared logic in `hooks/` and
 
 ## Mobile app at a glance
 
-- `app/` — Expo Router file-based routing: `(auth)`, `(tabs)`, `assignment/[id]`.
-- `components/`, `hooks/`, `services/`, `store/`, `types/`, `utils/` — feature folders.
-- Zustand stores persist auth/assignment state; `services/api` wraps axios. See [mobile-layout.md](mobile-layout.md).
+- `lib/main.dart` — Flutter entry (`ProviderScope` + `PeekabooApp`).
+- `lib/src/app/` — bootstrap and go_router routes.
+- `lib/src/state/` — Riverpod notifiers; `lib/src/api/` wraps dio. See [mobile-layout.md](mobile-layout.md).
 
 ## Deployment
 
-`scripts/deploy.sh` builds and starts the server and web client under PM2. The mobile app is distributed via EAS Build (see `mobile/` README). Details are in the top-level [README.md](../README.md#-deployment).
+`scripts/deploy.sh` builds and starts the server and web client under PM2. The rider app is built and released from CI (see `mobile/README.md`). Details are in the top-level [README.md](../README.md#-deployment).
 
 Environment for the deploy script (all optional): `NODE_MAJOR`, `NODE_ENV`, `PORT`, `CLIENT_PORT`, `SERVER_PM2_NAME`, `CLIENT_PM2_NAME`, `GIT_PULL`, `SEQUENTIAL` — documented in [environment-variables.md](environment-variables.md).
 
@@ -151,8 +151,8 @@ Environment for the deploy script (all optional): `NODE_MAJOR`, `NODE_ENV`, `POR
 
 ## Conventions shared across the repo
 
-- **TypeScript everywhere**; no plain JS in app code.
-- **Per-app environment files** (`.env`). `server/`, `client/`, and `mobile/` have committed `.env.example` files; client variables are also documented in `client/README.md` and [environment-variables.md](environment-variables.md).
+- **TypeScript** in `server/` and `client/`; Dart in `mobile/`.
+- **Per-app configuration.** `server/` and `client/` use `.env` (see committed `.env.example` files). The rider app uses `--dart-define` instead of a `.env` file. Client variables are also documented in `client/README.md` and [environment-variables.md](environment-variables.md).
 - **Feature folders** rather than flat file lists; shared code is colocated near the feature that owns it.
 - **Config over hardcoding:** env vars and per-feature constants live in `constants/` and are never duplicated across apps.
 - Each app has its own README that is kept up to date — start there when working inside an app.

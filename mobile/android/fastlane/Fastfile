@@ -3,7 +3,7 @@ default_platform(:android)
 platform :android do
   desc "Build release AAB and upload to the Play internal track"
   lane :internal do
-    # CI runs this lane from mobile_flutter/android, so one level up is the
+    # CI runs this lane from mobile/android, so one level up is the
     # Flutter project root and the AAB path below is relative to android/.
     Dir.chdir("..") do
       sh(

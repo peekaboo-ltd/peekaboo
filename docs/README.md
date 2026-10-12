@@ -13,8 +13,7 @@ The repository is a monorepo with three applications and a shared deployment scr
 ```
 peekaboo/
 ├── client/         # Web dashboard & public site (React + Vite + TypeScript)
-├── mobile_flutter/ # Rider mobile app (Flutter; replaces mobile/ at cutover)
-├── mobile/         # Legacy rider app (React Native + Expo Router; deleted at cutover)
+├── mobile/         # Rider mobile app (Flutter)
 ├── server/         # Backend API (Node.js + Express + TypeORM + PostgreSQL)
 ├── scripts/        # Shared deployment automation (deploy.sh)
 └── docs/           # This documentation
@@ -39,12 +38,11 @@ Each app is an independent project (own lockfile, README). There is no workspace
 
 | Tool | Version | Notes |
 | --- | --- | --- |
-| Node.js | 20+ (18+ for client, 18+ for mobile) | The deploy script installs Node 20 by default. |
+| Node.js | 20+ (18+ for client) | The deploy script installs Node 20 by default. |
 | npm | bundled with Node | |
 | PostgreSQL | any recent version | Used by the server. |
 | Git | any | |
-| Flutter | 3.47.6 | Only needed for the rider app (`mobile_flutter/`). |
-| Expo CLI (legacy) | latest | Only for the pre-cutover `mobile/` app; `npx expo` works too. |
+| Flutter | 3.47.6 | Only needed for the rider app (`mobile/`). |
 
 You will also need accounts/credentials for the integrations you plan to use (see [environment-variables.md](environment-variables.md)): WhatsApp Business API, UrubutoPay/Kpay, Google OAuth + Maps, Resend, Pindo, OneSignal, Cloudinary.
 
@@ -76,10 +74,10 @@ npm run dev                 # Vite dev server (default http://localhost:5173)
 
 Client env vars include `VITE_API_BASE_URL`, `VITE_GOOGLE_MAPS_API_KEY`, `VITE_GOOGLE_MAPS_MAP_ID`, `VITE_INACTIVITY_TIMEOUT`, `VITE_NODE_ENVIRONMENT`, and `VITE_PAYMENT_MODE`. See [environment-variables.md](environment-variables.md).
 
-### 3. Rider app — `mobile_flutter/`
+### 3. Rider app — `mobile/`
 
 ```bash
-cd mobile_flutter
+cd mobile
 flutter pub get
 flutter run --dart-define API_BASE_URL=http://localhost:8080/api/v1 \
   --dart-define ONESIGNAL_APP_ID=...
@@ -111,7 +109,7 @@ For teammates on physical devices, use your **LAN IP** (e.g. `http://192.168.1.2
 | Push subscriptions don't appear in OneSignal | Must run on a physical device; the rider `ONESIGNAL_APP_ID` must match server `ONESIGNAL_APP_ID`. |
 | Client can't load maps | `VITE_GOOGLE_MAPS_API_KEY` unset/invalid. |
 
-See each app README for deeper troubleshooting (`server/README.md`, `client/README.md`, `mobile_flutter/README.md`).
+See each app README for deeper troubleshooting (`server/README.md`, `client/README.md`, `mobile/README.md`).
 
 ## Glossary
 
@@ -125,7 +123,7 @@ See each app README for deeper troubleshooting (`server/README.md`, `client/READ
 | **Business plan / Organization** | B2B tiering: organizations subscribe to business plans, get members, batches, and billing. |
 | **Batch** | A bulk import of orders (e.g. spreadsheet) for B2B clients. |
 | **UrubutoPay / Kpay** | Rwandan payment gateways used for order checkout. |
-| **EAS** | Expo Application Services — cloud builds for the legacy mobile app (retires at cutover). |
+| **Rider app** | Flutter app in `mobile/` used by delivery riders. |
 | **LAN mode** | Dev API reachable over the local network for physical devices (use a LAN IP, not `localhost`). |
 
 ## Where to go next

@@ -8,7 +8,7 @@
 **Scope:** the whole `client/` web app — public marketing pages, auth screens, and the
 authenticated dashboard (tables, modals, charts, sidebars).
 **Out of scope:** `server/`. Do not touch it. (The Flutter rider app in
-`mobile_flutter/` follows these tokens; where this prose and the implemented
+`mobile/` follows these tokens; where this prose and the implemented
 client UI disagree, the client code wins — see
 `docs/mobile-flutter-rebuild.md`.)
 

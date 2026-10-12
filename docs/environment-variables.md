@@ -6,7 +6,7 @@ This document is the exhaustive reference for every environment variable used ac
 | --- | --- | --- | --- |
 | `server/` | `server/.env` | `dotenv/config` in `app.ts` + `whatsapp.helper.ts` | Secrets + service config |
 | `client/` | `client/.env` | Vite (at build time) | Public/browser-safe config |
-| `mobile/` | `mobile/.env` (dev) or `eas.json` env (cloud builds) | Expo/Metro | Public config baked into the bundle |
+| `mobile/` | `--dart-define` (and CI secrets) | Flutter, at build time | Public config baked into the binary |
 | `scripts/deploy.sh` | shell environment | deploy script | Deploy-time controls |
 
 > **Never commit `.env` files.** They are gitignored. Keep `.env.example` files up to date so new developers know what to configure.
@@ -127,7 +127,7 @@ Paypack HEAD-pings this URL before delivering payloads; the server answers HEAD 
 
 | Variable | Default | Required | Purpose & behavior | Read at |
 | --- | --- | --- | --- | --- |
-| `ONESIGNAL_APP_ID` | — | Yes (for push) | OneSignal app ID. **Must match the mobile app's `EXPO_PUBLIC_ONESIGNAL_APP_ID`.** Values are trimmed. | `oneSignalClient.ts:62` |
+| `ONESIGNAL_APP_ID` | — | Yes (for push) | OneSignal app ID. **Must match the rider app's `ONESIGNAL_APP_ID` dart-define.** Values are trimmed. | `oneSignalClient.ts:62` |
 | `ONESIGNAL_REST_API_KEY` | — | Yes (for push) | OneSignal REST API key (Settings → Keys & IDs) for the same app as `ONESIGNAL_APP_ID`. Trimmed. | `oneSignalClient.ts:63` |
 | `ONESIGNAL_ANDROID_CHANNEL_ASSIGNMENTS` | — | Optional | Android channel UUID for assignment notifications. Omit to use the default channel. | (read via OneSignal payload) |
 | `ONESIGNAL_ANDROID_CHANNEL_ASSIGNMENTS_URGENT` | — | Optional | Android channel UUID for urgent assignments. Omit to use the default channel. | (read via OneSignal payload) |
@@ -183,16 +183,15 @@ Vite only exposes variables prefixed with `VITE_` to the browser; they are read 
 
 ---
 
-## Mobile (`mobile/.env` or `eas.json`)
+## Mobile (`mobile/` `--dart-define`)
 
-Expo inlines variables prefixed with `EXPO_PUBLIC_` into the bundle at build time. For **EAS cloud builds**, values must come from the profile `env` in `eas.json` or EAS secrets — a local `.env` is **not** used. For local `expo start`, `mobile/.env` is used.
+The rider app has no `.env` file. Pass values with `--dart-define` to `flutter run` / `flutter build`. CI supplies the same names as environment variables (see `mobile/README.md`).
 
 | Variable | Default | Required | Purpose & behavior | Read at |
 | --- | --- | --- | --- | --- |
-| `EXPO_PUBLIC_API_BASE_URL` | localhost fallback in dev | Yes (non-dev) | Backend base URL. **Gotcha:** on physical devices use your computer's LAN IP (e.g. `http://192.168.1.20:8080/api/v1`), never `localhost` (it points at the phone itself). The app logs warnings for missing/localhost values. | `utils/constants.ts:2-18` |
-| `EXPO_PUBLIC_ONESIGNAL_APP_ID` | — | Yes (for push) | OneSignal app ID. **Must match the server's `ONESIGNAL_APP_ID`.** Logs a warning when missing. | `services/notifications/pushNotifications.ts:63` |
-| `EXPO_PUBLIC_PROJECT_ID` | — | Yes (for EAS) | Expo project ID (also in `app.config.ts` → `extra.eas.projectId`). Baked into `eas.json` profiles. | `eas.json`, `app.config.ts` |
-| `EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES` | `5` | Optional | How often rider location is sent to the backend. Set to `1` for faster testing; values ≤ 0 or non-numeric fall back to 1. | `utils/constants.ts:21-31` |
+| `API_BASE_URL` | `https://server.peekaboo.co.rw/api/v1` | No | Backend base URL. An empty override falls back to the hosted API. **Gotcha:** on a physical device, `localhost` points at the phone; use your computer's LAN IP (e.g. `http://192.168.1.20:8080/api/v1`). The Android emulator reaches the host at `10.0.2.2`. Debug builds log a warning when the URL contains `localhost`. | `lib/src/config/app_config.dart` |
+| `ONESIGNAL_APP_ID` | empty (push disabled) | Yes (for push) | OneSignal app ID. **Must match the server's `ONESIGNAL_APP_ID`.** | `lib/src/config/app_config.dart` |
+| `LOCATION_UPDATE_INTERVAL_MINUTES` | `5` | Optional | How often rider location is sent to the backend. Values ≤ 0 fall back to 1 minute. | `lib/src/config/app_config.dart` |
 
 ---
 
@@ -219,7 +218,7 @@ GIT_PULL=true SEQUENTIAL=true PORT=8081 CLIENT_PORT=4174 ./scripts/deploy.sh
 
 ## Cross-app consistency requirements
 
-- **OneSignal:** `mobile` `EXPO_PUBLIC_ONESIGNAL_APP_ID` must equal `server` `ONESIGNAL_APP_ID` (same OneSignal app). Android channel UUIDs should match the channels configured in the OneSignal dashboard.
+- **OneSignal:** the rider app's `ONESIGNAL_APP_ID` dart-define must equal `server` `ONESIGNAL_APP_ID` (same OneSignal app). Android channel UUIDs should match the channels configured in the OneSignal dashboard.
 - **Payment dev pricing:** `server` `NODE_ENV=development` (server source of truth) and `client` `VITE_NODE_ENVIRONMENT=development` (UI disclaimer) should agree during local testing.
-- **API base:** `client` `VITE_API_BASE_URL`, `mobile` `EXPO_PUBLIC_API_BASE_URL`, and `server` `PUBLIC_API_BASE_URL` must all point at the same backend origin (`http://<host>:8080/api/v1`).
+- **API base:** `client` `VITE_API_BASE_URL`, the rider app's `API_BASE_URL` dart-define (when overriding the hosted default), and `server` `PUBLIC_API_BASE_URL` must all point at the same backend origin (`http://<host>:8080/api/v1` locally, or the hosted API in production).
 - **UrubutoPay card redirects:** `URUBUTO_CARD_REDIRECT_BASE_URL` must be the exact public HTTPS domain approved by UrubutoPay; the server normalizes it (trims whitespace/trailing slash).

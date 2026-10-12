@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 
 /// Build-time configuration. Values come from `--dart-define`; the API
 /// defaults to the hosted server so every build works out of the box.
-/// Mirrors the semantics of the Expo app's `EXPO_PUBLIC_*` variables (see
-/// mobile/utils/constants.ts).
+/// Passed with `--dart-define` at build time (`API_BASE_URL`,
+/// `ONESIGNAL_APP_ID`, `LOCATION_UPDATE_INTERVAL_MINUTES`).
 class AppConfig {
   static const String hostedApiBaseUrl = 'https://server.peekaboo.co.rw/api/v1';
 

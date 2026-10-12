@@ -58,7 +58,7 @@ platform :ios do
       </plist>
     PLIST
 
-    # CI runs this lane from mobile_flutter/ios, so one level up is the
+    # CI runs this lane from mobile/ios, so one level up is the
     # Flutter project root. ExportOptions.plist was written to ios/ above,
     # which is what the path below resolves to.
     Dir.chdir("..") do

@@ -16,7 +16,7 @@ map: [docs/mobile-layout.md](../docs/mobile-layout.md).
 ## Run
 
 ```bash
-cd mobile_flutter
+cd mobile
 flutter pub get
 
 # Hosted API (default)
@@ -94,9 +94,9 @@ Optional variable: `LOCATION_UPDATE_INTERVAL_MINUTES` (default `5`).
 ## Branding
 
 Launcher icons and the monochrome native splash (white in light mode,
-black in dark) generate from art staged in `assets/branding/` (copied from
-the Expo app's `mobile/assets/images/`; the dark splash logo is an inverted
-copy for visibility on black). Regenerate after changing the art:
+black in dark) generate from art staged in `assets/branding/` (the dark
+splash logo is an inverted copy for visibility on black). Regenerate after
+changing the art:
 
 ```bash
 dart run flutter_launcher_icons

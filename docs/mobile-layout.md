@@ -2,18 +2,15 @@
 
 Rider app for delivery riders, built with Flutter (go_router navigation,
 Riverpod state, OneSignal push). Full run/release docs live in
-[mobile_flutter/README.md](../mobile_flutter/README.md); this file maps the
+[mobile/README.md](../mobile/README.md); this file maps the
 directory layout.
 
 > **Configuration:** all rider config is `--dart-define`
 > (`API_BASE_URL`, `ONESIGNAL_APP_ID`,
 > `LOCATION_UPDATE_INTERVAL_MINUTES`), documented in
 > [environment-variables.md](environment-variables.md).
->
-> **Legacy Expo app:** `mobile/` (React Native) stays runnable until the
-> flag-day cutover, then is deleted (see
-> [mobile-flutter-rebuild.md](mobile-flutter-rebuild.md)). Its layout is
-> described in [mobile/README.md](../mobile/README.md).
+> The Flutter app lives in `mobile/` (the Expo app was removed at cutover;
+> see [mobile-flutter-rebuild.md](mobile-flutter-rebuild.md)).
 
 ## Entry points
 
@@ -138,7 +135,7 @@ flutter run --dart-define API_BASE_URL=http://<LAN_IP>:8080/api/v1
 
 Build numbers come from `github.run_number`; build names from the tag
 (`1.0.0` on main). Secrets are listed in
-[mobile_flutter/README.md](../mobile_flutter/README.md#store-releases).
+[mobile/README.md](../mobile/README.md#store-releases).
 
 ### Push notifications (OneSignal)
 
@@ -148,7 +145,7 @@ Build numbers come from `github.run_number`; build names from the tag
   Subscriptions. iOS ships without a Notification Service Extension
   (follow-up, not a cutover blocker).
 
-## Key commands (from `mobile_flutter/`)
+## Key commands (from `mobile/`)
 
 ```bash
 flutter pub get
