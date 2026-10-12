@@ -24,6 +24,9 @@ import {
   UsersTrackingPage,
   UserLocationHistoryPage,
   RiderManagementPage,
+  RiderPerformanceDetailsPage,
+  RiderAttendanceDetailsPage,
+  RiderProblemReportDetailsPage,
 } from '@/pages/users';
 import { About, OrderFees } from '@/pages/about';
 import { PublicServiceDetailsPage, Services } from '@/pages/services';
@@ -577,21 +580,68 @@ const Router = () => {
             />
           </Route>
 
-          <Route
-            path="rider-management"
-            element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                {withLocalizedSEO(
-                  {
-                    seoKey: 'riderManagement',
-                    path: '/rider-management',
-                    noindex: true,
-                  },
-                  <RiderManagementPage />,
-                )}
-              </ProtectedRoute>
-            }
-          />
+          <Route path="rider-management">
+            <Route
+              index
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  {withLocalizedSEO(
+                    {
+                      seoKey: 'riderManagement',
+                      path: '/rider-management',
+                      noindex: true,
+                    },
+                    <RiderManagementPage />,
+                  )}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="riders/:riderId"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  {withLocalizedSEO(
+                    {
+                      seoKey: 'riderPerformanceDetail',
+                      path: '/rider-management/riders',
+                      noindex: true,
+                    },
+                    <RiderPerformanceDetailsPage />,
+                  )}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="attendance/:proofId"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  {withLocalizedSEO(
+                    {
+                      seoKey: 'riderAttendanceDetail',
+                      path: '/rider-management/attendance',
+                      noindex: true,
+                    },
+                    <RiderAttendanceDetailsPage />,
+                  )}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="problem-reports/:reportId"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  {withLocalizedSEO(
+                    {
+                      seoKey: 'riderProblemReportDetail',
+                      path: '/rider-management/problem-reports',
+                      noindex: true,
+                    },
+                    <RiderProblemReportDetailsPage />,
+                  )}
+                </ProtectedRoute>
+              }
+            />
+          </Route>
 
           <Route
             path="user-profile"

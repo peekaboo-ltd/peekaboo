@@ -35,6 +35,9 @@ export const riderManagementMessages: Record<Language, Record<string, string>> =
     'riderManagement.gap': 'Gap: {count} metric(s)', 'riderManagement.ties': 'Ties: {count}', 'riderManagement.metric': 'Metric', 'riderManagement.difference': 'Difference',
     'riderManagement.performance': 'Performance', 'riderManagement.topPerformer': 'Top performer', 'riderManagement.doingWell': 'Doing well',
     'riderManagement.needsSupport': 'Needs support', 'riderManagement.average': 'Average', 'riderManagement.viewDetails': 'View details',
+    'riderManagement.back': 'Back to rider management', 'riderManagement.notFound': 'This record could not be found.',
+    'riderManagement.loadingDetails': 'Loading details…', 'riderManagement.performanceDocTitle': 'Rider performance',
+    'riderManagement.attendanceDocTitle': 'Attendance proof', 'riderManagement.problemDocTitle': 'Problem report',
   },
   fr: {
     'riderManagement.docTitle': 'Gestion des coursiers', 'riderManagement.title': 'Gestion des coursiers',
@@ -70,6 +73,9 @@ export const riderManagementMessages: Record<Language, Record<string, string>> =
     'riderManagement.gap': 'Écart : {count} indicateur(s)', 'riderManagement.ties': 'Égalités : {count}', 'riderManagement.metric': 'Indicateur', 'riderManagement.difference': 'Différence',
     'riderManagement.performance': 'Performance', 'riderManagement.topPerformer': 'Meilleure performance', 'riderManagement.doingWell': 'Bonne performance',
     'riderManagement.needsSupport': 'Soutien nécessaire', 'riderManagement.average': 'Moyenne', 'riderManagement.viewDetails': 'Voir les détails',
+    'riderManagement.back': 'Retour à la gestion des coursiers', 'riderManagement.notFound': 'Cet enregistrement est introuvable.',
+    'riderManagement.loadingDetails': 'Chargement des détails…', 'riderManagement.performanceDocTitle': 'Performance du coursier',
+    'riderManagement.attendanceDocTitle': 'Justificatif de présence', 'riderManagement.problemDocTitle': 'Signalement de problème',
   },
   rw: {
     'riderManagement.docTitle': 'Gucunga abamotari', 'riderManagement.title': 'Gucunga abamotari',
@@ -105,5 +111,8 @@ export const riderManagementMessages: Record<Language, Record<string, string>> =
     'riderManagement.gap': 'Ikinyuranyo: ibipimo {count}', 'riderManagement.ties': 'Ibyangana: {count}', 'riderManagement.metric': 'Igipimo', 'riderManagement.difference': 'Ikinyuranyo',
     'riderManagement.performance': 'Imikorere', 'riderManagement.topPerformer': 'Akora neza kurusha abandi', 'riderManagement.doingWell': 'Akora neza',
     'riderManagement.needsSupport': 'Akeneye gufashwa', 'riderManagement.average': 'Imikorere isanzwe', 'riderManagement.viewDetails': 'Reba amakuru',
+    'riderManagement.back': 'Subira ku gucunga abamotari', 'riderManagement.notFound': 'Iyi nyandiko ntabwo yabonetse.',
+    'riderManagement.loadingDetails': 'Amakuru arimo gufunguka…', 'riderManagement.performanceDocTitle': 'Imikorere y’umumotari',
+    'riderManagement.attendanceDocTitle': 'Ikimenyetso cy’ubwitabire', 'riderManagement.problemDocTitle': 'Raporo y’ikibazo',
   },
 };

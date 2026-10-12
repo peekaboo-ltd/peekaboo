@@ -26,9 +26,7 @@ const getPerformanceLabelKey = (rider: RiderPerformanceItem) => {
   return 'riderManagement.average';
 };
 
-export const useRiderManagementColumns = (
-  onViewDetails: (rider: RiderPerformanceItem) => void,
-) => {
+export const useRiderManagementColumns = (detailSearch = '') => {
   const { t } = useI18n();
   const riderManagementColumns: ColumnDef<RiderPerformanceItem>[] = useMemo(
     () => [
@@ -78,11 +76,7 @@ export const useRiderManagementColumns = (
         id: 'actions',
         cell: ({ row }) => (
           <Link
-            to={`/users/${row?.original?.riderId}`}
-            onClick={(e) => {
-              e.preventDefault();
-              onViewDetails(row.original);
-            }}
+            to={`/rider-management/riders/${row.original.riderId}${detailSearch}`}
             className="text-(--ink) underline text-xs underline-offset-2"
           >
             {t('riderManagement.viewDetails')}
@@ -90,7 +84,7 @@ export const useRiderManagementColumns = (
         ),
       },
     ],
-    [onViewDetails, t],
+    [detailSearch, t],
   );
 
   return { riderManagementColumns };

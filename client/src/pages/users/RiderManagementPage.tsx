@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import Modal from '@/components/Modal';
 import Input from '@/components/inputs/Input';
 import Select from '@/components/inputs/Select';
 import Table from '@/components/table/Table';
-import { StatusBadge } from '@/components/inputs/StatusBadge';
 import { UserStatus } from '@/constants/user.constants';
 import useDebounce from '@/hooks/common/debounce.hooks';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
+import { useRiderAttendanceColumns } from '@/hooks/users/columns.riderAttendance';
 import { useRiderManagementColumns } from '@/hooks/users/columns.riderManagement';
+import { useRiderProblemReportColumns } from '@/hooks/users/columns.riderProblemReports';
 import {
   useFetchRiderManagementAttendance,
   useFetchRiderManagementPerformance,
@@ -19,14 +19,8 @@ import {
   RiderProblemReportItem,
   RiderManagementTimeframe,
 } from '@/types/user.type';
-import { formatCurrency, formatDate, formatNumbers } from '@/utils/strings.util';
-import { Link } from 'react-router-dom';
+import { formatCurrency, formatNumbers } from '@/utils/strings.util';
 import { ColumnDef } from '@tanstack/react-table';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import CustomPopover from '@/components/inputs/CustomPopover';
-import { faCircleInfo, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
-import { ellipsisHClassName, tableActionClassName } from '@/constants/inputs.constants';
-import { faCircleCheck, faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { useI18n } from '@/i18n/i18n';
 
 type SortBy = 'deliveries' | 'earnings' | 'canceled' | 'failed' | 'activeDays' | 'activeHours';
@@ -64,62 +58,6 @@ const resolveDateInputValue = (value: Date | { target?: { value?: string } }) =>
   return String(value?.target?.value || '');
 };
 
-const formatAttendanceDateTime = (value?: string) => {
-  if (!value) return '-';
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return '-';
-  return parsed.toLocaleString();
-};
-
-const normalizeProblemMediaUrl = (value?: string) => {
-  if (!value) return '';
-  const trimmed = value.trim();
-  if (!trimmed) return '';
-
-  try {
-    return new URL(trimmed).toString();
-  } catch {
-    return encodeURI(trimmed);
-  }
-};
-
-const isLikelyVideoMedia = (mediaType?: string, url?: string) => {
-  if (mediaType === 'video') return true;
-  if (!url) return false;
-  return /\.(mp4|webm|ogg|m3u8|mov|qt)(\?.*)?$/i.test(url);
-};
-
-const getCloudinaryVideoSourceCandidates = (url: string) => {
-  if (!url) return [] as string[];
-
-  const candidates = new Set<string>([url]);
-  if (!url.includes('/res.cloudinary.com/') || !url.includes('/video/upload/')) {
-    return Array.from(candidates);
-  }
-
-  const urlObj = new URL(url);
-
-  // Transcode to MP4/H.264 — required for MOV and other formats that browsers
-  // (Chrome, Firefox) cannot play natively. Cloudinary applies this server-side.
-  candidates.add(url.replace('/video/upload/', '/video/upload/f_mp4,vc_h264/'));
-
-  // Fallback: strip the full transformation chain and request the raw asset
-  // transcoded to MP4. Useful when the overlay/watermark chain fails for the
-  // source format (e.g. MOV with complex named-layer overlays).
-  // Use [^?]+ to exclude the query string so urlObj.search isn't duplicated.
-  const pathMatch = url.match(/\/v\d+\/[^?]+/);
-  if (pathMatch?.[0]) {
-    // Preserve the Cloudinary cloud name (first path segment after the host).
-    const cloudName = urlObj.pathname.split('/')[1];
-    const base = `${urlObj.protocol}//${urlObj.host}/${cloudName}`;
-    const plainPathUrl = `${base}/video/upload/f_mp4,vc_h264${pathMatch[0]}`;
-    const querySuffix = urlObj.search || '';
-    candidates.add(`${plainPathUrl}${querySuffix}`);
-  }
-
-  return Array.from(candidates);
-};
-
 const RiderManagementPage = () => {
   const { t } = useI18n();
   useDocumentTitle(t('riderManagement.docTitle'));
@@ -135,10 +73,6 @@ const RiderManagementPage = () => {
   const [problemReportsName, setProblemReportsName] = useState('');
   const [sortBy, setSortBy] = useState<SortBy>('deliveries');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [selectedRider, setSelectedRider] = useState<RiderPerformanceItem | null>(null);
-  const [attendanceProofRider, setAttendanceProofRider] = useState<RiderAttendanceItem | null>(null);
-  const [selectedProblemReport, setSelectedProblemReport] = useState<RiderProblemReportItem | null>(null);
-  const [problemVideoPreviewError, setProblemVideoPreviewError] = useState(false);
   const [compareLeftId, setCompareLeftId] = useState('');
   const [compareRightId, setCompareRightId] = useState('');
   const debouncedSearch = useDebounce(search, 350);
@@ -185,19 +119,8 @@ const RiderManagementPage = () => {
     () => (problemReportsData?.data?.rows ?? []) as RiderProblemReportItem[],
     [problemReportsData],
   );
-  const selectedProblemMediaUrl = useMemo(
-    () => normalizeProblemMediaUrl(selectedProblemReport?.imageUrl),
-    [selectedProblemReport?.imageUrl],
-  );
-  const selectedProblemIsVideo = useMemo(
-    () => isLikelyVideoMedia(selectedProblemReport?.mediaType, selectedProblemMediaUrl),
-    [selectedProblemReport?.mediaType, selectedProblemMediaUrl],
-  );
-  const selectedProblemVideoSources = useMemo(
-    () => getCloudinaryVideoSourceCandidates(selectedProblemMediaUrl),
-    [selectedProblemMediaUrl],
-  );
-  const { riderManagementColumns } = useRiderManagementColumns(setSelectedRider);
+  const { attendanceColumns } = useRiderAttendanceColumns();
+  const { problemReportColumns } = useRiderProblemReportColumns();
 
   useEffect(() => {
     setPage(0);
@@ -235,6 +158,28 @@ const RiderManagementPage = () => {
       endDate: endDate || undefined,
     };
   }, [timeframe, startDate, endDate]);
+
+  const performanceDetailSearch = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set('timeframe', timeframe);
+    if (normalizedCustomRange.startDate) params.set('startDate', normalizedCustomRange.startDate);
+    if (normalizedCustomRange.endDate) params.set('endDate', normalizedCustomRange.endDate);
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    if (status !== 'ALL') params.set('status', status);
+    params.set('sortBy', sortBy);
+    params.set('sortOrder', sortOrder);
+    const query = params.toString();
+    return query ? `?${query}` : '';
+  }, [
+    debouncedSearch,
+    normalizedCustomRange.endDate,
+    normalizedCustomRange.startDate,
+    sortBy,
+    sortOrder,
+    status,
+    timeframe,
+  ]);
+  const { riderManagementColumns } = useRiderManagementColumns(performanceDetailSearch);
 
   const comparisonDateFilterLabel = useMemo(() => {
     if (timeframe === 'custom') {
@@ -460,135 +405,6 @@ const RiderManagementPage = () => {
     };
   }, [leftRider, rightRider, comparisonRows]);
 
-  const openAttendanceProof = useCallback((row: RiderAttendanceItem) => {
-    setAttendanceProofRider(row);
-  }, []);
-
-  // ATTENDANCE COLUMNS
-  const attendanceColumns: ColumnDef<RiderAttendanceItem>[] = useMemo(
-    () => [
-      {
-        header: t('riderManagement.rider'),
-        accessorKey: 'riderName',
-        cell: ({ row }) => row.original.riderName || '-',
-      },
-      {
-        header: t('riderManagement.time'),
-        accessorKey: 'timestamp',
-        cell: ({ row }) =>
-          formatDate(row.original.timestamp, 'DD/MM/YYYY HH:mm'),
-      },
-      {
-        header: t('common.status'),
-        accessorKey: 'status',
-        cell: ({ row }) => {
-          const status = row.original.status === UserStatus.INACTIVE
-            ? {
-                icon: faCircleXmark,
-                iconColor: 'text-(--ink)',
-                text: t('riderManagement.checkOut'),
-              }
-            : {
-                icon: faCircleCheck,
-                iconColor: 'text-(--ink)',
-                text: t('riderManagement.checkIn'),
-              };
-          return (
-            <p className={`flex items-center gap-2 text-xs ${status.iconColor}`}>
-              <FontAwesomeIcon className="text-xs" icon={status.icon} />
-              {status.text}
-            </p>
-          );
-        },
-      },
-      {
-        header: t('common.actions'),
-        id: 'actions',
-        cell: ({ row }) => (
-          <CustomPopover
-            trigger={
-              <FontAwesomeIcon icon={faEllipsisH} className={ellipsisHClassName} />
-            }
-          >
-            <menu className="w-full flex flex-col gap-1">
-              <Link
-                className={tableActionClassName}
-                to={`/users/${row.original.riderId}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  openAttendanceProof(row.original);
-                }}
-              >
-                <FontAwesomeIcon icon={faCircleInfo} />
-                {t('riderManagement.viewProof')}
-              </Link>
-            </menu>
-          </CustomPopover>
-        ),
-      },
-    ],
-    [openAttendanceProof, t],
-  );
-  const problemReportColumns: ColumnDef<RiderProblemReportItem>[] = useMemo(
-    () => [
-      {
-        header: t('riderManagement.rider'),
-        accessorKey: 'riderName',
-        cell: ({ row }) => row.original.riderName || '-',
-      },
-      {
-        header: t('riderManagement.time'),
-        accessorKey: 'timestamp',
-        cell: ({ row }) => formatDate(row.original.timestamp, 'DD/MM/YYYY HH:mm'),
-      },
-      {
-        header: t('riderManagement.type'),
-        accessorKey: 'mediaType',
-        cell: ({ row }) =>
-          row.original.mediaType === 'video'
-            ? t('riderManagement.video')
-            : t('riderManagement.photo'),
-      },
-      {
-        header: t('riderManagement.location'),
-        accessorKey: 'locationLabel',
-        cell: ({ row }) => row.original.locationLabel || '-',
-      },
-      {
-        header: t('riderManagement.descriptionLabel'),
-        accessorKey: 'description',
-        cell: ({ row }) => row.original.description || '-',
-      },
-      {
-        header: t('common.actions'),
-        id: 'problem-actions',
-        cell: ({ row }) => (
-          <CustomPopover
-            trigger={
-              <FontAwesomeIcon icon={faEllipsisH} className={ellipsisHClassName} />
-            }
-          >
-            <menu className="w-full flex flex-col gap-1">
-              <Link
-                className={tableActionClassName}
-                to={`/users/${row.original.riderId}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setProblemVideoPreviewError(false);
-                  setSelectedProblemReport(row.original);
-                }}
-              >
-                <FontAwesomeIcon icon={faCircleInfo} />
-                {t('riderManagement.viewEvidence')}
-              </Link>
-            </menu>
-          </CustomPopover>
-        ),
-      },
-    ],
-    [t],
-  );
-
   type ComparisonRowItem = {
     metricKey: ComparisonMetricKey;
     label: string;
@@ -760,33 +576,6 @@ const RiderManagementPage = () => {
         noDataMessage={t('riderManagement.noRiders')}
       />
 
-      <Modal
-        isOpen={Boolean(selectedRider)}
-        onClose={() => setSelectedRider(null)}
-        heading={t('riderManagement.details', {
-          name: selectedRider?.riderName ? ` - ${selectedRider.riderName}` : '',
-        })}
-        description={t('riderManagement.detailsDescription')}
-      >
-        {selectedRider && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-            <p><strong>{t('riderManagement.name')}:</strong> {selectedRider.riderName || '-'}</p>
-            <p><strong>{t('riderManagement.email')}:</strong> {selectedRider.riderEmail || '-'}</p>
-            <p><strong>{t('riderManagement.phone')}:</strong> {selectedRider.riderPhoneNumber || '-'}</p>
-            <p className="flex items-center gap-2">
-              <strong>{t('common.status')}:</strong> <StatusBadge status={selectedRider.riderStatus} />
-            </p>
-            <p><strong>{t('riderManagement.rank')}:</strong> #{selectedRider.rank}</p>
-            <p><strong>{t('riderManagement.totalDeliveries')}:</strong> {formatNumbers(selectedRider.totalDeliveriesCompleted) || '0'}</p>
-            <p><strong>{t('riderManagement.totalEarnings')}:</strong> {formatCurrency(selectedRider.totalEarnings, 'RWF') || 'RWF 0'}</p>
-            <p><strong>{t('riderManagement.canceled')}:</strong> {formatNumbers(selectedRider.canceledDeliveries) || '0'}</p>
-            <p><strong>{t('riderManagement.failed')}:</strong> {formatNumbers(selectedRider.failedDeliveries) || '0'}</p>
-            <p><strong>{t('riderManagement.activeDays')}:</strong> {formatNumbers(selectedRider.activeDays) || '0'}</p>
-            <p><strong>{t('riderManagement.activeHours')}:</strong> {formatNumbers(selectedRider.activeHours) || '0'}</p>
-          </div>
-        )}
-      </Modal>
-
       <section className="bg-(--paper) border border-(--line) rounded-xl p-4 flex flex-col gap-4">
         <header className="flex flex-col gap-1">
           <h2 className="type-card-title">{t('riderManagement.attendance')}</h2>
@@ -872,123 +661,6 @@ const RiderManagementPage = () => {
           />
         </div>
       </section>
-
-      <Modal
-        isOpen={Boolean(attendanceProofRider)}
-        onClose={() => setAttendanceProofRider(null)}
-        heading={t('riderManagement.attendanceProof', {
-          name: attendanceProofRider?.riderName ? ` - ${attendanceProofRider.riderName}` : '',
-        })}
-        description={t('riderManagement.attendanceProofDate', {
-          date: attendanceProofRider?.date || '-',
-        })}
-      >
-        {attendanceProofRider && (
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-(--muted)">
-              {t('riderManagement.attendanceEvent', {
-                event:
-                  attendanceProofRider.status === UserStatus.ACTIVE
-                    ? t('riderManagement.checkIn')
-                    : t('riderManagement.checkOut'),
-                time: formatAttendanceDateTime(attendanceProofRider.timestamp),
-              })}
-            </p>
-            {attendanceProofRider.locationLabel && (
-              <p className="type-meta">
-                {t('riderManagement.location')}: {attendanceProofRider.locationLabel}
-              </p>
-            )}
-            <img
-              src={attendanceProofRider.imageUrl}
-              alt={t('riderManagement.proofAlt', {
-                name: attendanceProofRider.riderName || t('riderManagement.rider'),
-              })}
-              className="w-full max-h-96 object-contain rounded-lg bg-(--surface)"
-            />
-          </div>
-        )}
-      </Modal>
-
-      <Modal
-        isOpen={Boolean(selectedProblemReport)}
-        onClose={() => {
-          setProblemVideoPreviewError(false);
-          setSelectedProblemReport(null);
-        }}
-        heading={t('riderManagement.problemReport', {
-          name: selectedProblemReport?.riderName ? ` - ${selectedProblemReport.riderName}` : '',
-        })}
-        description={t('riderManagement.reportedAt', {
-          time: selectedProblemReport
-            ? formatAttendanceDateTime(selectedProblemReport.timestamp)
-            : '-',
-        })}
-      >
-        {selectedProblemReport && (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1 text-xs text-(--muted)">
-              <p>
-                <strong>{t('riderManagement.type')}:</strong>{' '}
-                {selectedProblemReport.mediaType === 'video'
-                  ? t('riderManagement.video')
-                  : t('riderManagement.photo')}
-              </p>
-              <p>
-                <strong>{t('riderManagement.timestamp')}:</strong>{' '}
-                {formatAttendanceDateTime(selectedProblemReport.timestamp)}
-              </p>
-              <p>
-                <strong>{t('riderManagement.location')}:</strong>{' '}
-                {selectedProblemReport.locationLabel || '-'}
-              </p>
-              <p>
-                <strong>{t('riderManagement.descriptionLabel')}:</strong>{' '}
-                {selectedProblemReport.description || '-'}
-              </p>
-            </div>
-
-            {selectedProblemIsVideo ? (
-              problemVideoPreviewError ? (
-                <div className="w-full rounded-lg bg-(--surface) p-4 text-sm text-(--ink)">
-                  <p className="font-normal">{t('riderManagement.videoError')}</p>
-                  {selectedProblemMediaUrl && (
-                    <a
-                      href={selectedProblemMediaUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-2 inline-flex text-sm font-normal text-(--ink) underline"
-                    >
-                      {t('riderManagement.openVideo')}
-                    </a>
-                  )}
-                </div>
-              ) : (
-                <video
-                  key={selectedProblemReport?.id}
-                  controls
-                  preload="metadata"
-                  className="w-full max-h-72 rounded-lg border border-(--line) bg-(--ink)"
-                  onError={() => setProblemVideoPreviewError(true)}
-                  onLoadedData={() => setProblemVideoPreviewError(false)}
-                >
-                  {selectedProblemVideoSources.map((sourceUrl, sourceIndex) => (
-                    <source key={`problem-report-video-source-${sourceIndex}`} src={sourceUrl} />
-                  ))}
-                </video>
-              )
-            ) : (
-              <img
-                src={selectedProblemMediaUrl}
-                alt={t('riderManagement.problemAlt', {
-                  name: selectedProblemReport.riderName || t('riderManagement.rider'),
-                })}
-                className="w-full max-h-72 object-contain rounded-lg border border-(--line) bg-(--paper)"
-              />
-            )}
-          </div>
-        )}
-      </Modal>
 
       <section className="bg-(--paper) border border-(--line) rounded-xl p-4 flex flex-col gap-4">
         <header>

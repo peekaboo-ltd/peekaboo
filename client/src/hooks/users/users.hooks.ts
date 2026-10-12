@@ -7,8 +7,11 @@ import {
   useLazyFetchUsersQuery,
   useLazyFetchUsersTrackingQuery,
   useLazyFetchRiderManagementPerformanceQuery,
+  useLazyFetchRiderManagementPerformanceByRiderIdQuery,
   useLazyFetchRiderManagementAttendanceQuery,
+  useLazyFetchRiderManagementAttendanceByIdQuery,
   useLazyFetchRiderManagementProblemReportsQuery,
+  useLazyFetchRiderManagementProblemReportByIdQuery,
 } from '@/api/queries/users.queries';
 import {
   useCreateUserMutation,
@@ -21,6 +24,11 @@ import {
 } from '@/api/mutations/users.mutations';
 import { usePagination } from '../common/pagination.hooks';
 import { UUID } from '@/types';
+import {
+  RiderAttendanceItem,
+  RiderPerformanceItem,
+  RiderProblemReportItem,
+} from '@/types/user.type';
 import { toast } from 'sonner';
 import { useI18n } from '@/i18n/i18n';
 
@@ -294,6 +302,22 @@ export const useFetchRiderManagementPerformance = () => {
   };
 };
 
+export const useFetchRiderManagementPerformanceByRiderId = () => {
+  const [
+    fetchRiderManagementPerformanceByRiderId,
+    { data, error, isFetching, isUninitialized, isError },
+  ] = useLazyFetchRiderManagementPerformanceByRiderIdQuery();
+
+  return {
+    fetchRiderManagementPerformanceByRiderId,
+    rider: (data?.data ?? null) as RiderPerformanceItem | null,
+    error,
+    isFetching,
+    isUninitialized,
+    isError,
+  };
+};
+
 export const useFetchRiderManagementAttendance = () => {
   const {
     page,
@@ -332,6 +356,22 @@ export const useFetchRiderManagementAttendance = () => {
   };
 };
 
+export const useFetchRiderManagementAttendanceById = () => {
+  const [
+    fetchRiderManagementAttendanceById,
+    { data, error, isFetching, isUninitialized, isError },
+  ] = useLazyFetchRiderManagementAttendanceByIdQuery();
+
+  return {
+    fetchRiderManagementAttendanceById,
+    attendance: (data?.data ?? null) as RiderAttendanceItem | null,
+    error,
+    isFetching,
+    isUninitialized,
+    isError,
+  };
+};
+
 export const useFetchRiderManagementProblemReports = () => {
   const {
     page,
@@ -367,6 +407,22 @@ export const useFetchRiderManagementProblemReports = () => {
     setSize,
     totalPages,
     totalCount,
+  };
+};
+
+export const useFetchRiderManagementProblemReportById = () => {
+  const [
+    fetchRiderManagementProblemReportById,
+    { data, error, isFetching, isUninitialized, isError },
+  ] = useLazyFetchRiderManagementProblemReportByIdQuery();
+
+  return {
+    fetchRiderManagementProblemReportById,
+    report: (data?.data ?? null) as RiderProblemReportItem | null,
+    error,
+    isFetching,
+    isUninitialized,
+    isError,
   };
 };
 

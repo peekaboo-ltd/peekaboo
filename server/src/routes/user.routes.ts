@@ -27,6 +27,13 @@ router.get(
   UserController.getRiderManagementPerformance
 );
 
+// GET one rider management performance record (ADMIN only)
+router.get(
+  "/rider-management/performance/:riderId",
+  authorize([RoleTypes.ADMIN]),
+  UserController.getRiderManagementPerformanceByRiderId
+);
+
 // GET rider management attendance (ADMIN only)
 router.get(
   "/rider-management/attendance",
@@ -34,11 +41,25 @@ router.get(
   UserController.getRiderManagementAttendance
 );
 
+// GET one rider management attendance record (ADMIN only)
+router.get(
+  "/rider-management/attendance/:id",
+  authorize([RoleTypes.ADMIN]),
+  UserController.getRiderManagementAttendanceById
+);
+
 // GET rider management problem reports (ADMIN only)
 router.get(
   "/rider-management/problem-reports",
   authorize([RoleTypes.ADMIN]),
   UserController.getRiderManagementProblemReports
+);
+
+// GET one rider problem report (ADMIN only)
+router.get(
+  "/rider-management/problem-reports/:id",
+  authorize([RoleTypes.ADMIN]),
+  UserController.getRiderManagementProblemReportById
 );
 
 // GET user by ID (ADMIN or own profile)

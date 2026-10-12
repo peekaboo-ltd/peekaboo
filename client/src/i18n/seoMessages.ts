@@ -110,6 +110,15 @@ export const seoMessages: Record<Language, Record<string, string>> = {
     'seo.riderManagement.title': 'Rider Management | Peekaboo',
     'seo.riderManagement.description':
       'Admin dashboard for rider deliveries, earnings, reliability, and activity ranking.',
+    'seo.riderPerformanceDetail.title': 'Rider Performance | Peekaboo',
+    'seo.riderPerformanceDetail.description':
+      'Review one rider’s deliveries, earnings, and activity for the selected period.',
+    'seo.riderAttendanceDetail.title': 'Attendance Proof | Peekaboo',
+    'seo.riderAttendanceDetail.description':
+      'Review a rider check-in or check-out proof, including time and location.',
+    'seo.riderProblemReportDetail.title': 'Problem Report | Peekaboo',
+    'seo.riderProblemReportDetail.description':
+      'Review a rider-submitted problem report and its photo or video evidence.',
     'seo.userProfile.title': 'My Profile | Peekaboo',
     'seo.userProfile.description':
       'Update personal details, preferences, and account settings.',
@@ -266,6 +275,15 @@ export const seoMessages: Record<Language, Record<string, string>> = {
     'seo.riderManagement.title': 'Gestion des coursiers | Peekaboo',
     'seo.riderManagement.description':
       'Tableau de bord administrateur pour les livraisons, revenus, fiabilité et classement d’activité des coursiers.',
+    'seo.riderPerformanceDetail.title': 'Performance du coursier | Peekaboo',
+    'seo.riderPerformanceDetail.description':
+      'Consultez les livraisons, revenus et l’activité d’un coursier pour la période choisie.',
+    'seo.riderAttendanceDetail.title': 'Justificatif de présence | Peekaboo',
+    'seo.riderAttendanceDetail.description':
+      'Consultez un justificatif d’arrivée ou de départ, avec l’heure et le lieu.',
+    'seo.riderProblemReportDetail.title': 'Signalement de problème | Peekaboo',
+    'seo.riderProblemReportDetail.description':
+      'Consultez un signalement envoyé par un coursier et sa photo ou sa vidéo.',
     'seo.userProfile.title': 'Mon profil | Peekaboo',
     'seo.userProfile.description':
       'Mettez à jour vos informations personnelles, préférences et paramètres de compte.',
@@ -421,6 +439,15 @@ export const seoMessages: Record<Language, Record<string, string>> = {
     'seo.riderManagement.title': 'Gucunga abatwara | Peekaboo',
     'seo.riderManagement.description':
       'Ikibaho cy’umuyobozi ku gutwara, inyungu, kwizera n’urutonde rw’imikorere y’abatwara.',
+    'seo.riderPerformanceDetail.title': 'Imikorere y’umumotari | Peekaboo',
+    'seo.riderPerformanceDetail.description':
+      'Reba komande, amafaranga n’imikorere y’umumotari mu gihe cyatoranyijwe.',
+    'seo.riderAttendanceDetail.title': 'Ikimenyetso cy’ubwitabire | Peekaboo',
+    'seo.riderAttendanceDetail.description':
+      'Reba ikimenyetso cy’itangira cyangwa kurangiza akazi, hamwe n’igihe n’ahantu.',
+    'seo.riderProblemReportDetail.title': 'Raporo y’ikibazo | Peekaboo',
+    'seo.riderProblemReportDetail.description':
+      'Reba raporo y’ikibazo yatanzwe n’umumotari n’ifoto cyangwa videwo yayo.',
     'seo.userProfile.title': 'Umwirondoro wanjye | Peekaboo',
     'seo.userProfile.description':
       'Hindura amakuru yawe, ibyo ukunda n’igenamiterere rya konti.',

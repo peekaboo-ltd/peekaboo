@@ -78,6 +78,38 @@ interface RiderProblemReportListItem {
   locationLabel?: string;
 }
 
+const toRiderAttendanceListItem = (proof: UserStatusProof): RiderAttendanceListItem => {
+  const proofDate = proof.capturedAt;
+  const date = `${proofDate.getFullYear()}-${String(proofDate.getMonth() + 1).padStart(2, '0')}-${String(proofDate.getDate()).padStart(2, '0')}`;
+  return {
+    id: proof.id,
+    riderId: proof.userId,
+    riderName: proof.user?.name,
+    riderPhoneNumber: proof.user?.phoneNumber,
+    date,
+    status: proof.status,
+    timestamp: proof.capturedAt.toISOString(),
+    imageUrl: proof.imageUrl,
+    locationLabel: proof.locationLabel,
+  };
+};
+
+const toRiderProblemReportListItem = (report: UserProblemReport): RiderProblemReportListItem => ({
+  id: report.id,
+  riderId: report.userId,
+  riderName: report.user?.name,
+  riderPhoneNumber: report.user?.phoneNumber,
+  imageUrl: report.imageUrl,
+  mediaType: report.mediaType,
+  submissionType: report.submissionType,
+  description: report.description,
+  timestamp: report.capturedAt.toISOString(),
+  locationLabel: report.locationLabel,
+});
+
+const isRiderUser = (user?: User | null) =>
+  Boolean(user?.userRoles?.some((userRole) => userRole.role?.name === RoleTypes.RIDER));
+
 type RiderManagementSortBy =
   | 'deliveries'
   | 'earnings'
@@ -566,9 +598,40 @@ export class UserService {
   async getRiderManagementPerformance(
     query: Request['query']
   ): Promise<Pagination<RiderPerformanceListItem>> {
-    const { page = 0, size = 10, search, status, timeframe = 'monthly', startDate, endDate, sortBy = 'deliveries', sortOrder = 'desc' } = query;
+    const { page = 0, size = 10 } = query;
     const pageNumber = Number(page) >= 0 ? Number(page) : 0;
     const sizeNumber = Number(size) > 0 ? Number(size) : 10;
+    const rankedRows = await this.buildRankedRiderPerformanceRows(query);
+    const totalCount = rankedRows.length;
+    const totalPages = totalCount > 0 ? Math.ceil(totalCount / sizeNumber) : 0;
+    const startIndex = pageNumber * sizeNumber;
+
+    return {
+      rows: rankedRows.slice(startIndex, startIndex + sizeNumber),
+      totalCount,
+      totalPages,
+      currentPage: pageNumber + 1,
+      size: sizeNumber,
+      page: pageNumber,
+    };
+  }
+
+  async getRiderManagementPerformanceByRiderId(
+    riderId: UUID,
+    query: Request['query'],
+  ): Promise<RiderPerformanceListItem> {
+    const rankedRows = await this.buildRankedRiderPerformanceRows(query);
+    const row = rankedRows.find((item) => item.riderId === riderId);
+    if (!row) {
+      throw new NotFoundError('Rider performance not found');
+    }
+    return row;
+  }
+
+  private async buildRankedRiderPerformanceRows(
+    query: Request['query'],
+  ): Promise<RiderPerformanceListItem[]> {
+    const { search, status, timeframe = 'monthly', startDate, endDate, sortBy = 'deliveries', sortOrder = 'desc' } = query;
     const sortDirection = String(sortOrder).toLowerCase() === 'asc' ? 'asc' : 'desc';
     const normalizedSortBy = String(sortBy) as RiderManagementSortBy;
     const allowedSortBy: RiderManagementSortBy[] = ['deliveries', 'earnings', 'canceled', 'failed', 'activeDays', 'activeHours'];
@@ -628,15 +691,7 @@ export class UserService {
     }).getMany();
     const riderIds = riders.map((rider) => rider.id);
 
-    const emptyResponse: Pagination<RiderPerformanceListItem> = {
-      rows: [],
-      totalCount: 0,
-      totalPages: 0,
-      currentPage: pageNumber + 1,
-      size: sizeNumber,
-      page: pageNumber,
-    };
-    if (!riderIds.length) return emptyResponse;
+    if (!riderIds.length) return [];
 
     const assignmentStatsQueryBuilder = this.orderAssignmentRepository
       .createQueryBuilder('assignment')
@@ -709,19 +764,7 @@ export class UserService {
       return (a.riderName ?? '').localeCompare(b.riderName ?? '');
     });
 
-    const rankedRows = sortedRows.map((row, index) => ({ ...row, rank: index + 1 }));
-    const totalCount = rankedRows.length;
-    const totalPages = totalCount > 0 ? Math.ceil(totalCount / sizeNumber) : 0;
-    const startIndex = pageNumber * sizeNumber;
-
-    return {
-      rows: rankedRows.slice(startIndex, startIndex + sizeNumber),
-      totalCount,
-      totalPages,
-      currentPage: pageNumber + 1,
-      size: sizeNumber,
-      page: pageNumber,
-    };
+    return sortedRows.map((row, index) => ({ ...row, rank: index + 1 }));
   }
 
   async getRiderManagementAttendance(
@@ -758,21 +801,7 @@ export class UserService {
       .orderBy('proof.capturedAt', 'DESC')
       .getMany();
 
-    const rows = proofs.map<RiderAttendanceListItem>((proof) => {
-      const proofDate = proof.capturedAt;
-      const date = `${proofDate.getFullYear()}-${String(proofDate.getMonth() + 1).padStart(2, '0')}-${String(proofDate.getDate()).padStart(2, '0')}`;
-      return {
-        id: proof.id,
-        riderId: proof.userId,
-        riderName: proof.user?.name,
-        riderPhoneNumber: proof.user?.phoneNumber,
-        date,
-        status: proof.status,
-        timestamp: proof.capturedAt.toISOString(),
-        imageUrl: proof.imageUrl,
-        locationLabel: proof.locationLabel,
-      };
-    });
+    const rows = proofs.map((proof) => toRiderAttendanceListItem(proof));
 
     const totalCount = rows.length;
     const totalPages = totalCount > 0 ? Math.ceil(totalCount / sizeNumber) : 0;
@@ -786,6 +815,23 @@ export class UserService {
       size: sizeNumber,
       page: pageNumber,
     };
+  }
+
+  async getRiderManagementAttendanceById(id: UUID): Promise<RiderAttendanceListItem> {
+    const proof = await this.userStatusProofRepository.findOne({
+      where: { id },
+      relations: {
+        user: {
+          userRoles: { role: true },
+        },
+      },
+    });
+
+    if (!proof || !isRiderUser(proof.user)) {
+      throw new NotFoundError('Attendance proof not found');
+    }
+
+    return toRiderAttendanceListItem(proof);
   }
 
   async getRiderManagementProblemReports(
@@ -830,18 +876,7 @@ export class UserService {
       .take(sizeNumber)
       .getManyAndCount();
 
-    const rows = reports.map<RiderProblemReportListItem>((report) => ({
-      id: report.id,
-      riderId: report.userId,
-      riderName: report.user?.name,
-      riderPhoneNumber: report.user?.phoneNumber,
-      imageUrl: report.imageUrl,
-      mediaType: report.mediaType,
-      submissionType: report.submissionType,
-      description: report.description,
-      timestamp: report.capturedAt.toISOString(),
-      locationLabel: report.locationLabel,
-    }));
+    const rows = reports.map((report) => toRiderProblemReportListItem(report));
 
     return {
       rows,
@@ -851,6 +886,23 @@ export class UserService {
       size: sizeNumber,
       page: pageNumber,
     };
+  }
+
+  async getRiderManagementProblemReportById(id: UUID): Promise<RiderProblemReportListItem> {
+    const report = await this.userProblemReportRepository.findOne({
+      where: { id },
+      relations: {
+        user: {
+          userRoles: { role: true },
+        },
+      },
+    });
+
+    if (!report || !isRiderUser(report.user)) {
+      throw new NotFoundError('Problem report not found');
+    }
+
+    return toRiderProblemReportListItem(report);
   }
 
   async createStatusProof(payload: {

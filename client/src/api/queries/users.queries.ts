@@ -120,6 +120,48 @@ export const usersQueriesApiSlice = createApi({
         },
       }),
     }),
+    fetchRiderManagementPerformanceByRiderId: builder.query({
+      query: ({
+        riderId,
+        timeframe,
+        startDate,
+        endDate,
+        search,
+        status,
+        sortBy,
+        sortOrder,
+      }: {
+        riderId: string;
+        timeframe?: string;
+        startDate?: string;
+        endDate?: string;
+        search?: string;
+        status?: string;
+        sortBy?: string;
+        sortOrder?: string;
+      }) => ({
+        url: `/users/rider-management/performance/${riderId}`,
+        params: {
+          timeframe,
+          startDate,
+          endDate,
+          search,
+          status,
+          sortBy,
+          sortOrder,
+        },
+      }),
+    }),
+    fetchRiderManagementAttendanceById: builder.query({
+      query: (id: string) => ({
+        url: `/users/rider-management/attendance/${id}`,
+      }),
+    }),
+    fetchRiderManagementProblemReportById: builder.query({
+      query: (id: string) => ({
+        url: `/users/rider-management/problem-reports/${id}`,
+      }),
+    }),
     fetchRiderManagementProblemReports: builder.query({
       query: ({
         page,
@@ -175,7 +217,10 @@ export const {
   useLazyFetchUserByIdQuery,
   useLazyFetchUsersTrackingQuery,
   useLazyFetchRiderManagementPerformanceQuery,
+  useLazyFetchRiderManagementPerformanceByRiderIdQuery,
   useLazyFetchRiderManagementAttendanceQuery,
+  useLazyFetchRiderManagementAttendanceByIdQuery,
   useLazyFetchRiderManagementProblemReportsQuery,
+  useLazyFetchRiderManagementProblemReportByIdQuery,
   useLazyFetchUserCurrentLocationHistoryQuery,
 } = usersQueriesApiSlice;

@@ -63,6 +63,31 @@ export const UserController = {
     }
   },
 
+  // GET ONE RIDER MANAGEMENT PERFORMANCE RECORD
+  async getRiderManagementPerformanceByRiderId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { riderId } = req.params;
+
+      if (!UUID_REGEX.test(riderId)) {
+        return res.status(400).json({
+          message: 'Invalid rider id provided',
+        });
+      }
+
+      const riderPerformance = await userService.getRiderManagementPerformanceByRiderId(
+        riderId as UUID,
+        req.query,
+      );
+
+      return res.status(200).json({
+        message: 'Rider management performance fetched successfully',
+        data: riderPerformance,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // GET RIDER MANAGEMENT ATTENDANCE
   async getRiderManagementAttendance(req: Request, res: Response, next: NextFunction) {
     try {
@@ -71,6 +96,28 @@ export const UserController = {
       return res.status(200).json({
         message: 'Rider attendance fetched successfully',
         data: riderAttendance,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET ONE RIDER MANAGEMENT ATTENDANCE RECORD
+  async getRiderManagementAttendanceById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      if (!UUID_REGEX.test(id)) {
+        return res.status(400).json({
+          message: 'Invalid attendance id provided',
+        });
+      }
+
+      const attendance = await userService.getRiderManagementAttendanceById(id as UUID);
+
+      return res.status(200).json({
+        message: 'Rider attendance fetched successfully',
+        data: attendance,
       });
     } catch (error) {
       next(error);
@@ -109,6 +156,28 @@ export const UserController = {
       return res.status(200).json({
         message: 'Rider problem reports fetched successfully',
         data: problemReports,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // GET ONE RIDER PROBLEM REPORT
+  async getRiderManagementProblemReportById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      if (!UUID_REGEX.test(id)) {
+        return res.status(400).json({
+          message: 'Invalid problem report id provided',
+        });
+      }
+
+      const problemReport = await userService.getRiderManagementProblemReportById(id as UUID);
+
+      return res.status(200).json({
+        message: 'Rider problem report fetched successfully',
+        data: problemReport,
       });
     } catch (error) {
       next(error);
