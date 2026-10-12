@@ -1,276 +1,139 @@
-# Peekaboo Rider Mobile App
+# Peekaboo Rider (Flutter)
 
-A minimalistic React Native mobile application for delivery riders to manage orders and assignments with real-time updates and efficient order acceptance workflows.
+Flutter rebuild of the rider app at full parity with the Expo app, restyled
+to match the implemented client UI (`client/src/index.css` + components).
+Decision record:
+[docs/mobile-flutter-rebuild.md](../docs/mobile-flutter-rebuild.md); layout
+map: [docs/mobile-layout.md](../docs/mobile-layout.md).
 
-## 🚀 Features
+## Prerequisites
 
-- **Authentication**: Secure login with phone number and password
-- **Dashboard**: Overview of today's deliveries, pending assignments, earnings, and recent activity
-- **Assignments Management**: View, accept, reject, and track delivery assignments
-- **Assignment Details**: View full order details, customer info, locations, and payment breakdown
-- **Real-time Updates**: Pull-to-refresh for latest data
-- **Push Notifications**: Get notified about new assignments (setup required)
+- Flutter stable `3.47.6` (`flutter --version`)
+- Nothing else for the API: builds talk to the hosted server
+  (`https://server.peekaboo.co.rw/api/v1`) unless `API_BASE_URL` overrides it
+- For device builds: Android SDK and/or Xcode with CocoaPods
 
-## 📱 Screenshots
-
-The app features a clean, minimalistic design with:
-- Dashboard with stat cards and recent activity
-- Assignment list with filters (All, Pending, Active, Completed)
-- Detailed assignment view with action buttons
-- Easy-to-use login screen
-
-## 🛠️ Tech Stack
-
-- **Framework**: React Native with Expo
-- **Navigation**: Expo Router (file-based routing)
-- **State Management**: Zustand
-- **HTTP Client**: Axios
-- **Secure Storage**: expo-secure-store
-- **UI Components**: Custom minimalistic components
-- **Icons**: @expo/vector-icons (Ionicons)
-- **Date Handling**: date-fns
-
-## 📋 Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-- Expo CLI (`npm install -g expo-cli`)
-- iOS Simulator (Mac only) or Android Emulator
-- Expo Go app on your physical device (for testing)
-
-## 🚀 Getting Started
-
-### 1. Install Dependencies
+## Run
 
 ```bash
-cd mobile
-npm install
+cd mobile_flutter
+flutter pub get
+
+# Hosted API (default)
+flutter run --dart-define ONESIGNAL_APP_ID=...
+
+# Local server instead: Android emulator reaches your machine at 10.0.2.2;
+# a physical device needs your machine's LAN IP, e.g.
+flutter run --dart-define API_BASE_URL=http://192.168.1.20:8080/api/v1 \
+  --dart-define ONESIGNAL_APP_ID=...
 ```
 
-### 2. Configure Environment (LAN-first for team testing)
+All configuration is `--dart-define` (no `.env` files):
 
-Create a `.env` file from the example:
+| Define | Default | Notes |
+| --- | --- | --- |
+| `API_BASE_URL` | `https://server.peekaboo.co.rw/api/v1` | Override to use a local server (`http://10.0.2.2:8080/api/v1` on the Android emulator). |
+| `ONESIGNAL_APP_ID` | empty (push disabled) | Must match server `ONESIGNAL_APP_ID` |
+| `LOCATION_UPDATE_INTERVAL_MINUTES` | `5` | Foreground location reporting |
+
+## Checks
 
 ```bash
-cp .env.example .env
+flutter analyze
+flutter test
 ```
 
-Update the environment variables:
-
-```env
-EXPO_PUBLIC_API_BASE_URL=https://your-backend-url/api/v1
-EXPO_PUBLIC_PROJECT_ID=your-expo-project-id
-EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES=5
-```
-
-LAN setup (required for colleagues on phones or separate laptops):
-
-1. Find your machine LAN IP (host running backend), e.g. `192.168.1.20`.
-   - macOS (Wi-Fi): `ipconfig getifaddr en0`
-   - macOS (alternate): `ipconfig getifaddr en1`
-2. Set `EXPO_PUBLIC_API_BASE_URL` using that IP, for example:
-   - `EXPO_PUBLIC_API_BASE_URL=http://192.168.1.20:8080/api/v1`
-3. Start backend so it is reachable on LAN (bind to `0.0.0.0`, not only `127.0.0.1`).
-4. Ensure everyone is on the same Wi-Fi / local network.
-5. Open firewall access for the backend port (example `8080`) if needed.
-
-Important:
-
-- Do not use `localhost` or `127.0.0.1` in `EXPO_PUBLIC_API_BASE_URL` for teammates using physical devices.
-- `localhost` points to each person/device itself, not your computer.
-- If API calls fail for teammates, first verify they can open `http://<LAN_IP>:<PORT>/api/v1` from their browser.
-
-For EAS builds, make sure `EXPO_PUBLIC_*` values are provided via `eas.json` `env` or EAS secrets. Local `.env` files are not used in cloud builds.
-
-`EXPO_PUBLIC_LOCATION_UPDATE_INTERVAL_MINUTES` controls how often rider location is sent to the backend (defaults to 5 minutes). Set it to `1` for faster testing.
-
-### 3. Start Development Server (LAN)
+Theme compliance (also enforced in CI — each must print nothing):
 
 ```bash
-npx expo start
+grep -rn "FontWeight\.w[6-9]" lib test
+grep -rn "LinearGradient\|RadialGradient\|SweepGradient" lib test
+grep -rn "letterSpacing" lib
+grep -rn "Color(0x" lib --include="*.dart" | grep -v "theme/tokens.dart"
 ```
 
-Expo should run in LAN mode for teammates. If needed, force LAN:
+Debug-only theme gallery (visual review): run a debug build and open
+`/gallery` (e.g. via deep link). It is not linked from any UI and 404s in
+release builds.
+
+## Internal builds
+
+Every `main` merge ships installable builds from CI
+(`.github/workflows/mobile-flutter.yaml`): a signed release APK (workflow
+artifact) and a TestFlight upload. Local equivalents:
 
 ```bash
-npx expo start --lan
+# Needs android/key.properties (see release-android job for the format)
+flutter build apk --release --dart-define API_BASE_URL=...
+
+# Needs Apple signing (see ios/fastlane/Fastfile)
+flutter build ipa --release --dart-define API_BASE_URL=...
 ```
 
-This will start the Expo development server. You can then:
-- Press `i` to open in iOS Simulator
-- Press `a` to open in Android Emulator
-- Scan the QR code with Expo Go app on your phone
+## Store releases
 
-## 📁 Project Structure
+Push a `rider-v*` tag (e.g. `rider-v1.2.3`); CI uploads the AAB to the Play
+internal track and the IPA to TestFlight. Build names come from the tag,
+build numbers from `github.run_number`. Promote to production in the store
+consoles. Required repository secrets:
 
-```
-mobile/
-├── app/                      # Expo Router screens
-│   ├── (auth)/              # Authentication screens
-│   │   ├── _layout.tsx
-│   │   └── login.tsx
-│   ├── (tabs)/              # Tab navigation screens
-│   │   ├── _layout.tsx
-│   │   ├── dashboard.tsx
-│   │   └── assignments.tsx
-│   ├── assignment/          # Assignment detail screens
-│   │   └── [id].tsx
-│   └── _layout.tsx          # Root layout
-├── components/
-│   ├── ui/                  # Reusable UI components
-│   │   ├── Button.tsx
-│   │   ├── Card.tsx
-│   │   ├── Input.tsx
-│   │   └── Badge.tsx
-│   ├── dashboard/           # Dashboard components
-│   │   ├── StatCard.tsx
-│   │   └── RecentActivity.tsx
-│   └── assignments/         # Assignment components
-│       ├── AssignmentCard.tsx
-│       ├── AssignmentDetails.tsx
-│       ├── AssignmentActions.tsx
-│       └── AssignmentFilters.tsx
-├── services/
-│   ├── api/                 # API services
-│   │   ├── client.ts
-│   │   ├── auth.ts
-│   │   ├── assignments.ts
-│   │   ├── orders.ts
-│   │   └── dashboard.ts
-│   ├── storage/             # Secure storage
-│   │   └── secureStorage.ts
-│   └── notifications/       # Push notifications
-│       └── pushNotifications.ts
-├── store/                   # Zustand stores
-│   ├── authStore.ts
-│   ├── assignmentStore.ts
-│   └── dashboardStore.ts
-├── hooks/                   # Custom React hooks
-│   ├── useAuth.ts
-│   ├── useAssignments.ts
-│   └── useDashboard.ts
-├── types/                   # TypeScript types
-│   ├── auth.ts
-│   ├── assignment.ts
-│   ├── order.ts
-│   └── dashboard.ts
-├── utils/                   # Utility functions
-│   ├── constants.ts
-│   ├── formatters.ts
-│   ├── validators.ts
-│   └── errorHandler.ts
-└── assets/                  # Images and fonts
-```
+| Secret | Purpose |
+| --- | --- |
+| `RIDER_API_BASE_URL` | Prod API URL (defaults to `https://server.peekaboo.co.rw/api/v1`) |
+| `ONESIGNAL_APP_ID` | Push app ID (must match the server value) |
+| `ANDROID_KEYSTORE_BASE64` | Release keystore (base64) |
+| `ANDROID_STORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` | Keystore credentials |
+| `PLAY_JSON_KEY` | Play service-account JSON (for `supply`) |
+| `APPLE_TEAM_ID` | Apple Developer Team ID |
+| `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_KEY_P8_BASE64` | App Store Connect API key |
+| `IOS_CERT_P12_BASE64` / `IOS_CERT_PASSWORD` | Distribution certificate |
+| `IOS_PROFILE_BASE64` / `IOS_PROFILE_NAME` | App Store provisioning profile |
 
-## 🔌 API Integration
+Optional variable: `LOCATION_UPDATE_INTERVAL_MINUTES` (default `5`).
 
-The app expects the following backend endpoints:
+## Branding
 
-### Authentication
-- `POST /api/auth/login` - Login with credentials
-- `POST /api/auth/logout` - Logout
-- `GET /api/auth/me` - Get current user profile
+Launcher icons and the monochrome native splash (white in light mode,
+black in dark) generate from art staged in `assets/branding/` (copied from
+the Expo app's `mobile/assets/images/`; the dark splash logo is an inverted
+copy for visibility on black). Regenerate after changing the art:
 
-### Assignments
-- `GET /api/order-assignments` - Get rider's assignments
-- `GET /api/order-assignments/:id` - Get assignment details
-- `PATCH /api/order-assignments/:id/accept` - Accept assignment
-- `PATCH /api/order-assignments/:id/reject` - Reject assignment
-
-### Dashboard
-- `GET /api/dashboard` - Get dashboard statistics
-
-## 🎨 Design System
-
-### Colors
-- **Primary**: #2563EB (Blue)
-- **Success**: #10B981 (Green)
-- **Warning**: #F59E0B (Orange)
-- **Danger**: #EF4444 (Red)
-- **Background**: #FFFFFF
-- **Surface**: #F9FAFB
-- **Text Primary**: #111827
-- **Text Secondary**: #6B7280
-
-### Spacing
-- xs: 4px
-- sm: 8px
-- md: 16px
-- lg: 24px
-- xl: 32px
-
-## 🏗️ Building for Production
-
-### Using EAS Build (Recommended)
-
-1. Install EAS CLI:
 ```bash
-npm install -g eas-cli
+dart run flutter_launcher_icons
+dart run flutter_native_splash:create
 ```
 
-2. Login to Expo:
-```bash
-eas login
+## Project layout
+
+```
+lib/
+  main.dart
+  src/
+    app/        # PeekabooApp bootstrap, go_router routes
+    config/     # --dart-define config, storage keys
+    theme/      # client-UI tokens + ThemeData (single source of truth)
+    models/     # User, Order, Assignment, Dashboard
+    api/        # dio client + typed endpoint modules
+    storage/    # secure storage
+    state/      # Riverpod notifiers (auth, assignments, dashboard)
+    i18n/       # en/rw string tables (default rw, parity-tested)
+    services/   # OneSignal push, location tracking, media
+    utils/      # formatters, validators, error classification
+    widgets/    # design-system primitives + feature widgets
+    screens/    # login, support, tabs, dashboard, assignments, detail, profile
+test/           # i18n parity, formatters, errors, mapping, state, widgets
+assets/
+  images/       # bundled images (app logo)
+  branding/     # icon/splash generator sources (not bundled)
 ```
 
-3. Configure EAS:
-```bash
-eas build:configure
-```
+## Notes
 
-4. Build for platforms:
-```bash
-# iOS
-eas build --platform ios
-
-# Android
-eas build --platform android
-```
-
-### Local Build
-
-For development builds:
-```bash
-# iOS (requires macOS)
-npx expo run:ios
-
-# Android
-npx expo run:android
-```
-
-## 📱 Testing
-
-Run on physical devices for the best experience:
-
-1. Install Expo Go from App Store or Play Store
-2. Run `npx expo start`
-3. Scan QR code with your camera (iOS) or Expo Go (Android)
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-1. **Metro bundler issues**: Clear cache with `npx expo start -c`
-2. **iOS Simulator not launching**: Run `npx expo run:ios`
-3. **Android emulator issues**: Make sure ANDROID_HOME is set
-4. **API connection issues**:
-   - Confirm `EXPO_PUBLIC_API_BASE_URL` uses LAN IP (not `localhost`)
-   - Confirm backend listens on `0.0.0.0`
-   - Confirm teammates can reach `http://<LAN_IP>:<PORT>/api/v1` from their devices
-   - Ensure EAS build env/secrets are configured for non-local builds
-5. **Push subscriptions not saving**: Push registration only works on a physical device, requires notification permission, and needs a valid Expo project ID. Login should still succeed even if push registration is skipped or the backend sync fails.
-
-### Logs
-
-View logs in the terminal where Expo is running, or use:
-```bash
-npx expo start --dev-client
-```
-
-## 📄 License
-
-This project is proprietary software. All rights reserved.
-
-## 👥 Contributors
-
-- Development Team - Peekaboo
+- Bundle ID `com.peekaboo.rider` and secure-storage keys are preserved from
+  the Expo app so reinstalls keep working.
+- `/api/v1` is consumed unchanged; the server is out of scope for this app.
+- Directions always open Google Maps — never Apple Maps.
+- Known minor parity gaps vs the Expo app (documented, not silent): avatar
+  images upload uncropped (no crop UI); no Notification Service Extension yet
+  (push works; rich attachments/badges are a follow-up verified on a Mac with
+  Xcode).
