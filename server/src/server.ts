@@ -6,7 +6,13 @@ import { startBillingCronJobs } from "./cron/billingCron";
 import { startBusinessReportCronJobs } from "./cron/businessReportCron";
 import { startWhatsappSessionCronJob } from "./cron/whatsappSessionCron";
 
-const numCPUs = os.cpus().length;
+// os.cpus() reports the host machine's cores, not the container's quota, so
+// on platforms like Render it can fork dozens of workers and blow the memory
+// limit. Default to one worker; raise WEB_CONCURRENCY when the plan allows.
+const numCPUs = Math.max(
+  1,
+  Math.min(Number(process.env.WEB_CONCURRENCY) || 1, os.cpus().length)
+);
 
 if (cluster.isPrimary) {
   logger.info(`Master ${process.pid} is running`);
