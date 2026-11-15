@@ -117,8 +117,8 @@ Small shared utilities (e.g. `utils.ts` — `cn()` class-merge helper).
 
 ```env
 VITE_API_BASE_URL=http://localhost:8080/api/v1
-VITE_GOOGLE_MAPS_API_KEY=...
-VITE_GOOGLE_MAPS_MAP_ID=...
+VITE_MAP_STYLE_URL=...                  # optional; defaults to OpenFreeMap Positron
+VITE_MAPBOX_ACCESS_TOKEN=...            # place search, reverse lookups, road routing
 VITE_INACTIVITY_TIMEOUT=5            # minutes before session-expired modal
 VITE_NODE_ENVIRONMENT=development    # optional override; drives dev pricing UI disclaimer
 ```

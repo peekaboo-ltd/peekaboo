@@ -2,19 +2,11 @@ import { useMemo } from 'react';
 import type { Control } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 import { skipToken } from '@reduxjs/toolkit/query';
-import {
-  AdvancedMarker,
-  APIProvider,
-  APILoadingStatus,
-  Map,
-  Pin,
-  useApiLoadingStatus,
-} from '@vis.gl/react-google-maps';
 import { Bike, LocateFixed } from 'lucide-react';
 import { useGetSuggestedRiderQuery } from '@/api/queries/landing.queries';
 import { FieldMessage } from '@/components/inputs/Field';
 import { Button } from '@/components/ui/button';
-import { ENVIRONMENTS } from '@/constants/environments.constants';
+import { BaseMap, MapMarker, MapPin, type LatLng } from '@/components/maps/mapGl';
 import type { GeolocationPickupState } from '@/hooks/locations/useGeolocationPickup';
 import useApproximateLocation, {
   type ApproximateMapLocation,
@@ -25,7 +17,6 @@ import type { OrderLocation } from '@/types/order.type';
 import { hasCoordinates } from '@/utils/locations.util';
 import type { HomeFormValues } from '../home.types';
 import HeroMapViewport from './HeroMapViewport';
-import HeroRouteCard from './HeroRouteCard';
 import { useI18n } from '@/i18n/i18n';
 
 interface HeroLiveMapProps {
@@ -49,7 +40,7 @@ const getApproximateZoom = (accuracyKm: number | null): number => {
 
 const toPosition = (
   location?: OrderLocation | null,
-): google.maps.LatLngLiteral | null =>
+): LatLng | null =>
   hasCoordinates(location)
     ? {
         lat: Number(location?.latitude),
@@ -85,7 +76,6 @@ const HeroLiveMapContent = ({
   approximateLocation,
 }: HeroLiveMapContentProps) => {
   const { t } = useI18n();
-  const apiStatus = useApiLoadingStatus();
   const locationFrom = useWatch({ control, name: 'locationFrom' });
   const locationTo = useWatch({ control, name: 'locationTo' });
   const {
@@ -119,27 +109,11 @@ const HeroLiveMapContent = ({
     refetchOnMountOrArgChange: 60,
   });
 
-  if (!ENVIRONMENTS.GOOGLE_MAPS_API_KEY) return <HeroRouteCard />;
-  if (
-    apiStatus === APILoadingStatus.FAILED ||
-    apiStatus === APILoadingStatus.AUTH_FAILURE
-  ) {
-    return <HeroRouteCard />;
-  }
-  if (apiStatus !== APILoadingStatus.LOADED) {
-    return (
-      <div
-        className="aspect-[4/3] w-full animate-pulse rounded-md bg-(--surface)"
-        aria-label={t('home.map.loading')}
-      />
-    );
-  }
-
   const riderPosition = rider
     ? { lat: rider.latitude, lng: rider.longitude }
     : null;
   const positions = [origin, dropOff, riderPosition].filter(
-    (position): position is google.maps.LatLngLiteral => position !== null,
+    (position): position is LatLng => position !== null,
   );
   const originLabel =
     pickupSource === 'geolocation' ? t('home.form.yourLocation') : t('home.map.pickup');
@@ -147,16 +121,7 @@ const HeroLiveMapContent = ({
   return (
     <div>
       <figure className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-md bg-(--surface)">
-        <Map
-          defaultCenter={KIGALI_CENTER}
-          defaultZoom={12}
-          mapId={ENVIRONMENTS.GOOGLE_MAPS_MAP_ID}
-          gestureHandling="cooperative"
-          disableDefaultUI
-          zoomControl
-          clickableIcons={false}
-          reuseMaps
-        >
+        <BaseMap initialCenter={KIGALI_CENTER} initialZoom={12} cooperativeGestures reuseMaps>
           <HeroMapViewport
             positions={positions}
             emptyCenter={approximateLocation?.position ?? KIGALI_CENTER}
@@ -168,31 +133,32 @@ const HeroLiveMapContent = ({
           />
 
           {origin ? (
-            <AdvancedMarker position={origin} title={originLabel}>
-              <Pin
-                background="var(--paper)"
-                borderColor="var(--ink)"
-                glyphColor="var(--ink)"
-              />
-            </AdvancedMarker>
+            <MapPin
+              position={origin}
+              title={originLabel}
+              background="var(--paper)"
+              borderColor="var(--ink)"
+              glyphColor="var(--ink)"
+            />
           ) : null}
 
           {dropOff ? (
-            <AdvancedMarker position={dropOff} title={t('home.map.dropoff')}>
-              <Pin
-                background="var(--ink)"
-                borderColor="var(--ink)"
-                glyphColor="var(--paper)"
-              />
-            </AdvancedMarker>
+            <MapPin
+              position={dropOff}
+              title={t('home.map.dropoff')}
+              background="var(--ink)"
+              borderColor="var(--ink)"
+              glyphColor="var(--paper)"
+            />
           ) : null}
 
           {rider && riderPosition ? (
-            <AdvancedMarker
-              position={riderPosition}
-              title={t('home.map.riderPosition', { status: t(rider.isLive ? 'home.map.live' : 'home.map.latest'), minutes: rider.etaMinutes })}
-            >
-              <span className="relative flex size-9 items-center justify-center rounded-full bg-(--ink) text-(--paper)">
+            <MapMarker position={riderPosition}>
+              <span
+                role="img"
+                aria-label={t('home.map.riderPosition', { status: t(rider.isLive ? 'home.map.live' : 'home.map.latest'), minutes: rider.etaMinutes })}
+                className="relative flex size-9 items-center justify-center rounded-full bg-(--ink) text-(--paper)"
+              >
                 {rider.isLive ? (
                   <span
                     className="absolute inset-0 animate-ping rounded-full border border-(--ink)"
@@ -201,9 +167,9 @@ const HeroLiveMapContent = ({
                 ) : null}
                 <Bike className="relative size-4" aria-hidden="true" />
               </span>
-            </AdvancedMarker>
+            </MapMarker>
           ) : null}
-        </Map>
+        </BaseMap>
 
         {positions.length ? (
           <figcaption className="absolute left-3 top-3 z-10 rounded-(--radius-control) bg-(--paper) px-3 py-2">
@@ -250,22 +216,11 @@ const HeroLiveMapContent = ({
 
 const HeroLiveMap = (props: HeroLiveMapProps) => {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
-  const approximateLocation = useApproximateLocation(
-    isDesktop && Boolean(ENVIRONMENTS.GOOGLE_MAPS_API_KEY),
-  );
+  const approximateLocation = useApproximateLocation(isDesktop);
   if (!isDesktop) return null;
-  if (!ENVIRONMENTS.GOOGLE_MAPS_API_KEY) return <HeroRouteCard />;
 
   return (
-    <APIProvider
-      apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY}
-      onError={() => undefined}
-    >
-      <HeroLiveMapContent
-        {...props}
-        approximateLocation={approximateLocation}
-      />
-    </APIProvider>
+    <HeroLiveMapContent {...props} approximateLocation={approximateLocation} />
   );
 };
 

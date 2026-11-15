@@ -1,17 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  APIProvider,
-  AdvancedMarker,
-  Map as GoogleMap,
-  Pin,
-  useMap,
-} from "@vis.gl/react-google-maps";
 import { toast } from "sonner";
 import Table from "@/components/table/Table";
-import { ENVIRONMENTS } from "@/constants/environments.constants";
+import { BaseMap, MapLine, MapPin } from "@/components/maps/mapGl";
 import { useFetchUserCurrentLocationHistory } from "@/hooks/users/users.hooks";
 import { useDocumentTitle } from "@/hooks/common/useDocumentTitle";
 import { useLazyFetchOrderAssignmentsQuery } from "@/api/queries/orderAssignment.queries";
@@ -83,40 +76,6 @@ const getDefaultRange = () => {
 };
 
 const DEFAULT_RANGE = getDefaultRange();
-
-// Draws a polyline connecting all path points and keeps it in sync with map
-const TrajectoryPolyline = ({
-  path,
-}: {
-  path: google.maps.LatLngLiteral[];
-}) => {
-  const map = useMap();
-  const polylineRef = useRef<google.maps.Polyline | null>(null);
-
-  useEffect(() => {
-    if (!map || path.length < 2) return;
-
-    const ink = getComputedStyle(document.documentElement)
-      .getPropertyValue("--ink")
-      .trim();
-
-    polylineRef.current = new google.maps.Polyline({
-      path,
-      map,
-      strokeColor: ink,
-      strokeWeight: 3,
-      strokeOpacity: 0.8,
-      geodesic: true,
-    });
-
-    return () => {
-      polylineRef.current?.setMap(null);
-      polylineRef.current = null;
-    };
-  }, [map, path]);
-
-  return null;
-};
 
 const UserLocationHistoryPage = () => {
   const { t, language } = useI18n();
@@ -510,35 +469,29 @@ const UserLocationHistoryPage = () => {
       </section>
 
       <section className="border rounded-md overflow-hidden h-[420px]">
-        <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY || ""}>
-          <GoogleMap
-            defaultCenter={mapCenter}
-            defaultZoom={12}
-            mapId="user-location-history-map"
-          >
-            <TrajectoryPolyline path={path} />
+        <BaseMap initialCenter={mapCenter} initialZoom={12}>
+          <MapLine path={path} color="var(--ink)" width={3} />
 
-            {first && (
-              <AdvancedMarker position={first.coordinates} title={t('locationHistory.start')}>
-                <Pin
-                  background="var(--ink)"
-                  borderColor="var(--ink)"
-                  glyphColor="var(--paper)"
-                />
-              </AdvancedMarker>
-            )}
+          {first && (
+            <MapPin
+              position={first.coordinates}
+              title={t('locationHistory.start')}
+              background="var(--ink)"
+              borderColor="var(--ink)"
+              glyphColor="var(--paper)"
+            />
+          )}
 
-            {last && last.entry.id !== first?.entry.id && (
-              <AdvancedMarker position={last.coordinates} title={t('locationHistory.latest')}>
-                <Pin
-                  background="var(--chart-3)"
-                  borderColor="var(--ink)"
-                  glyphColor="var(--paper)"
-                />
-              </AdvancedMarker>
-            )}
-          </GoogleMap>
-        </APIProvider>
+          {last && last.entry.id !== first?.entry.id && (
+            <MapPin
+              position={last.coordinates}
+              title={t('locationHistory.latest')}
+              background="var(--chart-3)"
+              borderColor="var(--ink)"
+              glyphColor="var(--paper)"
+            />
+          )}
+        </BaseMap>
       </section>
 
       <Table

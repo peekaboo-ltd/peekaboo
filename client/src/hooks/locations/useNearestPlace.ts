@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { OrderLocation } from '@/types/order.type';
 import { calculateHaversineDistance, hasCoordinates } from '@/utils/locations.util';
-import { loadGoogleMapsLibrary } from '@/utils/googleMapsApi.util';
+import { reverseLookup } from '@/utils/mapboxSearch.util';
+import { useI18n, type Language } from '@/i18n/i18n';
 
 export interface NearestPlace {
   /** Name of the closest point of interest, e.g. "Kacyiru Police Station". */
@@ -18,78 +19,65 @@ const EMPTY_PLACE: NearestPlace = { placeName: null, address: null };
  */
 const MAX_POI_DISTANCE_METRES = 200;
 
-// Both the Places and Geocoding APIs bill per call, so results are memoised for
-// the lifetime of the tab. Coordinates are rounded to ~1m to keep the key stable
-// across re-renders.
+// Mapbox bills each reverse lookup, so results are memoised for the lifetime of
+// the tab. Coordinates are rounded to ~1m to keep the key stable across
+// re-renders.
 const cache = new Map<string, Promise<NearestPlace>>();
 
-const cacheKey = (latitude: number, longitude: number) =>
-  `${latitude.toFixed(5)},${longitude.toFixed(5)}`;
+const cacheKey = (latitude: number, longitude: number, language: Language) =>
+  `${latitude.toFixed(5)},${longitude.toFixed(5)},${language}`;
 
-const findNearestPoi = (
-  placesLibrary: google.maps.PlacesLibrary,
-  position: google.maps.LatLngLiteral
-): Promise<string | null> =>
-  new Promise((resolve) => {
-    const service = new placesLibrary.PlacesService(document.createElement('div'));
-    service.nearbySearch(
-      {
-        location: position,
-        rankBy: placesLibrary.RankBy.DISTANCE,
-        type: 'point_of_interest',
-      },
-      (results, status) => {
-        if (
-          status !== google.maps.places.PlacesServiceStatus.OK ||
-          !results?.length
-        ) {
-          resolve(null);
-          return;
-        }
+interface Position {
+  lat: number;
+  lng: number;
+}
 
-        const [nearest] = results;
-        const nearestPosition = nearest.geometry?.location;
-        if (!nearest.name || !nearestPosition) {
-          resolve(null);
-          return;
-        }
-
-        // Measured locally rather than via google.maps.geometry, which would
-        // mean loading another library just for one distance check.
-        const distanceMetres =
-          calculateHaversineDistance(
-            { latitude: position.lat, longitude: position.lng },
-            { latitude: nearestPosition.lat(), longitude: nearestPosition.lng() }
-          ) * 1000;
-
-        resolve(distanceMetres <= MAX_POI_DISTANCE_METRES ? nearest.name : null);
-      }
-    );
+const findNearestPoi = async (
+  position: Position,
+  language: Language
+): Promise<string | null> => {
+  const [nearest] = await reverseLookup({
+    latitude: position.lat,
+    longitude: position.lng,
+    types: 'poi',
+    language,
   });
+  if (!nearest?.name) return null;
 
-const findAddress = (
-  geocodingLibrary: google.maps.GeocodingLibrary,
-  position: google.maps.LatLngLiteral
-): Promise<string | null> =>
-  new Promise((resolve) => {
-    const geocoder = new geocodingLibrary.Geocoder();
-    geocoder.geocode({ location: position }, (results, status) => {
-      if (status !== 'OK' || !results?.length) {
-        resolve(null);
-        return;
-      }
-      resolve(results[0]?.formatted_address ?? null);
-    });
+  const distanceMetres =
+    calculateHaversineDistance(
+      { latitude: position.lat, longitude: position.lng },
+      { latitude: nearest.latitude, longitude: nearest.longitude }
+    ) * 1000;
+
+  return distanceMetres <= MAX_POI_DISTANCE_METRES ? nearest.name : null;
+};
+
+const findAddress = async (
+  position: Position,
+  language: Language
+): Promise<string | null> => {
+  const [nearest] = await reverseLookup({
+    latitude: position.lat,
+    longitude: position.lng,
+    types: 'address,street,neighborhood,locality,place',
+    language,
   });
+  if (!nearest) return null;
+  return (
+    nearest.fullAddress ||
+    [nearest.name, nearest.placeFormatted].filter(Boolean).join(', ') ||
+    null
+  );
+};
 
 const lookupNearestPlace = async (
-  placesLibrary: google.maps.PlacesLibrary,
-  geocodingLibrary: google.maps.GeocodingLibrary,
-  position: google.maps.LatLngLiteral
+  position: Position,
+  language: Language
 ): Promise<NearestPlace> => {
   const [placeName, address] = await Promise.all([
-    findNearestPoi(placesLibrary, position).catch(() => null),
-    findAddress(geocodingLibrary, position).catch(() => null),
+    findNearestPoi(position, language).catch(() => null),
+    findAddress(position, language).catch(() => null),
   ]);
   return { placeName, address };
 };
@@ -100,11 +88,12 @@ const lookupNearestPlace = async (
  * Locations picked through the place search already carry their name and
  * address, so those are returned as-is with no network call. Only locations
  * saved as raw coordinates — a dropped pin, a WhatsApp order, "use my current
- * location" — are looked up against Google.
+ * location" — are looked up against Mapbox.
  */
 export const useNearestPlace = (
   location?: OrderLocation | null
 ): NearestPlace & { isLoading: boolean } => {
+  const { language } = useI18n();
   const persistedName = location?.name?.trim() || null;
   const persistedAddress = location?.formattedAddress?.trim() || null;
   const isPersisted = Boolean(persistedName || persistedAddress);
@@ -123,16 +112,11 @@ export const useNearestPlace = (
     }
 
     const position = { lat: Number(latitude), lng: Number(longitude) };
-    const key = cacheKey(position.lat, position.lng);
+    const key = cacheKey(position.lat, position.lng, language);
 
     let cached = cache.get(key);
     if (!cached) {
-      cached = Promise.all([
-        loadGoogleMapsLibrary('places'),
-        loadGoogleMapsLibrary('geocoding'),
-      ]).then(([placesLibrary, geocodingLibrary]) =>
-        lookupNearestPlace(placesLibrary, geocodingLibrary, position),
-      );
+      cached = lookupNearestPlace(position, language);
       cache.set(key, cached);
     }
 
@@ -155,7 +139,7 @@ export const useNearestPlace = (
     return () => {
       active = false;
     };
-  }, [isPersisted, latitude, longitude]);
+  }, [isPersisted, language, latitude, longitude]);
 
   if (isPersisted) {
     return {

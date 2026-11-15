@@ -72,7 +72,7 @@ cp .env.example .env
 npm run dev                 # Vite dev server (default http://localhost:5173)
 ```
 
-Client env vars include `VITE_API_BASE_URL`, `VITE_GOOGLE_MAPS_API_KEY`, `VITE_GOOGLE_MAPS_MAP_ID`, `VITE_INACTIVITY_TIMEOUT`, `VITE_NODE_ENVIRONMENT`, and `VITE_PAYMENT_MODE`. See [environment-variables.md](environment-variables.md).
+Client env vars include `VITE_API_BASE_URL`, `VITE_MAPBOX_ACCESS_TOKEN`, `VITE_MAP_STYLE_URL`, `VITE_INACTIVITY_TIMEOUT`, `VITE_NODE_ENVIRONMENT`, and `VITE_PAYMENT_MODE`. See [environment-variables.md](environment-variables.md).
 
 ### 3. Rider app — `mobile/`
 
@@ -107,7 +107,7 @@ For teammates on physical devices, use your **LAN IP** (e.g. `http://192.168.1.2
 | Emails/SMS/push not sent | Respective API keys unset (`RESEND_API_KEY`, `PINDO_TOKEN`, `ONESIGNAL_*`). Emails degrade gracefully. |
 | 10 RWF charges locally | Expected: `NODE_ENV=development` forces dev pricing. Use `NODE_ENV=production` for full fees. |
 | Push subscriptions don't appear in OneSignal | Must run on a physical device; the rider `ONESIGNAL_APP_ID` must match server `ONESIGNAL_APP_ID`. |
-| Client can't load maps | `VITE_GOOGLE_MAPS_API_KEY` unset/invalid. |
+| Client place search shows "Maps failed to load" | `VITE_MAPBOX_ACCESS_TOKEN` unset/invalid, or its URL restriction excludes this origin. |
 
 See each app README for deeper troubleshooting (`server/README.md`, `client/README.md`, `mobile/README.md`).
 

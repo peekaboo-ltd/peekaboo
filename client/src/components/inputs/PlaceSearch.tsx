@@ -7,19 +7,27 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { controlClassName } from './control';
-import { loadGoogleMapsLibrary } from '@/utils/googleMapsApi.util';
+import {
+  createSessionToken,
+  retrievePlace,
+  suggestPlaces,
+  type SearchFeature,
+  type SearchSuggestion,
+} from '@/utils/mapboxSearch.util';
 import { useI18n } from '@/i18n/i18n';
 
 export interface PlaceSearchResult {
-  place: google.maps.places.PlaceResult;
   coordinates: {
     latitude: number;
     longitude: number;
   };
   formattedAddress: string;
   name: string;
+  /** Mapbox feature id (older saved locations hold a Google place id here). */
   placeId?: string;
 }
+
+const SUGGEST_DEBOUNCE_MS = 200;
 
 interface PlaceSearchProps {
   onLocationSelect: (location: PlaceSearchResult) => void;
@@ -48,12 +56,10 @@ const PlaceSearch = ({
   country,
   emptyOption,
 }: PlaceSearchProps) => {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const resolvedPlaceholder = placeholder ?? t('common.searchLocation');
   const [inputValue, setInputValue] = useState(value || '');
-  const [predictions, setPredictions] = useState<
-    google.maps.places.AutocompletePrediction[]
-  >([]);
+  const [predictions, setPredictions] = useState<SearchSuggestion[]>([]);
   const [dropdownPosition, setDropdownPosition] = useState<{
     top: number;
     left: number;
@@ -62,43 +68,55 @@ const PlaceSearch = ({
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
-  const placesRef = useRef<google.maps.PlacesLibrary | null>(null);
+  // One token per search: every suggest call plus the final retrieve bill as a
+  // single Mapbox session.
+  const sessionTokenRef = useRef<string | null>(null);
+  const suggestTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suggestAbortRef = useRef<AbortController | null>(null);
   const predictionRequest = useRef(0);
   const [mapsFailed, setMapsFailed] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const normalizedCountry =
-    typeof country === 'string'
-      ? country.toLowerCase()
-      : country?.map((countryCode) => countryCode.toLowerCase());
+  const normalizedCountry = (typeof country === 'string' ? [country] : country)?.map(
+    (countryCode) => countryCode.toLowerCase(),
+  );
+  const countryKey = normalizedCountry?.join(',');
   const isMapsUnavailable = inputValue.length > 2 && mapsFailed;
   const showEmptyOption = Boolean(
     emptyOption && isFocused && inputValue.trim().length === 0,
   );
 
   const handlePlaceSelect = useCallback(
-    (place: google.maps.places.PlaceResult) => {
-      if (!place.geometry?.location) return;
-
+    (place: SearchFeature) => {
+      const formattedAddress =
+        place.fullAddress ||
+        [place.name, place.placeFormatted].filter(Boolean).join(', ');
       const result: PlaceSearchResult = {
-        place,
         coordinates: {
-          latitude: Number(place.geometry.location.lat().toFixed(8)),
-          longitude: Number(place.geometry.location.lng().toFixed(8)),
+          latitude: Number(place.latitude.toFixed(8)),
+          longitude: Number(place.longitude.toFixed(8)),
         },
-        formattedAddress: place.formatted_address || '',
+        formattedAddress,
         name: place.name || '',
-        placeId: place.place_id,
+        placeId: place.mapboxId,
       };
 
-      setInputValue(place.formatted_address || place.name || '');
+      setInputValue(formattedAddress || place.name || '');
       setPredictions([]);
       onLocationSelect(result);
 
       if (onChange) {
-        onChange(place.formatted_address || place.name || '');
+        onChange(formattedAddress || place.name || '');
       }
     },
     [onLocationSelect, onChange]
+  );
+
+  useEffect(
+    () => () => {
+      if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current);
+      suggestAbortRef.current?.abort();
+    },
+    [],
   );
 
   useEffect(() => {
@@ -156,6 +174,9 @@ const PlaceSearch = ({
     }
 
     const requestId = ++predictionRequest.current;
+    if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current);
+    suggestAbortRef.current?.abort();
+
     if (newValue.length <= 2) {
       setPredictions([]);
       setMapsFailed(false);
@@ -163,42 +184,30 @@ const PlaceSearch = ({
     }
 
     updateDropdownPosition();
-    void (async () => {
-      try {
-        const places =
-          placesRef.current ?? (await loadGoogleMapsLibrary('places'));
-        placesRef.current = places;
-        if (requestId !== predictionRequest.current) return;
+    suggestTimerRef.current = setTimeout(() => {
+      const controller = new AbortController();
+      suggestAbortRef.current = controller;
+      sessionTokenRef.current ??= createSessionToken();
 
-        const service = new places.AutocompleteService();
-        service.getPlacePredictions(
-          {
-            input: newValue,
-            componentRestrictions: normalizedCountry
-              ? { country: normalizedCountry }
-              : undefined,
-          },
-          (nextPredictions, status) => {
-            if (requestId !== predictionRequest.current) return;
-            if (
-              status === google.maps.places.PlacesServiceStatus.OK &&
-              nextPredictions
-            ) {
-              setPredictions(nextPredictions);
-              setMapsFailed(false);
-              updateDropdownPosition();
-            } else {
-              setPredictions([]);
-            }
-          },
-        );
-      } catch {
-        if (requestId === predictionRequest.current) {
+      suggestPlaces({
+        query: newValue,
+        sessionToken: sessionTokenRef.current,
+        country: countryKey ? countryKey.split(',') : undefined,
+        language,
+        signal: controller.signal,
+      })
+        .then((suggestions) => {
+          if (requestId !== predictionRequest.current) return;
+          setPredictions(suggestions);
+          setMapsFailed(false);
+          updateDropdownPosition();
+        })
+        .catch(() => {
+          if (controller.signal.aborted || requestId !== predictionRequest.current) return;
           setPredictions([]);
           setMapsFailed(true);
-        }
-      }
-    })();
+        });
+    }, SUGGEST_DEBOUNCE_MS);
   };
 
   useEffect(() => {
@@ -225,28 +234,23 @@ const PlaceSearch = ({
   }, [predictions.length, updateDropdownPosition]);
 
   const handleSuggestionClick = (
-    prediction: google.maps.places.AutocompletePrediction,
+    suggestion: SearchSuggestion,
     e: React.MouseEvent
   ) => {
     e.preventDefault();
     e.stopPropagation();
-    const places = placesRef.current;
-    if (!places) return;
+    const sessionToken = sessionTokenRef.current ?? createSessionToken();
+    // retrieve closes the billing session; the next search starts a new one.
+    sessionTokenRef.current = null;
 
-    const service = new places.PlacesService(document.createElement('div'));
-    service.getDetails(
-      {
-        placeId: prediction.place_id,
-        fields: ['geometry', 'name', 'formatted_address', 'place_id', 'geometry.location', 'geometry.location_type', 'geometry.viewport'],
-      },
-      (place, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-          handlePlaceSelect(place);
-          setPredictions([]);
-          setDropdownPosition(null);
-        }
-      }
-    );
+    retrievePlace({ mapboxId: suggestion.mapboxId, sessionToken, language })
+      .then((place) => {
+        if (!place) return;
+        handlePlaceSelect(place);
+        setPredictions([]);
+        setDropdownPosition(null);
+      })
+      .catch(() => setMapsFailed(true));
   };
 
   const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -336,16 +340,16 @@ const PlaceSearch = ({
 
       {predictions.map((prediction) => (
         <li
-          key={prediction.place_id}
+          key={prediction.mapboxId}
           className="cursor-pointer px-4 py-2.5 transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface)"
           onMouseDown={(e) => handleSuggestionClick(prediction, e)}
           role="option"
         >
           <strong className="block text-sm font-normal text-(--ink)">
-            {prediction.structured_formatting?.main_text}
+            {prediction.name}
           </strong>
           <address className="mt-0.5 block text-[0.8125rem] not-italic text-(--muted)">
-            {prediction.structured_formatting?.secondary_text}
+            {prediction.placeFormatted || prediction.fullAddress}
           </address>
         </li>
       ))}

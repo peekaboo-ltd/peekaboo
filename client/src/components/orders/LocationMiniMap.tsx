@@ -1,12 +1,8 @@
 import { useMemo } from 'react';
-import { AdvancedMarker, Map, Pin } from '@vis.gl/react-google-maps';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowUpRightFromSquare,
-  faLocationDot,
-} from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import type { OrderLocation } from '@/types/order.type';
-import { ENVIRONMENTS } from '@/constants/environments.constants';
+import { BaseMap, MapPin } from '@/components/maps/mapGl';
 import {
   describeLocation,
   hasCoordinates,
@@ -42,39 +38,22 @@ const LocationMiniMap = ({
   }
 
   const description = describeLocation(location);
-  const canRenderMap = Boolean(ENVIRONMENTS.GOOGLE_MAPS_API_KEY);
 
   return (
     <figure
       className={`overflow-hidden rounded-lg border border-(--line) bg-(--paper) ${className}`}
     >
-      {canRenderMap ? (
-        <div className="h-40 w-full">
-          <Map
-            defaultCenter={center}
-            defaultZoom={16}
-            mapId={ENVIRONMENTS.GOOGLE_MAPS_MAP_ID}
-            gestureHandling="cooperative"
-            disableDefaultUI
-            zoomControl
-            clickableIcons={false}
-          >
-            <AdvancedMarker position={center} title={description || label}>
-              <Pin
-                background="var(--ink)"
-                borderColor="var(--paper)"
-                glyphColor="var(--paper)"
-              />
-            </AdvancedMarker>
-          </Map>
-        </div>
-      ) : (
-        // Maps key missing — keep the link working rather than hiding the location.
-        <div className="flex h-24 w-full items-center justify-center gap-2 bg-(--surface) text-(--muted)">
-          <FontAwesomeIcon icon={faLocationDot} className="text-sm" aria-hidden="true" />
-          <span className="text-xs">{t('common.mapUnavailable')}</span>
-        </div>
-      )}
+      <div className="h-40 w-full">
+        <BaseMap initialCenter={center} initialZoom={16} cooperativeGestures>
+          <MapPin
+            position={center}
+            title={description || label}
+            background="var(--ink)"
+            borderColor="var(--paper)"
+            glyphColor="var(--paper)"
+          />
+        </BaseMap>
+      </div>
 
       <figcaption className="border-t border-(--line) px-3 py-2">
         <a
