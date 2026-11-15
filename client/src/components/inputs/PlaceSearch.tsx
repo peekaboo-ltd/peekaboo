@@ -7,6 +7,8 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { controlClassName } from './control';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import {
   createSessionToken,
   retrievePlace,
@@ -76,6 +78,7 @@ const PlaceSearch = ({
   const predictionRequest = useRef(0);
   const [mapsFailed, setMapsFailed] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const normalizedCountry = (typeof country === 'string' ? [country] : country)?.map(
     (countryCode) => countryCode.toLowerCase(),
   );
@@ -180,9 +183,14 @@ const PlaceSearch = ({
     if (newValue.length <= 2) {
       setPredictions([]);
       setMapsFailed(false);
+      setIsSearching(false);
       return;
     }
 
+    // Show the skeleton straight away, not after the debounce, so typing
+    // always gets immediate feedback.
+    setIsSearching(true);
+    setMapsFailed(false);
     updateDropdownPosition();
     suggestTimerRef.current = setTimeout(() => {
       const controller = new AbortController();
@@ -200,18 +208,22 @@ const PlaceSearch = ({
           if (requestId !== predictionRequest.current) return;
           setPredictions(suggestions);
           setMapsFailed(false);
+          setIsSearching(false);
           updateDropdownPosition();
         })
         .catch(() => {
           if (controller.signal.aborted || requestId !== predictionRequest.current) return;
           setPredictions([]);
           setMapsFailed(true);
+          setIsSearching(false);
         });
     }, SUGGEST_DEBOUNCE_MS);
   };
 
+  const isDropdownOpen = predictions.length > 0 || isSearching;
+
   useEffect(() => {
-    if (predictions.length > 0) {
+    if (isDropdownOpen) {
       updateDropdownPosition();
       const handleResize = () => updateDropdownPosition();
       const handleScroll = () => updateDropdownPosition();
@@ -231,7 +243,7 @@ const PlaceSearch = ({
         }
       };
     }
-  }, [predictions.length, updateDropdownPosition]);
+  }, [isDropdownOpen, updateDropdownPosition]);
 
   const handleSuggestionClick = (
     suggestion: SearchSuggestion,
@@ -262,6 +274,7 @@ const PlaceSearch = ({
     // Delay closing to allow click events to fire
     setTimeout(() => {
       setIsFocused(false);
+      setIsSearching(false);
       setPredictions([]);
       setDropdownPosition(null);
     }, 200);
@@ -278,12 +291,13 @@ const PlaceSearch = ({
   };
 
   const dropdownContent =
-    (showEmptyOption || predictions.length > 0) && dropdownPosition ? (
+    (showEmptyOption || isDropdownOpen) && dropdownPosition ? (
     <ul
       ref={dropdownRef}
       data-place-search-dropdown
       className="pointer-events-auto fixed z-[10000] max-h-60 overflow-auto rounded-(--radius-control) border border-(--line) bg-(--paper) py-1 shadow-(--shadow-menu)"
       role="listbox"
+      aria-busy={isSearching || undefined}
       style={{
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left}px`,
@@ -298,6 +312,7 @@ const PlaceSearch = ({
         const nextTarget = event.relatedTarget as Node | null;
         if (nextTarget && dropdownRef.current?.contains(nextTarget)) return;
         setIsFocused(false);
+        setIsSearching(false);
         setPredictions([]);
         setDropdownPosition(null);
       }}
@@ -338,7 +353,31 @@ const PlaceSearch = ({
         </li>
       ) : null}
 
-      {predictions.map((prediction) => (
+      {isSearching ? (
+        <li role="presentation" data-place-search-loading>
+          <p
+            role="status"
+            className="flex items-center gap-2 px-4 pt-2 pb-1 text-[0.8125rem] text-(--muted)"
+          >
+            <Spinner aria-hidden="true" className="size-3.5" />
+            {t('common.searchingPlaces')}
+          </p>
+          {[0, 1, 2].map((row) => (
+            <span key={row} aria-hidden="true" className="block px-4 py-2.5">
+              <Skeleton
+                className="h-3.5 rounded-sm bg-(--surface)"
+                style={{ width: `${[62, 48, 55][row]}%` }}
+              />
+              <Skeleton
+                className="mt-1.5 h-3 rounded-sm bg-(--surface)"
+                style={{ width: `${[80, 70, 76][row]}%` }}
+              />
+            </span>
+          ))}
+        </li>
+      ) : null}
+
+      {!isSearching && predictions.map((prediction) => (
         <li
           key={prediction.mapboxId}
           className="cursor-pointer px-4 py-2.5 transition-[background-color] duration-200 ease-(--ease-flat) hover:bg-(--surface)"

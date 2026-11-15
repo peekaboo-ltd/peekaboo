@@ -138,6 +138,39 @@ describe('PlaceSearch with Mapbox Search Box', () => {
     );
   });
 
+  it('shows skeleton rows while suggestions are loading', async () => {
+    const user = userEvent.setup();
+    let respond: (response: Response) => void = () => undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise<Response>((resolve) => { respond = resolve; })),
+    );
+
+    renderWithI18n(
+      <PlaceSearch onLocationSelect={vi.fn()} placeholder="Pickup" />,
+    );
+
+    await user.type(screen.getByPlaceholderText('Pickup'), 'Kim');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      messages.en['common.searchingPlaces'],
+    );
+    expect(screen.getByRole('listbox')).toHaveAttribute('aria-busy', 'true');
+
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    respond(
+      Response.json({
+        suggestions: [
+          { mapbox_id: 'place.1', name: 'Kimihurura', place_formatted: 'Kigali, Rwanda' },
+        ],
+      }),
+    );
+
+    expect(
+      await screen.findByRole('option', { name: /kimihurura/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
   it('shows an error when search is unavailable', async () => {
     const user = userEvent.setup();
     ENVIRONMENTS.MAPBOX_ACCESS_TOKEN = '';
