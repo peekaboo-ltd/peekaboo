@@ -1,13 +1,6 @@
 import { useMemo } from 'react';
-import {
-  AdvancedMarker,
-  APILoadingStatus,
-  Map,
-  Pin,
-  useApiLoadingStatus,
-} from '@vis.gl/react-google-maps';
 import { cn } from '@/lib/utils';
-import { ENVIRONMENTS } from '@/constants/environments.constants';
+import { BaseMap, MapPin, type LatLng } from '@/components/maps/mapGl';
 import type { OrderLocation } from '@/types/order.type';
 import { hasCoordinates } from '@/utils/locations.util';
 import HeroMapViewport from '@/pages/home/components/HeroMapViewport';
@@ -31,7 +24,7 @@ const KIGALI_CENTER = { lat: -1.9441, lng: 30.0619 };
 
 const toPosition = (
   location?: OrderLocation | null,
-): google.maps.LatLngLiteral | null =>
+): LatLng | null =>
   hasCoordinates(location)
     ? {
         lat: Number(location?.latitude),
@@ -58,12 +51,11 @@ const OrderSetupHeroMap = ({
   className,
 }: OrderSetupHeroMapProps) => {
   const { t } = useI18n();
-  const apiStatus = useApiLoadingStatus();
   const origin = toPosition(pickup);
   const destination = toPosition(dropoff);
   const positions = useMemo(
     () => [origin, destination].filter(
-      (position): position is google.maps.LatLngLiteral => position !== null,
+      (position): position is LatLng => position !== null,
     ),
     [origin, destination],
   );
@@ -81,29 +73,6 @@ const OrderSetupHeroMap = ({
       ? `${distance.toFixed(1)} km`
       : t('publicOrder.map.minutes', { minutes: 12 }));
 
-  if (!ENVIRONMENTS.GOOGLE_MAPS_API_KEY) {
-    return <HeroRouteCard etaLabel={etaLabel} statusLabel={statusLabel} />;
-  }
-
-  if (
-    apiStatus === APILoadingStatus.FAILED ||
-    apiStatus === APILoadingStatus.AUTH_FAILURE
-  ) {
-    return <HeroRouteCard etaLabel={etaLabel} statusLabel={statusLabel} />;
-  }
-
-  if (apiStatus !== APILoadingStatus.LOADED) {
-    return (
-      <div
-        className={cn(
-          'aspect-[4/3] w-full animate-pulse rounded-(--radius-card) bg-(--surface)',
-          className,
-        )}
-        aria-label={t('publicOrder.map.loading')}
-      />
-    );
-  }
-
   if (!positions.length) {
     return <HeroRouteCard etaLabel={etaLabel} statusLabel={t('publicOrder.map.setRoute')} />;
   }
@@ -115,38 +84,29 @@ const OrderSetupHeroMap = ({
         className,
       )}
     >
-      <Map
-        defaultCenter={KIGALI_CENTER}
-        defaultZoom={12}
-        mapId={ENVIRONMENTS.GOOGLE_MAPS_MAP_ID}
-        gestureHandling="cooperative"
-        disableDefaultUI
-        zoomControl
-        clickableIcons={false}
-        reuseMaps
-      >
+      <BaseMap initialCenter={KIGALI_CENTER} initialZoom={12} cooperativeGestures reuseMaps>
         <HeroMapViewport positions={positions} />
 
         {origin ? (
-          <AdvancedMarker position={origin} title={t('publicOrder.pickup')}>
-            <Pin
-              background="var(--paper)"
-              borderColor="var(--ink)"
-              glyphColor="var(--ink)"
-            />
-          </AdvancedMarker>
+          <MapPin
+            position={origin}
+            title={t('publicOrder.pickup')}
+            background="var(--paper)"
+            borderColor="var(--ink)"
+            glyphColor="var(--ink)"
+          />
         ) : null}
 
         {destination ? (
-          <AdvancedMarker position={destination} title={t('publicOrder.destination')}>
-            <Pin
-              background="var(--ink)"
-              borderColor="var(--ink)"
-              glyphColor="var(--paper)"
-            />
-          </AdvancedMarker>
+          <MapPin
+            position={destination}
+            title={t('publicOrder.destination')}
+            background="var(--ink)"
+            borderColor="var(--ink)"
+            glyphColor="var(--paper)"
+          />
         ) : null}
-      </Map>
+      </BaseMap>
 
       {/* Status only. The distance and ETA now live in RouteSummary, in the
           reading column — restating them here produced two different numbers

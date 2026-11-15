@@ -29,9 +29,15 @@ const paymentMode = resolveClientPaymentMode();
 
 export const ENVIRONMENTS = {
   API_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1',
-  GOOGLE_MAPS_API_KEY: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-  /** Cloud console map ID, required by AdvancedMarker. */
-  GOOGLE_MAPS_MAP_ID: import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID',
+  /** Vector style for every map. Defaults to OpenFreeMap, which needs no key. */
+  MAP_STYLE_URL:
+    import.meta.env.VITE_MAP_STYLE_URL ||
+    'https://tiles.openfreemap.org/styles/positron',
+  /**
+   * Public Mapbox token (pk.…). Required for place search and reverse lookups
+   * (Search Box API); also makes routes follow roads via Mapbox Directions.
+   */
+  MAPBOX_ACCESS_TOKEN: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || '',
   inactivityTimeout: import.meta.env.VITE_INACTIVITY_TIMEOUT || '5', // in minutes
   /** Optional override; falls back to Vite MODE (development | production). */
   NODE_ENVIRONMENT: nodeEnvironment,

@@ -1,8 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { APIProvider, AdvancedMarker, Map, Pin } from '@vis.gl/react-google-maps';
 import Table from '@/components/table/Table';
-import { ENVIRONMENTS } from '@/constants/environments.constants';
+import { BaseMap, MapPin } from '@/components/maps/mapGl';
 import { useFetchUsersTracking } from '@/hooks/users/users.hooks';
 import { useDocumentTitle } from '@/hooks/common/useDocumentTitle';
 import { useAppSelector } from '@/states/hooks';
@@ -165,23 +164,18 @@ const UsersTrackingPage = () => {
       </header>
 
       <section className="border rounded-md overflow-hidden h-[420px]">
-        <APIProvider apiKey={ENVIRONMENTS.GOOGLE_MAPS_API_KEY || ''}>
-          <Map defaultCenter={mapCenter} defaultZoom={11} mapId="users-tracking-map">
-            {mapMarkers.map(({ user: trackedUser, coordinates, color }) => (
-              <AdvancedMarker
-                key={trackedUser.id}
-                position={coordinates}
-                title={trackedUser.name || trackedUser.email || trackedUser.id}
-              >
-                <Pin
-                  background={color}
-                  borderColor={color}
-                  glyphColor="var(--paper)"
-                />
-              </AdvancedMarker>
-            ))}
-          </Map>
-        </APIProvider>
+        <BaseMap initialCenter={mapCenter} initialZoom={11}>
+          {mapMarkers.map(({ user: trackedUser, coordinates, color }) => (
+            <MapPin
+              key={trackedUser.id}
+              position={coordinates}
+              title={trackedUser.name || trackedUser.email || trackedUser.id}
+              background={color}
+              borderColor={color}
+              glyphColor="var(--paper)"
+            />
+          ))}
+        </BaseMap>
       </section>
 
       <Table

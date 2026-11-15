@@ -1,14 +1,6 @@
-import {
-  AdvancedMarker,
-  APILoadingStatus,
-  Map,
-  Pin,
-  useApiLoadingStatus,
-} from '@vis.gl/react-google-maps';
-import { ENVIRONMENTS } from '@/constants/environments.constants';
 import useMediaQuery from '@/hooks/common/useMediaQuery';
 import HeroMapViewport from '@/pages/home/components/HeroMapViewport';
-import HeroRouteCard from '@/pages/home/components/HeroRouteCard';
+import { BaseMap, MapPin } from './mapGl';
 import { DOWNTOWN_KIGALI_HQ, KIGALI_CENTER } from './publicMap.utils';
 import { useI18n } from '@/i18n/i18n';
 
@@ -21,54 +13,19 @@ const PublicHeadquartersMapContent = ({
 }: PublicHeadquartersMapProps) => {
   const { t } = useI18n();
   const resolvedRidersLabel = ridersLabel ?? t('map.kigaliWide');
-  const apiStatus = useApiLoadingStatus();
-
-  if (
-    apiStatus === APILoadingStatus.FAILED ||
-    apiStatus === APILoadingStatus.AUTH_FAILURE
-  ) {
-    return (
-      <HeroRouteCard
-        statusLabel={t('map.headquarters.label')}
-        etaLabel={resolvedRidersLabel}
-      />
-    );
-  }
-
-  if (apiStatus !== APILoadingStatus.LOADED) {
-    return (
-      <div
-        className="aspect-[4/3] w-full animate-pulse rounded-md bg-(--surface)"
-        aria-label={t('map.headquarters.loading')}
-      />
-    );
-  }
-
   return (
     <figure className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-md bg-(--surface)">
-      <Map
-        defaultCenter={KIGALI_CENTER}
-        defaultZoom={12}
-        mapId={ENVIRONMENTS.GOOGLE_MAPS_MAP_ID}
-        gestureHandling="cooperative"
-        disableDefaultUI
-        zoomControl
-        clickableIcons={false}
-        reuseMaps
-      >
+      <BaseMap initialCenter={KIGALI_CENTER} initialZoom={12} cooperativeGestures reuseMaps>
         <HeroMapViewport positions={[DOWNTOWN_KIGALI_HQ]} emptyZoom={14} />
 
-        <AdvancedMarker
+        <MapPin
           position={DOWNTOWN_KIGALI_HQ}
           title={t('map.headquarters.marker')}
-        >
-          <Pin
-            background="var(--public-clay-soft)"
-            borderColor="var(--public-clay)"
-            glyphColor="var(--public-clay)"
-          />
-        </AdvancedMarker>
-      </Map>
+          background="var(--public-clay-soft)"
+          borderColor="var(--public-clay)"
+          glyphColor="var(--public-clay)"
+        />
+      </BaseMap>
 
       <figcaption className="absolute left-3 top-3 z-10 rounded-(--radius-control) bg-(--paper) px-3 py-2 text-xs text-(--ink)">
         {t('map.headquarters.label')}
@@ -94,17 +51,8 @@ const PublicHeadquartersMapContent = ({
 
 const PublicHeadquartersMap = ({ ridersLabel }: PublicHeadquartersMapProps) => {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
-  const { t } = useI18n();
 
   if (!isDesktop) return null;
-  if (!ENVIRONMENTS.GOOGLE_MAPS_API_KEY) {
-    return (
-      <HeroRouteCard
-        statusLabel={t('map.headquarters.label')}
-        etaLabel={ridersLabel ?? t('map.kigaliWide')}
-      />
-    );
-  }
 
   return <PublicHeadquartersMapContent ridersLabel={ridersLabel} />;
 };
