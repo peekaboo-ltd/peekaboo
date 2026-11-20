@@ -36,6 +36,12 @@ import {
 } from './mvendReconciliation';
 import { getActivePaymentProvider } from '../helpers/paymentProvider.helper';
 import {
+  assertRefundable,
+  MvendRefundMethod,
+  MvendRefundRecord,
+  MvendRefundState,
+} from './mvendRefund';
+import {
   PaymentProvider,
   PaypackChannel,
   PaypackWebhookPayload,
@@ -1200,6 +1206,114 @@ export class PaymentService {
     status: PaymentStatus,
   ): Promise<Payment> {
     return this.updatePaymentStatus(paymentId, status);
+  }
+
+  // ADMIN: REFUND AN MVEND PAYMENT (rollback or credit)
+  // The refund is claimed under a row lock before MVend is called, so a
+  // double submit can never send two refunds. The payment status stays
+  // SUCCESSFUL; the refund is tracked in metadata.mvendRefund.
+  @AuditUpdate({
+    entityType: AuditLogEntityTypes.PAYMENT,
+    getEntityId: (args) => args[0],
+  })
+  async refundMvendPayment(
+    paymentId: UUID,
+    options: { method: MvendRefundMethod; amount?: number; requestedById?: UUID },
+  ): Promise<Payment> {
+    const refundTxref = generateMvendTxref();
+    const claimed = await AppDataSource.transaction(async (manager) => {
+      const repository = manager.getRepository(Payment);
+      const payment = await repository.findOne({
+        where: { id: paymentId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!payment) {
+        throw new NotFoundError('Payment not found', {
+          referenceId: paymentId,
+          referenceType: LogReferenceTypes.PAYMENT,
+        });
+      }
+
+      let amount: number;
+      try {
+        amount = assertRefundable(payment, options.method, options.amount);
+      } catch (error: any) {
+        throw new ValidationError(error.message);
+      }
+
+      const record: MvendRefundRecord = {
+        method: options.method,
+        txref: refundTxref,
+        amount,
+        state: 'requested',
+        requestedAt: new Date().toISOString(),
+        requestedById: options.requestedById,
+      };
+      const metadata: Record<string, any> = {
+        ...(payment.metadata || {}),
+        mvendRefund: record,
+        mvendRefundHistory: [
+          ...((payment.metadata?.mvendRefundHistory as MvendRefundRecord[]) || []),
+          ...(payment.metadata?.mvendRefund ? [payment.metadata.mvendRefund] : []),
+        ],
+      };
+      await repository.update(payment.id, { metadata });
+      payment.metadata = metadata;
+      return { payment, record };
+    });
+
+    const { payment, record } = claimed;
+    const result =
+      options.method === 'rollback'
+        ? await this.mvendService.rollback(payment.externalReferenceId as string, refundTxref)
+        : await this.mvendService.makePayment({
+            txref: refundTxref,
+            amount: record.amount,
+            creditAccount: formatPhoneMsisdn(payment.customerPhone) as string,
+            narration: `Refund ${payment.externalReferenceId}`,
+          });
+
+    const state: MvendRefundState =
+      result.success || result.duplicate
+        ? 'accepted'
+        : result.error?.code === MVEND_TIMEOUT
+          ? 'unknown'
+          : 'failed';
+    const paymentRef = result.data?.paymentref;
+    const finished: MvendRefundRecord = {
+      ...record,
+      state,
+      completedAt: new Date().toISOString(),
+      statusCode: result.data?.status_code,
+      ...(paymentRef !== undefined && paymentRef !== null ? { paymentRef: String(paymentRef) } : {}),
+      ...(result.data?.transactionstatus ? { transactionStatus: result.data.transactionstatus } : {}),
+      ...(result.error && state !== 'accepted' ? { error: { code: result.error.code, message: result.error.message } } : {}),
+    };
+
+    payment.metadata = { ...(payment.metadata || {}), mvendRefund: finished };
+    await this.paymentRepository.update(payment.id, { metadata: payment.metadata });
+
+    logger.info('MVend refund finished', {
+      paymentId: payment.id,
+      method: options.method,
+      state,
+      refundTxref,
+    });
+
+    if (state === 'failed') {
+      throw new ValidationError(result.error?.message || 'MVend rejected the refund');
+    }
+    return payment;
+  }
+
+  // ADMIN: MVEND MERCHANT BALANCE
+  async getMvendAccountBalance(): Promise<Record<string, any>> {
+    const result = await this.mvendService.getAccountBalance();
+    if (!result.success || !result.data) {
+      throw new AppError(result.error?.message || 'Could not fetch the MVend balance', 502);
+    }
+    const { status_code: _code, response_errormsg: _message, ...balance } = result.data;
+    return balance;
   }
 
   // ADMIN: EXPORT PAYMENTS (returns all matching payments without pagination)

@@ -202,6 +202,46 @@ export const PaymentController = {
     }
   },
 
+  // ADMIN: REFUND (rollback reverses the debit; credit pays the payer back)
+  async adminRefundPayment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { method, amount } = req.body || {};
+      if (method !== 'rollback' && method !== 'credit') {
+        throw new ValidationError("method must be 'rollback' or 'credit'");
+      }
+      const parsedAmount =
+        amount === undefined || amount === null || amount === '' ? undefined : Number(amount);
+      if (parsedAmount !== undefined && !Number.isFinite(parsedAmount)) {
+        throw new ValidationError('amount must be a number');
+      }
+      const payment = await paymentService.refundMvendPayment(id as UUID, {
+        method,
+        amount: parsedAmount,
+        requestedById: (req as AuthenticatedRequest).user?.id as UUID | undefined,
+      });
+      return res.status(200).json({
+        message: 'Refund requested successfully',
+        data: payment,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // ADMIN: MVEND MERCHANT BALANCE
+  async getProviderBalance(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const balance = await paymentService.getMvendAccountBalance();
+      return res.status(200).json({
+        message: 'Balance fetched successfully',
+        data: balance,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // ADMIN: EXPORT PAYMENTS
   async exportPayments(req: Request, res: Response, next: NextFunction) {
     try {

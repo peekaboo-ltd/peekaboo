@@ -66,6 +66,12 @@ export const paymentsQueriesApiSlice = createApi({
         method: 'GET',
       }),
     }),
+    fetchProviderBalance: builder.query<{ message: string; data: Record<string, unknown> }, void>({
+      query: () => ({
+        url: `/payments/admin/balance`,
+        method: 'GET',
+      }),
+    }),
     exportPayments: builder.query({
       query: (params: AdminPaymentsQueryParams) => ({
         url: `/payments/admin/export`,
@@ -84,4 +90,5 @@ export const {
   useLazyFetchAdminPaymentsQuery,
   useLazyFetchPaymentStatsQuery,
   useLazyExportPaymentsQuery,
+  useLazyFetchProviderBalanceQuery,
 } = paymentsQueriesApiSlice;
