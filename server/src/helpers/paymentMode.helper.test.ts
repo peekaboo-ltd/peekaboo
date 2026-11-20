@@ -37,7 +37,7 @@ test('isPaymentSimulation and isDevPriceMode reflect resolved mode', () => {
 });
 
 test('resolveChargeableAmount uses 100 RWF only in dev_price', () => {
-  const result = resolveChargeableAmount(DEVELOPMENT_PAYMENT_AMOUNT_RWF, {
+  const result = resolveChargeableAmount(2500, {
     paymentMode: 'dev_price',
     nodeEnv: 'development',
   });

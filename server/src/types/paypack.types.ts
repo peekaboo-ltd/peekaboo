@@ -1,21 +1,10 @@
 import { UUID } from '.';
 import { PaymentCurrency, PaymentStatus } from './payment-status.types';
 
-// Payment providers. URUBUTO and KPAY are retired; the members stay so
-// historical rows in the varchar provider column keep mapping to the enum.
-export enum PaymentProvider {
-  PAYPACK = 'PAYPACK',
-  URUBUTO = 'URUBUTO',
-  KPAY = 'KPAY',
-}
-
-// Mobile-money rails offered to payers. Paypack cashin takes only a phone
-// number and infers the network, so these are UX labels that all map to the
-// same call.
-export enum PaypackChannel {
-  MOMO = 'MOMO',
-  AIRTEL_MONEY = 'AIRTEL_MONEY',
-}
+// Provider and channel enums are shared across gateways; re-exported here so
+// existing imports keep working.
+export { PaymentProvider, PaymentChannel as PaypackChannel } from './payment-provider.types';
+import { PaymentChannel as PaypackChannel } from './payment-provider.types';
 
 // Paypack environment. The SDK/REST layer sends this as the X-Webhook-Mode
 // header, which must match the mode registered on the Paypack dashboard

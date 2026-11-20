@@ -64,6 +64,28 @@ This document is the exhaustive reference for every environment variable used ac
 | `WHATSAPP_FLOW_PRIVATE_KEY` | — | Optional (for Flows) | RSA private key used to decrypt WhatsApp Flow **data-exchange** requests. **Gotcha:** when set through an env file, newlines must be escaped (`\n`). | `whatsapp.flows.helper.ts:25` |
 | `WHATSAPP_ORDER_INITIAL_FEE` | `1500` | Optional | Initial fee applied to orders created via WhatsApp. **Not in `.env.example`** — set it to override `DEFAULT_ORDER_FEE` in `whatsapp.service.ts:32`. | `whatsapp.service.ts:574` |
 
+### MVend (payment gateway)
+
+| Variable | Default | Required | Purpose & behavior | Read at |
+| --- | --- | --- | --- | --- |
+| `MVEND_APP_ID` | — | Yes | MPS application ID (`appid`). | `mvend.config.ts` |
+| `MVEND_APP_KEY` | — | Yes | MPS service key (`appkey`). | `mvend.config.ts` |
+| `MVEND_SALT` | — | Yes | App salt. HMAC-SHA256 key for each request's `integrity_hash` (fields: timestamp, txref, amount, currency, payment_account, creditaccount, rollback_txref). | `mvend.hash.ts` |
+| `MVEND_CALLBACK_TOKEN` | — | Yes | Random secret (24+ chars) in the callback URL path. MVend does not sign callbacks, so the token authenticates them, and every callback is re-confirmed with `gettransactionstatus`. | `mvend.config.ts` |
+| `MVEND_BASE_URL` | `https://qa.mvendpay.com` | Optional | Use `https://live.mvendpay.com` in production. | `mvend.config.ts` |
+| `MVEND_PAYMENTS_PATH` | `/mpay/requestpayment` | Optional | Payments endpoint path. | `mvend.config.ts` |
+| `MVEND_CURRENCY` | `RWF` | Optional | Currency sent on debits and credits. | `mvend.config.ts` |
+| `MVEND_USE_TOKEN_AUTH` | `false` | Optional | Sends `Authorization: Token {token}` obtained from `/auth/user/token`. | `mvend.service.ts` |
+| `MVEND_AUTH_STRING` | — | If token auth | `auth_string` for `/auth/user/token`. | `mvend.service.ts` |
+
+**MVend callback URL** to configure on the MPS platform:
+
+```
+${PUBLIC_API_BASE_URL}/api/v1/webhooks/mvend/${MVEND_CALLBACK_TOKEN}
+```
+
+Smoke test: `npm run mvend:smoke-test` (balance only) or `npm run mvend:smoke-test -- 0788123456 100` (QA debit + status polling).
+
 ### Paypack (payment gateway)
 
 | Variable | Default | Required | Purpose & behavior | Read at |
