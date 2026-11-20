@@ -24,7 +24,7 @@ This document is the exhaustive reference for every environment variable used ac
 | `NODE_ENV` | (unset) | Optional | Runtime environment. Controls Express/Urubuto startup strictness and OneSignal. **Does not** control payment amounts anymore — use `PAYMENT_MODE` instead. | `app.ts:21`, `oneSignalClient.ts:114` |
 | `PAYMENT_MODE` | `simulate` (non-production) / `live` (production) | Optional | Payment behavior: `simulate` (instant SUCCESSFUL, no provider), `dev_price` (real provider, 10 RWF), `live` (real provider, catalog amount). Forced to `live` when `NODE_ENV=production`. | `paymentMode.helper.ts`, `payment.service.ts` |
 | `PUBLIC_API_BASE_URL` | — | Yes (for payments) | Public base URL of this API. Used to construct the webhook URLs registered with UrubutoPay (`${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/*`). Logs a startup warning if unset while UrubutoPay is the active provider. | `urubuto.config.ts:153`, `urubuto-smoke-test.ts:53` |
-| `PAYMENT_PROVIDER_DEFAULT` | `URUBUTO` | Optional | Selects the payment gateway. Supported values: `URUBUTO`. (Kpay integration exists but is not the default.) When it equals `URUBUTO`, startup validation runs against the Urubuto config. | `urubuto.config.ts:76`, `payment.service.ts:620` |
+| `PAYMENT_PROVIDER_DEFAULT` | `MVEND` | Optional | Gateway for new payments: `MVEND` or `PAYPACK` (rollback switch). Startup validation runs against the selected provider's config. | `paymentProvider.helper.ts`, `app.ts` |
 | `PORT` | `8080` | Optional | Server port. `server.ts` reads it (default `8080`); the deploy script sets it when starting under PM2. Default local URL: http://localhost:8080 | `server.ts:37`, deploy script |
 
 ### Database
