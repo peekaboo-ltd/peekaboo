@@ -78,11 +78,15 @@ This document is the exhaustive reference for every environment variable used ac
 | `MVEND_USE_TOKEN_AUTH` | `false` | Optional | Sends `Authorization: Token {token}` obtained from `/auth/user/token`. | `mvend.service.ts` |
 | `MVEND_AUTH_STRING` | — | If token auth | `auth_string` for `/auth/user/token`. | `mvend.service.ts` |
 
+`PAYMENT_PROVIDER_DEFAULT` selects the gateway for new payments: `MVEND` (default) or `PAYPACK` (rollback switch). Only the active gateway's config is validated at startup.
+
 **MVend callback URL** to configure on the MPS platform:
 
 ```
 ${PUBLIC_API_BASE_URL}/api/v1/webhooks/mvend/${MVEND_CALLBACK_TOKEN}
 ```
+
+The callback body is undocumented, so it is only used to read the `txref`. The final status always comes from `gettransactionstatus`, and a cron on the primary process (every 2 minutes) re-checks PENDING MVend payments between 1 minute and 24 hours old, so a missed callback cannot strand an order.
 
 Smoke test: `npm run mvend:smoke-test` (balance only) or `npm run mvend:smoke-test -- 0788123456 100` (QA debit + status polling).
 
