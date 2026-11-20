@@ -4,7 +4,7 @@ import { UUID } from '../types';
 import { PaymentType } from '../constants/payment.constants';
 import { User } from './user.entity';
 import { PaymentCurrency, PaymentStatus } from '../types/payment-status.types';
-import { PaymentProvider, PaypackChannel } from '../types/paypack.types';
+import { PaymentChannel, PaymentProvider } from '../types/payment-provider.types';
 
 @Entity('payments')
 export class Payment extends AbstractEntity {
@@ -46,7 +46,7 @@ export class Payment extends AbstractEntity {
   @Column({ name: 'currency', type: 'varchar', length: 3, nullable: false, default: PaymentCurrency.RWF })
   currency: 'RWF' | 'USD';
 
-  // EXTERNAL REFERENCE ID (provider transaction ref, e.g. Paypack ref)
+  // EXTERNAL REFERENCE ID (provider transaction ref, e.g. MVend txref)
   @Column({ name: 'external_reference_id', type: 'varchar', nullable: true })
   externalReferenceId?: string;
 
@@ -55,7 +55,7 @@ export class Payment extends AbstractEntity {
     name: 'provider',
     type: 'varchar',
     nullable: false,
-    default: PaymentProvider.PAYPACK,
+    default: PaymentProvider.MVEND,
   })
   provider: PaymentProvider;
 
@@ -86,7 +86,7 @@ export class Payment extends AbstractEntity {
     name: 'method',
     type: 'varchar',
     nullable: true,
-    default: PaypackChannel.MOMO,
+    default: PaymentChannel.MOMO,
   })
   method: string;
 

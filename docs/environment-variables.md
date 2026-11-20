@@ -21,10 +21,9 @@ This document is the exhaustive reference for every environment variable used ac
 
 | Variable | Default | Required | Purpose & behavior | Read at |
 | --- | --- | --- | --- | --- |
-| `NODE_ENV` | (unset) | Optional | Runtime environment. Controls Express/Urubuto startup strictness and OneSignal. **Does not** control payment amounts anymore — use `PAYMENT_MODE` instead. | `app.ts:21`, `oneSignalClient.ts:114` |
+| `NODE_ENV` | (unset) | Optional | Runtime environment. Controls payment-config startup strictness (MVend config issues throw in production) and OneSignal. **Does not** control payment amounts — use `PAYMENT_MODE` instead. | `app.ts`, `oneSignalClient.ts:114` |
 | `PAYMENT_MODE` | `simulate` (non-production) / `live` (production) | Optional | Payment behavior: `simulate` (instant SUCCESSFUL, no provider), `dev_price` (real provider, 10 RWF), `live` (real provider, catalog amount). Forced to `live` when `NODE_ENV=production`. | `paymentMode.helper.ts`, `payment.service.ts` |
-| `PUBLIC_API_BASE_URL` | — | Yes (for payments) | Public base URL of this API. Used to construct the webhook URLs registered with UrubutoPay (`${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/*`). Logs a startup warning if unset while UrubutoPay is the active provider. | `urubuto.config.ts:153`, `urubuto-smoke-test.ts:53` |
-| `PAYMENT_PROVIDER_DEFAULT` | `MVEND` | Optional | Gateway for new payments: `MVEND` or `PAYPACK` (rollback switch). Startup validation runs against the selected provider's config. | `paymentProvider.helper.ts`, `app.ts` |
+| `PUBLIC_API_BASE_URL` | — | Yes (for payments) | Public base URL of this API. Used to build the MVend callback URL registered on MPS (`${PUBLIC_API_BASE_URL}/api/v1/webhooks/mvend/${MVEND_CALLBACK_TOKEN}`). Startup warns if unset. | `mvend.config.ts` |
 | `PORT` | `8080` | Optional | Server port. `server.ts` reads it (default `8080`); the deploy script sets it when starting under PM2. Default local URL: http://localhost:8080 | `server.ts:37`, deploy script |
 
 ### Database
@@ -78,8 +77,6 @@ This document is the exhaustive reference for every environment variable used ac
 | `MVEND_USE_TOKEN_AUTH` | `false` | Optional | Sends `Authorization: Token {token}` obtained from `/auth/user/token`. | `mvend.service.ts` |
 | `MVEND_AUTH_STRING` | — | If token auth | `auth_string` for `/auth/user/token`. | `mvend.service.ts` |
 
-`PAYMENT_PROVIDER_DEFAULT` selects the gateway for new payments: `MVEND` (default) or `PAYPACK` (rollback switch). Only the active gateway's config is validated at startup.
-
 **MVend callback URL** to configure on the MPS platform:
 
 ```
@@ -89,24 +86,6 @@ ${PUBLIC_API_BASE_URL}/api/v1/webhooks/mvend/${MVEND_CALLBACK_TOKEN}
 The callback body is undocumented, so it is only used to read the `txref`. The final status always comes from `gettransactionstatus`, and a cron on the primary process (every 2 minutes) re-checks PENDING MVend payments between 1 minute and 24 hours old, so a missed callback cannot strand an order.
 
 Smoke test: `npm run mvend:smoke-test` (balance only) or `npm run mvend:smoke-test -- 0788123456 100` (QA debit + status polling).
-
-### Paypack (payment gateway)
-
-| Variable | Default | Required | Purpose & behavior | Read at |
-| --- | --- | --- | --- | --- |
-| `PAYPACK_CLIENT_ID` | — | Yes | Client ID of the Paypack dashboard application. | `paypack.config.ts` |
-| `PAYPACK_CLIENT_SECRET` | — | Yes | Client secret of the Paypack dashboard application. | `paypack.config.ts` |
-| `PAYPACK_WEBHOOK_SECRET` | — | Yes | Webhook secret from the Paypack dashboard. Verifies the `x-paypack-signature` header (base64 HMAC-SHA256 of the raw body) on `transaction:processed` events. | `paypack.service.ts` |
-| `PAYPACK_ENV` | `production` when `NODE_ENV=production`, else `development` | Optional | Sent as the `X-Webhook-Mode` header on cashin. **Must match the mode registered on the Paypack dashboard webhook** or no webhook is delivered. | `paypack.config.ts` |
-| `PAYPACK_BASE_URL` | `https://payments.paypack.rw/api` | Optional | Paypack API base URL override. | `paypack.config.ts` |
-
-**Paypack webhook URL** registered on the Paypack dashboard (constructed from `PUBLIC_API_BASE_URL`):
-
-```
-${PUBLIC_API_BASE_URL}/api/v1/webhooks/paypack
-```
-
-Paypack HEAD-pings this URL before delivering payloads; the server answers HEAD with 200. Cashin requires a minimum of 100 RWF — smaller charges (e.g. `dev_price` mode) complete as simulated and are flagged `paypackMinimumNotMet` in the payment metadata.
 
 ### Google OAuth
 
