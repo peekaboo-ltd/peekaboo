@@ -113,11 +113,15 @@ export function formatPhoneForProvider(
   return e164 ? e164.slice(1) : null;
 }
 
-// Paypack cashin expects the local MSISDN form (078xxxxxxx).
-export function formatPhoneForPaypack(
+// Mobile-money gateways (MVend, Paypack) take the Rwandan MSISDN without the
+// plus sign: 250XXXXXXXXX. Returns null for non-Rwandan or invalid numbers.
+export function formatPhoneMsisdn(
   input: string | null | undefined,
 ): string | null {
   const e164 = normalizePhoneNumber(input);
   if (!e164 || !e164.startsWith(RWANDA_COUNTRY.dial_code)) return null;
   return `250${e164.slice(RWANDA_COUNTRY.dial_code.length)}`;
 }
+
+/** @deprecated use formatPhoneMsisdn */
+export const formatPhoneForPaypack = formatPhoneMsisdn;

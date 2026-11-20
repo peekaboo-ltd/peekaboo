@@ -24,7 +24,7 @@ This document is the exhaustive reference for every environment variable used ac
 | `NODE_ENV` | (unset) | Optional | Runtime environment. Controls Express/Urubuto startup strictness and OneSignal. **Does not** control payment amounts anymore — use `PAYMENT_MODE` instead. | `app.ts:21`, `oneSignalClient.ts:114` |
 | `PAYMENT_MODE` | `simulate` (non-production) / `live` (production) | Optional | Payment behavior: `simulate` (instant SUCCESSFUL, no provider), `dev_price` (real provider, 10 RWF), `live` (real provider, catalog amount). Forced to `live` when `NODE_ENV=production`. | `paymentMode.helper.ts`, `payment.service.ts` |
 | `PUBLIC_API_BASE_URL` | — | Yes (for payments) | Public base URL of this API. Used to construct the webhook URLs registered with UrubutoPay (`${PUBLIC_API_BASE_URL}/api/v1/webhooks/urubuto/*`). Logs a startup warning if unset while UrubutoPay is the active provider. | `urubuto.config.ts:153`, `urubuto-smoke-test.ts:53` |
-| `PAYMENT_PROVIDER_DEFAULT` | `URUBUTO` | Optional | Selects the payment gateway. Supported values: `URUBUTO`. (Kpay integration exists but is not the default.) When it equals `URUBUTO`, startup validation runs against the Urubuto config. | `urubuto.config.ts:76`, `payment.service.ts:620` |
+| `PAYMENT_PROVIDER_DEFAULT` | `MVEND` | Optional | Gateway for new payments: `MVEND` or `PAYPACK` (rollback switch). Startup validation runs against the selected provider's config. | `paymentProvider.helper.ts`, `app.ts` |
 | `PORT` | `8080` | Optional | Server port. `server.ts` reads it (default `8080`); the deploy script sets it when starting under PM2. Default local URL: http://localhost:8080 | `server.ts:37`, deploy script |
 
 ### Database
@@ -78,11 +78,15 @@ This document is the exhaustive reference for every environment variable used ac
 | `MVEND_USE_TOKEN_AUTH` | `false` | Optional | Sends `Authorization: Token {token}` obtained from `/auth/user/token`. | `mvend.service.ts` |
 | `MVEND_AUTH_STRING` | — | If token auth | `auth_string` for `/auth/user/token`. | `mvend.service.ts` |
 
+`PAYMENT_PROVIDER_DEFAULT` selects the gateway for new payments: `MVEND` (default) or `PAYPACK` (rollback switch). Only the active gateway's config is validated at startup.
+
 **MVend callback URL** to configure on the MPS platform:
 
 ```
 ${PUBLIC_API_BASE_URL}/api/v1/webhooks/mvend/${MVEND_CALLBACK_TOKEN}
 ```
+
+The callback body is undocumented, so it is only used to read the `txref`. The final status always comes from `gettransactionstatus`, and a cron on the primary process (every 2 minutes) re-checks PENDING MVend payments between 1 minute and 24 hours old, so a missed callback cannot strand an order.
 
 Smoke test: `npm run mvend:smoke-test` (balance only) or `npm run mvend:smoke-test -- 0788123456 100` (QA debit + status polling).
 

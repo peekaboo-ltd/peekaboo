@@ -1,7 +1,10 @@
 import {
+  Between,
   FindOptionsWhere,
   LessThanOrEqual,
   MoreThanOrEqual,
+  Not,
+  IsNull,
   Repository,
 } from 'typeorm';
 import { AppDataSource } from '../data-source';
@@ -17,6 +20,21 @@ import {
   PaypackService,
 } from '../integrations/paypack/paypack.service';
 import { PAYPACK_MIN_CASHIN_RWF } from '../integrations/paypack/paypack.config';
+import {
+  generateMvendTxref,
+  MVEND_TIMEOUT,
+  MvendService,
+} from '../integrations/mvend/mvend.service';
+import { MVEND_MIN_DEBIT_RWF } from '../integrations/mvend/mvend.config';
+import { MvendCallbackPayload, MvendResult } from '../types/mvend.types';
+import {
+  extractCallbackTxref,
+  reconcileMvendPayment,
+  recoverMvendTimeout,
+  ReconcileOutcome,
+  ReconcileSource,
+} from './mvendReconciliation';
+import { getActivePaymentProvider } from '../helpers/paymentProvider.helper';
 import {
   PaymentProvider,
   PaypackChannel,
@@ -46,7 +64,7 @@ import { Conversation } from '../entities/conversation.entity';
 import { AuditCreate, AuditUpdate } from '../decorators/auditLog.decorator';
 import { AuditLogEntityTypes } from '../constants/auditLog.constants';
 import {
-  formatPhoneForPaypack,
+  formatPhoneMsisdn,
   validateAndFormatPhoneNumber,
 } from '../helpers/phone.helper';
 import { ConversationStatus } from '../constants/conversation.constants';
@@ -74,6 +92,7 @@ type InitiationContext = {
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
   private readonly paypackService: PaypackService;
+  private readonly mvendService: MvendService;
   private readonly orderActivityService: OrderActivityService;
   private readonly orderAssignmentService: OrderAssignmentService;
   private readonly emailService: EmailService;
@@ -82,6 +101,7 @@ export class PaymentService {
   constructor() {
     this.paymentRepository = AppDataSource.getRepository(Payment);
     this.paypackService = new PaypackService();
+    this.mvendService = new MvendService();
     this.orderActivityService = new OrderActivityService();
     this.orderAssignmentService = new OrderAssignmentService();
     this.emailService = new EmailService();
@@ -114,7 +134,7 @@ export class PaymentService {
       isDevPrice: context.isDevPrice,
       isSimulated: context.isSimulated,
       phoneNumber: context.customerPhone,
-      phoneNumberFormatted: formatPhoneForPaypack(context.customerPhone),
+      phoneNumberFormatted: formatPhoneMsisdn(context.customerPhone),
     });
 
     const result = await this.initiateProviderPayment(
@@ -143,6 +163,9 @@ export class PaymentService {
       if (result.error?.code === PAYPACK_TIMEOUT) {
         return this.reconcilePaypackTimeout(newPayment, payment, context, result);
       }
+      if (result.error?.code === MVEND_TIMEOUT) {
+        return this.reconcileMvendTimeout(newPayment, payment, context, result);
+      }
 
       // The provider was never reached, so no transaction exists on their side
       // and marking this payment failed is safe. It is an outage, not a bad
@@ -163,7 +186,7 @@ export class PaymentService {
 
       const failureMessage =
         result.error?.message ||
-        'Paypack payment could not be initiated. Please try again.';
+        'Payment could not be initiated. Please try again.';
 
       throw isProviderUnreachable
         ? new AppError(failureMessage, 503)
@@ -443,22 +466,93 @@ export class PaymentService {
     });
   }
 
-  async verifyPaypackTransactionStatus(ref: string) {
-    const lookup = await this.paypackService.findTransaction(ref);
-    if (!lookup.success || !lookup.data) {
-      throw new NotFoundError(lookup.error?.message || 'Transaction not found');
+  // MVend callbacks are unsigned and undocumented, so the body is only used
+  // to find the payment; the outcome always comes from gettransactionstatus.
+  // The controller authenticates the request by its secret URL token.
+  async processMvendCallback(
+    payload: MvendCallbackPayload,
+  ): Promise<{ payment: Payment; outcome: ReconcileOutcome }> {
+    const txref = extractCallbackTxref(payload);
+    if (!txref) {
+      throw new ValidationError('MVend callback did not include a transaction reference');
     }
-    return {
-      status: this.paypackService.mapStatusToInternal(lookup.data.status),
-      data: lookup.data,
-    };
+
+    const payment = await this.paymentRepository.findOne({
+      where: { externalReferenceId: txref, provider: PaymentProvider.MVEND },
+    });
+    logger.debug('MVend callback payment lookup', { txref, matchedPaymentId: payment?.id });
+    if (!payment) {
+      throw new NotFoundError('Payment not found');
+    }
+
+    return this.reconcileMvend(payment, 'callback', payload);
   }
 
+  // Re-checks a payment against MVend. Used by the reconciliation cron and
+  // available for manual refreshes.
+  async refreshPaymentStatusFromProvider(
+    paymentId: UUID,
+    source: ReconcileSource = 'manual',
+  ): Promise<{ payment: Payment; outcome: ReconcileOutcome }> {
+    const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
+    if (!payment) {
+      throw new NotFoundError('Payment not found', {
+        referenceId: paymentId,
+        referenceType: LogReferenceTypes.PAYMENT,
+      });
+    }
+    if (payment.provider !== PaymentProvider.MVEND) {
+      throw new ValidationError('Provider status refresh is only supported for MVend payments');
+    }
+    return this.reconcileMvend(payment, source);
+  }
+
+  // PENDING MVend payments old enough that a callback should have arrived,
+  // but young enough to still be worth polling.
+  async findPendingMvendPayments(options: {
+    minAgeMs?: number;
+    maxAgeMs?: number;
+    limit?: number;
+  } = {}): Promise<Payment[]> {
+    const { minAgeMs = 60_000, maxAgeMs = 24 * 60 * 60_000, limit = 50 } = options;
+    const now = Date.now();
+    return this.paymentRepository.find({
+      where: {
+        provider: PaymentProvider.MVEND,
+        status: PaymentStatus.PENDING,
+        externalReferenceId: Not(IsNull()),
+        createdAt: Between(new Date(now - maxAgeMs), new Date(now - minAgeMs)),
+      },
+      order: { createdAt: 'ASC' },
+      take: limit,
+    });
+  }
+
+  private reconcileMvend(
+    payment: Payment,
+    source: ReconcileSource,
+    callbackPayload?: MvendCallbackPayload,
+  ): Promise<{ payment: Payment; outcome: ReconcileOutcome }> {
+    return reconcileMvendPayment(
+      payment,
+      {
+        getTransactionStatus: (txref) => this.mvendService.getTransactionStatus(txref),
+        updatePaymentStatus: (id, status, metadata) =>
+          this.updatePaymentStatus(id as UUID, status, metadata),
+        updateMetadata: async (id, metadata) => {
+          await this.paymentRepository.update(id as UUID, { metadata });
+        },
+      },
+      { source, callbackPayload },
+    );
+  }
 
   private resolveInitiationContext(payment: CreatePaymentDto): InitiationContext {
     const mode = getPaymentMode();
     const isSimulated = mode === 'simulate';
-    const provider = PaymentProvider.PAYPACK;
+    const provider = getActivePaymentProvider();
+    const providerMinimum =
+      provider === PaymentProvider.MVEND ? MVEND_MIN_DEBIT_RWF : PAYPACK_MIN_CASHIN_RWF;
     const requestedMethod =
       payment.channelName || payment.method || payment.metadata?.channelName || PaypackChannel.MOMO;
 
@@ -488,11 +582,11 @@ export class PaymentService {
     const { chargeAmount, isDevPrice, catalogAmount, isSimulated: simulated } =
       resolveChargeableAmount(Number(payment.amount));
 
-    // Paypack cashin rejects amounts below its minimum. Never charge a
-    // different amount than displayed, so complete these as simulated and say
-    // so in the metadata (affects dev_price mode, which charges 10 RWF).
+    // Providers reject amounts below their minimum. Never charge a different
+    // amount than displayed, so complete these as simulated and say so in the
+    // metadata.
     const belowProviderMinimum =
-      !simulated && chargeAmount < PAYPACK_MIN_CASHIN_RWF;
+      !simulated && chargeAmount < providerMinimum;
 
     const metadata: Record<string, any> = {
       ...(payment.metadata || {}),
@@ -512,8 +606,8 @@ export class PaymentService {
         : {}),
       ...(belowProviderMinimum
         ? {
-            paypackMinimumNotMet: true,
-            paypackMinimum: PAYPACK_MIN_CASHIN_RWF,
+            providerMinimumNotMet: true,
+            providerMinimum,
           }
         : {}),
     };
@@ -527,10 +621,11 @@ export class PaymentService {
     }
 
     if (belowProviderMinimum) {
-      logger.info('Charge below Paypack minimum, completing as simulated', {
+      logger.info('Charge below provider minimum, completing as simulated', {
         entityId: payment.entityId,
+        provider,
         chargeAmount,
-        minimum: PAYPACK_MIN_CASHIN_RWF,
+        minimum: providerMinimum,
       });
     }
 
@@ -616,7 +711,7 @@ export class PaymentService {
     newPayment: Payment,
     context: InitiationContext,
   ): Promise<any> {
-    const localNumber = formatPhoneForPaypack(context.customerPhone);
+    const localNumber = formatPhoneMsisdn(context.customerPhone);
     if (!localNumber) {
       return {
         success: false,
@@ -625,6 +720,10 @@ export class PaymentService {
           message: 'A valid Rwandan mobile number is required for mobile money',
         },
       };
+    }
+
+    if (context.provider === PaymentProvider.MVEND) {
+      return this.initiateMvendPayment(newPayment, context, localNumber);
     }
 
     return this.paypackService.cashin({
@@ -637,6 +736,109 @@ export class PaymentService {
       idempotencyKey: String(newPayment?.id).replace(/-/g, ''),
       channel: context.requestedMethod as PaypackChannel,
     });
+  }
+
+  private async initiateMvendPayment(
+    newPayment: Payment,
+    context: InitiationContext,
+    msisdn: string,
+  ): Promise<any> {
+    // Persist our txref before calling MVend so a callback, the cron or the
+    // timeout recovery can always find this payment, even if the response is
+    // lost.
+    const txref = generateMvendTxref();
+    newPayment.externalReferenceId = txref;
+    newPayment.metadata = { ...(newPayment.metadata || {}), mvendTxref: txref };
+    await this.paymentRepository.update(newPayment.id, {
+      externalReferenceId: txref,
+      metadata: newPayment.metadata,
+    });
+
+    const result = await this.mvendService.requestPayment({
+      txref,
+      amount: context.chargeAmount,
+      paymentAccount: msisdn,
+    });
+    return this.toMvendInitiationResult(txref, result);
+  }
+
+  private toMvendInitiationResult(txref: string, result: MvendResult): any {
+    if (!result.success && !result.duplicate) {
+      return { success: false, error: result.error };
+    }
+    const paymentRef = result.data?.paymentref;
+    return {
+      success: true,
+      data: {
+        transactionId: txref,
+        status: PaymentStatus.PENDING,
+        message: result.data?.response_errormsg,
+        metadata: {
+          mvendTxref: txref,
+          mvendStatusCode: result.data?.status_code,
+          ...(paymentRef !== undefined && paymentRef !== null
+            ? { mvendPaymentRef: String(paymentRef) }
+            : {}),
+          ...(result.duplicate ? { mvendDuplicateOnInitiation: true } : {}),
+        },
+      },
+    };
+  }
+
+  // The debit request timed out. Look the txref up and, if MVend has no
+  // record, resend it once (same txref, so no double debit). An accepted or
+  // unknown outcome stays PENDING for the callback/cron; a definite
+  // rejection fails the payment.
+  private async reconcileMvendTimeout(
+    newPayment: Payment,
+    payment: CreatePaymentDto,
+    context: InitiationContext,
+    result: any,
+  ): Promise<Payment> {
+    const txref = newPayment.externalReferenceId as string;
+    const msisdn = formatPhoneMsisdn(context.customerPhone) as string;
+
+    const recovery = await recoverMvendTimeout(txref, {
+      getTransactionStatus: (ref) => this.mvendService.getTransactionStatus(ref),
+      resend: () =>
+        this.mvendService.requestPayment({
+          txref,
+          amount: context.chargeAmount,
+          paymentAccount: msisdn,
+        }),
+    });
+
+    newPayment.status =
+      recovery.outcome === 'rejected' ? PaymentStatus.FAILED : PaymentStatus.PENDING;
+    newPayment.metadata = {
+      ...(newPayment.metadata || {}),
+      initiationError: result.error,
+      mvendTimeoutRecovery: {
+        ...recovery.detail,
+        outcome: recovery.outcome,
+        checkedAt: new Date().toISOString(),
+      },
+    };
+    await this.paymentRepository.update(newPayment.id, {
+      status: newPayment.status,
+      metadata: newPayment.metadata,
+    });
+
+    logger.info('MVend timeout recovery finished', {
+      paymentId: newPayment.id,
+      txref,
+      outcome: recovery.outcome,
+    });
+
+    if (recovery.outcome === 'rejected') {
+      throw new ValidationError(
+        recovery.detail.error?.message || 'Payment could not be initiated. Please try again.',
+      );
+    }
+    if (recovery.outcome === 'accepted') {
+      this.sendPaymentInitiatedEmail(payment, context.chargeAmount);
+    }
+    return newPayment;
   }
 
   private async applyInitiationResult(
@@ -731,7 +933,7 @@ export class PaymentService {
     context: InitiationContext,
   ): Promise<string | undefined> {
     try {
-      const localNumber = formatPhoneForPaypack(context.customerPhone);
+      const localNumber = formatPhoneMsisdn(context.customerPhone);
       if (!localNumber) return undefined;
       const listing = await this.paypackService.listTransactions({
         limit: 20,

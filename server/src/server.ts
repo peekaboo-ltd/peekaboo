@@ -5,6 +5,7 @@ import { AppDataSource } from "./data-source";
 import { startBillingCronJobs } from "./cron/billingCron";
 import { startBusinessReportCronJobs } from "./cron/businessReportCron";
 import { startWhatsappSessionCronJob } from "./cron/whatsappSessionCron";
+import { startPaymentReconcileCronJob } from "./cron/paymentReconcileCron";
 
 // os.cpus() reports the host machine's cores, not the container's quota, so
 // on platforms like Render it can fork dozens of workers and blow the memory
@@ -24,6 +25,7 @@ if (cluster.isPrimary) {
       startBillingCronJobs();
       startBusinessReportCronJobs();
       startWhatsappSessionCronJob();
+      startPaymentReconcileCronJob();
     })
     .catch((error) => {
       logger.error('Primary process database connection failed, cron jobs will not start', error);

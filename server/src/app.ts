@@ -14,15 +14,35 @@ import {
   buildPaypackConfig,
   validatePaypackStartupConfig,
 } from './integrations/paypack/paypack.config';
+import {
+  buildMvendCallbackUrl,
+  buildMvendConfig,
+  validateMvendStartupConfig,
+} from './integrations/mvend/mvend.config';
+import { getActivePaymentProvider } from './helpers/paymentProvider.helper';
+import { PaymentProvider } from './types/payment-provider.types';
 
-const paypackConfigIssues = validatePaypackStartupConfig(buildPaypackConfig());
-if (paypackConfigIssues.length) {
-  paypackConfigIssues.forEach((issue) => logger.warning(`[Paypack] ${issue}`));
+// Validate only the gateway that initiates new payments.
+const activePaymentProvider = getActivePaymentProvider();
+const paymentConfigIssues =
+  activePaymentProvider === PaymentProvider.MVEND
+    ? validateMvendStartupConfig(buildMvendConfig())
+    : validatePaypackStartupConfig(buildPaypackConfig());
+if (paymentConfigIssues.length) {
+  paymentConfigIssues.forEach((issue) =>
+    logger.warning(`[${activePaymentProvider}] ${issue}`),
+  );
 
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
-      `Paypack configuration invalid: ${paypackConfigIssues.join('; ')}`,
+      `${activePaymentProvider} configuration invalid: ${paymentConfigIssues.join('; ')}`,
     );
+  }
+}
+if (activePaymentProvider === PaymentProvider.MVEND) {
+  const callbackUrl = buildMvendCallbackUrl();
+  if (callbackUrl) {
+    logger.info(`[MVEND] Callback route ready at ${callbackUrl.replace(/[^/]+$/, '<MVEND_CALLBACK_TOKEN>')}`);
   }
 }
 
