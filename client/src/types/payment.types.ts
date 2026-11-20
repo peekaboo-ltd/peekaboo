@@ -11,13 +11,14 @@ export enum PaymentStatus {
 }
 
 export enum PaymentProvider {
+  MVEND = 'MVEND',
   PAYPACK = 'PAYPACK',
   // Retired providers, kept so historical payments still map.
   URUBUTO = 'URUBUTO',
   KPAY = 'KPAY',
 }
 
-/** Mirrors the server's PaypackChannel (server/src/types/paypack.types.ts). */
+/** Mirrors the server's PaymentChannel (server/src/types/payment-provider.types.ts). */
 export enum PaymentChannel {
   MOMO = 'MOMO',
   AIRTEL_MONEY = 'AIRTEL_MONEY',
@@ -35,6 +36,30 @@ export const PAYMENT_CHANNEL_LABELS: Record<PaymentChannel, string> = {
   [PaymentChannel.MOMO]: 'MTN Mobile Money',
   [PaymentChannel.AIRTEL_MONEY]: 'Airtel Money',
 };
+
+export type MvendRefundMethod = 'rollback' | 'credit';
+export type MvendRefundState = 'requested' | 'accepted' | 'unknown' | 'failed';
+
+/** Mirrors server/src/services/mvendRefund.ts (payment.metadata.mvendRefund). */
+export interface MvendRefundRecord {
+  method: MvendRefundMethod;
+  txref: string;
+  amount: number;
+  state: MvendRefundState;
+  requestedAt: string;
+  completedAt?: string;
+  paymentRef?: string;
+  error?: { code: string; message: string };
+}
+
+/** A refund may be started when none exists or the last one definitely failed. */
+export const canRefundPayment = (payment?: Payment): boolean =>
+  Boolean(
+    payment &&
+      payment.provider === PaymentProvider.MVEND &&
+      payment.status === PaymentStatus.SUCCESSFUL &&
+      (!payment.metadata?.mvendRefund || payment.metadata.mvendRefund.state === 'failed'),
+  );
 
 // Payment Entity (matches backend Payment entity)
 export interface Payment {
@@ -78,7 +103,7 @@ export interface Payment {
   failureReason?: string;
 
   // Metadata
-  metadata?: Record<string, string>;
+  metadata?: Record<string, unknown> & { mvendRefund?: MvendRefundRecord };
 
   // Relations
   createdBy?: {

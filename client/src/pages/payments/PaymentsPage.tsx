@@ -4,6 +4,7 @@ import {
   useFetchAdminPayments,
   useFetchPaymentStats,
   useExportPayments,
+  useFetchProviderBalance,
 } from '@/hooks/payments/payment.hooks';
 import { useAppSelector } from '@/states/hooks';
 import { useCallback, useEffect, useState } from 'react';
@@ -98,6 +99,11 @@ const PaymentsPage = () => {
   } = useFetchAdminPayments();
 
   const { fetchPaymentStats, stats } = useFetchPaymentStats();
+  const { fetchProviderBalance, balance: providerBalance } = useFetchProviderBalance();
+
+  useEffect(() => {
+    fetchProviderBalance();
+  }, [fetchProviderBalance]);
   const {
     exportPayments,
     exportData,
@@ -367,6 +373,12 @@ const PaymentsPage = () => {
             </Button>
           </div>
         </section>
+
+        {providerBalance !== undefined && (
+          <p className="type-meta">
+            {t('payments.providerBalance', { amount: formatCurrency(providerBalance) })}
+          </p>
+        )}
 
         {/* Stats Cards */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

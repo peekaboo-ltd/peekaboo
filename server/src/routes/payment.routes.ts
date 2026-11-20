@@ -51,6 +51,20 @@ router.get(
   PaymentController.exportPayments
 );
 
+// Admin: MVend merchant balance
+router.get(
+  '/admin/balance',
+  authorize([RoleTypes.ADMIN]),
+  PaymentController.getProviderBalance
+);
+
+// Admin: Refund an MVend payment (body: { method: 'rollback' | 'credit', amount? })
+router.post(
+  '/admin/:id/refund',
+  authorize([RoleTypes.ADMIN]),
+  PaymentController.adminRefundPayment
+);
+
 // Admin: Update payment status
 router.patch(
   '/admin/:id/status',

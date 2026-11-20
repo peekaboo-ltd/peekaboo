@@ -6,7 +6,8 @@ import { useGetOrder } from '@/hooks/orders/orders.hooks';
 import { useGetPayment } from '@/hooks/payments/payment.hooks';
 import { useAppSelector } from '@/states/hooks';
 import { UUID } from '@/types';
-import { PaymentStatus, PaymentType } from '@/types/payment.types';
+import { canRefundPayment, PaymentStatus, PaymentType } from '@/types/payment.types';
+import RefundPaymentModal from './RefundPaymentModal';
 import { formatCurrency, formatDate } from '@/utils/strings.util';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -26,7 +27,7 @@ import {
   faXmarkCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { motion, Variants } from 'framer-motion';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   InternalPage,
@@ -69,6 +70,11 @@ const PaymentDetailsPage = () => {
 
   const { getPayment, isFetching: isFetchingPayment } = useGetPayment();
   const { getOrder, isFetching: isFetchingOrder } = useGetOrder();
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const closeRefundModal = useCallback(() => setRefundModalOpen(false), []);
+  const refetchPayment = useCallback(() => {
+    if (id) getPayment(id as UUID);
+  }, [id, getPayment]);
 
   useEffect(() => {
     if (id) {
@@ -114,6 +120,13 @@ const PaymentDetailsPage = () => {
     smartcash: 'SmartCash',
     spenn: 'Spenn',
   };
+
+  const refund = payment.metadata?.mvendRefund;
+  const refundLabel = refund
+    ? `${t(`paymentRefund.state.${refund.state}`)} · ${t(
+        refund.method === 'rollback' ? 'paymentRefund.methodRollback' : 'paymentRefund.methodCredit',
+      )} · ${formatCurrency(refund.amount, payment.currency)}`
+    : undefined;
 
   const linkedOrder =
     payment.type === PaymentType.ORDER && order?.id === payment.entityId ? order : undefined;
@@ -203,6 +216,9 @@ const PaymentDetailsPage = () => {
               { label: t('paymentDetails.externalReference'), value: payment.externalReferenceId, icon: faFileLines },
               { label: t('paymentDetails.method'), value: methodLabelMap[payment.method] || payment.method, icon: faMoneyBillWave },
               { label: t('paymentDetails.currency'), value: payment.currency, icon: faMoneyBillWave },
+              ...(refundLabel
+                ? [{ label: t('paymentRefund.label'), value: refundLabel, icon: faClockRotateLeft }]
+                : []),
             ].map((item) => (
               <li
                 key={item.label}
@@ -318,7 +334,23 @@ const PaymentDetailsPage = () => {
         >
           {t('paymentDetails.back')}
         </Button>
+        {canRefundPayment(payment) && (
+          <Button
+            type="button"
+            onClick={(e) => { e.preventDefault(); setRefundModalOpen(true); }}
+          >
+            {t('paymentRefund.open')}
+          </Button>
+        )}
       </motion.menu>
+      {refundModalOpen && (
+        <RefundPaymentModal
+          payment={payment}
+          open={refundModalOpen}
+          onClose={closeRefundModal}
+          onRefunded={refetchPayment}
+        />
+      )}
     </InternalPage>
   );
 };

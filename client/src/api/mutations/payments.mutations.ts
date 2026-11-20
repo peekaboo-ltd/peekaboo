@@ -28,6 +28,13 @@ export const paymentsMutationsApiSlice = createApi({
         body: { status },
       }),
     }),
+    adminRefundPayment: builder.mutation({
+      query: ({ id, method, amount }: { id: string; method: 'rollback' | 'credit'; amount?: number }) => ({
+        url: `/payments/admin/${id}/refund`,
+        method: 'POST',
+        body: { method, amount },
+      }),
+    }),
   }),
 });
 
@@ -35,4 +42,5 @@ export const {
   useCreatePublicPaymentMutation,
   useCreatePaymentMutation,
   useAdminUpdatePaymentStatusMutation,
+  useAdminRefundPaymentMutation,
 } = paymentsMutationsApiSlice;

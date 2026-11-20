@@ -2,6 +2,7 @@ import {
   useCreatePublicPaymentMutation,
   useCreatePaymentMutation,
   useAdminUpdatePaymentStatusMutation,
+  useAdminRefundPaymentMutation,
 } from '@/api/mutations/payments.mutations';
 import {
   useLazyFetchPublicPaymentsQuery,
@@ -10,6 +11,7 @@ import {
   useLazyFetchPaymentStatsQuery,
   useLazyExportPaymentsQuery,
   useLazyGetPaymentQuery,
+  useLazyFetchProviderBalanceQuery,
 } from '@/api/queries/payments.queries';
 import { useAppDispatch } from '@/states/hooks';
 import {
@@ -232,5 +234,71 @@ export const useAdminUpdatePaymentStatus = () => {
     isLoading,
     isSuccess,
     reset,
+  };
+};
+
+/**
+ * Admin: refund an MVend payment (rollback or credit). Calls onSuccess so the
+ * caller can refetch the payment with its relations.
+ */
+export const useAdminRefundPayment = (onSuccess?: () => void) => {
+  const { t } = useI18n();
+  const [refundPayment, { data, error, isLoading, isSuccess, reset }] =
+    useAdminRefundPaymentMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      const state = data?.data?.metadata?.mvendRefund?.state;
+      if (state === 'unknown') {
+        toast.warning(t('paymentRefund.unknown'));
+      } else {
+        toast.success(t('paymentRefund.requested'));
+      }
+      onSuccess?.();
+      reset();
+    }
+  }, [isSuccess, data, onSuccess, reset, t]);
+
+  useEffect(() => {
+    if (error) {
+      const errorMessage =
+        (error as { data?: { message?: string } })?.data?.message ||
+        t('paymentRefund.error');
+      toast.error(errorMessage);
+    }
+  }, [error, t]);
+
+  return { refundPayment, isLoading, isSuccess, error };
+};
+
+// MVend's balance response is undocumented; read the first numeric field
+// that looks like a balance.
+const BALANCE_KEYS = ['balance', 'available_balance', 'current_balance', 'account_balance', 'app_balance'];
+
+export const pickBalance = (payload?: Record<string, unknown>): number | undefined => {
+  if (!payload) return undefined;
+  const sources = [payload, payload.data as Record<string, unknown> | undefined];
+  for (const source of sources) {
+    if (!source || typeof source !== 'object') continue;
+    for (const key of BALANCE_KEYS) {
+      const value = Number(source[key]);
+      if (source[key] !== undefined && source[key] !== null && Number.isFinite(value)) return value;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Admin: MVend merchant account balance
+ */
+export const useFetchProviderBalance = () => {
+  const [fetchProviderBalance, { data, error, isFetching }] =
+    useLazyFetchProviderBalanceQuery();
+
+  return {
+    fetchProviderBalance,
+    balance: pickBalance(data?.data),
+    error,
+    isFetching,
   };
 };
