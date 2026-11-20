@@ -1,7 +1,7 @@
 /**
  * Payment modes:
  * - simulate: no provider call; instant SUCCESSFUL (local default)
- * - dev_price: real provider, fixed 10 RWF charge
+ * - dev_price: real provider, fixed 100 RWF charge
  * - live: real provider, catalog amount
  *
  * Controlled by PAYMENT_MODE. Defaults to live in production NODE_ENV,
