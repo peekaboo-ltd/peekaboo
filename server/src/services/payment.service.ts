@@ -15,15 +15,10 @@ import {
 } from '../types/payment.types';
 import { PaymentStatus } from '../types/payment-status.types';
 import {
-  PAYPACK_TIMEOUT,
-  PROVIDER_UNREACHABLE,
-  PaypackService,
-} from '../integrations/paypack/paypack.service';
-import { PAYPACK_MIN_CASHIN_RWF } from '../integrations/paypack/paypack.config';
-import {
   generateMvendTxref,
   MVEND_TIMEOUT,
   MvendService,
+  PROVIDER_UNREACHABLE,
 } from '../integrations/mvend/mvend.service';
 import { MVEND_MIN_DEBIT_RWF } from '../integrations/mvend/mvend.config';
 import { MvendCallbackPayload, MvendResult } from '../types/mvend.types';
@@ -34,18 +29,13 @@ import {
   ReconcileOutcome,
   ReconcileSource,
 } from './mvendReconciliation';
-import { getActivePaymentProvider } from '../helpers/paymentProvider.helper';
 import {
   assertRefundable,
   MvendRefundMethod,
   MvendRefundRecord,
   MvendRefundState,
 } from './mvendRefund';
-import {
-  PaymentProvider,
-  PaypackChannel,
-  PaypackWebhookPayload,
-} from '../types/paypack.types';
+import { PaymentChannel, PaymentProvider } from '../types/payment-provider.types';
 import { Request } from 'express';
 import {
   getPagination,
@@ -97,7 +87,6 @@ type InitiationContext = {
 
 export class PaymentService {
   private readonly paymentRepository: Repository<Payment>;
-  private readonly paypackService: PaypackService;
   private readonly mvendService: MvendService;
   private readonly orderActivityService: OrderActivityService;
   private readonly orderAssignmentService: OrderAssignmentService;
@@ -106,7 +95,6 @@ export class PaymentService {
 
   constructor() {
     this.paymentRepository = AppDataSource.getRepository(Payment);
-    this.paypackService = new PaypackService();
     this.mvendService = new MvendService();
     this.orderActivityService = new OrderActivityService();
     this.orderAssignmentService = new OrderAssignmentService();
@@ -166,9 +154,6 @@ export class PaymentService {
     }
 
     if (result && !result.success) {
-      if (result.error?.code === PAYPACK_TIMEOUT) {
-        return this.reconcilePaypackTimeout(newPayment, payment, context, result);
-      }
       if (result.error?.code === MVEND_TIMEOUT) {
         return this.reconcileMvendTimeout(newPayment, payment, context, result);
       }
@@ -423,55 +408,6 @@ export class PaymentService {
     return payment;
   }
 
-  // Signature verification itself happens in the webhook controller, which
-  // rejects forged payloads before this runs.
-  async processPaypackWebhook(payload: PaypackWebhookPayload): Promise<Payment> {
-    if (payload.kind !== 'transaction:processed' || !payload.data) {
-      throw new ValidationError('Unsupported Paypack webhook event');
-    }
-
-    const data = payload.data;
-    const payment = await this.paymentRepository.findOne({
-      where: { externalReferenceId: data.ref },
-    });
-
-    logger.debug('Paypack webhook payment lookup', {
-      ref: data.ref,
-      transactionStatus: data.status,
-      matchedPaymentId: payment?.id,
-    });
-
-    if (!payment) {
-      throw new NotFoundError('Payment not found');
-    }
-
-    if (
-      data.amount !== undefined &&
-      (!Number.isFinite(Number(data.amount)) ||
-        Math.abs(Number(data.amount) - Number(payment.amount)) > 0.001)
-    ) {
-      throw new ValidationError('Paypack webhook amount does not match');
-    }
-
-    const status = this.paypackService.mapStatusToInternal(data.status);
-    // Never let a late "pending" event reopen a terminal payment.
-    const nextStatus =
-      status === PaymentStatus.PENDING &&
-      (payment.status === PaymentStatus.SUCCESSFUL ||
-        payment.status === PaymentStatus.FAILED)
-        ? payment.status
-        : status;
-
-    return this.updatePaymentStatus(payment.id as UUID, nextStatus, {
-      paypackWebhookPayload: payload,
-      paypackLastStatus: data.status,
-      paypackProcessedAt: data.processed_at,
-      paypackFee: data.fee,
-      paypackProvider: data.provider,
-      paypackLastWebhookAt: new Date().toISOString(),
-    });
-  }
-
   // MVend callbacks are unsigned and undocumented, so the body is only used
   // to find the payment; the outcome always comes from gettransactionstatus.
   // The controller authenticates the request by its secret URL token.
@@ -556,14 +492,13 @@ export class PaymentService {
   private resolveInitiationContext(payment: CreatePaymentDto): InitiationContext {
     const mode = getPaymentMode();
     const isSimulated = mode === 'simulate';
-    const provider = getActivePaymentProvider();
-    const providerMinimum =
-      provider === PaymentProvider.MVEND ? MVEND_MIN_DEBIT_RWF : PAYPACK_MIN_CASHIN_RWF;
+    const provider = PaymentProvider.MVEND;
+    const providerMinimum = MVEND_MIN_DEBIT_RWF;
     const requestedMethod =
-      payment.channelName || payment.method || payment.metadata?.channelName || PaypackChannel.MOMO;
+      payment.channelName || payment.method || payment.metadata?.channelName || PaymentChannel.MOMO;
 
     if (
-      !Object.values(PaypackChannel).includes(requestedMethod as PaypackChannel)
+      !Object.values(PaymentChannel).includes(requestedMethod as PaymentChannel)
     ) {
       throw new ValidationError(
         'Unsupported payment channel. Choose MTN Mobile Money or Airtel Money.',
@@ -728,20 +663,7 @@ export class PaymentService {
       };
     }
 
-    if (context.provider === PaymentProvider.MVEND) {
-      return this.initiateMvendPayment(newPayment, context, localNumber);
-    }
-
-    return this.paypackService.cashin({
-      amount: context.chargeAmount,
-      currency: payment.currency,
-      customerPhone: localNumber,
-      refId: newPayment?.id as UUID,
-      // UUID hex is exactly 32 chars, the max Idempotency-Key length, so a
-      // retried cashin for the same payment can never double-charge.
-      idempotencyKey: String(newPayment?.id).replace(/-/g, ''),
-      channel: context.requestedMethod as PaypackChannel,
-    });
+    return this.initiateMvendPayment(newPayment, context, localNumber);
   }
 
   private async initiateMvendPayment(
@@ -875,92 +797,6 @@ export class PaymentService {
         newPayment.id as UUID,
         result.data?.status as PaymentStatus,
       );
-    }
-  }
-
-  // The cashin POST timed out, so a transaction may or may not exist at
-  // Paypack. First look for a transaction the timed-out request may have
-  // created, then retry once with the same idempotency key (Paypack rejects
-  // the duplicate instead of double-charging). Either way the payment stays
-  // PENDING and the webhook settles it.
-  private async reconcilePaypackTimeout(
-    newPayment: Payment,
-    payment: CreatePaymentDto,
-    context: InitiationContext,
-    result: any,
-  ): Promise<Payment> {
-    const reconciliation: Record<string, any> = {
-      checkedAt: new Date().toISOString(),
-      initiationError: result.error,
-    };
-
-    const adopted = await this.adoptTimedOutTransaction(newPayment, context);
-    if (adopted) {
-      reconciliation.adoptedRef = adopted;
-      newPayment.status = PaymentStatus.PENDING;
-      newPayment.externalReferenceId = adopted;
-    } else {
-      const retry = await this.initiateProviderPayment(payment, newPayment, context);
-      reconciliation.retry = { success: retry?.success, error: retry?.error };
-      if (retry?.success && retry.data?.transactionId) {
-        await this.applyInitiationResult(newPayment, retry);
-        this.sendPaymentInitiatedEmail(payment, context.chargeAmount);
-        newPayment.metadata = {
-          ...(newPayment.metadata || {}),
-          paypackTimeoutReconciliation: reconciliation,
-        };
-        await this.paymentRepository.update(newPayment.id, {
-          metadata: newPayment.metadata,
-        });
-        return newPayment;
-      }
-      newPayment.status = PaymentStatus.PENDING;
-    }
-
-    newPayment.metadata = {
-      ...(newPayment.metadata || {}),
-      initiationError: result.error,
-      paypackTimeoutReconciliation: reconciliation,
-    };
-
-    await this.paymentRepository.update(newPayment.id, {
-      externalReferenceId: newPayment.externalReferenceId,
-      status: newPayment.status,
-      metadata: newPayment.metadata,
-    });
-
-    return newPayment;
-  }
-
-  // Find a CASHIN for our number+amount created in the last 15 minutes and
-  // adopt its ref when the timed-out cashin never returned one.
-  private async adoptTimedOutTransaction(
-    newPayment: Payment,
-    context: InitiationContext,
-  ): Promise<string | undefined> {
-    try {
-      const localNumber = formatPhoneMsisdn(context.customerPhone);
-      if (!localNumber) return undefined;
-      const listing = await this.paypackService.listTransactions({
-        limit: 20,
-        offset: 0,
-        kind: 'CASHIN',
-        client: localNumber,
-      });
-      const candidates = listing.data?.transactions || [];
-      const cutoff = Date.now() - 15 * 60_000;
-      const match = candidates.find(
-        (tx: any) =>
-          Number(tx.amount) === Number(newPayment.amount) &&
-          Date.parse(tx.timestamp) >= cutoff,
-      );
-      return match?.ref;
-    } catch (error) {
-      logger.error('Paypack timeout reconciliation lookup failed', {
-        paymentId: newPayment.id,
-        message: (error as any)?.message,
-      });
-      return undefined;
     }
   }
 

@@ -64,7 +64,7 @@ export const legalBodyFr: Record<string, string> = {
   // --- Terms: s06 Payment ---
   'legal.terms.s06.title': 'Paiement',
   'legal.terms.s06.p1':
-    'Les paiements sont traités en francs rwandais (RWF) par l’intermédiaire de notre partenaire de paiement (actuellement Paypack ou tout autre prestataire que nous désignons). En autorisant un paiement, vous acceptez les conditions du prestataire et nous autorisez à débiter le montant affiché.',
+    'Les paiements sont traités en francs rwandais (RWF) par l’intermédiaire de notre partenaire de paiement (actuellement MVend ou tout autre prestataire que nous désignons). En autorisant un paiement, vous acceptez les conditions du prestataire et nous autorisez à débiter le montant affiché.',
   'legal.terms.s06.p2':
     'Un paiement réussi peut entraîner l’attribution d’un livreur et la progression de la commande dans nos systèmes. Un paiement échoué ou annulé peut retarder ou annuler l’exécution. Vous êtes responsable de disposer de fonds suffisants et de moyens de paiement valides.',
   'legal.terms.s06.p3':
@@ -218,7 +218,7 @@ export const legalBodyFr: Record<string, string> = {
   // --- Refund: r06 ---
   'legal.refund.r06.title': 'Délais et modalités de traitement',
   'legal.refund.r06.p1':
-    'Nous visons à accuser réception des demandes dans un délai de trois (3) jours ouvrables et à achever l’examen interne dans un délai de sept (7) à quatorze (14) jours ouvrables lorsque les informations sont complètes. Le crédit effectif sur votre portefeuille, compte bancaire ou carte peut nécessiter un délai supplémentaire selon Paypack, les banques ou les opérateurs de mobile money.',
+    'Nous visons à accuser réception des demandes dans un délai de trois (3) jours ouvrables et à achever l’examen interne dans un délai de sept (7) à quatorze (14) jours ouvrables lorsque les informations sont complètes. Le crédit effectif sur votre portefeuille, compte bancaire ou carte peut nécessiter un délai supplémentaire selon MVend, les banques ou les opérateurs de mobile money.',
   'legal.refund.r06.p2':
     'Les remboursements, lorsqu’ils sont approuvés, sont généralement envoyés par le même canal de paiement que la transaction initiale. Si ce canal ne peut recevoir d’annulation, nous pouvons proposer une alternative raisonnable (par exemple, virement bancaire) sous réserve de vérification.',
   'legal.refund.r06.p3':

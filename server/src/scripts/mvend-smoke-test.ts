@@ -12,7 +12,7 @@ import {
   buildMvendConfig,
   MVEND_LIVE_BASE_URL,
 } from '../integrations/mvend/mvend.config';
-import { formatPhoneForPaypack } from '../helpers/phone.helper';
+import { formatPhoneMsisdn } from '../helpers/phone.helper';
 import { PaymentStatus } from '../types/payment-status.types';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -40,7 +40,7 @@ async function main(): Promise<void> {
     throw new Error('Refusing to send a debit against the live host');
   }
 
-  const msisdn = formatPhoneForPaypack(phoneArg);
+  const msisdn = formatPhoneMsisdn(phoneArg);
   if (!msisdn) throw new Error(`Invalid Rwandan phone number: ${phoneArg}`);
 
   const txref = generateMvendTxref();

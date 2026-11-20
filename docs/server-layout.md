@@ -9,7 +9,7 @@ Node.js + Express 5 + TypeScript + TypeORM backend. Full feature/setup docs live
 | File | Responsibility |
 | --- | --- |
 | `src/server.ts` | Process entry. Reads `PORT`, boots the Node cluster, starts the HTTP server. |
-| `src/app.ts` | Express app factory: JSON/urlencoded/cors middleware, Passport (Google OAuth), audit-context middleware, mounts routes at `/api/v1`, serves `/api/v1/uploads` statically, attaches the error handler, initializes the database. Also runs UrubutoPay startup config validation (warns in dev, throws in production on invalid config). |
+| `src/app.ts` | Express app factory: JSON/urlencoded/cors middleware, Passport (Google OAuth), audit-context middleware, mounts routes at `/api/v1`, serves `/api/v1/uploads` statically, attaches the error handler, initializes the database. Also runs MVend startup config validation (warns in dev, throws in production on invalid config). |
 | `src/data-source.ts` | TypeORM `DataSource`: database config, entity/subscriber registration. |
 
 ## Request lifecycle
@@ -59,7 +59,7 @@ One router per feature, all aggregated in `routes/index.ts`. Mounted prefixes:
 | `/order-assignments` | orderAssignment.routes.ts |
 | `/order-activities` | orderActivity.routes.ts |
 | `/payments` | payment.routes.ts |
-| `/webhooks` | webhook.routes.ts (kpay, urubuto, whatsapp) |
+| `/webhooks` | webhook.routes.ts (mvend) and whatsapp routes |
 | `/dashboard` | dashboard.routes.ts |
 | `/landing` | landing.routes.ts (public) |
 | `/business-plans` | businessPlan.routes.ts |
@@ -79,7 +79,8 @@ Business logic. Notable services:
 - `user.service.ts` / `role.service.ts` / `userRole.service.ts` — accounts, roles, RBAC.
 - `auth.service.ts` — login, JWT, Google OAuth.
 - `conversation.service.ts` / `message.service.ts` — WhatsApp conversation state and message history.
-- `payment.service.ts` — Kpay + UrubutoPay orchestration, payment status, payer selection, phone formatting.
+- `payment.service.ts` — MVend payment orchestration (debit, timeout recovery, callback + cron reconciliation, refunds), payment status, payer selection.
+- `mvendReconciliation.ts` / `mvendRefund.ts` — DB-free MVend reconciliation and refund-eligibility logic (unit tested).
 - `auditLog.service.ts` — entity change tracking, history lookup.
 - `dashboard.service.ts` / `organizationDashboard.service.ts` / `landing.service.ts` — analytics/aggregations.
 - `organization*.service.ts`, `organizationBilling.service.ts`, `batch.service.ts`, `businessPlan.service.ts` — B2B features.
@@ -91,8 +92,7 @@ TypeORM entities (PostgreSQL). One file per table, registered in `entities/index
 ### `src/integrations/`
 Third-party provider adapters (one folder each):
 
-- `kpay/` — Kpay payment gateway (`kpay.service.ts`).
-- `urubuto/` — UrubutoPay client + config + tests (`urubuto.config.ts`, `urubuto.service.ts`).
+- `mvend/` — MVend Payments API client, request signing, config and callback-token check (`mvend.service.ts`, `mvend.hash.ts`, `mvend.config.ts`, `mvend.callback.ts`).
 - `whatsapp/` — not present here; WhatsApp calls are in `services/whatsapp.service.ts` + `helpers/whatsapp.*`.
 - `emails/` — Resend-based email service and JSX templates (`email.service.ts`, `templates/<area>/*.tsx`).
 - `sms/` — Pindo SMS (`sms.service.ts`, `sms.messages.ts`).
@@ -115,7 +115,7 @@ Enums/constants per feature: `order.constants.ts`, `payment.constants.ts`, `role
 `whatsapp/` — `whatsapp.template.ts` (message builders) and `whatsapp-flow.json` (Meta WhatsApp Flow definition, referenced by `WHATSAPP_FLOW_ID`).
 
 ### `src/types/`
-Shared TypeScript types: `auth.types.ts`, `kpay.types.ts`, `urubuto.types.ts`, `payment.types.ts`, `push.types.ts`, `dashboard.types.ts`, `b2b.types.ts`, `orderImport.types.ts`, `auditLog.types.ts`, `index.ts`.
+Shared TypeScript types: `auth.types.ts`, `mvend.types.ts`, `payment-provider.types.ts`, `payment.types.ts`, `push.types.ts`, `dashboard.types.ts`, `b2b.types.ts`, `orderImport.types.ts`, `auditLog.types.ts`, `index.ts`.
 
 ### `src/helpers/`
 Pure utilities: `auth.helper.ts`, `phone.helper.ts`, `pricing.helper.ts`, `paymentMode.helper.ts`, `distance.helper.ts`, `location.helper.ts`, `string.helper.ts`, `errors.helper.ts`, `logger.helper.ts`, `pagination.helper.ts`, `audit.helper.ts`, `whatsapp.helper.ts`, `whatsapp.flows.helper.ts`.
@@ -133,8 +133,8 @@ Scheduled jobs via `node-cron`: `billingCron.ts`, `businessReportCron.ts`, `what
 `passport.config.ts` — Google OAuth strategy setup.
 
 ### `src/scripts/`
-Standalone seed/test scripts (run via `npm run seed:*` / `npm run urubuto:smoke-test`):
-`seed-admin.ts`, `seed-roles.ts`, `seed-business-plans.ts`, `seed-rider-attendance.ts`, `seed-rider-problem-reports.ts`, `urubuto-smoke-test.ts`.
+Standalone seed/test scripts (run via `npm run seed:*` / `npm run mvend:smoke-test`):
+`seed-admin.ts`, `seed-roles.ts`, `seed-business-plans.ts`, `seed-rider-attendance.ts`, `seed-rider-problem-reports.ts`, `mvend-smoke-test.ts`.
 
 ### `src/assets/`
 Static assets, e.g. `watermarks/` used for problem-report video watermarking.
@@ -160,9 +160,9 @@ Status transitions are managed in `order.service.ts` and `orderActivity.service.
 
 ## Payments (provider selection)
 
-- `PAYMENT_PROVIDER_DEFAULT` (default `URUBUTO`) selects the gateway used by `payment.service.ts`.
-- **UrubutoPay** (primary): configured via `URUBUTO_*` vars. Supports CARD redirects (`URUBUTO_CARD_REDIRECT_BASE_URL`) and server-to-server webhooks (auth, validation, callback, notification, reversal). Startup validation in `integrations/urubuto/urubuto.config.ts` fails fast on misconfiguration in production.
-- **Kpay** (secondary): configured via `KPAY_*` vars (`integrations/kpay/kpay.service.ts`). Supports Mobile Money, Cards, SPENN, SmartCash.
+- **MVend** is the only payment gateway (MTN MoMo / Airtel Money debits from the payer's MSISDN), configured via `MVEND_*` vars. Every request is signed with an HMAC-SHA256 `integrity_hash`.
+- Callbacks are treated as triggers only; the outcome always comes from `gettransactionstatus`. `cron/paymentReconcileCron.ts` (cluster primary, every 2 minutes) re-checks PENDING MVend payments so a missed callback cannot strand an order.
+- Admins can refund through `rollback` (full) or `makepayment` (full or partial). Paypack, UrubutoPay and Kpay are retired; their provider values remain for historical rows.
 - Payment flows support payer selection (Sender / Recipient / custom phone) and Rwanda phone formatting (250XXXXXXXXX).
 - Payment charges are controlled by `PAYMENT_MODE` (`simulate` | `dev_price` | `live`); see `helpers/paymentMode.helper.ts`.
 
@@ -173,8 +173,7 @@ Mounted under `/api/v1/webhooks` (`routes/webhook.routes.ts`):
 | Endpoint | Provider | Purpose |
 | --- | --- | --- |
 | `/webhooks/whatsapp` | WhatsApp | Inbound customer messages + flow data-exchange events (verify via `WHATSAPP_BUSINESS_VERIFY_TOKEN`). |
-| `/webhooks/kpay` | Kpay | Payment notifications (URL set by `KPAY_WEBHOOK_URL`). |
-| `/webhooks/urubuto/{auth,validation,callback,notification,reversal}` | UrubutoPay | Payment lifecycle; constructed from `PUBLIC_API_BASE_URL`. |
+| `/webhooks/mvend/:token` | MVend | Payment-completed notifications; authenticated by `MVEND_CALLBACK_TOKEN` in the path, confirmed with `gettransactionstatus`. |
 
 ## Cron jobs (`src/cron/`)
 
@@ -189,7 +188,7 @@ Mounted under `/api/v1/webhooks` (`routes/webhook.routes.ts`):
 - Full, exhaustive reference for **every** server variable: [environment-variables.md](environment-variables.md).
 - `server/.env.example` documents the variables; `server/.env` is gitignored — never commit it.
 - Required groups: database (`DB_*`), JWT, WhatsApp (`WHATSAPP_BUSINESS_*` / `WHATSAPP_FLOW_*`), payment gateway, Google OAuth, Resend, Pindo, Maps, OneSignal, Cloudinary.
-- `NODE_ENV=development` enables reduced pricing (charges 10 RWF) for local testing and relaxes UrubutoPay startup validation.
+- `PAYMENT_MODE=dev_price` charges 100 RWF for local testing; `NODE_ENV=production` makes MVend config issues fatal at startup.
 
 ## Key commands (from `server/`)
 
@@ -205,4 +204,4 @@ npm run test                       # node --test over src/**/*.test.ts
 
 ## Tests
 
-Unit tests are colocated with source as `*.test.ts` (e.g. `payment.service.test.ts`, `urubuto.config.test.ts`, `urubuto.service.test.ts`, `paymentMode.helper.test.ts`). Run with `npm run test`.
+Unit tests are colocated with source as `*.test.ts` (e.g. `mvend.service.test.ts`, `mvend.hash.test.ts`, `mvendReconciliation.test.ts`, `paymentMode.helper.test.ts`). Run with `npm run test`.

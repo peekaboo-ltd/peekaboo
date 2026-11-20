@@ -63,7 +63,7 @@ export const legalBodyEn: Record<string, string> = {
   // --- Terms: s06 Payment ---
   'legal.terms.s06.title': 'Payment',
   'legal.terms.s06.p1':
-    'Payments are processed in Rwandan Francs (RWF) through our payment partner (currently Paypack or such other processor as we designate). By authorizing a payment, you agree to the processor’s terms and to us charging the displayed amount.',
+    'Payments are processed in Rwandan Francs (RWF) through our payment partner (currently MVend or such other processor as we designate). By authorizing a payment, you agree to the processor’s terms and to us charging the displayed amount.',
   'legal.terms.s06.p2':
     'Successful payment may trigger assignment of a rider and progression of the order in our systems. Failed or reversed payments may delay or cancel fulfillment. You are responsible for ensuring sufficient funds and valid payment credentials.',
   'legal.terms.s06.p3':
@@ -217,7 +217,7 @@ export const legalBodyEn: Record<string, string> = {
   // --- Refund: r06 ---
   'legal.refund.r06.title': 'Processing times and methods',
   'legal.refund.r06.p1':
-    'We aim to acknowledge requests within three (3) business days and to complete internal review within seven (7) to fourteen (14) business days where information is complete. Actual crediting to your wallet, bank account, or card may take additional time depending on Paypack, banks, or mobile money operators.',
+    'We aim to acknowledge requests within three (3) business days and to complete internal review within seven (7) to fourteen (14) business days where information is complete. Actual crediting to your wallet, bank account, or card may take additional time depending on MVend, banks, or mobile money operators.',
   'legal.refund.r06.p2':
     'Refunds, when approved, are generally sent through the same payment channel as the original transaction. If that channel cannot receive a reversal, we may propose a reasonable alternative (e.g. bank transfer) subject to verification.',
   'legal.refund.r06.p3':

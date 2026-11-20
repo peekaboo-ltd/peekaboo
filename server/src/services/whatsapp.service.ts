@@ -7,7 +7,7 @@ import { WhatsAppMessageStatus } from "../constants/message.constants";
 import { PaymentType } from "../constants/payment.constants";
 import { RoleTypes } from "../constants/role.constants";
 import { PaymentCurrency, PaymentStatus } from "../types/payment-status.types";
-import { PaymentProvider, PaypackChannel } from "../types/paypack.types";
+import { PaymentChannel } from "../types/payment-provider.types";
 import {
   formatPhoneForProvider,
   normalizePhoneNumber,
@@ -537,8 +537,8 @@ export class WhatsappService {
         if (data.approve_quote !== true && data.approve_quote !== "true") {
           return respond(screen, { ...this.quoteScreenData(session), error: "Approve the calculated fee to continue." });
         }
-        const method = String(data.payment_method || "") as PaypackChannel;
-        if (!Object.values(PaypackChannel).includes(method)) {
+        const method = String(data.payment_method || "") as PaymentChannel;
+        if (!Object.values(PaymentChannel).includes(method)) {
           return respond(screen, { ...this.quoteScreenData(session), error: "Choose MTN Mobile Money or Airtel Money." });
         }
         await this.initiatePayment(session, method, senderPhone);
@@ -658,7 +658,7 @@ export class WhatsappService {
 
   private async initiatePayment(
     session: PendingOrderSession,
-    method: PaypackChannel,
+    method: PaymentChannel,
     payerPhone: string,
     customerName = "",
     customerEmail = "",
@@ -687,7 +687,6 @@ export class WhatsappService {
         customerName: customerName || payer?.name || "WhatsApp customer",
         customerEmail: customerEmail || payer?.email || "",
         createdById: payer?.id,
-        provider: PaymentProvider.PAYPACK,
         channelName: method,
         metadata: {
           source: "whatsapp_personal",
@@ -726,7 +725,7 @@ export class WhatsappService {
       await this.sendText(
         payerPhone,
         conversationId,
-        `Approve the ${method === PaypackChannel.MOMO ? "MTN MoMo" : "Airtel Money"} wallet prompt for order ${order.referenceId}. No payment link is required.`,
+        `Approve the ${method === PaymentChannel.MOMO ? "MTN MoMo" : "Airtel Money"} wallet prompt for order ${order.referenceId}. No payment link is required.`,
       );
       await this.conversationService.updateConversation(conversationId, {
         step: ConversationStep.PAYMENT_PENDING,

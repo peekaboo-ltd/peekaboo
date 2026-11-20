@@ -1,7 +1,7 @@
 import { UUID } from ".";
 import { PaymentType } from "../constants/payment.constants";
 import { PaymentCurrency, PaymentStatus } from "./payment-status.types";
-import { PaymentProvider, PaypackChannel } from "./paypack.types";
+import { PaymentChannel, PaymentProvider } from "./payment-provider.types";
 
 // Payment creation DTO
 export interface CreatePaymentDto {
@@ -17,7 +17,7 @@ export interface CreatePaymentDto {
   createdById?: UUID;
   provider?: PaymentProvider;
   method?: string;
-  channelName?: PaypackChannel;
+  channelName?: PaymentChannel;
   metadata?: Record<string, any>;
 }
 

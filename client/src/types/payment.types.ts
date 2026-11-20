@@ -12,8 +12,8 @@ export enum PaymentStatus {
 
 export enum PaymentProvider {
   MVEND = 'MVEND',
-  PAYPACK = 'PAYPACK',
   // Retired providers, kept so historical payments still map.
+  PAYPACK = 'PAYPACK',
   URUBUTO = 'URUBUTO',
   KPAY = 'KPAY',
 }
